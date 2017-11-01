@@ -129,9 +129,8 @@ setMethod(f="load_data", signature=c("NeuroVecSource"),
 			nels <- prod(meta@Dim[1:4])
 			ind <- x@indices
 
-			## use RNifti
-			arr <- RNifti::readNifti(meta@dataFile)
-
+			## use RNifti, fails to work with other formats, though...
+			arr <- RNifti::readNifti(meta@data_file)
 
 			## bit of a hack to deal with scale factors
 			if (.hasSlot(meta, "slope")) {
@@ -141,7 +140,8 @@ setMethod(f="load_data", signature=c("NeuroVecSource"),
         }
 			}
 
-      bspace <- NeuroSpace(c(meta@Dim[1:3], length(ind)),meta@spacing, meta@origin, meta@spatialAxes, trans(meta))
+      bspace <- NeuroSpace(c(meta@Dim[1:3], length(ind)),meta@spacing, meta@origin,
+                           meta@spatial_axes, trans(meta))
 			DenseNeuroVec(arr[,,,ind,drop=FALSE], bspace, x)
 
 		})
@@ -337,12 +337,11 @@ setMethod(f="[[", signature=signature(x="BrainVector", i="numeric"),
 #' @param file_name the name of the file to load
 #' @param indices the indices of the sub-volumes to load (e.g. if the file is 4-dimensional)
 #' @param mask a mask defining the spatial elements to load
-#' @param mmap memory mapping if possible
 #' @return an \code{\linkS4class{NeuroVec}} object
 #' @export
-read_vec  <- function(file_name, indices=NULL, mask=NULL, mmap=FALSE) {
+read_vec  <- function(file_name, indices=NULL, mask=NULL) {
 	src <- NeuroVecSource(file_name, indices, mask)
-	load_data(src,mmap)
+	load_data(src)
 }
 
 
@@ -361,65 +360,6 @@ setMethod(f="concat", signature=signature(x="NeuroVol", y="NeuroVec"),
   def=function(x,y, ...) {
     .concat4D(x,y,...)
   })
-
-#' @rdname scale_series-methods
-#' @export
-setMethod(f="scale_series", signature=signature(x="NeuroVec", center="logical", scale="logical"),
-          def=function(x, center, scale) {
-            M <- as.matrix(x)
-            Ms <- scale(t(M), center, scale)
-            NeuroVec(Ms, space(x))
-
-          })
-
-#' @rdname scale_series-methods
-#' @export
-setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", scale="logical"),
-          def=function(x, center, scale) {
-            callGeneric(x, TRUE, scale)
-          })
-
-
-#' @rdname scale_series-methods
-#' @export
-setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", scale="missing"),
-          def=function(x, center, scale) {
-            callGeneric(x, TRUE, TRUE)
-          })
-
-#' @rdname scale_series-methods
-#' @export
-setMethod(f="scale_series", signature=signature(x="NeuroVec", center="logical", scale="missing"),
-          def=function(x, center, scale) {
-            callGeneric(x, center, TRUE)
-          })
-
-#' @export
-#' @rdname split_scale-methods
-#' @importFrom abind abind
-setMethod(f="split_scale", signature=signature(x = "DenseNeuroVec", f="factor", center="missing", scale="missing"),
-          def=function(x, f) {
-            callGeneric(x, f, TRUE, TRUE)
-
-          })
-
-#' @export
-#' @rdname split_scale-methods
-#' @importFrom abind abind
-setMethod(f="split_scale", signature=signature(x = "DenseNeuroVec", f="factor", center="logical", scale="missing"),
-          def=function(x, f, center) {
-            callGeneric(x, f, center, TRUE)
-
-          })
-
-#' @export
-#' @rdname split_scale-methods
-#' @importFrom abind abind
-setMethod(f="split_scale", signature=signature(x = "DenseNeuroVec", f="factor", center="logical", scale="logical"),
-          def=function(x, f, center, scale) {
-            m <- callGeneric(t(as.matrix(x)), f, center, scale)
-            NeuroVec(m, space(x))
-          })
 
 
 

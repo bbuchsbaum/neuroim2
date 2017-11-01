@@ -134,6 +134,41 @@ setMethod(f="split_scale", signature=signature(x = "matrix", f="factor", center=
             callGeneric(x,f, TRUE, TRUE)
           })
 
+#' @rdname scale_series-methods
+#' @export
+setMethod(f="scale_series", signature=signature(x="NeuroVec", center="logical", scale="missing"),
+          def=function(x, center, scale) {
+            callGeneric(x, center, TRUE)
+          })
+
+#' @export
+#' @rdname split_scale-methods
+#' @importFrom abind abind
+setMethod(f="split_scale", signature=signature(x = "DenseNeuroVec", f="factor", center="missing", scale="missing"),
+          def=function(x, f) {
+            callGeneric(x, f, TRUE, TRUE)
+
+          })
+
+#' @export
+#' @rdname split_scale-methods
+#' @importFrom abind abind
+setMethod(f="split_scale", signature=signature(x = "DenseNeuroVec", f="factor", center="logical", scale="missing"),
+          def=function(x, f, center) {
+            callGeneric(x, f, center, TRUE)
+
+          })
+
+#' @export
+#' @rdname split_scale-methods
+#' @importFrom abind abind
+setMethod(f="split_scale", signature=signature(x = "DenseNeuroVec", f="factor", center="logical", scale="logical"),
+          def=function(x, f, center, scale) {
+            m <- callGeneric(t(as.matrix(x)), f, center, scale)
+            NeuroVec(m, space(x))
+          })
+
+
 
 #' .isExtension
 #' @rdname internal-methods
