@@ -1,15 +1,30 @@
 Package: neuroim2
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Data Structures and Handling for Neuroimaging Data
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+LinkingTo: Rcpp
+Author: Bradley R. Buchsbaum
+Maintainer: Bradley Buchsbaum <brad.buchsbaum@gmail.com>
+Description: A collection of data structures that represent
+    volumetric brain imaging data. The focus is on basic data handling for 3D
+    and 4D neuroimaging data. In addition, there are function to read and write
+    NIFTI files and limited support for reading AFNI files.
+License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
-Collate:
+VignetteBuilder: knitr
+Depends:
+    R (>= 3.0.0),
+    Matrix
+Collate: 
+    'RcppExports.R'
     'all_generic.R'
     'all_class.R'
-RoxygenNote: 5.0.1
+    'axis.R'
+    'common.R'
+    'neuroim.R'
+    'neuroslice.R'
+    'neurospace.R'
+    'neurovec.R'
+    'ops.R'
+RoxygenNote: 6.0.1

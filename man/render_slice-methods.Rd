@@ -22,4 +22,3 @@ render_slice(x, zpos, width, height, colmap, ...)
 \description{
 Render a slice at z coordinate
 }
-

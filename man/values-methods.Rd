@@ -14,4 +14,3 @@ values(x, ...)
 \description{
 Generic function to extract data values of object
 }
-

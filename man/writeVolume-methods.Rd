@@ -36,4 +36,3 @@ writeVolume(bvol, "out.nii")
 writeVolume(bvol, "out.nii.gz")
 }
 }
-

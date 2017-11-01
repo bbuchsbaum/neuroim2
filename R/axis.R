@@ -1,6 +1,6 @@
-#' @include AllGeneric.R
+#' @include all_generic.R
 NULL
-#' @include AllClass.R
+#' @include all_class.R
 NULL
 
 

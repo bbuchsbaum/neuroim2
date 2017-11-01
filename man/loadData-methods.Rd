@@ -14,4 +14,3 @@ load_data(x, ...)
 \description{
 Generic function to load data from a data source
 }
-

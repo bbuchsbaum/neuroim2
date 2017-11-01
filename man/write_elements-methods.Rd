@@ -14,4 +14,3 @@ write_elements(x, els)
 \description{
 Generic function to write a sequence of elements from an input source
 }
-

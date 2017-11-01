@@ -36,4 +36,3 @@ all(abs(apply(Ms[fac == 2,], 2, mean)) < .000001)
 all.equal(apply(Ms[fac == 1,], 2, sd), rep(1, ncol(Ms)))
 all.equal(apply(Ms[fac == 2,], 2, sd), rep(1, ncol(Ms)))
 }
-

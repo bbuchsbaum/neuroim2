@@ -16,4 +16,3 @@ lookup(x, i, ...)
 \description{
 Index Lookup operation
 }
-

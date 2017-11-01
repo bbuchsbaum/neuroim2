@@ -14,4 +14,3 @@ read_meta_info(x, file_name)
 \description{
 Generic function to read image meta info given a file and a \code{\linkS4class{FileFormat}} instance.
 }
-

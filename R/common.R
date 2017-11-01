@@ -206,78 +206,42 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 #' .concat4D
 #' @rdname internal-methods
 #' @keywords internal
-.concat4D <- function(x,y, ...) {
-	rest <- list(...)
-
-	D <- dim(x)[1:3]
-
-	lapply(rest, function(z) {
-			stopifnot(length(dim(z)) >= 3)
-			stopifnot(identical(D, dim(z)[1:3]))
-	})
-
-	D4 <- function(vol) { if (length(dim(vol)) == 3) 1 else dim(vol)[4] }
-
-	NVOLS <- D4(x) + D4(y)
-
-	ndat <- abind(as.array(x), as.array(y), along=4)
-
-	new.dim <- c(D, NVOLS)
-
-	nspace <- BrainSpace(new.dim, origin=origin(x@space), spacing=spacing(x@space),
-			axes=axes(x@space), trans=trans(x@space))
-
-	ret <- DenseNeuroVol(ndat, nspace)
-
-  ## TODO fix me ridiculously slow
-	if (length(rest) > 0) {
-		for (i in seq_along(rest)) {
-			ret <- concat(ret, rest[[i]])
-		}
-	}
-
-	ret
-
+.concat4D <- function(x, y, ...) {
+  rest <- list(...)
+  
+  D <- dim(x)[1:3]
+  
+  rvols <- lapply(rest, function(z) {
+    stopifnot(length(dim(z)) >= 3)
+    stopifnot(identical(D, dim(z)[1:3]))
+    z
+  })
+  
+  out <- cbind(as.matrix(x), as.matrix(y))
+  
+  if (length(rvols) > 0) {
+    out2 <- do.call(cbind, lapply(rvols, as.matrix))
+    out <- cbind(out, out2)
+  }
+  
+  nvols <- ncol(out)
+  new.dim <- c(D, nvols)
+  
+  nspace <-
+    NeuroSpace(
+      new.dim,
+      origin = origin(x@space),
+      spacing = spacing(x@space),
+      axes = axes(x@space),
+      trans = trans(x@space)
+    )
+  
+  DenseNeuroVec(out, nspace)
+  
 }
 
-#' .extract.array
-#' @rdname internal-methods
-#' @keywords internal
-.extract.array <- function(x, ..., drop=FALSE, indices=list(...)) {
-  nindices <- length(indices)
-  if (nindices == 0) {
-    stop("Argument 'indices' is empty.")
-  }
-  dims <- names(indices)
-  if (is.null(dims)) {
-    dims <- seq(length = nindices)
-  }
 
-  ndim <- length(dim(x))
-  if (any(dims < 1 | dims > ndim)) {
-    stop("Argument 'dims' is out of bounds [1,", ndim, "]: ",
-         paste(dims, collapse = ", "))
-  }
-  if (is.null(ndim)) {
-    stop("Argument 'x' is not an array: ", class(x)[1])
-  }
 
-  args <- rep("", ndim)
-  for (kk in seq(length = length(indices))) {
-    dd <- dims[kk]
-    ii <- sprintf("indices[[%d]]", kk)
-    args[dd] <- ii
-  }
-
-  if (ndim > 1) {
-    args <- c(args, "drop=drop")
-  }
-
-  args <- paste(args, collapse = ",")
-  code <- paste("x[", args, "]", sep = "")
-  expr <- parse(text = code)
-  eval(expr)
-}
 
 #' .gridToIndex3D
 #' @rdname internal-methods

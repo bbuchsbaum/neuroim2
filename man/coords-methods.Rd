@@ -14,4 +14,3 @@ coords(x, ...)
 \description{
 Extract coordinates
 }
-

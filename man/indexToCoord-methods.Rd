@@ -24,4 +24,3 @@ g <- indexToCoord(bvol, idx)
 idx2 <- coord_to_index(bvol, g)
 all.equal(idx, idx2)
 }
-

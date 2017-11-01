@@ -1,6 +1,6 @@
-#' @include AllClass.R
+#' @include all_class.R
 {}
-#' @include Axis.R
+#' @include axis.R
 {}
 
 
@@ -122,7 +122,7 @@ setMethod(f="drop_dim", signature=signature(x = "NeuroSpace", dimnum="missing"),
 			Dind <- 1:(length(D)-1)
 
 
-			### doesn't drop dimension in transformation matrix...
+			### TODO doesn't drop dimension in transformation matrix...
       ### brain vector's don't have th axis and these are incorrectly dropped
       if (ndim(x) > 3) {
 			  NeuroSpace(D[Dind], origin=origin(x)[Dind], spacing=spacing(x)[Dind], axes=axes(x), trans=trans(x))
@@ -147,6 +147,8 @@ setMethod(f="ndim", signature=signature(x = "NeuroSpace"),
 		def=function(x) length(x@Dim))
 
 
+#' @export
+#' @rdname dim_of-methods
 setMethod(f="dim_of", signature=signature(x = "NeuroSpace", axis="NamedAxis"),
             function(x, axis) {
   dir <- abs(axis@direction)
@@ -155,6 +157,8 @@ setMethod(f="dim_of", signature=signature(x = "NeuroSpace", axis="NamedAxis"),
   dim(x)[dnum]
 })
 
+#' @export
+#' @rdname which_dim-methods
 setMethod(f="which_dim", signature=signature(x = "NeuroSpace", axis="NamedAxis"),
           function(x, axis) {
             dir <- abs(axis@direction)
@@ -302,7 +306,8 @@ setMethod(f="grid_to_coord", signature=signature(x="NeuroSpace", coords="matrix"
           def=function(x, coords) {
             input <- t(cbind(coords-1, rep(1, nrow(coords))))
             ret <- t(trans(x) %*% input)
-            ret[,1:3,drop=FALSE]
+            md <- min(ndim(x), 3)
+            ret[,1:md,drop=FALSE]
           })
 
 #' @export
@@ -312,7 +317,9 @@ setMethod(f="grid_to_coord", signature=signature(x="NeuroSpace", coords="numeric
             coords <- matrix(coords, ncol=length(coords))
             input <- t(cbind(coords-1, rep(1, nrow(coords))))
             ret <- t(trans(x) %*% input)
-            ret[,1:3,drop=FALSE]
+      
+            md <- min(ndim(x), 3)
+            ret[,1:md,drop=FALSE]
 
           })
 
@@ -346,6 +353,71 @@ setMethod(f="grid_to_index", signature=signature(x="NeuroSpace", coords="numeric
 			.grid_to_index3D(dim(x), matrix(coords, nrow=1, byrow=TRUE))
 		})
 
+#' @export 
+#' @rdname index_to_coord-methods
+setMethod(f="index_to_coord", signature=signature(x="NeuroVol", idx="index"),
+          def=function(x, idx) {
+            callGeneric(space(x),idx)
+          })
+
+
+#' @export 
+#' @rdname coord_to_index-methods
+setMethod(f="coord_to_index", signature=signature(x="NeuroVol", coords="matrix"),
+          def=function(x, coords) {
+            assert_that(ncol(coords) == 3)
+            callGeneric(space(x), coords)
+          })
+
+
+
+#' @export 
+#' @rdname index_to_grid-methods
+setMethod(f="index_to_grid", signature=signature(x="BrainVector", idx="index"),
+          def=function(x, idx) {
+            callGeneric(space(x), idx)
+          })
+
+#' @export 
+#' @rdname index_to_grid-methods
+setMethod(f="index_to_grid", signature=signature(x="BrainVector", idx="integer"),
+          def=function(x, idx) {
+            callGeneric(space(x), as.numeric(idx))
+          })
+
+
+#' @export 
+#' @rdname index_to_grid-methods
+setMethod(f="index_to_grid", signature=signature(x="NeuroVol", idx="index"),
+          def=function(x, idx) {
+            callGeneric(space(x), idx)
+          })
+
+#' @export 
+#' @rdname index_to_grid-methods
+setMethod(f="index_to_grid", signature=signature(x="NeuroVol", idx="integer"),
+          def=function(x, idx) {
+            callGeneric(space(x), as.numeric(idx))
+          })
+
+#' @export 
+#' @rdname grid_to_index-methods
+setMethod(f="grid_to_index", signature=signature(x="NeuroVol", coords="matrix"),
+          def=function(x, coords) {
+            assert_that(ncol(coords) == 3)
+            array.dim <- dim(x)
+            .grid_to_index3D(dim(x), coords)
+          })
+
+
+#' @export 
+#' @rdname grid_to_index-methods
+setMethod(f="grid_to_index", signature=signature(x="NeuroVol", coords="numeric"),
+          def=function(x, coords) {
+            assert_that(length(coords) == 3)
+            array.dim <- dim(x)
+            .grid_to_index3D(dim(x), matrix(coords, nrow=1, byrow=TRUE))
+          })
 
 
 #' @export

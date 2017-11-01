@@ -9,4 +9,3 @@ Base class for image representing 3D volumetric data.}
 NeuroVol
 Base class for image representing 3D volumetric data.
 }
-

@@ -17,4 +17,3 @@ file_name without extension
 \description{
 Generic function to strip extension from file name, given a \code{\linkS4class{FileFormat}} instance.
 }
-

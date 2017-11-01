@@ -14,4 +14,3 @@ perm_mat(x, ...)
 \description{
 Extract permutation matrix
 }
-

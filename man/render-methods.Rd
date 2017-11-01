@@ -20,4 +20,3 @@ render(x, width, height, colmap, ...)
 \description{
 Render an image to create a drawable image.
 }
-

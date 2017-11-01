@@ -16,4 +16,3 @@ map(x, m, ...)
 \description{
 Generic function to apply a function to an object
 }
-

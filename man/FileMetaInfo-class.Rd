@@ -2,9 +2,9 @@
 % Please edit documentation in R/all_class.R
 \docType{class}
 \name{FileMetaInfo-class}
-\alias{AFNIMetaInfo-class}
 \alias{FileMetaInfo-class}
 \alias{NIFTIMetaInfo-class}
+\alias{AFNIMetaInfo-class}
 \title{FileMetaInfo}
 \description{
 This class contains meta information from an image data file

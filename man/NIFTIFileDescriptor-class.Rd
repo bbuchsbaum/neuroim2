@@ -7,4 +7,3 @@
 \description{
 This class supports the NIFTI file format
 }
-
