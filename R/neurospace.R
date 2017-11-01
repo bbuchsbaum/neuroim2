@@ -122,7 +122,7 @@ setMethod(f="drop_dim", signature=signature(x = "NeuroSpace", dimnum="missing"),
 			Dind <- 1:(length(D)-1)
 
 
-			### doesn't drop dimension in transformation matrix...
+			### TODO doesn't drop dimension in transformation matrix...
       ### brain vector's don't have th axis and these are incorrectly dropped
       if (ndim(x) > 3) {
 			  NeuroSpace(D[Dind], origin=origin(x)[Dind], spacing=spacing(x)[Dind], axes=axes(x), trans=trans(x))
@@ -147,6 +147,8 @@ setMethod(f="ndim", signature=signature(x = "NeuroSpace"),
 		def=function(x) length(x@Dim))
 
 
+#' @export
+#' @rdname dim_of-methods
 setMethod(f="dim_of", signature=signature(x = "NeuroSpace", axis="NamedAxis"),
             function(x, axis) {
   dir <- abs(axis@direction)
@@ -155,6 +157,8 @@ setMethod(f="dim_of", signature=signature(x = "NeuroSpace", axis="NamedAxis"),
   dim(x)[dnum]
 })
 
+#' @export
+#' @rdname which_dim-methods
 setMethod(f="which_dim", signature=signature(x = "NeuroSpace", axis="NamedAxis"),
           function(x, axis) {
             dir <- abs(axis@direction)
