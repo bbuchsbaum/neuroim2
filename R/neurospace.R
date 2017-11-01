@@ -302,8 +302,8 @@ setMethod(f="grid_to_coord", signature=signature(x="NeuroSpace", coords="matrix"
           def=function(x, coords) {
             input <- t(cbind(coords-1, rep(1, nrow(coords))))
             ret <- t(trans(x) %*% input)
-            ## TODO assumes 3D
-            ret[,1:3,drop=FALSE]
+            md <- min(ndim(x), 3)
+            ret[,1:md,drop=FALSE]
           })
 
 #' @export
@@ -313,8 +313,9 @@ setMethod(f="grid_to_coord", signature=signature(x="NeuroSpace", coords="numeric
             coords <- matrix(coords, ncol=length(coords))
             input <- t(cbind(coords-1, rep(1, nrow(coords))))
             ret <- t(trans(x) %*% input)
-            ## TODO assumes 3D
-            ret[,1:3,drop=FALSE]
+      
+            md <- min(ndim(x), 3)
+            ret[,1:md,drop=FALSE]
 
           })
 
