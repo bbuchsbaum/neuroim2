@@ -75,17 +75,17 @@ setGeneric(name="add_dim", def=function(x, n) standardGeneric("add_dim"))
 #' @param x a dimensioned object
 #' @param dimnum the index of the dimension to drop
 #' @export
-#' @rdname dropDim-methods
+#' @rdname drop_dim-methods
 #' @examples
 #' x = NeuroSpace(c(10,10,10), c(1,1,1))
-#' x1 <- dropDim(x)
+#' x1 <- drop_dim(x)
 #' ndim(x1) == 2
 #' dim(x1)[2] == 10
 setGeneric(name="drop_dim", def=function(x, dimnum) standardGeneric("drop_dim"))
 
 #' Generic function to extract geometric properties of an image.
 #'
-#' @param x the object to query, e.g. an instance of \code{\linkS4class{NeuroVol}} or \code{\linkS4class{BrainVector}}
+#' @param x the object to query, e.g. an instance of \code{\linkS4class{NeuroVol}} or \code{\linkS4class{NeuroVec}}
 #' @param ... additional arguments
 #' @return an object representing the geometric space of the image of type \code{\linkS4class{NeuroSpace}}
 #' @export space
@@ -146,6 +146,7 @@ setGeneric(name="fill", def=function(x, lookup) standardGeneric("fill"))
 
 
 #' Generic function to center/scale row-subsets of a matrix or matrix-like object
+#' 
 #' @param x a numeric matrix or matrix-like object
 #' @param f the splitting object, typically a \code{factor} or set of \code{integer} indices. must be equal to number of rows of matrix.
 #' @param center should values within each submatrix be centered? (mean removed from each column of submatrix)
@@ -166,7 +167,7 @@ setGeneric(name="fill", def=function(x, lookup) standardGeneric("fill"))
 #' # correctly scaled
 #' all.equal(apply(Ms[fac == 1,], 2, sd), rep(1, ncol(Ms)))
 #' all.equal(apply(Ms[fac == 2,], 2, sd), rep(1, ncol(Ms)))
-#' @rdname splitScale-methods
+#' @rdname split_scale-methods
 setGeneric(name="split_scale", def=function(x, f, center, scale) standardGeneric("split_scale"))
 
 #' Generic function to summarize subsets of an object by first splitting by row and then "reducing" by a summary \code{function}
@@ -177,7 +178,7 @@ setGeneric(name="split_scale", def=function(x, f, center, scale) standardGeneric
 #' @docType methods
 #' @details if \code{FUN} is supplied it must take a vector and return a single scalar value. If it returns more than one value, an error will occur.
 #'
-#' if \code{x} is a \code{\linkS4class{BrainVector}} instance then voxels (dims 1:3) are treated as columns and time-series (dim 4) as rows.
+#' if \code{x} is a \code{\linkS4class{NeuroVec}} instance then voxels (dims 1:3) are treated as columns and time-series (dim 4) as rows.
 #' The summary function then is applied to groups of voxels. However, if the goal is to apply a function to groups of time-points,
 #' then this can be achieved as follows:
 #'
@@ -197,7 +198,7 @@ setGeneric(name="split_scale", def=function(x, f, center, scale) standardGeneric
 #'
 #' ## compute time-series means grouped over voxels.
 #' ## Here, \code{length(fac)} must equal the number of voxels: \code{prod(dim(bvec)[1:3]}
-#' bvec <- BrainVector(array(rnorm(24*24*24*24), c(24,24,24,24)), NeuroSpace(c(24,24,24,24), c(1,1,1)))
+#' bvec <- NeuroVec(array(rnorm(24*24*24*24), c(24,24,24,24)), NeuroSpace(c(24,24,24,24), c(1,1,1)))
 #' fac <- factor(sample(1:3, prod(dim(bvec)[1:3]), replace=TRUE))
 #' ms <- splitReduce(bvec, fac)
 #' ms2 <- splitReduce(bvec, fac, mean)
@@ -271,8 +272,8 @@ setGeneric(name="trans",  def=function(x) standardGeneric("trans"))
 #' @examples
 #' bspace <- NeuroSpace(c(10,10,10), c(2,2,2))
 #' itrans <- inverse_trans(bspace)
-#' identical(trans(bspace) %*% inverseTrans(bspace), diag(4))
-#' @rdname inverseTrans-methods
+#' identical(trans(bspace) %*% inverse_trans(bspace), diag(4))
+#' @rdname inverse_trans-methods
 setGeneric(name="inverse_trans", def=function(x) standardGeneric("inverse_trans"))
 
 #' Generic function to read a sequence of elements from an input source
@@ -321,7 +322,7 @@ setGeneric(name="write_vol",  def=function(x, file_name, format, dataType) stand
 
 
 #' Generic function to write a 4D image vector to disk
-#' @param x an image object, typically a \code{BrainVector} instance.
+#' @param x an image object, typically a \code{NeuroVec} instance.
 #' @param file_name output file name.
 #' @param format file format string. Since "NIFTI" is the only currently supported format, this parameter can be safely ignored and omitted.
 #' @param dataType the numeric data type. If specified should be a \code{character} vector of: "BINARY", "UBYTE", "SHORT", "INT", "FLOAT", "DOUBLE".
@@ -329,7 +330,7 @@ setGeneric(name="write_vol",  def=function(x, file_name, format, dataType) stand
 #' @export
 #' @examples
 #'
-#' bvec <- BrainVector(array(0, c(10,10,10,10)), NeuroSpace(c(10,10,10,10), c(1,1,1)))
+#' bvec <- NeuroVec(array(0, c(10,10,10,10)), NeuroSpace(c(10,10,10,10), c(1,1,1)))
 #' \dontrun{
 #' writeVector(bvol, "out.nii")
 #' writeVector(bvol, "out.nii.gz")
@@ -426,14 +427,14 @@ setGeneric(name="grid_to_index",   def=function(x, coords) standardGeneric("grid
 
 
 
-#' Generic function to extract a sub-vector from a \code{BrainVector} object.
+#' Generic function to extract a sub-vector from a \code{NeuroVec} object.
 #' @param x four-dimensional image
 #' @param i the indices of the volume(s) to extract
 #' @param ... additional arguments
-#' @return a  \code{BrainVector} object that is a sub-sequence of the supplied object.
+#' @return a  \code{NeuroVec} object that is a sub-sequence of the supplied object.
 #' @export
 #' @examples
-#' bvec <- BrainVector(array(rnorm(24*24*24*24), c(24,24,24,24)), NeuroSpace(c(24,24,24,24), c(1,1,1)))
+#' bvec <- NeuroVec(array(rnorm(24*24*24*24), c(24,24,24,24)), NeuroSpace(c(24,24,24,24), c(1,1,1)))
 #' vec <- sub_vector(bvec,1:2)
 #' all.equal(2, dim(vec)[4])
 #'
@@ -441,7 +442,7 @@ setGeneric(name="grid_to_index",   def=function(x, coords) standardGeneric("grid
 #' all.equal(4, dim(vec)[4])
 #'
 #' mask <- LogicalNeuroVol(rep(TRUE, 24*24*24), NeuroSpace(c(24,24,24), c(1,1,1)))
-#' svec <- SparseBrainVector(array(rnorm(24*24*24*24), c(24,24,24,24)),
+#' svec <- SparseNeuroVec(array(rnorm(24*24*24*24), c(24,24,24,24)),
 #' NeuroSpace(c(24,24,24,24), c(1,1,1)), mask)
 #' vec <- sub_vector(svec, c(1,3,5))
 #' all.equal(3, dim(vec)[4])
@@ -456,7 +457,7 @@ setGeneric(name="sub_vector", def=function(x, i, ...) standardGeneric("sub_vecto
 #' @param scale a \code{logical} value indicating whether series should be divided by standard deviation
 #' @export
 #' @examples
-#' bvec <- BrainVector(array(rnorm(24*24*24*24), c(24,24,24,24)), NeuroSpace(c(24,24,24,24), c(1,1,1)))
+#' bvec <- NeuroVec(array(rnorm(24*24*24*24), c(24,24,24,24)), NeuroSpace(c(24,24,24,24), c(1,1,1)))
 #' res <- scale_series(bvec, TRUE, TRUE)
 #' @rdname scale_series-methods
 setGeneric(name="scale_series", def=function(x, center, scale) standardGeneric("scale_series"))
@@ -464,7 +465,7 @@ setGeneric(name="scale_series", def=function(x, center, scale) standardGeneric("
 
 #' Convert to from dense to sparse representation
 #'
-#' @param x the object to make sparse, e.g. \code{DenseNeuroVol} or \code{DenseBrainVector}
+#' @param x the object to make sparse, e.g. \code{DenseNeuroVol} or \code{DenseNeuroVec}
 #' @param mask the elements to retain
 #' @param ... additional arguments
 #'
@@ -577,16 +578,16 @@ setGeneric(name="render_slice", def=function(x, zpos, width, height, colmap,...)
 setGeneric(name="perm_mat", def=function(x, ...) standardGeneric("perm_mat"))
 
 #' Concatenate two objects
-#' @param x the first object, typically \code{NeuroVol} or \code{BrainVector}
-#' @param y the second object, typically \code{NeuroVol} or \code{BrainVector}
-#' @details The \code{x} and \code{y} images must have compatible dimensions. a \code{NeuroVol} can be concatenated to \code{BrainVector}, and vice versa. See examples.
+#' @param x the first object, typically \code{NeuroVol} or \code{NeuroVec}
+#' @param y the second object, typically \code{NeuroVol} or \code{NeuroVec}
+#' @details The \code{x} and \code{y} images must have compatible dimensions. a \code{NeuroVol} can be concatenated to \code{NeuroVec}, and vice versa. See examples.
 #' @param ... additional objects
 #'
 #' @examples
 #' bv1 <- NeuroVol(rep(1,1000), NeuroSpace(c(10,10,10), c(1,1,1)))
 #' bv2 <- NeuroVol(rep(2,1000), NeuroSpace(c(10,10,10), c(1,1,1)))
 #' bv3 <- concat(bv1,bv2)
-#' inherits(bv3, "BrainVector")
+#' inherits(bv3, "NeuroVec")
 #'
 #' bv4 <- concat(bv3, bv1)
 #' dim(bv4)[4] == 3

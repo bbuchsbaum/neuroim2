@@ -20,4 +20,3 @@ slice(x, zlevel, along, orientation, ...)
 \description{
 Extract a 2D slice from an image volume
 }
-

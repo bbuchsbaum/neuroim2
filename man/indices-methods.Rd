@@ -12,4 +12,3 @@ indices(x)
 \description{
 Extract indices
 }
-

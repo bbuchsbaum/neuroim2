@@ -14,4 +14,3 @@ as.mask(x, indices)
 \description{
 Convert to a LogicalNeuroVol
 }
-

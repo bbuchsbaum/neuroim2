@@ -20,4 +20,3 @@ x1 <- dropDim(x)
 ndim(x1) == 2
 dim(x1)[2] == 10
 }
-

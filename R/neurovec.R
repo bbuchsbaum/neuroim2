@@ -317,7 +317,7 @@ setMethod(f="sub_vector", signature=signature(x="DenseNeuroVec", i="numeric"),
 #' @rdname NeuroVec-methods
 #' @param i the volume index
 #' @export
-setMethod(f="[[", signature=signature(x="BrainVector", i="numeric"),
+setMethod(f="[[", signature=signature(x="NeuroVec", i="numeric"),
           def = function(x, i) {
             xs <- space(x)
             dat <- x[,,,i]
@@ -325,8 +325,6 @@ setMethod(f="[[", signature=signature(x="BrainVector", i="numeric"),
             bspace <- NeuroSpace(newdim, spacing=spacing(xs), origin=origin(xs), axes(xs), trans(xs))
             DenseNeuroVol(dat, bspace)
           })
-
-
 
 
 
@@ -398,7 +396,7 @@ setMethod("series_roi", signature(x="NeuroVec", i="matrix"),
 
 #' @rdname series-methods
 #' @export
-setMethod("series", signature(x="NeuroVec", i="ROIVolume"),
+setMethod("series", signature(x="NeuroVec", i="ROIVol"),
           def=function(x,i) {
             grid <- coords(i)
             callGeneric(x, grid)
@@ -407,7 +405,7 @@ setMethod("series", signature(x="NeuroVec", i="ROIVolume"),
 
 #' @rdname series-methods
 #' @export
-setMethod("series_roi", signature(x="NeuroVec", i="ROIVolume"),
+setMethod("series_roi", signature(x="NeuroVec", i="ROIVol"),
           def=function(x,i) {
             rvol <- series(x, i)
             ROIVector(space(x), coords=coords(rvol), data=as.matrix(values(rvol)))
@@ -422,7 +420,7 @@ setMethod("series", signature(x="NeuroVec", i="LogicalNeuroVol"),
             idx <- which(i == TRUE)
             assertthat::assert_that(length(idx) > 0)
 
-            grid <- indexToGrid(i, idx)
+            grid <- index_to_grid(i, idx)
             callGeneric(x, grid)
 
           })
@@ -432,7 +430,7 @@ setMethod("series", signature(x="NeuroVec", i="LogicalNeuroVol"),
 setMethod("series_roi", signature(x="NeuroVec", i="LogicalNeuroVol"),
           def=function(x,i) {
             mat <- as.matrix(series(x, i))
-            ROIVector(space(x), coords=indexToGrid(which(i == TRUE), idx), data=as.matrix(mat))
+            ROIVector(space(x), coords=index_to_grid(which(i == TRUE), idx), data=as.matrix(mat))
 
           })
 

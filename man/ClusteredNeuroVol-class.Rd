@@ -7,4 +7,3 @@
 \description{
 Three-dimensional brain image that is divided into N disjoint partitions
 }
-

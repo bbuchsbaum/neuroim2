@@ -50,7 +50,7 @@ setMethod(f="grid_to_index", signature=signature(x = "NeuroSlice", coords="matri
 
 
 #' @export
-#' @rdname indexToGrid-methods
+#' @rdname index_to_grid-methods
 setMethod(f="index_to_grid", signature=signature(x = "NeuroSlice", idx="numeric"),
 		def=function(x, idx) {
 			.indexToGrid(idx, dim(x))

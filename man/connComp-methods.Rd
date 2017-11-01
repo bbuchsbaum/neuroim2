@@ -14,4 +14,3 @@ conn_comp(x, ...)
 \description{
 Find connected components
 }
-

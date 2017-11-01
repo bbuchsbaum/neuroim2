@@ -35,4 +35,3 @@ length(unique(as.vector(ovol.mean))) == 10
 ## transform by reversing vector -- FUN returns a vector.
 ovol2 <- splitFill(vol, fac, rev)
 }
-

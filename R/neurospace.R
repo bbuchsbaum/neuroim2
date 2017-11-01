@@ -1,6 +1,6 @@
-#' @include AllClass.R
+#' @include all_class.R
 {}
-#' @include Axis.R
+#' @include axis.R
 {}
 
 
