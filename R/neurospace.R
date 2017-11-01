@@ -302,6 +302,7 @@ setMethod(f="grid_to_coord", signature=signature(x="NeuroSpace", coords="matrix"
           def=function(x, coords) {
             input <- t(cbind(coords-1, rep(1, nrow(coords))))
             ret <- t(trans(x) %*% input)
+            ## TODO assumes 3D
             ret[,1:3,drop=FALSE]
           })
 
@@ -312,6 +313,7 @@ setMethod(f="grid_to_coord", signature=signature(x="NeuroSpace", coords="numeric
             coords <- matrix(coords, ncol=length(coords))
             input <- t(cbind(coords-1, rep(1, nrow(coords))))
             ret <- t(trans(x) %*% input)
+            ## TODO assumes 3D
             ret[,1:3,drop=FALSE]
 
           })
@@ -346,6 +348,71 @@ setMethod(f="grid_to_index", signature=signature(x="NeuroSpace", coords="numeric
 			.grid_to_index3D(dim(x), matrix(coords, nrow=1, byrow=TRUE))
 		})
 
+#' @export 
+#' @rdname index_to_coord-methods
+setMethod(f="index_to_coord", signature=signature(x="NeuroVol", idx="index"),
+          def=function(x, idx) {
+            callGeneric(space(x),idx)
+          })
+
+
+#' @export 
+#' @rdname coord_to_index-methods
+setMethod(f="coord_to_index", signature=signature(x="NeuroVol", coords="matrix"),
+          def=function(x, coords) {
+            assert_that(ncol(coords) == 3)
+            callGeneric(space(x), coords)
+          })
+
+
+
+#' @export 
+#' @rdname index_to_grid-methods
+setMethod(f="index_to_grid", signature=signature(x="BrainVector", idx="index"),
+          def=function(x, idx) {
+            callGeneric(space(x), idx)
+          })
+
+#' @export 
+#' @rdname index_to_grid-methods
+setMethod(f="index_to_grid", signature=signature(x="BrainVector", idx="integer"),
+          def=function(x, idx) {
+            callGeneric(space(x), as.numeric(idx))
+          })
+
+
+#' @export 
+#' @rdname index_to_grid-methods
+setMethod(f="index_to_grid", signature=signature(x="NeuroVol", idx="index"),
+          def=function(x, idx) {
+            callGeneric(space(x), idx)
+          })
+
+#' @export 
+#' @rdname index_to_grid-methods
+setMethod(f="index_to_grid", signature=signature(x="NeuroVol", idx="integer"),
+          def=function(x, idx) {
+            callGeneric(space(x), as.numeric(idx))
+          })
+
+#' @export 
+#' @rdname grid_to_index-methods
+setMethod(f="grid_to_index", signature=signature(x="NeuroVol", coords="matrix"),
+          def=function(x, coords) {
+            assert_that(ncol(coords) == 3)
+            array.dim <- dim(x)
+            .grid_to_index3D(dim(x), coords)
+          })
+
+
+#' @export 
+#' @rdname grid_to_index-methods
+setMethod(f="grid_to_index", signature=signature(x="NeuroVol", coords="numeric"),
+          def=function(x, coords) {
+            assert_that(length(coords) == 3)
+            array.dim <- dim(x)
+            .grid_to_index3D(dim(x), matrix(coords, nrow=1, byrow=TRUE))
+          })
 
 
 #' @export
