@@ -197,15 +197,15 @@ setClass("FileSource", representation(metaInfo="FileMetaInfo"))
 #' @rdname NeuroVolSource-class
 #' @slot index the index of the volume to be read -- must be of length 1.
 #' @exportClass NeuroVolSource
-setClass("NeuroVolSource", representation(index="integer"))
+setClass("NeuroVolSource", representation(index="integer"), contains="FileSource")
 
 #' NeuroVecSource
 #'
-#' A class that is used to produce a \code{\linkS4class{NeuroVecSource}} instance
+#' A class that is used to produce a \code{\linkS4class{NeuroVec}} instance
 #' @rdname NeuroVecSource-class
 #' @slot indices the index vector of the volumes to be loaded
 #' @export
-setClass("NeuroVecSource", representation(indices="integer"))
+setClass("NeuroVecSource", representation(indices="integer"), contains="FileSource")
 
 
 
@@ -483,7 +483,6 @@ setClass("ROIVector",
 setClass("Kernel", representation(width="numeric", weights="numeric", voxels="matrix", coords="matrix"))
 
 
-## TODO add a LazyBrainBucket class
 
 #' BrainBucket
 #'
