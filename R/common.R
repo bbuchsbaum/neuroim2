@@ -169,6 +169,31 @@ setMethod(f="split_scale", signature=signature(x = "DenseNeuroVec", f="factor", 
           })
 
 
+#' @rdname scale_series-methods
+#' @export
+setMethod(f="scale_series", signature=signature(x="NeuroVec", center="logical", scale="logical"),
+          def=function(x, center, scale) {
+            M <- as.matrix(x)
+            Ms <- scale(t(M), center, scale)
+            NeuroVec(Ms, space(x))
+
+          })
+
+#' @rdname scale_series-methods
+#' @export
+setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", scale="logical"),
+          def=function(x, center, scale) {
+            callGeneric(x, TRUE, scale)
+          })
+
+
+#' @rdname scale_series-methods
+#' @export
+setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", scale="missing"),
+          def=function(x, center, scale) {
+            callGeneric(x, TRUE, TRUE)
+          })
+
 
 #' .isExtension
 #' @rdname internal-methods
