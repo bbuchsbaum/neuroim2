@@ -270,7 +270,7 @@ setGeneric(name="trans",  def=function(x) standardGeneric("trans"))
 #' @export
 #' @examples
 #' bspace <- NeuroSpace(c(10,10,10), c(2,2,2))
-#' itrans <- inverseTrans(bspace)
+#' itrans <- inverse_trans(bspace)
 #' identical(trans(bspace) %*% inverseTrans(bspace), diag(4))
 #' @rdname inverseTrans-methods
 setGeneric(name="inverse_trans", def=function(x) standardGeneric("inverse_trans"))

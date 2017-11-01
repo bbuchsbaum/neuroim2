@@ -14,7 +14,7 @@ setOldClass("environment")
 #' @slot axis the name of the axis
 #' @slot direction of axis (-1,+1)
 #' @export
-setClass("NamedAxis", representation=representation(axis="character", direction="numeric"))
+setClass("NamedAxis", representation(axis="character", direction="numeric"))
 
 #'
 #' AxisSet
@@ -23,7 +23,7 @@ setClass("NamedAxis", representation=representation(axis="character", direction=
 #' @rdname AxisSet-class
 #' @slot ndim the number of axes (or dimensions)
 #' @export
-setClass("AxisSet", representation=representation(ndim="integer"))
+setClass("AxisSet", representation(ndim="integer"))
 
 #' AxisSet1D
 #'
@@ -31,7 +31,7 @@ setClass("AxisSet", representation=representation(ndim="integer"))
 #' @rdname AxisSet1D-class
 #' @slot i the first axis
 #' @export
-setClass("AxisSet1D", representation=representation(i="NamedAxis"), contains=c("AxisSet"))
+setClass("AxisSet1D", representation(i="NamedAxis"), contains=c("AxisSet"))
 
 #' AxisSet2D
 #'
@@ -40,8 +40,7 @@ setClass("AxisSet1D", representation=representation(i="NamedAxis"), contains=c("
 #' @rdname AxisSet2D-class
 #' @slot j the second axis
 #' @export
-setClass("AxisSet2D", representation=representation(j="NamedAxis"),
-         contains=c("AxisSet1D"))
+setClass("AxisSet2D", representation(j="NamedAxis"), contains=c("AxisSet1D"))
 
 #' AxisSet3D
 #'
@@ -50,8 +49,7 @@ setClass("AxisSet2D", representation=representation(j="NamedAxis"),
 #' @rdname AxisSet3D-class
 #' @slot k the third axis
 #' @export
-setClass("AxisSet3D", representation=representation(k="NamedAxis"),
-         contains=c("AxisSet2D"))
+setClass("AxisSet3D", representation(k="NamedAxis"),contains=c("AxisSet2D"))
 
 #' AxisSet4D
 #'
@@ -59,8 +57,7 @@ setClass("AxisSet3D", representation=representation(k="NamedAxis"),
 #' @name AxisSet4D-class
 #' @slot l the fourth axis
 #' @export
-setClass("AxisSet4D", representation=representation(l="NamedAxis"),
-         contains=c("AxisSet3D"))
+setClass("AxisSet4D", representation(l="NamedAxis"), contains=c("AxisSet3D"))
 
 #' AxisSet5D
 #'
@@ -69,8 +66,7 @@ setClass("AxisSet4D", representation=representation(l="NamedAxis"),
 #' @name AxisSet5D-class
 #' @slot m the fifth axis
 #' @export
-setClass("AxisSet5D", representation=representation(m="NamedAxis"),
-         contains=c("AxisSet4D"))
+setClass("AxisSet5D", representation(m="NamedAxis"), contains=c("AxisSet4D"))
 
 #' FileFormatDescriptor
 #'
@@ -150,7 +146,6 @@ setClass("MetaInfo",
 #' @slot header a list of format specific attributes
 #' @export
 setClass("FileMetaInfo",
-         representation=
            representation(header_file="character",
                           data_file="character",
                           descriptor="FileFormat",
@@ -180,7 +175,7 @@ setClass("NIFTIMetaInfo",
 #' @slot afni_header a \code{list} of attributes specific to the AFNI file format
 #' @export
 setClass("AFNIMetaInfo",
-         representation=(afni_header="list"),
+         representation(afni_header="list"),
          contains=c("FileMetaInfo"))
 
 
@@ -191,9 +186,8 @@ setClass("AFNIMetaInfo",
 #' low level IO and image loading functionality.
 #' @rdname FileSource-class
 #' @slot metaInfo meta information for the data source
-#' @exportClass BrainFileSource
-setClass("FileSource", representation=
-           representation(metaInfo="FileMetaInfo"))
+#' @exportClass FileSource
+setClass("FileSource", representation(metaInfo="FileMetaInfo"))
 
 
 
@@ -203,7 +197,7 @@ setClass("FileSource", representation=
 #' @rdname NeuroVolSource-class
 #' @slot index the index of the volume to be read -- must be of length 1.
 #' @exportClass NeuroVolSource
-setClass("NeuroVolSource", representation=representation(index="integer"))
+setClass("NeuroVolSource", representation(index="integer"))
 
 #' NeuroVecSource
 #'
@@ -211,7 +205,7 @@ setClass("NeuroVolSource", representation=representation(index="integer"))
 #' @rdname NeuroVecSource-class
 #' @slot indices the index vector of the volumes to be loaded
 #' @export
-setClass("NeuroVecSource", representation=representation(indices="integer"))
+setClass("NeuroVecSource", representation(indices="integer"))
 
 
 
@@ -225,7 +219,7 @@ setClass("NeuroVecSource", representation=representation(indices="integer"))
 #' @slot bytes_per_element number of bytes in each data element (e.g. 4 or 8 for floating point numbers)
 #' @slot endian endianness of binary input connection
 #' @export
-setClass("BinaryReader", representation=
+setClass("BinaryReader",
            representation(input="connection",
                           byte_offset="numeric",
                           data_type="character",
@@ -244,7 +238,7 @@ setClass("BinaryReader", representation=
 #' @slot bytes_per_element number of bytes in each data element (e.g. 4 or 8 for floating point numbers)
 #' @slot endian endianness of binary output connection
 #' @export
-setClass("BinaryWriter", representation=
+setClass("BinaryWriter",
            representation(output="connection",
                           byte_offset="numeric",
                           data_type="character",
@@ -265,9 +259,8 @@ setClass("BinaryWriter", representation=
 #'
 # TODO add 'ref_space' e.g. the name of the coordinate reference space (e.g. LPI)?
 setClass("NeuroSpace",
-         representation=
-           representation(dim = "integer", origin = "numeric", spacing = "numeric",
-                          axes="AxisSet", trans="matrix", inverse="matrix"),
+        representation(dim = "integer", origin = "numeric", spacing = "numeric",
+                       axes="AxisSet", trans="matrix", inverse="matrix"),
 
          validity = function(object) {
            dim <- object@dim
@@ -383,7 +376,7 @@ setClass("DenseNeuroVec",  contains=c("NeuroVec", "array"))
 #' @slot map instance of class \code{\linkS4class{IndexLookupVolume}} is used to map between spatial and index/row coordinates
 #' @export
 setClass("SparseNeuroVec",
-         representation=representation(mask="LogicalNeuroVol",data="matrix", map="IndexLookupVolume"),
+         representation(mask="LogicalNeuroVol",data="matrix", map="IndexLookupVolume"),
          contains=c("NeuroVec"))
 
 
@@ -401,7 +394,7 @@ setClass("SparseNeuroVec",
 #' @slot map instance of class \code{\linkS4class{IndexLookupVolume}} is used to map between spatial and index/row coordinates
 #' @export
 setClass("BasisNeuroVec",
-         representation=representation(mask="LogicalNeuroVol",
+         representation(mask="LogicalNeuroVol",
                                        basis="Matrix",
                                        coeffs="Matrix",
                                        map="IndexLookupVolume")
@@ -439,7 +432,7 @@ setClass("ROI", contains="VIRTUAL")
 #' @slot coords the voxel coordinates of the ROI
 #' @exportClass ROIVol
 setClass("ROIVol",
-         representation=representation(data="numeric", coords="matrix"), contains=c("ROI"),
+         representation(data="numeric", coords="matrix"), contains=c("ROI"),
          validity = function(object) {
            if (ncol(object@coords) != 3) {
              stop("coords slot must be a matrix with 3 columns")
@@ -487,8 +480,7 @@ setClass("ROIVector",
 #' @slot voxels the relative voxel coordinates of the kernel
 #' @slot coords the relative real coordinates of the kernel
 #' @export
-setClass("Kernel",
-         representation=representation(width="numeric", weights="numeric", voxels="matrix", coords="matrix"))
+setClass("Kernel", representation(width="numeric", weights="numeric", voxels="matrix", coords="matrix"))
 
 
 ## TODO add a LazyBrainBucket class
