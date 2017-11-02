@@ -494,9 +494,12 @@ setGeneric(name="as.mask", def=function(x, indices) standardGeneric("as.mask"))
 
 #' patch_set
 #'
+#' generate a set of coordinate "patches" of fixed size from an image object.
+#'
 #' @param x the object to extract patches from
 #' @param dims a vector indicating the dimensions of the patches
 #' @param mask mask indicating the valid patch area
+#' @rdname patch_set-methods
 setGeneric(name="patch_set", def=function(x, dims, mask, ...) standardGeneric("patch_set"))
 
 #' num_clusters
@@ -546,7 +549,10 @@ setGeneric(name="series_roi", def=function(x, i, ...) standardGeneric("series_ro
 #' @rdname series-methods
 setGeneric(name="series", def=function(x, i, ...) standardGeneric("series"))
 
+#' slice
+#'
 #' Extract a 2D slice from an image volume
+#'
 #' @param x the object
 #' @param zlevel coordinate (in voxel units) along the sliced axis
 #' @param along the axis along which to slice

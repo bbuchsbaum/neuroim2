@@ -451,7 +451,7 @@ setMethod(f="split_fill", signature=signature(x="NeuroVol", fac="factor", FUN="f
 
 		})
 
-
+#' @keywords internal
 fast.expand.grid <- function(seq1,seq2, constant) {
   cbind(Var1 = rep.int(seq1, length(seq2)),
         Var2 = rep.int(seq2, rep.int(length(seq1),length(seq2))),
@@ -535,6 +535,7 @@ setMethod(f="coord_to_grid", signature=signature(x="NeuroVol", coords="matrix"),
 
 
 #' @importFrom rflann Neighbour
+#' @keywords internal
 .pruneCoords <- function(coord.set,  vals,  mindist=10) {
 
 	if (NROW(coord.set) == 1) {
@@ -568,6 +569,8 @@ setMethod(f="coord_to_grid", signature=signature(x="NeuroVol", coords="matrix"),
 
 }
 
+
+#' @rdname patch_set-methods
 setMethod(f="patch_set", signature=signature(x="NeuroVol",
                                             dims="numeric",
                                             mask="LogicalNeuroVol"),
