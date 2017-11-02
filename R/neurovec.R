@@ -541,15 +541,15 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVec", mask="numeric"),
 
 #' @export
 #' @rdname write_vec-methods
-setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character", format="missing", dataType="missing"),
+setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character", format="missing", data_type="missing"),
 		def=function(x, file_name) {
-			write.nifti.vector(x, file_name)
+			write_nifti_vector(x, file_name)
 		})
 
 
 #' @export
 #' @rdname write_vec-methods
-setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character", format="character", dataType="missing"),
+setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character", format="character", data_type="missing"),
 		def=function(x, file_name, format) {
 			if (toupper(format) == "NIFTI" || toupper(format) == "NIFTI1" || toupper(format) == "NIFTI-1") {
 				callGeneric(x, file_name)
@@ -562,9 +562,9 @@ setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character",
 #' @export write_vec
 #' @rdname write_vec-methods
 #' @aliases write_vec,NeuroVec,character,missing,character,ANY-method
-setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character", format="missing", dataType="character"),
-		def=function(x, file_name, dataType) {
-			write.nifti.vector(x, file_name, dataType)
+setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character", format="missing", data_type="character"),
+		def=function(x, file_name, data_type) {
+			write_nifti_vector(x, file_name, data_type)
 
 		})
 

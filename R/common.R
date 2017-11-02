@@ -208,25 +208,25 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 #' @keywords internal
 .concat4D <- function(x, y, ...) {
   rest <- list(...)
-  
+
   D <- dim(x)[1:3]
-  
+
   rvols <- lapply(rest, function(z) {
     stopifnot(length(dim(z)) >= 3)
     stopifnot(identical(D, dim(z)[1:3]))
     z
   })
-  
+
   out <- cbind(as.matrix(x), as.matrix(y))
-  
+
   if (length(rvols) > 0) {
     out2 <- do.call(cbind, lapply(rvols, as.matrix))
     out <- cbind(out, out2)
   }
-  
+
   nvols <- ncol(out)
   new.dim <- c(D, nvols)
-  
+
   nspace <-
     NeuroSpace(
       new.dim,
@@ -235,9 +235,9 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
       axes = axes(x@space),
       trans = trans(x@space)
     )
-  
+
   DenseNeuroVec(out, nspace)
-  
+
 }
 
 
@@ -563,11 +563,11 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
     rawbytes <- rawbytes[(meta@data_offset+1):length(rawbytes)]
 
     mmap::munmap(rawbytes)
-    readBin(rawbytes, what=.getRStorage(meta@dataType), size=.getDataSize(meta@dataType), n=nels, endian=meta@endian)
+    readBin(rawbytes, what=.getRStorage(meta@data_type), size=.getDataSize(meta@data_type), n=nels, endian=meta@endian)
   } else {
-    #mmap::mmap(meta@data_file, mode=.getMMapMode(meta@dataType), off=meta@data_offset,prot=mmap::mmapFlags("PROT_READ"),flags=mmap::mmapFlags("MAP_PRIVATE"))
+    #mmap::mmap(meta@data_file, mode=.getMMapMode(meta@data_type), off=meta@data_offset,prot=mmap::mmapFlags("PROT_READ"),flags=mmap::mmapFlags("MAP_PRIVATE"))
     ret <- mmap::mmap(meta@data_file, mode=.getMMapMode(meta@data_type), prot=mmap::mmapFlags("PROT_READ"))
-    offset <- meta@data_offset/.getDataSize(meta@dataType) + 1
+    offset <- meta@data_offset/.getDataSize(meta@data_type) + 1
     vals <- ret[offset:nels]
     mmap::munmap(ret)
     vals
