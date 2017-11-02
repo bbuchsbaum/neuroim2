@@ -5,6 +5,7 @@
 \alias{coord_to_index}
 \alias{coord_to_index,NeuroSpace,matrix-method}
 \alias{coord_to_index,NeuroSpace,numeric-method}
+\alias{coord_to_index,NeuroVol,matrix-method}
 \title{Generic function to convert N-dimensional real world coordinates to 1D indices}
 \usage{
 coord_to_index(x, coords)
@@ -12,6 +13,8 @@ coord_to_index(x, coords)
 \S4method{coord_to_index}{NeuroSpace,matrix}(x, coords)
 
 \S4method{coord_to_index}{NeuroSpace,numeric}(x, coords)
+
+\S4method{coord_to_index}{NeuroVol,matrix}(x, coords)
 }
 \arguments{
 \item{x}{the object}

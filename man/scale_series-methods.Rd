@@ -4,12 +4,21 @@
 \name{scale_series}
 \alias{scale_series}
 \alias{scale_series,NeuroVec,logical,missing-method}
+\alias{scale_series,NeuroVec,logical,logical-method}
+\alias{scale_series,NeuroVec,missing,logical-method}
+\alias{scale_series,NeuroVec,missing,missing-method}
 \title{Generic functions to scale (center and/or normalize by standard deviation) each series of a 4D image
 That is, if the 4th dimension is 'time' each series is a 1D time series.}
 \usage{
 scale_series(x, center, scale)
 
 \S4method{scale_series}{NeuroVec,logical,missing}(x, center, scale)
+
+\S4method{scale_series}{NeuroVec,logical,logical}(x, center, scale)
+
+\S4method{scale_series}{NeuroVec,missing,logical}(x, center, scale)
+
+\S4method{scale_series}{NeuroVec,missing,missing}(x, center, scale)
 }
 \arguments{
 \item{x}{a four dimensional image}

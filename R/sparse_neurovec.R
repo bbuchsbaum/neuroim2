@@ -336,18 +336,20 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVec", i = "numeric", j = "n
 })
 
 #' @export
-#' @rdname subVector-methods
-setMethod(f="subVector", signature=signature(x="SparseNeuroVec", i="numeric"),
+#' @rdname sub_vector-methods
+setMethod(f="sub_vector", signature=signature(x="SparseNeuroVec", i="numeric"),
           def=function(x, i) {
             idx <- which(x@mask > 0)
-            bspace <- dropDim(space(x))
+            bspace <- drop_dim(space(x))
 
             res <- lapply(i, function(i) x@data[i,])
             res <- do.call("cbind", res)
             SparseNeuroVec(res, bspace, x@mask)
           })
 
-#' @rdname BrainVector-methods
+#' [[
+#'
+#' @rdname SparseNeuroVec-methods
 #' @param i the volume index
 #' @export
 setMethod(f="[[", signature=signature(x="SparseNeuroVec", i="numeric"),

@@ -9,14 +9,14 @@
 \alias{write_vec,NeuroVec,character,missing,character,ANY-method}
 \title{Generic function to write a 4D image vector to disk}
 \usage{
-write_vec(x, file_name, format, dataType)
+write_vec(x, file_name, format, data_type)
 
 \S4method{write_vec}{NeuroVec,character,missing,missing}(x, file_name)
 
 \S4method{write_vec}{NeuroVec,character,character,missing}(x, file_name, format)
 
 \S4method{write_vec}{NeuroVec,character,missing,character}(x, file_name,
-  dataType)
+  data_type)
 }
 \arguments{
 \item{x}{an image object, typically a \code{NeuroVec} instance.}
@@ -25,7 +25,7 @@ write_vec(x, file_name, format, dataType)
 
 \item{format}{file format string. Since "NIFTI" is the only currently supported format, this parameter can be safely ignored and omitted.}
 
-\item{dataType}{the numeric data type. If specified should be a \code{character} vector of: "BINARY", "UBYTE", "SHORT", "INT", "FLOAT", "DOUBLE".
+\item{data_type}{the numeric data type. If specified should be a \code{character} vector of: "BINARY", "UBYTE", "SHORT", "INT", "FLOAT", "DOUBLE".
 Otherwise output format will be inferred from R the datatype of the image.}
 }
 \description{

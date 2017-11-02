@@ -3,7 +3,7 @@
 \docType{class}
 \name{ROIVol-class}
 \alias{ROIVol-class}
-\title{ROIVolume}
+\title{ROIVol}
 \description{
 A class that represents a volumetric region of interest
 }

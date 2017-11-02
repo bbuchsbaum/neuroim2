@@ -6,6 +6,8 @@
 \alias{grid_to_index,NeuroSlice,matrix-method}
 \alias{grid_to_index,NeuroSpace,matrix-method}
 \alias{grid_to_index,NeuroSpace,numeric-method}
+\alias{grid_to_index,NeuroVol,matrix-method}
+\alias{grid_to_index,NeuroVol,numeric-method}
 \title{Generic function to convert N-dimensional grid coordinate to 1D indices}
 \usage{
 grid_to_index(x, coords)
@@ -15,6 +17,10 @@ grid_to_index(x, coords)
 \S4method{grid_to_index}{NeuroSpace,matrix}(x, coords)
 
 \S4method{grid_to_index}{NeuroSpace,numeric}(x, coords)
+
+\S4method{grid_to_index}{NeuroVol,matrix}(x, coords)
+
+\S4method{grid_to_index}{NeuroVol,numeric}(x, coords)
 }
 \arguments{
 \item{x}{the object, typically a \code{NeuroVol} or \code{NeuroSpace} instance.}
