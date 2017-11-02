@@ -406,21 +406,21 @@ setMethod(f="concat", signature=signature(x="DenseNeuroVol", y="DenseNeuroVol"),
 
 
 #' @export
-#' @rdname fill-methods
-setMethod(f="fill", signature=signature(x="NeuroVol", lookup="list"),
+#' @rdname map_values-methods
+setMethod(f="map_values", signature=signature(x="NeuroVol", lookup="list"),
           def=function(x,lookup) {
             out <- lookup[unlist(x)]
             DenseNeuroVol(unlist(out), space(x))
           })
 
 #' @export
-#' @rdname fill-methods
-setMethod(f="fill", signature=signature(x="NeuroVol", lookup="matrix"),
+#' @rdname map_values-methods
+setMethod(f="map_values", signature=signature(x="NeuroVol", lookup="matrix"),
           def=function(x,lookup) {
             if (ncol(lookup) != 2) {
-              stop("fill: lookup matrix must have two columns: column 1 is key, column 2 is value")
+              stop("map_values: lookup matrix must have two columns: column 1 is key, column 2 is value")
             } else if (nrow(lookup) < 1) {
-              stop("fill: lookup matrix have at least one row")
+              stop("map_values: lookup matrix have at least one row")
             }
 
             m <- match(as.vector(x), lookup[,1])

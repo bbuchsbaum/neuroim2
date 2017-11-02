@@ -134,16 +134,16 @@ setGeneric(name="split_fill", def=function(x, fac, FUN) standardGeneric("split_f
 #'
 #' ## lookup table is list
 #' lookup <- lapply(1:10, function(i) i*10)
-#' ovol <- fill(vol, lookup)
+#' ovol <- map_values(vol, lookup)
 #'
 #' ## lookup table is matrix. First column is key, second column is value
 #' names(lookup) <- 1:length(lookup)
 #' lookup.mat <- cbind(as.numeric(names(lookup)), unlist(lookup))
-#' ovol2 <- fill(vol, lookup.mat)
+#' ovol2 <- map_values(vol, lookup.mat)
 #' all.equal(as.vector(ovol2), as.vector(ovol))
 #'
-#' @rdname fill-methods
-setGeneric(name="fill", def=function(x, lookup) standardGeneric("fill"))
+#' @rdname map_values-methods
+setGeneric(name="map_values", def=function(x, lookup) standardGeneric("map_values"))
 
 
 
