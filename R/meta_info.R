@@ -45,13 +45,6 @@ setMethod(f="data_reader", signature=signature("AFNIMetaInfo"),
 		})
 
 
-#' @rdname readColumns-methods
-setMethod(f="readColumns", signature=signature(x="ColumnReader", columnIndices="numeric"),
-          def=function(x,columnIndices) {
-            x@reader(columnIndices)
-          })
-
-
 #' @rdname trans-methods
 setMethod(f="trans", signature=signature("MetaInfo"),
 		def=function(x) {
@@ -111,8 +104,8 @@ NIFTIMetaInfo <- function(descriptor, nifti_header) {
 
 
 	new("NIFTIMetaInfo",
-			header_file=header_file(descriptor, nifti_header$fileName),
-			data_file=data_file(descriptor, nifti_header$fileName),
+			header_file=header_file(descriptor, nifti_header$file_name),
+			data_file=data_file(descriptor, nifti_header$file_name),
 			fileDescriptor=descriptor,
 			endian=nifti_header$endian,
 			data_offset=nifti_header$voxOffset,
@@ -123,7 +116,7 @@ NIFTIMetaInfo <- function(descriptor, nifti_header) {
 			additional_axes=NullAxis,
 			spacing=nifti_header$pixdim[2:4],
 			origin=nifti_header$qoffset,
-			label=strip_extension(descriptor, basename(nifti_header$fileName)),
+			label=strip_extension(descriptor, basename(nifti_header$file_name)),
 			intercept=nifti_header$sclIntercept,
 			slope=nifti_header$sclSlope,
 			header=nifti_header)
@@ -182,8 +175,8 @@ AFNIMetaInfo <- function(descriptor, afni_header) {
     TLPI <- rbind(TLPI, c(0,0,0,1))
 
 		new("AFNIMetaInfo",
-			header_file=header_file(descriptor, afni_header$fileName),
-			data_file=data_file(descriptor, afni_header$fileName),
+			header_file=header_file(descriptor, afni_header$file_name),
+			data_file=data_file(descriptor, afni_header$file_name),
 			fileDescriptor=descriptor,
 			endian=ifelse(afni_header[["BYTEORDER_STRING"]]$content == "MSB_FIRST", "big", "little"),
 			data_offset=0,
@@ -204,16 +197,16 @@ AFNIMetaInfo <- function(descriptor, afni_header) {
 #' read header information of an image file
 #'
 #'
-#' @param fileName the name of the file to read
+#' @param file_name the name of the file to read
 #' @return an instance of class \code{\linkS4class{FileMetaInfo}}
-#' @export readHeader
-readHeader <- function(fileName) {
-	desc <- findDescriptor(fileName)
+#' @export read_header
+read_header <- function(file_name) {
+	desc <- find_descriptor(file_name)
 	if (is.null(desc)) {
-		stop(paste("could not find reader for file: ", fileName))
+		stop(paste("could not find reader for file: ", file_name))
 	}
 
-	readMetaInfo(desc, fileName)
+	readMetaInfo(desc, file_name)
 }
 
 setAs(from="MetaInfo", to="NIFTIMetaInfo", def=function(from) {
@@ -221,7 +214,7 @@ setAs(from="MetaInfo", to="NIFTIMetaInfo", def=function(from) {
 				from
 			} else {
 				hdr <- as.nifti.header(from)
-				desc <- findDescriptor(hdr$fileName)
+				desc <- find_descriptor(hdr$file_name)
 				NIFTIMetaInfo(desc, hdr)
 			}
 
