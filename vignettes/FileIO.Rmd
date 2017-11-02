@@ -10,29 +10,29 @@ vignette: >
 
 ```{r, echo = FALSE, message = FALSE}
 knitr::opts_chunk$set(collapse = T, comment = "#>")
-library(neuroim)
+library(neuroim2)
 ```
 
 ## Reading a NIFTI formatted image volume
 
-The easiest way to read an image file is to use `loadVolume`:
+The way to read an volumetric image file is to use `read_vol`:
 
 
 ```{r}
-    fileName <- system.file("extdata", "global_mask.nii", package="neuroim")
-    vol <- loadVolume(fileName)
+    file_name <- system.file("extdata", "global_mask.nii", package="neuroim2")
+    vol <- read_vol(file_name)
 ```
 
 ## Working with image volumes
 
-Information about the geometry of the image volume is easily accessed:
+Information about the geometry of the image volume is shown here:
 
 
 ```{r}
     print(vol)
 ```
 
-`loadVolume` returns an object of class `DenseBrainVolume` which extends an R `array' and has 3 dimensions (x,y,z).
+`read_vol` returns an object of class `NeurolVol` object which extends an R `array` and has 3 dimensions (x,y,z).
 
 ```{r}
     class(vol)
@@ -68,24 +68,24 @@ A numeric image volume can be converted to a binary image as follows:
     print(vol2[1,1,1])
 ```
 
-We can also create a `BrainVolume` instance from an `array` or `numeric` vector:
+We can also create a `NeuroVol` instance from an `array` or `numeric` vector:
 
 
 ```{r}
     # create an 64X64X64 array of zeros 
     x <- array(0, c(64,64,64))
     
-    # create a 'BrainSpace' instance that describes the geometry of the image including, at minimu its dimensions and voxel spacing
-    bspace <- BrainSpace(Dim=c(64,64,64), spacing=c(1,1,1))
-    vol <- BrainVolume(x, bspace)
+    # create a 'NeuroSpace' instance that describes the geometry of the image including, at minimu its dimensions and voxel spacing
+    bspace <- NeuroSpace(dim=c(64,64,64), spacing=c(1,1,1))
+    vol <- NeuroVol(x, bspace)
     vol
 ```
 
-We do not usually have to create `BrainSpace` objects because this information is usually read from disk. Thus, `BrainSpace` objects are usually copied from existing images using the `space` extractor function when needed:
+We do not usually have to create `NeuroSpace` objects because this information is usually read from disk. Thus, `NeuroSpace` objects are usually copied from existing images using the `space` extractor function when needed:
 
 
 ```{r}
-    vol2 <- BrainVolume((vol+1)*25, space(vol))
+    vol2 <- NeuroVol((vol+1)*25, space(vol))
     max(vol2)
     
     space(vol2)
@@ -93,13 +93,13 @@ We do not usually have to create `BrainSpace` objects because this information i
 
 ## Writing a NIFTI formatted image volume
 
-When we're ready to write an image volume to disk, we use `writeVolume`
+When we're ready to write an image volume to disk, we use `write_vol`
 
 ```{r}
-    writeVolume(vol2, "output.nii")
+    write_vol(vol2, "output.nii")
     
     ## adding a '.gz' extension results ina gzipped file.
-    writeVolume(vol2, "output.nii.gz")
+    write_vol(vol2, "output.nii.gz")
 ```
 
 

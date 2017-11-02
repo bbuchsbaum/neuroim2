@@ -10,11 +10,11 @@
 #' @param indices linear indices corresponding used if \code{data} is a 1D vector.
 #' @export
 #' @examples
-#' bspace <- BrainSpace(c(64,64), spacing=c(1,1))
+#' bspace <- NeuroSpace(c(64,64), spacing=c(1,1))
 #' dat <- array(rnorm(64*64), c(64,64))
-#' bslice <- neuro_slice(dat,bspace)
+#' bslice <- NeuroSlice(dat,bspace)
 #' print(bslice)
-neuro_slice <- function(data, space, indices=NULL) {
+NeuroSlice <- function(data, space, indices=NULL) {
 	if (ndim(space) != 2) {
 		stop("incorrect dimension for neuro_slice")
 	}

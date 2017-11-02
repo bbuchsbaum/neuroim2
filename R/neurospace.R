@@ -6,7 +6,7 @@
 
 #' Constructor function for \code{\linkS4class{NeuroSpace}} class
 #'
-#' @param Dim a vector describing the dimensions of the image grid
+#' @param dim a vector describing the dimensions of the image grid
 #' @param origin the coordinate origin of the image space
 #' @param spacing the real-valued voxel dimensions (e.g. in millimeters)
 #' @param axes the image axes ordering (default is based on the NIFTI standard, Left-Posterior-Inferior)
@@ -23,14 +23,14 @@
 #' origin(bspace)
 #' axes(bspace)
 #' trans(bspace)
-NeuroSpace <- function(Dim, spacing=NULL, origin=NULL, axes=NULL, trans=NULL) {
+NeuroSpace <- function(dim, spacing=NULL, origin=NULL, axes=NULL, trans=NULL) {
 
 	if (is.null(spacing)) {
-		spacing <- rep(1, min(length(Dim), 3))
+		spacing <- rep(1, min(length(dim), 3))
 	}
 
 	if (is.null(origin)) {
-		origin <- rep(0, min(length(Dim), 3))
+		origin <- rep(0, min(length(dim), 3))
 	}
 
   if (length(origin) != length(spacing)) {
@@ -38,22 +38,22 @@ NeuroSpace <- function(Dim, spacing=NULL, origin=NULL, axes=NULL, trans=NULL) {
   }
 
 	if (is.null(trans)) {
-		D <- min(length(Dim), 3)
+		D <- min(length(dim), 3)
 		trans <- diag(c(spacing,1))
 		trans[1:D,D+1] <- origin
 	}
 
   trans <- signif(trans,3)
 
-	if (is.null(axes) && length(Dim) >= 3) {
+	if (is.null(axes) && length(dim) >= 3) {
 	  axes <- .nearestAnatomy(trans)
-	} else if (is.null(axes) && length(Dim) == 2) {
+	} else if (is.null(axes) && length(dim) == 2) {
 	  ### need .nearestAnatomy for 2d slice
 	  ## TODO
 	  axes <- AxisSet2D(LEFT_RIGHT, POST_ANT)
 	}
 
-	new("NeuroSpace", dim=as.integer(Dim),
+	new("NeuroSpace", dim=as.integer(dim),
 			origin=signif(origin,3),
 			spacing=signif(spacing,3),
 			axes=axes,
@@ -103,12 +103,13 @@ setMethod(f="drop_dim", signature=signature(x="NeuroSpace", dimnum="numeric"),
                          axes=axes(x), trans=trans(x))
             } else {
 
-              tx <- trans(x)
+              tx <- x@trans
               keep_col <- Dind
               keep_row <- which(apply(tx[,Dind], 1, function(x) !all(x==0)))
               tx <- rbind(cbind(tx[keep_row,keep_col], origin(x)[keep_row]), c(rep(0, length(Dind)), 1))
 
-              NeuroSpace(D[-dimnum], origin=origin(x)[-dimnum], spacing=spacing(x)[-dimnum], axes=drop_dim(axes(x), dimnum), trans=tx)
+              NeuroSpace(D[-dimnum], origin=origin(x)[-dimnum], spacing=spacing(x)[-dimnum],
+                         axes=drop_dim(axes(x), dimnum), trans=tx)
             }
 
           })
@@ -117,6 +118,7 @@ setMethod(f="drop_dim", signature=signature(x="NeuroSpace", dimnum="numeric"),
 #' @rdname drop_dim-methods
 setMethod(f="drop_dim", signature=signature(x = "NeuroSpace", dimnum="missing"),
 		def=function(x) {
+
 			D <- dim(x)
 			stopifnot(length(D) >= 2)
 			Dind <- 1:(length(D)-1)
@@ -138,13 +140,13 @@ setMethod(f="drop_dim", signature=signature(x = "NeuroSpace", dimnum="missing"),
 #' @export
 #' @param x the object
 setMethod(f="dim", signature=signature(x = "NeuroSpace"),
-		def=function(x) x@Dim)
+		def=function(x) x@dim)
 
 
 #' @export
 #' @rdname ndim-methods
 setMethod(f="ndim", signature=signature(x = "NeuroSpace"),
-		def=function(x) length(x@Dim))
+		def=function(x) length(x@dim))
 
 
 #' @export
@@ -203,7 +205,7 @@ setMethod(f="bounds", signature=signature(x = "NeuroSpace"),
 setMethod(f="index_to_grid", signature=signature(x="NeuroSpace", idx="numeric"),
           def=function(x, idx) {
             array.dim <- dim(x)
-            .index_to_grid(idx, array.dim)
+            .indexToGrid(idx, array.dim)
           })
 
 
@@ -458,17 +460,13 @@ setMethod(f="trans", signature=signature(x = "NeuroSpace"),def=function(x) x@tra
 
 #' @export
 #' @rdname inverse_trans-methods
-setMethod(f="inverse_trans", signature=signature(x = "NeuroSpace"), def=function(x) x@inverse_trans)
+setMethod(f="inverse_trans", signature=signature(x = "NeuroSpace"), def=function(x) x@inverse)
 
 
 
 #' @export
 #' @rdname space-methods
 setMethod(f="space", signature=signature(x = "NeuroSpace"), def=function(x) x)
-
-#' @export
-#' @rdname trans-methods
-setMethod(f="trans", signature=signature(x = "NeuroSpace"), def=function(x) trans(space(x)))
 
 
 

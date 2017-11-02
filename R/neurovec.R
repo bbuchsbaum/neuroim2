@@ -52,7 +52,6 @@ make_vector <- function(data, refdata, label="") {
 #'        which must all be identical.
 #' @param space a \code{\linkS4class{NeuroSpace}} object. Does not ned to be included if \code{data} argument is a list of \code{NeuroVols}
 #' @param mask an optional \code{array} of type \code{logical}
-#' @param source an optional \code{\linkS4class{BrainSource}} object
 #' @param label a label of type \code{character}
 #' @return a concrete instance of \code{\linkS4class{NeuroVec}} class.
 #' If \code{mask} is provided then \code{\linkS4class{SparseNeuroVec}}, otherwise \code{\linkS4class{DenseNeuroVec}}
@@ -124,9 +123,9 @@ setMethod(f="load_data", signature=c("NeuroVecSource"),
 
 			meta <- x@meta_info
 
-			stopifnot(length(meta@Dim) == 4)
+			stopifnot(length(meta@dims) == 4)
 
-			nels <- prod(meta@Dim[1:4])
+			nels <- prod(meta@dims[1:4])
 			ind <- x@indices
 
 			## use RNifti, fails to work with other formats, though...
@@ -140,7 +139,7 @@ setMethod(f="load_data", signature=c("NeuroVecSource"),
         }
 			}
 
-      bspace <- NeuroSpace(c(meta@Dim[1:3], length(ind)),meta@spacing, meta@origin,
+      bspace <- NeuroSpace(c(meta@dims[1:3], length(ind)),meta@spacing, meta@origin,
                            meta@spatial_axes, trans(meta))
 			DenseNeuroVec(arr[,,,ind,drop=FALSE], bspace, x)
 
@@ -175,15 +174,15 @@ NeuroVecSource <- function(file_name, indices=NULL, mask=NULL) {
 	  assert_that(min(indices) > 0)
 	}
 
-  if (length(meta_info@Dim) == 2) {
-    stop(paste("cannot create NeuroVec with only two dimensions: ", paste(meta_info@Dim, collapse=" ")))
+  if (length(meta_info@dims) == 2) {
+    stop(paste("cannot create NeuroVec with only two dimensions: ", paste(meta_info@dims, collapse=" ")))
   }
 
-  if ( length(meta_info@Dim) == 3) {
+  if ( length(meta_info@dims) == 3) {
 		indices <- 1
-    meta_info@Dim <- c(meta_info@Dim,1)
-	} else if (length(meta_info@Dim) == 4 && is.null(indices)) {
-		indices=seq(1, meta_info@Dim[4])
+    meta_info@dims <- c(meta_info@dims,1)
+	} else if (length(meta_info@dims) == 4 && is.null(indices)) {
+		indices=seq(1, meta_info@dims[4])
 	}
 
 
@@ -312,6 +311,47 @@ setMethod(f="sub_vector", signature=signature(x="DenseNeuroVec", i="numeric"),
             DenseNeuroVec(dat, bspace)
           })
 
+
+#' @export
+#' @rdname vols-methods
+setMethod(f="vols", signature=signature(x="NeuroVec", indices="numeric"),
+          def = function(x, indices) {
+            assert_that(min(indices) > 0 && max(indices) <= dim(x)[4])
+            lis <- lapply(indices, function(i) function(i) x[[i]])
+            deferred_list(lis)
+          })
+
+#' @export
+#' @rdname vols-methods
+setMethod(f="vols", signature=signature(x="NeuroVec", indices="missing"),
+          def = function(x) {
+            f <- function(i) x[[i]]
+            lis <- lapply(1:(dim(x)[4]), function(i) f)
+            deferred_list(lis)
+          })
+
+#' @export
+#' @rdname vectors-methods
+setMethod(f="vectors", signature=signature(x="NeuroVec", subset="missing"),
+          def = function(x) {
+            ind <- 1:prod(dim(x)[1:3])
+            vox <- index_to_grid(x, ind)
+            f <- function(i) x[vox[i,1], vox[i,2], vox[i,3],]
+            lis <- lapply(ind, function(i) f)
+            deferred_list(lis)
+          })
+
+#' @export
+#' @rdname vectors-methods
+setMethod(f="vectors", signature=signature(x="NeuroVec", subset="numeric"),
+          def = function(x,subset) {
+            ind <- subset
+            assert_that(max(ind) < prod(dim(x)[1:3]))
+            vox <- index_to_grid(x, ind)
+            f <- function(i) x[vox[i,1], vox[i,2], vox[i,3],]
+            lis <- lapply(seq_along(ind), function(i) f)
+            deferred_list(lis)
+          })
 
 
 #' [[

@@ -187,7 +187,7 @@ setClass("AFNIMetaInfo",
 #' @rdname FileSource-class
 #' @slot metaInfo meta information for the data source
 #' @exportClass FileSource
-setClass("FileSource", representation(metaInfo="FileMetaInfo"))
+setClass("FileSource", representation(meta_info="FileMetaInfo"))
 
 
 
@@ -279,19 +279,24 @@ setClass("NeuroSpace",
            }
          })
 
+#' NeuroObj
+#' Base class for all data objects with a cartesion spatial represenetation
+#'
+#' @slot space
+setClass("NeuroObj", representation(space="NeuroSpace"))
 
 #' NeuroSlice
 #'
 #' Two-dimensional brain image
 #' @rdname NeuroSlice-class
 #' @export
-setClass("NeuroSlice", contains=c("array"))
+setClass("NeuroSlice", contains=c("array", "NeuroObj"))
 
 #' NeuroVol
 #' Base class for image representing 3D volumetric data.
 #' @rdname NeuroVol-class
 #' @export
-setClass("NeuroVol")
+setClass("NeuroVol", contains="NeuroObj")
 
 
 
@@ -355,7 +360,7 @@ setClass("IndexLookupVol",
 #'
 #' @rdname NeuroVec-class
 #' @export
-setClass("NeuroVec")
+setClass("NeuroVec", contains="NeuroObj")
 
 #' DenseNeuroVec
 #'

@@ -4,11 +4,11 @@
 \alias{NeuroSpace}
 \title{Constructor function for \code{\linkS4class{NeuroSpace}} class}
 \usage{
-NeuroSpace(Dim, spacing = NULL, origin = NULL, axes = NULL,
+NeuroSpace(dim, spacing = NULL, origin = NULL, axes = NULL,
   trans = NULL)
 }
 \arguments{
-\item{Dim}{a vector describing the dimensions of the image grid}
+\item{dim}{a vector describing the dimensions of the image grid}
 
 \item{spacing}{the real-valued voxel dimensions (e.g. in millimeters)}
 

@@ -16,7 +16,7 @@ VignetteBuilder: knitr
 Depends:
     R (>= 3.0.0),
     Matrix
-Collate:
+Collate: 
     'RcppExports.R'
     'afni_io.R'
     'all_generic.R'
@@ -27,6 +27,7 @@ Collate:
     'file_format.R'
     'index_vol.R'
     'meta_info.R'
+    'neuro_obj.R'
     'neuroim.R'
     'neuroslice.R'
     'neurospace.R'
@@ -35,6 +36,7 @@ Collate:
     'nifti_io.R'
     'niml_io.R'
     'ops.R'
+    'pipeline.R'
     'roi.R'
     'searchlight.R'
     'sparse_neurovec.R'

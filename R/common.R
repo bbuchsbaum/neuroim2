@@ -207,6 +207,7 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 #' @rdname internal-methods
 #' @keywords internal
 .concat4D <- function(x, y, ...) {
+  print("concat4d")
   rest <- list(...)
 
   D <- dim(x)[1:3]
@@ -217,12 +218,13 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
     z
   })
 
-  out <- cbind(as.matrix(x), as.matrix(y))
-
-  if (length(rvols) > 0) {
-    out2 <- do.call(cbind, lapply(rvols, as.matrix))
-    out <- cbind(out, out2)
+  clist <- if (length(rvols) > 0) {
+    c(list(as.matrix(x), as.matrix(y)), rvols)
+  } else {
+    list(as.matrix(x), as.matrix(y))
   }
+
+  out <- do.call(cbind, clist)
 
   nvols <- ncol(out)
   new.dim <- c(D, nvols)

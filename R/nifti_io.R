@@ -44,7 +44,7 @@ write_nifti_vector <- function(vec, file_name, data_type=NULL) {
 }
 
 
-write.nifti.volume <- function(vol, file_name, data_type=NULL) {
+write_nifti_volume <- function(vol, file_name, data_type=NULL) {
 	stopifnot(length(dim(vol)) == 3)
 	hdr <- as_nifti_header(vol, vol@source@meta_info)
 
@@ -102,21 +102,16 @@ as_nifti_header <- function(vol, meta_info, fname=NULL, oneFile=TRUE) {
 		hd$datatype <- .getDataCode(meta_info@data_type)
 		hd$data_storage <- .getDataStorage(hd$datatype)
 		hd$bitpix <- meta_info@bytesPerElement * 8
-		hd$dimensions <- c(length(meta_info@Dim), meta_info@Dim)
+		hd$dimensions <- c(length(meta_info@dims), meta_info@dims)
 		N <- 8 - length(hd$dimensions)
 		hd$dimensions <- c(hd$dimensions,  rep(1, N))
-		hd$num_dimensions <- length(meta_info@Dim)
+		hd$num_dimensions <- length(meta_info@dims)
 
 		### only encodes pixdim for three dimensions
 		hd$pixdim <- c(0, meta_info@spacing, rep(0,4))
 		hd$qoffset <- meta_info@origin
 		hd$scl_intercept <- meta_info@intercept
 		hd$scl_slope <- meta_info@scl_slope
-
-		#tmat <- diag(c(meta_info@spacing, 1))
-		#tmat[1:3, 4] <- meta_info@origin
-
-
 
 		tmat <- trans(vol)
 
@@ -150,10 +145,10 @@ as_nifti_header <- function(vol, meta_info, fname=NULL, oneFile=TRUE) {
 		hd$bitpix <- .getDataSize(meta_info@data_type) * 8
 
 
-		hd$dimensions <- c(length(meta_info@Dim), meta_info@Dim)
+		hd$dimensions <- c(length(meta_info@dims), meta_info@dims)
 		N <- 8 - length(hd$dimensions)
 		hd$dimensions <- c(hd$dimensions,  rep(1, N))
-		hd$num_dimensions <- length(meta_info@Dim)
+		hd$num_dimensions <- length(meta_info@dims)
 
 		### only encodes pixdim for three dimensions
 		hd$pixdim <- c(0, meta_info@spacing, rep(0,4))

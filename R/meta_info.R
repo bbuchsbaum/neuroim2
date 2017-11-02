@@ -16,7 +16,7 @@ setGeneric(name="data_reader", def=function(x, offset) standardGeneric("data_rea
 #' @export
 setMethod(f="dim", signature=signature("FileMetaInfo"),
 		def=function(x) {
-			x@Dim
+			x@dims
 		})
 
 
@@ -27,7 +27,7 @@ setMethod(f="dim", signature=signature("FileMetaInfo"),
 #' @rdname data_reader-methods
 setMethod(f="data_reader", signature=signature("NIFTIMetaInfo"),
 		def=function(x, offset=0) {
-			if (x@fileDescriptor@dataEncoding == "gzip") {
+			if (x@descriptor@data_encoding == "gzip") {
 				BinaryReader(gzfile(x@data_file, "rb"), x@data_offset+offset, .getRStorage(x@data_type), x@bytes_per_element, x@endian)
 			} else {
 				BinaryReader(x@data_file, x@data_offset+offset, .getRStorage(x@data_type), x@bytes_per_element, x@endian)
@@ -37,7 +37,7 @@ setMethod(f="data_reader", signature=signature("NIFTIMetaInfo"),
 #' @rdname data_reader-methods
 setMethod(f="data_reader", signature=signature("AFNIMetaInfo"),
 		def=function(x, offset=0) {
-			if (x@fileDescriptor@dataEncoding == "gzip") {
+			if (x@descriptor@data_encoding == "gzip") {
 				BinaryReader(gzfile(x@data_file, "rb"), x@data_offset+offset, .getRStorage(x@data_type), x@bytes_per_element, x@endian)
 			} else {
 				BinaryReader(x@data_file, x@data_offset+offset, .getRStorage(x@data_type), x@bytes_per_element, x@endian)
@@ -48,7 +48,7 @@ setMethod(f="data_reader", signature=signature("AFNIMetaInfo"),
 #' @rdname trans-methods
 setMethod(f="trans", signature=signature("MetaInfo"),
 		def=function(x) {
-			D <- min(length(x@Dim), 3)
+			D <- min(length(x@dims), 3)
 			trans <- diag(c(x@spacing,1))
 			trans[1:D,D+1] <- x@origin
 			trans
@@ -82,7 +82,7 @@ niftiDim <- function(nifti_header) {
 #' @rdname MetaInfo-class
 MetaInfo <- function(Dim, spacing, origin=rep(0, length(spacing)), data_type="FLOAT", label="", spatial_axes=OrientationList3D$AXIAL_LPI, additional_axes=NullAxis) {
 	new("MetaInfo",
-			Dim=Dim,
+			dims=Dim,
 			spacing=spacing,
 			origin=origin,
 			data_type=data_type,
@@ -106,19 +106,19 @@ NIFTIMetaInfo <- function(descriptor, nifti_header) {
 	new("NIFTIMetaInfo",
 			header_file=header_file(descriptor, nifti_header$file_name),
 			data_file=data_file(descriptor, nifti_header$file_name),
-			fileDescriptor=descriptor,
+			descriptor=descriptor,
 			endian=nifti_header$endian,
 			data_offset=nifti_header$vox_offset,
 			data_type=nifti_header$data_storage,
 			bytes_per_element=as.integer(.getDataSize(nifti_header$data_storage)),
-			Dim=niftiDim(nifti_header),
+			dims=niftiDim(nifti_header),
 			spatial_axes=.nearestAnatomy(nifti_header$qform),
 			additional_axes=NullAxis,
 			spacing=nifti_header$pixdim[2:4],
 			origin=nifti_header$qoffset,
 			label=strip_extension(descriptor, basename(nifti_header$file_name)),
-			intercept=nifti_header$sclIntercept,
-			slope=nifti_header$sclSlope,
+			intercept=nifti_header$scl_intercept,
+			slope=nifti_header$scl_slope,
 			header=nifti_header)
 }
 
@@ -135,7 +135,7 @@ setMethod(f="show", signature=signature("FileMetaInfo"),
 			cat("endian:", "\t", object@endian, "\n")
 			cat("data_offset:", "\t", object@data_offset, "\n")
 			cat("data_type:", "\t", object@data_type, "\n")
-			cat("dimensions:", "\t", object@Dim, "\n")
+			cat("dimensions:", "\t", object@dims, "\n")
 			cat("voxel size:", "\t", object@spacing, "\n")
 			cat("origin:", "\t", object@origin, "\n")
 			cat("label(s):", "\t", object@label, "\n")
@@ -177,12 +177,12 @@ AFNIMetaInfo <- function(descriptor, afni_header) {
 		new("AFNIMetaInfo",
 			header_file=header_file(descriptor, afni_header$file_name),
 			data_file=data_file(descriptor, afni_header$file_name),
-			fileDescriptor=descriptor,
+			descriptor=descriptor,
 			endian=ifelse(afni_header[["BYTEORDER_STRING"]]$content == "MSB_FIRST", "big", "little"),
 			data_offset=0,
 			data_type=switch(afni_header$BRICK_TYPES$content[1], "0"="BYTE", "1"="SHORT", "3"="FLOAT"),
 			bytes_per_element=as.integer(switch(afni_header$BRICK_TYPES$content[1], "0"=1, "1"=2, "3"=4)),
-			Dim=.Dim,
+			dims=.Dim,
 			spatial_axes=.nearestAnatomy(TLPI),
 			additional_axes=NullAxis,            # incorrect
 			spacing=abs(afni_header$DELTA$content),

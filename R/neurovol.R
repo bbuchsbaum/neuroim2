@@ -138,7 +138,6 @@ ClusteredNeuroVol <- function(mask, clusters, label_map=NULL, label="") {
   }
 
 
-
   clus_idx <- which(mask == TRUE)
   clus_split <- split(clus_idx, clusters)
   clus_names <- names(clus_split)
@@ -148,7 +147,8 @@ ClusteredNeuroVol <- function(mask, clusters, label_map=NULL, label="") {
     cluster_map[[clus_names[[i]]]] <- clus_split[[clus_names[[i]]]]
   }
 
-  new("ClusteredNeuroVol", mask=mask, clusters=as.integer(clusters), label_map=label_map, cluster_map=cluster_map, space=space)
+  new("ClusteredNeuroVol", mask=mask, clusters=as.integer(clusters),
+      label_map=label_map, cluster_map=cluster_map, space=space)
 }
 
 
@@ -317,10 +317,10 @@ setMethod(f="load_data", signature=c(x="NeuroVolSource"),
 		def=function(x) {
 
 			meta <- x@meta_info
-			nels <- prod(meta@Dim[1:3])
+			nels <- prod(meta@dims[1:3])
 
 			### for brain buckets, this offset needs to be precomputed ....
-			offset <- (nels * (x@index-1)) * meta@bytesPerElement
+			offset <- (nels * (x@index-1)) * meta@bytes_per_element
 
 			reader <- data_reader(meta, offset)
 			dat <- read_elements(reader, nels)
@@ -334,9 +334,9 @@ setMethod(f="load_data", signature=c(x="NeuroVolSource"),
       }
 
 			close(reader)
-			arr <- array(dat, meta@Dim[1:3])
+			arr <- array(dat, meta@dims[1:3])
 
-			bspace <- NeuroSpace(meta@Dim[1:3], meta@spacing, meta@origin, meta@spatial_axes, trans(meta))
+			bspace <- NeuroSpace(meta@dims[1:3], meta@spacing, meta@origin, meta@spatial_axes, trans(meta))
 			DenseNeuroVol(arr, bspace, x)
 
 		})
@@ -360,9 +360,9 @@ NeuroVolSource <- function(input, index=1) {
 
 	stopifnot(file.exists(input))
 
-	meta_info <- readHeader(input)
+	meta_info <- read_header(input)
 
-	if ( length(meta_info@Dim) < 4 && index > 1) {
+	if ( length(meta_info@dims) < 4 && index > 1) {
 		stop("index cannot be greater than 1 for a image with dimensions < 4")
 	}
 
@@ -387,6 +387,17 @@ read_vol  <- function(file_name, index=1) {
 	src <- NeuroVolSource(file_name, index)
 	load_data(src)
 }
+
+#' @export
+#' @rdname slices-methods
+setMethod(f="slices", signature=signature(x="NeuroVol"),
+          def = function(x) {
+            nslices <- dim(x)[3]
+            f <- function(i) slice(x, i, 3)
+            lis <- lapply(1:nslices, function(i) f)
+            deferred_list(lis)
+          })
+
 
 #' @rdname concat-methods
 #' @export

@@ -34,6 +34,32 @@ setGeneric(name="load_data", def=function(x, ...) standardGeneric("load_data"))
 #' @rdname map-methods
 setGeneric(name="map", def=function(x, m, ...) standardGeneric("map"))
 
+#' Generic function to extract an ordered series of 3D volumes
+#'
+#' @param x the object that supplies the volume data
+#' @param indices the indices of the volumes
+#' @param ... additional arguments
+#' @export
+#' @rdname vols-methods
+setGeneric(name="vols", def=function(x, indices, ...) standardGeneric("vols"))
+
+#' Generic function to extract an ordered series of 1D vectors
+#'
+#' @param x the object that supplies the vector data
+#' @param subset the subset of vectors to extract
+#' @param ... additional arguments
+#' @export
+#' @rdname vectors-methods
+setGeneric(name="vectors", def=function(x, subset, ...) standardGeneric("vectors"))
+
+#' Generic function to extract an ordered series of 2D slices
+#'
+#' @param x the object that supplies the slices
+#' @param ... additional arguments
+#' @export
+#' @rdname slices-methods
+setGeneric(name="slices", def=function(x, ...) standardGeneric("slices"))
+
 
 #' Generic function to extract the number of dimensions of an object
 #'
@@ -64,10 +90,10 @@ setGeneric(name="which_dim", def=function(x, axis) standardGeneric("which_dim"))
 #' @param x a dimensioned object
 #' @param n the size of the dimension to add
 #' @export
-#' @rdname addDim-methods
+#' @rdname add_dim-methods
 #' @examples
 #' x = NeuroSpace(c(10,10,10), c(1,1,1))
-#' x1 <- addDim(x, 10)
+#' x1 <- add_dim(x, 10)
 #' ndim(x1) == 4
 #' dim(x1)[4] == 10
 setGeneric(name="add_dim", def=function(x, n) standardGeneric("add_dim"))
@@ -160,7 +186,7 @@ setGeneric(name="map_values", def=function(x, lookup) standardGeneric("map_value
 #'
 #' M <- matrix(rnorm(1000), 10, 100)
 #' fac <- factor(rep(1:2, each=5))
-#' Ms <- splitScale(M, fac)
+#' Ms <- split_scale(M, fac)
 #'
 #' ## correctly centered
 #' all(abs(apply(Ms[fac == 1,], 2, mean)) < .000001)
