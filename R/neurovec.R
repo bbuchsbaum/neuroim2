@@ -207,15 +207,15 @@ setMethod("length", signature=c("NeuroVec"),
 
 
 
-#' loadVolumeList
+#' read_vol_list
 #'
 #' load a list of image volumes and return a \code{\linkS4class{NeuroVec}} instance
 #'
 #' @param file_names a list of files to load
 #' @param mask an optional mask indicating subset of voxels to load
 #' @return an instance of class \code{\linkS4class{NeuroVec}}
-#' @export loadVolumeList
-loadVolumeList <- function(file_names, mask=NULL) {
+#' @export read_vol_list
+read_vol_list <- function(file_names, mask=NULL) {
 	stopifnot(all(sapply(file_names, file.exists)))
 	meta_info <- lapply(file_names, read_header)
 
