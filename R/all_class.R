@@ -373,10 +373,10 @@ setClass("DenseNeuroVec",  contains=c("NeuroVec", "array"))
 #' @rdname SparseNeuroVec-class
 #' @slot mask the mask defining the sparse domain
 #' @slot data the matrix of series, where rows span across voxel space and columns span the fourth dimensions
-#' @slot map instance of class \code{\linkS4class{IndexLookupVolume}} is used to map between spatial and index/row coordinates
+#' @slot map instance of class \code{\linkS4class{IndexLookupVol}} is used to map between spatial and index/row coordinates
 #' @export
 setClass("SparseNeuroVec",
-         representation(mask="LogicalNeuroVol",data="matrix", map="IndexLookupVolume"),
+         representation(mask="LogicalNeuroVol",data="matrix", map="IndexLookupVol"),
          contains=c("NeuroVec"))
 
 
@@ -397,7 +397,7 @@ setClass("BasisNeuroVec",
          representation(mask="LogicalNeuroVol",
                                        basis="Matrix",
                                        coeffs="Matrix",
-                                       map="IndexLookupVolume")
+                                       map="IndexLookupVol")
 )
 
 
@@ -423,11 +423,11 @@ setClass("ROI", contains="VIRTUAL")
 
 
 
-#' ROIVolume
+#' ROIVol
 #'
 #' A class that represents a volumetric region of interest
 #'
-#' @rdname ROIVolume-class
+#' @rdname ROIVol-class
 #' @slot data the \code{numeric} data stored in ROI
 #' @slot coords the voxel coordinates of the ROI
 #' @exportClass ROIVol
@@ -449,11 +449,11 @@ setClass("ROIVol",
 #'
 #' A class that represents a vector-valued volumetric region of interest
 #'
-#' @rdname ROIVector-class
+#' @rdname ROIVec-class
 #' @slot data the \code{matrix} data stored in ROI
 #' @slot coords the voxel coordinates of the ROI
-#' @exportClass ROIVector
-setClass("ROIVector",
+#' @exportClass ROIVec
+setClass("ROIVec",
          representation=representation(data="matrix", coords="matrix"), contains=c("ROI"),
          validity = function(object) {
            if (ncol(object@coords) != 3) {

@@ -50,10 +50,12 @@ setGeneric(name="map", def=function(x, m, ...) standardGeneric("map"))
 setGeneric(name="ndim", def=function(x, ...) standardGeneric("ndim"))
 
 
-
+#' dim_of
+#' @rdname dim_of-methods
 setGeneric(name="dim_of", def=function(x, axis) standardGeneric("dim_of"))
 
-
+#' which_dim
+#' @rdname which_dim-methods
 setGeneric(name="which_dim", def=function(x, axis) standardGeneric("which_dim"))
 
 
@@ -104,7 +106,7 @@ setGeneric(name="space", def=function(x, ...) standardGeneric("space"))
 #' @param FUN the function to summarize the the sets
 #' @return a new object where the original values have been replaced by the function output
 #' @export
-#' @rdname splitFill-methods
+#' @rdname split_fill-methods
 #' @details \code{FUN} can either return a scalar for each input vector or a vector equal to the length of the input vector.
 #' If it returns a scalar then every voxel in the set will be filled with that value in the output vector.
 #' @examples
@@ -113,11 +115,11 @@ setGeneric(name="space", def=function(x, ...) standardGeneric("space"))
 #' x = NeuroSpace(c(10,10,10), c(1,1,1))
 #' vol <- NeuroVol(rnorm(10*10*10), x)
 #' fac <- factor(rep(1:10, length.out=1000))
-#' ovol.mean <- splitFill(vol, fac, mean)
+#' ovol.mean <- split_fill(vol, fac, mean)
 #' identical(dim(ovol.mean), dim(vol))
 #' length(unique(as.vector(ovol.mean))) == 10
 #' ## transform by reversing vector -- FUN returns a vector.
-#' ovol2 <- splitFill(vol, fac, rev)
+#' ovol2 <- split_fill(vol, fac, rev)
 setGeneric(name="split_fill", def=function(x, fac, FUN) standardGeneric("split_fill"))
 
 #' Generic function to map values from one set to another using a user-supplied lookup table
@@ -378,7 +380,7 @@ setGeneric(name="index_to_grid",   def=function(x, idx) standardGeneric("index_t
 #' g <- indexToCoord(bvol, idx)
 #' idx2 <- coord_to_index(bvol, g)
 #' all.equal(idx, idx2)
-#' @rdname indexToCoord-methods
+#' @rdname index_to_coord-methods
 setGeneric(name="index_to_coord",   def=function(x, idx) standardGeneric("index_to_coord"))
 
 #' Generic function to convert N-dimensional real world coordinates to 1D indices
@@ -637,7 +639,7 @@ if (!isGeneric("as.raster"))
 #' @param x object for which the file name is to matched to
 #' @param file_name file name to be matched
 #' @return TRUE for match, FALSE otherwise
-#' @rdname fileMatches-methods
+#' @rdname file_matches-methods
 setGeneric(name="file_matches", def=function(x, file_name) standardGeneric("file_matches"))
 
 

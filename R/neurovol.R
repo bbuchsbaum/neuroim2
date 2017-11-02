@@ -1,14 +1,14 @@
 #' @importFrom assertthat assert_that
 #' @importFrom Matrix sparseVector
 #' @importFrom rflann Neighbour
-NULL
-
 #' @include all_class.R
 #' @include all_generic.R
+NULL
 
-#' make_volume
+#' make_vol
 #'
 #' Construct a \code{\linkS4class{NeuroVol}} instance, using default (dense) implementation
+#'
 #' @param data an optional one- or three-dimensional \code{vector} or \code{array}
 #' @param refvol an instance of class \code{\linkS4class{NeuroVol}} containing the reference space for the new volume.
 #' @param label an optional \code{character} string
@@ -18,14 +18,14 @@ NULL
 #' bspace <- NeuroSpace(c(64,64,64), spacing=c(1,1,1))
 #' dat <- array(rnorm(64*64*64), c(64,64,64))
 #' bvol <- NeuroVol(dat,bspace, label="test")
-#' bvol2 <- make_volume(dat, bvol)
+#' bvol2 <- make_vol(dat, bvol)
 #' all.equal(as.array(bvol),as.array(bvol2))
 #' data <- 1:10
 #' indices = seq(1,1000, length.out=10)
-#' bvol3 <- make_volume(data,bvol,indices=indices)
+#' bvol3 <- make_vol(data,bvol,indices=indices)
 #' sum(bvol3) == sum(data)
-#' @export make_volume
-make_volume <- function(data=NULL, refvol, label="", indices=NULL) {
+#' @export make_vol
+make_vol <- function(data=NULL, refvol, label="", indices=NULL) {
   if (is.null(data)) {
 	  DenseNeuroVol(array(0, dim(refvol)),space(refvol),label,indices)
   } else {
@@ -471,7 +471,7 @@ setMethod(f="slice", signature=signature(x="NeuroVol", zlevel="numeric", along="
                               "2"=x[,zlevel,],
                               "3"=x[,,zlevel])
 
-            NeuroSlice(imslice, dropDim(space(x), along))
+            NeuroSlice(imslice, drop_dim(space(x), along))
 
 
           })
@@ -497,7 +497,7 @@ setMethod(f="slice", signature=signature(x="NeuroVol", zlevel="numeric", along="
 
             imslice <- x[gg]
 
-            NeuroSlice(matrix(imslice, xdim,ydim), dropDim(along,which_dim(along, orientation@k)))
+            NeuroSlice(matrix(imslice, xdim,ydim), drop_dim(along,which_dim(along, orientation@k)))
 
 
           })

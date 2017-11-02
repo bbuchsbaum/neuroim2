@@ -31,7 +31,7 @@ NULL
 make_vector <- function(data, refdata, label="") {
 	stopifnot(length(dim(refdata)) == 4)
 	rspace <- if (ndim(space(refdata)) == 4) {
-		dropDim(space(refdata))
+		drop_dim(space(refdata))
 	} else if (ndim(space(refdata)) == 3) {
 		space(refdata)
 	} else {
@@ -314,6 +314,7 @@ setMethod(f="sub_vector", signature=signature(x="DenseNeuroVec", i="numeric"),
 
 
 
+#' [[
 #' @rdname NeuroVec-methods
 #' @param i the volume index
 #' @export
@@ -530,7 +531,7 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVec", mask="numeric"),
 			m <- array(0, vdim)
 			m[mask] <- TRUE
 
-			logivol <- LogicalNeuroVol(m, dropDim(space(x)))
+			logivol <- LogicalNeuroVol(m, drop_dim(space(x)))
 
 			dat <- as.matrix(x)[mask,]
 

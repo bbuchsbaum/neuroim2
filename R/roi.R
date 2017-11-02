@@ -7,7 +7,7 @@
 
 
 #' Create an instance of class \code{\linkS4class{ROIVol}}
-#' 
+#'
 #' @param space an instance of class \code{NeuroSpace}
 #' @param coords matrix of voxel coordinates
 #' @param data the data values, numeric vector
@@ -19,7 +19,7 @@ ROIVol <- function(vspace, coords, data=rep(nrow(coords),1)) {
 }
 
 #' Create an instance of class \code{\linkS4class{ROIVec}}
-#' 
+#'
 #' @param vspace an instance of class \code{NeuroSpace}
 #' @param coords matrix of voxel coordinates
 #' @param data the \code{matrix} of data values
@@ -31,12 +31,12 @@ ROIVec <- function(vspace, coords, data=rep(nrow(coords),1)) {
 }
 
 #' convert a \code{ROIVec} to a matrix
-#' 
+#'
 #' @rdname as.matrix-methods
 #' @param x the object
-#' @export 
+#' @export
 setMethod(f="as.matrix", signature=signature(x = "ROIVec"), def=function(x) {
-  as(x, "matrix")						
+  as(x, "matrix")
 })
 
 
@@ -45,19 +45,19 @@ setMethod(f="as.matrix", signature=signature(x = "ROIVec"), def=function(x) {
   vspacing <- spacing(bvol)
   vdim <- dim(bvol)
   centroid <- as.integer(centroid)
-  
+
   dimnums <- seq(1,3)[-fixdim]
-  
+
   coords <- lapply(centroid, function(x) { round(seq(x-surround, x+surround)) })
   coords <- lapply(dimnums, function(i) {
     x <- coords[[i]]
     x[x > 0 & x <= vdim[i]]
   })
-  
+
   if (all(sapply(coords, length) == 0)) {
     stop(paste("invalid cube for centroid", centroid, " with surround", surround, ": volume is zero"))
   }
-  
+
   if (fixdim == 3) {
     grid <- as.matrix(expand.grid(x=coords[[1]],y=coords[[2]],z=centroid[3]))
   } else if (fixdim == 2) {
@@ -65,33 +65,33 @@ setMethod(f="as.matrix", signature=signature(x = "ROIVec"), def=function(x) {
   } else if (fixdim == 1) {
     grid <- as.matrix(expand.grid(x=centroid[1],y=coords[[1]],z=coords[[2]]))
   }
-  
+
   grid
-  
+
 }
 
 .makeCubicGrid <- function(bvol, centroid, surround) {
   vspacing <- spacing(bvol)
   vdim <- dim(bvol)
   centroid <- as.integer(centroid)
-  
+
   coords <- lapply(centroid, function(x) { round(seq(x-surround, x+surround)) })
   coords <- lapply(1:3, function(i) {
     x <- coords[[i]]
     x[x > 0 & x <= vdim[i]]
   })
- 
+
   if (all(sapply(coords, length) == 0)) {
     stop(paste("invalid cube for centroid", centroid, " with surround", surround, ": volume is zero"))
   }
-  
+
   grid <- as.matrix(expand.grid(x=coords[[1]],y=coords[[2]],z=coords[[3]]))
 }
 
 
 
 #' Create a square region of interest where the z-dimension is fixed at one voxel coordinate.
-#' 
+#'
 #' @param bvol an \code{NeuroVol} or \code{NeuroSpace} instance.
 #' @param centroid the center of the cube in \emph{voxel} coordinates.
 #' @param surround the number of voxels on either side of the central voxel.
@@ -110,44 +110,44 @@ square_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE, fixdi
   if (is.matrix(centroid)) {
     centroid <- drop(centroid)
   }
-  
+
   if (length(centroid) != 3) {
     stop("square_roi: centroid must have length of 3 (x,y,z coordinates)")
   }
-  
+
   if (surround < 0) {
     stop("'surround' argument cannot be negative")
   }
-  
+
   if (is(bvol, "NeuroSpace") && is.null(fill)) {
     fill = 1
   }
-  
+
   grid <- .makeSquareGrid(bvol,centroid,surround,fixdim=fixdim)
-  
+
   vals <- if (!is.null(fill)) {
     rep(fill, nrow(grid))
   } else {
     as.numeric(bvol[grid])
-  }   
-  
+  }
+
   keep <- if (nonzero) {
-    which(vals != 0)    
+    which(vals != 0)
   } else {
     seq_along(vals)
   }
-  
+
   ### add central voxel
   ROIVol(space(bvol), data = vals[keep], coords = grid[keep, ])
-  
+
 }
 
-  
+
 #' Create A Cuboid Region of Interest
 #' @param bvol an \code{NeuroVol} or \code{NeuroSpace} instance
 #' @param centroid the center of the cube in \emph{voxel} coordinates
 #' @param surround the number of voxels on either side of the central voxel. A \code{vector} of length 3.
-#' @param fill optional value(s) to assign to data slot. 
+#' @param fill optional value(s) to assign to data slot.
 #' @param nonzero keep only nonzero elements from \code{bvol}. If \code{bvol} is A \code{NeuroSpace} then this argument is ignored.
 #' @return an instance of class \code{ROIVol}
 #' @rdname cube_roi
@@ -156,76 +156,76 @@ square_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE, fixdi
 #'  cube <- cube_roi(sp1, c(5,5,5), 3)
 #'  vox <- coords(cube)
 #'  cube2 <- cube_roi(sp1, c(5,5,5), 3, fill=5)
-#'  
-#'  
+#'
+#'
 #' @export
 cube_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE) {
   if (is.matrix(centroid)) {
     centroid <- drop(centroid)
   }
-  
+
   if (length(centroid) != 3) {
     stop("cube_roi: centroid must have length of 3 (x,y,z coordinates)")
   }
-  
+
   if (surround < 0) {
     stop("'surround' argument cannot be negative")
   }
-  
+
   if (is(bvol, "NeuroSpace") && is.null(fill)) {
     fill = 1
   }
-  
+
   grid <- .makeCubicGrid(bvol,centroid,surround)
-  
+
   vals <- if (!is.null(fill)) {
     rep(fill, nrow(grid))
   } else {
     as.numeric(bvol[grid])
-  }   
-  
+  }
+
   keep <- if (nonzero) {
-    which(vals != 0)    
+    which(vals != 0)
   } else {
     seq_along(vals)
   }
-  
+
   ### add central voxel
   ROIVol(space(bvol), data = vals[keep], coords = grid[keep, ])
-  
+
 }
 
 #' @importFrom rflann RadiusSearch
 .makeSphericalGrid <- function(bvol, centroid, radius) {
-  
+
   vspacing <- spacing(bvol)
-  
+
   if (radius < min(vspacing)) {
     stop("'radius' is too small; must be greater than at least one voxel dimension in image")
   }
-  
+
   vdim <- dim(bvol)
   centroid <- as.integer(centroid)
-  
-  
+
+
   cube <- as.matrix(expand.grid(
     seq(centroid[1] - round(radius/vspacing[1]), centroid[1] + round(radius/vspacing[1])),
     seq(centroid[2] - round(radius/vspacing[2]), centroid[2] + round(radius/vspacing[2])),
     seq(centroid[3] - round(radius/vspacing[3]), centroid[3] + round(radius/vspacing[3]))))
-  
-  
+
+
   coords <- t(t(cube) * vspacing)
-  
+
   res <- rflann::RadiusSearch(matrix(centroid * vspacing, ncol=3), coords, radius=radius^2, max_neighbour=nrow(cube))
-  
+
   cube[res$indices[[1]],]
-        
+
 }
 
 
 
 #' @title Create a Spherical Region of Interest
-#' 
+#'
 #' @description Creates a Spherical ROI based on a Centroid.
 #' @param bvol an \code{NeuroVol} or \code{NeuroSpace} instance
 #' @param centroid the center of the sphere in voxel space
@@ -247,32 +247,32 @@ spherical_roi <- function (bvol, centroid, radius, fill=NULL, nonzero=FALSE) {
     assertthat::assert_that(ncol(centroid == 3) & nrow(centroid) == 1)
     centroid <- drop(centroid)
   }
-  
+
   assertthat::assert_that(length(centroid) == 3)
-  
+
   if (is.null(fill) && is(bvol, "NeuroSpace")) {
     fill = 1
   }
-  
+
   bspace <- space(bvol)
   vspacing <- spacing(bvol)
   vdim <- dim(bvol)
   centroid <- as.integer(centroid)
   grid <- .makeSphericalGrid(bvol, centroid, radius)
-   
+
   vals <- if (!is.null(fill)) {
     rep(fill, nrow(grid))
-  } else {    
+  } else {
     as.numeric(bvol[grid])
-  }   
-  
+  }
+
   if (nonzero) {
-    keep <- vals != 0 
+    keep <- vals != 0
     ROIVol(bspace, data = vals[keep], coords = grid[keep, ,drop=FALSE])
   } else {
     ROIVol(bspace, data = vals, coords = grid)
   }
-  
+
 }
 
 .resample <- function(x, ...) x[sample.int(length(x), ...)]
@@ -283,7 +283,7 @@ roi_vector_matrix <- function(mat, refspace, indices, coords) {
             indices=indices,
             coords=coords,
             class=c("roi_vector_matrix", "matrix"))
-  
+
 }
 
 roi_surface_matrix <- function(mat, refspace, indices, coords) {
@@ -292,7 +292,7 @@ roi_surface_matrix <- function(mat, refspace, indices, coords) {
             indices=indices,
             coords=coords,
             class=c("roi_surface_matrix", "matrix"))
-  
+
 }
 
 
@@ -301,8 +301,10 @@ roi_surface_matrix <- function(mat, refspace, indices, coords) {
 #' @rdname as-methods
 setAs(from="ROIVec", to="matrix", function(from) {
   ind <- indices(from)
-  roi_vector_matrix(from@data, refspace=from@space, indices=ind, coords=indexToCoord(dropDim(from@space), as.numeric(ind)))
-  
+  roi_vector_matrix(from@data, refspace=from@space, indices=ind,
+                    coords=index_to_coord(drop_dim(from@space),
+                                          as.numeric(ind)))
+
 })
 
 
@@ -316,14 +318,14 @@ setAs(from="ROIVol", to="DenseNeuroVol", function(from) {
 
 
 #' @rdname values-methods
-#' @export 
+#' @export
 setMethod("values", signature(x="ROIVol"),
           function(x, ...) {
              x@data
           })
 
 #' @rdname values-methods
-#' @export 
+#' @export
 setMethod("values", signature(x="ROIVec"),
           function(x, ...) {
             x@data
@@ -331,19 +333,19 @@ setMethod("values", signature(x="ROIVec"),
 
 
 #' @rdname indices-methods
-#' @export 
+#' @export
 setMethod("indices", signature(x="ROIVol"),
           function(x) {
 			      grid_to_index(x@space, x@coords)
 		  })
 
 #' @rdname indices-methods
-#' @export 
+#' @export
 setMethod("indices", signature(x="ROIVec"),
           function(x) {
             grid_to_index(x@space, x@coords)
           })
-            
+
 
 #' @export
 #' @param real if \code{TRUE}, return coordinates in real world units
@@ -351,7 +353,7 @@ setMethod("indices", signature(x="ROIVec"),
 setMethod(f="coords", signature=signature(x="ROIVol"),
           function(x, real=FALSE) {
             if (real) {
-              input <- t(cbind(x@coords-.5, rep(1, nrow(x@coords)))) 
+              input <- t(cbind(x@coords-.5, rep(1, nrow(x@coords))))
               ret <- t(trans(x) %*% input)
               ret[,1:3,drop=FALSE]
             } else {
@@ -360,7 +362,7 @@ setMethod(f="coords", signature=signature(x="ROIVol"),
           })
 
 
-#' @export 
+#' @export
 #' @rdname length-methods
 setMethod(f="length", signature=signature(x="ROIVol"),
           function(x) {
@@ -392,7 +394,7 @@ setMethod("[", signature=signature(x="ROIVol", i="logical", j="missing", drop="A
           })
 
 
-#' show an \code{\linkS4class{ROIVol}} 
+#' show an \code{\linkS4class{ROIVol}}
 #' @param object the object
 #' @export
 setMethod("show", signature=signature(object = "ROIVol"),
@@ -404,15 +406,15 @@ setMethod("show", signature=signature(object = "ROIVol"),
 			  cat("\t voxel center of mass: ", colMeans(coords(object)), "\n")
 		  })
 
-  
-      
+
+
 
 
 
 
 
 #' Create a Kernel object from a function of distance from kernel center
-#' 
+#'
 #' @param kerndim the dimensions in voxels of the kernel
 #' @param vdim the dimensions of the voxels in real units
 #' @param FUN the kernel function taking as its first argument representing the distance from the center of the kernel
@@ -423,38 +425,38 @@ Kernel <- function(kerndim, vdim, FUN=dnorm, ...) {
   if (length(kerndim) < 2) {
     stop("kernel dim length must be greater than 1")
   }
-  
+
   .distance <- function(p1, p2) {
     diffs = (p1 - p2)
     sqrt(sum(diffs*diffs))
   }
-  
+
   #kern <- array(0, kerndim)
-  
+
   ## the half-width for each dimensions
   hwidth <- sapply(kerndim, function(d) ceiling(d/2 -1))
-  
+
   ## note, if a kernel dim is even, this will force it to be odd numbered
   grid.vec <- lapply(hwidth, function(sv) seq(-sv, sv))
 
   # compute relative voxel locations (i.e. centered at 0,0,0)
   voxel.ind <- as.matrix(do.call("expand.grid", grid.vec))
-  
+
   # fractional voxel locations so that the location of a voxel coordinate is centered within the voxel
   cvoxel.ind <- t(apply(voxel.ind, 1, function(vals) sign(vals)* ifelse(vals == 0, 0, abs(vals)-.5)))
-  
+
   ## the coordinates ofthe voxels (i.e. after multiplying by pixel dims)
   coords <- t(apply(cvoxel.ind, 1, function(v) (v * vdim)))
-  
+
   ## distance of coordinate from kernel center
   coord.dist <- apply(coords, 1, .distance, c(0,0,0))
-  
+
   wts <- FUN(coord.dist, ...)
   wts <- wts/sum(wts)
 
-  
+
   kern.weights <- wts
-  
+
   new("Kernel", width=kerndim, weights=kern.weights, voxels=voxel.ind, coords=coords)
 
 }
@@ -474,20 +476,20 @@ setMethod(f="voxels", signature=signature(x="Kernel"),
           })
 
 
-  
+
 # GradientKernel <- function(direction=c("x", "y", "z")) {
 #   direction <- match.arg(direction)
 #   grid.vec <- lapply(1:3, function(sv) seq(-1, 1))
-#   
+#
 #   # compute relative voxel locations (i.e. centered at 0,0,0)
 #   voxel.ind <- as.matrix(do.call("expand.grid", grid.vec))
-#   
+#
 #   # fractional voxel locations so that the location of a voxel coordinate is centered within the voxel
 #   cvoxel.ind <- t(apply(voxel.ind, 1, function(vals) sign(vals)* ifelse(vals == 0, 0, abs(vals)-.5)))
-#   
+#
 #   ## the coordinates of the voxels (i.e. after multiplying by pixel dims)
 #   coords <- t(apply(cvoxel.ind, 1, function(v) (v * vdim)))
-#   
+#
 #   if (direction == "x") {
 #     gdim <- 1
 #     odim <- 2:3
@@ -498,8 +500,8 @@ setMethod(f="voxels", signature=signature(x="Kernel"),
 #     gdim <- 3
 #     odim <- c(1,2)
 #   }
-#   
-#     
+#
+#
 #   wts <- apply(coords, 1, function(r) {
 #     if (r[gdim] == 0) {
 #       0
@@ -513,10 +515,10 @@ setMethod(f="voxels", signature=signature(x="Kernel"),
 #       1
 #     }
 #   })
-#   
+#
 #   new("Kernel", width=c(3,3,3), weights=wts, voxels=voxel.ind, coords=coords)
-#       
+#
 # }
-#   
+#
 
-  
+

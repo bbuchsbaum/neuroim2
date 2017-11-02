@@ -37,4 +37,5 @@ Collate:
     'ops.R'
     'roi.R'
     'searchlight.R'
+    'sparse_neurovec.R'
 RoxygenNote: 6.0.1
