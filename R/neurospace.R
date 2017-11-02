@@ -317,7 +317,7 @@ setMethod(f="grid_to_coord", signature=signature(x="NeuroSpace", coords="numeric
             coords <- matrix(coords, ncol=length(coords))
             input <- t(cbind(coords-1, rep(1, nrow(coords))))
             ret <- t(trans(x) %*% input)
-      
+
             md <- min(ndim(x), 3)
             ret[,1:md,drop=FALSE]
 
@@ -353,7 +353,7 @@ setMethod(f="grid_to_index", signature=signature(x="NeuroSpace", coords="numeric
 			.grid_to_index3D(dim(x), matrix(coords, nrow=1, byrow=TRUE))
 		})
 
-#' @export 
+#' @export
 #' @rdname index_to_coord-methods
 setMethod(f="index_to_coord", signature=signature(x="NeuroVol", idx="index"),
           def=function(x, idx) {
@@ -361,7 +361,7 @@ setMethod(f="index_to_coord", signature=signature(x="NeuroVol", idx="index"),
           })
 
 
-#' @export 
+#' @export
 #' @rdname coord_to_index-methods
 setMethod(f="coord_to_index", signature=signature(x="NeuroVol", coords="matrix"),
           def=function(x, coords) {
@@ -371,36 +371,36 @@ setMethod(f="coord_to_index", signature=signature(x="NeuroVol", coords="matrix")
 
 
 
-#' @export 
+#' @export
 #' @rdname index_to_grid-methods
-setMethod(f="index_to_grid", signature=signature(x="BrainVector", idx="index"),
+setMethod(f="index_to_grid", signature=signature(x="NeuroVec", idx="index"),
           def=function(x, idx) {
             callGeneric(space(x), idx)
           })
 
-#' @export 
+#' @export
 #' @rdname index_to_grid-methods
-setMethod(f="index_to_grid", signature=signature(x="BrainVector", idx="integer"),
+setMethod(f="index_to_grid", signature=signature(x="NeuroVec", idx="integer"),
           def=function(x, idx) {
             callGeneric(space(x), as.numeric(idx))
           })
 
 
-#' @export 
+#' @export
 #' @rdname index_to_grid-methods
 setMethod(f="index_to_grid", signature=signature(x="NeuroVol", idx="index"),
           def=function(x, idx) {
             callGeneric(space(x), idx)
           })
 
-#' @export 
+#' @export
 #' @rdname index_to_grid-methods
 setMethod(f="index_to_grid", signature=signature(x="NeuroVol", idx="integer"),
           def=function(x, idx) {
             callGeneric(space(x), as.numeric(idx))
           })
 
-#' @export 
+#' @export
 #' @rdname grid_to_index-methods
 setMethod(f="grid_to_index", signature=signature(x="NeuroVol", coords="matrix"),
           def=function(x, coords) {
@@ -410,7 +410,7 @@ setMethod(f="grid_to_index", signature=signature(x="NeuroVol", coords="matrix"),
           })
 
 
-#' @export 
+#' @export
 #' @rdname grid_to_index-methods
 setMethod(f="grid_to_index", signature=signature(x="NeuroVol", coords="numeric"),
           def=function(x, coords) {

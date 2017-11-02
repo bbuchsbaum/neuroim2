@@ -1,6 +1,6 @@
 #' @include common.R
 {}
-#' @include BinaryIO.R
+#' @include binary_io.R
 {}
 
 

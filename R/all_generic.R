@@ -146,7 +146,7 @@ setGeneric(name="fill", def=function(x, lookup) standardGeneric("fill"))
 
 
 #' Generic function to center/scale row-subsets of a matrix or matrix-like object
-#' 
+#'
 #' @param x a numeric matrix or matrix-like object
 #' @param f the splitting object, typically a \code{factor} or set of \code{integer} indices. must be equal to number of rows of matrix.
 #' @param center should values within each submatrix be centered? (mean removed from each column of submatrix)
@@ -297,15 +297,15 @@ setGeneric(name="write_elements", def=function(x, els) standardGeneric("write_el
 #' @param x an image object, typically a \code{NeuroVol} instance.
 #' @param file_name output file name
 #' @param format file format string. Since "NIFTI" is the only currently supported format, this parameter can be safely ignored and omitted.
-#' @param dataType output data type, If specified should be a \code{character} vector of: "BINARY", "UBYTE", "SHORT", "INT", "FLOAT", "DOUBLE".
+#' @param data_type output data type, If specified should be a \code{character} vector of: "BINARY", "UBYTE", "SHORT", "INT", "FLOAT", "DOUBLE".
 #' Otherwise output format will be inferred from R the datatype of the image.
 #' @export
 #' @details
 #'
 #'  The output format will be inferred from file extension.
 #' @details The output format will be inferred from file extension.
-#'  \code{writeVolume(x, "out.nii")} outputs a NIFTI file.
-#'  \code{writeVolume(x, "out.nii.gz")} outputs a gzipped NIFTI file.
+#'  \code{write_vol(x, "out.nii")} outputs a NIFTI file.
+#'  \code{write_vol(x, "out.nii.gz")} outputs a gzipped NIFTI file.
 #'
 #' No other file output formats are currently supported.
 #'
@@ -314,18 +314,18 @@ setGeneric(name="write_elements", def=function(x, els) standardGeneric("write_el
 #'
 #' bvol <- NeuroVol(array(0, c(10,10,10)), NeuroSpace(c(10,10,10), c(1,1,1)))
 #' \dontrun{
-#' writeVolume(bvol, "out.nii")
-#' writeVolume(bvol, "out.nii.gz")
+#' write_vol(bvol, "out.nii")
+#' write_vol(bvol, "out.nii.gz")
 #' }
-#' @rdname writeVolume-methods
-setGeneric(name="write_vol",  def=function(x, file_name, format, dataType) standardGeneric("write_vol"))
+#' @rdname write_vol-methods
+setGeneric(name="write_vol",  def=function(x, file_name, format, data_type) standardGeneric("write_vol"))
 
 
 #' Generic function to write a 4D image vector to disk
 #' @param x an image object, typically a \code{NeuroVec} instance.
 #' @param file_name output file name.
 #' @param format file format string. Since "NIFTI" is the only currently supported format, this parameter can be safely ignored and omitted.
-#' @param dataType the numeric data type. If specified should be a \code{character} vector of: "BINARY", "UBYTE", "SHORT", "INT", "FLOAT", "DOUBLE".
+#' @param data_type the numeric data type. If specified should be a \code{character} vector of: "BINARY", "UBYTE", "SHORT", "INT", "FLOAT", "DOUBLE".
 #' Otherwise output format will be inferred from R the datatype of the image.
 #' @export
 #' @examples
@@ -338,7 +338,7 @@ setGeneric(name="write_vol",  def=function(x, file_name, format, dataType) stand
 #' writeVector(bvec, "out.nii.gz")
 #' }
 #' @rdname write_vec-methods
-setGeneric(name="write_vec",  def=function(x, file_name, format, dataType) standardGeneric("write_vec"))
+setGeneric(name="write_vec",  def=function(x, file_name, format, data_type) standardGeneric("write_vec"))
 
 
 
@@ -497,6 +497,13 @@ setGeneric(name="as.mask", def=function(x, indices) standardGeneric("as.mask"))
 #' @param mask mask indicating the valid patch area
 setGeneric(name="patch_set", def=function(x, dims, mask, ...) standardGeneric("patch_set"))
 
+#' num_clusters
+#'
+#' @param x the object to extract number of clusters
+#' @export
+#' @rdname num_clusters-methods
+setGeneric(name="num_clusters", def=function(x) standardGeneric("num_clusters"))
+
 
 #' Extract coordinates
 #'
@@ -606,7 +613,7 @@ setGeneric(name="concat", def=function(x,y, ...) standardGeneric("concat"))
 #' @param x the image object
 #' @param ... additonal arguments
 #' @export
-#' @rdname connComp-methods
+#' @rdname conn_comp-methods
 setGeneric(name="conn_comp", def=function(x, ...) standardGeneric("conn_comp"))
 
 #' extract voxel coordinates

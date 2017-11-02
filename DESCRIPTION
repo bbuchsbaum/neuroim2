@@ -16,15 +16,25 @@ VignetteBuilder: knitr
 Depends:
     R (>= 3.0.0),
     Matrix
-Collate: 
+Collate:
     'RcppExports.R'
+    'afni_io.R'
     'all_generic.R'
     'all_class.R'
     'axis.R'
+    'binary_io.R'
     'common.R'
+    'file_format.R'
+    'index_vol.R'
+    'meta_info.R'
     'neuroim.R'
     'neuroslice.R'
     'neurospace.R'
     'neurovec.R'
+    'neurovol.R'
+    'nifti_io.R'
+    'niml_io.R'
     'ops.R'
+    'roi.R'
+    'searchlight.R'
 RoxygenNote: 6.0.1

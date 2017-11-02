@@ -336,13 +336,13 @@ setClass("ClusteredNeuroVol",
          contains=c("NeuroVol"))
 
 
-#' IndexLookupVolume
+#' IndexLookupVol
 #'
 #' Three-dimensional brain image that can be used as a map between 1D grid indices and a table of values
 #' Currently used in the \code{\linkS4class{SparseNeuroVec}} class.
-#' @rdname IndexLookupVolume-class
+#' @rdname IndexLookupVol-class
 #' @export
-setClass("IndexLookupVolume",
+setClass("IndexLookupVol",
          representation=
            representation(space="NeuroSpace", indices="integer", map="integer"),
          contains=c("NeuroVol"))

@@ -108,9 +108,9 @@ NIFTIMetaInfo <- function(descriptor, nifti_header) {
 			data_file=data_file(descriptor, nifti_header$file_name),
 			fileDescriptor=descriptor,
 			endian=nifti_header$endian,
-			data_offset=nifti_header$voxOffset,
-			data_type=nifti_header$dataStorage,
-			bytes_per_element=as.integer(.getDataSize(nifti_header$dataStorage)),
+			data_offset=nifti_header$vox_offset,
+			data_type=nifti_header$data_storage,
+			bytes_per_element=as.integer(.getDataSize(nifti_header$data_storage)),
 			Dim=niftiDim(nifti_header),
 			spatial_axes=.nearestAnatomy(nifti_header$qform),
 			additional_axes=NullAxis,
@@ -149,8 +149,8 @@ setMethod(f="show", signature=signature("FileMetaInfo"),
 #' AFNIMetaInfo
 #'
 #' Constructor for \code{\linkS4class{AFNIMetaInfo}} class
-#' @param descriptor an instance of class \code{\linkS4class{AFNIFileDescriptor}}
-#' @param afni_header a \code{list} returned by \code{readAFNIHeader}
+#' @param descriptor an instance of class \code{\linkS4class{AFNIFormat}}
+#' @param afni_header a \code{list} returned by \code{read_afni_header}
 #' @return an instance of class \code{\linkS4class{AFNIMetaInfo}}
 #' @export AFNIMetaInfo
 #' @rdname AFNIMetaInfo-class
@@ -206,7 +206,7 @@ read_header <- function(file_name) {
 		stop(paste("could not find reader for file: ", file_name))
 	}
 
-	readMetaInfo(desc, file_name)
+	read_meta_info(desc, file_name)
 }
 
 setAs(from="MetaInfo", to="NIFTIMetaInfo", def=function(from) {
