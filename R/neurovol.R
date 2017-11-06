@@ -665,7 +665,7 @@ setMethod(f="conn_comp", signature=signature(x="NeuroVol"),
 		mask <- (x > threshold)
 		stopifnot(any(mask))
 
-		comps <- connComp3D(mask)
+		comps <- conn_comp_3D(mask)
 
 		grid <- as.data.frame(index_to_grid(mask, which(mask>0)))
 		colnames(grid) <- c("x", "y", "z")

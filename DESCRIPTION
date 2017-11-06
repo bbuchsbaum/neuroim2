@@ -17,7 +17,7 @@ VignetteBuilder: knitr
 Depends:
     R (>= 3.0.0),
     Matrix
-Collate:
+Collate: 
     'RcppExports.R'
     'afni_io.R'
     'all_generic.R'
@@ -26,6 +26,7 @@ Collate:
     'binary_io.R'
     'clustervol.R'
     'common.R'
+    'conncomp.R'
     'datadoc.R'
     'file_format.R'
     'index_vol.R'

@@ -225,7 +225,7 @@ make_spherical_grid <- function(bvol, centroid, radius) {
 
   res <- rflann::RadiusSearch(matrix(centroid * vspacing, ncol=3), coords, radius=radius^2, max_neighbour=nrow(cube))
 
-  cube[res$indices[[1]],]
+  cube[res$indices[[1]],,drop=FALSE]
 
 }
 
