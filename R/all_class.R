@@ -402,8 +402,9 @@ setClass("BasisNeuroVec",
          representation(mask="LogicalNeuroVol",
                                        basis="Matrix",
                                        coeffs="Matrix",
-                                       map="IndexLookupVol")
-)
+                                       map="IndexLookupVol"),
+         contains=c("NeuroVec"))
+
 
 
 #' SparseNeuroVecSource
@@ -416,7 +417,6 @@ setClass("BasisNeuroVec",
 setClass("SparseNeuroVecSource", representation(mask="LogicalNeuroVol"), contains=c("NeuroVecSource"))
 
 
-
 setClassUnion("numericOrMatrix", c("numeric", "matrix"))
 
 #' ROI
@@ -426,7 +426,9 @@ setClassUnion("numericOrMatrix", c("numeric", "matrix"))
 #' @export
 setClass("ROI", contains="VIRTUAL")
 
-
+setClass("ROICoords",
+         representation=representation(coords="matrix"),
+         contains=c("ROI", "NeuroObj"))
 
 #' ROIVol
 #'
@@ -437,15 +439,15 @@ setClass("ROI", contains="VIRTUAL")
 #' @slot coords the voxel coordinates of the ROI
 #' @exportClass ROIVol
 setClass("ROIVol",
-         representation(data="numeric", coords="matrix"), contains=c("ROI"),
+         contains=c("numeric", "ROICoords"),
          validity = function(object) {
            if (ncol(object@coords) != 3) {
              stop("coords slot must be a matrix with 3 columns")
            }
-           if (!is.vector(object@data)) {
+           if (!is.vector(object@.Data)) {
              stop("'data' must be a vector")
            }
-           if (length(object@data) != nrow(object@coords)) {
+           if (length(object@.Data) != nrow(object@coords)) {
              stop("length of data vector must equal 'nrow(coords)'")
            }
          })
@@ -455,20 +457,16 @@ setClass("ROIVol",
 #' A class that represents a vector-valued volumetric region of interest
 #'
 #' @rdname ROIVec-class
-#' @slot data the \code{matrix} data stored in ROI
-#' @slot coords the voxel coordinates of the ROI
 #' @exportClass ROIVec
 setClass("ROIVec",
-         representation=representation(data="matrix", coords="matrix"), contains=c("ROI"),
+         contains=c("matrix", "ROICoords"),
          validity = function(object) {
            if (ncol(object@coords) != 3) {
              stop("coords slot must be a matrix with 3 columns")
            }
-           if (!is.matrix(object@data)) {
-             stop("'data' must be a matrix")
-           }
-           if (ncol(object@data) != nrow(object@coords)) {
-             stop("'ncol(data)' must equal 'nrow(coords)'")
+
+           if (ncol(object) != nrow(object@coords)) {
+             stop("'ncol(object)' must equal 'nrow(coords)'")
            }
          })
 

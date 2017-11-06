@@ -6,6 +6,7 @@
 \alias{coord_to_grid,NeuroSpace,matrix-method}
 \alias{coord_to_grid,NeuroSpace,numeric-method}
 \alias{coord_to_grid,NeuroVol,matrix-method}
+\alias{coord_to_grid,NeuroVol,numeric-method}
 \title{Generic function to convert N-dimensional real world coordinates to grid coordinates}
 \usage{
 coord_to_grid(x, coords)
@@ -15,6 +16,8 @@ coord_to_grid(x, coords)
 \S4method{coord_to_grid}{NeuroSpace,numeric}(x, coords)
 
 \S4method{coord_to_grid}{NeuroVol,matrix}(x, coords)
+
+\S4method{coord_to_grid}{NeuroVol,numeric}(x, coords)
 }
 \arguments{
 \item{x}{the object}

@@ -2,18 +2,20 @@
 % Please edit documentation in R/searchlight.R
 \name{clustered_searchlight}
 \alias{clustered_searchlight}
-\title{Create a clustered Searchlight iterator}
+\title{Create a clustered searchlight iterator}
 \usage{
-clustered_searchlight(mask, csize)
+clustered_searchlight(mask, cvol = NULL, csize = NULL)
 }
 \arguments{
 \item{mask}{an image volume containing valid central voxels for roving searchlight}
 
-\item{csize}{the number of clusters}
+\item{cvol}{a \code{ClusteredNeuroVol} instance}
+
+\item{csize}{the number of clusters (ignored if \code{cvol} is provided)}
 }
 \value{
 an \code{iter} class
 }
 \description{
-Create a clustered Searchlight iterator
+Create a clustered searchlight iterator
 }

@@ -15,7 +15,7 @@
 #' @rdname ROIVol
 #' @export
 ROIVol <- function(vspace, coords, data=rep(nrow(coords),1)) {
-  new("ROIVol", space=vspace, coords=coords, data=as.vector(data))
+  new("ROIVol", space=vspace, coords=coords, as.vector(data))
 }
 
 #' Create an instance of class \code{\linkS4class{ROIVec}}
@@ -27,7 +27,7 @@ ROIVol <- function(vspace, coords, data=rep(nrow(coords),1)) {
 #' @rdname ROIVec
 #' @export
 ROIVec <- function(vspace, coords, data=rep(nrow(coords),1)) {
-  new("ROIVec", space=vspace, coords=coords, data=data)
+  new("ROIVec", space=vspace, coords=coords, data)
 }
 
 #' convert a \code{ROIVec} to a matrix
@@ -138,34 +138,35 @@ square_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE, fixdi
   }
 
   ### add central voxel
-  ROIVol(space(bvol), data = vals[keep], coords = grid[keep, ])
+  ROIVol(space(bvol), coords = grid[keep, ], data=vals[keep])
 
 }
 
 
 #' Create A Cuboid Region of Interest
+#'
 #' @param bvol an \code{NeuroVol} or \code{NeuroSpace} instance
 #' @param centroid the center of the cube in \emph{voxel} coordinates
 #' @param surround the number of voxels on either side of the central voxel. A \code{vector} of length 3.
 #' @param fill optional value(s) to assign to data slot.
 #' @param nonzero keep only nonzero elements from \code{bvol}. If \code{bvol} is A \code{NeuroSpace} then this argument is ignored.
 #' @return an instance of class \code{ROIVol}
-#' @rdname cube_roi
+#' @rdname cuboid_roi
 #' @examples
 #'  sp1 <- NeuroSpace(c(10,10,10), c(1,1,1))
-#'  cube <- cube_roi(sp1, c(5,5,5), 3)
+#'  cube <- cuboid_roi(sp1, c(5,5,5), 3)
 #'  vox <- coords(cube)
-#'  cube2 <- cube_roi(sp1, c(5,5,5), 3, fill=5)
+#'  cube2 <- cuboid_roi(sp1, c(5,5,5), 3, fill=5)
 #'
 #'
 #' @export
-cube_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE) {
+cuboid_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE) {
   if (is.matrix(centroid)) {
     centroid <- drop(centroid)
   }
 
   if (length(centroid) != 3) {
-    stop("cube_roi: centroid must have length of 3 (x,y,z coordinates)")
+    stop("cuboid_roi: centroid must have length of 3 (x,y,z coordinates)")
   }
 
   if (surround < 0) {
@@ -191,12 +192,13 @@ cube_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE) {
   }
 
   ### add central voxel
-  ROIVol(space(bvol), data = vals[keep], coords = grid[keep, ])
+  ROIVol(space(bvol), coords = grid[keep, ], data = vals[keep])
 
 }
 
 #' @importFrom rflann RadiusSearch
-.makeSphericalGrid <- function(bvol, centroid, radius) {
+#' @keywords internal
+make_spherical_grid <- function(bvol, centroid, radius) {
 
   vspacing <- spacing(bvol)
 
@@ -205,14 +207,19 @@ cube_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE) {
   }
 
   vdim <- dim(bvol)
+
   centroid <- as.integer(centroid)
 
+  deltas <- sapply(vspacing, function(x) round(radius/x))
 
   cube <- as.matrix(expand.grid(
     seq(centroid[1] - round(radius/vspacing[1]), centroid[1] + round(radius/vspacing[1])),
     seq(centroid[2] - round(radius/vspacing[2]), centroid[2] + round(radius/vspacing[2])),
     seq(centroid[3] - round(radius/vspacing[3]), centroid[3] + round(radius/vspacing[3]))))
 
+  rs <- rowSums(sapply(1:ncol(cube), function(i) cube[,i] > 0 & cube[,i] <= vdim[i]))
+  keep <- which(rs == 3)
+  cube <- cube[keep,]
 
   coords <- t(t(cube) * vspacing)
 
@@ -248,17 +255,22 @@ spherical_roi <- function (bvol, centroid, radius, fill=NULL, nonzero=FALSE) {
     centroid <- drop(centroid)
   }
 
+  vdim <- dim(bvol)
+
   assertthat::assert_that(length(centroid) == 3)
+  assertthat::assert_that(centroid[1] <= vdim[1] && centroid[2] <= vdim[2] && centroid[3] <= vdim[3])
+  assertthat::assert_that(all(centroid > 0))
 
   if (is.null(fill) && is(bvol, "NeuroSpace")) {
     fill = 1
   }
 
+
   bspace <- space(bvol)
   vspacing <- spacing(bvol)
-  vdim <- dim(bvol)
+
   centroid <- as.integer(centroid)
-  grid <- .makeSphericalGrid(bvol, centroid, radius)
+  grid <- make_spherical_grid(bvol, centroid, radius)
 
   vals <- if (!is.null(fill)) {
     rep(fill, nrow(grid))
@@ -277,6 +289,7 @@ spherical_roi <- function (bvol, centroid, radius, fill=NULL, nonzero=FALSE) {
 
 .resample <- function(x, ...) x[sample.int(length(x), ...)]
 
+#' @keywords internal
 roi_vector_matrix <- function(mat, refspace, indices, coords) {
   structure(mat,
             refspace=refspace,
@@ -286,6 +299,7 @@ roi_vector_matrix <- function(mat, refspace, indices, coords) {
 
 }
 
+#' @keywords internal
 roi_surface_matrix <- function(mat, refspace, indices, coords) {
   structure(mat,
             refspace=refspace,
@@ -383,14 +397,14 @@ setMethod(f="length", signature=signature(x="ROIVol"),
 #' @aliases [,ROIVol,numeric,missing,ANY-method
 setMethod("[", signature=signature(x = "ROIVol", i = "numeric", j = "missing", drop = "ANY"),
           function (x, i, j, drop) {
-            ROIVol(x@space, x@coords[i,,drop=FALSE], x@data[i])
+            ROIVol(x@space, x@coords[i,,drop=FALSE], x@.Data[i])
           })
 
 #' @rdname vol_subset-methods
 #' @aliases [,ROIVol,logical,missing,ANY-method
 setMethod("[", signature=signature(x="ROIVol", i="logical", j="missing", drop="ANY"),
           function(x,i,j,drop) {
-            ROIVol(x@space, x@coords[i,,drop=FALSE], x@data[i])
+            ROIVol(x@space, x@coords[i,,drop=FALSE], x@.Data[i])
           })
 
 
@@ -399,11 +413,11 @@ setMethod("[", signature=signature(x="ROIVol", i="logical", j="missing", drop="A
 #' @export
 setMethod("show", signature=signature(object = "ROIVol"),
 		  function (object) {
-			  cat("\n\n\tROIVol", "\n")
-			  cat("\t size: ", length(object), "\n")
-			  cat("\t parent dim:", dim(object), "\n")
-			  cat("\t num data cols:", if (is.matrix(object@data)) ncol(object@data) else 1, "\n" )
-			  cat("\t voxel center of mass: ", colMeans(coords(object)), "\n")
+			  cat("\n\nROIVol", "\n")
+			  cat("  Size:           ", length(object), "\n")
+			  cat("  Parent Dim:     ", dim(object), "\n")
+			  cat("  Num Data Cols:  ", ncol(object), "\n" )
+			  cat("  Voxel Cen. Mass:", colMeans(coords(object)), "\n")
 		  })
 
 

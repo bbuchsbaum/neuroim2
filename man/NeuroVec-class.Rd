@@ -18,8 +18,6 @@ which must all be identical.}
 \item{mask}{an optional \code{array} of type \code{logical}}
 
 \item{label}{a label of type \code{character}}
-
-\item{source}{an optional \code{\linkS4class{BrainSource}} object}
 }
 \value{
 a concrete instance of \code{\linkS4class{NeuroVec}} class.

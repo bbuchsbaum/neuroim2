@@ -7,11 +7,3 @@
 \description{
 A class that represents a vector-valued volumetric region of interest
 }
-\section{Slots}{
-
-\describe{
-\item{\code{data}}{the \code{matrix} data stored in ROI}
-
-\item{\code{coords}}{the voxel coordinates of the ROI}
-}}
-

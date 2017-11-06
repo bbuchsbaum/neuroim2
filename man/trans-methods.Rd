@@ -6,7 +6,6 @@
 \alias{trans,MetaInfo-method}
 \alias{trans,NIFTIMetaInfo-method}
 \alias{trans,NeuroSpace-method}
-\alias{trans,NeuroSpace-method}
 \title{Generic getter to extract image coordinate transformation}
 \usage{
 trans(x)
@@ -14,8 +13,6 @@ trans(x)
 \S4method{trans}{MetaInfo}(x)
 
 \S4method{trans}{NIFTIMetaInfo}(x)
-
-\S4method{trans}{NeuroSpace}(x)
 
 \S4method{trans}{NeuroSpace}(x)
 }

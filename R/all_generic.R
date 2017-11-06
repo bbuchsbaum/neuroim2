@@ -60,6 +60,16 @@ setGeneric(name="vectors", def=function(x, subset, ...) standardGeneric("vectors
 #' @rdname slices-methods
 setGeneric(name="slices", def=function(x, ...) standardGeneric("slices"))
 
+#' Generic function to partition an image into a set of regions
+#'
+#' @param x the object to partition
+#' @param by the object defining the partitions over the image space.
+#' @param ... additional arguments
+#' @export
+#' @rdname partition_by-methods
+setGeneric(name="partition_by", def=function(x, by, ...) standardGeneric("partition_by"))
+
+
 
 #' Generic function to extract the number of dimensions of an object
 #'
@@ -403,7 +413,7 @@ setGeneric(name="index_to_grid",   def=function(x, idx) standardGeneric("index_t
 #' @examples
 #' bvol <- NeuroVol(array(0, c(10,10,10)), NeuroSpace(c(10,10,10), c(1,1,1)))
 #' idx <- 1:10
-#' g <- indexToCoord(bvol, idx)
+#' g <- index_to_coord(bvol, idx)
 #' idx2 <- coord_to_index(bvol, g)
 #' all.equal(idx, idx2)
 #' @rdname index_to_coord-methods

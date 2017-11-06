@@ -299,29 +299,29 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
   }
 }
 
-#' @rdname internal-methods
-#' @keywords internal
-#' @importFrom mmap int8 uint8 int16 int32 real32 real64
-#' @importFrom mmap mmap char mmapFlags munmap
-.getMMapMode <- function(code) {
-	if (code == "UNKNOWN") {
-		stop(paste(".getMMapMode: no memory map mode for UNKNOWN data type: ", code))
-	} else if (code == "BINARY") {
-		mmap::int8()
-	} else if (code == "UBYTE") {
-	  mmap::uint8()
-	} else if(code == "SHORT") {
-	  mmap::int16()
-	} else if(code == "INT") {
-	  mmap::int32()
-	} else if (code == "FLOAT") {
-	  mmap::real32()
-	} else if (code == "DOUBLE") {
-	  mmap::real64()
-	} else {
-		stop(paste(".getMMapMode: unsupported data type: ", code))
-	}
-}
+# @rdname internal-methods
+# @keywords internal
+# @importFrom mmap int8 uint8 int16 int32 real32 real64
+# @importFrom mmap mmap char mmapFlags munmap
+# .getMMapMode <- function(code) {
+# 	if (code == "UNKNOWN") {
+# 		stop(paste(".getMMapMode: no memory map mode for UNKNOWN data type: ", code))
+# 	} else if (code == "BINARY") {
+# 		mmap::int8()
+# 	} else if (code == "UBYTE") {
+# 	  mmap::uint8()
+# 	} else if(code == "SHORT") {
+# 	  mmap::int16()
+# 	} else if(code == "INT") {
+# 	  mmap::int32()
+# 	} else if (code == "FLOAT") {
+# 	  mmap::real32()
+# 	} else if (code == "DOUBLE") {
+# 	  mmap::real64()
+# 	} else {
+# 		stop(paste(".getMMapMode: unsupported data type: ", code))
+# 	}
+# }
 
 
 #' .getDataStorage
@@ -554,29 +554,29 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 }
 
 
-#' @rdname internal-methods
-#' @keywords internal
-.makeMMap <- function(meta) {
-  nels <- prod(meta@Dim[1:4])
-
-  if (.Platform$endian != meta@endian) {
-    ## read raw bytes
-    rawbytes <- mmap::mmap(meta@data_file, mode=mmap::char(), prot=mmap::mmapFlags("PROT_READ"))
-    rawbytes <- rawbytes[(meta@data_offset+1):length(rawbytes)]
-
-    mmap::munmap(rawbytes)
-    readBin(rawbytes, what=.getRStorage(meta@data_type), size=.getDataSize(meta@data_type), n=nels, endian=meta@endian)
-  } else {
-    #mmap::mmap(meta@data_file, mode=.getMMapMode(meta@data_type), off=meta@data_offset,prot=mmap::mmapFlags("PROT_READ"),flags=mmap::mmapFlags("MAP_PRIVATE"))
-    ret <- mmap::mmap(meta@data_file, mode=.getMMapMode(meta@data_type), prot=mmap::mmapFlags("PROT_READ"))
-    offset <- meta@data_offset/.getDataSize(meta@data_type) + 1
-    vals <- ret[offset:nels]
-    mmap::munmap(ret)
-    vals
-  }
-
-
-}
+# @rdname internal-methods
+# @keywords internal
+# .makeMMap <- function(meta) {
+#   nels <- prod(meta@Dim[1:4])
+#
+#   if (.Platform$endian != meta@endian) {
+#     ## read raw bytes
+#     rawbytes <- mmap::mmap(meta@data_file, mode=mmap::char(), prot=mmap::mmapFlags("PROT_READ"))
+#     rawbytes <- rawbytes[(meta@data_offset+1):length(rawbytes)]
+#
+#     mmap::munmap(rawbytes)
+#     readBin(rawbytes, what=.getRStorage(meta@data_type), size=.getDataSize(meta@data_type), n=nels, endian=meta@endian)
+#   } else {
+#     #mmap::mmap(meta@data_file, mode=.getMMapMode(meta@data_type), off=meta@data_offset,prot=mmap::mmapFlags("PROT_READ"),flags=mmap::mmapFlags("MAP_PRIVATE"))
+#     ret <- mmap::mmap(meta@data_file, mode=.getMMapMode(meta@data_type), prot=mmap::mmapFlags("PROT_READ"))
+#     offset <- meta@data_offset/.getDataSize(meta@data_type) + 1
+#     vals <- ret[offset:nels]
+#     mmap::munmap(ret)
+#     vals
+#   }
+#
+#
+# }
 
 
 

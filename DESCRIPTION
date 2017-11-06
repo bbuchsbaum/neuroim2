@@ -3,7 +3,8 @@ Type: Package
 Title: Data Structures and Handling for Neuroimaging Data
 Version: 0.1.0
 LinkingTo: Rcpp
-Author: Bradley R. Buchsbaum
+Authors@R: c(
+    person(c("Bradley", "R"), "Buchsbaum", role = c("aut", "cre"), email = "brad.buchsbaum@gmail.com"))
 Maintainer: Bradley Buchsbaum <brad.buchsbaum@gmail.com>
 Description: A collection of data structures that represent
     volumetric brain imaging data. The focus is on basic data handling for 3D
@@ -16,14 +17,16 @@ VignetteBuilder: knitr
 Depends:
     R (>= 3.0.0),
     Matrix
-Collate: 
+Collate:
     'RcppExports.R'
     'afni_io.R'
     'all_generic.R'
     'all_class.R'
     'axis.R'
     'binary_io.R'
+    'clustervol.R'
     'common.R'
+    'datadoc.R'
     'file_format.R'
     'index_vol.R'
     'meta_info.R'
@@ -41,3 +44,4 @@ Collate:
     'searchlight.R'
     'sparse_neurovec.R'
 RoxygenNote: 6.0.1
+Suggests: testthat

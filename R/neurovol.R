@@ -99,57 +99,7 @@ DenseNeuroVol <- function(data, space, label="", indices=NULL) {
 
 }
 
-#' ClusteredNeuroVol
-#'
-#' Construct a \code{\linkS4class{ClusteredNeuroVol}} instance
-#' @param mask an instance of class \code{\linkS4class{LogicalNeuroVol}}
-#' @param clusters a vector of clusters ids with length equal to number of nonzero voxels in mask \code{mask}
-#' @param label_map an optional \code{list} that maps from cluster id to a cluster label, e.g. (1 -> "FFA", 2 -> "PPA")
-#' @param label an optional \code{character} string used to label of the volume
-#' @return \code{\linkS4class{ClusteredNeuroVol}} instance
-#' @export ClusteredNeuroVol
-#' @examples
-#'
-#' bspace <- NeuroSpace(c(16,16,16), spacing=c(1,1,1))
-#' grid <- index_to_grid(bspace, 1:(16*16*16))
-#' kres <- kmeans(grid, centers=10)
-#' mask <- NeuroVol(rep(1, 16^3),bspace)
-#' clusvol <- ClusteredNeuroVol(mask, kres$cluster)
-#' @rdname ClusteredNeuroVol-class
-#' @importFrom hash hash
-ClusteredNeuroVol <- function(mask, clusters, label_map=NULL, label="") {
-  mask <- as(mask, "LogicalNeuroVol")
-  space <- space(mask)
-  ids <- sort(unique(clusters))
 
-  stopifnot(length(clusters) == sum(mask))
-
-  if (length(ids) == 1) {
-    warning("clustered volume only contains 1 partition")
-  }
-
-  if (is.null(label_map)) {
-    labs <- paste("Clus_", ids, sep="")
-    label_map <- as.list(ids)
-    names(label_map) <- labs
-  } else {
-    stopifnot(length(label_map) == length(ids))
-    stopifnot(all(unlist(label_map) %in% ids))
-  }
-
-
-  clus_idx <- which(mask == TRUE)
-  clus_split <- split(clus_idx, clusters)
-  clus_names <- names(clus_split)
-  cluster_map <- new.env()
-
-  for (i in 1:length(clus_split)) {
-    cluster_map[[clus_names[[i]]]] <- clus_split[[clus_names[[i]]]]
-  }
-
-  new("ClusteredNeuroVol", mask=mask, clusters=as.integer(clusters),
-      label_map=label_map, cluster_map=cluster_map, space=space)
-}
 
 
 
@@ -276,14 +226,7 @@ setAs(from="DenseNeuroVol", to="LogicalNeuroVol", def=function(from) {
 	LogicalNeuroVol(as.array(from), space(from))
 })
 
-#' conversion from ClusteredNeuroVol to LogicalNeuroVol
-#' @name as
-#' @rdname as-methods
-setAs(from="ClusteredNeuroVol", to="DenseNeuroVol", def=function(from) {
-  data = from@clusters
-  indices <- which(from@mask == TRUE)
-  DenseNeuroVol(data, space(from), indices=indices)
-})
+
 
 #' conversion from NeuroVol to array
 #' @rdname as-methods
@@ -307,6 +250,25 @@ setMethod(f="show", signature=signature("NeuroVol"),
 
           }
 )
+
+#' show a \code{SparseNeuroVol}
+#' @param object the object
+#' @export
+setMethod(f="show", signature=signature("SparseNeuroVol"),
+          def=function(object) {
+            sp <- space(object)
+            cat("NeuroVol\n")
+            cat("  Type           :", class(object), "\n")
+            cat("  Dimension      :", dim(object), "\n")
+            cat("  Spacing        :", paste(paste(signif(sp@spacing[1:(length(sp@spacing)-1)],2), " X ", collapse=" "),
+                                            sp@spacing[length(sp@spacing)], "\n"))
+            cat("  Origin         :", paste(paste(signif(sp@origin[1:(length(sp@origin)-1)],2), " X ", collapse=" "),
+                                            sp@origin[length(sp@origin)], "\n"))
+            cat("  Axes           :", paste(sp@axes@i@axis, sp@axes@j@axis,sp@axes@k@axis), "\n")
+            cat("  Cardinality    :", length(which(object@data>0)))
+          }
+)
+
 
 
 #' load a NeuroVol
@@ -388,6 +350,7 @@ read_vol  <- function(file_name, index=1) {
 	load_data(src)
 }
 
+
 #' @export
 #' @rdname slices-methods
 setMethod(f="slices", signature=signature(x="NeuroVol"),
@@ -397,6 +360,14 @@ setMethod(f="slices", signature=signature(x="NeuroVol"),
             lis <- lapply(1:nslices, function(i) f)
             deferred_list(lis)
           })
+
+setMethod(f="[", signature=signature(x = "NeuroVol", i = "ROICoords", j = "missing"),
+          def=function (x, i, j, k, m, ..., drop=TRUE) {
+            browser()
+            callGeneric(x, i@coords)
+          }
+)
+
 
 
 #' @rdname concat-methods
@@ -543,6 +514,13 @@ setMethod(f="coord_to_grid", signature=signature(x="NeuroVol", coords="matrix"),
             callGeneric(space(x), coords)
           })
 
+#' @export
+#' @rdname coord_to_grid-methods
+setMethod(f="coord_to_grid", signature=signature(x="NeuroVol", coords="numeric"),
+          def=function(x, coords) {
+            coords <- matrix(coords, nrow=1)
+            callGeneric(x, coords)
+          })
 
 
 #' @importFrom rflann Neighbour
@@ -580,6 +558,17 @@ setMethod(f="coord_to_grid", signature=signature(x="NeuroVol", coords="matrix"),
 
 }
 
+#' @rdname patch_set-methods
+#' @export
+setMethod(f="patch_set", signature=signature(x="NeuroVol",
+                                             dims="numeric",
+                                             mask="missing"),
+          def=function(x, dims, ...) {
+            mask <- LogicalNeuroVol(array(1, dim(x)), space=space(x))
+            callGeneric(x, dims, mask)
+
+          })
+
 
 #' @rdname patch_set-methods
 setMethod(f="patch_set", signature=signature(x="NeuroVol",
@@ -594,32 +583,25 @@ setMethod(f="patch_set", signature=signature(x="NeuroVol",
               stop("all 'dims' must be odd numbers")
             }
 
-
             template <- as.matrix(expand.grid(x=seq(seq(ceiling(-dims[1]/2),floor(dims[1]/2))),
                                     y=seq(seq(ceiling(-dims[2]/2),floor(dims[2]/2))),
                                     z=seq(seq(ceiling(-dims[3]/2),floor(dims[3]/2)))))
 
             xdim <- dim(x)
             grid <- index_to_grid(mask, which(mask>0))
-            patches <- lapply(1:nrow(grid), function(i) {
 
+            f <- function(i) {
               g <- grid[i,]
-              m <- sweep(template, 2, g, "+")
+              m <- t(t(template) + g)
               m[,1] <- pmax(pmin(m[,1], xdim[1]), 1)
               m[,2] <- pmax(pmin(m[,2], xdim[2]), 1)
               m[,3] <- pmax(pmin(m[,3], xdim[3]), 1)
               x[m]
-            })
 
-            list(patches=patches, centers=grid, get_patch_coords = function(i) {
-              g <- grid[i,]
-              m <- sweep(template, 2, g, "+")
-              m[,1] <- pmax(pmin(m[,1], xdim[1]), 1)
-              m[,2] <- pmax(pmin(m[,2], xdim[2]), 1)
-              m[,3] <- pmax(pmin(m[,3], xdim[3]), 1)
-              m
+            }
 
-            })
+            patches <- deferred_list(lapply(1:nrow(grid), function(i) f))
+
           })
 
 
@@ -665,14 +647,6 @@ setMethod(f="map", signature=signature(x="NeuroVol", m="Kernel"),
           })
 
 
-
-#' get number of clusters in a ClusteredNeuroVol
-#' @rdname num_clusters-methods
-#' @export
-setMethod(f="num_clusters", signature=signature(x="ClusteredNeuroVol"),
-          def=function(x) {
-            length(x@cluster_map)
-          })
 
 
 

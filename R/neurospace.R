@@ -218,6 +218,22 @@ setMethod(f="index_to_coord", signature=signature(x="NeuroSpace", idx="numeric")
             t(res[1:ndim(x),])
           })
 
+#' @export
+#' @rdname index_to_coord-methods
+setMethod(f="index_to_coord", signature=signature(x="NeuroSpace", idx="integer"),
+          def=function(x, idx) {
+            grid <- index_to_grid(x, idx) - .5
+            res <- trans(x) %*% t(cbind(grid, rep(1,nrow(grid))))
+            t(res[1:ndim(x),])
+          })
+
+#' @export
+#' @rdname index_to_coord-methods
+setMethod(f="index_to_coord", signature=signature(x="NeuroVol", idx="integer"),
+          def=function(x, idx) {
+            callGeneric(space(x), as.numeric(idx))
+          })
+
 
 #' @export
 #' @rdname coord_to_index-methods
@@ -342,7 +358,7 @@ setMethod(f="grid_to_index", signature=signature(x="NeuroSpace", coords="matrix"
 		def=function(x, coords) {
 			array.dim <- dim(x)
       ### TODO assumes 3D index ....
-			.grid_to_index3D(dim(x)[1:3], coords)
+			.gridToIndex3D(dim(x)[1:3], coords)
 		})
 
 
@@ -352,15 +368,9 @@ setMethod(f="grid_to_index", signature=signature(x="NeuroSpace", coords="numeric
 		def=function(x, coords) {
 		  ### TODO assumes 3D index ....
 			array.dim <- dim(x)
-			.grid_to_index3D(dim(x), matrix(coords, nrow=1, byrow=TRUE))
+			.gridToIndex3D(dim(x), matrix(coords, nrow=1, byrow=TRUE))
 		})
 
-#' @export
-#' @rdname index_to_coord-methods
-setMethod(f="index_to_coord", signature=signature(x="NeuroVol", idx="index"),
-          def=function(x, idx) {
-            callGeneric(space(x),idx)
-          })
 
 
 #' @export
@@ -408,7 +418,7 @@ setMethod(f="grid_to_index", signature=signature(x="NeuroVol", coords="matrix"),
           def=function(x, coords) {
             assert_that(ncol(coords) == 3)
             array.dim <- dim(x)
-            .grid_to_index3D(dim(x), coords)
+            .gridToIndex3D(dim(x), coords)
           })
 
 
@@ -418,7 +428,7 @@ setMethod(f="grid_to_index", signature=signature(x="NeuroVol", coords="numeric")
           def=function(x, coords) {
             assert_that(length(coords) == 3)
             array.dim <- dim(x)
-            .grid_to_index3D(dim(x), matrix(coords, nrow=1, byrow=TRUE))
+            .gridToIndex3D(dim(x), matrix(coords, nrow=1, byrow=TRUE))
           })
 
 

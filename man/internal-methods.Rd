@@ -7,7 +7,6 @@
 \alias{.gridToIndex}
 \alias{.indexToGrid}
 \alias{.getRStorage}
-\alias{.getMMapMode}
 \alias{.getDataStorage}
 \alias{.getDataCode}
 \alias{.getDataSize}
@@ -15,7 +14,6 @@
 \alias{.niftiExt}
 \alias{.matrixToQuatern}
 \alias{.quaternToMatrix}
-\alias{.makeMMap}
 \title{.isExtension}
 \usage{
 .isExtension(fname, extension)
@@ -30,8 +28,6 @@
 
 .getRStorage(data_type)
 
-.getMMapMode(code)
-
 .getDataStorage(code)
 
 .getDataCode(data_type)
@@ -45,8 +41,6 @@
 .matrixToQuatern(mat)
 
 .quaternToMatrix(quat, origin, stepSize, qfac)
-
-.makeMMap(meta)
 }
 \description{
 .isExtension

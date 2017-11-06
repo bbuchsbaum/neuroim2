@@ -3,10 +3,13 @@
 \docType{methods}
 \name{patch_set}
 \alias{patch_set}
+\alias{patch_set,NeuroVol,numeric,missing-method}
 \alias{patch_set,NeuroVol,numeric,LogicalNeuroVol-method}
 \title{patch_set}
 \usage{
 patch_set(x, dims, mask, ...)
+
+\S4method{patch_set}{NeuroVol,numeric,missing}(x, dims, mask, ...)
 
 \S4method{patch_set}{NeuroVol,numeric,LogicalNeuroVol}(x, dims, mask, ...)
 }

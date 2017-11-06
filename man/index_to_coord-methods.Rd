@@ -4,14 +4,17 @@
 \name{index_to_coord}
 \alias{index_to_coord}
 \alias{index_to_coord,NeuroSpace,numeric-method}
-\alias{index_to_coord,NeuroVol,index-method}
+\alias{index_to_coord,NeuroSpace,integer-method}
+\alias{index_to_coord,NeuroVol,integer-method}
 \title{Generic function to convert 1D indices to N-dimensional real world coordinates}
 \usage{
 index_to_coord(x, idx)
 
 \S4method{index_to_coord}{NeuroSpace,numeric}(x, idx)
 
-\S4method{index_to_coord}{NeuroVol,index}(x, idx)
+\S4method{index_to_coord}{NeuroSpace,integer}(x, idx)
+
+\S4method{index_to_coord}{NeuroVol,integer}(x, idx)
 }
 \arguments{
 \item{x}{the object}
@@ -27,7 +30,7 @@ Generic function to convert 1D indices to N-dimensional real world coordinates
 \examples{
 bvol <- NeuroVol(array(0, c(10,10,10)), NeuroSpace(c(10,10,10), c(1,1,1)))
 idx <- 1:10
-g <- indexToCoord(bvol, idx)
+g <- index_to_coord(bvol, idx)
 idx2 <- coord_to_index(bvol, g)
 all.equal(idx, idx2)
 }

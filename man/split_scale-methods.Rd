@@ -43,7 +43,7 @@ Generic function to center/scale row-subsets of a matrix or matrix-like object
 
 M <- matrix(rnorm(1000), 10, 100)
 fac <- factor(rep(1:2, each=5))
-Ms <- splitScale(M, fac)
+Ms <- split_scale(M, fac)
 
 ## correctly centered
 all(abs(apply(Ms[fac == 1,], 2, mean)) < .000001)
