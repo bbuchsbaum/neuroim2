@@ -23,17 +23,6 @@ conn_comp_3D <- function(mask) {
 	dimnames(local.mask) <- NULL
 	local.mask <- local.mask[-(ceiling(nrow(local.mask)/2)),]
 	
-	# neighbors <- function(vox) {
-	# 	vox.hood <- sweep(local.mask, 2, vox, "+", check.margin=FALSE)
-	# 	if (any(vox == 1) || any(vox == DIM)) {
-	# 		vox.hood <- vox.hood[apply(vox.hood, 1, function(coords) {
-	# 			all(coords > 1 & coords <= DIM)
-	# 		}),,drop=FALSE]			
-	# 	}
-	# 	
-	# 	vox.hood[labels[vox.hood] != 0,,drop=F]	
-	# }
-	
 	neighbors <- function(vox) {
 	  vox.hood <- local.mask + vox
 	  if (any(vox == 1) || any(vox == DIM)) {
@@ -80,34 +69,7 @@ conn_comp_3D <- function(mask) {
 		nextlabel <- nextlabel + 1	
 	}
 	
-	##for (k in 1:zdim) {
-	##	for (j in 1:ydim) {
-	##		for (i in 1:xdim) {
-	##			if (mask[i,j,k]) {
-	##				nabes <- neighbors(c(i,j,k))			
-	##			
-	##				if (length(nabes) == 0) {	
-	##					nodes[nextlabel] <- nextlabel				
-	##					labels[i,j,k] <- nextlabel									
-	##				} else {
-	##				
-	##					L <- labels[nabes]					
-	##					ML <- min(L)
-	##					labels[i,j,k] <- ML	
-	##					nodes[nextlabel] <- ML
-	##												
-	##					for (lab in L) {
-	##						rootx <- find(lab)
-	##						nodes[rootx] <- find(ML)				
-	##					}
-	##				}
-	##			
-	##				nextlabel <- nextlabel + 1	
-	##			}
-	##					
-	##		}
-	##	}
-	##}
+
 
 	## pass2
 	for (k in 1:zdim) {

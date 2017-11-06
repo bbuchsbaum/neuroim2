@@ -4,9 +4,11 @@ library(neuroim2)
 library(testthat)
 
 test_that("can compute connected components for random masks", { 
+  
+  D <- 64
   for (i in 1:10) {
-    mat <- array(sample(c(0, 1), size = 20^3, replace = TRUE), dim = rep(20, 3))
-    nspace <- NeuroSpace(c(20,20,20))
+    mat <- array(sample(c(0, 1), size = D^3, replace = TRUE), dim = rep(D, 3))
+    nspace <- NeuroSpace(c(D,D,D))
     vol <- NeuroVol(mat, nspace)
     mask <- as.logical(vol)
     cc <- conn_comp(mask)
