@@ -1,6 +1,8 @@
 ---
 title: "neuroim2"
-output: html_document
+output:
+  md_document:
+    variant: markdown_github
 ---
 
 ```{r setup, include=FALSE}
@@ -21,6 +23,6 @@ devtools::install_github("bbuchsbaum/neuroim2")
 
 ## Vignettes
 
-See examples of use of `neuroim2` in the [vignettes](https://jbbuchsbaum.github.io/neuroim2/articles/index.html).
+See examples of use of `neuroim2` in the [vignettes](https://bbuchsbaum.github.io/neuroim2/articles/index.html).
 
 
