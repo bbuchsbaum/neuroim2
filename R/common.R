@@ -207,7 +207,6 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 #' @rdname internal-methods
 #' @keywords internal
 .concat4D <- function(x, y, ...) {
-  print("concat4d")
   rest <- list(...)
 
   D <- dim(x)[1:3]
