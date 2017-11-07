@@ -214,14 +214,16 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
   rvols <- lapply(rest, function(z) {
     stopifnot(length(dim(z)) >= 3)
     stopifnot(identical(D, dim(z)[1:3]))
-    z
+    as(z, "matrix")
   })
 
   clist <- if (length(rvols) > 0) {
-    c(list(as.matrix(x), as.matrix(y)), rvols)
+    c(list(as(x, "matrix"), as(y, "matrix")), rvols)
   } else {
-    list(as.matrix(x), as.matrix(y))
+    list(as(x, "matrix"), as(y, "matrix"))
   }
+
+
 
   out <- do.call(cbind, clist)
 
