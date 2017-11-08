@@ -573,7 +573,7 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVec", mask="numeric"),
 
 			logivol <- LogicalNeuroVol(m, drop_dim(space(x)))
 
-			dat <- as.matrix(x)[mask,]
+			dat <- as(x, "matrix")[mask,]
 
 			bvec <- SparseNeuroVec(dat, space(x), logivol)
 

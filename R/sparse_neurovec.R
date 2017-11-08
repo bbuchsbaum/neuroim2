@@ -36,9 +36,9 @@ SparseNeuroVecSource <- function(meta_info, indices, mask) {
 		stop("illegal mask argument with dim: ", paste(dim(mask), collapse=", "))
 	}
 
-  if (!inherits(mask, "LogicalBrainVolume")) {
+  if (!inherits(mask, "LogicalNeuroVol")) {
     mspace <- NeuroSpace(dim(mask),  meta_info@spacing, meta_info@origin, meta_info@spatial_axes)
-    mask <- LogicalBrainVolume(mask, mspace)
+    mask <- LogicalNeuroVol(mask, mspace)
   }
 
 	stopifnot(all(dim(mask) == D))
@@ -68,12 +68,12 @@ SparseNeuroVecSource <- function(meta_info, indices, mask) {
 SparseNeuroVec <- function(data, space, mask, source=NULL, label="") {
 	stopifnot(inherits(space, "NeuroSpace"))
 
-	if (!inherits(mask, "LogicalBrainVolume")) {
+	if (!inherits(mask, "LogicalNeuroVol")) {
 		mspace <- NeuroSpace(dim(space)[1:3], spacing(space), origin(space), axes(space), trans(space))
 		mask <- LogicalBrainVolume(as.logical(mask), mspace)
 	}
 
-	stopifnot(inherits(mask, "LogicalBrainVolume"))
+	stopifnot(inherits(mask, "LogicalNeuroVol"))
 
 
 	D4 <- if (is.matrix(data)) {
@@ -309,30 +309,42 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVec", i = "numeric", j = "n
           def = function (x, i, j, k, m, ..., drop = TRUE) {
             if (missing(k))
               k = 1:(dim(x)[3])
+            if (missing(m)) {
+              m <- 1:(dim(x)[4])
+            }
 
-            vmat <- as.matrix(expand.grid(i,j,k,m))
+
+
+            vmat <- as.matrix(expand.grid(i,j,k))
             ind <- .gridToIndex3D(dim(x)[1:3], vmat[,1:3,drop = FALSE])
 
 
-            mapped <- cbind(lookup(x, ind), m)
 
-            vals <- unlist(apply(mapped, 1, function(i) {
-              if (i[1] == 0) {
-                0
+            mapped <- lookup(x, ind)
+            keep <- mapped > 0
+
+            if (sum(keep) == 0) {
+              if (drop) {
+                return(drop(array(0, dimout)))
               } else {
-                x@data[i[2], i[1]]
-                #x@data[i[1],i[2]]
+                return(array(0, dimout))
               }
-            }))
-
-            dim(vals) <- c(length(i),length(j),length(k),length(m))
-
-            if (drop) {
-              drop(vals)
-            } else {
-              vals
             }
 
+            dimout <- c(length(i),length(j),length(k),length(m))
+            egrid <- expand.grid(mapped[keep], m)
+            indmat <- cbind(egrid[,2], egrid[,1])
+
+            oval <- numeric(prod(dimout))
+            oval[rep(keep, length(m))] <- x@data[indmat]
+
+            dim(oval) <- c(length(i),length(j),length(k),length(m))
+
+            if (drop) {
+              drop(oval)
+            } else {
+              oval
+            }
 })
 
 #' @export
