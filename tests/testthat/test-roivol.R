@@ -19,3 +19,11 @@ test_that("can convert roi coordinates to indices", {
   expect_equivalent(vox, coords(cube))
 })
 
+test_that("can add two ROIVols", {
+  sp1 <- NeuroSpace(c(10,10,10), c(1,1,1))
+  cube <- cuboid_roi(sp1, c(5,5,5), 3, fill=3)
+  cube2 <- cuboid_roi(sp1, c(5,5,5), 3, fill=6)
+  cube3 <- cube + cube2
+  expect_true(all(cube3@.Data == 9))
+})
+

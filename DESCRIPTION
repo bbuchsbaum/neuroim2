@@ -17,7 +17,7 @@ VignetteBuilder: knitr
 Depends:
     R (>= 3.0.0),
     Matrix
-Collate: 
+Collate:
     'RcppExports.R'
     'afni_io.R'
     'all_generic.R'
@@ -45,4 +45,5 @@ Collate:
     'searchlight.R'
     'sparse_neurovec.R'
 RoxygenNote: 6.0.1
-Suggests: testthat
+Suggests: testthat,
+    covr

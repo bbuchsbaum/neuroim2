@@ -835,7 +835,7 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "missing", drop="missing"),
           def=function (x, i, j, k, ..., drop) {
             if (missing(k) && nargs() == 4) {
-              x@data[i]
+              x@data[as.numeric(i)]
             } else {
               callGeneric(x, i=i,  seq(1,dim(x)[2]), k, drop)
             }

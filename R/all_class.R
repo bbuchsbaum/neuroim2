@@ -427,8 +427,8 @@ setClassUnion("numericOrMatrix", c("numeric", "matrix"))
 setClass("ROI", contains="VIRTUAL")
 
 setClass("ROICoords",
-         representation=representation(coords="matrix"),
-         contains=c("ROI", "NeuroObj"))
+         representation=representation(space="NeuroSpace", coords="matrix"),
+         contains=c("ROI"))
 
 #' ROIVol
 #'
@@ -465,7 +465,7 @@ setClass("ROIVec",
              stop("coords slot must be a matrix with 3 columns")
            }
 
-           if (ncol(object) != nrow(object@coords)) {
+           if (ncol(object@.Data) != nrow(object@coords)) {
              stop("'ncol(object)' must equal 'nrow(coords)'")
            }
          })
