@@ -21,6 +21,54 @@ test_that("can construct NeuroVol from 1D array with indices", {
 	expect_equal(dim(bv), c(64,64,64))
 })
 
+test_that("can construct NeuroVol from 1D vector", {
+
+  spc <- NeuroSpace(c(64,64,64))
+  dat <- rnorm(prod(dim(spc)))
+  bv <- DenseNeuroVol(dat, spc)
+  expect_true(!is.null(bv))
+  expect_equal(dim(bv), c(64,64,64))
+})
+
+
+test_that("can construct NeuroVol from matrix with 1 row or column", {
+
+  spc <- NeuroSpace(c(64,64,64))
+  dat <- as.matrix(rnorm(prod(dim(spc))))
+  bv <- DenseNeuroVol(dat, spc)
+  bv2 <- DenseNeuroVol(t(dat), spc)
+  expect_equal(bv, bv2)
+})
+
+test_that("can convert NeuroVol to LogicalNeuroVol", {
+
+  spc <- NeuroSpace(c(64,64,64))
+  dat <- rnorm(prod(dim(spc)))
+  tot <- sum(dat>0)
+  bv <- DenseNeuroVol(dat, spc)
+  bvlog <- as.logical(bv>0)
+  expect_equal(tot, sum(bvlog))
+})
+
+
+test_that("NeuroVol with mismatching data and space dimensions throw error", {
+
+  spc <- NeuroSpace(c(64,64,64))
+  dat <- array(0, c(64,64,63))
+  expect_error(DenseNeuroVol(dat, spc))
+
+})
+
+test_that("can subset a NeuroVol with an ROIVol", {
+
+  spc <- NeuroSpace(c(64,64,64))
+  dat <- array(0, c(64,64,64))
+  vol <- DenseNeuroVol(dat, spc)
+  roi <- spherical_roi(vol, c(32,32,32), 3)
+  vals <- vol[roi]
+  expect_equal(length(vals), nrow(coords(roi)))
+})
+
 test_that("can concatenate multiple NeuroVols to get a NeuroVec", {
 	dat <- array(0, c(64,64,64))
 	spc <- NeuroSpace(c(64,64,64))
@@ -83,8 +131,20 @@ test_that("can convert NeuroVol to LogicalNeuroVol", {
 	vol1 <- read_vol(gmask)
 	vol2 <- as(vol1, "LogicalNeuroVol")
 	vol3 <- as.logical(vol1)
+	vol4 <- as.mask(vol1)
+	vol5 <- as.mask(vol, indices=which(vol1>0))
 	expect_true(!is.null(vol2))
+	expect_equal(sum(vol3), sum(vol4))
+	expect_equal(sum(vol4), sum(vol5))
 })
+
+test_that("can map a kernel over a NeuroVol", {
+  vol1 <- read_vol(gmask)
+  kern <- Kernel(c(3,3,3), vdim=spacing(vol))
+  vol2 <- map(vol1, kern)
+  expect_equal(space(vol1), space(vol2))
+})
+
 
 
 test_that("can compute mean of each slice with 'slices'", {

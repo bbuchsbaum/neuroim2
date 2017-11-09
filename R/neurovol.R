@@ -169,7 +169,7 @@ LogicalNeuroVol <- function(data, space, label="", indices=NULL) {
 
 	if (!is.logical(data)) {
 		D <- dim(data)
-		data <- as.logical(data)
+		data <- as.logical(data > 0)
 		dim(data) <- D
 	}
 
@@ -216,13 +216,6 @@ setMethod(f="as.numeric", signature=signature(x = "SparseNeuroVol"), def=functio
 #' @rdname as-methods
 #' @name as
 setAs(from="NeuroVol", to="LogicalNeuroVol", def=function(from) {
-	LogicalNeuroVol(as.array(from), space(from))
-})
-
-#' conversion from DenseNeuroVol to LogicalNeuroVol
-#' @name as
-#' @rdname as-methods
-setAs(from="DenseNeuroVol", to="LogicalNeuroVol", def=function(from) {
 	LogicalNeuroVol(as.array(from), space(from))
 })
 
@@ -363,7 +356,6 @@ setMethod(f="slices", signature=signature(x="NeuroVol"),
 
 setMethod(f="[", signature=signature(x = "NeuroVol", i = "ROICoords", j = "missing"),
           def=function (x, i, j, k, m, ..., drop=TRUE) {
-            browser()
             callGeneric(x, i@coords)
           }
 )
@@ -633,13 +625,9 @@ setMethod(f="map", signature=signature(x="NeuroVol", m="Kernel"),
             }
 
             res <- apply(grid, 1, function(vox) {
-              loc <- sweep(m@voxels, 2, vox, "+")
+              loc <- t(t(m@voxels) +vox)
               ivals <- x[loc]
-              if (all(ivals == 0)) {
-                0
-              } else {
-                sum(ivals * m@weights)
-              }
+              sum(ivals * m@weights)
             })
 
             ovol[grid] <- res

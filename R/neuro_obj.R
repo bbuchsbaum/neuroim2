@@ -18,6 +18,15 @@ setMethod(f="dim", signature=signature(x = "NeuroObj"),
           def=function(x) dim(x@space))
 
 
+#' @export
+#' @rdname space-methods
+setMethod(f="space", signature=signature(x = "ROICoords"),
+          def=function(x) x@space)
+
+#' @export
+#' @rdname spacing-methods
+setMethod(f="spacing", signature=signature(x = "ROICoords"),
+          def=function(x) spacing(x@space))
 
 #' @export
 #' @rdname space-methods

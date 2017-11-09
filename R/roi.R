@@ -315,7 +315,7 @@ roi_surface_matrix <- function(mat, refspace, indices, coords) {
 #' @rdname as-methods
 setAs(from="ROIVec", to="matrix", function(from) {
   ind <- indices(from)
-  roi_vector_matrix(from@data, refspace=from@space, indices=ind,
+  roi_vector_matrix(from@.Data, refspace=from@space, indices=ind,
                     coords=index_to_coord(drop_dim(from@space),
                                           as.numeric(ind)))
 

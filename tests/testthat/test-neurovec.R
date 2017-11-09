@@ -75,6 +75,16 @@ test_that("can convert NeuroVec to matrix", {
 	expect_equal(mat, mat2)
 })
 
+test_that("can perform arithmetic on NeuroVec", {
+  bv1 <- gen_dat(5,5,5,5)
+  bv2 <- gen_dat(5,5,5,5)
+  bv3 <- bv1+bv2
+  bv4 <- bv1*bv2
+  bv5 <- bv2-bv1
+  expect_true(TRUE)
+
+})
+
 
 
 # test.SparseNeuroVec.series <- function() {
