@@ -73,6 +73,7 @@ setMethod(f="Arith", signature=signature(e1="SparseNeuroVec", e2="SparseNeuroVec
 				    D4 <- dim(e1)[4]
 				    vols <- list()
 				    ind <- list()
+
 				    for (i in 1:D4) {
 					    vols[[i]] <- callGeneric(e1[[i]], e2[[i]])
 					    ind[[i]] <- vols[[i]]@data@i
@@ -80,7 +81,6 @@ setMethod(f="Arith", signature=signature(e1="SparseNeuroVec", e2="SparseNeuroVec
 
 				    ind <- sort(unique(unlist(ind)))
 				    vret <- do.call(rbind, lapply(vols, function(vol) as.numeric(vol[ind])))
-
 
 				    dspace <- add_dim(space(vols[[1]]), length(vols))
 				    m <- logical(prod(dim(space(vols[[1]]))))
@@ -113,11 +113,6 @@ setMethod(f="Arith", signature=signature(e1="SparseNeuroVec", e2="SparseNeuroVec
 
 		  })
 
-
-setMethod(f="Arith", signature=signature(e1="NeuroVol", e2="NeuroVec"),
-		def=function(e1, e2) {
-			callGeneric(e2,e1)
-		})
 
 
 setMethod(f="Summary", signature=signature(x="SparseNeuroVec"),

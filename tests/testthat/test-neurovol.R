@@ -132,15 +132,23 @@ test_that("can convert NeuroVol to LogicalNeuroVol", {
 	vol2 <- as(vol1, "LogicalNeuroVol")
 	vol3 <- as.logical(vol1)
 	vol4 <- as.mask(vol1)
-	vol5 <- as.mask(vol, indices=which(vol1>0))
+	vol5 <- as.mask(vol1, indices=which(vol1>0))
 	expect_true(!is.null(vol2))
 	expect_equal(sum(vol3), sum(vol4))
 	expect_equal(sum(vol4), sum(vol5))
 })
 
+test_that("can convert NeuroVol to SparseNeuroVol", {
+  vol1 <- read_vol(gmask)
+  svol1 <- as.sparse(vol1, mask=which(vol1>0))
+  svol2 <- as.sparse(vol1, mask=as.logical(vol1))
+  expect_equal(svol1,svol2)
+
+})
+
 test_that("can map a kernel over a NeuroVol", {
   vol1 <- read_vol(gmask)
-  kern <- Kernel(c(3,3,3), vdim=spacing(vol))
+  kern <- Kernel(c(3,3,3), vdim=spacing(vol1))
   vol2 <- map(vol1, kern)
   expect_equal(space(vol1), space(vol2))
 })

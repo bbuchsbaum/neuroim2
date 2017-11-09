@@ -661,8 +661,6 @@ setMethod(f="conn_comp", signature=signature(x="NeuroVol"),
 
 		ret <- list(size=NeuroVol(comps$size, space(x)), index=NeuroVol(comps$index, space(x)), voxels=locations)
 
-
-
 		if (cluster_table) {
 			maxima <- do.call(rbind, lapply(locations, function(loc) {
 				if (nrow(loc) == 1) {
@@ -773,9 +771,8 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVol", mask="LogicalNeu
           def=function(x, mask) {
             assert_that(all(dim(x) == dim(mask)))
             assert_that(all(spacing(x) == spacing(mask)))
-
             dat <- x[mask]
-            bvec <- SparseNeuroVec(dat, space(x))
+            bvec <- SparseNeuroVol(dat, space(x),indices=which(mask>0))
 
 })
 

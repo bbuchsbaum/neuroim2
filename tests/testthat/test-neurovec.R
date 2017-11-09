@@ -179,6 +179,20 @@ test_that("can concatenate a SparseNeuroVec", {
 	#expect_equal(bv4[1,1,1,1],0)
 })
 
+test_that("can extract nonzero coords of SparseNeuroVec", {
+  dat <- array(0, c(64,64,64,4))
+  spc <- NeuroSpace(c(64,64,64,4))
+  tmp <- rnorm(64*64*64)
+  mask <- tmp > .8
+  mask <- LogicalNeuroVol(mask, drop_dim(spc))
+
+  bv1 <- SparseNeuroVec(dat, spc, mask)
+  cds <- coords(bv1)
+  ind <- indices(bv1)
+  expect_equal(nrow(cds), sum(mask))
+  expect_equal(ind, which(mask>0))
+})
+
 
 
 # test.NeuroVec.roundtrip.io <- function() {
