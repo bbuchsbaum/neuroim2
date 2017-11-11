@@ -31,6 +31,12 @@ test_that("can convert roi coordinates to indices", {
   vox <- index_to_grid(space(cube), idx)
   expect_equivalent(vox, coords(cube))
 })
+test_that("can convert ROIVol to DenseNeuroVol", {
+  sp1 <- NeuroSpace(c(10,10,10), c(1,1,1))
+  cube <- cuboid_roi(sp1, c(5,5,5), 3)
+  vol <- as.dense(cube)
+  expect_equal(sum(vol), sum(cube))
+})
 
 test_that("can add two ROIVols", {
   sp1 <- NeuroSpace(c(10,10,10), c(1,1,1))

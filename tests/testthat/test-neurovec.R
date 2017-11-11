@@ -105,6 +105,19 @@ test_that("can extract multiple series from a NeuroVec", {
 	expect_equal(r1, r2)
 })
 
+test_that("can extract an ROIVec from a NeuroVec", {
+  bv1 <- gen_dat()
+  roi <- series_roi(bv1, 1:10)
+  roi2 <- series_roi(bv1, LogicalNeuroVol(data=rep(1, 10), space=drop_dim(space(bv1)), indices=1:10))
+  rvol <- ROIVol(space(drop_dim(space(bv1))), coords(roi2), data=rep(1, nrow(coords(roi2))))
+  roi3 <- series_roi(bv1, rvol)
+  roi4 <- series_roi(bv1, coords(rvol))
+  expect_equal(coords(roi), coords(roi2))
+  expect_equal(coords(roi2), coords(roi3))
+  expect_equal(coords(roi3), coords(roi4))
+})
+
+
 
 test_that("can convert NeuroVec to matrix", {
 	bv1 <- gen_dat(5,5,5,5)
@@ -195,6 +208,21 @@ test_that("can perform arithmetic on a SparseNeuroVec", {
   bv2 <- bv1 + bv1
   bv3 <- bv1 * bv2
   bv4 <- bv3 - bv1
+})
+
+test_that("can add/subtract NeuroVol from NeuroVec", {
+  dat <- array(rnorm(12*12*12*4), c(12,12,12,4))
+  spc <- NeuroSpace(c(12,12,12,4))
+  tmp <- rnorm(12*12*12)
+  mask <- tmp > .8
+  mask <- LogicalNeuroVol(mask, drop_dim(spc))
+
+  bv1 <- SparseNeuroVec(dat, spc, mask)
+  vol <- NeuroVol(array(rnorm(12*12*12),c(12,12,12)), space(mask))
+  bv2 <- bv1 + vol
+  bv3 <- bv2 - vol
+  bv4 <- bv1 * vol
+  expect_equal(sum(bv3), sum(bv1))
 })
 
 

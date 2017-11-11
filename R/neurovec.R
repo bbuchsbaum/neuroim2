@@ -391,7 +391,7 @@ setMethod("series", signature(x="NeuroVec", i="matrix"),
 setMethod("series_roi", signature(x="NeuroVec", i="matrix"),
           def=function(x,i) {
             mat <- series(x, i)
-            ROIVector(space(x), coords=i, data=mat)
+            ROIVec(space(x), coords=i, data=mat)
 
           })
 
@@ -399,7 +399,7 @@ setMethod("series_roi", signature(x="NeuroVec", i="matrix"),
 
 #' @rdname series-methods
 #' @export
-setMethod("series", signature(x="NeuroVec", i="ROIVol"),
+setMethod("series", signature(x="NeuroVec", i="ROICoords"),
           def=function(x,i) {
             grid <- coords(i)
             callGeneric(x, grid)
@@ -408,10 +408,10 @@ setMethod("series", signature(x="NeuroVec", i="ROIVol"),
 
 #' @rdname series-methods
 #' @export
-setMethod("series_roi", signature(x="NeuroVec", i="ROIVol"),
+setMethod("series_roi", signature(x="NeuroVec", i="ROICoords"),
           def=function(x,i) {
             rvol <- series(x, i)
-            ROIVector(space(x), coords=coords(rvol), data=as.matrix(values(rvol)))
+            ROIVec(space(x), coords=coords(i), data=rvol)
           })
 
 
@@ -433,7 +433,8 @@ setMethod("series", signature(x="NeuroVec", i="LogicalNeuroVol"),
 setMethod("series_roi", signature(x="NeuroVec", i="LogicalNeuroVol"),
           def=function(x,i) {
             mat <- as.matrix(series(x, i))
-            ROIVector(space(x), coords=index_to_grid(which(i == TRUE), idx), data=as.matrix(mat))
+
+            ROIVec(space(x), coords=index_to_grid(i, which(i == TRUE)), data=as.matrix(mat))
 
           })
 

@@ -439,7 +439,7 @@ setClass("ROICoords",
 #' @slot coords the voxel coordinates of the ROI
 #' @exportClass ROIVol
 setClass("ROIVol",
-         contains=c("numeric", "ROICoords"),
+         contains=c("ROICoords", "numeric"),
          validity = function(object) {
            if (ncol(object@coords) != 3) {
              stop("coords slot must be a matrix with 3 columns")
@@ -459,7 +459,7 @@ setClass("ROIVol",
 #' @rdname ROIVec-class
 #' @exportClass ROIVec
 setClass("ROIVec",
-         contains=c("matrix", "ROICoords"),
+         contains=c("ROICoords", "matrix"),
          validity = function(object) {
            if (ncol(object@coords) != 3) {
              stop("coords slot must be a matrix with 3 columns")

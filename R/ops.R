@@ -68,6 +68,14 @@ setMethod(f="Arith", signature=signature(e1="DenseNeuroVec", e2="DenseNeuroVec")
             DenseNeuroVec(ret, space(e1))
           })
 
+setMethod(f="Arith", signature=signature(e1="SparseNeuroVol", e2="NeuroVol"),
+          def=function(e1, e2) {
+            checkDim(e1,e2)
+            ret <- callGeneric(as.vector(e1@data), as.vector(e2@.Data))
+            DenseNeuroVol(ret, space(e1))
+          })
+
+
 setMethod(f="Arith", signature=signature(e1="SparseNeuroVec", e2="SparseNeuroVec"),
           def=function(e1, e2) {
 				    D4 <- dim(e1)[4]
@@ -103,7 +111,7 @@ setMethod(f="Arith", signature=signature(e1="SparseNeuroVec", e2="SparseNeuroVec
 
 			  for (i in 1:D4) {
 			    ## sub_vol(e1,i)
-				  vols[[i]] <- callGeneric(takeVolume(e1,i), e2)
+				  vols[[i]] <- callGeneric(e1[[i]], e2)
 			  }
 
 			  mat <- do.call(cbind, vols)
