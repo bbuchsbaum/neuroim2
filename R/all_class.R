@@ -282,7 +282,7 @@ setClass("NeuroSpace",
 #' NeuroObj
 #' Base class for all data objects with a cartesion spatial represenetation
 #'
-#' @slot space
+#' @slot space the geometry of the image object
 setClass("NeuroObj", representation(space="NeuroSpace"))
 
 #' NeuroSlice

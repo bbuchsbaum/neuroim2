@@ -191,11 +191,9 @@ setMethod(f="spacing", signature=signature(x = "NeuroSpace"), def=function(x) x@
 #' @rdname bounds-methods
 setMethod(f="bounds", signature=signature(x = "NeuroSpace"),
 		def=function(x) {
-
 		  c1 <- grid_to_coord(x, c(1,1,1))
 		  c2 <- grid_to_coord(x, c(dim(x)[1], dim(x)[2], dim(x)[3]))
-    	 mat <- cbind(as.vector(c1),as.vector(c2))
-			return(mat)
+    	cbind(as.vector(c1),as.vector(c2))
 		}
 )
 
@@ -356,9 +354,20 @@ setMethod(f="grid_to_coord", signature=signature(x="NeuroVol", coords="matrix"),
 #' @rdname grid_to_index-methods
 setMethod(f="grid_to_index", signature=signature(x="NeuroSpace", coords="matrix"),
 		def=function(x, coords) {
-			array.dim <- dim(x)
-      ### TODO assumes 3D index ....
-			.gridToIndex3D(dim(x)[1:3], coords)
+			dx <- dim(x)
+			if (length(dx) == 2) {
+			  assert_that(length(coords) == 2)
+			  dx <- dim(x)
+			  nsize <- prod(dx)
+			  apply(coords, 1, function(vox) {
+			    (vox[2]-1)*dx[1] + vox[1]
+			  })
+			} else if (ncol(coords) == 3) {
+			  assert_that(length(dx) >= 3)
+			  .gridToIndex3D(dx[1:3], coords)
+			} else {
+			  stop("grid_to_index: 'coords' must be a matrix with 2- or 3-columns that matches dim of 'x'")
+			}
 		})
 
 
@@ -366,10 +375,17 @@ setMethod(f="grid_to_index", signature=signature(x="NeuroSpace", coords="matrix"
 #' @rdname grid_to_index-methods
 setMethod(f="grid_to_index", signature=signature(x="NeuroSpace", coords="numeric"),
 		def=function(x, coords) {
-		  ### TODO assumes 3D index ....
-			array.dim <- dim(x)
-			.gridToIndex3D(dim(x), matrix(coords, nrow=1, byrow=TRUE))
-		})
+		  dx <- dim(x)
+		  if (length(dx) == 2) {
+		    assert_that(length(coords) == 2)
+		    nsize <- prod(dx)
+		    (coords[2]-1)*dx[1] + coords[1]
+		  } else {
+		    assert_that(length(coords) == 3)
+			  .gridToIndex3D(dim(x), matrix(coords, nrow=1, byrow=TRUE))
+		  }
+		}
+)
 
 
 

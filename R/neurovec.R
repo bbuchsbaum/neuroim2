@@ -5,44 +5,6 @@ NULL
 
 
 
-.NeuroVecFromMatrix <- function(data, space) {
-	nvols <- dim(space)[4]
-	nelements <-  prod(dim(space)[1:3])
-
-	if ( (dim(data)[1] == nvols) && (dim(data)[2] == nelements) ) {
-		#fourth dimension is rows
-		DenseNeuroVec(t(data), space)
-	} else if ((dim(data)[2] == nvols) && (dim(data)[1] == nelements )) {
-		#fourth dimension is columns
-		DenseNeuroVec(data, space=space)
-	} else {
-		stop(paste("illegal matrix dimension ", dim(data)))
-	}
-}
-
-#' make_vector
-#'
-#' Construct a \code{\linkS4class{NeuroVec}} instance, using default (dense) implementation
-#' @param data a four-dimensional \code{array}
-#' @param refdata an instance of class \code{\linkS4class{NeuroVec}} or \code{\linkS4class{NeuroVol}} containing the reference space for the new vector.
-#' @param label a \code{character} string
-#' @return \code{\linkS4class{DenseNeuroVec}} instance
-#' @export make_vector
-make_vector <- function(data, refdata, label="") {
-	stopifnot(length(dim(refdata)) == 4)
-	rspace <- if (ndim(space(refdata)) == 4) {
-		drop_dim(space(refdata))
-	} else if (ndim(space(refdata)) == 3) {
-		space(refdata)
-	} else {
-		stop("refdata must have 3 or 4 dimensions")
-	}
-
-	DenseNeuroVec(data,add_dim(rspace, dim(data)[4]),label)
-
-}
-
-
 #' NeuroVec
 #'
 #' constructor function for virtual class \code{\linkS4class{NeuroVec}}

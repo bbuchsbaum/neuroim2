@@ -1,6 +1,6 @@
 
 #' Create an spherical random searchlight iterator
-
+#'
 #' @param mask an volumetric image mask of type \code{\linkS4class{NeuroVol}}
 #'       containing valid searchlight voxel set.
 #' @param radius width in mm of spherical searchlight

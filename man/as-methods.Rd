@@ -9,7 +9,6 @@
 \alias{as}
 \alias{as}
 \alias{as}
-\alias{as}
 \title{conversion from ClusteredNeuroVol to LogicalNeuroVol}
 \description{
 conversion from ClusteredNeuroVol to LogicalNeuroVol
@@ -21,8 +20,6 @@ conversion from \code{SparseNeuroVol} to \code{array}
 conversion from SparseNeuroVol to numeric
 
 conversion from NeuroVol to LogicalNeuroVol
-
-conversion from DenseNeuroVol to LogicalNeuroVol
 
 conversion from NeuroVol to array
 }

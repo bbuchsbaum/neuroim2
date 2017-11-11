@@ -5,33 +5,6 @@
 #' @include all_generic.R
 NULL
 
-#' make_vol
-#'
-#' Construct a \code{\linkS4class{NeuroVol}} instance, using default (dense) implementation
-#'
-#' @param data an optional one- or three-dimensional \code{vector} or \code{array}
-#' @param refvol an instance of class \code{\linkS4class{NeuroVol}} containing the reference space for the new volume.
-#' @param label an optional \code{character} string
-#' @param indices an optional 1d vector of indices in to the 3d space
-#' @return \code{\linkS4class{DenseNeuroVol}} instance
-#' @examples
-#' bspace <- NeuroSpace(c(64,64,64), spacing=c(1,1,1))
-#' dat <- array(rnorm(64*64*64), c(64,64,64))
-#' bvol <- NeuroVol(dat,bspace, label="test")
-#' bvol2 <- make_vol(dat, bvol)
-#' all.equal(as.array(bvol),as.array(bvol2))
-#' data <- 1:10
-#' indices = seq(1,1000, length.out=10)
-#' bvol3 <- make_vol(data,bvol,indices=indices)
-#' sum(bvol3) == sum(data)
-#' @export make_vol
-make_vol <- function(data=NULL, refvol, label="", indices=NULL) {
-  if (is.null(data)) {
-	  DenseNeuroVol(array(0, dim(refvol)),space(refvol),label,indices)
-  } else {
-    DenseNeuroVol(data,space(refvol),label,indices)
-  }
-}
 
 #' NeuroVol
 #'
@@ -383,8 +356,8 @@ setMethod(f="concat", signature=signature(x="DenseNeuroVol", y="DenseNeuroVol"),
 #' @rdname map_values-methods
 setMethod(f="map_values", signature=signature(x="NeuroVol", lookup="list"),
           def=function(x,lookup) {
-            out <- lookup[unlist(x)]
-            DenseNeuroVol(unlist(out), space(x))
+            out <- match(x,as.numeric(names(lookup)))
+            DenseNeuroVol(unlist(lookup[out]), space(x))
           })
 
 #' @export
