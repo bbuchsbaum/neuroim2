@@ -315,7 +315,7 @@ roi_surface_matrix <- function(mat, refspace, indices, coords) {
 #' @rdname as-methods
 setAs(from="ROIVec", to="matrix", function(from) {
   ind <- indices(from)
-  roi_vector_matrix(from@data, refspace=from@space, indices=ind,
+  roi_vector_matrix(from@.Data, refspace=from@space, indices=ind,
                     coords=index_to_coord(drop_dim(from@space),
                                           as.numeric(ind)))
 
@@ -325,24 +325,34 @@ setAs(from="ROIVec", to="matrix", function(from) {
 #' @name as
 #' @rdname as-methods
 setAs(from="ROIVol", to="DenseNeuroVol", function(from) {
-  dat <- array(0, dim(from@space))
-  dat[coords(from)] <- from@data
-  ovol <- DenseNeuroVol(dat, from@space, from@source)
+  NeuroVol(values(from), space(from), indices=indices(from))
+  #dat <- array(0, dim(from@space))
+  #dat[coords(from)] <- from@data
+  #ovol <- DenseNeuroVol(dat, from@space, from@source)
 })
+
+#' @rdname as.dense-methods
+#' @export
+setMethod("as.dense", signature(x="ROIVol"),
+          function(x) {
+            as(x, "DenseNeuroVol")
+            #NeuroVol(values(x), space(x), indices=indices(x))
+})
+
 
 
 #' @rdname values-methods
 #' @export
 setMethod("values", signature(x="ROIVol"),
           function(x, ...) {
-             x@data
+             x@.Data
           })
 
 #' @rdname values-methods
 #' @export
 setMethod("values", signature(x="ROIVec"),
           function(x, ...) {
-            x@data
+            x@.Data
           })
 
 
@@ -364,7 +374,7 @@ setMethod("indices", signature(x="ROIVec"),
 #' @export
 #' @param real if \code{TRUE}, return coordinates in real world units
 #' @rdname coords-methods
-setMethod(f="coords", signature=signature(x="ROIVol"),
+setMethod(f="coords", signature=signature(x="ROICoords"),
           function(x, real=FALSE) {
             if (real) {
               input <- t(cbind(x@coords-.5, rep(1, nrow(x@coords))))
@@ -374,6 +384,7 @@ setMethod(f="coords", signature=signature(x="ROIVol"),
               x@coords
             }
           })
+
 
 
 #' @export

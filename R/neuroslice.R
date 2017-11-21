@@ -40,12 +40,8 @@ NeuroSlice <- function(data, space, indices=NULL) {
 #' @rdname grid_to_index-methods
 setMethod(f="grid_to_index", signature=signature(x = "NeuroSlice", coords="matrix"),
 		def=function(x, coords) {
-			dx <- dim(x)
-			nsize <- prod(dx)
-			apply(coords, 1, function(vox) {
-						(vox[2]-1)*dx[1] + vox[1]
-					})
-		})
+			callGeneric(x@space, coords)
+})
 
 
 
@@ -53,8 +49,8 @@ setMethod(f="grid_to_index", signature=signature(x = "NeuroSlice", coords="matri
 #' @rdname index_to_grid-methods
 setMethod(f="index_to_grid", signature=signature(x = "NeuroSlice", idx="numeric"),
 		def=function(x, idx) {
-			.indexToGrid(idx, dim(x))
-		})
+		  callGeneric(x@space, idx)
+})
 
 
 

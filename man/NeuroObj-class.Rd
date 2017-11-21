@@ -9,3 +9,9 @@ Base class for all data objects with a cartesion spatial represenetation}
 NeuroObj
 Base class for all data objects with a cartesion spatial represenetation
 }
+\section{Slots}{
+
+\describe{
+\item{\code{space}}{the geometry of the image object}
+}}
+

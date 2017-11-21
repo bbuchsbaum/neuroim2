@@ -21,6 +21,62 @@ test_that("can construct NeuroVol from 1D array with indices", {
 	expect_equal(dim(bv), c(64,64,64))
 })
 
+test_that("can construct NeuroVol from 1D vector", {
+
+  spc <- NeuroSpace(c(64,64,64))
+  dat <- rnorm(prod(dim(spc)))
+  bv <- DenseNeuroVol(dat, spc)
+  expect_true(!is.null(bv))
+  expect_equal(dim(bv), c(64,64,64))
+})
+
+
+test_that("can construct NeuroVol from matrix with 1 row or column", {
+
+  spc <- NeuroSpace(c(64,64,64))
+  dat <- as.matrix(rnorm(prod(dim(spc))))
+  bv <- DenseNeuroVol(dat, spc)
+  bv2 <- DenseNeuroVol(t(dat), spc)
+  expect_equal(bv, bv2)
+})
+
+test_that("DenseNeuroVol throws error when space has wrong dimensions", {
+
+  spc <- NeuroSpace(c(64,64))
+  dat <- as.matrix(rnorm(prod(64*64*64)))
+  expect_error(DenseNeuroVol(dat, spc))
+
+})
+
+test_that("can convert NeuroVol to LogicalNeuroVol", {
+
+  spc <- NeuroSpace(c(64,64,64))
+  dat <- rnorm(prod(dim(spc)))
+  tot <- sum(dat>0)
+  bv <- DenseNeuroVol(dat, spc)
+  bvlog <- as.logical(bv>0)
+  expect_equal(tot, sum(bvlog))
+})
+
+
+test_that("NeuroVol with mismatching data and space dimensions throw error", {
+
+  spc <- NeuroSpace(c(64,64,64))
+  dat <- array(0, c(64,64,63))
+  expect_error(DenseNeuroVol(dat, spc))
+
+})
+
+test_that("can subset a NeuroVol with an ROIVol", {
+
+  spc <- NeuroSpace(c(64,64,64))
+  dat <- array(0, c(64,64,64))
+  vol <- DenseNeuroVol(dat, spc)
+  roi <- spherical_roi(vol, c(32,32,32), 3)
+  vals <- vol[roi]
+  expect_equal(length(vals), nrow(coords(roi)))
+})
+
 test_that("can concatenate multiple NeuroVols to get a NeuroVec", {
 	dat <- array(0, c(64,64,64))
 	spc <- NeuroSpace(c(64,64,64))
@@ -83,8 +139,57 @@ test_that("can convert NeuroVol to LogicalNeuroVol", {
 	vol1 <- read_vol(gmask)
 	vol2 <- as(vol1, "LogicalNeuroVol")
 	vol3 <- as.logical(vol1)
+	vol4 <- as.mask(vol1)
+	vol5 <- as.mask(vol1, indices=which(vol1>0))
 	expect_true(!is.null(vol2))
+	expect_equal(sum(vol3), sum(vol4))
+	expect_equal(sum(vol4), sum(vol5))
 })
+
+test_that("can convert NeuroVol to SparseNeuroVol", {
+  vol1 <- read_vol(gmask)
+  svol1 <- as.sparse(vol1, mask=which(vol1>0))
+  svol2 <- as.sparse(vol1, mask=as.logical(vol1))
+  expect_equal(svol1,svol2)
+
+})
+
+test_that("data and indices must have same length to contruct SparseNeuroVol", {
+  vol1 <- read_vol(gmask)
+  indices <- which(vol1>0)
+  dat <- vol1[indices]
+  dat <- c(0,dat)
+  expect_error(SparseNeuroVol(data=dat, indices=indices, space=space(vol1)))
+})
+
+test_that("can convert SparseNeuroVol to an array or vector", {
+  vol1 <- read_vol(gmask)
+  svol1 <- as.sparse(vol1, mask=which(vol1>0))
+
+  arr <- as.array(svol1)
+  vec <- as.numeric(svol1)
+  expect_equal(dim(arr), dim(vol1))
+  expect_equal(sum(vec), sum(svol1))
+})
+
+test_that("can map a kernel over a NeuroVol", {
+  vol1 <- read_vol(gmask)
+  kern <- Kernel(c(3,3,3), vdim=spacing(vol1))
+  vol2 <- map(vol1, kern)
+  expect_equal(space(vol1), space(vol2))
+})
+
+test_that("can map values over a NeuroVol", {
+  vol1 <- read_vol(gmask)
+  lookup <- list("0"=2,"1"=5)
+  x <- map_values(vol1, lookup)
+  expect_equal(names(table(x)), c("2", "5"))
+  x2 <- map_values(vol1, rbind(c(0,2), c(1,5)))
+  expect_equal(names(table(x2)), c("2", "5"))
+
+})
+
+
 
 
 test_that("can compute mean of each slice with 'slices'", {

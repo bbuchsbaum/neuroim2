@@ -3,11 +3,14 @@
 \docType{methods}
 \name{spacing}
 \alias{spacing}
+\alias{spacing,ROICoords-method}
 \alias{spacing,NeuroObj-method}
 \alias{spacing,NeuroSpace-method}
 \title{Generic function to extract the voxel dimensions of an image}
 \usage{
 spacing(x)
+
+\S4method{spacing}{ROICoords}(x)
 
 \S4method{spacing}{NeuroObj}(x)
 

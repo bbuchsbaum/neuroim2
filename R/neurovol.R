@@ -5,33 +5,6 @@
 #' @include all_generic.R
 NULL
 
-#' make_vol
-#'
-#' Construct a \code{\linkS4class{NeuroVol}} instance, using default (dense) implementation
-#'
-#' @param data an optional one- or three-dimensional \code{vector} or \code{array}
-#' @param refvol an instance of class \code{\linkS4class{NeuroVol}} containing the reference space for the new volume.
-#' @param label an optional \code{character} string
-#' @param indices an optional 1d vector of indices in to the 3d space
-#' @return \code{\linkS4class{DenseNeuroVol}} instance
-#' @examples
-#' bspace <- NeuroSpace(c(64,64,64), spacing=c(1,1,1))
-#' dat <- array(rnorm(64*64*64), c(64,64,64))
-#' bvol <- NeuroVol(dat,bspace, label="test")
-#' bvol2 <- make_vol(dat, bvol)
-#' all.equal(as.array(bvol),as.array(bvol2))
-#' data <- 1:10
-#' indices = seq(1,1000, length.out=10)
-#' bvol3 <- make_vol(data,bvol,indices=indices)
-#' sum(bvol3) == sum(data)
-#' @export make_vol
-make_vol <- function(data=NULL, refvol, label="", indices=NULL) {
-  if (is.null(data)) {
-	  DenseNeuroVol(array(0, dim(refvol)),space(refvol),label,indices)
-  } else {
-    DenseNeuroVol(data,space(refvol),label,indices)
-  }
-}
 
 #' NeuroVol
 #'
@@ -169,7 +142,7 @@ LogicalNeuroVol <- function(data, space, label="", indices=NULL) {
 
 	if (!is.logical(data)) {
 		D <- dim(data)
-		data <- as.logical(data)
+		data <- as.logical(data > 0)
 		dim(data) <- D
 	}
 
@@ -216,13 +189,6 @@ setMethod(f="as.numeric", signature=signature(x = "SparseNeuroVol"), def=functio
 #' @rdname as-methods
 #' @name as
 setAs(from="NeuroVol", to="LogicalNeuroVol", def=function(from) {
-	LogicalNeuroVol(as.array(from), space(from))
-})
-
-#' conversion from DenseNeuroVol to LogicalNeuroVol
-#' @name as
-#' @rdname as-methods
-setAs(from="DenseNeuroVol", to="LogicalNeuroVol", def=function(from) {
 	LogicalNeuroVol(as.array(from), space(from))
 })
 
@@ -363,7 +329,6 @@ setMethod(f="slices", signature=signature(x="NeuroVol"),
 
 setMethod(f="[", signature=signature(x = "NeuroVol", i = "ROICoords", j = "missing"),
           def=function (x, i, j, k, m, ..., drop=TRUE) {
-            browser()
             callGeneric(x, i@coords)
           }
 )
@@ -391,8 +356,8 @@ setMethod(f="concat", signature=signature(x="DenseNeuroVol", y="DenseNeuroVol"),
 #' @rdname map_values-methods
 setMethod(f="map_values", signature=signature(x="NeuroVol", lookup="list"),
           def=function(x,lookup) {
-            out <- lookup[unlist(x)]
-            DenseNeuroVol(unlist(out), space(x))
+            out <- match(x,as.numeric(names(lookup)))
+            DenseNeuroVol(unlist(lookup[out]), space(x))
           })
 
 #' @export
@@ -633,13 +598,9 @@ setMethod(f="map", signature=signature(x="NeuroVol", m="Kernel"),
             }
 
             res <- apply(grid, 1, function(vox) {
-              loc <- sweep(m@voxels, 2, vox, "+")
+              loc <- t(t(m@voxels) +vox)
               ivals <- x[loc]
-              if (all(ivals == 0)) {
-                0
-              } else {
-                sum(ivals * m@weights)
-              }
+              sum(ivals * m@weights)
             })
 
             ovol[grid] <- res
@@ -672,8 +633,6 @@ setMethod(f="conn_comp", signature=signature(x="NeuroVol"),
 		locations <- split(grid, comps$index[comps$index>0])
 
 		ret <- list(size=NeuroVol(comps$size, space(x)), index=NeuroVol(comps$index, space(x)), voxels=locations)
-
-
 
 		if (cluster_table) {
 			maxima <- do.call(rbind, lapply(locations, function(loc) {
@@ -785,9 +744,8 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVol", mask="LogicalNeu
           def=function(x, mask) {
             assert_that(all(dim(x) == dim(mask)))
             assert_that(all(spacing(x) == spacing(mask)))
-
             dat <- x[mask]
-            bvec <- SparseNeuroVec(dat, space(x))
+            bvec <- SparseNeuroVol(dat, space(x),indices=which(mask>0))
 
 })
 
@@ -835,7 +793,7 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "missing", drop="missing"),
           def=function (x, i, j, k, ..., drop) {
             if (missing(k) && nargs() == 4) {
-              x@data[i]
+              x@data[as.numeric(i)]
             } else {
               callGeneric(x, i=i,  seq(1,dim(x)[2]), k, drop)
             }

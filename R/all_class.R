@@ -282,7 +282,7 @@ setClass("NeuroSpace",
 #' NeuroObj
 #' Base class for all data objects with a cartesion spatial represenetation
 #'
-#' @slot space
+#' @slot space the geometry of the image object
 setClass("NeuroObj", representation(space="NeuroSpace"))
 
 #' NeuroSlice
@@ -427,8 +427,8 @@ setClassUnion("numericOrMatrix", c("numeric", "matrix"))
 setClass("ROI", contains="VIRTUAL")
 
 setClass("ROICoords",
-         representation=representation(coords="matrix"),
-         contains=c("ROI", "NeuroObj"))
+         representation=representation(space="NeuroSpace", coords="matrix"),
+         contains=c("ROI"))
 
 #' ROIVol
 #'
@@ -439,7 +439,7 @@ setClass("ROICoords",
 #' @slot coords the voxel coordinates of the ROI
 #' @exportClass ROIVol
 setClass("ROIVol",
-         contains=c("numeric", "ROICoords"),
+         contains=c("ROICoords", "numeric"),
          validity = function(object) {
            if (ncol(object@coords) != 3) {
              stop("coords slot must be a matrix with 3 columns")
@@ -459,13 +459,13 @@ setClass("ROIVol",
 #' @rdname ROIVec-class
 #' @exportClass ROIVec
 setClass("ROIVec",
-         contains=c("matrix", "ROICoords"),
+         contains=c("ROICoords", "matrix"),
          validity = function(object) {
            if (ncol(object@coords) != 3) {
              stop("coords slot must be a matrix with 3 columns")
            }
 
-           if (ncol(object) != nrow(object@coords)) {
+           if (ncol(object@.Data) != nrow(object@coords)) {
              stop("'ncol(object)' must equal 'nrow(coords)'")
            }
          })

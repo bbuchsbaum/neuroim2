@@ -5,44 +5,6 @@ NULL
 
 
 
-.NeuroVecFromMatrix <- function(data, space) {
-	nvols <- dim(space)[4]
-	nelements <-  prod(dim(space)[1:3])
-
-	if ( (dim(data)[1] == nvols) && (dim(data)[2] == nelements) ) {
-		#fourth dimension is rows
-		DenseNeuroVec(t(data), space)
-	} else if ((dim(data)[2] == nvols) && (dim(data)[1] == nelements )) {
-		#fourth dimension is columns
-		DenseNeuroVec(data, space=space)
-	} else {
-		stop(paste("illegal matrix dimension ", dim(data)))
-	}
-}
-
-#' make_vector
-#'
-#' Construct a \code{\linkS4class{NeuroVec}} instance, using default (dense) implementation
-#' @param data a four-dimensional \code{array}
-#' @param refdata an instance of class \code{\linkS4class{NeuroVec}} or \code{\linkS4class{NeuroVol}} containing the reference space for the new vector.
-#' @param label a \code{character} string
-#' @return \code{\linkS4class{DenseNeuroVec}} instance
-#' @export make_vector
-make_vector <- function(data, refdata, label="") {
-	stopifnot(length(dim(refdata)) == 4)
-	rspace <- if (ndim(space(refdata)) == 4) {
-		drop_dim(space(refdata))
-	} else if (ndim(space(refdata)) == 3) {
-		space(refdata)
-	} else {
-		stop("refdata must have 3 or 4 dimensions")
-	}
-
-	DenseNeuroVec(data,add_dim(rspace, dim(data)[4]),label)
-
-}
-
-
 #' NeuroVec
 #'
 #' constructor function for virtual class \code{\linkS4class{NeuroVec}}
@@ -429,7 +391,7 @@ setMethod("series", signature(x="NeuroVec", i="matrix"),
 setMethod("series_roi", signature(x="NeuroVec", i="matrix"),
           def=function(x,i) {
             mat <- series(x, i)
-            ROIVector(space(x), coords=i, data=mat)
+            ROIVec(space(x), coords=i, data=mat)
 
           })
 
@@ -437,7 +399,7 @@ setMethod("series_roi", signature(x="NeuroVec", i="matrix"),
 
 #' @rdname series-methods
 #' @export
-setMethod("series", signature(x="NeuroVec", i="ROIVol"),
+setMethod("series", signature(x="NeuroVec", i="ROICoords"),
           def=function(x,i) {
             grid <- coords(i)
             callGeneric(x, grid)
@@ -446,10 +408,10 @@ setMethod("series", signature(x="NeuroVec", i="ROIVol"),
 
 #' @rdname series-methods
 #' @export
-setMethod("series_roi", signature(x="NeuroVec", i="ROIVol"),
+setMethod("series_roi", signature(x="NeuroVec", i="ROICoords"),
           def=function(x,i) {
             rvol <- series(x, i)
-            ROIVector(space(x), coords=coords(rvol), data=as.matrix(values(rvol)))
+            ROIVec(space(x), coords=coords(i), data=rvol)
           })
 
 
@@ -471,7 +433,8 @@ setMethod("series", signature(x="NeuroVec", i="LogicalNeuroVol"),
 setMethod("series_roi", signature(x="NeuroVec", i="LogicalNeuroVol"),
           def=function(x,i) {
             mat <- as.matrix(series(x, i))
-            ROIVector(space(x), coords=index_to_grid(which(i == TRUE), idx), data=as.matrix(mat))
+
+            ROIVec(space(x), coords=index_to_grid(i, which(i == TRUE)), data=as.matrix(mat))
 
           })
 

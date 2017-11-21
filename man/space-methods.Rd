@@ -5,6 +5,7 @@
 \name{space}
 \alias{space}
 \alias{space,IndexLookupVol-method}
+\alias{space,ROICoords-method}
 \alias{space,NeuroObj-method}
 \alias{trans,NeuroObj-method}
 \alias{space,NeuroSpace-method}
@@ -13,6 +14,8 @@
 space(x, ...)
 
 \S4method{space}{IndexLookupVol}(x)
+
+\S4method{space}{ROICoords}(x)
 
 \S4method{space}{NeuroObj}(x)
 

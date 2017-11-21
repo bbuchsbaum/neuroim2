@@ -520,6 +520,12 @@ setGeneric(name="scale_series", def=function(x, center, scale) standardGeneric("
 #' @rdname as.sparse-methods
 setGeneric(name="as.sparse", def=function(x, mask, ...) standardGeneric("as.sparse"))
 
+#' Convert to dense representation
+#'
+#' @param x the object to densify
+#' @rdname as.dense-methods
+setGeneric(name="as.dense", def=function(x) standardGeneric("as.dense"))
+
 #' Convert to a LogicalNeuroVol
 #' @param x the object to binarize
 #' @param indices the indices to set to TRUE
