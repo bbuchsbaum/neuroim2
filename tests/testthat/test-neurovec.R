@@ -136,7 +136,6 @@ test_that("can perform arithmetic on NeuroVec", {
   bv4 <- bv1*bv2
   bv5 <- bv2-bv1
   expect_true(TRUE)
-
 })
 
 
@@ -152,9 +151,11 @@ test_that("can perform arithmetic on NeuroVec", {
 # }
 
 
+
 # test.SparseNeuroVec.roundtrip.io <- function() {
 # 	bvec <- loadVector("data/qrscan01.nii.gz", indices=1:4, mask=rep(TRUE, 96*96*26))
 # 	template <- takeVolume(bvec,1)
+# 
 #
 # 	mask.idx <- sort(sample(1:length(template), 1000))
 # 	vals <- rnorm(length(mask.idx))
@@ -162,6 +163,10 @@ test_that("can perform arithmetic on NeuroVec", {
 # 	fname <- paste(tempfile(), ".nii", sep="")
 # 	writeVolume(bv,fname)
 # 	bv2 <- loadVolume(fname)
+# 
+# 	expect_equal(dim(bv2), dim(bv))
+# 	expect_equalNumeric(trans(bv2), trans(bv), tol=.0001)
+# 
 #
 # 	expect_equal(dim(bv2), dim(bv))
 # 	expect_equalNumeric(trans(bv2), trans(bv), tol=.0001)
@@ -174,6 +179,8 @@ test_that("can convert dense NeuroVec to sparse", {
 	expect_equal(dim(svec), c(12,12,12,4))
 
 })
+
+
 
 test_that("can construct a SparseNeuroVol", {
 	dat <- array(rnorm(12*12*12*4), c(12,12,12,4))
@@ -196,6 +203,8 @@ test_that("can construct a SparseNeuroVol", {
 	expect_equal(dat[1,2:3,2:3,], bvec[1,2:3,2:3,])
 
 })
+
+
 
 test_that("can perform arithmetic on a SparseNeuroVec", {
   dat <- array(rnorm(12*12*12*4), c(12,12,12,4))
@@ -231,6 +240,7 @@ test_that("can concatenate a SparseNeuroVec", {
 	dat <- array(0, c(12,12,12,4))
 	spc <- NeuroSpace(c(12,12,12,4))
 	tmp <- rnorm(12*12*12)
+
 	mask <- tmp > .8
 	mask <- LogicalNeuroVol(mask, drop_dim(spc))
 
@@ -244,7 +254,7 @@ test_that("can concatenate a SparseNeuroVec", {
 	expect_true(inherits(bv3, "NeuroVec"))
 	expect_equal(dim(bv3), c(12,12,12,24))
 
-	do.call(concat, list(bv1))
+	#do.call(concat, list(bv1))
 	#expect_equal(bv4[1,1,1,1],0)
 })
 
@@ -261,6 +271,7 @@ test_that("can extract nonzero coords of SparseNeuroVec", {
   expect_equal(nrow(cds), sum(mask))
   expect_equal(ind, which(mask>0))
 })
+
 
 
 
