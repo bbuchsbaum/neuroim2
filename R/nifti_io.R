@@ -26,7 +26,7 @@ write_nifti_vector <- function(vec, file_name, data_type="FLOAT") {
 	NVOLS <- dim(vec)[4]
 
 	for (i in 1:NVOLS) {
-		writeElements(writer, as.numeric(vec[[i]]))
+		write_elements(writer, as.numeric(vec[[i]]))
 	}
 	close(writer)
 }
@@ -44,20 +44,20 @@ write_nifti_volume <- function(vol, file_name, data_type="FLOAT") {
 
 	write_nifti_header(hdr, conn, close=FALSE)
 	writer <- BinaryWriter(conn, hdr$vox_offset, data_type, hdr$bitpix/8, .Platform$endian)
-	writeElements(writer, as.numeric(vol))
+	write_elements(writer, as.numeric(vol))
 	close(writer)
 }
 
 
 
-as_nifti_header <- function(vol, fname, oneFile=TRUE, data_type="FLOAT") {
-		hd <- createNIfTIHeader(oneFile=oneFile, file_name=fname)
-		hd$file_name <- fname
+as_nifti_header <- function(vol, file_name, oneFile=TRUE, data_type="FLOAT") {
+		hd <- createNIfTIHeader(oneFile=oneFile, file_name=file_name)
+		hd$file_name <- file_name
 		hd$endian <- .Platform$endian
 		hd$vox_offset <- 352
 		hd$datatype <- .getDataCode(data_type)
 		hd$data_storage <- .getDataStorage(hd$datatype)
-		hd$bitpix <- .getDataSize(hd$datatype) * 8
+		hd$bitpix <- .getDataSize(data_type) * 8
 		hd$dimensions <- c(length(dim(vol)), dim(vol))
 		N <- 8 - length(hd$dimensions)
 		hd$dimensions <- c(hd$dimensions,  rep(1, N))

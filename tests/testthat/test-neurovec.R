@@ -1,3 +1,5 @@
+gmask <- system.file("extdata", "global_mask.nii", package="neuroim2")
+
 
 gen_dat <- function(d1 = 12,
                     d2 = 12,
@@ -155,7 +157,7 @@ test_that("can perform arithmetic on NeuroVec", {
 # test.SparseNeuroVec.roundtrip.io <- function() {
 # 	bvec <- loadVector("data/qrscan01.nii.gz", indices=1:4, mask=rep(TRUE, 96*96*26))
 # 	template <- takeVolume(bvec,1)
-# 
+#
 #
 # 	mask.idx <- sort(sample(1:length(template), 1000))
 # 	vals <- rnorm(length(mask.idx))
@@ -163,10 +165,10 @@ test_that("can perform arithmetic on NeuroVec", {
 # 	fname <- paste(tempfile(), ".nii", sep="")
 # 	writeVolume(bv,fname)
 # 	bv2 <- loadVolume(fname)
-# 
+#
 # 	expect_equal(dim(bv2), dim(bv))
 # 	expect_equalNumeric(trans(bv2), trans(bv), tol=.0001)
-# 
+#
 #
 # 	expect_equal(dim(bv2), dim(bv))
 # 	expect_equalNumeric(trans(bv2), trans(bv), tol=.0001)
@@ -272,7 +274,17 @@ test_that("can extract nonzero coords of SparseNeuroVec", {
   expect_equal(ind, which(mask>0))
 })
 
+test_that("can write and read back an image vector", {
+  mask <- read_vol(gmask)
+  maskvec <- concat(mask,mask)
+  fname <- paste(tempfile(), ".nii", sep="")
+  write_vec(maskvec, fname)
 
+  vec2 <- read_vec(fname)
+  expect_true(all(maskvec == vec2))
+  expect_true(identical(space(maskvec), space(vec2)))
+
+})
 
 
 # test.NeuroVec.roundtrip.io <- function() {

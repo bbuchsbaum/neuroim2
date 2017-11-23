@@ -200,24 +200,16 @@ test_that("can compute mean of each slice with 'slices'", {
 	expect_equal(unlist(mean.slice1), apply(vol1, 3, mean))
 })
 
-# test_that({
-# 	vol1 <- loadVolume("data/global_mask.nii")
-# 	fname <- paste(tempfile(), ".nii", sep="")
-# 	writeVolume(vol1, fname)
-#
-#
-# 	vol2 <- loadVolume(fname)
-# 	expect_true(all(vol1 == vol2))
-# 	expect_equal(vol2@source@metaInfo@dataType, vol1@source@metaInfo@dataType)
-#
-# 	expect_true(identical(space(vol1), space(vol2)))
-#
-# 	fname <- paste(tempfile(), ".nii", sep="")
-# 	writeVolume(vol1, fname, dataType="DOUBLE")
-# 	vol3 <- loadVolume(fname)
-# 	expect_equal(vol3@source@metaInfo@dataType, "DOUBLE")
-#
-# }
+test_that("can write and read back an image vol", {
+  mask <- read_vol(gmask)
+	fname <- paste(tempfile(), ".nii", sep="")
+	write_vol(mask, fname)
+
+	vol2 <- read_vol(fname)
+	expect_true(all(mask == vol2))
+	expect_true(identical(space(mask), space(vol2)))
+
+})
 
 
 
