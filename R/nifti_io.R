@@ -10,22 +10,9 @@
 	}
 }
 
-write_nifti_vector <- function(vec, file_name, data_type=NULL) {
-	stopifnot(length(dim(vec)) == 4)
-	hdr <- as_nifti_header(vec, vec@source@meta_info)
-
-	if (!is.null(data_type) && data_type != vec@source@meta_info@data_type) {
-		hdr$datatype <- .getDataCode(data_type)
-		hdr$data_storage <- .getDataStorage(hdr$datatype)
-		hdr$bitpix <- .getDataSize(data_type) * 8
-	} else {
-		data_type <- vec@source@meta_info@data_type
-
-		### code duplication
-		hdr$datatype <- .getDataCode(data_type)
-		hdr$data_storage <- .getDataStorage(hdr$datatype)
-		hdr$bitpix <- .getDataSize(data_type) * 8
-	}
+write_nifti_vector <- function(vec, file_name, data_type="FLOAT") {
+	assertthat::assert_that(length(dim(vec)) == 4)
+	hdr <- as_nifti_header(vec, file_name=file_name, data_type=data_type)
 
 	conn <- if (substr(file_name, nchar(file_name)-2, nchar(file_name)) == ".gz") {
 				gzfile(file_name, open="wb")
@@ -37,28 +24,17 @@ write_nifti_vector <- function(vec, file_name, data_type=NULL) {
 	writer <- BinaryWriter(conn, hdr$vox_offset, data_type, hdr$bitpix/8, .Platform$endian)
 
 	NVOLS <- dim(vec)[4]
+
 	for (i in 1:NVOLS) {
-		writeElements(writer, as.numeric(takeVolume(vec, i)))
+		writeElements(writer, as.numeric(vec[[i]]))
 	}
 	close(writer)
 }
 
 
-write_nifti_volume <- function(vol, file_name, data_type=NULL) {
+write_nifti_volume <- function(vol, file_name, data_type="FLOAT") {
 	stopifnot(length(dim(vol)) == 3)
-	hdr <- as_nifti_header(vol, vol@source@meta_info)
-
-	if (!is.null(data_type) && data_type != vol@source@meta_info@data_type) {
-		hdr$datatype <- .getDataCode(data_type)
-		hdr$data_storage <- .getDataStorage(hdr$datatype)
-		hdr$bitpix <- .getDataSize(data_type) * 8
-	} else {
-		data_type <- vol@source@meta_info@data_type
-		### code duplication
-		hdr$datatype <- .getDataCode(data_type)
-		hdr$data_storage <- .getDataStorage(hdr$datatype)
-		hdr$bitpix <- .getDataSize(data_type) * 8
-	}
+	hdr <- as_nifti_header(vol, file_name=file_name, data_type=data_type)
 
 	conn <- if (substr(file_name, nchar(file_name)-2, nchar(file_name)) == ".gz") {
 		gzfile(file_name, open="wb")
@@ -74,93 +50,27 @@ write_nifti_volume <- function(vol, file_name, data_type=NULL) {
 
 
 
-as_nifti_header <- function(vol, meta_info, fname=NULL, oneFile=TRUE) {
-	if (inherits(meta_info, "NIfTIMetaInfo")) {
-		ret <- meta_info@header
-		if (!is.null(fname)) {
-			ret$file_name <- fname
-		}
-		ret$onefile <- oneFile
-		if (oneFile) {
-			ret$magic <- "n+1"
-		} else {
-			ret$magic <- "ni1"
-		}
-
-		ret
-	} else if (inherits(meta_info, "FileMetaInfo")){
-		### serious code duplication
+as_nifti_header <- function(vol, fname, oneFile=TRUE, data_type="FLOAT") {
 		hd <- createNIfTIHeader(oneFile=oneFile, file_name=fname)
-		if (is.null(fname)) {
-			hd$file_name <- meta_info@headerFile
-		} else {
-			hd$file_name <- fname
-		}
-
-		hd$endian <- meta_info@endian
-		hd$vox_offset <- meta_info@dataOffset
-		hd$datatype <- .getDataCode(meta_info@data_type)
-		hd$data_storage <- .getDataStorage(hd$datatype)
-		hd$bitpix <- meta_info@bytesPerElement * 8
-		hd$dimensions <- c(length(meta_info@dims), meta_info@dims)
-		N <- 8 - length(hd$dimensions)
-		hd$dimensions <- c(hd$dimensions,  rep(1, N))
-		hd$num_dimensions <- length(meta_info@dims)
-
-		### only encodes pixdim for three dimensions
-		hd$pixdim <- c(0, meta_info@spacing, rep(0,4))
-		hd$qoffset <- meta_info@origin
-		hd$scl_intercept <- meta_info@intercept
-		hd$scl_slope <- meta_info@scl_slope
-
-		tmat <- trans(vol)
-
-		hd$qform <- tmat
-		hd$sform <- tmat
-
-		quat1 <- .matrixToQuatern(tmat)
-		hd$quaternion <- quat1$quaternion
-		hd$qfac <- quat1$qfac
-		hd$pixdim[1] <- hd$qfac
-		hd
-		### serious code duplication
-	} else if (inherits(meta_info, "BrainMetaInfo")) {
-		hd <- createNIfTIHeader(oneFile=oneFile, file_name=fname)
-
-		if (is.null(fname)) {
-			hd$file_name <- "nothing.nii"
-		} else {
-			hd$file_name <- fname
-		}
-
-
-		### serious code duplication
-
+		hd$file_name <- fname
 		hd$endian <- .Platform$endian
 		hd$vox_offset <- 352
-
-		hd$datatype <- .getDataCode(meta_info@data_type)
+		hd$datatype <- .getDataCode(data_type)
 		hd$data_storage <- .getDataStorage(hd$datatype)
-
-		hd$bitpix <- .getDataSize(meta_info@data_type) * 8
-
-
-		hd$dimensions <- c(length(meta_info@dims), meta_info@dims)
+		hd$bitpix <- .getDataSize(hd$datatype) * 8
+		hd$dimensions <- c(length(dim(vol)), dim(vol))
 		N <- 8 - length(hd$dimensions)
 		hd$dimensions <- c(hd$dimensions,  rep(1, N))
-		hd$num_dimensions <- length(meta_info@dims)
+		hd$num_dimensions <- length(dim(vol))
 
 		### only encodes pixdim for three dimensions
-		hd$pixdim <- c(0, meta_info@spacing, rep(0,4))
+		hd$pixdim <- c(0, spacing(vol), rep(0,4))
 
-
-		hd$qoffset <- meta_info@origin
+		hd$qoffset <- origin(space(vol))
 		hd$scl_intercept <- 0
-		hd$scl_slope <- 0
-
+		hd$scl_slope <- 1
 
 		tmat <- trans(vol)
-
 
 		hd$qform <- tmat
 		hd$sform <- tmat
@@ -171,12 +81,9 @@ as_nifti_header <- function(vol, meta_info, fname=NULL, oneFile=TRUE) {
 		hd$pixdim[1] <- hd$qfac
 		hd
 
-		### serious code duplication
-
-
-	}
-
 }
+
+
 
 createNIfTIHeader <- function(oneFile=TRUE, file_name=NULL) {
 	header <- list()
