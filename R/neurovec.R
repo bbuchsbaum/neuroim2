@@ -380,7 +380,7 @@ setMethod("series", signature(x="NeuroVec", i="matrix"),
 
 		  d4 <- dim(x)[4]
 		  expanded <- i[rep(1:nrow(i), each=d4),]
-		  expanded <- cbind(expanded, 1:4)
+		  expanded <- cbind(expanded, 1:d4)
 	    vec <- x[expanded]
 	    matrix(vec, d4, nrow(i))
 		})
@@ -433,9 +433,7 @@ setMethod("series", signature(x="NeuroVec", i="LogicalNeuroVol"),
 setMethod("series_roi", signature(x="NeuroVec", i="LogicalNeuroVol"),
           def=function(x,i) {
             mat <- as.matrix(series(x, i))
-
             ROIVec(space(x), coords=index_to_grid(i, which(i == TRUE)), data=as.matrix(mat))
-
           })
 
 #' @rdname series-methods
