@@ -249,6 +249,10 @@ make_spherical_grid <- function(bvol, centroid, radius) {
 #'  ## fill in ROI with value of 6
 #'  cube1 <- spherical_roi(sp1, c(5,5,5), 3.5, fill=6)
 #'  all(cube1@data == 6)
+#'
+#'  # create an ROI centered around the real-valued coordinates: x=5, y=5, z=5
+#'  vox <- coord_to_grid(sp1, c(5, 5, 5))
+#'  cube <- spherical_roi(sp1, vox, 3.5)
 #' @export
 spherical_roi <- function (bvol, centroid, radius, fill=NULL, nonzero=FALSE) {
   if (is.matrix(centroid)) {
@@ -427,8 +431,8 @@ setMethod("show", signature=signature(object = "ROIVol"),
 		  function (object) {
 			  cat("\n\nROIVol", "\n")
 			  cat("  Size:           ", length(object), "\n")
-			  cat("  Parent Dim:     ", dim(object), "\n")
-			  cat("  Num Data Cols:  ", ncol(object), "\n" )
+			  cat("  Parent Dim:     ", dim(object@space), "\n")
+			  cat("  Num Data Cols:  ", 1, "\n" )
 			  cat("  Voxel Cen. Mass:", colMeans(coords(object)), "\n")
 		  })
 
