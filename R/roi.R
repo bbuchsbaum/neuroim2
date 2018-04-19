@@ -233,15 +233,16 @@ make_spherical_grid <- function(bvol, centroid, radius) {
 
 #' @title Create a Spherical Region of Interest
 #'
-#' @description Creates a Spherical ROI based on a Centroid.
+#' @description Creates a Spherical ROI based on a centroid.
 #' @param bvol an \code{NeuroVol} or \code{NeuroSpace} instance
-#' @param centroid the center of the sphere in voxel space
+#' @param centroid the center of the sphere in positive-coordinate (i,j,k) voxel space.
 #' @param radius the radius in real units (e.g. millimeters) of the spherical ROI
 #' @param fill optional value(s) to store as data
 #' @param nonzero if \code{TRUE}, keep only nonzero elements from \code{bvol}
 #' @return an instance of class \code{ROIVol}
 #' @examples
 #'  sp1 <- NeuroSpace(c(10,10,10), c(1,2,3))
+#'  # create an ROI centered around the integer-valued positive voxel coordinate: i=5, j=5, k=5
 #'  cube <- spherical_roi(sp1, c(5,5,5), 3.5)
 #'  vox <- coords(cube)
 #'  cds <- coords(cube, real=TRUE)
