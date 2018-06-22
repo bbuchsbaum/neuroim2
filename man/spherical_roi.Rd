@@ -9,7 +9,7 @@ spherical_roi(bvol, centroid, radius, fill = NULL, nonzero = FALSE)
 \arguments{
 \item{bvol}{an \code{NeuroVol} or \code{NeuroSpace} instance}
 
-\item{centroid}{the center of the sphere in voxel space}
+\item{centroid}{the center of the sphere in positive-coordinate (i,j,k) voxel space.}
 
 \item{radius}{the radius in real units (e.g. millimeters) of the spherical ROI}
 
@@ -21,14 +21,19 @@ spherical_roi(bvol, centroid, radius, fill = NULL, nonzero = FALSE)
 an instance of class \code{ROIVol}
 }
 \description{
-Creates a Spherical ROI based on a Centroid.
+Creates a Spherical ROI based on a centroid.
 }
 \examples{
  sp1 <- NeuroSpace(c(10,10,10), c(1,2,3))
+ # create an ROI centered around the integer-valued positive voxel coordinate: i=5, j=5, k=5
  cube <- spherical_roi(sp1, c(5,5,5), 3.5)
  vox <- coords(cube)
  cds <- coords(cube, real=TRUE)
  ## fill in ROI with value of 6
  cube1 <- spherical_roi(sp1, c(5,5,5), 3.5, fill=6)
  all(cube1@data == 6)
+
+ # create an ROI centered around the real-valued coordinates: x=5, y=5, z=5
+ vox <- coord_to_grid(sp1, c(5, 5, 5))
+ cube <- spherical_roi(sp1, vox, 3.5)
 }

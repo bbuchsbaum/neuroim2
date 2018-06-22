@@ -175,7 +175,7 @@ test_that("can convert SparseNeuroVol to an array or vector", {
 test_that("can map a kernel over a NeuroVol", {
   vol1 <- read_vol(gmask)
   kern <- Kernel(c(3,3,3), vdim=spacing(vol1))
-  vol2 <- map(vol1, kern)
+  vol2 <- mapf(vol1, kern)
   expect_equal(space(vol1), space(vol2))
 })
 
@@ -209,6 +209,53 @@ test_that("can write and read back an image vol", {
 	expect_true(all(mask == vol2))
 	expect_true(identical(space(mask), space(vol2)))
 
+})
+
+
+test_that("can construct a NeuroSlice", {
+  slice <- NeuroSlice(matrix(0,10,10), NeuroSpace(c(10,10)))
+  expect_true(!is.null(slice))
+})
+
+test_that("can construct a NeuroSlice and extract index", {
+  slice <- NeuroSlice(matrix(0,10,10), NeuroSpace(c(10,10)))
+  pix <- grid_to_index(slice, c(1,1))
+  expect_equal(pix, 1)
+  pix <- index_to_grid(slice, 1)
+  expect_equal(as.vector(pix), c(1,1))
+})
+
+test_that("NeuroSlice with wrong input space throws error", {
+  expect_error(NeuroSlice(matrix(0,10,10), NeuroSpace(c(10,10,10))))
+
+})
+
+test_that("NeuroSlice with mismatching data dim throws error", {
+  expect_error(NeuroSlice(array(0,c(10,10,10)), NeuroSpace(c(10,10))))
+})
+
+test_that("Can construct a ClusteredNeuroVol", {
+  mask <- NeuroVol(array(1,c(10,10,10)), NeuroSpace(c(10,10,10)))
+  mask.idx <- which(mask != 0)
+	grid <- index_to_coord(mask, mask.idx)
+  vox <- index_to_grid(mask, mask.idx)
+  kres <- kmeans(grid, centers=50, iter.max=500)
+  kvol <- ClusteredNeuroVol(mask, kres$cluster)
+  expect_true(!is.null(kvol))
+  expect_equal(length(unique(kvol@clusters)), 50)
+  expect_equal(length(kvol@cluster_map), 50)
+  expect_equal(num_clusters(kvol), 50)
+})
+
+test_that("Can partition a NeuroVol into a set of ROIVols", {
+  mask <- NeuroVol(array(1,c(10,10,10)), NeuroSpace(c(10,10,10)))
+  mask.idx <- which(mask != 0)
+  grid <- index_to_coord(mask, mask.idx)
+  vox <- index_to_grid(mask, mask.idx)
+  kres <- kmeans(grid, centers=50, iter.max=500)
+  kvol <- ClusteredNeuroVol(mask, kres$cluster)
+  p <- partition_by(mask, kvol)
+  expect_equal(50, length(p))
 })
 
 

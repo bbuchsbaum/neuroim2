@@ -2,7 +2,7 @@
 % Please edit documentation in R/searchlight.R
 \name{searchlight}
 \alias{searchlight}
-\title{Create an exhaustive searchlight iterator}
+\title{searchlight}
 \usage{
 searchlight(mask, radius)
 }

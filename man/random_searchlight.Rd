@@ -2,7 +2,7 @@
 % Please edit documentation in R/searchlight.R
 \name{random_searchlight}
 \alias{random_searchlight}
-\title{Create an spherical random searchlight iterator}
+\title{random_searchlight}
 \usage{
 random_searchlight(mask, radius)
 }

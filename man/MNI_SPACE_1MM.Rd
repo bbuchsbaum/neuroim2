@@ -9,6 +9,6 @@
 data(MNI_SPACE_1MM)
 }
 \description{
-This is a \code{BrainSpace} object encoding the geometry of the MNI_1MM template.
+This is a \code{NeuroSpace} object encoding the geometry of the MNI_1MM template.
 }
 \keyword{datasets}

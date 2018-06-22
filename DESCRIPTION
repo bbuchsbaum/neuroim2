@@ -44,6 +44,6 @@ Collate:
     'roi.R'
     'searchlight.R'
     'sparse_neurovec.R'
-RoxygenNote: 6.0.1
+RoxygenNote: 6.0.1.9000
 Suggests: testthat,
     covr

@@ -25,6 +25,20 @@ Three-dimensional brain image that is divided into N disjoint partitions
 
 Construct a \code{\linkS4class{ClusteredNeuroVol}} instance
 }
+\section{Slots}{
+
+\describe{
+\item{\code{mask}}{the \code{logical} mask indicating the spatial domain of the set of clusters}
+
+\item{\code{clusters}}{an integer index indicating the cluster number for each voxel in the mask}
+
+\item{\code{centers}}{the cluster centers}
+
+\item{\code{label_map}}{a list mapping from name to cluster id}
+
+\item{\code{cluster_map}}{an \code{environment} mapping from cluster id to the set of 1D spatial indices}
+}}
+
 \examples{
 
 bspace <- NeuroSpace(c(16,16,16), spacing=c(1,1,1))

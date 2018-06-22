@@ -5,7 +5,7 @@
 \name{coords}
 \alias{coords}
 \alias{coords,IndexLookupVol-method}
-\alias{coords,ROIVol-method}
+\alias{coords,ROICoords-method}
 \alias{coords,SparseNeuroVec-method}
 \title{Extract coordinates}
 \usage{
@@ -13,7 +13,7 @@ coords(x, ...)
 
 \S4method{coords}{IndexLookupVol}(x, i)
 
-\S4method{coords}{ROIVol}(x, real = FALSE)
+\S4method{coords}{ROICoords}(x, real = FALSE)
 
 \S4method{coords}{SparseNeuroVec}(x, i)
 }

@@ -383,14 +383,14 @@ setMethod(f="split_fill", signature=signature(x="NeuroVol", fac="factor", FUN="f
 		def=function(x,fac,FUN) {
 			stopifnot(length(x) == length(fac))
 			S <- split(1:length(x), fac, drop=TRUE)
-			res <- sapply(S, function(ind) {
+			res <- map(S, function(ind) {
 						X <- FUN(x[ind])
 						if (length(X) == length(ind)) {
 							X
 						} else {
 							rep(X, length(ind))
 						}
-					}, simplify=FALSE)
+			})
 
 			ovol <- x
 			ovol[1:length(x)] <- unsplit(res, fac)
@@ -577,7 +577,7 @@ setMethod(f="patch_set", signature=signature(x="NeuroVol",
 #' @rdname map-methods
 #' @param mask restrict application of kernel to masked area
 #' @export
-setMethod(f="map", signature=signature(x="NeuroVol", m="Kernel"),
+setMethod(f="mapf", signature=signature(x="NeuroVol", m="Kernel"),
           def=function(x, m, mask=NULL) {
             ovol <- array(0, dim(x))
             hwidth <- sapply(m@width, function(d) ceiling(d/2 -1)) + 1

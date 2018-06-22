@@ -4,6 +4,7 @@
 \name{grid_to_index}
 \alias{grid_to_index}
 \alias{grid_to_index,NeuroSlice,matrix-method}
+\alias{grid_to_index,NeuroSlice,numeric-method}
 \alias{grid_to_index,NeuroSpace,matrix-method}
 \alias{grid_to_index,NeuroSpace,numeric-method}
 \alias{grid_to_index,NeuroVol,matrix-method}
@@ -13,6 +14,8 @@
 grid_to_index(x, coords)
 
 \S4method{grid_to_index}{NeuroSlice,matrix}(x, coords)
+
+\S4method{grid_to_index}{NeuroSlice,numeric}(x, coords)
 
 \S4method{grid_to_index}{NeuroSpace,matrix}(x, coords)
 

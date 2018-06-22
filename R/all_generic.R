@@ -32,7 +32,7 @@ setGeneric(name="load_data", def=function(x, ...) standardGeneric("load_data"))
 #' @param ... additional arguments
 #' @export
 #' @rdname map-methods
-setGeneric(name="map", def=function(x, m, ...) standardGeneric("map"))
+setGeneric(name="mapf", def=function(x, m, ...) standardGeneric("mapf"))
 
 #' Generic function to extract an ordered series of 3D volumes
 #'

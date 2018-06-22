@@ -19,9 +19,11 @@ NeuroSlice <- function(data, space, indices=NULL) {
 		stop("incorrect dimension for neuro_slice")
 	}
 
+
+
 	if (is.null(indices)) {
 		if (length(dim(data)) != 2) {
-		  stopifnot(length(data) != prod(dim(space)[1:2]))
+		  stopifnot(length(data) == prod(dim(space)[1:2]))
 			data <- matrix(data, dim(space)[1], dim(space)[2])
 		}
 
@@ -42,6 +44,13 @@ setMethod(f="grid_to_index", signature=signature(x = "NeuroSlice", coords="matri
 		def=function(x, coords) {
 			callGeneric(x@space, coords)
 })
+
+#' @export
+#' @rdname grid_to_index-methods
+setMethod(f="grid_to_index", signature=signature(x = "NeuroSlice", coords="numeric"),
+          def=function(x, coords) {
+            callGeneric(x@space, coords)
+          })
 
 
 

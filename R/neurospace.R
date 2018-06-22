@@ -272,6 +272,7 @@ setMethod(f="coord_to_grid", signature=signature(x="NeuroSpace", coords="numeric
 
 #' @export
 #' @rdname grid_to_grid-methods
+#' @importFrom purrr map_int
 setMethod(f="grid_to_grid", signature=signature(x="NeuroSpace", vox="matrix"),
           def=function(x, vox) {
 
@@ -282,7 +283,7 @@ setMethod(f="grid_to_grid", signature=signature(x="NeuroSpace", vox="matrix"),
             idx <- which(tx != 0, arr.ind=TRUE)
             tx[idx] <- 1 * sign(tx[idx])
             ovox <- tx %*% t(vox)
-            offset <- sapply(1:nrow(tx), function(i) {
+            offset <- map_int(1:nrow(tx), function(i) {
               if (any(tx[i,] < 0)) {
                 dim(x)[i] + 1
               } else {
@@ -302,7 +303,7 @@ setMethod(f="grid_to_grid", signature=signature(x="matrix", vox="matrix"),
             stopifnot(ncol(vox) == nd)
             tx <- x[1:nd, 1:nd]
             ovox <- vox %*% tx[1:nd, 1:nd]
-            offset <- sapply(1:ncol(tx), function(i) {
+            offset <- map_int(1:ncol(tx), function(i) {
               if (any(tx[,i] < 0)) {
                 dim(x)[i] + 1
               } else {
@@ -378,7 +379,7 @@ setMethod(f="grid_to_index", signature=signature(x="NeuroSpace", coords="numeric
 		  dx <- dim(x)
 		  if (length(dx) == 2) {
 		    assert_that(length(coords) == 2)
-		    nsize <- prod(dx)
+		    assert_that(coords[1] >= 1 && coords[1] <= dx[1] && coords[2] >= 1 && coords[2] <= dx[2])
 		    (coords[2]-1)*dx[1] + coords[1]
 		  } else {
 		    assert_that(length(coords) == 3)

@@ -7,8 +7,8 @@
 \alias{series}
 \alias{series,NeuroVec,matrix-method}
 \alias{series_roi,NeuroVec,matrix-method}
-\alias{series,NeuroVec,ROIVol-method}
-\alias{series_roi,NeuroVec,ROIVol-method}
+\alias{series,NeuroVec,ROICoords-method}
+\alias{series_roi,NeuroVec,ROICoords-method}
 \alias{series,NeuroVec,LogicalNeuroVol-method}
 \alias{series_roi,NeuroVec,LogicalNeuroVol-method}
 \alias{series,NeuroVec,numeric-method}
@@ -25,9 +25,9 @@ series(x, i, ...)
 
 \S4method{series_roi}{NeuroVec,matrix}(x, i)
 
-\S4method{series}{NeuroVec,ROIVol}(x, i)
+\S4method{series}{NeuroVec,ROICoords}(x, i)
 
-\S4method{series_roi}{NeuroVec,ROIVol}(x, i)
+\S4method{series_roi}{NeuroVec,ROICoords}(x, i)
 
 \S4method{series}{NeuroVec,LogicalNeuroVol}(x, i)
 

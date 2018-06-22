@@ -176,12 +176,13 @@ setMethod("length", signature=c("NeuroVec"),
 #' @param mask an optional mask indicating subset of voxels to load
 #' @return an instance of class \code{\linkS4class{NeuroVec}}
 #' @export read_vol_list
+#' @importFrom purrr map_lgl
 read_vol_list <- function(file_names, mask=NULL) {
-	stopifnot(all(sapply(file_names, file.exists)))
+	stopifnot(all(map_lgl(file_names, file.exists)))
 	meta_info <- lapply(file_names, read_header)
 
 	dims <- do.call(rbind, lapply(meta_info, dim))
-	if (!all(sapply(1:nrow(dims), function(i) all.equal(dims[1,], dims[i,])))) {
+	if (!all(map_lgl(1:nrow(dims), function(i) all.equal(dims[1,], dims[i,])))) {
 		stop("list of volumes must all have same dimensions")
 	}
 

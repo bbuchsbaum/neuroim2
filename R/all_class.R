@@ -330,6 +330,12 @@ setClass("LogicalNeuroVol", contains=c("DenseNeuroVol"))
 #' ClusteredNeuroVol
 #'
 #' Three-dimensional brain image that is divided into N disjoint partitions
+#'
+#' @slot mask the \code{logical} mask indicating the spatial domain of the set of clusters
+#' @slot clusters an integer index indicating the cluster number for each voxel in the mask
+#' @slot centers the cluster centers
+#' @slot label_map a list mapping from name to cluster id
+#' @slot cluster_map an \code{environment} mapping from cluster id to the set of 1D spatial indices
 #' @rdname ClusteredNeuroVol-class
 #' @export
 setClass("ClusteredNeuroVol",
@@ -495,10 +501,11 @@ setClass("Kernel", representation(width="numeric", weights="numeric", voxels="ma
 #' @slot labels the names of the sub-volumes contained in the bucket
 #' @slot data a list of \code{\linkS4class{NeuroVol}} instances with names corresponding to volume labels
 #' @export
+#' @importFrom purrr map_lgl
 setClass("BrainBucket",
          representation=representation(labels="character", data="list"),
          validity = function(object) {
-           if (any(sapply(object@data, function(obj) !is(obj, "NeuroVol")))) {
+           if (any(map_lgl(object@data, function(obj) !is(obj, "NeuroVol")))) {
              stop("all elements of data list must be of type `NeuroVol`")
            } else {
              TRUE

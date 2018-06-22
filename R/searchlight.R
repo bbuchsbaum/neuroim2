@@ -1,4 +1,6 @@
 
+#' random_searchlight
+#'
 #' Create an spherical random searchlight iterator
 #'
 #' @param mask an volumetric image mask of type \code{\linkS4class{NeuroVol}}
@@ -50,58 +52,16 @@ random_searchlight <- function(mask, radius) {
   slist
 }
 
-#'
-#' #' Create an spherical random searchlight iterator
-#' #'
-#' #' @param mask an volumetric image mask of type \code{\linkS4class{NeuroVol}}
-#' #'        containing valid searchlight voxel set.
-#' #' @param radius width in mm of spherical searchlight
-#' #' @export
-#' random_searchlight <- function(mask, radius) {
-#'   assert_that(inherits(mask, "NeuroVol"))
-#'
-#'   done <- array(FALSE, dim(mask))
-#'
-#'   mask.idx <- which(mask != 0)
-#'
-#'   grid <- index_to_grid(mask, as.numeric(mask.idx))
-#'
-#'   prog <- function() { sum(done)/length(mask.idx) }
-#'
-#'   nextEl <- function() {
-#'     if (!all(done[mask.idx])) {
-#'       center <- .resample(which(!done[mask.idx]), 1)
-#'       search <- spherical_roi(mask, grid[center,], radius, nonzero=TRUE)
-#'       vox <- coords(search)
-#'       keep <- !done[vox]
-#'       vox <- vox[keep,,drop=FALSE]
-#'       search2 <- ROIVol(space(mask), coords=vox, data=rep(1,sum(keep)))
-#'       done[vox] <<- TRUE
-#'       attr(search2, "center") <- grid[center,]
-#'       attr(search2, "center.index") <- mask.idx[center]
-#'       attr(search2, "indices") <- grid_to_index(mask, vox)
-#'       attr(search2, "length") <- nrow(vox)
-#'       search2
-#'
-#'     } else {
-#'       stop('StopIteration')
-#'     }
-#'   }
-#'   obj <- list(nextElem=nextEl, progress=prog)
-#'   class(obj) <- c("random_searchlight", "searchlight", 'abstractiter', 'iter')
-#'   obj
-#' }
 
-
-
+#' bootstrap_searchlight
+#'
 #' Create a spherical searchlight iterator that samples regions from within a mask.
-#'
-#' searchlight centers are sampled without replacement, but the same surround voxel can belong to multiple searchlight samples.
 #'
 #' @param mask an image volume containing valid central voxels for roving searchlight
 #' @param radius in mm of spherical searchlight (can be a vector which is randomly sampled)
 #' @param iter the total number of searchlights to sample (default is 100).
 #' @export
+#' @details searchlight centers are sampled without replacement, but the same surround voxel can belong to multiple searchlight samples.
 bootstrap_searchlight <- function(mask, radius=8, iter=100) {
   mask.idx <- which(mask != 0)
   grid <- index_to_grid(mask, mask.idx)
@@ -120,6 +80,8 @@ bootstrap_searchlight <- function(mask, radius=8, iter=100) {
 }
 
 
+#' searchlight
+#'
 #' Create an exhaustive searchlight iterator
 #'
 #' @param mask an image volume containing valid central voxels for roving searchlight

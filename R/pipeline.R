@@ -18,6 +18,13 @@ deferred_list <- function(fs) {
  ff(i)
 }
 
+#' @keywords internal
+#' @export
+`[.deferred_list` <- function (x, i)  {
+  ff <- NextMethod()
+  deferred_list(ff)
+}
+
 
 
 #' #' @keywords internal
