@@ -300,7 +300,7 @@ setMethod(f="vectors", signature=signature(x="NeuroVec", subset="missing"),
             ind <- 1:prod(dim(x)[1:3])
             vox <- index_to_grid(x, ind)
             f <- function(i) x[vox[i,1], vox[i,2], vox[i,3],]
-            lis <- lapply(ind, function(i) f)
+            lis <- map(ind, function(i) f)
             deferred_list(lis)
           })
 

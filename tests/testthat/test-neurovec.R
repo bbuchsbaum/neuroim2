@@ -82,8 +82,8 @@ test_that("can map over each volume in a NeuroVec", {
 
 test_that("can map over each vector in a NeuroVec", {
   bv1 <- gen_dat(10,10,10, rand=TRUE)
-  mean.vec1 <- lapply(vectors(bv1), mean)
-  mean.vec2 <- lapply(vectors(bv1, 1:10), mean)
+  mean.vec1 <- map_dbl(vectors(bv1), mean)
+  mean.vec2 <- map_dbl(vectors(bv1, 1:10), mean)
   expect_equal(length(mean.vec1), 10*10*10)
   expect_equal(length(mean.vec2), 10)
   expect_equal(unlist(mean.vec1), as.vector(apply(bv1, 1:3, mean)))

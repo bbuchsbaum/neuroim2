@@ -223,9 +223,7 @@ setMethod(f="concat", signature=signature(x="SparseNeuroVec", y="SparseNeuroVec"
 
 
             if (length(rest) >= 1) {
-              mat <- do.call(rbind, lapply(rest, function(vec) {
-                vec@data
-              }))
+              mat <- do.call(rbind, map(rest, ~ .@data))
 
               ndim <- c(d1[1:3], d1[4] + d2[4] + nrow(mat))
               ndat <- rbind(ndat, mat)
