@@ -54,7 +54,7 @@ setMethod(f="as.matrix", signature=signature(x = "ROIVec"), def=function(x) {
     x[x > 0 & x <= vdim[i]]
   })
 
-  if (all(sapply(coords, length) == 0)) {
+  if (all(map_int(coords, length) == 0)) {
     stop(paste("invalid cube for centroid", centroid, " with surround", surround, ": volume is zero"))
   }
 
@@ -81,7 +81,7 @@ setMethod(f="as.matrix", signature=signature(x = "ROIVec"), def=function(x) {
     x[x > 0 & x <= vdim[i]]
   })
 
-  if (all(sapply(coords, length) == 0)) {
+  if (all(map_int(coords, length) == 0)) {
     stop(paste("invalid cube for centroid", centroid, " with surround", surround, ": volume is zero"))
   }
 
@@ -210,7 +210,7 @@ make_spherical_grid <- function(bvol, centroid, radius) {
 
   centroid <- as.integer(centroid)
 
-  deltas <- sapply(vspacing, function(x) round(radius/x))
+  deltas <- map_int(vspacing, function(x) round(radius/x))
 
   cube <- as.matrix(expand.grid(
     seq(centroid[1] - round(radius/vspacing[1]), centroid[1] + round(radius/vspacing[1])),
@@ -464,10 +464,10 @@ Kernel <- function(kerndim, vdim, FUN=dnorm, ...) {
   #kern <- array(0, kerndim)
 
   ## the half-width for each dimensions
-  hwidth <- sapply(kerndim, function(d) ceiling(d/2 -1))
+  hwidth <- map_int(kerndim, function(d) ceiling(d/2 -1))
 
   ## note, if a kernel dim is even, this will force it to be odd numbered
-  grid.vec <- lapply(hwidth, function(sv) seq(-sv, sv))
+  grid.vec <- map(hwidth, function(sv) seq(-sv, sv))
 
   # compute relative voxel locations (i.e. centered at 0,0,0)
   voxel.ind <- as.matrix(do.call("expand.grid", grid.vec))

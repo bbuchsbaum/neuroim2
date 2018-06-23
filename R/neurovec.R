@@ -199,7 +199,7 @@ read_vol_list <- function(file_names, mask=NULL) {
 	if (is.null(mask)) {
 		mat <- do.call(cbind, vols)
 		dspace <- add_dim(space(vols[[1]]), length(vols))
-		DenseNeuroVec(mat, dspace, label=sapply(meta_info, function(m) m@label))
+		DenseNeuroVec(mat, dspace, label=map_chr(meta_info, function(m) m@label))
 	} else {
 		mat <- do.call(cbind, vols)
 		dspace <- add_dim(space(vols[[1]]), length(vols))
@@ -213,7 +213,7 @@ read_vol_list <- function(file_names, mask=NULL) {
 		}
 
 
-		SparseNeuroVec(mat[mask,], dspace, mask=mask, label=sapply(meta_info, function(m) m@label))
+		SparseNeuroVec(mat[mask,], dspace, mask=mask, label=map_chr(meta_info, function(m) m@label))
 
 	}
 }

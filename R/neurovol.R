@@ -580,7 +580,7 @@ setMethod(f="patch_set", signature=signature(x="NeuroVol",
 setMethod(f="mapf", signature=signature(x="NeuroVol", m="Kernel"),
           def=function(x, m, mask=NULL) {
             ovol <- array(0, dim(x))
-            hwidth <- sapply(m@width, function(d) ceiling(d/2 -1)) + 1
+            hwidth <- map_int(m@width, function(d) ceiling(d/2 -1)) + 1
             xdim <- dim(x)[1]
             ydim <- dim(x)[2]
             zdim <- dim(x)[3]
@@ -650,7 +650,7 @@ setMethod(f="conn_comp", signature=signature(x="NeuroVol"),
 		}
 
 		if (local_maxima) {
-			if (all(sapply(locations, NROW) == 1)) {
+			if (all(map_int(locations, NROW) == 1)) {
 
 			}
 			coord.sets <- lapply(locations, function(loc) {

@@ -3,7 +3,7 @@
 #' @keywords internal
 #' @export
 deferred_list <- function(fs) {
-  stopifnot(all(sapply(fs, is.function)))
+  stopifnot(all(map_lgl(fs, is.function)))
   ret <- as.list(fs)
   structure(ret, class="deferred_list")
 }

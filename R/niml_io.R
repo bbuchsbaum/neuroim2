@@ -8,8 +8,8 @@ parse_niml_element <- function(el) {
       keyval <- strsplit(it, "=")[[1]]
       c(key=keyval[1], val=keyval[2])
     })
-    keys <- sapply(els, "[[", "key")
-    vals <- lapply(els, "[[", "val")
+    keys <- map_chr(els, "[[", "key")
+    vals <- map(els, "[[", "val")
     names(vals) <- keys
     list(label=label, attr=vals)
   } else if (length(items) == 1) {
