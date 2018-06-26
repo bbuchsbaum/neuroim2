@@ -307,7 +307,7 @@ setMethod(f="vectors", signature=signature(x="NeuroVec", subset="missing"),
 #' @export
 #' @rdname vectors-methods
 setMethod(f="vectors", signature=signature(x="NeuroVec", subset="numeric"),
-          def = function(x,subset) {
+          def = function(x, subset) {
             ind <- subset
             assert_that(max(ind) < prod(dim(x)[1:3]))
             vox <- index_to_grid(x, ind)
@@ -316,6 +316,38 @@ setMethod(f="vectors", signature=signature(x="NeuroVec", subset="numeric"),
             deferred_list(lis)
           })
 
+#' @export
+#' @rdname vectors-methods
+setMethod(f="vectors", signature=signature(x="NeuroVec", subset="logical"),
+          def = function(x, subset) {
+            assert_that(length(subset) == prod(dim(x)[1:3]))
+            ind <- which(subset)
+            assert_that(length(ind) > 0)
+            vox <- index_to_grid(x, ind)
+            f <- function(i) x[vox[i,1], vox[i,2], vox[i,3],]
+            lis <- lapply(seq_along(ind), function(i) f)
+            deferred_list(lis)
+          })
+
+
+#' @export
+#' @rdname vectors-methods
+setMethod(f="blocks", signature=signature(x="NeuroVec", indices="integer"),
+          def = function(x, indices,...) {
+            assert_that(length(indices) == dim(x)[4])
+            isplit <- split(1:length(indices), indices)
+            out <- vector(mode="list", length(isplit))
+
+            for (i in seq_along(isplit)) {
+              out[[i]] <- function(i) {
+                sub_vector(x, isplit[[i]])
+              }
+            }
+
+            ret <- deferred_list(out)
+            names(ret) <- names(isplit)
+            ret
+          })
 
 #' [[
 #' @rdname NeuroVec-methods

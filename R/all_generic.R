@@ -52,6 +52,15 @@ setGeneric(name="vols", def=function(x, indices, ...) standardGeneric("vols"))
 #' @rdname vectors-methods
 setGeneric(name="vectors", def=function(x, subset, ...) standardGeneric("vectors"))
 
+#' Generic function to cut a vector-valued object into a list of sub-blocks
+#'
+#' @param x the object that supplies the vector data
+#' @param indices a vector of indices for the blocks. Must match the length of the inut vector.
+#' @param ... additional arguments
+#' @export
+#' @rdname blocks-methods
+setGeneric(name="blocks", def=function(x, indices, ...) standardGeneric("blocks"))
+
 #' Generic function to extract an ordered series of 2D slices
 #'
 #' @param x the object that supplies the slices

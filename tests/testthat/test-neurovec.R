@@ -1,3 +1,4 @@
+library(magrittr)
 gmask <- system.file("extdata", "global_mask.nii", package="neuroim2")
 
 
@@ -88,6 +89,27 @@ test_that("can map over each vector in a NeuroVec", {
   expect_equal(length(mean.vec2), 10)
   expect_equal(unlist(mean.vec1), as.vector(apply(bv1, 1:3, mean)))
 })
+
+
+test_that("can extract a list of vectors from a NeuroVec", {
+  bv1 <- gen_dat(10,10,10, rand=TRUE)
+
+  vecs <- bv1 %>% vectors
+  assert_that(length(vecs) == prod(dim(bv1)[1:3]))
+  assert_that(length(vecs[[1]]) == dim(bv1)[4])
+
+  vecs2 <- bv1 %>% vectors(subset=1:100)
+  assert_that(length(vecs2) == 100)
+  assert_that(length(vecs2[[1]]) == dim(bv1)[4])
+
+  keep <- runif(prod(dim(bv1)[1:3])) > .5
+  vecs3 <- bv1 %>% vectors(subset=keep)
+
+  assert_that(length(vecs3) == sum(keep))
+  assert_that(length(vecs3[[1]]) == dim(bv1)[4])
+
+})
+
 
 test_that("can map over a subset of vols in a NeuroVec", {
   bv1 <- gen_dat()

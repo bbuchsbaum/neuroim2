@@ -5,6 +5,8 @@
 \alias{vectors}
 \alias{vectors,NeuroVec,missing-method}
 \alias{vectors,NeuroVec,numeric-method}
+\alias{vectors,NeuroVec,logical-method}
+\alias{blocks,NeuroVec,integer-method}
 \title{Generic function to extract an ordered series of 1D vectors}
 \usage{
 vectors(x, subset, ...)
@@ -12,6 +14,10 @@ vectors(x, subset, ...)
 \S4method{vectors}{NeuroVec,missing}(x)
 
 \S4method{vectors}{NeuroVec,numeric}(x, subset)
+
+\S4method{vectors}{NeuroVec,logical}(x, subset)
+
+\S4method{blocks}{NeuroVec,integer}(x, indices, ...)
 }
 \arguments{
 \item{x}{the object that supplies the vector data}

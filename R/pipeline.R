@@ -9,6 +9,16 @@ deferred_list <- function(fs) {
 }
 
 
+#' @export
+print.deferred_list <- function(x) {
+  cat("deferred_list: ", length(x), " elements. \n")
+}
+
+#' @export
+as.list.deferred_list <- function(x) {
+  map(1:length(x), function(i) x[[i]])
+}
+
 
 #' @keywords internal
 #' @export
