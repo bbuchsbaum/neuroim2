@@ -54,12 +54,22 @@ setGeneric(name="vectors", def=function(x, subset, ...) standardGeneric("vectors
 
 #' Generic function to cut a vector-valued object into a list of sub-blocks
 #'
-#' @param x the object that supplies the vector data
+#' @param x the object to split
 #' @param indices a vector of indices for the blocks. Must match the length of the inut vector.
 #' @param ... additional arguments
 #' @export
-#' @rdname blocks-methods
-setGeneric(name="blocks", def=function(x, indices, ...) standardGeneric("blocks"))
+#' @rdname split_blocks-methods
+setGeneric(name="split_blocks", def=function(x, indices, ...) standardGeneric("split_blocks"))
+
+#' Generic function to cut an object into a list of spatial or spatiotemporal clusters
+#'
+#' @param x the object to split
+#' @param clusters a vector of cluster indices to split by
+#' @param ... additional arguments
+#' @export
+#' @rdname split_clusters-methods
+setGeneric(name="split_clusters", def=function(x, clusters, ...) standardGeneric("split_clusters"))
+
 
 #' Generic function to extract an ordered series of 2D slices
 #'

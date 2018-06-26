@@ -305,7 +305,7 @@ NeuroVolSource <- function(input, index=1) {
 #' @return an instance of the class \code{\linkS4class{DenseNeuroVol}}
 #'
 #' @examples
-#' fname <- system.file("extdata", "global_mask.nii", package="neuroim")
+#' fname <- system.file("extdata", "global_mask.nii", package="neuroim2")
 #' x <- read_vol(fname)
 #' print(dim(x))
 #' space(x)

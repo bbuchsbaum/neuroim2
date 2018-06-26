@@ -1,4 +1,5 @@
 library(magrittr)
+library(purrr)
 gmask <- system.file("extdata", "global_mask.nii", package="neuroim2")
 
 
@@ -88,6 +89,32 @@ test_that("can map over each vector in a NeuroVec", {
   expect_equal(length(mean.vec1), 10*10*10)
   expect_equal(length(mean.vec2), 10)
   expect_equal(unlist(mean.vec1), as.vector(apply(bv1, 1:3, mean)))
+})
+
+test_that("can split a NeuroVec into a set of subvectors", {
+  bv1 <- gen_dat(10,10,10, d4=20, rand=TRUE)
+  blstruc <- rep(1:4, length.out=20)
+
+  blks <- split_blocks(bv1, blstruc)
+  assert_that(length(blks) == length(unique(blstruc)))
+  assert_that(dim(blks[[1]])[4] == sum(blstruc == 1))
+
+  ## nested map
+  ## first divide into blocks, then convert to vectors, then foreach block/vector compute mean
+  res <- bv1 %>% split_blocks(blstruc) %>% map(vectors) %>% map(~ map_dbl(., mean))
+  assert_that(length(res) == length(blks))
+  assert_that(length(res[[1]]) == prod(dim(bv1)[1:3]))
+
+})
+
+test_that("can split a NeuroVec into a set of clustered ROIs", {
+  bv1 <- gen_dat(10,10,10, d4=20, rand=TRUE)
+  blstruc <- rep(1:4, length.out=20)
+
+  grid <- index_to_coord(space(bv1), as.numeric(1:prod(dim(bv1)[1:3])))
+  kres <- kmeans(grid, centers=50)
+  bv1 %>% split_clusters(kres$cluster) %>% map_dbl(~ mean(.))
+
 })
 
 

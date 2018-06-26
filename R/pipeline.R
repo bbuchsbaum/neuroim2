@@ -3,9 +3,9 @@
 #' @keywords internal
 #' @export
 deferred_list <- function(fs) {
-  stopifnot(all(map_lgl(fs, is.function)))
+  assert_that(all(map_lgl(fs, is.function)))
   ret <- as.list(fs)
-  structure(ret, class="deferred_list")
+  structure(ret, class=c("deferred_list", "list"))
 }
 
 
@@ -24,7 +24,6 @@ as.list.deferred_list <- function(x) {
 #' @export
 `[[.deferred_list` <- function (x, i)  {
  ff <- NextMethod()
-
  ff(i)
 }
 

@@ -211,9 +211,12 @@ setMethod(f="index_to_grid", signature=signature(x="NeuroSpace", idx="numeric"),
 #' @rdname index_to_coord-methods
 setMethod(f="index_to_coord", signature=signature(x="NeuroSpace", idx="numeric"),
           def=function(x, idx) {
+            d <- min(3, ndim(x))
             grid <- index_to_grid(x, idx) - .5
-            res <- trans(x) %*% t(cbind(grid, rep(1,nrow(grid))))
-            t(res[1:ndim(x),])
+            res <- trans(x) %*% t(cbind(grid[,1:d], rep(1,nrow(grid))))
+
+
+            t(res[1:d,])
           })
 
 #' @export

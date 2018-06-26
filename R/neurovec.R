@@ -331,8 +331,31 @@ setMethod(f="vectors", signature=signature(x="NeuroVec", subset="logical"),
 
 
 #' @export
-#' @rdname vectors-methods
-setMethod(f="blocks", signature=signature(x="NeuroVec", indices="integer"),
+#' @rdname split_blocks-methods
+setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="integer"),
+          def = function(x, clusters,...) {
+            assert_that(length(clusters) == prod(dim(x)[1:3]))
+            keep <- which(clusters > 0 & !is.na(clusters))
+            clusters <- clusters[keep]
+            assert_that(length(clusters) > 0)
+
+            isplit <- split(1:length(clusters), clusters)
+            out <- vector(mode="list", length(isplit))
+
+            for (i in seq_along(isplit)) {
+              out[[i]] <- function(i) {
+                series_roi(x, isplit[[i]])
+              }
+            }
+
+            ret <- deferred_list(out)
+            names(ret) <- names(isplit)
+            ret
+          })
+
+#' @export
+#' @rdname split_blocks-methods
+setMethod(f="split_blocks", signature=signature(x="NeuroVec", indices="integer"),
           def = function(x, indices,...) {
             assert_that(length(indices) == dim(x)[4])
             isplit <- split(1:length(indices), indices)

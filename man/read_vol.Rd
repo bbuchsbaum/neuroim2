@@ -18,7 +18,7 @@ an instance of the class \code{\linkS4class{DenseNeuroVol}}
 Load an image volume from a file
 }
 \examples{
-fname <- system.file("extdata", "global_mask.nii", package="neuroim")
+fname <- system.file("extdata", "global_mask.nii", package="neuroim2")
 x <- read_vol(fname)
 print(dim(x))
 space(x)

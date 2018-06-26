@@ -437,6 +437,19 @@ setMethod("show", signature=signature(object = "ROIVol"),
 		  })
 
 
+#' show an \code{\linkS4class{ROIVec}}
+#' @param object the object
+#' @export
+setMethod("show", signature=signature(object = "ROIVec"),
+          function (object) {
+            cat("\n\nROIVec", "\n")
+            cat("  ncol:           ", ncol(object), "\n")
+            cat("  nrow:           ", nrow(object), "\n")
+            cat("  Parent Dim:     ", dim(object@space), "\n")
+            cat("  Voxel Cen. Mass:", colMeans(coords(object)), "\n")
+          })
+
+
 
 
 
