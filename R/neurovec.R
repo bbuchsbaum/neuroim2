@@ -331,7 +331,7 @@ setMethod(f="vectors", signature=signature(x="NeuroVec", subset="logical"),
 
 
 #' @export
-#' @rdname split_blocks-methods
+#' @rdname split_clusters-methods
 setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="integer"),
           def = function(x, clusters,...) {
             assert_that(length(clusters) == prod(dim(x)[1:3]))
@@ -351,6 +351,25 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="intege
             ret <- deferred_list(out)
             names(ret) <- names(isplit)
             ret
+          })
+
+#' @export
+#' @rdname split_clusters-methods
+setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="numeric"),
+          def = function(x, clusters,...) {
+            callGeneric(x, as.integer(clusters), ...)
+          })
+
+
+#' @export
+#' @rdname split_clusters-methods
+setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="ClusteredNeuroVol"),
+          def = function(x, clusters,...) {
+            assert_that(prod(dim(x)[1:3]) == length(clusters@mask))
+            m <- which(clusters@mask)
+            clus <- rep(0, length(clusters@mask))
+            clus[m] <- clusters@clusters
+            split_clusters(x,clus)
           })
 
 #' @export

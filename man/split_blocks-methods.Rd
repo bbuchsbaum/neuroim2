@@ -3,13 +3,10 @@
 \docType{methods}
 \name{split_blocks}
 \alias{split_blocks}
-\alias{split_clusters,NeuroVec,integer-method}
 \alias{split_blocks,NeuroVec,integer-method}
 \title{Generic function to cut a vector-valued object into a list of sub-blocks}
 \usage{
 split_blocks(x, indices, ...)
-
-\S4method{split_clusters}{NeuroVec,integer}(x, clusters, ...)
 
 \S4method{split_blocks}{NeuroVec,integer}(x, indices, ...)
 }

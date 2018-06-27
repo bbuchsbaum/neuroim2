@@ -80,24 +80,64 @@ setMethod(f="show", signature=signature("ClusteredNeuroVol"),
 )
 
 #' @export
-#' @rdname partition_by-methods
+#' @rdname split_clusters-methods
 #' @examples
-#' mask <- NeuroVol(array(1,c(10,10,10)), NeuroSpace(c(10,10,10)))
+#'
+#' ## split 'NeuroVol' with a 'ClusteredNeuroVol'
+#' vol <- NeuroVol(array(runif(10*10*10),c(10,10,10)), NeuroSpace(c(10,10,10)))
+#' mask <- as.logical(vol > .5)
 #' mask.idx <- which(mask != 0)
 #' grid <- index_to_coord(mask, mask.idx)
 #' vox <- index_to_grid(mask, mask.idx)
+#'
+#' ## partition coordinates into 50 clusters using 'kmeans'
 #' kres <- kmeans(grid, centers=50, iter.max=500)
 #' kvol <- ClusteredNeuroVol(mask, kres$cluster)
-#' klis <- partition_by(mask, kvol)
-#' mask %>% partition_by(kvol) %>% purrr::map(~ mean(values(.)))
-setMethod(f="partition_by", signature=signature(x="NeuroVol", by="ClusteredNeuroVol"),
-          def = function(x,by) {
+#' klis <- split_clusters(mask, kvol)
+#' ret1 <- vol %>% split_clusters(kvol) %>% purrr::map_dbl(~ mean(values(.)))
+#'
+#' ## split NeuroVol with 'integer' vector of clusters.
+#' indices <- numeric(prod(dim(mask)[1:3]))
+#'
+#' ## locations with a cluster value of 0 are ignored
+#' indices[mask.idx] <- kres$cluster
+#'
+#' ret2 <- vol %>% split_clusters(as.integer(indices)) %>% purrr::map_dbl(~ mean(values(.)))
+#' all(ret1 == ret1)
+#'
+setMethod(f="split_clusters", signature=signature(x="NeuroVol", clusters="ClusteredNeuroVol"),
+          def = function(x,clusters) {
             f <- function(i) {
               idx <- kvol@cluster_map[[as.character(i)]]
               ROIVol(space(x), index_to_grid(x,as.numeric(idx)), x[idx])
             }
 
-            dlis <- deferred_list(lapply(1:num_clusters(by), function(i) f))
+            dlis <- deferred_list(lapply(1:num_clusters(clusters), function(i) f))
+          })
+
+
+#' @export
+#' @rdname split_clusters-methods
+setMethod(f="split_clusters", signature=signature(x="NeuroVol", clusters="integer"),
+          def = function(x,clusters) {
+            assert_that(length(clusters) == prod(dim(x)[1:3]))
+            ind <- which(clusters > 0)
+            clusters <- clusters[ind]
+            clist <- split(ind, clusters)
+
+            f <- function(i) {
+              idx <- clist[[i]]
+              ROIVol(space(x), index_to_grid(x,as.numeric(idx)), x[idx])
+            }
+
+            dlis <- deferred_list(lapply(1:length(clist), function(i) f))
+          })
+
+#' @export
+#' @rdname split_clusters-methods
+setMethod(f="split_clusters", signature=signature(x="NeuroVol", clusters="numeric"),
+          def = function(x,clusters) {
+            callGeneric(x,as.integer(clusters))
           })
 
 

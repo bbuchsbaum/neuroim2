@@ -79,14 +79,6 @@ setGeneric(name="split_clusters", def=function(x, clusters, ...) standardGeneric
 #' @rdname slices-methods
 setGeneric(name="slices", def=function(x, ...) standardGeneric("slices"))
 
-#' Generic function to partition an image into a set of regions
-#'
-#' @param x the object to partition
-#' @param by the object defining the partitions over the image space.
-#' @param ... additional arguments
-#' @export
-#' @rdname partition_by-methods
-setGeneric(name="partition_by", def=function(x, by, ...) standardGeneric("partition_by"))
 
 
 

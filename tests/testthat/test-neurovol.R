@@ -254,7 +254,7 @@ test_that("Can partition a NeuroVol into a set of ROIVols", {
   vox <- index_to_grid(mask, mask.idx)
   kres <- kmeans(grid, centers=50, iter.max=500)
   kvol <- ClusteredNeuroVol(mask, kres$cluster)
-  p <- partition_by(mask, kvol)
+  p <- split_clusters(mask, kvol)
   expect_equal(50, length(p))
 })
 
