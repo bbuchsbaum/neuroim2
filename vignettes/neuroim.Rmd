@@ -1,5 +1,5 @@
 ---
-title: "The neuroim package"
+title: "The neuroim2 package"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >

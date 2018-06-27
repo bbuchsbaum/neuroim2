@@ -616,23 +616,24 @@ setMethod(f="mapf", signature=signature(x="NeuroVol", m="Kernel"),
 #' find connected components in NeuroVol
 #'
 #' @export
+#' @importFrom purrr map_int
 #' @param threshold threshold defining lower intensity bound for image mask
 #' @param cluster_table return cluster_table
 #' @param local_maxima return table of local maxima
 #' @param local_maxima_dist the distance used to define minum distance between local maxima
 #' @rdname conn_comp-methods
 setMethod(f="conn_comp", signature=signature(x="NeuroVol"),
-	def=function(x, threshold=0, cluster_table=TRUE, local_maxima=TRUE, local_maxima_dist=15) {
+	def=function(x, threshold=0, cluster_table=TRUE, local_maxima=TRUE, local_maxima_dist=15,...) {
 		mask <- (x > threshold)
 		stopifnot(any(mask))
 
-		comps <- conn_comp_3D(mask)
+		comps <- conn_comp_3D(mask,...)
 
 		grid <- as.data.frame(index_to_grid(mask, which(mask>0)))
 		colnames(grid) <- c("x", "y", "z")
 		locations <- split(grid, comps$index[comps$index>0])
 
-		ret <- list(size=NeuroVol(comps$size, space(x)), index=NeuroVol(comps$index, space(x)), voxels=locations)
+		ret <- list(index=ClusteredNeuroVol(mask, clusters=comps$index[mask>0]), size=NeuroVol(comps$size, space(x)), voxels=locations)
 
 		if (cluster_table) {
 			maxima <- do.call(rbind, lapply(locations, function(loc) {
@@ -646,18 +647,18 @@ setMethod(f="conn_comp", signature=signature(x="NeuroVol"),
 			N <- comps$size[as.matrix(maxima)]
 			Area <- N * prod(spacing(x))
 			maxvals <- x[as.matrix(maxima)]
-			ret$cluster_table <- data.frame(index=1:NROW(maxima), x=maxima[,1], y=maxima[,2], z=maxima[,3], N=N, Area=Area, value=maxvals)
+			ret$cluster_table <- data.frame(index=1:NROW(maxima),
+			                                x=maxima[,1], y=maxima[,2], z=maxima[,3],
+			                                N=N, Area=Area, value=maxvals)
 		}
 
 		if (local_maxima) {
-			if (all(map_int(locations, NROW) == 1)) {
-
-			}
+			#if (all(map_int(locations, NROW) == 1)) {
+      #
+			#}
 			coord.sets <- lapply(locations, function(loc) {
 				sweep(as.matrix(loc), 2, spacing(x), "*")
 			})
-
-
 
 			loc.max <- do.call(rbind, mapply(function(cset, i) {
 				idx <- .pruneCoords(as.matrix(cset), x[as.matrix(locations[[i]])], mindist=local_maxima_dist)

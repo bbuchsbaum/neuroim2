@@ -86,22 +86,38 @@ bootstrap_searchlight <- function(mask, radius=8, iter=100) {
 #'
 #' @param mask an image volume containing valid central voxels for roving searchlight
 #' @param radius in mm of spherical searchlight
+#' @param nonzero only include nonzero values
 #' @return an \code{iter} class
 #' @importFrom rflann RadiusSearch
 #' @export
-searchlight <- function(mask, radius) {
+searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE) {
   mask.idx <- which(mask != 0)
+
   grid <- index_to_grid(mask, mask.idx)
+  if (!eager) {
 
-  f <- function(i) {
-    search <- spherical_roi(mask, grid[i,], radius, nonzero=TRUE)
-    attr(search, "center") <- grid[i,]
-    attr(search, "center.index") <- mask.idx[i]
-    attr(search, "length") <- nrow(search@coords)
-    search
+    f <- function(i) {
+      search <- spherical_roi(mask, grid[i,], radius, nonzero=nonzero)
+      attr(search, "center") <- grid[i,]
+      attr(search, "center.index") <- mask.idx[i]
+      attr(search, "length") <- nrow(search@coords)
+      search
+    }
+    deferred_list(lapply(1:nrow(grid), function(i) f))
+  } else {
+    cds <- index_to_coord(mask, mask.idx)
+    rad <- rflann:::RadiusSearch(cds, cds, radius=radius^2, max_neighbour=radius^3)
+    spmask <- space(mask)
+    purrr::map(seq_along(rad$indices), function(i) {
+      ind <- rad$indices[[i]]
+      search <- ROIVol(spmask, grid[ind,,drop=FALSE], mask[ind])
+      attr(search, "center") <- grid[i,]
+      attr(search, "center.index") <- mask.idx[i]
+      attr(search, "length") <- nrow(search@coords)
+      search
+    })
+
   }
-
-  deferred_list(lapply(1:nrow(grid), function(i) f))
 }
 
 

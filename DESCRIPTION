@@ -46,4 +46,6 @@ Collate:
     'sparse_neurovec.R'
 RoxygenNote: 6.0.1.9000
 Suggests: testthat,
-    covr
+    covr,
+    assertthat,
+    purrr

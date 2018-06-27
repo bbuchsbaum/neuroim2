@@ -108,7 +108,7 @@ setMethod(f="show", signature=signature("ClusteredNeuroVol"),
 setMethod(f="split_clusters", signature=signature(x="NeuroVol", clusters="ClusteredNeuroVol"),
           def = function(x,clusters) {
             f <- function(i) {
-              idx <- kvol@cluster_map[[as.character(i)]]
+              idx <- clusters@cluster_map[[as.character(i)]]
               ROIVol(space(x), index_to_grid(x,as.numeric(idx)), x[idx])
             }
 

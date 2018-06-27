@@ -40,7 +40,6 @@ setMethod(f="as.matrix", signature=signature(x = "ROIVec"), def=function(x) {
 })
 
 
-
 .makeSquareGrid <- function(bvol, centroid, surround, fixdim=3) {
   vspacing <- spacing(bvol)
   vdim <- dim(bvol)
@@ -210,7 +209,7 @@ make_spherical_grid <- function(bvol, centroid, radius) {
 
   centroid <- as.integer(centroid)
 
-  deltas <- map_int(vspacing, function(x) round(radius/x))
+  deltas <- map_dbl(vspacing, function(x) round(radius/x))
 
   cube <- as.matrix(expand.grid(
     seq(centroid[1] - round(radius/vspacing[1]), centroid[1] + round(radius/vspacing[1])),
@@ -269,7 +268,6 @@ spherical_roi <- function (bvol, centroid, radius, fill=NULL, nonzero=FALSE) {
   if (is.null(fill) && is(bvol, "NeuroSpace")) {
     fill = 1
   }
-
 
   bspace <- space(bvol)
   vspacing <- spacing(bvol)
