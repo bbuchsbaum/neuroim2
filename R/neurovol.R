@@ -717,6 +717,19 @@ setMethod(f="write_vol",signature=signature(x="NeuroVol", file_name="character",
 		})
 
 
+#' @export
+#' @rdname write_vol-methods
+setMethod(f="write_vol",signature=signature(x="ROIVol", file_name="character", format="character", data_type="missing"),
+          def=function(x, file_name, format) {
+            if (toupper(format) == "NIFTI" || toupper(format) == "NIFTI1" || toupper(format) == "NIFTI-1") {
+              callGeneric(as.dense(x), file_name)
+            } else {
+              stop(paste("sorry, cannot write format: ", format))
+            }
+          })
+
+
+
 #' @export write_vol
 #' @rdname write_vol-methods
 setMethod(f="write_vol",signature=signature(x="NeuroVol", file_name="character", format="missing", data_type="character"),

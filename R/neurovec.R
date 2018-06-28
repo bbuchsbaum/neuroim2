@@ -586,6 +586,15 @@ setMethod(f="as.matrix", signature=signature(x = "DenseNeuroVec"), def=function(
 		})
 
 
+#' @export
+setAs(from="ROIVec", to="SparseNeuroVec",
+      function(from) {
+        dat <- from@.Data
+        mask <- array(0, dim(from@space)[1:3])
+        mask[coords(from)] <- 1
+        SparseNeuroVec(dat, from@space, mask=mask)
+      })
+
 #' @rdname as.sparse-methods
 #' @export
 setMethod(f="as.sparse", signature=signature(x="DenseNeuroVec", mask="LogicalNeuroVol"),
@@ -614,6 +623,16 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVec", mask="numeric"),
 			bvec <- SparseNeuroVec(dat, space(x), logivol)
 
 		})
+
+
+
+
+#' @export
+#' @rdname write_vec-methods
+setMethod(f="write_vec",signature=signature(x="ROIVec", file_name="character", format="missing", data_type="missing"),
+          def=function(x, file_name) {
+            callGeneric(as(x, "SparseNeuroVec"), file_name)
+          })
 
 
 #' @export

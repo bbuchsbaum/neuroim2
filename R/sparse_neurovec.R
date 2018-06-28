@@ -70,7 +70,7 @@ SparseNeuroVec <- function(data, space, mask, source=NULL, label="") {
 
 	if (!inherits(mask, "LogicalNeuroVol")) {
 		mspace <- NeuroSpace(dim(space)[1:3], spacing(space), origin(space), axes(space), trans(space))
-		mask <- LogicalBrainVolume(as.logical(mask), mspace)
+		mask <- LogicalNeuroVol(as.logical(mask), mspace)
 	}
 
 	stopifnot(inherits(mask, "LogicalNeuroVol"))

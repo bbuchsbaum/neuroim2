@@ -343,7 +343,6 @@ setMethod("as.dense", signature(x="ROIVol"),
 })
 
 
-
 #' @rdname values-methods
 #' @export
 setMethod("values", signature(x="ROIVol"),
