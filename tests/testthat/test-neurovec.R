@@ -335,6 +335,18 @@ test_that("can write and read back an image vector", {
 
 })
 
+test_that("can extract ROI from NeuroVec", {
+  mask <- read_vol(gmask)
+  maskvec <- concat(mask,mask,mask,mask)
+  roi <- spherical_roi(mask, centroid=c(10,10,10), radius=8)
+  cds <- coords(roi)
+  roi <- series_roi(maskvec, cds)
+  vec <- as(roi, "SparseNeuroVec")
+  expect_equivalent(class(vec), "SparseNeuroVec")
+  expect_equivalent(nrow(roi@coords), sum(vec@mask))
+
+})
+
 
 # test.NeuroVec.roundtrip.io <- function() {
 #   bvec <- loadVector("data/qrscan01.nii.gz", indices=1:4)
