@@ -440,7 +440,7 @@ setMethod(f="slice", signature=signature(x="NeuroVol", zlevel="numeric", along="
 
             vox <- as.matrix(fast.expand.grid(seq(1,xdim), seq(1,ydim), zlevel))
 
-            gg <- gridToGrid(along, vox)
+            gg <- grid_to_grid(along, vox)
 
             imslice <- x[gg]
 
