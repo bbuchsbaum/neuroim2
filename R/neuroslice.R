@@ -61,6 +61,72 @@ setMethod(f="index_to_grid", signature=signature(x = "NeuroSlice", idx="numeric"
 		  callGeneric(x@space, idx)
 })
 
+#' @export
+#' @importFrom graphics plot
+#' @param cmap a color map consisting of a vector of colors in hex format (e.g. \code{gray(n=255)})
+#' @param irange the intensity range indicating the low and high values of the color scale.
+#' @rdname plot
+#' @examples
+#'
+#' dat <- matrix(rnorm(100*100), 100, 100)
+#' slice <- NeuroSlice(dat, NeuroSpace(c(100,100)))
+#' plot(slice)
+setMethod("plot", signature=signature(x="NeuroSlice"),
+          def=function(x,cmap=gray(seq(0,1,length.out=255)), irange=range(x)) {
+
+            ## reorder y-axis (needed for correct orientation using grid.raster)
+            imslice <- x[1:nrow(x), ncol(x):1,drop=FALSE]
+            ## map intensities to colors
+            imcols <- mapToColors(imslice, cmap, alpha=1, irange=irange, zero_col="#000000")
+
+            cds <- index_to_coord(space(x), 1:length(x))
+            df1 <- data.frame(x=cds[,1], y=cds[,2], value=as.vector(imcols))
+            ggplot2::ggplot(aes(x=x, y=y), data=df1) + geom_raster(aes(fill=value)) +
+              scale_fill_identity() +
+              theme_bw()
+
+          })
+
+
+
+#' @import assertthat
+#' @keywords internal
+mapToColors <- function (imslice, col = heat.colors(128, alpha = 1), zero_col = "#00000000",
+                         alpha = 1, irange = range(imslice), threshold = c(0, 0)) {
+
+  assertthat::assert_that(diff(irange) >= 0)
+  drange <- diff(irange)
+  mcols <- (imslice - irange[1])/diff(irange) * (length(col) -
+                                                   1) + 1
+  mcols[mcols < 1] <- 1
+  mcols[mcols > length(col)] <- length(col)
+  imcols <- col[mcols]
+  if (!is.vector(imslice)) {
+    dim(imcols) <- dim(imslice)
+  }
+  imcols[imslice == 0] <- zero_col
+
+  if (diff(threshold) > 0) {
+    imcols[(imslice >= threshold[1]) & (imslice <= threshold[2])] <- "#00000000"
+  }
+  if (alpha < 1) {
+    rgbmat <- col2rgb(imcols, alpha = TRUE)
+    rgbmat <- rgbmat/255
+    rgbmat[4, ] <- rgbmat[4, ] * alpha
+
+    if (is.vector(imslice)) {
+      array(t(rgbmat), c(length(imslice), 4))
+    }
+    else {
+      array(t(rgbmat), c(dim(imslice), 4))
+    }
+  }
+  else {
+    imcols
+  }
+}
+
+
 
 
 

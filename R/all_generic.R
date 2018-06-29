@@ -1,4 +1,6 @@
 
+if (!isGeneric("plot"))
+  setGeneric("plot", function(x, y, ...) standardGeneric("plot"))
 
 #' Generic function to print an object
 #'
