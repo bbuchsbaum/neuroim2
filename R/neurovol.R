@@ -450,11 +450,6 @@ setMethod(f="slice", signature=signature(x="NeuroVol", zlevel="numeric", along="
           })
 
 
-
-
-
-
-
 #' @export
 #' @rdname as.mask-methods
 setMethod(f="as.mask", signature=signature(x="NeuroVol", indices="missing"),
@@ -864,6 +859,41 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "missing", j = "n
 
 
 
+
+#' @importFrom graphics plot
+#' @param cmap a color map consisting of a vector of colors in hex format (e.g. \code{gray(n=255)})
+#' @param irange the intensity range indicating the low and high values of the color scale.
+#' @param zlevels the series of slice indices to display.
+#' @export
+#' @rdname plot
+#' @examples
+#'
+#' dat <- matrix(rnorm(100*100), 100, 100)
+#' slice <- NeuroSlice(dat, NeuroSpace(c(100,100)))
+#' plot(slice)
+setMethod("plot", signature=signature(x="NeuroVol"),
+          def=function(x,cmap=gray(seq(0,1,length.out=255)),
+                                   zlevels=unique(round(seq(1, dim(x)[3], length.out=6))),
+                                   irange=range(x)) {
+
+
+            df1 <- do.call(rbind, purrr::map(zlevels, function(i) {
+              imslice <- slice(x, zlevel=i, along=3)
+              imcols <- mapToColors(imslice, cmap, alpha=1, irange=irange, zero_col="#000000")
+
+              cds <- index_to_coord(space(imslice), 1:length(imslice))
+              data.frame(x=cds[,1], y=cds[,2], z=i, value=as.vector(imcols))
+            }))
+
+
+            ggplot2::ggplot(aes(x=x, y=y), data=df1) + geom_raster(aes(fill=value)) +
+              scale_fill_identity() +
+              scale_x_continuous(expand=c(0,0)) +
+              scale_y_continuous(expand=c(0,0)) +
+              facet_wrap(~ z) +
+              theme_bw()
+
+          })
 
 
 

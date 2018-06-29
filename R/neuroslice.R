@@ -74,10 +74,9 @@ setMethod(f="index_to_grid", signature=signature(x = "NeuroSlice", idx="numeric"
 setMethod("plot", signature=signature(x="NeuroSlice"),
           def=function(x,cmap=gray(seq(0,1,length.out=255)), irange=range(x)) {
 
-            ## reorder y-axis (needed for correct orientation using grid.raster)
-            imslice <- x[1:nrow(x), ncol(x):1,drop=FALSE]
+
             ## map intensities to colors
-            imcols <- mapToColors(imslice, cmap, alpha=1, irange=irange, zero_col="#000000")
+            imcols <- mapToColors(x, cmap, alpha=1, irange=irange, zero_col="#000000")
 
             cds <- index_to_coord(space(x), 1:length(x))
             df1 <- data.frame(x=cds[,1], y=cds[,2], value=as.vector(imcols))
