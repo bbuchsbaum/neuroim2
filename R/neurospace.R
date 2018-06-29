@@ -286,7 +286,7 @@ setMethod(f="grid_to_grid", signature=signature(x="NeuroSpace", vox="matrix"),
             idx <- which(tx != 0, arr.ind=TRUE)
             tx[idx] <- 1 * sign(tx[idx])
             ovox <- tx %*% t(vox)
-            offset <- map_int(1:nrow(tx), function(i) {
+            offset <- map_dbl(1:nrow(tx), function(i) {
               if (any(tx[i,] < 0)) {
                 dim(x)[i] + 1
               } else {
