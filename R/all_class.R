@@ -458,6 +458,32 @@ setClass("ROIVol",
            }
          })
 
+
+#' ROIVolWindow
+#'
+#' A class that represents a spatially windowed volumetric region of interest
+#'
+#' @rdname ROIVolWindow-class
+#' @slot parent_index the 1D index of the center voxel in the parent space.
+#' @slot center_index the location in the coordinate matrix of the center voxel in the window
+setClass("ROIVolWindow",
+         contains=c("ROIVol"),
+         representation=representation(parent_index="integer", center_index="integer"),
+         validity = function(object) {
+           if (ncol(object@coords) != 3) {
+             stop("coords slot must be a matrix with 3 columns")
+           }
+           if (!is.vector(object@.Data)) {
+             stop("'data' must be a vector")
+           }
+           if (length(object@.Data) != nrow(object@coords)) {
+             stop("length of data vector must equal 'nrow(coords)'")
+           }
+         })
+
+
+
+
 #' ROIVec
 #'
 #' A class that represents a vector-valued volumetric region of interest
@@ -477,6 +503,25 @@ setClass("ROIVec",
          })
 
 
+#' ROIVecWindow
+#'
+#' A class that represents a vector-valued volumetric region of interest
+#'
+#' @slot parent_index the 1D index of the center voxel in the parent space.
+#' @slot center_index the location in the coordinate matrix of the center voxel in the window
+#' @rdname ROIVecWindow-class
+setClass("ROIVecWindow",
+         representation=representation(parent_index="integer", center_index="integer"),
+         contains=c("ROIVec"),
+         validity = function(object) {
+           if (ncol(object@coords) != 3) {
+             stop("coords slot must be a matrix with 3 columns")
+           }
+
+           if (ncol(object@.Data) != nrow(object@coords)) {
+             stop("'ncol(object)' must equal 'nrow(coords)'")
+           }
+         })
 
 
 #' Kernel

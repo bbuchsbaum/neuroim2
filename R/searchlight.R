@@ -35,11 +35,9 @@ random_searchlight <- function(mask, radius) {
     idx <- lookup[vox]
     ret <- mget(as.character(idx), envir=hmap, ifnotfound=NA)
     keep <- !is.na(unlist(ret))
-    search2 <- ROIVol(space(mask), coords=coords(search)[keep,,drop=FALSE], data=rep(1,sum(keep)))
-    attr(search2, "center") <- grid[center,]
-    attr(search2, "center.index") <- mask.idx[center]
-    attr(search2, "indices") <- grid_to_index(mask, vox)
-    attr(search2, "length") <- nrow(vox)
+
+    search2 <- new("ROIVolWindow", rep(1,sum(keep)), space(mask), coords=coords(search)[keep,,drop=FALSE],
+                   center_index=as.integer(1), parent_index=as.integer(search@parent_index))
 
     rm(list=as.character(idx[keep]),envir=hmap)
     slist[[counter]] <- search2
@@ -68,13 +66,7 @@ bootstrap_searchlight <- function(mask, radius=8, iter=100) {
 
   sample.idx <- sample(1:nrow(grid), iter)
 
-  f <- function(i) {
-    search <- spherical_roi(mask, grid[sample.idx[i],], radius, nonzero=TRUE)
-    attr(search, "center") <- grid[i,]
-    attr(search, "center.index") <- mask.idx[i]
-    attr(search, "length") <- nrow(search@coords)
-    search
-  }
+  f <- function(i) spherical_roi(mask, grid[sample.idx[i],], radius, nonzero=TRUE)
 
   dlis <- deferred_list(lapply(1:iter, function(i) f))
 }
@@ -95,14 +87,7 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE) {
 
   grid <- index_to_grid(mask, mask.idx)
   if (!eager) {
-
-    f <- function(i) {
-      search <- spherical_roi(mask, grid[i,], radius, nonzero=nonzero)
-      attr(search, "center") <- grid[i,]
-      attr(search, "center.index") <- mask.idx[i]
-      attr(search, "length") <- nrow(search@coords)
-      search
-    }
+    f <- function(i) { spherical_roi(mask, grid[i,], radius, nonzero=nonzero) }
     deferred_list(lapply(1:nrow(grid), function(i) f))
   } else {
     cds <- index_to_coord(mask, mask.idx)
@@ -110,10 +95,8 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE) {
     spmask <- space(mask)
     purrr::map(seq_along(rad$indices), function(i) {
       ind <- rad$indices[[i]]
-      search <- ROIVol(spmask, grid[ind,,drop=FALSE], mask[ind])
-      attr(search, "center") <- grid[i,]
-      attr(search, "center.index") <- mask.idx[i]
-      attr(search, "length") <- nrow(search@coords)
+      search <- new("ROIVolWindow", mask[mask.idx[ind]], space=spmask, coords=grid[ind,,drop=FALSE],
+                    center_index=as.integer(1), parent_index=as.integer(mask.idx[ind[1]]))
       search
     })
 
@@ -148,11 +131,7 @@ clustered_searchlight <- function(mask, cvol=NULL, csize=NULL) {
   sp <- space(mask)
   f <- function(i) {
     ind <- index_list[[as.character(i)]]
-    ret <- ROIVol(sp, index_to_grid(sp,ind), data=rep(1, length(ind)))
-    attr(ret, "mask_indices") <- mask.idx[ind]
-    attr(ret, "indices") <- ind
-    attr(ret, "length") <- length(ind)
-    ret
+    ROIVol(sp, index_to_grid(sp,ind), data=rep(1, length(ind)))
   }
 
   dlis <- deferred_list(lapply(1:csize, function(i) f))

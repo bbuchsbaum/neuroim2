@@ -69,6 +69,8 @@ setMethod(f="as.matrix", signature=signature(x = "ROIVec"), def=function(x) {
 
 }
 
+
+#' @keywords internal
 .makeCubicGrid <- function(bvol, centroid, surround) {
   vspacing <- spacing(bvol)
   vdim <- dim(bvol)
@@ -131,13 +133,17 @@ square_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE, fixdi
   }
 
   keep <- if (nonzero) {
-    which(vals != 0)
+    vals != 0
   } else {
-    seq_along(vals)
+    TRUE
   }
 
+  grid <- grid[keep,,drop=FALSE]
+
+  center_index <- which(colSums(apply(grid, 1, "==", centroid)) == 3)
+  parent_index <- grid_to_index(bvol, grid[center_index,])
   ### add central voxel
-  ROIVol(space(bvol), coords = grid[keep, ], data=vals[keep])
+  new("ROIVolWindow", space=space(bvol), coords = grid, center_index=center_index, parent_index=parent_index,vals[keep])
 
 }
 
@@ -185,13 +191,16 @@ cuboid_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE) {
   }
 
   keep <- if (nonzero) {
-    which(vals != 0)
+    vals != 0
   } else {
-    seq_along(vals)
+    TRUE
   }
 
-  ### add central voxel
-  ROIVol(space(bvol), coords = grid[keep, ], data = vals[keep])
+  grid <- grid[keep,,drop=FALSE]
+  center_index <- which(colSums(apply(grid, 1, "==", centroid)) == 3)
+  parent_index <- grid_to_index(bvol, grid[center_index,])
+
+  new("ROIVolWindow", vals[keep], space=space(bvol), coords = grid, center_index=center_index, parent_index=parent_index)
 
 }
 
@@ -247,7 +256,7 @@ make_spherical_grid <- function(bvol, centroid, radius) {
 #'  cds <- coords(cube, real=TRUE)
 #'  ## fill in ROI with value of 6
 #'  cube1 <- spherical_roi(sp1, c(5,5,5), 3.5, fill=6)
-#'  all(cube1@data == 6)
+#'  all(cube1 == 6)
 #'
 #'  # create an ROI centered around the real-valued coordinates: x=5, y=5, z=5
 #'  vox <- coord_to_grid(sp1, c(5, 5, 5))
@@ -283,9 +292,15 @@ spherical_roi <- function (bvol, centroid, radius, fill=NULL, nonzero=FALSE) {
 
   if (nonzero) {
     keep <- vals != 0
-    ROIVol(bspace, data = vals[keep], coords = grid[keep, ,drop=FALSE])
+    grid <- grid[keep, ,drop=FALSE]
+    grid[keep, ,drop=FALSE]
+    center_index <- which(colSums(apply(grid, 1, "==", centroid)) == 3)
+    parent_index <- grid_to_index(bvol, grid[center_index,])
+    new("ROIVolWindow", vals[keep], space=bspace, coords = grid, center_index=center_index, parent_index=parent_index)
   } else {
-    ROIVol(bspace, data = vals, coords = grid)
+    center_index <- which(colSums(apply(grid, 1, "==", centroid)) == 3)
+    parent_index <- grid_to_index(bvol, grid[center_index,])
+    new("ROIVolWindow", vals, space=bspace, coords = grid,center_index=center_index, parent_index=parent_index)
   }
 
 }
@@ -380,7 +395,7 @@ setMethod(f="coords", signature=signature(x="ROICoords"),
           function(x, real=FALSE) {
             if (real) {
               input <- t(cbind(x@coords-.5, rep(1, nrow(x@coords))))
-              ret <- t(trans(x) %*% input)
+              ret <- t(trans(x@space) %*% input)
               ret[,1:3,drop=FALSE]
             } else {
               x@coords
