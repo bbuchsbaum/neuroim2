@@ -171,7 +171,7 @@ AFNIMetaInfo <- function(descriptor, afni_header) {
     ## AFNI contains a transform from IJK to dicom (RAI) space.
     ## We want the transform to go from IJK to nifti (LPI) space
 		Tdicom <- matrix(afni_header$IJK_TO_DICOM$content, 3,4, byrow=TRUE)
-		TLPI <- permMat(OrientationList3D$AXIAL_RAI) %*% Tdicom[1:3,]
+		TLPI <- perm_mat(OrientationList3D$AXIAL_RAI) %*% Tdicom[1:3,]
     TLPI <- rbind(TLPI, c(0,0,0,1))
 
 		new("AFNIMetaInfo",

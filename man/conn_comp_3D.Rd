@@ -4,7 +4,7 @@
 \alias{conn_comp_3D}
 \title{Extract connected components from a 3D mask}
 \usage{
-conn_comp_3D(mask, connect = c("6-connect", "18-connect", "26-connect"))
+conn_comp_3D(mask, connect = c("26-connect", "18-connect", "6-connect"))
 }
 \arguments{
 \item{mask}{a 3D binary array}

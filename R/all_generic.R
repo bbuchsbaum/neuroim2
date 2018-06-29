@@ -642,7 +642,7 @@ setGeneric(name="render_slice", def=function(x, zpos, width, height, colmap,...)
 #' @param x the object
 #' @param ... additional arguments
 #' @export
-#' @rdname permMat-methods
+#' @rdname perm_mat-methods
 setGeneric(name="perm_mat", def=function(x, ...) standardGeneric("perm_mat"))
 
 #' Concatenate two objects

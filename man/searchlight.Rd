@@ -4,12 +4,14 @@
 \alias{searchlight}
 \title{searchlight}
 \usage{
-searchlight(mask, radius)
+searchlight(mask, radius, eager = FALSE, nonzero = FALSE)
 }
 \arguments{
 \item{mask}{an image volume containing valid central voxels for roving searchlight}
 
 \item{radius}{in mm of spherical searchlight}
+
+\item{nonzero}{only include nonzero values}
 }
 \value{
 an \code{iter} class

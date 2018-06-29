@@ -2,7 +2,7 @@
 
 #' Extract connected components from a 3D mask
 #' @export
-#' @importFrom purrr
+#' @import purrr
 #' @param mask a 3D binary array
 #' @param connect the connectiivty constraint: "6-connect", "18-connect", or "26-connect"
 #' @return a two-element list of the connected components (cluster \code{index} and cluster \code{size})

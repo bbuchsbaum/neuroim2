@@ -458,8 +458,8 @@ setMethod(f="reorient", signature=signature(x = "NeuroSpace", orient="character"
           def=function(x, orient) {
 
             anat <- findAnatomy3D(orient[1], orient[2], orient[3])
-            pmat_orig <- permMat(x)
-            pmat_new <- permMat(anat)
+            pmat_orig <- perm_mat(x)
+            pmat_new <- perm_mat(anat)
 
 
             tx <- t(pmat_new) %*% trans(x)[1:ndim(x),]

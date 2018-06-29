@@ -3,6 +3,7 @@
 \docType{methods}
 \name{write_vec}
 \alias{write_vec}
+\alias{write_vec,ROIVec,character,missing,missing-method}
 \alias{write_vec,NeuroVec,character,missing,missing-method}
 \alias{write_vec,NeuroVec,character,character,missing-method}
 \alias{write_vec,NeuroVec,character,missing,character-method}
@@ -10,6 +11,8 @@
 \title{Generic function to write a 4D image vector to disk}
 \usage{
 write_vec(x, file_name, format, data_type)
+
+\S4method{write_vec}{ROIVec,character,missing,missing}(x, file_name)
 
 \S4method{write_vec}{NeuroVec,character,missing,missing}(x, file_name)
 

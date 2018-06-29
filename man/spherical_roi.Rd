@@ -31,7 +31,7 @@ Creates a Spherical ROI based on a centroid.
  cds <- coords(cube, real=TRUE)
  ## fill in ROI with value of 6
  cube1 <- spherical_roi(sp1, c(5,5,5), 3.5, fill=6)
- all(cube1@data == 6)
+ all(cube1 == 6)
 
  # create an ROI centered around the real-valued coordinates: x=5, y=5, z=5
  vox <- coord_to_grid(sp1, c(5, 5, 5))

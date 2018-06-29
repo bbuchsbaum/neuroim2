@@ -9,7 +9,7 @@
 conn_comp(x, ...)
 
 \S4method{conn_comp}{NeuroVol}(x, threshold = 0, cluster_table = TRUE,
-  local_maxima = TRUE, local_maxima_dist = 15)
+  local_maxima = TRUE, local_maxima_dist = 15, ...)
 }
 \arguments{
 \item{x}{the image object}
