@@ -330,7 +330,7 @@ setClass("LogicalNeuroVol", contains=c("DenseNeuroVol"))
 #' ClusteredNeuroVol
 #'
 #' Three-dimensional brain image that is divided into N disjoint partitions
-#'
+#' @slot svol a \code{\linkS4class{SparseNeuroVol}} containing cluster indices in 3D space
 #' @slot mask the \code{logical} mask indicating the spatial domain of the set of clusters
 #' @slot clusters an integer index indicating the cluster number for each voxel in the mask
 #' @slot centers the cluster centers
@@ -339,7 +339,8 @@ setClass("LogicalNeuroVol", contains=c("DenseNeuroVol"))
 #' @rdname ClusteredNeuroVol-class
 #' @export
 setClass("ClusteredNeuroVol",
-         representation=representation(mask="LogicalNeuroVol",
+         representation=representation(svol="SparseNeuroVol",
+                                       mask="LogicalNeuroVol",
                                        clusters="integer",
                                        centers="matrix",
                                        label_map="list",

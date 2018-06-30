@@ -46,7 +46,8 @@ ClusteredNeuroVol <- function(mask, clusters, label_map=NULL, label="") {
     cluster_map[[clus_names[[i]]]] <- clus_split[[clus_names[[i]]]]
   }
 
-  new("ClusteredNeuroVol", mask=mask, clusters=as.integer(clusters),
+  svol <- SparseNeuroVol(clusters, space(mask), indices=which(mask))
+  new("ClusteredNeuroVol", svol=svol, mask=mask, clusters=as.integer(clusters),
       label_map=label_map, cluster_map=cluster_map, space=space)
 }
 
@@ -149,4 +150,95 @@ setMethod(f="num_clusters", signature=signature(x="ClusteredNeuroVol"),
             length(x@cluster_map)
           })
 
+
+#' extractor
+#' @export
+#' @param x the object
+#' @param i first index
+#' @param j second index
+#' @param k third index
+#' @param ... additional args
+#' @param drop dimension
+setMethod(f="[", signature=signature(x = "ClusteredNeuroVol", i = "numeric", j = "numeric", drop="ANY"),
+          def=function (x, i, j, k, ..., drop=TRUE) {
+            callGeneric(x@svol, i, j, k,...,drop=drop)
+          })
+
+
+#' extractor
+#' @export
+#' @param x the object
+#' @param i first index
+#' @param j second index
+#' @param k third index
+#' @param ... additional args
+#' @param drop drop dimension
+setMethod(f="[", signature=signature(x = "ClusteredNeuroVol", i = "numeric", j = "missing", drop="missing"),
+          def=function (x, i, j, k, ..., drop) {
+            j <- 1:dim(x)[2]
+
+            if (missing(k)) {
+              k <- 1:dim(x)[3]
+            }
+            callGeneric(x@svol, i=i, j=j, k=k, ..., drop=drop)
+          }
+)
+
+#' extractor
+#' @export
+#' @param x the object
+#' @param i first index
+#' @param j second index
+#' @param k third index
+#' @param ... additional args
+#' @param drop dimension
+setMethod(f="[", signature=signature(x = "ClusteredNeuroVol", i = "matrix", j="missing", drop="ANY"),
+          def=function (x, i, j, k, ..., drop=TRUE) {
+            callGeneric(x@svol, i,j,k,...,drop=drop)
+          }
+)
+
+#' extractor
+#' @export
+#' @param x the object
+#' @param i first index
+#' @param j second index
+#' @param k third index
+#' @param ... additional args
+#' @param drop dimension
+setMethod(f="[", signature=signature(x = "ClusteredNeuroVol", i = "missing", j = "missing", drop="ANY"),
+          def=function (x, i, j, k, ..., drop=TRUE) {
+            i <- 1:(dim(x)[1])
+            j <- 1:(dim(x)[2])
+            callGeneric(x@svol, i=i, j=j,k=k,...,drop=drop)
+          }
+)
+
+#' extractor
+#' @export
+#' @param x the object
+#' @param i first index
+#' @param j second index
+#' @param k third index
+#' @param ... additional args
+#' @param drop dimension
+setMethod(f="[", signature=signature(x = "ClusteredNeuroVol", i = "missing", j = "numeric", drop="ANY"),
+          def=function (x, i, j, k,  ..., drop=TRUE) {
+            callGeneric(x@svol, i,j,k,...,drop=drop)
+          }
+)
+
+#' extractor
+#' @export
+#' @param x the object
+#' @param i first index
+#' @param j second index
+#' @param k third index
+#' @param ... additional args
+#' @param drop dimension
+setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "missing", drop="ANY"),
+          def=function (x, i, j, k,  ..., drop=TRUE) {
+            callGeneric(x, i, j, k,...)
+          }
+)
 

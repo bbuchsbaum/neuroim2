@@ -316,8 +316,6 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVec", i = "numeric", j = "n
             vmat <- as.matrix(expand.grid(i,j,k))
             ind <- .gridToIndex3D(dim(x)[1:3], vmat[,1:3,drop = FALSE])
 
-
-
             mapped <- lookup(x, ind)
             keep <- mapped > 0
 

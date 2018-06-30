@@ -19,8 +19,6 @@ NeuroSlice <- function(data, space, indices=NULL) {
 		stop("incorrect dimension for neuro_slice")
 	}
 
-
-
 	if (is.null(indices)) {
 		if (length(dim(data)) != 2) {
 		  stopifnot(length(data) == prod(dim(space)[1:2]))

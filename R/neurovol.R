@@ -86,6 +86,7 @@ DenseNeuroVol <- function(data, space, label="", indices=NULL) {
 #' @param label a \code{character} string
 #' @return \code{\linkS4class{SparseNeuroVol}} instance
 #' @export SparseNeuroVol
+#' @import Matrix
 #' @details
 #' Image data is backed by \code{Matrix::sparseVector}.
 #' @examples
@@ -231,7 +232,7 @@ setMethod(f="show", signature=signature("SparseNeuroVol"),
             cat("  Origin         :", paste(paste(signif(sp@origin[1:(length(sp@origin)-1)],2), " X ", collapse=" "),
                                             sp@origin[length(sp@origin)], "\n"))
             cat("  Axes           :", paste(sp@axes@i@axis, sp@axes@j@axis,sp@axes@k@axis), "\n")
-            cat("  Cardinality    :", length(which(object@data>0)))
+            cat("  Cardinality    :", length(Matrix::which(object@data>0)))
           }
 )
 
@@ -754,7 +755,7 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVol", mask="LogicalNeu
             assert_that(all(dim(x) == dim(mask)))
             assert_that(all(spacing(x) == spacing(mask)))
             dat <- x[mask]
-            bvec <- SparseNeuroVol(dat, space(x),indices=which(mask>0))
+            bvec <- SparseNeuroVol(data=dat, space=space(x),indices=which(mask>0))
 
 })
 
@@ -782,13 +783,16 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
               k <- seq(1, dim(x)[3])
             }
 
-            n <- length(i) * length(j) * length(k)
-            mind <- cbind(rep(i, length.out=n), rep(j, each=length(i)), rep(k, each=length(i) * length(j)))
 
-            ind <- gridToIndex(x, mind)
-            x@data[ind]
+            nel <- length(i) * length(j) * length(k)
+            mind <- cbind(rep(i, length.out=nel), rep(j, each=length(i)), rep(k, each=length(i) * length(j)))
+
+            ind <- grid_to_index(x, mind)
+            x@data[as.numeric(ind)]
 
         })
+
+
 
 
 #' extractor
@@ -804,7 +808,10 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "m
             if (missing(k) && nargs() == 4) {
               x@data[as.numeric(i)]
             } else {
-              callGeneric(x, i=i,  seq(1,dim(x)[2]), k, drop)
+              if (missing(k)) {
+                k <- 1:(dim(x)[3])
+              }
+              callGeneric(x, i=i,  j=seq(1,dim(x)[2]), k, drop)
             }
          }
 )
@@ -819,7 +826,7 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "m
 #' @param drop dimension
 setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "matrix", j="missing", drop="ANY"),
           def=function (x, i, j, k, ..., drop=TRUE) {
-            ind <- gridToIndex(x,i)
+            ind <- grid_to_index(x,i)
             x@data[ind]
           }
 )
@@ -837,7 +844,10 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "missing", j = "m
             if (missing(k)) {
               x@data
             } else {
-              callGeneric(x, seq(1, dim(x)[1]), seq(1, dim(x)[2]), k, ...)
+              if (missing(k)) {
+                k <- seq(1, dim(x)[3])
+              }
+              callGeneric(x, i=seq(1, dim(x)[1]), j=seq(1, dim(x)[2]), k=k, ...)
             }
           }
 )
@@ -852,10 +862,29 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "missing", j = "m
 #' @param drop dimension
 setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "missing", j = "numeric", drop="ANY"),
           def=function (x, i, j, k,  ..., drop=TRUE) {
-            callGeneric(x, seq(1, dim(x)[1]), j, k,...)
+            if (missing(k)) {
+              k <- seq(1, dim(x)[3])
+            }
+            callGeneric(x, i=seq(1, dim(x)[1]), j, k,...)
           }
 )
 
+#' extractor
+#' @export
+#' @param x the object
+#' @param i first index
+#' @param j second index
+#' @param k third index
+#' @param ... additional args
+#' @param drop dimension
+setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "missing", drop="ANY"),
+          def=function (x, i, j, k,  ..., drop=TRUE) {
+            if (missing(k)) {
+              k <- 1:(dim(x)[3])
+            }
+            callGeneric(x, i=i, j=seq(1,dim(x)[2]), k,...)
+          }
+)
 
 
 
@@ -878,6 +907,7 @@ setMethod("plot", signature=signature(x="NeuroVol"),
 
 
             df1 <- do.call(rbind, purrr::map(zlevels, function(i) {
+
               imslice <- slice(x, zlevel=i, along=3)
               imcols <- mapToColors(imslice, cmap, alpha=1, irange=irange, zero_col="#000000")
 
