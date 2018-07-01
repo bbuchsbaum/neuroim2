@@ -71,16 +71,19 @@ setMethod(f="index_to_grid", signature=signature(x = "NeuroSlice", idx="numeric"
 #' plot(slice)
 setMethod("plot", signature=signature(x="NeuroSlice"),
           def=function(x,cmap=gray(seq(0,1,length.out=255)), irange=range(x)) {
-
+            if (!requireNamespace("ggplot2", quietly = TRUE)) {
+              stop("Package \"ggplot2\" needed for this function to work. Please install it.",
+                   call. = FALSE)
+            }
 
             ## map intensities to colors
             imcols <- mapToColors(x, cmap, alpha=1, irange=irange, zero_col="#000000")
 
             cds <- index_to_coord(space(x), 1:length(x))
             df1 <- data.frame(x=cds[,1], y=cds[,2], value=as.vector(imcols))
-            ggplot2::ggplot(aes(x=x, y=y), data=df1) + geom_raster(aes(fill=value)) +
-              scale_fill_identity() +
-              theme_bw()
+            ggplot2::ggplot(aes(x=x, y=y), data=df1) + ggplot2::geom_raster(aes(fill=value)) +
+              ggplot2::scale_fill_identity() + ggplot2::xlab("") + ggplot2::ylab("")
+              ggplot2::theme_bw()
 
           })
 

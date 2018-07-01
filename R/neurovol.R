@@ -905,6 +905,10 @@ setMethod("plot", signature=signature(x="NeuroVol"),
                                    zlevels=unique(round(seq(1, dim(x)[3], length.out=6))),
                                    irange=range(x)) {
 
+            if (!requireNamespace("ggplot2", quietly = TRUE)) {
+              stop("Package \"ggplot2\" needed for this function to work. Please install it.",
+                   call. = FALSE)
+            }
 
             df1 <- do.call(rbind, purrr::map(zlevels, function(i) {
 
@@ -916,12 +920,12 @@ setMethod("plot", signature=signature(x="NeuroVol"),
             }))
 
 
-            ggplot2::ggplot(aes(x=x, y=y), data=df1) + geom_raster(aes(fill=value)) +
-              scale_fill_identity() +
-              scale_x_continuous(expand=c(0,0)) +
-              scale_y_continuous(expand=c(0,0)) +
-              facet_wrap(~ z) +
-              theme_bw()
+            ggplot2::ggplot(aes(x=x, y=y), data=df1) + ggplot2::geom_raster(aes(fill=value)) +
+              ggplot2::scale_fill_identity() + xlab("") + ylab("") +
+              ggplot2::scale_x_continuous(expand=c(0,0)) +
+              ggplot2::scale_y_continuous(expand=c(0,0)) +
+              ggplot2::facet_wrap(~ z) +
+              ggplot2::theme_bw()
 
           })
 

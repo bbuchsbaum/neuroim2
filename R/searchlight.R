@@ -71,6 +71,37 @@ bootstrap_searchlight <- function(mask, radius=8, iter=100) {
   dlis <- deferred_list(lapply(1:iter, function(i) f))
 }
 
+#' searchlight
+#'
+#' Create an exhaustive searchlight iterator that only returns voxel coordinates
+#'
+#' @param mask an image volume containing valid central voxels for roving searchlight
+#' @param radius in mm of spherical searchlight
+#' @param nonzero only include nonzero coordinates
+#' @return a list of three-dimensional matrices containingof integer-valued voxel coordinates
+#' @importFrom rflann RadiusSearch
+#' @export
+searchlight_coords <- function(mask, radius, nonzero=FALSE) {
+  mask.idx <- which(mask != 0)
+
+  grid <- index_to_grid(mask, mask.idx)
+  cds <- index_to_coord(mask, mask.idx)
+  rad <- rflann:::RadiusSearch(cds, cds, radius=radius^2, max_neighbour=radius^3)
+  spmask <- space(mask)
+
+  f <- function(i) {
+    ind <- rad$indices[[i]]
+    grid[ind,,drop=FALSE]
+  }
+
+  deferred_list(map(seq_along(rad$indices), ~ f))
+
+  #purrr::map(seq_along(rad$indices), function(i) {
+  #    ind <- rad$indices[[i]]
+  #    grid[ind,,drop=FALSE]
+  #})
+}
+
 
 #' searchlight
 #'
@@ -79,7 +110,7 @@ bootstrap_searchlight <- function(mask, radius=8, iter=100) {
 #' @param mask an image volume containing valid central voxels for roving searchlight
 #' @param radius in mm of spherical searchlight
 #' @param nonzero only include nonzero values
-#' @return an \code{iter} class
+#' @return an \code{ROIVolWindow} class
 #' @importFrom rflann RadiusSearch
 #' @export
 searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE) {
