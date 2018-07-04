@@ -14,7 +14,7 @@ searchlight(mask, radius, eager = FALSE, nonzero = FALSE)
 \item{nonzero}{only include nonzero values}
 }
 \value{
-an \code{iter} class
+an \code{ROIVolWindow} class
 }
 \description{
 Create an exhaustive searchlight iterator

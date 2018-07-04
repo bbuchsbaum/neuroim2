@@ -38,6 +38,9 @@ ClusteredNeuroVol <- function(mask, clusters, label_map=NULL, label="") {
 
 
   clus_idx <- which(mask == TRUE)
+  cds <- index_to_coords(mask, clus_idx)
+  cds_split <- do.call(rbind, map(split(cds, clusters), rowMeans))
+
   clus_split <- split(clus_idx, clusters)
   clus_names <- names(clus_split)
   cluster_map <- new.env()

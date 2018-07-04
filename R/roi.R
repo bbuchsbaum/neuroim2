@@ -293,7 +293,6 @@ spherical_roi <- function (bvol, centroid, radius, fill=NULL, nonzero=FALSE) {
   if (nonzero) {
     keep <- vals != 0
     grid <- grid[keep, ,drop=FALSE]
-    grid[keep, ,drop=FALSE]
     center_index <- which(colSums(apply(grid, 1, "==", centroid)) == 3)
     parent_index <- grid_to_index(bvol, grid[center_index,])
     new("ROIVolWindow", vals[keep], space=bspace, coords = grid, center_index=center_index, parent_index=parent_index)

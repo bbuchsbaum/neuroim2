@@ -10,7 +10,9 @@ vignette: >
 
 ```{r, echo = FALSE, message = FALSE}
 knitr::opts_chunk$set(collapse = T, comment = "#>")
-library(neuroim2)
+#library(neuroim2)
+devtools::load_all()
+library(assertthat)
 ```
 
 ## Reading a NIFTI formatted image volume
@@ -31,6 +33,8 @@ Information about the geometry of the image volume is shown here:
 ```{r}
     print(vol)
 ```
+
+
 
 `read_vol` returns an object of class `NeurolVol` object which extends an R `array` and has 3 dimensions (x,y,z).
 
@@ -103,6 +107,24 @@ When we're ready to write an image volume to disk, we use `write_vol`
     #write_vol(vol2, "output.nii.gz")
 ```
 
+We can also display a `NeuroVol` instance. Lets download an MNI image from the web and plot it.
+
+```{r}
+    temp <- tempfile()
+    uri = "http://www.bic.mni.mcgill.ca/~vfonov/nihpd/obj1/nihpd_asym_07.5-13.5_nifti.zip"
+    download.file(uri,temp)
+    cmd <- paste("unzip ", "-d", dirname(temp), temp)
+    system(cmd)
+    vol <- read_vol(paste0(dirname(temp), "/nihpd_asym_07.5-13.5_t1w.nii"))
+    
+```
+
+Now we can display it using the `plot` command. We will show every 15th slice.
+
+```{r}
+   plot(vol, zlevels=seq(1, dim(vol)[3], by=15))
+    
+```
 
 
 

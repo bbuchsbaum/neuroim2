@@ -10,7 +10,9 @@ vignette: >
 
 ```{r, echo = FALSE, message = FALSE}
 knitr::opts_chunk$set(collapse = T, comment = "#>")
-library(neuroim2)
+devtools::load_all()
+library(assertthat)
+library(purrr)
 ```
 
 
@@ -41,10 +43,7 @@ filling all values in the ROI with 100.
 sphere
 ```
 
-```{r}
-      all.equal(sphere, rep(100, length(sphere)))   
-```
-      
+
 ## Creating a Spherical ROI around a real-valued coordinate
 
 To create a spherical ROI centered around a real coordinate in millimeters, we need to first convert the real-valued coordinates to a voxel-based coordinate.
@@ -98,10 +97,9 @@ The so-called roving "searchlight" is often used to perform multivariate statist
 Here, we compute the mean value in an exhaustive set of spherical searchlights in an image volume.
 
 ```{r}
-library(magrittr)
+library(purrr)
 
-
-slist <- searchlight(vol, radius=8)
+slist <- searchlight(vol, eager=TRUE, radius=8)
 ret <- slist %>% purrr::map(~ mean(vol[coords(.)]))
 ```
 
@@ -129,7 +127,7 @@ ret <- vol %>% clustered_searchlight(cvol=kvol) %>% purrr::map(~ mean(vol[coords
 
 ## Working with image patches
 
-Another type of ROI analysis, similar to the 'searchlight', involves working with square of cuboid image "patches". The `patch_set` function can be used to generate a set of equally-sized patches that span the image space (or some mask covering the space). While a 'searchlight' may have different sizes depending on it's surround, patches are guranteed to be of equal size. This means that at edges, 'patches' will be padded out with the value at the image extremes.
+Another type of ROI analysis, similar to the 'searchlight', involves working with sets of square or cuboid image "patches". The `patch_set` function can be used to generate a set of equally-sized patches that span the image space (or some mask covering the space). The patches are guaranteed to be of equal size. This means that at edges, 'patches' will be padded out with the value at the image extremes.
 
 Here we create a patch set consistting of 3 by 3 by 1 square patches that span the image.
 

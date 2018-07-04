@@ -77,7 +77,21 @@ avgvol <- vol %>% searchlight_coords(radius=12) %>% map_dbl(function(x) {
 plot(avgvol, cmap=rainbow(255), zlevels=seq(1,25,by=3))
 
 ```
-## Mapping a function over each volume of a `NeuroVec`
+
+## Mapping a function over every slice of a `NeuroVol`
+
+Suppose we want to split up an image volume by slice and apply a function to each slice. We can use the `slices` function to achieve this as follows:
+
+```{r}
+
+slice_means <- vol %>% slices %>% map_dbl(~ mean(.))
+plot(slice_means, type='l', ylab="mean intensity", xlab="slice number")
+
+```
+
+
+```{r}
+## Mapping a function over each volume of a `NeuroVec` object
 
 ```{r}
 
@@ -89,7 +103,7 @@ assert_that(length(sd_vec) == dim(vec)[4])
 
 ```
 
-## Mapping a function over each vector of a NeuroVec
+## Mapping a function over each vector of a `NeuroVec` object
 
 ```{r}
 vec <- concat(vol,vol,vol,vol,vol)

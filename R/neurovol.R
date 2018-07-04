@@ -920,8 +920,8 @@ setMethod("plot", signature=signature(x="NeuroVol"),
             }))
 
 
-            ggplot2::ggplot(aes(x=x, y=y), data=df1) + ggplot2::geom_raster(aes(fill=value)) +
-              ggplot2::scale_fill_identity() + xlab("") + ylab("") +
+            ggplot2::ggplot(ggplot2::aes(x=x, y=y), data=df1) + ggplot2::geom_raster(ggplot2::aes(fill=value)) +
+              ggplot2::scale_fill_identity() + ggplot2::xlab("") + ggplot2::ylab("") +
               ggplot2::scale_x_continuous(expand=c(0,0)) +
               ggplot2::scale_y_continuous(expand=c(0,0)) +
               ggplot2::facet_wrap(~ z) +

@@ -18,13 +18,22 @@
 <!-- Font Awesome icons -->
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 
+<!-- clipboard.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script>
+
+<!-- sticky kit -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
-<script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
+
+
+
+<meta property="og:title" content="Function reference" />
+
+
+
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,8 +56,12 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../index.html">neuroim2</a>
+      <span class="navbar-brand">
+        <a class="navbar-link" href="../index.html">neuroim2</a>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.1.0</span>
+      </span>
     </div>
+
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
@@ -68,10 +81,13 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/FileIO.html">Working with Image Volumes</a>
+      <a href="../articles/ImageVolumes.html">Working with Image Volumes</a>
     </li>
     <li>
-      <a href="../articles/neuroim.html">The neuroim package</a>
+      <a href="../articles/neuroim.html">The neuroim2 package</a>
+    </li>
+    <li>
+      <a href="../articles/pipelines.html">Pipelines</a>
     </li>
     <li>
       <a href="../articles/regionOfInterest.html">Regions of Interest</a>
@@ -83,6 +99,7 @@
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
+      
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
@@ -90,1049 +107,1111 @@
       
       </header>
 
-      <div class="row">
-  <div class="col-md-9">
+<div class="row">
+  <div class="contents col-md-9">
     <div class="page-header">
-      <h1>
-        Reference
-        <small>version&nbsp;0.1.0</small>
-      </h1>
+      <h1>Reference</h1>
     </div>
 
-    <div class="contents">
-      <table class="ref-index">
+    <table class="ref-index">
 
-      <colgroup>
-        <col class="alias" />
-        <col class="title" />
-      </colgroup>
+    <colgroup>
+      
+      <col class="alias" />
+      <col class="title" />
+    </colgroup>
 
-      <tbody>
-        <tr>
-          <th colspan="2">
-            <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-            <p class="section-desc"></p>
-          </th>
-        </tr>
-        <tr>
-          <!--  -->
-          <td>
-            <p><code><a href="add_dim-methods.html">add_dim</a></code> </p>
-          </td>
-          <td><p>Generic function to add a dimension to an object</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="AFNIDescriptor-class.html">AFNIFormat-class</a></code> </p>
-          </td>
-          <td><p>AFNIFormat</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="AFNIMetaInfo-class.html">AFNIMetaInfo</a></code> </p>
-          </td>
-          <td><p>AFNIMetaInfo</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="as-methods.html">as</a></code> </p>
-          </td>
-          <td><p>conversion from ClusteredNeuroVol to LogicalNeuroVol</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="as.array-NeuroObj-method.html">as.array</a></code> </p>
-          </td>
-          <td><p>convert <code>NeuroObj</code> instance to array</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="as.list-methods.html">as.list</a></code> </p>
-          </td>
-          <td><p>convert a <code>NeuroVec</code> to <code>list</code> of volumes.</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="as.logical-methods.html">as.logical</a></code> </p>
-          </td>
-          <td><p>as.logical</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="as.mask-methods.html">as.mask</a></code> </p>
-          </td>
-          <td><p>Convert to a LogicalNeuroVol</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="as.matrix-methods.html">as.matrix</a></code> </p>
-          </td>
-          <td><p>convert a <code>DenseNeuroVec</code> to a matrix</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="as.matrix-NeuroObj-method.html">as.matrix</a></code> </p>
-          </td>
-          <td><p>convert <code>NeuroObj</code> instance to matrix</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="as.numeric-methods.html">as.numeric</a></code> </p>
-          </td>
-          <td><p>Convert SparseNeuroVol to numeric</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="as.sparse-methods.html">as.sparse</a></code> </p>
-          </td>
-          <td><p>Convert to from dense to sparse representation</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="as.vector-NeuroObj-method.html">as.vector</a></code> </p>
-          </td>
-          <td><p>convert <code>NeuroObj</code> instance to vector</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="axes-methods.html">axes</a></code> </p>
-          </td>
-          <td><p>Generic getter function to extract image axes</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="AxisSet-class.html">AxisSet-class</a></code> </p>
-          </td>
-          <td><p>AxisSet</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="AxisSet1D-class.html">AxisSet1D-class</a></code> </p>
-          </td>
-          <td><p>AxisSet1D</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="AxisSet2D-class.html">AxisSet2D-class</a></code> </p>
-          </td>
-          <td><p>AxisSet2D</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="AxisSet3D-class.html">AxisSet3D-class</a></code> </p>
-          </td>
-          <td><p>AxisSet3D</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="AxisSet4D-class.html">AxisSet4D-class</a></code> </p>
-          </td>
-          <td><p>AxisSet4D</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="AxisSet5D-class.html">AxisSet5D-class</a></code> </p>
-          </td>
-          <td><p>AxisSet5D</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="BinaryReader-class.html">BinaryReader-class</a></code> </p>
-          </td>
-          <td><p>BinaryReader</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="BinaryReader.html">BinaryReader</a></code> </p>
-          </td>
-          <td><p>BinaryReader</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="BinaryWriter-class.html">BinaryWriter</a></code> </p>
-          </td>
-          <td><p>BinaryWriter</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="bounds-methods.html">bounds</a></code> </p>
-          </td>
-          <td><p>Generic function to extract the spatial bounds (origin + dim * spacing) of an image
-param x the object</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="BrainBasisVector.html">BasisNeuroVec-class</a></code> </p>
-          </td>
-          <td><p>BasisNeuroVec</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="BrainBucket-class.html">BrainBucket-class</a></code> </p>
-          </td>
-          <td><p>BrainBucket</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="close-methods.html">close</a></code> </p>
-          </td>
-          <td><p>close</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="clustered_searchlight.html">clustered_searchlight</a></code> </p>
-          </td>
-          <td><p>Create a clustered searchlight iterator</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="ClusteredNeuroVol-class.html">ClusteredNeuroVol</a></code> </p>
-          </td>
-          <td><p>ClusteredNeuroVol</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="concat-methods.html">concat</a></code> </p>
-          </td>
-          <td><p>Concatenate two objects</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="conn_comp-methods.html">conn_comp</a></code> </p>
-          </td>
-          <td><p>Find connected components</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="coord_to_grid-methods.html">coord_to_grid</a></code> </p>
-          </td>
-          <td><p>Generic function to convert N-dimensional real world coordinates to grid coordinates</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="coord_to_index-methods.html">coord_to_index</a></code> </p>
-          </td>
-          <td><p>Generic function to convert N-dimensional real world coordinates to 1D indices</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="coords-methods.html">coords</a></code> </p>
-          </td>
-          <td><p>Extract coordinates</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="cuboid_roi.html">cuboid_roi</a></code> </p>
-          </td>
-          <td><p>Create A Cuboid Region of Interest</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="data_file_matches-methods.html">data_file_matches</a></code> </p>
-          </td>
-          <td><p>Generic function to test whether a file name conforms to the given a <code><a href='reference/FileFormat-class.html'>FileFormat</a></code> instance.
-Will test for match to data file only</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="data_file-methods.html">data_file</a></code> </p>
-          </td>
-          <td><p>Generic function to get the name of the data file, given a file name and a <code><a href='reference/FileFormat-class.html'>FileFormat</a></code> instance.</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="data_reader-methods.html">data_reader</a></code> </p>
-          </td>
-          <td><p>Generic function to create data reader</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="DenseNeuroVec-class.html">DenseNeuroVec</a></code> </p>
-          </td>
-          <td><p>DenseNeuroVec</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="DenseNeuroVol-class.html">DenseNeuroVol</a></code> </p>
-          </td>
-          <td><p>DenseNeuroVol</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="dim_of-methods.html">dim_of</a></code> </p>
-          </td>
-          <td><p>dim_of</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="dim-FileMetaInfo-method.html">dim</a></code> </p>
-          </td>
-          <td><p>dim of <code>FileMetaInfo</code></p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="dim-NeuroObj-method.html">dim</a></code> </p>
-          </td>
-          <td><p>dim of <code>NeuroObj</code> object</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="dim-NeuroSpace-method.html">dim</a></code> </p>
-          </td>
-          <td><p>dim</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="drop_dim-methods.html">drop_dim</a></code> </p>
-          </td>
-          <td><p>Generic function to drop a dimension from an object</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="file_matches-methods.html">file_matches</a></code> </p>
-          </td>
-          <td><p>Generic function to test whether a file name conforms to the given <code><a href='reference/FileFormat-class.html'>FileFormat</a></code> instance.
-Will test for match to either header file or data file</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="FileFormat-class.html">FileFormat-class</a></code> </p>
-          </td>
-          <td><p>FileFormatDescriptor</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="FileMetaInfo-class.html">FileMetaInfo-class</a></code> </p>
-          </td>
-          <td><p>FileMetaInfo</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="FileSource-class.html">FileSource-class</a></code> </p>
-          </td>
-          <td><p>FileSource</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="grid_to_coord-methods.html">grid_to_coord</a></code> </p>
-          </td>
-          <td><p>Generic function to convert N-dimensional grid coordinate coordinates to real world coordinates</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="grid_to_grid-methods.html">grid_to_grid</a></code> </p>
-          </td>
-          <td><p>Generic function to convert voxel coordinates in the reference space (LPI) to native array space.</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="grid_to_index-methods.html">grid_to_index</a></code> </p>
-          </td>
-          <td><p>Generic function to convert N-dimensional grid coordinate to 1D indices</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="header_file_matches-methods.html">header_file_matches</a></code> </p>
-          </td>
-          <td><p>Generic function to test whether a file name conforms to the given <code><a href='reference/FileFormat-class.html'>FileFormat</a></code> instance.
-Will test for match to header file only</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="header_file-methods.html">header_file</a></code> </p>
-          </td>
-          <td><p>Generic function to get the name of the header file, given a file name and a <code><a href='reference/FileFormat-class.html'>FileFormat</a></code> instance.</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="hello.html">hello</a></code> </p>
-          </td>
-          <td><p>Hello, World!</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="index_to_coord-methods.html">index_to_coord</a></code> </p>
-          </td>
-          <td><p>Generic function to convert 1D indices to N-dimensional real world coordinates</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="index_to_grid-methods.html">index_to_grid</a></code> </p>
-          </td>
-          <td><p>Generic function to convert 1D indices to N-dimensional grid coordinates</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="IndexLookupVol-class.html">IndexLookupVol</a></code> </p>
-          </td>
-          <td><p>IndexLookupVol</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="indices-methods.html">indices</a></code> </p>
-          </td>
-          <td><p>Extract indices</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="inverse_trans-methods.html">inverse_trans</a></code> </p>
-          </td>
-          <td><p>Generic getter to extract inverse image coordinate transformation</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="Kernel-class.html">Kernel-class</a></code> </p>
-          </td>
-          <td><p>Kernel</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="Kernel.html">Kernel</a></code> </p>
-          </td>
-          <td><p>Create a Kernel object from a function of distance from kernel center</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="length-methods.html">length</a></code> </p>
-          </td>
-          <td><p>Get length of <code>NeuroVec</code>. This is the numbe rof volumes in the volume vector (e.g. the 4th image dimension)</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="load_data-methods.html">load_data</a></code> </p>
-          </td>
-          <td><p>load_data</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="loadData-methods.html">load_data</a></code> </p>
-          </td>
-          <td><p>Generic function to load data from a data source</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="LogicalNeuroVol-class.html">LogicalNeuroVol</a></code> </p>
-          </td>
-          <td><p>LogicalNeuroVol</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="lookup-methods.html">lookup</a></code> </p>
-          </td>
-          <td><p>Index Lookup operation</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="make_vector.html">make_vector</a></code> </p>
-          </td>
-          <td><p>make_vector</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="make_vol.html">make_vol</a></code> </p>
-          </td>
-          <td><p>make_vol</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="map_values-methods.html">map_values</a></code> </p>
-          </td>
-          <td><p>Generic function to map values from one set to another using a user-supplied lookup table</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="map-methods.html">map</a></code> </p>
-          </td>
-          <td><p>Generic function to apply a function to an object</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="matchAnatomy2D.html">matchAnatomy2D</a></code> </p>
-          </td>
-          <td><p>given two named axes return AxisSet2D singleton</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="matchAnatomy3D.html">matchAnatomy3D</a></code> </p>
-          </td>
-          <td><p>given three named axes return AxisSet3D singleton</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="MetaInfo-class.html">MetaInfo</a></code> </p>
-          </td>
-          <td><p>MetaInfo</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="MNI_SPACE_1MM.html">data</a></code> </p>
-          </td>
-          <td><p>MNI SPACE 1MM</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="NamedAxis-class.html">NamedAxis-class</a></code> </p>
-          </td>
-          <td><p>NamedAxis</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="ndim-methods.html">ndim</a></code> </p>
-          </td>
-          <td><p>Generic function to extract the number of dimensions of an object</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="neuro_space.html">NeuroSpace</a></code> </p>
-          </td>
-          <td><p>Constructor function for <code><a href='reference/NeuroSpace-class.html'>NeuroSpace</a></code> class</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="neuroim2.html">neuroim2</a></code> </p>
-          </td>
-          <td><p>neuroim2</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="NeuroObj-class.html">NeuroObj-class</a></code> </p>
-          </td>
-          <td><p>NeuroObj
+    <tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
+          <p class="section-desc"></p>
+        </th>
+      </tr>
+      <tr>
+        
+        <td>
+          <p><code><a href="AFNIDescriptor-class.html">AFNIFormat-class</a></code> </p>
+        </td>
+        <td><p>AFNIFormat</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="AFNIMetaInfo-class.html">AFNIMetaInfo()</a></code> </p>
+        </td>
+        <td><p>AFNIMetaInfo</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="AxisSet-class.html">AxisSet-class</a></code> </p>
+        </td>
+        <td><p>AxisSet</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="AxisSet1D-class.html">AxisSet1D-class</a></code> </p>
+        </td>
+        <td><p>AxisSet1D</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="AxisSet2D-class.html">AxisSet2D-class</a></code> </p>
+        </td>
+        <td><p>AxisSet2D</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="AxisSet3D-class.html">AxisSet3D-class</a></code> </p>
+        </td>
+        <td><p>AxisSet3D</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="AxisSet4D-class.html">AxisSet4D-class</a></code> </p>
+        </td>
+        <td><p>AxisSet4D</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="AxisSet5D-class.html">AxisSet5D-class</a></code> </p>
+        </td>
+        <td><p>AxisSet5D</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="BinaryReader-class.html">BinaryReader-class</a></code> </p>
+        </td>
+        <td><p>BinaryReader</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="BinaryReader.html">BinaryReader()</a></code> </p>
+        </td>
+        <td><p>BinaryReader</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="BinaryWriter-class.html">BinaryWriter()</a></code> </p>
+        </td>
+        <td><p>BinaryWriter</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="BrainBasisVector.html">BasisNeuroVec-class</a></code> </p>
+        </td>
+        <td><p>BasisNeuroVec</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="BrainBucket-class.html">BrainBucket-class</a></code> </p>
+        </td>
+        <td><p>BrainBucket</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="ClusteredNeuroVol-class.html">ClusteredNeuroVol()</a></code> </p>
+        </td>
+        <td><p>ClusteredNeuroVol</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="DenseNeuroVec-class.html">DenseNeuroVec()</a></code> </p>
+        </td>
+        <td><p>DenseNeuroVec</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="DenseNeuroVol-class.html">DenseNeuroVol()</a></code> </p>
+        </td>
+        <td><p>DenseNeuroVol</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="FileFormat-class.html">FileFormat-class</a></code> </p>
+        </td>
+        <td><p>FileFormatDescriptor</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="FileMetaInfo-class.html">FileMetaInfo-class</a></code> </p>
+        </td>
+        <td><p>FileMetaInfo</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="FileSource-class.html">FileSource-class</a></code> </p>
+        </td>
+        <td><p>FileSource</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="IndexLookupVol-class.html">IndexLookupVol()</a></code> </p>
+        </td>
+        <td><p>IndexLookupVol</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="Kernel-class.html">Kernel-class</a></code> </p>
+        </td>
+        <td><p>Kernel</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="Kernel.html">Kernel()</a></code> </p>
+        </td>
+        <td><p>Create a Kernel object from a function of distance from kernel center</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="LogicalNeuroVol-class.html">LogicalNeuroVol()</a></code> </p>
+        </td>
+        <td><p>LogicalNeuroVol</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="MNI_SPACE_1MM.html">MNI_SPACE_1MM</a></code> </p>
+        </td>
+        <td><p>MNI SPACE 1MM</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="MetaInfo-class.html">MetaInfo()</a></code> </p>
+        </td>
+        <td><p>MetaInfo</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="NIFTIFileDescriptor-class.html">NIFTIFormat-class</a></code> </p>
+        </td>
+        <td><p>NIFTIFormat</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="NIFTIMetaInfo-class.html">NIFTIMetaInfo()</a></code> </p>
+        </td>
+        <td><p>Constructor for <code>NIFTIMetaInfo</code> class</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="NamedAxis-class.html">NamedAxis-class</a></code> </p>
+        </td>
+        <td><p>NamedAxis</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="NeuroObj-class.html">NeuroObj-class</a></code> </p>
+        </td>
+        <td><p>NeuroObj
 Base class for all data objects with a cartesion spatial represenetation</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="NeuroSlice-class.html">NeuroSlice-class</a></code> </p>
-          </td>
-          <td><p>NeuroSlice</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="NeuroSlice.html">NeuroSlice</a></code> </p>
-          </td>
-          <td><p>neuro_slice constructor</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="NeuroSpace-class.html">NeuroSpace-class</a></code> </p>
-          </td>
-          <td><p>NeuroSpace</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="NeuroVec-class.html">NeuroVec</a></code> </p>
-          </td>
-          <td><p>NeuroVec</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="NeuroVec-methods.html">[[,NeuroVec,numeric-method</a></code> </p>
-          </td>
-          <td><p>[[</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="NeuroVecSource-class.html">NeuroVecSource-class</a></code> </p>
-          </td>
-          <td><p>NeuroVecSource</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="NeuroVecSource.html">NeuroVecSource</a></code> </p>
-          </td>
-          <td><p>NeuroVecSource</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="NeuroVol-class.html">NeuroVol-class</a></code> </p>
-          </td>
-          <td><p>NeuroVol
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="NeuroSlice-class.html">NeuroSlice-class</a></code> </p>
+        </td>
+        <td><p>NeuroSlice</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="NeuroSlice.html">NeuroSlice()</a></code> </p>
+        </td>
+        <td><p>neuro_slice constructor</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="NeuroSpace-class.html">NeuroSpace-class</a></code> </p>
+        </td>
+        <td><p>NeuroSpace</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="NeuroVec-class.html">NeuroVec()</a></code> </p>
+        </td>
+        <td><p>NeuroVec</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="NeuroVec-methods.html">`[[`(<i>&lt;NeuroVec&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>[[</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="NeuroVecSource-class.html">NeuroVecSource-class</a></code> </p>
+        </td>
+        <td><p>NeuroVecSource</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="NeuroVecSource.html">NeuroVecSource()</a></code> </p>
+        </td>
+        <td><p>NeuroVecSource</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="NeuroVol-class.html">NeuroVol-class</a></code> </p>
+        </td>
+        <td><p>NeuroVol
 Base class for image representing 3D volumetric data.</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="NeuroVol.html">NeuroVol</a></code> </p>
-          </td>
-          <td><p>NeuroVol</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="NeuroVolSource-class.html">NeuroVolSource</a></code> </p>
-          </td>
-          <td><p>NeuroVolSource</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="NIFTIFileDescriptor-class.html">NIFTIFormat-class</a></code> </p>
-          </td>
-          <td><p>NIFTIFormat</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="NIFTIMetaInfo-class.html">NIFTIMetaInfo</a></code> </p>
-          </td>
-          <td><p>Constructor for <code><a href='reference/FileMetaInfo-class.html'>NIFTIMetaInfo</a></code> class</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="num_clusters-methods.html">num_clusters</a></code> </p>
-          </td>
-          <td><p>num_clusters</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="origin-methods.html">origin</a></code> </p>
-          </td>
-          <td><p>Generic getter to extract image origin</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="partition_by-methods.html">partition_by</a></code> </p>
-          </td>
-          <td><p>Generic function to partition an image into a set of regions</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="patch_set-methods.html">patch_set</a></code> </p>
-          </td>
-          <td><p>patch_set</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="perm_mat-methods.html">perm_mat</a></code> </p>
-          </td>
-          <td><p>perm_mat</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="permMat-methods.html">perm_mat</a></code> </p>
-          </td>
-          <td><p>Extract permutation matrix</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="print-AxisSet2D-method.html">print</a></code> </p>
-          </td>
-          <td><p>print a <code>AxisSet2D</code> instance</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="print-AxisSet3D-method.html">print</a></code> </p>
-          </td>
-          <td><p>print a <code>AxisSet3D</code> instance</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="print-methods.html">print</a></code> </p>
-          </td>
-          <td><p>Generic function to print an object</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="print-NamedAxis-method.html">print</a></code> </p>
-          </td>
-          <td><p>print a <code>NamedAxis</code></p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="random_searchlight.html">random_searchlight</a></code> </p>
-          </td>
-          <td><p>Create an spherical random searchlight iterator</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="read_elements-methods.html">read_elements</a></code> </p>
-          </td>
-          <td><p>Generic function to read a sequence of elements from an input source</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="read_header.html">read_header</a></code> </p>
-          </td>
-          <td><p>read header information of an image file</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="read_meta_info-methods.html">read_meta_info</a></code> </p>
-          </td>
-          <td><p>Generic function to read image meta info given a file and a <code><a href='reference/FileFormat-class.html'>FileFormat</a></code> instance.</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="read_vec.html">read_vec</a></code> </p>
-          </td>
-          <td><p>read_vec</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="read_vol_list.html">read_vol_list</a></code> </p>
-          </td>
-          <td><p>read_vol_list</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="read_vol.html">read_vol</a></code> </p>
-          </td>
-          <td><p>Load an image volume from a file</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="render_slice-methods.html">render_slice</a></code> </p>
-          </td>
-          <td><p>Render a slice at z coordinate</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="render-methods.html">render</a></code> </p>
-          </td>
-          <td><p>Render an image to create a drawable image.</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="reorient-methods.html">reorient</a></code> </p>
-          </td>
-          <td><p>Generic function to remap the grid-to-world coordinates mapping of an image.</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="ROI-class.html">ROI-class</a></code> </p>
-          </td>
-          <td><p>ROI</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="ROIVec-class.html">ROIVec-class</a></code> </p>
-          </td>
-          <td><p>ROIVec</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="ROIVec.html">ROIVec</a></code> </p>
-          </td>
-          <td><p>Create an instance of class <code><a href='reference/ROIVec-class.html'>ROIVec</a></code></p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="ROIVol-class.html">ROIVol-class</a></code> </p>
-          </td>
-          <td><p>ROIVol</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="ROIVol.html">ROIVol</a></code> </p>
-          </td>
-          <td><p>Create an instance of class <code><a href='reference/ROIVol-class.html'>ROIVol</a></code></p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="scale_series-methods.html">scale_series</a></code> </p>
-          </td>
-          <td><p>Generic functions to scale (center and/or normalize by standard deviation) each series of a 4D image
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="NeuroVol.html">NeuroVol()</a></code> </p>
+        </td>
+        <td><p>NeuroVol</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="NeuroVolSource-class.html">NeuroVolSource()</a></code> </p>
+        </td>
+        <td><p>NeuroVolSource</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="ROI-class.html">ROI-class</a></code> </p>
+        </td>
+        <td><p>ROI</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="ROIVec-class.html">ROIVec-class</a></code> </p>
+        </td>
+        <td><p>ROIVec</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="ROIVec.html">ROIVec()</a></code> </p>
+        </td>
+        <td><p>Create an instance of class <code>ROIVec</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="ROIVecWindow-class.html">ROIVecWindow-class</a></code> </p>
+        </td>
+        <td><p>ROIVecWindow</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="ROIVol-class.html">ROIVol-class</a></code> </p>
+        </td>
+        <td><p>ROIVol</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="ROIVol.html">ROIVol()</a></code> </p>
+        </td>
+        <td><p>Create an instance of class <code>ROIVol</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="ROIVolWindow-class.html">ROIVolWindow-class</a></code> </p>
+        </td>
+        <td><p>ROIVolWindow</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SparseNeuroVec-class.html">SparseNeuroVec()</a></code> </p>
+        </td>
+        <td><p>SparseNeuroVec</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SparseNeuroVec-methods.html">`[[`(<i>&lt;SparseNeuroVec&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>[[</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SparseNeuroVecSource-class.html">SparseNeuroVecSource()</a></code> </p>
+        </td>
+        <td><p>SparseNeuroVecSource</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SparseNeuroVol-class.html">SparseNeuroVol()</a></code> </p>
+        </td>
+        <td><p>SparseNeuroVol</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="add_dim-methods.html">add_dim()</a></code> </p>
+        </td>
+        <td><p>Generic function to add a dimension to an object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="as-methods.html">as</a></code> </p>
+        </td>
+        <td><p>conversion from ClusteredNeuroVol to LogicalNeuroVol</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="as.array-NeuroObj-method.html">as.array(<i>&lt;NeuroObj&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>convert <code>NeuroObj</code> instance to array</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="as.dense-methods.html">as.dense()</a></code> </p>
+        </td>
+        <td><p>Convert to dense representation</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="as.list-methods.html">as.list(<i>&lt;NeuroVec&gt;</i>)</a></code> <code><a href="as.list-methods.html">as.list(<i>&lt;SparseNeuroVec&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>convert a <code>NeuroVec</code> to <code>list</code> of volumes.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="as.logical-methods.html">as.logical(<i>&lt;NeuroVol&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>as.logical</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="as.mask-methods.html">as.mask()</a></code> </p>
+        </td>
+        <td><p>Convert to a LogicalNeuroVol</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="as.matrix-NeuroObj-method.html">as.matrix(<i>&lt;NeuroObj&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>convert <code>NeuroObj</code> instance to matrix</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="as.matrix-methods.html">as.matrix(<i>&lt;DenseNeuroVec&gt;</i>)</a></code> <code><a href="as.matrix-methods.html">as.matrix(<i>&lt;ROIVec&gt;</i>)</a></code> <code><a href="as.matrix-methods.html">as.matrix(<i>&lt;SparseNeuroVec&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>convert a <code>DenseNeuroVec</code> to a matrix</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="as.numeric-methods.html">as.numeric(<i>&lt;SparseNeuroVol&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Convert SparseNeuroVol to numeric</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="as.sparse-methods.html">as.sparse()</a></code> </p>
+        </td>
+        <td><p>Convert to from dense to sparse representation</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="as.vector-NeuroObj-method.html">as.vector(<i>&lt;NeuroObj&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>convert <code>NeuroObj</code> instance to vector</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="axes-methods.html">axes()</a></code> </p>
+        </td>
+        <td><p>Generic getter function to extract image axes</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="bootstrap_searchlight.html">bootstrap_searchlight()</a></code> </p>
+        </td>
+        <td><p>bootstrap_searchlight</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="bounds-methods.html">bounds()</a></code> </p>
+        </td>
+        <td><p>Generic function to extract the spatial bounds (origin + dim * spacing) of an image
+param x the object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="close-methods.html">close(<i>&lt;BinaryReader&gt;</i>)</a></code> <code><a href="close-methods.html">close(<i>&lt;BinaryWriter&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>close</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="clustered_searchlight.html">clustered_searchlight()</a></code> </p>
+        </td>
+        <td><p>Create a clustered searchlight iterator</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="concat-methods.html">concat()</a></code> </p>
+        </td>
+        <td><p>Concatenate two objects</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="conn_comp-methods.html">conn_comp()</a></code> </p>
+        </td>
+        <td><p>Find connected components</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="conn_comp_3D.html">conn_comp_3D()</a></code> </p>
+        </td>
+        <td><p>Extract connected components from a 3D mask</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="coord_to_grid-methods.html">coord_to_grid()</a></code> </p>
+        </td>
+        <td><p>Generic function to convert N-dimensional real world coordinates to grid coordinates</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="coord_to_index-methods.html">coord_to_index()</a></code> </p>
+        </td>
+        <td><p>Generic function to convert N-dimensional real world coordinates to 1D indices</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="coords-methods.html">coords()</a></code> </p>
+        </td>
+        <td><p>Extract coordinates</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="cuboid_roi.html">cuboid_roi()</a></code> </p>
+        </td>
+        <td><p>Create A Cuboid Region of Interest</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="data_file-methods.html">data_file()</a></code> </p>
+        </td>
+        <td><p>Generic function to get the name of the data file, given a file name and a <code>FileFormat</code> instance.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="data_file_matches-methods.html">data_file_matches()</a></code> </p>
+        </td>
+        <td><p>Generic function to test whether a file name conforms to the given a <code>FileFormat</code> instance.
+Will test for match to data file only</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="data_reader-methods.html">data_reader()</a></code> </p>
+        </td>
+        <td><p>Generic function to create data reader</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="dim-FileMetaInfo-method.html">dim(<i>&lt;FileMetaInfo&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>dim of <code>FileMetaInfo</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="dim-NeuroObj-method.html">dim(<i>&lt;NeuroObj&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>dim of <code>NeuroObj</code> object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="dim-NeuroSpace-method.html">dim(<i>&lt;NeuroSpace&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>dim</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="dim_of-methods.html">dim_of()</a></code> </p>
+        </td>
+        <td><p>dim_of</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="drop_dim-methods.html">drop_dim()</a></code> </p>
+        </td>
+        <td><p>Generic function to drop a dimension from an object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="file_matches-methods.html">file_matches()</a></code> </p>
+        </td>
+        <td><p>Generic function to test whether a file name conforms to the given <code>FileFormat</code> instance.
+Will test for match to either header file or data file</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="grid_to_coord-methods.html">grid_to_coord()</a></code> </p>
+        </td>
+        <td><p>Generic function to convert N-dimensional grid coordinate coordinates to real world coordinates</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="grid_to_grid-methods.html">grid_to_grid()</a></code> </p>
+        </td>
+        <td><p>Generic function to convert voxel coordinates in the reference space (LPI) to native array space.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="grid_to_index-methods.html">grid_to_index()</a></code> </p>
+        </td>
+        <td><p>Generic function to convert N-dimensional grid coordinate to 1D indices</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="header_file-methods.html">header_file()</a></code> </p>
+        </td>
+        <td><p>Generic function to get the name of the header file, given a file name and a <code>FileFormat</code> instance.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="header_file_matches-methods.html">header_file_matches()</a></code> </p>
+        </td>
+        <td><p>Generic function to test whether a file name conforms to the given <code>FileFormat</code> instance.
+Will test for match to header file only</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="hello.html">hello()</a></code> </p>
+        </td>
+        <td><p>Hello, World!</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="index_to_coord-methods.html">index_to_coord()</a></code> </p>
+        </td>
+        <td><p>Generic function to convert 1D indices to N-dimensional real world coordinates</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="index_to_grid-methods.html">index_to_grid()</a></code> </p>
+        </td>
+        <td><p>Generic function to convert 1D indices to N-dimensional grid coordinates</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="indices-methods.html">indices()</a></code> </p>
+        </td>
+        <td><p>Extract indices</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="inverse_trans-methods.html">inverse_trans()</a></code> </p>
+        </td>
+        <td><p>Generic getter to extract inverse image coordinate transformation</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="length-methods.html">length(<i>&lt;NeuroVec&gt;</i>)</a></code> <code><a href="length-methods.html">length(<i>&lt;ROIVol&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Get length of <code>NeuroVec</code>. This is the numbe rof volumes in the volume vector (e.g. the 4th image dimension)</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="loadData-methods.html">load_data()</a></code> </p>
+        </td>
+        <td><p>Generic function to load data from a data source</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="load_data-methods.html">load_data(<i>&lt;NeuroVecSource&gt;</i>)</a></code> <code><a href="load_data-methods.html">load_data(<i>&lt;NeuroVolSource&gt;</i>)</a></code> <code><a href="load_data-methods.html">load_data(<i>&lt;SparseNeuroVecSource&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>load_data</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="lookup-methods.html">lookup()</a></code> </p>
+        </td>
+        <td><p>Index Lookup operation</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="map-methods.html">mapf()</a></code> </p>
+        </td>
+        <td><p>Generic function to apply a function to an object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="map_values-methods.html">map_values()</a></code> </p>
+        </td>
+        <td><p>Generic function to map values from one set to another using a user-supplied lookup table</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="matchAnatomy2D.html">matchAnatomy2D()</a></code> </p>
+        </td>
+        <td><p>given two named axes return AxisSet2D singleton</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="matchAnatomy3D.html">matchAnatomy3D()</a></code> </p>
+        </td>
+        <td><p>given three named axes return AxisSet3D singleton</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="ndim-methods.html">ndim()</a></code> </p>
+        </td>
+        <td><p>Generic function to extract the number of dimensions of an object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="neuro_space.html">NeuroSpace()</a></code> </p>
+        </td>
+        <td><p>Constructor function for <code>NeuroSpace</code> class</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="neuroim2.html">neuroim2</a></code> </p>
+        </td>
+        <td><p>neuroim2</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="num_clusters-methods.html">num_clusters()</a></code> </p>
+        </td>
+        <td><p>num_clusters</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="origin-methods.html">origin()</a></code> </p>
+        </td>
+        <td><p>Generic getter to extract image origin</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="patch_set-methods.html">patch_set()</a></code> </p>
+        </td>
+        <td><p>patch_set</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="perm_mat-methods.html">perm_mat()</a></code> </p>
+        </td>
+        <td><p>Extract permutation matrix</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="print-AxisSet2D-method.html">print(<i>&lt;AxisSet2D&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>print a <code>AxisSet2D</code> instance</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="print-AxisSet3D-method.html">print(<i>&lt;AxisSet3D&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>print a <code>AxisSet3D</code> instance</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="print-NamedAxis-method.html">print(<i>&lt;NamedAxis&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>print a <code>NamedAxis</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="print-methods.html">print()</a></code> </p>
+        </td>
+        <td><p>Generic function to print an object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="random_searchlight.html">random_searchlight()</a></code> </p>
+        </td>
+        <td><p>random_searchlight</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="read_elements-methods.html">read_elements()</a></code> </p>
+        </td>
+        <td><p>Generic function to read a sequence of elements from an input source</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="read_header.html">read_header()</a></code> </p>
+        </td>
+        <td><p>read header information of an image file</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="read_meta_info-methods.html">read_meta_info()</a></code> </p>
+        </td>
+        <td><p>Generic function to read image meta info given a file and a <code>FileFormat</code> instance.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="read_vec.html">read_vec()</a></code> </p>
+        </td>
+        <td><p>read_vec</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="read_vol.html">read_vol()</a></code> </p>
+        </td>
+        <td><p>Load an image volume from a file</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="read_vol_list.html">read_vol_list()</a></code> </p>
+        </td>
+        <td><p>read_vol_list</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="render-methods.html">render()</a></code> </p>
+        </td>
+        <td><p>Render an image to create a drawable image.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="render_slice-methods.html">render_slice()</a></code> </p>
+        </td>
+        <td><p>Render a slice at z coordinate</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="reorient-methods.html">reorient()</a></code> </p>
+        </td>
+        <td><p>Generic function to remap the grid-to-world coordinates mapping of an image.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="scale_series-methods.html">scale_series()</a></code> </p>
+        </td>
+        <td><p>Generic functions to scale (center and/or normalize by standard deviation) each series of a 4D image
 That is, if the 4th dimension is 'time' each series is a 1D time series.</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="searchlight.html">searchlight</a></code> </p>
-          </td>
-          <td><p>Create an exhaustive searchlight iterator</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="series-methods.html">series_roi</a></code> <code><a href="series-methods.html">series</a></code> </p>
-          </td>
-          <td><p>Extract one or more series from object and return as ROI object</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="show-AxisSet1D-method.html">show</a></code> </p>
-          </td>
-          <td><p>show an <code>AxisSet1D</code></p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="show-AxisSet2D-method.html">show</a></code> </p>
-          </td>
-          <td><p>show an <code>AxisSet2D</code></p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="show-AxisSet3D-method.html">show</a></code> </p>
-          </td>
-          <td><p>show an <code>AxisSet3D</code></p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="show-AxisSet4D-method.html">show</a></code> </p>
-          </td>
-          <td><p>show an <code>AxisSet4D</code></p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="show-ClusteredNeuroVol-method.html">show</a></code> </p>
-          </td>
-          <td><p>show a <code>ClusteredNeuroVol</code></p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="show-FileMetaInfo-method.html">show</a></code> </p>
-          </td>
-          <td><p>show a <code>FileMetaInfo</code></p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="show-NamedAxis-method.html">show</a></code> </p>
-          </td>
-          <td><p>show an <code>NamedAxis</code></p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="show-NeuroSpace-method.html">show</a></code> </p>
-          </td>
-          <td><p>show a <code>NeuroSpace</code></p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="show-NeuroVec-method.html">show</a></code> </p>
-          </td>
-          <td><p>show a <code>NeuroVec</code></p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="show-NeuroVecSource-method.html">show</a></code> </p>
-          </td>
-          <td><p>show a <code>NeuroVecSource</code></p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="show-NeuroVol-method.html">show</a></code> </p>
-          </td>
-          <td><p>show a <code>NeuroVol</code></p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="show-ROIVol-method.html">show</a></code> </p>
-          </td>
-          <td><p>show an <code><a href='reference/ROIVol-class.html'>ROIVol</a></code></p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="show-SparseNeuroVec-method.html">show</a></code> </p>
-          </td>
-          <td><p>show a <code>SparseNeuroVec</code></p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="show-SparseNeuroVol-method.html">show</a></code> </p>
-          </td>
-          <td><p>show a <code>SparseNeuroVol</code></p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="slice-methods.html">slice</a></code> </p>
-          </td>
-          <td><p>slice</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="slices-methods.html">slices</a></code> </p>
-          </td>
-          <td><p>Generic function to extract an ordered series of 2D slices</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="space-methods.html">space</a></code> <code><a href="space-methods.html">trans</a></code> </p>
-          </td>
-          <td><p>Generic function to extract geometric properties of an image.</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="spacing-methods.html">spacing</a></code> </p>
-          </td>
-          <td><p>Generic function to extract the voxel dimensions of an image</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="SparseNeuroVec-class.html">SparseNeuroVec</a></code> </p>
-          </td>
-          <td><p>SparseNeuroVec</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="SparseNeuroVec-methods.html">[[,SparseNeuroVec,numeric-method</a></code> </p>
-          </td>
-          <td><p>[[</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="SparseNeuroVecSource-class.html">SparseNeuroVecSource</a></code> </p>
-          </td>
-          <td><p>SparseNeuroVecSource</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="SparseNeuroVol-class.html">SparseNeuroVol</a></code> </p>
-          </td>
-          <td><p>SparseNeuroVol</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="spherical_roi.html">spherical_roi</a></code> </p>
-          </td>
-          <td><p>Create a Spherical Region of Interest</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="split_fill-methods.html">split_fill</a></code> </p>
-          </td>
-          <td><p>Generic function to fill disjoint sets of values with the output of a function</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="split_reduce-methods.html">split_reduce</a></code> </p>
-          </td>
-          <td><p>Generic function to summarize subsets of an object by first splitting by row and then "reducing" by a summary <code>function</code></p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="split_scale-methods.html">split_scale</a></code> </p>
-          </td>
-          <td><p>Generic function to center/scale row-subsets of a matrix or matrix-like object</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="square_roi.html">square_roi</a></code> </p>
-          </td>
-          <td><p>Create a square region of interest where the z-dimension is fixed at one voxel coordinate.</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="strip_extension-methods.html">strip_extension</a></code> </p>
-          </td>
-          <td><p>Generic function to strip extension from file name, given a <code><a href='reference/FileFormat-class.html'>FileFormat</a></code> instance.</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="sub_vector-methods.html">sub_vector</a></code> </p>
-          </td>
-          <td><p>Generic function to extract a sub-vector from a <code>NeuroVec</code> object.</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="sub-SparseNeuroVec-missing-missing-ANY-method.html">[,SparseNeuroVec,missing,missing,ANY-method</a></code> </p>
-          </td>
-          <td><p>extractor</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="sub-SparseNeuroVec-missing-numeric-ANY-method.html">[,SparseNeuroVec,missing,numeric,ANY-method</a></code> </p>
-          </td>
-          <td><p>extractor</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="sub-SparseNeuroVec-numeric-missing-ANY-method.html">[,SparseNeuroVec,numeric,missing,ANY-method</a></code> </p>
-          </td>
-          <td><p>extractor</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="sub-SparseNeuroVec-numeric-numeric-ANY-method.html">[,SparseNeuroVec,numeric,numeric,ANY-method</a></code> </p>
-          </td>
-          <td><p>extractor</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="sub-SparseNeuroVol-matrix-missing-ANY-method.html">[,SparseNeuroVol,matrix,missing,ANY-method</a></code> </p>
-          </td>
-          <td><p>extractor</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="sub-SparseNeuroVol-missing-missing-ANY-method.html">[,SparseNeuroVol,missing,missing,ANY-method</a></code> </p>
-          </td>
-          <td><p>extractor</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="sub-SparseNeuroVol-missing-numeric-ANY-method.html">[,SparseNeuroVol,missing,numeric,ANY-method</a></code> </p>
-          </td>
-          <td><p>extractor</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="sub-SparseNeuroVol-numeric-missing-missing-method.html">[,SparseNeuroVol,numeric,missing,missing-method</a></code> </p>
-          </td>
-          <td><p>extractor</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="sub-SparseNeuroVol-numeric-numeric-ANY-method.html">[,SparseNeuroVol,numeric,numeric,ANY-method</a></code> </p>
-          </td>
-          <td><p>extractor</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="trans-methods.html">trans</a></code> </p>
-          </td>
-          <td><p>Generic getter to extract image coordinate transformation</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="values-methods.html">values</a></code> </p>
-          </td>
-          <td><p>Generic function to extract data values of object</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="vectors-methods.html">vectors</a></code> </p>
-          </td>
-          <td><p>Generic function to extract an ordered series of 1D vectors</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="vol_subset-methods.html">[,ROIVol,numeric,missing,ANY-method</a></code> </p>
-          </td>
-          <td><p>subset an <code>ROIVol</code></p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="vols-methods.html">vols</a></code> </p>
-          </td>
-          <td><p>Generic function to extract an ordered series of 3D volumes</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="voxels-methods.html">voxels</a></code> </p>
-          </td>
-          <td><p>extract voxel coordinates</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="which_dim-methods.html">which_dim</a></code> </p>
-          </td>
-          <td><p>which_dim</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="write_elements-methods.html">write_elements</a></code> </p>
-          </td>
-          <td><p>Generic function to write a sequence of elements from an input source</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="write_vec-methods.html">write_vec</a></code> </p>
-          </td>
-          <td><p>Generic function to write a 4D image vector to disk</p></td>
-        </tr><tr>
-          <!--  -->
-          <td>
-            <p><code><a href="write_vol-methods.html">write_vol</a></code> </p>
-          </td>
-          <td><p>Generic function to write a 3D image volume to disk</p></td>
-        </tr>
-      </tbody>
-      </table>
-    </div>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="searchlight.html">searchlight()</a></code> </p>
+        </td>
+        <td><p>searchlight</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="searchlight_coords.html">searchlight_coords()</a></code> </p>
+        </td>
+        <td><p>searchlight</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="series-methods.html">series_roi()</a></code> <code><a href="series-methods.html">series()</a></code> </p>
+        </td>
+        <td><p>Extract one or more series from object and return as ROI object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="show-AxisSet1D-method.html">show(<i>&lt;AxisSet1D&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>show an <code>AxisSet1D</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="show-AxisSet2D-method.html">show(<i>&lt;AxisSet2D&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>show an <code>AxisSet2D</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="show-AxisSet3D-method.html">show(<i>&lt;AxisSet3D&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>show an <code>AxisSet3D</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="show-AxisSet4D-method.html">show(<i>&lt;AxisSet4D&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>show an <code>AxisSet4D</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="show-ClusteredNeuroVol-method.html">show(<i>&lt;ClusteredNeuroVol&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>show a <code>ClusteredNeuroVol</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="show-FileMetaInfo-method.html">show(<i>&lt;FileMetaInfo&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>show a <code>FileMetaInfo</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="show-NamedAxis-method.html">show(<i>&lt;NamedAxis&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>show an <code>NamedAxis</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="show-NeuroSpace-method.html">show(<i>&lt;NeuroSpace&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>show a <code>NeuroSpace</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="show-NeuroVec-method.html">show(<i>&lt;NeuroVec&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>show a <code>NeuroVec</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="show-NeuroVecSource-method.html">show(<i>&lt;NeuroVecSource&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>show a <code>NeuroVecSource</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="show-NeuroVol-method.html">show(<i>&lt;NeuroVol&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>show a <code>NeuroVol</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="show-ROIVec-method.html">show(<i>&lt;ROIVec&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>show an <code>ROIVec</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="show-ROIVol-method.html">show(<i>&lt;ROIVol&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>show an <code>ROIVol</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="show-SparseNeuroVec-method.html">show(<i>&lt;SparseNeuroVec&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>show a <code>SparseNeuroVec</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="show-SparseNeuroVol-method.html">show(<i>&lt;SparseNeuroVol&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>show a <code>SparseNeuroVol</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="slice-methods.html">slice()</a></code> </p>
+        </td>
+        <td><p>slice</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="slices-methods.html">slices()</a></code> </p>
+        </td>
+        <td><p>Generic function to extract an ordered series of 2D slices</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="space-methods.html">space()</a></code> <code><a href="space-methods.html">trans(<i>&lt;NeuroObj&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Generic function to extract geometric properties of an image.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="spacing-methods.html">spacing()</a></code> </p>
+        </td>
+        <td><p>Generic function to extract the voxel dimensions of an image</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="spherical_roi.html">spherical_roi()</a></code> </p>
+        </td>
+        <td><p>Create a Spherical Region of Interest</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="split_blocks-methods.html">split_blocks()</a></code> </p>
+        </td>
+        <td><p>Generic function to cut a vector-valued object into a list of sub-blocks</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="split_clusters-methods.html">split_clusters()</a></code> </p>
+        </td>
+        <td><p>Generic function to cut an object into a list of spatial or spatiotemporal clusters</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="split_fill-methods.html">split_fill()</a></code> </p>
+        </td>
+        <td><p>Generic function to fill disjoint sets of values with the output of a function</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="split_reduce-methods.html">split_reduce()</a></code> </p>
+        </td>
+        <td><p>Generic function to summarize subsets of an object by first splitting by row and then "reducing" by a summary <code>function</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="split_scale-methods.html">split_scale()</a></code> </p>
+        </td>
+        <td><p>Generic function to center/scale row-subsets of a matrix or matrix-like object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="square_roi.html">square_roi()</a></code> </p>
+        </td>
+        <td><p>Create a square region of interest where the z-dimension is fixed at one voxel coordinate.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="strip_extension-methods.html">strip_extension()</a></code> </p>
+        </td>
+        <td><p>Generic function to strip extension from file name, given a <code>FileFormat</code> instance.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="sub-ClusteredNeuroVol-matrix-missing-ANY-method.html">`[`(<i>&lt;ClusteredNeuroVol&gt;</i>,<i>&lt;matrix&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>extractor</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="sub-ClusteredNeuroVol-missing-missing-ANY-method.html">`[`(<i>&lt;ClusteredNeuroVol&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>extractor</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="sub-ClusteredNeuroVol-missing-numeric-ANY-method.html">`[`(<i>&lt;ClusteredNeuroVol&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>extractor</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="sub-ClusteredNeuroVol-numeric-missing-missing-method.html">`[`(<i>&lt;ClusteredNeuroVol&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>extractor</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="sub-ClusteredNeuroVol-numeric-numeric-ANY-method.html">`[`(<i>&lt;ClusteredNeuroVol&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>extractor</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="sub-SparseNeuroVec-missing-missing-ANY-method.html">`[`(<i>&lt;SparseNeuroVec&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>extractor</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="sub-SparseNeuroVec-missing-numeric-ANY-method.html">`[`(<i>&lt;SparseNeuroVec&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>extractor</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="sub-SparseNeuroVec-numeric-missing-ANY-method.html">`[`(<i>&lt;SparseNeuroVec&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>extractor</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="sub-SparseNeuroVec-numeric-numeric-ANY-method.html">`[`(<i>&lt;SparseNeuroVec&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>extractor</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="sub-SparseNeuroVol-matrix-missing-ANY-method.html">`[`(<i>&lt;SparseNeuroVol&gt;</i>,<i>&lt;matrix&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>extractor</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="sub-SparseNeuroVol-missing-missing-ANY-method.html">`[`(<i>&lt;SparseNeuroVol&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>extractor</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="sub-SparseNeuroVol-missing-numeric-ANY-method.html">`[`(<i>&lt;SparseNeuroVol&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>extractor</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="sub-SparseNeuroVol-numeric-missing-ANY-method.html">`[`(<i>&lt;SparseNeuroVol&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="sub-SparseNeuroVol-numeric-missing-ANY-method.html">`[`(<i>&lt;SparseNeuroVol&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>extractor</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="sub-SparseNeuroVol-numeric-missing-missing-method.html">`[`(<i>&lt;SparseNeuroVol&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>extractor</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="sub-SparseNeuroVol-numeric-numeric-ANY-method.html">`[`(<i>&lt;SparseNeuroVol&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>extractor</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="sub_vector-methods.html">sub_vector()</a></code> </p>
+        </td>
+        <td><p>Generic function to extract a sub-vector from a <code>NeuroVec</code> object.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="trans-methods.html">trans()</a></code> </p>
+        </td>
+        <td><p>Generic getter to extract image coordinate transformation</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="values-methods.html">values()</a></code> </p>
+        </td>
+        <td><p>Generic function to extract data values of object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="vectors-methods.html">vectors()</a></code> </p>
+        </td>
+        <td><p>Generic function to extract an ordered series of 1D vectors</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="vol_subset-methods.html">`[`(<i>&lt;ROIVol&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="vol_subset-methods.html">`[`(<i>&lt;ROIVol&gt;</i>,<i>&lt;logical&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>subset an <code>ROIVol</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="vols-methods.html">vols()</a></code> </p>
+        </td>
+        <td><p>Generic function to extract an ordered series of 3D volumes</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="voxels-methods.html">voxels()</a></code> </p>
+        </td>
+        <td><p>extract voxel coordinates</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="which_dim-methods.html">which_dim()</a></code> </p>
+        </td>
+        <td><p>which_dim</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="write_elements-methods.html">write_elements()</a></code> </p>
+        </td>
+        <td><p>Generic function to write a sequence of elements from an input source</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="write_vec-methods.html">write_vec()</a></code> </p>
+        </td>
+        <td><p>Generic function to write a 4D image vector to disk</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="write_vol-methods.html">write_vol()</a></code> </p>
+        </td>
+        <td><p>Generic function to write a 3D image volume to disk</p></td>
+      </tr>
+    </tbody>
+    </table>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -1149,11 +1228,14 @@ That is, if the 4th dimension is 'time' each series is a 1D time series.</p></td
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="http://hadley.github.io/pkgdown/">pkgdown</a>.</p>
+  <p>Site built with <a href="http://pkgdown.r-lib.org/">pkgdown</a>.</p>
 </div>
 
       </footer>
    </div>
 
+  
+
   </body>
 </html>
+

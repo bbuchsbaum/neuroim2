@@ -18,13 +18,25 @@
 <!-- Font Awesome icons -->
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 
+<!-- clipboard.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script>
+
+<!-- sticky kit -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
-<script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
+
+
+
+<meta property="og:title" content="Create a Spherical Region of Interest — spherical_roi" />
+
+<meta property="og:description" content="Creates a Spherical ROI based on a centroid." />
+<meta name="twitter:card" content="summary" />
+
+
+
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,8 +59,12 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../index.html">neuroim2</a>
+      <span class="navbar-brand">
+        <a class="navbar-link" href="../index.html">neuroim2</a>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.1.0</span>
+      </span>
     </div>
+
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
@@ -68,10 +84,13 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/FileIO.html">Working with Image Volumes</a>
+      <a href="../articles/ImageVolumes.html">Working with Image Volumes</a>
     </li>
     <li>
-      <a href="../articles/neuroim.html">The neuroim package</a>
+      <a href="../articles/neuroim.html">The neuroim2 package</a>
+    </li>
+    <li>
+      <a href="../articles/pipelines.html">Pipelines</a>
     </li>
     <li>
       <a href="../articles/regionOfInterest.html">Regions of Interest</a>
@@ -83,6 +102,7 @@
       <ul class="nav navbar-nav navbar-right">
         
       </ul>
+      
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
@@ -90,19 +110,23 @@
       
       </header>
 
-      <div class="row">
+<div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Create a Spherical Region of Interest</h1>
+    
+    <div class="hidden name"><code>spherical_roi.Rd</code></div>
     </div>
 
+    <div class="ref-description">
     
-    <p>Creates a Spherical ROI based on a Centroid.</p>
+    <p>Creates a Spherical ROI based on a centroid.</p>
     
+    </div>
 
     <pre class="usage"><span class='fu'>spherical_roi</span>(<span class='no'>bvol</span>, <span class='no'>centroid</span>, <span class='no'>radius</span>, <span class='kw'>fill</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>nonzero</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
     
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
@@ -111,7 +135,7 @@
     </tr>
     <tr>
       <th>centroid</th>
-      <td><p>the center of the sphere in voxel space</p></td>
+      <td><p>the center of the sphere in positive-coordinate (i,j,k) voxel space.</p></td>
     </tr>
     <tr>
       <th>radius</th>
@@ -134,12 +158,12 @@
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'> <span class='no'>sp1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='neuro_space.html'>NeuroSpace</a></span>(<span class='fu'>c</span>(<span class='fl'>10</span>,<span class='fl'>10</span>,<span class='fl'>10</span>), <span class='fu'>c</span>(<span class='fl'>1</span>,<span class='fl'>2</span>,<span class='fl'>3</span>))
- <span class='no'>cube</span> <span class='kw'>&lt;-</span> <span class='fu'>spherical_roi</span>(<span class='no'>sp1</span>, <span class='fu'>c</span>(<span class='fl'>5</span>,<span class='fl'>5</span>,<span class='fl'>5</span>), <span class='fl'>3.5</span>)
- <span class='no'>vox</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='coords-methods.html'>coords</a></span>(<span class='no'>cube</span>)
- <span class='no'>cds</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='coords-methods.html'>coords</a></span>(<span class='no'>cube</span>, <span class='kw'>real</span><span class='kw'>=</span><span class='fl'>TRUE</span>)
- <span class='co'>## fill in ROI with value of 6</span>
- <span class='no'>cube1</span> <span class='kw'>&lt;-</span> <span class='fu'>spherical_roi</span>(<span class='no'>sp1</span>, <span class='fu'>c</span>(<span class='fl'>5</span>,<span class='fl'>5</span>,<span class='fl'>5</span>), <span class='fl'>3.5</span>, <span class='kw'>fill</span><span class='kw'>=</span><span class='fl'>6</span>)
- <span class='fu'>all</span>(<span class='no'>cube1</span>@<span class='kw'>data</span> <span class='kw'>==</span> <span class='fl'>6</span>)</div><div class='output co'>#&gt; <span class='error'>Error in eval(expr, envir, enclos): no slot of name "data" for this object of class "ROIVol"</span></div></pre>
+ <span class='co'># create an ROI centered around the integer-valued positive voxel coordinate: i=5, j=5, k=5</span>
+ <span class='no'>cube</span> <span class='kw'>&lt;-</span> <span class='fu'>spherical_roi</span>(<span class='no'>sp1</span>, <span class='fu'>c</span>(<span class='fl'>5</span>,<span class='fl'>5</span>,<span class='fl'>5</span>), <span class='fl'>3.5</span>)</div><div class='output co'>#&gt; <span class='error'>Error in map_dbl(vspacing, function(x) round(radius/x)): could not find function "map_dbl"</span></div><div class='input'> <span class='no'>vox</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='coords-methods.html'>coords</a></span>(<span class='no'>cube</span>)</div><div class='output co'>#&gt; <span class='error'>Error in coords(cube): object 'cube' not found</span></div><div class='input'> <span class='no'>cds</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='coords-methods.html'>coords</a></span>(<span class='no'>cube</span>, <span class='kw'>real</span><span class='kw'>=</span><span class='fl'>TRUE</span>)</div><div class='output co'>#&gt; <span class='error'>Error in coords(cube, real = TRUE): object 'cube' not found</span></div><div class='input'> <span class='co'>## fill in ROI with value of 6</span>
+ <span class='no'>cube1</span> <span class='kw'>&lt;-</span> <span class='fu'>spherical_roi</span>(<span class='no'>sp1</span>, <span class='fu'>c</span>(<span class='fl'>5</span>,<span class='fl'>5</span>,<span class='fl'>5</span>), <span class='fl'>3.5</span>, <span class='kw'>fill</span><span class='kw'>=</span><span class='fl'>6</span>)</div><div class='output co'>#&gt; <span class='error'>Error in map_dbl(vspacing, function(x) round(radius/x)): could not find function "map_dbl"</span></div><div class='input'> <span class='fu'>all</span>(<span class='no'>cube1</span> <span class='kw'>==</span> <span class='fl'>6</span>)</div><div class='output co'>#&gt; <span class='error'>Error in eval(expr, envir, enclos): object 'cube1' not found</span></div><div class='input'>
+ <span class='co'># create an ROI centered around the real-valued coordinates: x=5, y=5, z=5</span>
+ <span class='no'>vox</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='coord_to_grid-methods.html'>coord_to_grid</a></span>(<span class='no'>sp1</span>, <span class='fu'>c</span>(<span class='fl'>5</span>, <span class='fl'>5</span>, <span class='fl'>5</span>))
+ <span class='no'>cube</span> <span class='kw'>&lt;-</span> <span class='fu'>spherical_roi</span>(<span class='no'>sp1</span>, <span class='no'>vox</span>, <span class='fl'>3.5</span>)</div><div class='output co'>#&gt; <span class='error'>Error in map_dbl(vspacing, function(x) round(radius/x)): could not find function "map_dbl"</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -160,11 +184,14 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="http://hadley.github.io/pkgdown/">pkgdown</a>.</p>
+  <p>Site built with <a href="http://pkgdown.r-lib.org/">pkgdown</a>.</p>
 </div>
 
       </footer>
    </div>
 
+  
+
   </body>
 </html>
+

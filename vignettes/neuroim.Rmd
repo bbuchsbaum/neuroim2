@@ -20,15 +20,25 @@ The **neuroim2** package is a library of S4 classes and functions supporting neu
 
 A brief summary of most important functions is below. More extended documentation can be found in the associated vignettes.
 
-## loading an image volume
+## Loading an image volume
 
-`read_vol`
+To load a three-dimensional image volume into R, use the `read_vol` function. For example, if we wish to read in a file from disk, we can use the `read_vol` command. Here we load an example file included with the package:
 
-example: 
+```{r}
+file_name <- system.file("extdata", "global_mask.nii", package="neuroim2")
+print(file_name)
+vol <- read_vol(file_name)
+```
 
-`read_vol("example.nii")`
+The variable `vol` now can be used to access the three-dimensional image data and is a instance of the `DenseNeuroVol` class. This is basically a three-dimensonal R array with some additional meta-information that describes the geometry of the image.
 
-## writing an image volume to disk
+```{r}
+print(vol)
+```
+
+To access infromation about 
+
+## Writing an image volume to disk
 
 `write_vol`
 
@@ -44,7 +54,7 @@ example:
 
 `read_vec("example_4d.nii")`
 
-## writing a 4-dimensional image (e.g. for fMRI)
+## Writing a 4-dimensional image (e.g. for fMRI)
 
 `write_vec`
 
@@ -52,13 +62,13 @@ example:
 
 `write_vec(bvec, "example_4d.nii")`
 
-## extract a time-series from a single voxel in a 4-dimensional image
+## Extract a time-series from a single voxel in a 4-dimensional image
 
 `series`
 
 example: `series(bvec, 12,12,12)  ## voxel coordinates are [12,12,12] in grid units starting at [1,1,1]`
 
-## extract a time-series matrix from a set of voxels in a 4-dimensional image
+## Extract a time-series matrix from a set of voxels in a 4-dimensional image
 
 `series`
 

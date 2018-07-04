@@ -333,7 +333,6 @@ setClass("LogicalNeuroVol", contains=c("DenseNeuroVol"))
 #' @slot svol a \code{\linkS4class{SparseNeuroVol}} containing cluster indices in 3D space
 #' @slot mask the \code{logical} mask indicating the spatial domain of the set of clusters
 #' @slot clusters an integer index indicating the cluster number for each voxel in the mask
-#' @slot centers the cluster centers
 #' @slot label_map a list mapping from name to cluster id
 #' @slot cluster_map an \code{environment} mapping from cluster id to the set of 1D spatial indices
 #' @rdname ClusteredNeuroVol-class
@@ -342,7 +341,6 @@ setClass("ClusteredNeuroVol",
          representation=representation(svol="SparseNeuroVol",
                                        mask="LogicalNeuroVol",
                                        clusters="integer",
-                                       centers="matrix",
                                        label_map="list",
                                        cluster_map="environment"),
          contains=c("NeuroVol"))

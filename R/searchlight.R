@@ -30,13 +30,14 @@ random_searchlight <- function(mask, radius) {
   while (len > 0) {
 
     center <- as.integer(keys[1])
+
     search <- spherical_roi(mask, grid[center,], radius, nonzero=TRUE)
     vox <- coords(search)
     idx <- lookup[vox]
     ret <- mget(as.character(idx), envir=hmap, ifnotfound=NA)
     keep <- !is.na(unlist(ret))
 
-    search2 <- new("ROIVolWindow", rep(1,sum(keep)), space(mask), coords=coords(search)[keep,,drop=FALSE],
+    search2 <- new("ROIVolWindow", rep(1,sum(keep)), space=space(mask), coords=coords(search)[keep,,drop=FALSE],
                    center_index=as.integer(1), parent_index=as.integer(search@parent_index))
 
     rm(list=as.character(idx[keep]),envir=hmap)
