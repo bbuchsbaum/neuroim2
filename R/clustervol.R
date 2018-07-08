@@ -37,7 +37,7 @@ ClusteredNeuroVol <- function(mask, clusters, label_map=NULL, label="") {
   }
 
 
-  #clus_idx <- which(mask == TRUE)
+  clus_idx <- which(mask == TRUE)
   #cds <- index_to_coords(mask, clus_idx)
 
   clus_split <- split(clus_idx, clusters)

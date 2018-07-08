@@ -237,6 +237,14 @@ setMethod(f="index_to_coord", signature=signature(x="NeuroVol", idx="integer"),
 
 
 #' @export
+#' @rdname index_to_coord-methods
+setMethod(f="index_to_coord", signature=signature(x="NeuroVec", idx="integer"),
+          def=function(x, idx) {
+            callGeneric(space(x), as.numeric(idx))
+          })
+
+
+#' @export
 #' @rdname coord_to_index-methods
 setMethod(f="coord_to_index", signature=signature(x="NeuroSpace", coords="matrix"),
           def=function(x, coords) {

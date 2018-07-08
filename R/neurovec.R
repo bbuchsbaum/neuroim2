@@ -27,10 +27,10 @@ NeuroVec <- function(data, space=NULL, mask=NULL, label="") {
 
   }
 
-	if (prod(dim(space)) != length(data)) {
-		stop("dimensions of data argument do not match dimensions of space argument")
-	}
 	if (is.null(mask)) {
+	  if (prod(dim(space)) != length(data)) {
+	    stop("dimensions of data argument do not match dimensions of space argument")
+	  }
 		DenseNeuroVec(data,space, label)
 	} else {
 		SparseNeuroVec(data,space,mask,label)
@@ -511,17 +511,26 @@ setMethod("series_roi", signature(x="NeuroVec", i="LogicalNeuroVol"),
             ROIVec(space(x), coords=index_to_grid(i, which(i == TRUE)), data=as.matrix(mat))
           })
 
+
+#' @rdname series-methods
+#' @export
+setMethod("series", signature(x="NeuroVec", i="integer"),
+          def=function(x, i, j, k) {
+            if (missing(j) && missing(k)) {
+              vdim <- dim(x)[1:3]
+              mat <- arrayInd(i, vdim)
+              apply(mat, 1, function(i) x[i[1], i[2], i[3],])
+            } else {
+              x[i,j,k,]
+            }
+          })
+
+
 #' @rdname series-methods
 #' @export
 setMethod("series", signature(x="NeuroVec", i="numeric"),
 		def=function(x, i, j, k) {
-			if (missing(j) && missing(k)) {
-				vdim <- dim(x)[1:3]
-				mat <- arrayInd(i, vdim)
-				apply(mat, 1, function(i) x[i[1], i[2], i[3],])
-			} else {
-				x[i,j,k,]
-			}
+			callGeneric(x,as.integer(i),as.integer(j),as.integer(k))
 		})
 
 
