@@ -903,7 +903,9 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "m
 setMethod("plot", signature=signature(x="NeuroVol"),
           def=function(x,cmap=gray(seq(0,1,length.out=255)),
                                    zlevels=unique(round(seq(1, dim(x)[3], length.out=6))),
-                                   irange=range(x)) {
+                                   irange=range(x),
+                                   thresh=c(0,0),
+                                   bgvol=NULL) {
 
             if (!requireNamespace("ggplot2", quietly = TRUE)) {
               stop("Package \"ggplot2\" needed for this function to work. Please install it.",
@@ -920,7 +922,8 @@ setMethod("plot", signature=signature(x="NeuroVol"),
             }))
 
 
-            ggplot2::ggplot(ggplot2::aes(x=x, y=y), data=df1) + ggplot2::geom_raster(ggplot2::aes(fill=value)) +
+            ggplot2::ggplot(ggplot2::aes(x=x, y=y), data=df1) +
+              ggplot2::geom_raster(ggplot2::aes(fill=value)) +
               ggplot2::scale_fill_identity() + ggplot2::xlab("") + ggplot2::ylab("") +
               ggplot2::scale_x_continuous(expand=c(0,0)) +
               ggplot2::scale_y_continuous(expand=c(0,0)) +

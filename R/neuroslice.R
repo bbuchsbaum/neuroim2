@@ -4,7 +4,8 @@
 {}
 
 
-#' neuro_slice constructor
+#' NeuroSlice constructor
+#'
 #' @param data data vector or matrix
 #' @param space an instance of class BrainSpace
 #' @param indices linear indices corresponding used if \code{data} is a 1D vector.

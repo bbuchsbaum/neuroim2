@@ -113,12 +113,12 @@ setMethod(f="load_data", signature=c("SparseNeuroVecSource"),
 
 
 			meta <- x@meta_info
-			nels <- prod(meta@Dim[1:3])
+			nels <- prod(dim(meta)[1:3])
 
 			ind <- x@indices
 			M <- x@mask > 0
 			reader <- data_reader(meta, offset=0)
-			dat4D <- read_elements(reader, prod(meta@Dim[1:4]))
+			dat4D <- read_elements(reader, prod(dim(meta)[1:4]))
 			close(reader)
 
 			datlist <- lapply(1:length(ind), function(i) {
@@ -135,7 +135,8 @@ setMethod(f="load_data", signature=c("SparseNeuroVecSource"),
 			  }
 			}
 
-			bspace <- NeuroSpace(c(meta@Dim[1:3], length(ind)), meta@spacing, meta@origin, meta@spatial_axes)
+			bspace <- NeuroSpace(c(dim(meta)[1:3], length(ind)), meta@spacing,
+			                     meta@origin, meta@spatial_axes)
 			SparseNeuroVec(arr, bspace, x@mask)
 
 		})
