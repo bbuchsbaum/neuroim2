@@ -258,7 +258,14 @@ setMethod(f="lookup", signature=signature(x="SparseNeuroVec", i="numeric"),
 #' @param drop dimension
 setMethod(f="[", signature=signature(x = "SparseNeuroVec", i = "numeric", j = "missing"),
 		  def=function (x, i, j, k, m, ..., drop=TRUE) {
-			  callGeneric(x, i, 1:(dim(x)[2]))
+		    if (missing(k)) {
+		      k = 1:(dim(x)[3])
+		    }
+		    if (missing(m)) {
+		      m = 1:(dim(x)[4])
+		    }
+
+			  callGeneric(x, i, 1:(dim(x)[2]),k,m,drop=drop)
 		  }
   )
 
@@ -274,7 +281,15 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVec", i = "numeric", j = "m
 #' @param drop dimension
 setMethod(f="[", signature=signature(x = "SparseNeuroVec", i = "missing", j = "missing"),
 		  def=function (x, i, j, k, m, ..., drop=TRUE) {
-			  callGeneric(x, 1:(dim(x)[1]), 1:(dim(x)[2]))
+		    if (missing(k)) {
+		      k = 1:(dim(x)[3])
+		    }
+
+		    if (missing(m)) {
+		      m = 1:(dim(x)[4])
+		    }
+
+			  callGeneric(x, 1:(dim(x)[1]), 1:(dim(x)[2]), k,m,drop=drop)
 		  }
   )
 
@@ -290,7 +305,7 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVec", i = "missing", j = "m
 #' @param drop dimension
 setMethod(f="[", signature=signature(x = "SparseNeuroVec", i = "missing", j = "numeric"),
 		  def=function (x, i, j, k, m, ..., drop=TRUE) {
-			  callGeneric(x, i:(dim(x)[1]), j)
+			  callGeneric(x, i:(dim(x)[1]), j,k,m,drop=drop)
 		  }
   )
 
@@ -319,6 +334,7 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVec", i = "numeric", j = "n
 
             mapped <- lookup(x, ind)
             keep <- mapped > 0
+            dimout <- c(length(i),length(j),length(k),length(m))
 
             if (sum(keep) == 0) {
               if (drop) {
@@ -328,7 +344,7 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVec", i = "numeric", j = "n
               }
             }
 
-            dimout <- c(length(i),length(j),length(k),length(m))
+
             egrid <- expand.grid(mapped[keep], m)
             indmat <- cbind(egrid[,2], egrid[,1])
 

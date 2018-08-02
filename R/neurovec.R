@@ -299,7 +299,7 @@ setMethod(f="vectors", signature=signature(x="NeuroVec", subset="missing"),
           def = function(x) {
             ind <- 1:prod(dim(x)[1:3])
             vox <- index_to_grid(x, ind)
-            f <- function(i) x[vox[i,1], vox[i,2], vox[i,3],]
+            f <- function(i) series(x, vox[i,1], vox[i,2], vox[i,3])
             lis <- map(ind, function(i) f)
             deferred_list(lis)
           })
@@ -311,7 +311,7 @@ setMethod(f="vectors", signature=signature(x="NeuroVec", subset="numeric"),
             ind <- subset
             assert_that(max(ind) < prod(dim(x)[1:3]))
             vox <- index_to_grid(x, ind)
-            f <- function(i) x[vox[i,1], vox[i,2], vox[i,3],]
+            f <- function(i) series(x, vox[i,1], vox[i,2], vox[i,3])
             lis <- lapply(seq_along(ind), function(i) f)
             deferred_list(lis)
           })
@@ -324,7 +324,7 @@ setMethod(f="vectors", signature=signature(x="NeuroVec", subset="logical"),
             ind <- which(subset)
             assert_that(length(ind) > 0)
             vox <- index_to_grid(x, ind)
-            f <- function(i) x[vox[i,1], vox[i,2], vox[i,3],]
+            f <- function(i) series(x, vox[i,1], vox[i,2], vox[i,3])
             lis <- lapply(seq_along(ind), function(i) f)
             deferred_list(lis)
           })
@@ -763,9 +763,90 @@ setMethod("series_roi", signature(x="NeuroVecSeq", i="matrix"),
 
 
 
+#' [[
+#' @rdname NeuroVec-methods
+#' @param i the volume index
+#' @export
+setMethod(f="[[", signature=signature(x="NeuroVecSeq", i="numeric"),
+          def = function(x, i) {
+            xs <- space(x)
+            dat <- x[,,,i]
+            newdim <- dim(x)[1:3]
+            bspace <- NeuroSpace(newdim, spacing=spacing(xs), origin=origin(xs), axes(xs), trans(xs))
+            DenseNeuroVol(dat, bspace)
+          })
+
+
+#' extractor
+#' @export
+#' @param x the object
+#' @param i first index
+#' @param j second index
+#' @param k third index
+#' @param m the fourth index
+#' @param ... additional args
+#' @param drop dimension
+setMethod(f="[", signature=signature(x = "NeuroVecSeq", i = "numeric", j = "numeric"),
+          def = function (x, i, j, k, m, ..., drop = TRUE) {
+            if (missing(k))
+              k = 1:(dim(x)[3])
+            if (missing(m)) {
+              m <- 1:(dim(x)[4])
+            }
+
+            ret <- do.call(rbind, map(x@vecs, ~ .[i,j,k,]))
+            ret <- do.call(rbind, map(x@vecs, ~ .[i,j,k,]))
+            if (drop) drop(ret) else ret
+          })
 
 
 
+#' extractor
+#' @export
+#' @param x the object
+#' @param i first index
+#' @param j second index
+#' @param k third index
+#' @param m the fourth index
+#' @param ... additional args
+#' @param drop dimension
+setMethod(f="[", signature=signature(x = "NeuroVecSeq", i = "missing", j = "numeric"),
+          def = function (x, i, j, k, m, ..., drop = TRUE) {
+            i <- 1:(dim(x)[1])
+            if (missing(k))
+              k = 1:(dim(x)[3])
+            if (missing(m)) {
+              m <- 1:(dim(x)[4])
+            }
+
+            ret <- do.call(rbind, map(x@vecs, ~ .[i,j,k,]))
+            ret <- ret[m,]
+            if (drop) drop(ret) else ret
+          })
+
+
+#' extractor
+#' @export
+#' @param x the object
+#' @param i first index
+#' @param j second index
+#' @param k third index
+#' @param m the fourth index
+#' @param ... additional args
+#' @param drop dimension
+setMethod(f="[", signature=signature(x = "NeuroVecSeq", i = "numeric", j = "missing"),
+          def = function (x, i, j, k, m, ..., drop = TRUE) {
+            j <- 1:(dim(x)[2])
+            if (missing(k))
+              k = 1:(dim(x)[3])
+            if (missing(m)) {
+              m <- 1:(dim(x)[4])
+            }
+
+            ret <- do.call(rbind, map(x@vecs, ~ .[i,j,k,]))
+            ret <- ret[m,]
+            if (drop) drop(ret) else ret
+          })
 
 
 
