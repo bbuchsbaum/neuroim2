@@ -410,6 +410,26 @@ setClass("CachedSparseNeuroVec",
 
 
 
+#' NeuroVecSeq
+#'
+#' A concatenated sequence of \code{\linkS4class{NeuroVec}} instances.
+#'
+#' @rdname NeuroVecSeq-class
+#' @slot vecs the sequences of \code{NeuroVec} instances
+setClass("NeuroVecSeq",
+         representation(vecs="list"),
+         contains=c("NeuroVec"),
+
+         validity = function(object) {
+           assert_that(all(purrr::map_lgl(object@vecs, ~ inherits(., "NeuroVec"))))
+           dimlist <- purrr::map(object@vecs, ~ dim(.)[1:3])
+           splist <- purrr::map(object@vecs, ~ spacing(.))
+           assert_that(all(purrr::map_lgl(dimlist, ~ all(dimlist[[1]] == .))))
+           assert_that(all(purrr::map_lgl(splist, ~ all(splist[[1]] == .))))
+
+         })
+
+
 #' BasisNeuroVec
 #'
 #' a class that stores a represents a 4-dimensional array as a set of basis functions (dictionary) and

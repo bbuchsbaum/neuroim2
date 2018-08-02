@@ -157,7 +157,7 @@ NeuroVecSource <- function(file_name, indices=NULL, mask=NULL) {
 }
 
 
-#' Get length of \code{NeuroVec}. This is the numbe rof volumes in the volume vector (e.g. the 4th image dimension)
+#' Get length of \code{NeuroVec}. This is the number of volumes in the volume vector (e.g. the 4th image dimension)
 #'
 #' @export
 #' @rdname length-methods
@@ -447,6 +447,37 @@ setMethod(f="concat", signature=signature(x="NeuroVec", y="NeuroVec"),
 		})
 
 
+
+#' @rdname concat-methods
+#' @export
+setMethod(f="concat", signature=signature(x="ROIVec", y="ROIVec"),
+          def=function(x,y,...) {
+            ll <- list(x,y,...)
+
+            cds <- map(ll, ~ coords(.))
+            ident <- map_lgl(cds, ~ all(cds[[1]] == .))
+            assert_that(all(ident), msg=paste("concat.ROIVec: ", "all 'ROIVec' arguments must have the same set of coordinates"))
+
+            dat <- do.call(rbind, map(ll, ~ .@.Data))
+            vspace <- space(x)
+            nd <- c(dim(vspace)[1:3], nrow(dat))
+
+
+            nspace <-
+              NeuroSpace(
+                nd,
+                origin = origin(x@space),
+                spacing = spacing(x@space),
+                axes = axes(x@space),
+                trans = trans(x@space)
+              )
+
+
+            ROIVec(nspace, coords=coords(x), data=dat)
+          })
+
+
+
 #' @rdname series-methods
 #' @export
 setMethod("series", signature(x="NeuroVec", i="matrix"),
@@ -672,5 +703,74 @@ setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character",
 			write_nifti_vector(x, file_name, data_type)
 
 		})
+
+
+## NeuroVecSeq methods
+############################################
+
+
+
+
+
+#' @export
+#' @rdname length-methods
+setMethod("length", signature=c("NeuroVecSeq"),
+          def=function(x) {
+            sum(map_dbl(x@vecs, ~ length(.)))
+          })
+
+
+
+
+#' @rdname series-methods
+#' @export
+setMethod("series", signature(x="NeuroVecSeq", i="integer"),
+          def=function(x, i, j, k) {
+            map(x@vecs, ~ series(., i,j,k)) %>% flatten_dbl()
+          })
+
+
+#' @rdname series-methods
+#' @export
+setMethod("series", signature(x="NeuroVecSeq", i="numeric"),
+          def=function(x, i, j, k) {
+            map(x@vecs, ~ series(., as.integer(i),as.integer(j),as.integer(k))) %>% flatten_dbl()
+          })
+
+
+#' @rdname series-methods
+#' @export
+setMethod("series", signature(x="NeuroVecSeq", i="matrix"),
+          def=function(x,i) {
+            do.call(rbind, map(x@vecs, ~ series(., i)))
+          })
+
+
+#' @rdname series-methods
+#' @export
+setMethod("series_roi", signature(x="NeuroVecSeq", i="matrix"),
+          def=function(x,i) {
+            rois <- map(x@vecs, ~ series_roi(., i))
+            if (length(rois) == 1) {
+              rois[[1]]
+            } else if (length(rois) == 2) {
+              concat(rois[[1]], rois[[2]])
+            } else {
+              f <- partial(concat, rois[[1]], rois[[2]])
+              do.call(f, rois[3:length(rois)])
+            }
+          })
+
+
+
+
+
+
+
+
+
+
+
+
 
 
