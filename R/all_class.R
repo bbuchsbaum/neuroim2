@@ -330,6 +330,7 @@ setClass("LogicalNeuroVol", contains=c("DenseNeuroVol"))
 #' ClusteredNeuroVol
 #'
 #' Three-dimensional brain image that is divided into N disjoint partitions
+#'
 #' @slot svol a \code{\linkS4class{SparseNeuroVol}} containing cluster indices in 3D space
 #' @slot mask the \code{logical} mask indicating the spatial domain of the set of clusters
 #' @slot clusters an integer index indicating the cluster number for each voxel in the mask
@@ -379,7 +380,8 @@ setClass("DenseNeuroVec",  contains=c("NeuroVec", "array"))
 #' SparseNeuroVec
 #'
 #' a sparse four-dimensional brain image, backed by a \code{matrix}, where each column represents
-#' a vector spanning the fourth dimension (e.g. time)
+#' a non-zero vector spanning the fourth dimension (e.g. time), and defined by a volumetric mask.
+#'
 #' @rdname SparseNeuroVec-class
 #' @slot mask the mask defining the sparse domain
 #' @slot data the matrix of series, where rows span across voxel space and columns span the fourth dimensions
@@ -387,6 +389,23 @@ setClass("DenseNeuroVec",  contains=c("NeuroVec", "array"))
 #' @export
 setClass("SparseNeuroVec",
          representation(mask="LogicalNeuroVol",data="matrix", map="IndexLookupVol"),
+         contains=c("NeuroVec"))
+
+
+#' CachedSparseNeuroVec
+#'
+#' a sparse four-dimensional brain image, backed by a \code{matrix}, where each column represents
+#' a non-zero vector spanning the fourth dimension (e.g. time), and defined by a volumetric mask.
+#' The data is loaded on demand and retained in a memory-limited cache for faster repeated access.
+#'
+#'
+#' @rdname CachedSparseNeuroVec-class
+#' @slot mask the mask defining the sparse domain
+#' @slot map instance of class \code{\linkS4class{IndexLookupVol}} is used to map between spatial and index/row coordinates
+#' @slot bucket_vol the set of buckets
+#' @slot cache_size the maximum number of buckets to keep in cache
+setClass("CachedSparseNeuroVec",
+         representation(mask="LogicalNeuroVol",map="IndexLookupVol", bucket_vol="ClusteredNeuroVol", cache_size="integer"),
          contains=c("NeuroVec"))
 
 
@@ -420,6 +439,18 @@ setClass("BasisNeuroVec",
 #' @slot mask the subset of voxels that will be stored in memory
 #' @export
 setClass("SparseNeuroVecSource", representation(mask="LogicalNeuroVol"), contains=c("NeuroVecSource"))
+
+
+#' CachedSparseNeuroVecSource
+#'
+#' A class that is used to produce a \code{\linkS4class{CachedSparseNeuroVec}} instance
+#'
+#' @rdname CachedSparseNeuroVecSource-class
+#' @slot mask the subset of voxels that will be stored in memory
+#' @slot bucket_vol the volume defining the cache partitions
+#' @slot cache_size the number of buckets to retain in memory cache.
+setClass("CachedSparseNeuroVecSource", representation(mask="LogicalNeuroVol", bucket_vol="ClusteredNeuroVol",
+                                                      cache_size="integer"), contains=c("NeuroVecSource"))
 
 
 setClassUnion("numericOrMatrix", c("numeric", "matrix"))

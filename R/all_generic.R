@@ -63,6 +63,22 @@ setGeneric(name="vectors", def=function(x, subset, ...) standardGeneric("vectors
 #' @rdname split_blocks-methods
 setGeneric(name="split_blocks", def=function(x, indices, ...) standardGeneric("split_blocks"))
 
+
+
+
+
+
+#' Generic function to partition an image into a set of disjoint clusters
+#'
+#' @param x the object to partition
+#' @param k the number of clusters
+#' @param ... additional arguments
+#' @export
+#' @rdname partition-methods
+setGeneric(name="partition", def=function(x, k, ...) standardGeneric("partition"))
+
+
+
 #' Generic function to cut an object into a list of spatial or spatiotemporal clusters
 #'
 #' @param x the object to split

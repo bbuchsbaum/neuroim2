@@ -48,7 +48,7 @@ ClusteredNeuroVol <- function(mask, clusters, label_map=NULL, label="") {
     cluster_map[[clus_names[[i]]]] <- clus_split[[clus_names[[i]]]]
   }
 
-  svol <- SparseNeuroVol(clusters, space(mask), indices=which(mask))
+  svol <- SparseNeuroVol(clusters, space(mask), indices=which(mask != 0))
   new("ClusteredNeuroVol", svol=svol, mask=mask, clusters=as.integer(clusters),
       label_map=label_map, cluster_map=cluster_map, space=space)
 }

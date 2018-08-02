@@ -759,6 +759,16 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVol", mask="LogicalNeu
 
 })
 
+
+#' @rdname partition-methods
+setMethod("partition", signature=signature(x="LogicalNeuroVol", k="integer"),
+          def=function(x,k) {
+            idx <- which(x != 0)
+            cds <- index_to_coord(x,idx)
+            kres <- kmeans(cds, centers=k)
+            ClusteredNeuroVol(x, kres$cluster)
+          })
+
 #' @rdname as.sparse-methods
 setMethod(f="as.sparse", signature=signature(x="DenseNeuroVol", mask="numeric"),
           def=function(x, mask) {

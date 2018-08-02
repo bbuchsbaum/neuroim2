@@ -24,6 +24,7 @@ Collate:
     'all_class.R'
     'axis.R'
     'binary_io.R'
+    'cached_neurovec.R'
     'clustervol.R'
     'common.R'
     'conncomp.R'
