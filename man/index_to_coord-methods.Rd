@@ -6,6 +6,7 @@
 \alias{index_to_coord,NeuroSpace,numeric-method}
 \alias{index_to_coord,NeuroSpace,integer-method}
 \alias{index_to_coord,NeuroVol,integer-method}
+\alias{index_to_coord,NeuroVec,integer-method}
 \title{Generic function to convert 1D indices to N-dimensional real world coordinates}
 \usage{
 index_to_coord(x, idx)
@@ -15,6 +16,8 @@ index_to_coord(x, idx)
 \S4method{index_to_coord}{NeuroSpace,integer}(x, idx)
 
 \S4method{index_to_coord}{NeuroVol,integer}(x, idx)
+
+\S4method{index_to_coord}{NeuroVec,integer}(x, idx)
 }
 \arguments{
 \item{x}{the object}

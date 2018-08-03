@@ -7,6 +7,7 @@
 \alias{concat,NeuroVec,NeuroVol-method}
 \alias{concat,NeuroVol,NeuroVec-method}
 \alias{concat,NeuroVec,NeuroVec-method}
+\alias{concat,ROIVec,ROIVec-method}
 \alias{concat,DenseNeuroVol,missing-method}
 \alias{concat,DenseNeuroVol,DenseNeuroVol-method}
 \alias{concat,SparseNeuroVec,missing-method}
@@ -20,6 +21,8 @@ concat(x, y, ...)
 \S4method{concat}{NeuroVol,NeuroVec}(x, y, ...)
 
 \S4method{concat}{NeuroVec,NeuroVec}(x, y, ...)
+
+\S4method{concat}{ROIVec,ROIVec}(x, y, ...)
 
 \S4method{concat}{DenseNeuroVol,missing}(x, y, ...)
 

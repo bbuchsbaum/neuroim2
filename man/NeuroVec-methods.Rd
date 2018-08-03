@@ -3,13 +3,20 @@
 \docType{methods}
 \name{[[,NeuroVec,numeric-method}
 \alias{[[,NeuroVec,numeric-method}
+\alias{[[,NeuroVecSeq,numeric-method}
 \title{[[}
 \usage{
 \S4method{[[}{NeuroVec,numeric}(x, i)
+
+\S4method{[[}{NeuroVecSeq,numeric}(x, i)
 }
 \arguments{
 \item{i}{the volume index}
+
+\item{i}{the volume index}
 }
 \description{
+[[
+
 [[
 }

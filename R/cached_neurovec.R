@@ -1,21 +1,43 @@
-#' CachedNeuroVecSource
-#'
-#' constructs a CachedNeuroVecSource object
-#'
-#' @param meta_info an object of class \code{\linkS4class{MetaInfo}}
-#' @param indices a vector of 1D indices
-#' @param mask a 3D \code{array} of type \code{logical}
-#' @param bucket_vol a user supplied \code{\linkS4class{ClusteredNeuroVol}} defining the cache buckets
-#' @rdname CachedSparseNeuroVecSource-class
-CachedSparseNeuroVecSource <- function(meta_info, indices, bucket_vol) {
 
-  stopifnot(length(dim(meta_info)) >= 3)
-  stopifnot(all(indices >= 1 & indices <= dim(meta_info)[4]))
 
-  D <- dim(meta_info)[1:3]
+CachedSparseNeuroVec <- function(file_name, bucket_vol) {
   mask <- bucket_vol@mask
+  meta <- read_header(file_name)
+  assert_that(length(meta@dims) == 4)
+  assert_that(all(meta@dims[1:3] == dim(bucket_vol)))
 
-  stopifnot(all(dim(mask) == D))
+  indices <- which(mask> 0)
+  map <- IndexLookupVol(space(mask), indices=indices)
 
-  new("CachedSparseNeuroVecSource", meta_info=meta_info, indices=indices, mask=mask, bucket_vol=bucket_vol)
+  len <- prod(dim(mask))
+  sp <- add_dim(space(mask), meta@dims[4])
+
+  new("CachedSparseNeuroVec",
+      space=sp,
+      meta=meta,
+      mask=mask,
+      map=map,
+      bucket_vol=bucket_vol,
+      cache_size=as.integer(5),
+      cache=sparseMatrix(i=numeric(), j=numeric(), dims=c(meta@dims[4], len)),
+      cache_list=vector(length(vec@bucket_vol@cluster_map),mode="list"))
+
 }
+
+
+#' @export
+#' @rdname series-methods
+setMethod(f="series", signature=signature(x="CachedSparseNeuroVec", i="matrix"),
+          def=function(x,i) {
+            idx <- grid_to_index(x@mask, i)
+
+            first <- min(idx)
+            last <- max(idx)
+
+            f <- series_reader(x@meta@data_file)
+            m <- f(first, last)
+            keep <- seq(first, last) %in% idx
+            m[,keep]
+          })
+
+

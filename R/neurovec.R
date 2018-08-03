@@ -788,8 +788,6 @@ setMethod(f="[", signature=signature(x = "NeuroVecSeq", i = "numeric", j = "nume
             if (missing(m)) {
               m <- 1:(dim(x)[4])
             }
-
-            ret <- do.call(rbind, map(x@vecs, ~ .[i,j,k,]))
             ret <- do.call(rbind, map(x@vecs, ~ .[i,j,k,]))
             if (drop) drop(ret) else ret
           })
@@ -814,9 +812,7 @@ setMethod(f="[", signature=signature(x = "NeuroVecSeq", i = "missing", j = "nume
               m <- 1:(dim(x)[4])
             }
 
-            ret <- do.call(rbind, map(x@vecs, ~ .[i,j,k,]))
-            ret <- ret[m,]
-            if (drop) drop(ret) else ret
+            callGeneric(x,i,j,k,m)
           })
 
 
@@ -838,9 +834,7 @@ setMethod(f="[", signature=signature(x = "NeuroVecSeq", i = "numeric", j = "miss
               m <- 1:(dim(x)[4])
             }
 
-            ret <- do.call(rbind, map(x@vecs, ~ .[i,j,k,]))
-            ret <- ret[m,]
-            if (drop) drop(ret) else ret
+            callGeneric(x,i,j,k,m)
           })
 
 

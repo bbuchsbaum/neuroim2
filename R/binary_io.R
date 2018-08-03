@@ -1,9 +1,41 @@
 #' @include all_class.R
-NULL
+{}
 #' @include all_generic.R
-NULL
+{}
 
+series_reader <- function(file_name) {
+  if (endsWith(file_name, ".gz")) {
+    stop(paste("Cannot create series_reader with gzipped file", file_name))
+  }
 
+  meta <- read_header(file_name)
+  assert_that(length(meta@dims) == 4, msg="'file_name' argument must refer to a 4-dimensional image")
+  nels <- prod(meta@dims[1:3])
+
+  dtype <- .getRStorage(meta@data_type)
+
+  f <- function(first, last, input=NULL) {
+    if (is.null(input)) {
+      input <- file(file_name, open="rb")
+      close <- TRUE
+    } else {
+      close <- FALSE
+    }
+
+    res <- lapply(seq(1, meta@dims[4]), function(i) {
+      seek(input, where=(i-1)*nels*meta@bytes_per_element + meta@data_offset + (first-1)*meta@bytes_per_element, origin="start")
+      readBin(input, what=dtype, size=meta@bytes_per_element, n=(last-first)+1, endian=meta@endian)
+    })
+
+    if (close) {
+      close(input)
+    }
+
+    do.call(rbind, res)
+  }
+
+  f
+}
 
 #' BinaryReader
 #'
@@ -18,7 +50,8 @@ NULL
 #' @export
 BinaryReader <- function(input, byte_offset, data_type, bytes_per_element, endian=.Platform$endian) {
 	if (is.character(input)) {
-		new("BinaryReader", input=file(input, open="rb"), byte_offset=as.integer(byte_offset), data_type=data_type, bytes_per_element=as.integer(bytes_per_element), endian=endian)
+		new("BinaryReader", input=file(input, open="rb"), byte_offset=as.integer(byte_offset),
+		    data_type=data_type, bytes_per_element=as.integer(bytes_per_element), endian=endian)
 	} else {
 		stopifnot(inherits(input, "connection"))
 		new("BinaryReader", input=input, byte_offset=as.integer(byte_offset), data_type=data_type, bytes_per_element=as.integer(bytes_per_element), endian=endian)

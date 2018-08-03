@@ -34,8 +34,6 @@ Construct a \code{\linkS4class{ClusteredNeuroVol}} instance
 
 \item{\code{clusters}}{an integer index indicating the cluster number for each voxel in the mask}
 
-\item{\code{centers}}{the cluster centers}
-
 \item{\code{label_map}}{a list mapping from name to cluster id}
 
 \item{\code{cluster_map}}{an \code{environment} mapping from cluster id to the set of 1D spatial indices}

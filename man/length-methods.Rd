@@ -3,13 +3,16 @@
 \docType{methods}
 \name{length,NeuroVec-method}
 \alias{length,NeuroVec-method}
+\alias{length,NeuroVecSeq-method}
 \alias{length,ROIVol-method}
-\title{Get length of \code{NeuroVec}. This is the numbe rof volumes in the volume vector (e.g. the 4th image dimension)}
+\title{Get length of \code{NeuroVec}. This is the number of volumes in the volume vector (e.g. the 4th image dimension)}
 \usage{
 \S4method{length}{NeuroVec}(x)
+
+\S4method{length}{NeuroVecSeq}(x)
 
 \S4method{length}{ROIVol}(x)
 }
 \description{
-Get length of \code{NeuroVec}. This is the numbe rof volumes in the volume vector (e.g. the 4th image dimension)
+Get length of \code{NeuroVec}. This is the number of volumes in the volume vector (e.g. the 4th image dimension)
 }

@@ -7,6 +7,12 @@ setOldClass(c("file", "connection"))
 setOldClass(c("gzfile", "connection"))
 setOldClass("environment")
 
+
+#' @keywords internal
+setClass("Cache", representation(env="environment"),
+         prototype(env=new.env()))
+
+
 #' NamedAxis
 #'
 #' This class represents an axis with a name attribute
@@ -331,7 +337,6 @@ setClass("LogicalNeuroVol", contains=c("DenseNeuroVol"))
 #'
 #' Three-dimensional brain image that is divided into N disjoint partitions
 #'
-#' @slot svol a \code{\linkS4class{SparseNeuroVol}} containing cluster indices in 3D space
 #' @slot mask the \code{logical} mask indicating the spatial domain of the set of clusters
 #' @slot clusters an integer index indicating the cluster number for each voxel in the mask
 #' @slot label_map a list mapping from name to cluster id
@@ -339,18 +344,19 @@ setClass("LogicalNeuroVol", contains=c("DenseNeuroVol"))
 #' @rdname ClusteredNeuroVol-class
 #' @export
 setClass("ClusteredNeuroVol",
-         representation=representation(svol="SparseNeuroVol",
+         representation=representation(
                                        mask="LogicalNeuroVol",
                                        clusters="integer",
                                        label_map="list",
                                        cluster_map="environment"),
-         contains=c("NeuroVol"))
+         contains=c("SparseNeuroVol"))
 
 
 #' IndexLookupVol
 #'
 #' Three-dimensional brain image that can be used as a map between 1D grid indices and a table of values
 #' Currently used in the \code{\linkS4class{SparseNeuroVec}} class.
+#'
 #' @rdname IndexLookupVol-class
 #' @export
 setClass("IndexLookupVol",
@@ -400,12 +406,16 @@ setClass("SparseNeuroVec",
 #'
 #'
 #' @rdname CachedSparseNeuroVec-class
+#' @slot meta the file meta information of type \code{\linkS4class{FileMetaInfo}}
 #' @slot mask the mask defining the sparse domain
 #' @slot map instance of class \code{\linkS4class{IndexLookupVol}} is used to map between spatial and index/row coordinates
-#' @slot bucket_vol the set of buckets
+#' @slot bucket_vol the volume contianing set of buckets or clusters used to define the data partitions
 #' @slot cache_size the maximum number of buckets to keep in cache
+#' @slot cache a sparse matrix holding the cached data
+#' @slot cache_map an array containing the array positions currently stored in memory
 setClass("CachedSparseNeuroVec",
-         representation(mask="LogicalNeuroVol",map="IndexLookupVol", bucket_vol="ClusteredNeuroVol", cache_size="integer"),
+         representation(meta="FileMetaInfo", mask="LogicalNeuroVol", map="IndexLookupVol", bucket_vol="ClusteredNeuroVol",
+                        cache_size="integer", cache="ngCMatrix", cache_list="list"),
          contains=c("NeuroVec"))
 
 

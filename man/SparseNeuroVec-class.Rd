@@ -21,7 +21,7 @@ SparseNeuroVec(data, space, mask, source = NULL, label = "")
 }
 \description{
 a sparse four-dimensional brain image, backed by a \code{matrix}, where each column represents
-a vector spanning the fourth dimension (e.g. time)
+a non-zero vector spanning the fourth dimension (e.g. time), and defined by a volumetric mask.
 
 constructs a SparseNeuroVec object
 }

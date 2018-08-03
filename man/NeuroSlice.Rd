@@ -2,7 +2,7 @@
 % Please edit documentation in R/neuroslice.R
 \name{NeuroSlice}
 \alias{NeuroSlice}
-\title{neuro_slice constructor}
+\title{NeuroSlice constructor}
 \usage{
 NeuroSlice(data, space, indices = NULL)
 }
@@ -14,7 +14,7 @@ NeuroSlice(data, space, indices = NULL)
 \item{indices}{linear indices corresponding used if \code{data} is a 1D vector.}
 }
 \description{
-neuro_slice constructor
+NeuroSlice constructor
 }
 \examples{
 bspace <- NeuroSpace(c(64,64), spacing=c(1,1))
