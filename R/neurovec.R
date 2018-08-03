@@ -607,12 +607,7 @@ setAs(from="DenseNeuroVec", to="matrix",
 #' @param x the object
 #' @export
 setMethod(f="as.list", signature=signature(x = "NeuroVec"), def=function(x) {
-  out = list()
-  for (i in 1:dim(x)[4]) {
-    out[[i]] <- takeVolume(x,i)
-  }
-
-  out
+  map(1:length(x), ~ x[[.]])
 })
 
 
