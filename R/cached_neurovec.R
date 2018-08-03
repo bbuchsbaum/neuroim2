@@ -31,6 +31,9 @@ setMethod(f="series", signature=signature(x="CachedSparseNeuroVec", i="matrix"),
           def=function(x,i) {
             idx <- grid_to_index(x@mask, i)
 
+            out <- matrix(0, dim(x)[4], length(idx))
+
+
             first <- min(idx)
             last <- max(idx)
 
