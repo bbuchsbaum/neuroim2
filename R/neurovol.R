@@ -786,6 +786,14 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVol", mask="numeric"),
 
 
 
+
+setMethod(f="linear_access", signature=signature(x = "SparseNeuroVol", i = "numeric"),
+          def=function (x, i) {
+            x@data[i]
+          })
+
+
+
 #' extractor
 #' @export
 #' @param x the object
@@ -800,108 +808,15 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
               k <- seq(1, dim(x)[3])
             }
 
-
             nel <- length(i) * length(j) * length(k)
             mind <- cbind(rep(i, length.out=nel), rep(j, each=length(i)), rep(k, each=length(i) * length(j)))
 
             ind <- grid_to_index(x, mind)
-            x@data[as.numeric(ind)]
+            dat <- x@data[as.numeric(ind)]
+            array(dat, c(length(i), length(j), length(k)))
 
-        })
+          })
 
-
-
-
-#' extractor
-#' @export
-#' @param x the object
-#' @param i first index
-#' @param j second index
-#' @param k third index
-#' @param ... additional args
-#' @param drop drop dimension
-setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "missing", drop="missing"),
-          def=function (x, i, j, k, ..., drop) {
-            if (missing(k) && nargs() == 4) {
-              x@data[as.numeric(i)]
-            } else {
-              if (missing(k)) {
-                k <- 1:(dim(x)[3])
-              }
-              callGeneric(x, i=i,  j=seq(1,dim(x)[2]), k, drop)
-            }
-         }
-)
-
-#' extractor
-#' @export
-#' @param x the object
-#' @param i first index
-#' @param j second index
-#' @param k third index
-#' @param ... additional args
-#' @param drop dimension
-setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "matrix", j="missing", drop="ANY"),
-          def=function (x, i, j, k, ..., drop=TRUE) {
-            ind <- grid_to_index(x,i)
-            x@data[ind]
-          }
-)
-
-#' extractor
-#' @export
-#' @param x the object
-#' @param i first index
-#' @param j second index
-#' @param k third index
-#' @param ... additional args
-#' @param drop dimension
-setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "missing", j = "missing", drop="ANY"),
-          def=function (x, i, j, k, ..., drop=TRUE) {
-            if (missing(k)) {
-              x@data
-            } else {
-              if (missing(k)) {
-                k <- seq(1, dim(x)[3])
-              }
-              callGeneric(x, i=seq(1, dim(x)[1]), j=seq(1, dim(x)[2]), k=k, ...)
-            }
-          }
-)
-
-#' extractor
-#' @export
-#' @param x the object
-#' @param i first index
-#' @param j second index
-#' @param k third index
-#' @param ... additional args
-#' @param drop dimension
-setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "missing", j = "numeric", drop="ANY"),
-          def=function (x, i, j, k,  ..., drop=TRUE) {
-            if (missing(k)) {
-              k <- seq(1, dim(x)[3])
-            }
-            callGeneric(x, i=seq(1, dim(x)[1]), j, k,...)
-          }
-)
-
-#' extractor
-#' @export
-#' @param x the object
-#' @param i first index
-#' @param j second index
-#' @param k third index
-#' @param ... additional args
-#' @param drop dimension
-setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "missing", drop="ANY"),
-          def=function (x, i, j, k,  ..., drop=TRUE) {
-            if (missing(k)) {
-              k <- 1:(dim(x)[3])
-            }
-            callGeneric(x, i=i, j=seq(1,dim(x)[2]), k,...)
-          }
-)
 
 
 

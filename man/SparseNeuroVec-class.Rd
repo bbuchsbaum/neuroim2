@@ -15,7 +15,7 @@ SparseNeuroVec(data, space, mask, source = NULL, label = "")
 
 \item{mask}{a 3D \code{array} of type \code{logical}}
 
-\item{source}{the data source -- an instance of class \code{\linkS4class{BrainSource}}}
+\item{source}{the data source -- an instance of class \code{\linkS4class{FileSource}}}
 
 \item{label}{associated sub-image labels}
 }

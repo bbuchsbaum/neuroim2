@@ -11,7 +11,7 @@ This class contains meta information from an image data file
 
 This class contains meta information for a NIfTI image file
 
-This class contains meta information for a AFNI image file
+This class contains meta information for a AFNI image file.
 }
 \section{Slots}{
 

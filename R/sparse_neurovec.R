@@ -9,7 +9,7 @@
 #'
 #' constructs a SparseNeuroVecSource object
 #'
-#' @param meta_info an object of class \code{\linkS4class{BrainMetaInfo}}
+#' @param meta_info an object of class \code{\linkS4class{MetaInfo}}
 #' @param indices a vector of 1D indices
 #' @param mask a 3D \code{array} of type \code{logical}
 #' @export
@@ -54,7 +54,7 @@ SparseNeuroVecSource <- function(meta_info, indices, mask) {
 #' @param data an array which can be a \code{matrix} or 4-D \code{array}
 #' @param space a NeuroSpace instance
 #' @param mask a 3D \code{array} of type \code{logical}
-#' @param source the data source -- an instance of class \code{\linkS4class{BrainSource}}
+#' @param source the data source -- an instance of class \code{\linkS4class{FileSource}}
 #' @param label associated sub-image labels
 #' @export
 #' @examples
@@ -110,7 +110,6 @@ SparseNeuroVec <- function(data, space, mask, source=NULL, label="") {
 #' @rdname load_data-methods
 setMethod(f="load_data", signature=c("SparseNeuroVecSource"),
 		def=function(x) {
-
 
 			meta <- x@meta_info
 			nels <- prod(dim(meta)[1:3])
@@ -262,74 +261,6 @@ setMethod(f="linear_access", signature=signature(x = "SparseNeuroVec", i = "nume
             ovals
           })
 
-#' extractor
-#' @export
-#' @param x the object
-#' @param i first index
-#' @param j second index
-#' @param k third index
-#' @param m the fourth index
-#' @param ... additional args
-#' @param drop dimension
-setMethod(f="[", signature=signature(x = "SparseNeuroVec", i = "numeric", j = "missing"),
-		  def=function (x, i, j, k, m, ..., drop=TRUE) {
-		    if (missing(k)) {
-		      k = 1:(dim(x)[3])
-		    }
-		    if (missing(m)) {
-		      m = 1:(dim(x)[4])
-		    }
-
-			  callGeneric(x, i, 1:(dim(x)[2]),k,m,drop=drop)
-		  }
-  )
-
-
-#' extractor
-#' @export
-#' @param x the object
-#' @param i first index
-#' @param j second index
-#' @param k third index
-#' @param m the fourth index
-#' @param ... additional args
-#' @param drop dimension
-setMethod(f="[", signature=signature(x = "SparseNeuroVec", i = "missing", j = "missing"),
-		  def=function (x, i, j, k, m, ..., drop=TRUE) {
-		    if (missing(k)) {
-		      k = 1:(dim(x)[3])
-		    }
-
-		    if (missing(m)) {
-		      m = 1:(dim(x)[4])
-		    }
-
-			  callGeneric(x, 1:(dim(x)[1]), 1:(dim(x)[2]), k,m,drop=drop)
-		  }
-  )
-
-
-#' extractor
-#' @export
-#' @param x the object
-#' @param i first index
-#' @param j second index
-#' @param k third index
-#' @param m the fourth index
-#' @param ... additional args
-#' @param drop dimension
-setMethod(f="[", signature=signature(x = "SparseNeuroVec", i = "missing", j = "numeric"),
-		  def=function (x, i, j, k, m, ..., drop=TRUE) {
-		    if (missing(k)) {
-		      k = 1:(dim(x)[3])
-		    }
-
-		    if (missing(m)) {
-		      m = 1:(dim(x)[4])
-		    }
-			  callGeneric(x, i:(dim(x)[1]), j,k,m,drop=drop)
-		  }
-  )
 
 
 #' extractor
@@ -431,7 +362,7 @@ setMethod(f="as.matrix", signature=signature(x = "SparseNeuroVec"), def=function
 
 #' as.list
 #'
-#' convert SparseNeuroVec to list of \code{\linkS4class{DenseBrainVolume}}
+#' convert SparseNeuroVec to list of \code{\linkS4class{DenseNeuroVol}}
 #' @rdname as.list-methods
 #' @export
 setMethod(f="as.list", signature=signature(x = "SparseNeuroVec"), def=function(x) {

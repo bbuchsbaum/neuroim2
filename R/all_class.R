@@ -6,6 +6,7 @@ NULL
 setOldClass(c("file", "connection"))
 setOldClass(c("gzfile", "connection"))
 setOldClass("environment")
+setOldClass("mmap")
 
 setClass("ArrayLike4D")
 setClass("ArrayLike3D")
@@ -172,7 +173,8 @@ setClass("NIFTIMetaInfo",
 
 #' AFNIMetaInfo
 #'
-#' This class contains meta information for a AFNI image file
+#' This class contains meta information for a AFNI image file.
+#'
 #' @rdname FileMetaInfo-class
 #' @slot afni_header a list of attributes specific to the AFNI file format
 #' @slot afni_header a \code{list} of attributes specific to the AFNI file format
@@ -187,6 +189,7 @@ setClass("AFNIMetaInfo",
 #'
 #' Base class for representing a data source for images. The purpose of this class is to provide a layer in between
 #' low level IO and image loading functionality.
+#'
 #' @rdname FileSource-class
 #' @slot metaInfo meta information for the data source
 #' @exportClass FileSource
@@ -201,6 +204,8 @@ setClass("FileSource", representation(meta_info="FileMetaInfo"))
 #' @slot index the index of the volume to be read -- must be of length 1.
 #' @exportClass NeuroVolSource
 setClass("NeuroVolSource", representation(index="integer"), contains="FileSource")
+
+
 
 #' NeuroVecSource
 #'
@@ -290,12 +295,15 @@ setClass("NeuroObj", representation(space="NeuroSpace"))
 
 #' NeuroSlice
 #'
-#' Two-dimensional brain image
+#' A two-dimensional brain image.
+#'
 #' @rdname NeuroSlice-class
 #' @export
 setClass("NeuroSlice", contains=c("array", "NeuroObj"))
 
+
 #' NeuroVol
+#'
 #' Base class for image representing 3D volumetric data.
 #' @rdname NeuroVol-class
 #' @export
@@ -320,7 +328,7 @@ setClass("DenseNeuroVol", contains=c("NeuroVol", "array"))
 #' @export
 setClass("SparseNeuroVol",
          representation=representation(data="sparseVector"),
-         contains=c("NeuroVol"))
+         contains=c("NeuroVol", "ArrayLike3D"))
 
 
 #' LogicalNeuroVol
@@ -379,6 +387,16 @@ setClass("NeuroVec", contains="NeuroObj")
 setClass("DenseNeuroVec",  contains=c("NeuroVec", "array"))
 
 
+#' MappedNeuroVec
+#'
+#' Four-dimensional brain image, backed by an memory-mapped file.
+#'
+#' @name MappedNeuroVec-class
+#' @export
+setClass("MappedNeuroVec",  representation(filemap="mmap", offset="integer"), contains=c("NeuroVec", "ArrayLike4D"))
+
+
+
 
 #' SparseNeuroVec
 #'
@@ -414,9 +432,8 @@ setClass("FileBackedNeuroVec",
 #' @rdname NeuroVecSeq-class
 #' @slot vecs the sequences of \code{NeuroVec} instances
 setClass("NeuroVecSeq",
-         representation(vecs="list"),
+         representation(vecs="list", lens="numeric"),
          contains=c("NeuroVec", "ArrayLike4D"),
-
          validity = function(object) {
            assert_that(all(purrr::map_lgl(object@vecs, ~ inherits(., "NeuroVec"))))
            dimlist <- purrr::map(object@vecs, ~ dim(.)[1:3])
@@ -432,7 +449,7 @@ setClass("NeuroVecSeq",
 #' a class that stores a represents a 4-dimensional array as a set of basis functions (dictionary) and
 #' corresponding set of coefficients.
 #'
-#' @rdname BrainBasisVector
+#' @rdname BasisNeuroVec
 #'
 #' @slot mask the mask defining the sparse domain
 #' @slot basis the matrix of bases, were each column is a basis vector.
@@ -456,6 +473,16 @@ setClass("BasisNeuroVec",
 #' @slot mask the subset of voxels that will be stored in memory
 #' @export
 setClass("SparseNeuroVecSource", representation(mask="LogicalNeuroVol"), contains=c("NeuroVecSource"))
+
+
+
+#' MappedNeuroVecSource
+#'
+#' A class that is used to produce a \code{\linkS4class{MappedNeuroVec}} instance
+#'
+#' @rdname MappedNeuroVecSource-class
+#' @export
+setClass("MappedNeuroVecSource", contains=c("NeuroVecSource"))
 
 
 
@@ -574,16 +601,16 @@ setClass("Kernel", representation(width="numeric", weights="numeric", voxels="ma
 
 
 
-#' BrainBucket
+#' NeuroBucket
 #'
 #' a four-dimensional image that conists of a sequence of labeled image volumes backed by a list
-#' @rdname BrainBucket-class
+#' @rdname NeuroBucket-class
 #' @slot source the data source for the bucket volumes
 #' @slot labels the names of the sub-volumes contained in the bucket
 #' @slot data a list of \code{\linkS4class{NeuroVol}} instances with names corresponding to volume labels
 #' @export
 #' @importFrom purrr map_lgl
-setClass("BrainBucket",
+setClass("NeuroBucket",
          representation=representation(labels="character", data="list"),
          validity = function(object) {
            if (any(map_lgl(object@data, function(obj) !is(obj, "NeuroVol")))) {

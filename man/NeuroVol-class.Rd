@@ -3,9 +3,7 @@
 \docType{class}
 \name{NeuroVol-class}
 \alias{NeuroVol-class}
-\title{NeuroVol
-Base class for image representing 3D volumetric data.}
+\title{NeuroVol}
 \description{
-NeuroVol
 Base class for image representing 3D volumetric data.
 }

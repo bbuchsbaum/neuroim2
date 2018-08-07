@@ -209,7 +209,7 @@ test_that("can perform arithmetic on NeuroVec", {
 #
 # 	mask.idx <- sort(sample(1:length(template), 1000))
 # 	vals <- rnorm(length(mask.idx))
-# 	bv <- BrainVolume(vals, space(template), indices=mask.idx)
+# 	bv <- NeuroVol(vals, space(template), indices=mask.idx)
 # 	fname <- paste(tempfile(), ".nii", sep="")
 # 	writeVolume(bv,fname)
 # 	bv2 <- loadVolume(fname)
@@ -353,7 +353,7 @@ test_that("can extract ROI from NeuroVec", {
 #
 #   mask.idx <- sort(sample(1:length(template), 1000))
 #   vals <- rnorm(length(mask.idx))
-#   bv <- BrainVolume(vals, space(template), indices=mask.idx)
+#   bv <- NeuroVol(vals, space(template), indices=mask.idx)
 #   fname <- paste(tempfile(), ".nii", sep="")
 #   writeVolume(bv,fname)
 #   bv2 <- loadVolume(fname)
