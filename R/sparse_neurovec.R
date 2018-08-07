@@ -305,6 +305,13 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVec", i = "missing", j = "m
 #' @param drop dimension
 setMethod(f="[", signature=signature(x = "SparseNeuroVec", i = "missing", j = "numeric"),
 		  def=function (x, i, j, k, m, ..., drop=TRUE) {
+		    if (missing(k)) {
+		      k = 1:(dim(x)[3])
+		    }
+
+		    if (missing(m)) {
+		      m = 1:(dim(x)[4])
+		    }
 			  callGeneric(x, i:(dim(x)[1]), j,k,m,drop=drop)
 		  }
   )

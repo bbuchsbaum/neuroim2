@@ -41,3 +41,41 @@ setMethod(f="sub_vector", signature=signature(x="FileBackedNeuroVec", i="numeric
           })
 
 
+#' as.list
+#'
+#' convert FileBackedNeuroVec to list of \code{\linkS4class{DenseNeuroVol}}
+#' @rdname as.list-methods
+#' @export
+setMethod(f="as.list", signature=signature(x = "FileBackedNeuroVec"), def=function(x) {
+  D4 <- dim(x)[4]
+
+  f <- function(i) {
+    drop(sub_vector(x, i))
+  }
+
+  deferred_list(lapply(seq(1, D4),
+         function(i) { f } ))
+
+})
+
+
+#' extractor
+#' @export
+#' @param x the object
+#' @param i first index
+#' @param j second index
+#' @param k third index
+#' @param m third index
+#' @param ... additional args
+#' @param drop drop dimension
+setMethod(f="[", signature=signature(x = "FileBackedNeuroVec", i = "numeric", j = "missing", drop="missing"),
+          def=function (x, i, j, k, m, ..., drop) {
+            if (missing(k) && missing(m) && nargs() == 4) {
+              vals <- read_mapped_data(x@meta, i)
+            } else {
+              stop()
+            }
+          }
+)
+
+

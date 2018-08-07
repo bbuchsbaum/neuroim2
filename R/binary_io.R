@@ -42,6 +42,19 @@ read_mapped_series <- function(meta, idx) {
   t(matrix(ret, length(idx), meta@dims[4]))
 }
 
+read_mapped_data <- function(meta, idx) {
+  if (endsWith(meta@data_file, ".gz")) {
+    stop(paste("Cannot create series_reader with gzipped file", file_name))
+  }
+
+  assert_that(length(meta@dims) == 4, msg="'file_name' argument must refer to a 4-dimensional image")
+  nels <- prod(meta@dims[1:3])
+
+  #dtype <- .getRStorage(meta@data_type)
+  #idx_set <- map(seq(1, meta@dims[4]), ~ idx + (nels*(.-1))) %>% flatten_dbl()
+  ret <- .read_mmap(meta, idx)
+}
+
 read_mapped_vols <- function(meta, idx) {
   if (endsWith(meta@data_file, ".gz")) {
     stop(paste("Cannot create series_reader with gzipped file", file_name))
@@ -52,8 +65,6 @@ read_mapped_vols <- function(meta, idx) {
   nimages <- meta@dims[4]
 
   assert_that(min(idx) >= 1 && max(idx) <= nimages)
-
-  dtype <- .getRStorage(meta@data_type)
 
   idx_set <- map(idx, ~ (.-1)*nels + seq(1,nels)) %>% flatten_dbl()
   ret <- .read_mmap(meta, idx_set)

@@ -503,6 +503,8 @@ setMethod("series_roi", signature(x="NeuroVec", i="matrix"),
 
 
 
+
+
 #' @rdname series-methods
 #' @export
 setMethod("series", signature(x="NeuroVec", i="ROICoords"),
@@ -839,6 +841,17 @@ setMethod(f="[", signature=signature(x = "NeuroVecSeq", i = "numeric", j = "miss
 
 
 
+#' @rdname drop-methods
+#' @export
+setMethod("drop", signature(x="NeuroVec"),
+          def=function(x) {
+            if (dim(x)[4] == 1) {
+              idx <- seq(1, prod(dim(x)[1:3]))
+              vals <- x[idx]
+              sp <- drop_dim(space(x))
+              DenseNeuroVol(array(vals, dim(sp)), sp)
+            }
+          })
 
 
 
