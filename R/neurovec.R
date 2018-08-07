@@ -218,6 +218,19 @@ read_vol_list <- function(file_names, mask=NULL) {
 	}
 }
 
+#' @rdname drop-methods
+#' @export
+setMethod("drop", signature(x="NeuroVec"),
+          def=function(x) {
+            if (dim(x)[4] == 1) {
+              idx <- seq(1, prod(dim(x)[1:3]))
+              vals <- x[idx]
+              sp <- drop_dim(space(x))
+              DenseNeuroVol(array(vals, dim(sp)), sp)
+            }
+          })
+
+
 
 setAs("DenseNeuroVec", "array", function(from) from@.Data)
 
@@ -397,6 +410,7 @@ setMethod(f="split_blocks", signature=signature(x="NeuroVec", indices="integer")
 #' @export
 setMethod(f="[[", signature=signature(x="NeuroVec", i="numeric"),
           def = function(x, i) {
+            assert_that(length(i) == 1)
             xs <- space(x)
             dat <- x[,,,i]
             newdim <- dim(x)[1:3]
@@ -703,10 +717,6 @@ setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character",
 
 
 ## NeuroVecSeq methods
-############################################
-
-
-
 
 
 #' @export
@@ -773,6 +783,12 @@ setMethod(f="[[", signature=signature(x="NeuroVecSeq", i="numeric"),
             DenseNeuroVol(dat, bspace)
           })
 
+#' @export
+setMethod(f="linear_access", signature=signature(x = "NeuroVecSeq", i = "numeric"),
+          def = function (x, i) {
+            map(x@vecs, ~ .[i]) %>% flatten_dbl()
+          })
+
 
 #' extractor
 #' @export
@@ -794,64 +810,6 @@ setMethod(f="[", signature=signature(x = "NeuroVecSeq", i = "numeric", j = "nume
             if (drop) drop(ret) else ret
           })
 
-
-
-#' extractor
-#' @export
-#' @param x the object
-#' @param i first index
-#' @param j second index
-#' @param k third index
-#' @param m the fourth index
-#' @param ... additional args
-#' @param drop dimension
-setMethod(f="[", signature=signature(x = "NeuroVecSeq", i = "missing", j = "numeric"),
-          def = function (x, i, j, k, m, ..., drop = TRUE) {
-            i <- 1:(dim(x)[1])
-            if (missing(k))
-              k = 1:(dim(x)[3])
-            if (missing(m)) {
-              m <- 1:(dim(x)[4])
-            }
-
-            callGeneric(x,i,j,k,m)
-          })
-
-
-#' extractor
-#' @export
-#' @param x the object
-#' @param i first index
-#' @param j second index
-#' @param k third index
-#' @param m the fourth index
-#' @param ... additional args
-#' @param drop dimension
-setMethod(f="[", signature=signature(x = "NeuroVecSeq", i = "numeric", j = "missing"),
-          def = function (x, i, j, k, m, ..., drop = TRUE) {
-            j <- 1:(dim(x)[2])
-            if (missing(k))
-              k = 1:(dim(x)[3])
-            if (missing(m)) {
-              m <- 1:(dim(x)[4])
-            }
-
-            callGeneric(x,i,j,k,m)
-          })
-
-
-
-#' @rdname drop-methods
-#' @export
-setMethod("drop", signature(x="NeuroVec"),
-          def=function(x) {
-            if (dim(x)[4] == 1) {
-              idx <- seq(1, prod(dim(x)[1:3]))
-              vals <- x[idx]
-              sp <- drop_dim(space(x))
-              DenseNeuroVol(array(vals, dim(sp)), sp)
-            }
-          })
 
 
 

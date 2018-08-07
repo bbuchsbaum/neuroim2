@@ -32,6 +32,7 @@ Collate:
     'file_format.R'
     'filebacked_neurovec.R'
     'index_vol.R'
+    'mapped_neurovec.R'
     'meta_info.R'
     'neuro_obj.R'
     'neuroim.R'

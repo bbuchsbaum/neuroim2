@@ -647,7 +647,7 @@ setGeneric(name="series", def=function(x, i, ...) standardGeneric("series"))
 setGeneric(name="slice", def=function(x, zlevel, along, orientation, ...) standardGeneric("slice"))
 
 #' Render an image to create a drawable image.
-#' @param x the object, e.g. an instance of type \code{BrainSlice}
+#' @param x the object, e.g. an instance of type \code{NeuroSlice}
 #' @param width width of the rendered image
 #' @param height height of the rendered image
 #' @param colmap the colors used to map from values to RGBA colors.

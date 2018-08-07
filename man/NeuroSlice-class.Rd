@@ -5,5 +5,5 @@
 \alias{NeuroSlice-class}
 \title{NeuroSlice}
 \description{
-Two-dimensional brain image
+A two-dimensional brain image.
 }

@@ -7,7 +7,7 @@
 render(x, width, height, colmap, ...)
 }
 \arguments{
-\item{x}{the object, e.g. an instance of type \code{BrainSlice}}
+\item{x}{the object, e.g. an instance of type \code{NeuroSlice}}
 
 \item{width}{width of the rendered image}
 

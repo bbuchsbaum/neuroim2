@@ -9,7 +9,7 @@
 SparseNeuroVecSource(meta_info, indices, mask)
 }
 \arguments{
-\item{meta_info}{an object of class \code{\linkS4class{BrainMetaInfo}}}
+\item{meta_info}{an object of class \code{\linkS4class{MetaInfo}}}
 
 \item{indices}{a vector of 1D indices}
 
