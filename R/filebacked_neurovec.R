@@ -68,14 +68,42 @@ setMethod(f="as.list", signature=signature(x = "FileBackedNeuroVec"), def=functi
 #' @param m third index
 #' @param ... additional args
 #' @param drop drop dimension
-setMethod(f="[", signature=signature(x = "FileBackedNeuroVec", i = "numeric", j = "missing", drop="missing"),
-          def=function (x, i, j, k, m, ..., drop) {
+setMethod(f="[", signature=signature(x = "FileBackedNeuroVec", i = "numeric", j = "missing"),
+          def=function (x, i, j, k, m, ..., drop=TRUE) {
             if (missing(k) && missing(m) && nargs() == 4) {
               vals <- read_mapped_data(x@meta, i)
             } else {
-              stop()
+              j <- seq(1, dim(x)[2])
+              if (missing(k))
+                k = seq(1, dim(x)[3])
+              if (missing(m)) {
+                m <- seq(1, dim(x)[4])
+              }
+              callGeneric(x,i,j,k,m,drop=drop)
             }
           }
+)
+
+setMethod(f="[", signature=signature(x = "FileBackedNeuroVec", i = "numeric", j = "numeric"),
+          def=function (x, i, j, k, m, ..., drop=TRUE) {
+              if (missing(k))
+                k = seq(1, dim(x)[3])
+              if (missing(m)) {
+                m <- seq(1, dim(x)[4])
+              }
+
+              vmat <- expand.grid(i=i, j=j, k=k, m=m)
+              idx <- .gridToIndex(dim(x), vmat)
+              vals <- read_mapped_data(x@meta, idx)
+              ret <- array(vals, c(length(i), length(j), length(k), length(m)))
+              if (drop) {
+                drop(ret)
+              } else {
+                ret
+              }
+
+            }
+
 )
 
 

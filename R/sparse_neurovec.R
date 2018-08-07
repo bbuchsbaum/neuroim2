@@ -334,8 +334,6 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVec", i = "numeric", j = "n
               m <- 1:(dim(x)[4])
             }
 
-
-
             vmat <- as.matrix(expand.grid(i,j,k))
             ind <- .gridToIndex3D(dim(x)[1:3], vmat[,1:3,drop = FALSE])
 
