@@ -22,6 +22,15 @@ setGeneric(name="print", def=function(x, ...) standardGeneric("print"))
 #' @rdname values-methods
 setGeneric(name="values", def=function(x, ...) standardGeneric("values"))
 
+#' Generic function to extract values from an array-like object using linear indexing
+#'
+#' @param x a data source
+#' @param ... additional arguments
+#' @export
+#' @rdname linear_access-methods
+setGeneric(name="linear_access", def=function(x, i, ...) standardGeneric("linear_access"))
+
+
 
 #' Generic function to load data from a data source
 #'

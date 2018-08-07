@@ -28,8 +28,6 @@ Construct a \code{\linkS4class{ClusteredNeuroVol}} instance
 \section{Slots}{
 
 \describe{
-\item{\code{svol}}{a \code{\linkS4class{SparseNeuroVol}} containing cluster indices in 3D space}
-
 \item{\code{mask}}{the \code{logical} mask indicating the spatial domain of the set of clusters}
 
 \item{\code{clusters}}{an integer index indicating the cluster number for each voxel in the mask}

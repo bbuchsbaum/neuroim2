@@ -247,6 +247,21 @@ setMethod(f="lookup", signature=signature(x="SparseNeuroVec", i="numeric"),
           })
 
 
+setMethod(f="linear_access", signature=signature(x = "SparseNeuroVec", i = "numeric"),
+          def=function (x, i) {
+            nels <- prod(dim(x)[1:3])
+            n <- as.integer(i / nels) + 1
+            offset <- i %% nels
+
+            ll <- lookup(x, offset)
+            nz <- which(ll > 0)
+            idx2d <- cbind(n[nz], ll[nz])
+            vals <- x@data[idx2d]
+            ovals <- numeric(length(i))
+            ovals[nz] <- vals
+            ovals
+          })
+
 #' extractor
 #' @export
 #' @param x the object

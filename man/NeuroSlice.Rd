@@ -9,7 +9,7 @@ NeuroSlice(data, space, indices = NULL)
 \arguments{
 \item{data}{data vector or matrix}
 
-\item{space}{an instance of class BrainSpace}
+\item{space}{an instance of class NeuroSpace}
 
 \item{indices}{linear indices corresponding used if \code{data} is a 1D vector.}
 }

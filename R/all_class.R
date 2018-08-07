@@ -7,7 +7,8 @@ setOldClass(c("file", "connection"))
 setOldClass(c("gzfile", "connection"))
 setOldClass("environment")
 
-
+setClass("ArrayLike4D")
+setClass("ArrayLike3D")
 
 #' NamedAxis
 #'
@@ -391,7 +392,7 @@ setClass("DenseNeuroVec",  contains=c("NeuroVec", "array"))
 #' @export
 setClass("SparseNeuroVec",
          representation(mask="LogicalNeuroVol",data="matrix", map="IndexLookupVol"),
-         contains=c("NeuroVec"))
+         contains=c("NeuroVec", "ArrayLike4D"))
 
 
 #' FileBackedNeuroVec
@@ -402,7 +403,7 @@ setClass("SparseNeuroVec",
 #' @slot meta the file meta information of type \code{\linkS4class{FileMetaInfo}}
 setClass("FileBackedNeuroVec",
          representation(meta="FileMetaInfo"),
-         contains=c("NeuroVec"))
+         contains=c("NeuroVec", "ArrayLike4D"))
 
 
 
@@ -456,17 +457,6 @@ setClass("BasisNeuroVec",
 #' @export
 setClass("SparseNeuroVecSource", representation(mask="LogicalNeuroVol"), contains=c("NeuroVecSource"))
 
-
-#' CachedSparseNeuroVecSource
-#'
-#' A class that is used to produce a \code{\linkS4class{CachedSparseNeuroVec}} instance
-#'
-#' @rdname CachedSparseNeuroVecSource-class
-#' @slot mask the subset of voxels that will be stored in memory
-#' @slot bucket_vol the volume defining the cache partitions
-#' @slot cache_size the number of buckets to retain in memory cache.
-setClass("CachedSparseNeuroVecSource", representation(mask="LogicalNeuroVol", bucket_vol="ClusteredNeuroVol",
-                                                      cache_size="integer"), contains=c("NeuroVecSource"))
 
 
 setClassUnion("numericOrMatrix", c("numeric", "matrix"))

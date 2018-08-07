@@ -1,4 +1,8 @@
 
+
+#' Constuct a \code{FileBackedNeuroVec} instance
+#'
+#' @param the name of the image file
 #' @export
 FileBackedNeuroVec <- function(file_name) {
   meta <- read_header(file_name)
@@ -16,10 +20,14 @@ FileBackedNeuroVec <- function(file_name) {
 #' @export
 #' @rdname series-methods
 setMethod(f="series", signature=signature(x="FileBackedNeuroVec", i="numeric"),
-          def=function(x,i) {
-            read_mapped_series(x@meta,i)
+          def=function(x,i,j,k) {
+            if (missing(j) && missing(k)) {
+              linear_access(x@meta,i)
+            } else {
+              idx <- grid_to_index(space(x), cbind(i,j,k))
+              read_mapped_series(x@meta,idx)
+            }
           })
-
 
 
 #' @export
@@ -58,31 +66,11 @@ setMethod(f="as.list", signature=signature(x = "FileBackedNeuroVec"), def=functi
 
 })
 
+setMethod(f="linear_access", signature=signature(x = "FileBackedNeuroVec", i = "numeric"),
+          def=function (x, i) {
+            read_mapped_data(x@meta, i)
+          })
 
-#' extractor
-#' @export
-#' @param x the object
-#' @param i first index
-#' @param j second index
-#' @param k third index
-#' @param m third index
-#' @param ... additional args
-#' @param drop drop dimension
-setMethod(f="[", signature=signature(x = "FileBackedNeuroVec", i = "numeric", j = "missing"),
-          def=function (x, i, j, k, m, ..., drop=TRUE) {
-            if (missing(k) && missing(m) && nargs() == 4) {
-              vals <- read_mapped_data(x@meta, i)
-            } else {
-              j <- seq(1, dim(x)[2])
-              if (missing(k))
-                k = seq(1, dim(x)[3])
-              if (missing(m)) {
-                m <- seq(1, dim(x)[4])
-              }
-              callGeneric(x,i,j,k,m,drop=drop)
-            }
-          }
-)
 
 setMethod(f="[", signature=signature(x = "FileBackedNeuroVec", i = "numeric", j = "numeric"),
           def=function (x, i, j, k, m, ..., drop=TRUE) {
@@ -96,6 +84,7 @@ setMethod(f="[", signature=signature(x = "FileBackedNeuroVec", i = "numeric", j 
               idx <- .gridToIndex(dim(x), vmat)
               vals <- read_mapped_data(x@meta, idx)
               ret <- array(vals, c(length(i), length(j), length(k), length(m)))
+
               if (drop) {
                 drop(ret)
               } else {
@@ -106,4 +95,65 @@ setMethod(f="[", signature=signature(x = "FileBackedNeuroVec", i = "numeric", j 
 
 )
 
+#' [[
+#'
+#' @rdname FileBackedNeuroVec-methods
+#' @param i the volume index
+#' @export
+setMethod(f="[[", signature=signature(x="FileBackedNeuroVec", i="numeric"),
+          def = function(x, i) {
+            stopifnot(length(i) == 1)
+            xs <- space(x)
+            drop(sub_vector(x,i))
 
+          })
+
+
+
+#' @rdname as.matrix-methods
+#' @param x the object
+#' @export
+setMethod(f="as.matrix", signature=signature(x = "FileBackedNeuroVec"), def=function(x) {
+  as(x, "matrix")
+})
+
+#' @export
+setAs(from="FileBackedNeuroVec", to="matrix",
+      function(from) {
+        len <- prod(from@meta@dims[1:3])
+        t(series(from, seq(1, len)))
+      })
+
+
+#' @export
+#' @rdname concat-methods
+# setMethod(f="concat", signature=signature(x="FileBackedNeuroVec", y="FileBackedNeuroVec"),
+#           def=function(x,y,...) {
+#             if (!all(dim(x)[1:3] == dim(y)[1:3])) {
+#               stop("cannot concatenate arguments with different spatial dimensions")
+#             }
+#             if (!all(spacing(x) == spacing(y))) {
+#               stop("cannot concatenate arguments with different voxel spacing")
+#             }
+#
+#             ndat <- rbind(x@data, y@data)
+#             d1 <- dim(x)
+#             d2 <- dim(y)
+#
+#             rest <- list(...)
+#
+#
+#             if (length(rest) >= 1) {
+#               mat <- do.call(rbind, map(rest, ~ .@data))
+#
+#               ndim <- c(d1[1:3], d1[4] + d2[4] + nrow(mat))
+#               ndat <- rbind(ndat, mat)
+#               nspace <- NeuroSpace(ndim, spacing(x@space),  origin(x@space), axes(x@space), trans(x@space))
+#               SparseNeuroVec(ndat, nspace, mask=x@mask)
+#             } else {
+#               ndim <- c(d1[1:3], d1[4] + d2[4])
+#               nspace <- NeuroSpace(ndim, spacing(x@space),  origin(x@space), axes(x@space), trans(x@space))
+#               SparseNeuroVec(ndat, nspace, mask=x@mask)
+#             }
+#
+#           })

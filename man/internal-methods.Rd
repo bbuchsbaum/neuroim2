@@ -7,6 +7,7 @@
 \alias{.gridToIndex}
 \alias{.indexToGrid}
 \alias{.getRStorage}
+\alias{.getMMapMode}
 \alias{.getDataStorage}
 \alias{.getDataCode}
 \alias{.getDataSize}
@@ -27,6 +28,8 @@
 .indexToGrid(idx, array.dim)
 
 .getRStorage(data_type)
+
+.getMMapMode(code)
 
 .getDataStorage(code)
 

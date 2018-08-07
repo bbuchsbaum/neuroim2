@@ -169,7 +169,6 @@ test_that("can extract an ROIVec from a NeuroVec", {
 })
 
 
-
 test_that("can convert NeuroVec to matrix", {
 	bv1 <- gen_dat(5,5,5,5)
 	mat <- as.matrix(bv1)

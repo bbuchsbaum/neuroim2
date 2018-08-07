@@ -9,7 +9,7 @@
 IndexLookupVol(space, indices)
 }
 \arguments{
-\item{space}{a BrainSpace object}
+\item{space}{a NeuroSpace object}
 
 \item{indices}{the set of 1-d indices defining the lookup map}
 }
