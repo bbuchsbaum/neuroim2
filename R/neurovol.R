@@ -766,7 +766,7 @@ setMethod("partition", signature=signature(x="LogicalNeuroVol", k="integer"),
             assert_that(k>1)
             idx <- which(x != 0)
             cds <- index_to_coord(x,idx)
-            kres <- kmeans(cds, centers=k)
+            kres <- kmeans(cds, centers=k, iter.max=100)
             ClusteredNeuroVol(x, kres$cluster)
           })
 

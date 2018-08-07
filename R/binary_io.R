@@ -3,6 +3,64 @@
 #' @include all_generic.R
 {}
 
+.read_mmap <- function(meta, idx) {
+
+  if (.Platform$endian != meta@endian) {
+    stop(".read_mmap: swapped endian data not supported.")
+    ## read raw bytes
+    rawbytes <- mmap::mmap(meta@dataFile, mode=mmap::char(),
+                           prot=mmap::mmapFlags("PROT_READ"))
+    rawbytes <- rawbytes[(meta@dataOffset+1):length(rawbytes)]
+
+    mmap::munmap(rawbytes)
+    readBin(rawbytes, what=.getRStorage(meta@dataType), size=.getDataSize(meta@dataType), n=nels, endian=meta@endian)
+  } else {
+    #mmap::mmap(meta@dataFile, mode=.getMMapMode(meta@dataType), off=meta@dataOffset,prot=mmap::mmapFlags("PROT_READ"),
+    #flags=mmap::mmapFlags("MAP_PRIVATE"))
+    ret <- mmap::mmap(meta@data_file, mode=.getMMapMode(meta@data_type), prot=mmap::mmapFlags("PROT_READ"))
+    offset <- meta@data_offset/.getDataSize(meta@data_type)
+    idx_off <- idx + offset
+    vals <- ret[idx_off]
+    mmap::munmap(ret)
+    vals
+  }
+
+
+}
+
+read_mapped_series <- function(meta, idx) {
+  if (endsWith(meta@data_file, ".gz")) {
+    stop(paste("Cannot create series_reader with gzipped file", file_name))
+  }
+
+  assert_that(length(meta@dims) == 4, msg="'file_name' argument must refer to a 4-dimensional image")
+  nels <- prod(meta@dims[1:3])
+
+  dtype <- .getRStorage(meta@data_type)
+  idx_set <- map(seq(1, meta@dims[4]), ~ idx + (nels*(.-1))) %>% flatten_dbl()
+  ret <- .read_mmap(meta, idx_set)
+  t(matrix(ret, length(idx), meta@dims[4]))
+}
+
+read_mapped_vols <- function(meta, idx) {
+  if (endsWith(meta@data_file, ".gz")) {
+    stop(paste("Cannot create series_reader with gzipped file", file_name))
+  }
+
+  assert_that(length(meta@dims) == 4, msg="'file_name' argument must refer to a 4-dimensional image")
+  nels <- prod(meta@dims[1:3])
+  nimages <- meta@dims[4]
+
+  assert_that(min(idx) >= 1 && max(idx) <= nimages)
+
+  dtype <- .getRStorage(meta@data_type)
+
+  idx_set <- map(idx, ~ (.-1)*nels + seq(1,nels)) %>% flatten_dbl()
+  ret <- .read_mmap(meta, idx_set)
+  mat <- matrix(ret, nels, length(idx))
+}
+
+
 series_reader <- function(file_name) {
   if (endsWith(file_name, ".gz")) {
     stop(paste("Cannot create series_reader with gzipped file", file_name))

@@ -8,10 +8,6 @@ setOldClass(c("gzfile", "connection"))
 setOldClass("environment")
 
 
-#' @keywords internal
-setClass("Cache", representation(env="environment"),
-         prototype(env=new.env()))
-
 
 #' NamedAxis
 #'
@@ -398,24 +394,14 @@ setClass("SparseNeuroVec",
          contains=c("NeuroVec"))
 
 
-#' CachedSparseNeuroVec
+#' FileBackedNeuroVec
 #'
-#' a sparse four-dimensional brain image, backed by a \code{matrix}, where each column represents
-#' a non-zero vector spanning the fourth dimension (e.g. time), and defined by a volumetric mask.
-#' The data is loaded on demand and retained in a memory-limited cache for faster repeated access.
+#' a four-dimensional brain image that is read in to memory "on demand" using memory-mapped file access.
 #'
-#'
-#' @rdname CachedSparseNeuroVec-class
+#' @rdname FileBackedNeuroVec-class
 #' @slot meta the file meta information of type \code{\linkS4class{FileMetaInfo}}
-#' @slot mask the mask defining the sparse domain
-#' @slot map instance of class \code{\linkS4class{IndexLookupVol}} is used to map between spatial and index/row coordinates
-#' @slot bucket_vol the volume contianing set of buckets or clusters used to define the data partitions
-#' @slot cache_size the maximum number of buckets to keep in cache
-#' @slot cache a sparse matrix holding the cached data
-#' @slot cache_map an array containing the array positions currently stored in memory
-setClass("CachedSparseNeuroVec",
-         representation(meta="FileMetaInfo", mask="LogicalNeuroVol", map="IndexLookupVol", bucket_vol="ClusteredNeuroVol",
-                        cache_size="integer", cache="ngCMatrix", cache_list="list"),
+setClass("FileBackedNeuroVec",
+         representation(meta="FileMetaInfo"),
          contains=c("NeuroVec"))
 
 

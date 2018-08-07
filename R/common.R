@@ -301,29 +301,29 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
   }
 }
 
-# @rdname internal-methods
-# @keywords internal
-# @importFrom mmap int8 uint8 int16 int32 real32 real64
-# @importFrom mmap mmap char mmapFlags munmap
-# .getMMapMode <- function(code) {
-# 	if (code == "UNKNOWN") {
-# 		stop(paste(".getMMapMode: no memory map mode for UNKNOWN data type: ", code))
-# 	} else if (code == "BINARY") {
-# 		mmap::int8()
-# 	} else if (code == "UBYTE") {
-# 	  mmap::uint8()
-# 	} else if(code == "SHORT") {
-# 	  mmap::int16()
-# 	} else if(code == "INT") {
-# 	  mmap::int32()
-# 	} else if (code == "FLOAT") {
-# 	  mmap::real32()
-# 	} else if (code == "DOUBLE") {
-# 	  mmap::real64()
-# 	} else {
-# 		stop(paste(".getMMapMode: unsupported data type: ", code))
-# 	}
-# }
+#' @rdname internal-methods
+#' @keywords internal
+#' @importFrom mmap int8 uint8 int16 int32 real32 real64
+#' @importFrom mmap mmap char mmapFlags munmap
+.getMMapMode <- function(code) {
+	if (code == "UNKNOWN") {
+		stop(paste(".getMMapMode: no memory map mode for UNKNOWN data type: ", code))
+	} else if (code == "BINARY") {
+		mmap::int8()
+	} else if (code == "UBYTE") {
+	  mmap::uint8()
+	} else if(code == "SHORT") {
+	  mmap::int16()
+	} else if(code == "INT") {
+	  mmap::int32()
+	} else if (code == "FLOAT") {
+	  mmap::real32()
+	} else if (code == "DOUBLE") {
+	  mmap::real64()
+	} else {
+		stop(paste(".getMMapMode: unsupported data type: ", code))
+	}
+}
 
 
 #' .getDataStorage

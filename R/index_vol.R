@@ -6,7 +6,7 @@
 
 #' IndexLookupVol
 #'
-#' @param space a BrainSpace object
+#' @param space a NeuroSpace object
 #' @param indices the set of 1-d indices defining the lookup map
 #' @export IndexLookupVol
 #' @rdname IndexLookupVol-class
