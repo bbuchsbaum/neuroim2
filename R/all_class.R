@@ -432,9 +432,8 @@ setClass("FileBackedNeuroVec",
 #' @rdname NeuroVecSeq-class
 #' @slot vecs the sequences of \code{NeuroVec} instances
 setClass("NeuroVecSeq",
-         representation(vecs="list"),
+         representation(vecs="list", lens="numeric"),
          contains=c("NeuroVec", "ArrayLike4D"),
-
          validity = function(object) {
            assert_that(all(purrr::map_lgl(object@vecs, ~ inherits(., "NeuroVec"))))
            dimlist <- purrr::map(object@vecs, ~ dim(.)[1:3])

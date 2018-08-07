@@ -718,6 +718,18 @@ setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character",
 
 ## NeuroVecSeq methods
 
+#' Create an \code{NeuroVecSeq} instance for a variable length list of \code{NeuroVec} objects.
+#'
+#' @param ... one or more instance of type \code{NeuroVec}
+NeuroVecSeq <- function(...) {
+  vecs <- list(...)
+  assert_that(all(map_lgl(vecs, ~ inherits(., "NeuroVec"))))
+  sp <- space(vecs[[1]])
+  lens <- map_dbl(vecs, function(x) dim(x)[4])
+  sp <- add_dim(drop_dim(sp), sum(lens))
+
+  new("NeuroVecSeq", space=sp, vecs=vecs, lens=lens)
+}
 
 #' @export
 #' @rdname length-methods
@@ -725,8 +737,6 @@ setMethod("length", signature=c("NeuroVecSeq"),
           def=function(x) {
             sum(map_dbl(x@vecs, ~ length(.)))
           })
-
-
 
 
 #' @rdname series-methods
@@ -786,6 +796,12 @@ setMethod(f="[[", signature=signature(x="NeuroVecSeq", i="numeric"),
 #' @export
 setMethod(f="linear_access", signature=signature(x = "NeuroVecSeq", i = "numeric"),
           def = function (x, i) {
+            ## inprog
+            nels <- prod(dim(x)[1:3])
+            els <- cumsum(nels * x@lens)
+            offset <- i %% els
+            vnum <- as.integer(i/els)
+            idx <- cbind(vnum, i)
             map(x@vecs, ~ .[i]) %>% flatten_dbl()
           })
 

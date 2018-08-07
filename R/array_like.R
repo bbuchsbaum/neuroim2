@@ -29,7 +29,7 @@ setMethod(f="[", signature=signature(x = "ArrayLike4D", i = "matrix", j="missing
 setMethod(f="[", signature=signature(x = "ArrayLike4D", i = "numeric", j = "missing"),
           def=function (x, i, j, k, m, ..., drop=TRUE) {
             if (missing(k) && missing(m) && nargs() == 4) {
-              vals <- linear_access(x@meta, i)
+              vals <- linear_access(x, i)
             } else {
               j <- seq(1, dim(x)[2])
               if (missing(k))
