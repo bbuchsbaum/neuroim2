@@ -799,37 +799,17 @@ setMethod(f="linear_access", signature=signature(x = "NeuroVecSeq", i = "numeric
             ## inprog
             nels <- prod(dim(x)[1:3])
             els <- nels * x@lens
-            csum <- cumsum(nels * x@lens)
-            cels <- c(0, csum[-length(csum)])
+            csum <- cumsum(nels * x@lens) +1
+            cels <- c(1, csum[-length(csum)])
             vnum <- find_seqnum(cels, i)
-            offsets <- i - cels[vnum]
-
-            ## split(1:length(vnum), vnum)
-
-            imap(vnum, ~ x@vecs[[.x]][offsets[.y]])
+            offsets <- i - cels[vnum] + 1
+            ## faster? first split offsets by vnum, then extract once per vec.
+            ## then rearrange outputs.
+            imap_dbl(vnum, ~ x@vecs[[.x]][offsets[.y]])
 
           })
 
 
-#' extractor
-#' @export
-#' @param x the object
-#' @param i first index
-#' @param j second index
-#' @param k third index
-#' @param m the fourth index
-#' @param ... additional args
-#' @param drop dimension
-setMethod(f="[", signature=signature(x = "NeuroVecSeq", i = "numeric", j = "numeric"),
-          def = function (x, i, j, k, m, ..., drop = TRUE) {
-            if (missing(k))
-              k = 1:(dim(x)[3])
-            if (missing(m)) {
-              m <- 1:(dim(x)[4])
-            }
-            ret <- do.call(rbind, map(x@vecs, ~ .[i,j,k,]))
-            if (drop) drop(ret) else ret
-          })
 
 
 

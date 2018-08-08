@@ -25,6 +25,42 @@ IntegerVector find_seqnum(IntegerVector clens, IntegerVector idx) {
 
 }
 
+// .gridToIndex <- function(dimensions, vmat) {
+// D <- Reduce("*", dimensions, accumulate=TRUE)
+//   apply(vmat, 1, function(vox) {
+//     sum(map_dbl(length(D):2, function(i) {
+//       D[i-1]*(vox[i]-1)
+//     })) + vox[1]
+//   })
+//
+// }
+
+// [[Rcpp::export]]
+IntegerVector gridToIndexCpp(IntegerVector array_dim, NumericMatrix voxmat) {
+  IntegerVector D = IntegerVector(array_dim.length());
+  IntegerVector out = IntegerVector(voxmat.nrow());
+
+  int cum = 1;
+  for (int i = 0; i < D.length(); i++) {
+    cum = cum * array_dim[i];
+    D[i] = cum;
+
+  }
+
+  for (int i=0; i < voxmat.nrow(); i++) {
+    int ind = 0;
+    for (int j=D.length()-1; j>0; j--) {
+      ind = ind + D[j-1] * (voxmat(i,j)-1);
+    }
+    out[i] = ind + voxmat(i,0);
+  }
+
+  return out;
+
+}
+
+
+
 // [[Rcpp::export]]
 IntegerVector gridToIndex3DCpp(IntegerVector array_dim, NumericMatrix voxmat) {
   int slicedim = array_dim[0]*array_dim[1];
