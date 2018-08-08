@@ -35,7 +35,7 @@ setMethod(f="load_data", signature=c("MappedNeuroVecSource"),
             offset <- meta@data_offset/.getDataSize(meta@data_type)
 
             bspace <- NeuroSpace(dim(meta), meta@spacing,
-                                 meta@origin, meta@spatial_axes)
+                                 meta@origin, meta@spatial_axes, trans=trans(meta))
 
             new("MappedNeuroVec", space=bspace, filemap=fmap, offset=as.integer(offset))
 
@@ -47,38 +47,4 @@ setMethod(f="linear_access", signature=signature(x = "MappedNeuroVec", i = "nume
           def=function (x, i) {
             idx <- i + x@offset
             x@filemap[idx]
-          })
-
-
-
-#' extractor
-#' @export
-#' @param x the object
-#' @param i first index
-#' @param j second index
-#' @param k third index
-#' @param m the fourth index
-#' @param ... additional args
-#' @param drop dimension
-setMethod(f="[", signature=signature(x = "MappedNeuroVec", i = "numeric", j = "numeric"),
-          def = function (x, i, j, k, m, ..., drop = TRUE) {
-            if (missing(k))
-              k = 1:(dim(x)[3])
-            if (missing(m)) {
-              m <- 1:(dim(x)[4])
-            }
-
-            vmat <- expand.grid(i=i, j=j, k=k, m=m)
-            idx <- .gridToIndex(dim(x), vmat)
-            vals <- linear_access(x,idx)
-
-            ret <- array(vals, c(length(i), length(j), length(k), length(m)))
-
-            if (drop) {
-              drop(ret)
-            } else {
-              ret
-            }
-
-
           })

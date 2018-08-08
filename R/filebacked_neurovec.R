@@ -22,7 +22,7 @@ FileBackedNeuroVec <- function(file_name) {
 setMethod(f="series", signature=signature(x="FileBackedNeuroVec", i="numeric"),
           def=function(x,i,j,k) {
             if (missing(j) && missing(k)) {
-              linear_access(x@meta,i)
+              linear_access(x,i)
             } else {
               idx <- grid_to_index(space(x), cbind(i,j,k))
               read_mapped_series(x@meta,idx)
@@ -71,29 +71,6 @@ setMethod(f="linear_access", signature=signature(x = "FileBackedNeuroVec", i = "
             read_mapped_data(x@meta, i)
           })
 
-
-setMethod(f="[", signature=signature(x = "FileBackedNeuroVec", i = "numeric", j = "numeric"),
-          def=function (x, i, j, k, m, ..., drop=TRUE) {
-              if (missing(k))
-                k = seq(1, dim(x)[3])
-              if (missing(m)) {
-                m <- seq(1, dim(x)[4])
-              }
-
-              vmat <- expand.grid(i=i, j=j, k=k, m=m)
-              idx <- .gridToIndex(dim(x), vmat)
-              vals <- read_mapped_data(x@meta, idx)
-              ret <- array(vals, c(length(i), length(j), length(k), length(m)))
-
-              if (drop) {
-                drop(ret)
-              } else {
-                ret
-              }
-
-            }
-
-)
 
 #' [[
 #'

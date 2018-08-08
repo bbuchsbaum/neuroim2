@@ -1,5 +1,10 @@
 
 
+
+
+
+
+
 #' extractor
 #' @export
 #' @param x the object
@@ -33,10 +38,12 @@ setMethod(f="[", signature=signature(x = "ArrayLike4D", i = "numeric", j = "nume
             }
 
 
-            grid <- as.matrix(expand.grid(i=i,j=j,k=k,m=m))
+            ind <- exgridToIndex4DCpp(dim(x), i,j,k,m)
+
+            #grid <- as.matrix(expand.grid(i=i,j=j,k=k,m=m))
 
             ## TODO grid_to_index for 4D image doesn't work
-            ind <- .gridToIndex(dim(x), grid)
+            #ind <- .gridToIndex(dim(x), grid)
 
             vals <- linear_access(x,ind)
             ret <- array(vals, c(length(i), length(j), length(k), length(m)))
@@ -69,29 +76,6 @@ setMethod(f="[", signature=signature(x = "ArrayLike4D", i = "numeric", j = "miss
               }
               callGeneric(x,i,j,k,m,drop=drop)
             }
-          }
-)
-
-
-#' extractor
-#' @export
-#' @param x the object
-#' @param i first index
-#' @param j second index
-#' @param k third index
-#' @param m the fourth index
-#' @param ... additional args
-#' @param drop dimension
-setMethod(f="[", signature=signature(x = "ArrayLike4D", i = "numeric", j = "missing"),
-          def=function (x, i, j, k, m, ..., drop=TRUE) {
-            if (missing(k)) {
-              k = 1:(dim(x)[3])
-            }
-            if (missing(m)) {
-              m = 1:(dim(x)[4])
-            }
-
-            callGeneric(x, i, 1:(dim(x)[2]),k,m,drop=drop)
           }
 )
 
@@ -155,7 +139,7 @@ setMethod(f="[", signature=signature(x = "ArrayLike4D", i = "missing", j = "nume
 #' @param k third index
 #' @param ... additional args
 #' @param drop drop dimension
-setMethod(f="[", signature=signature(x = "ArrayLike3D", i = "numeric", j = "missing", drop="missing"),
+setMethod(f="[", signature=signature(x = "ArrayLike3D", i = "numeric", j = "missing", drop="ANY"),
           def=function (x, i, j, k, ..., drop=TRUE) {
 
             if (missing(k) && nargs() == 4) {
@@ -193,7 +177,7 @@ setMethod(f="[", signature=signature(x = "ArrayLike3D", i = "matrix", j="missing
 #' @param k third index
 #' @param ... additional args
 #' @param drop dimension
-setMethod(f="[", signature=signature(x = "ArrayLike3D", i = "missing", j = "missing", drop="missing"),
+setMethod(f="[", signature=signature(x = "ArrayLike3D", i = "missing", j = "missing", drop="ANY"),
           def=function (x, i, j, k, ..., drop=TRUE) {
             if (missing(k)) {
               idx <- seq(1, prod(dim(x)))

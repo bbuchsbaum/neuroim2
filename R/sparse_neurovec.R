@@ -135,7 +135,8 @@ setMethod(f="load_data", signature=c("SparseNeuroVecSource"),
 			}
 
 			bspace <- NeuroSpace(c(dim(meta)[1:3], length(ind)), meta@spacing,
-			                     meta@origin, meta@spatial_axes)
+			                     meta@origin, meta@spatial_axes, trans=trans(meta))
+
 			SparseNeuroVec(arr, bspace, x@mask)
 
 		})
@@ -159,8 +160,6 @@ setMethod(f="coords", signature=signature(x="SparseNeuroVec"),
           })
 
 
-
-
 #' @export
 #' @rdname series-methods
 setMethod(f="series", signature=signature(x="SparseNeuroVec", i="matrix"),
@@ -170,11 +169,22 @@ setMethod(f="series", signature=signature(x="SparseNeuroVec", i="matrix"),
          })
 
 
+
+setMethod("series", signature(x="SparseNeuroVec", i="numeric"),
+          def=function(x,i, j, k) {
+            if (missing(j) && missing(k)) {
+              callGeneric(x, as.integer(i))
+            } else {
+              callGeneric(x, as.integer(i), as.integer(j), as.integer(k))
+            }
+          })
+
+
  #' @export
  #' @rdname series-methods
  #' @param j index for 2nd dimension
  #' @param k index for 3rd dimension
- setMethod("series", signature(x="SparseNeuroVec", i="numeric"),
+ setMethod("series", signature(x="SparseNeuroVec", i="integer"),
 		 def=function(x,i, j, k) {
 			 if (missing(j) && missing(k)) {
 				 idx <- lookup(x, as.integer(i))
@@ -188,8 +198,9 @@ setMethod(f="series", signature=signature(x="SparseNeuroVec", i="matrix"),
 				 }
 			 } else {
 				 vdim <- dim(x)
-				 slicedim <- vdim[1] * vdim[2]
-				 idx <- slicedim*(k-1) + (j-1)*vdim[1] + i
+				 idx <- gridToIndex3DCpp(vdim[1:3], cbind(i,j,k))
+				 #slicedim <- vdim[1] * vdim[2]
+				 #idx <- slicedim*(k-1) + (j-1)*vdim[1] + i
 				 callGeneric(x, idx)
 			 }
 
@@ -256,6 +267,7 @@ setMethod(f="linear_access", signature=signature(x = "SparseNeuroVec", i = "nume
             nz <- which(ll > 0)
             idx2d <- cbind(n[nz], ll[nz])
             vals <- x@data[idx2d]
+
             ovals <- numeric(length(i))
             ovals[nz] <- vals
             ovals

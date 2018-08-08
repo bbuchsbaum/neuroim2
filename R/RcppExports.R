@@ -5,6 +5,22 @@ find_seqnum <- function(clens, idx) {
     .Call('_neuroim2_find_seqnum', PACKAGE = 'neuroim2', clens, idx)
 }
 
+grid_to_intvec <- function(D, vox) {
+    .Call('_neuroim2_grid_to_intvec', PACKAGE = 'neuroim2', D, vox)
+}
+
+exgridToIndex3DCpp <- function(array_dim, iind, jind, kind) {
+    .Call('_neuroim2_exgridToIndex3DCpp', PACKAGE = 'neuroim2', array_dim, iind, jind, kind)
+}
+
+exgridToIndex4DCpp <- function(array_dim, iind, jind, kind, mind) {
+    .Call('_neuroim2_exgridToIndex4DCpp', PACKAGE = 'neuroim2', array_dim, iind, jind, kind, mind)
+}
+
+gridToIndexCpp <- function(array_dim, voxmat) {
+    .Call('_neuroim2_gridToIndexCpp', PACKAGE = 'neuroim2', array_dim, voxmat)
+}
+
 gridToIndex3DCpp <- function(array_dim, voxmat) {
     .Call('_neuroim2_gridToIndex3DCpp', PACKAGE = 'neuroim2', array_dim, voxmat)
 }

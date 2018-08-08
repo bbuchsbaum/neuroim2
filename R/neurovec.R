@@ -516,9 +516,6 @@ setMethod("series_roi", signature(x="NeuroVec", i="matrix"),
           })
 
 
-
-
-
 #' @rdname series-methods
 #' @export
 setMethod("series", signature(x="NeuroVec", i="ROICoords"),
@@ -557,20 +554,38 @@ setMethod("series_roi", signature(x="NeuroVec", i="LogicalNeuroVol"),
             mat <- as.matrix(series(x, i))
             ROIVec(space(x), coords=index_to_grid(i, which(i == TRUE)), data=as.matrix(mat))
           })
-
-
-#' @rdname series-methods
 #' @export
-setMethod("series", signature(x="NeuroVec", i="integer"),
-          def=function(x, i, j, k) {
+#' @rdname series-methods
+setMethod(f="series", signature=signature(x="NeuroVec", i="integer"),
+          def=function(x,i,j,k, drop=TRUE) {
             if (missing(j) && missing(k)) {
-              vdim <- dim(x)[1:3]
-              mat <- arrayInd(i, vdim)
-              apply(mat, 1, function(i) x[i[1], i[2], i[3],])
+              nels <- prod(dim(x)[1:3])
+              offsets <- seq(0, dim(x)[4]-1) * nels
+              idx <- map(i, ~ . + offsets) %>% flatten_dbl()
+              vals <- x[idx]
+              ret <- matrix(vals, dim(x)[4], length(i))
+              if (drop) drop(ret) else ret
             } else {
-              x[i,j,k,]
+              assert_that(length(i) == 1 && length(j) ==1 && length(k) ==1)
+              ret <- x[i,j,k,]
+              if (drop) drop(ret) else ret
             }
           })
+
+
+
+#' #' @rdname series-methods
+#' #' @export
+#' setMethod("series", signature(x="NeuroVec", i="integer"),
+#'           def=function(x, i, j, k) {
+#'             if (missing(j) && missing(k)) {
+#'               vdim <- dim(x)[1:3]
+#'               mat <- arrayInd(i, vdim)
+#'               apply(mat, 1, function(i) x[i[1], i[2], i[3],])
+#'             } else {
+#'               x[i,j,k,]
+#'             }
+#'           })
 
 
 #' @rdname series-methods
@@ -590,7 +605,7 @@ setMethod("series_roi", signature(x="NeuroVec", i="numeric"),
               vox <- arrayInd(i, vdim)
               callGeneric(x, vox)
             } else if (missing(i) || missing(j) || missing(k)) {
-              stop("series_roi: must provide either 1D 'i' or 3D ('i', 'k', 'j') vector indices")
+              stop("series_roi: must provide either 1D 'i' or 3D ('i', 'j', 'k') vector indices")
             }
             else {
               vox <- cbind(i,j,k)
@@ -739,44 +754,44 @@ setMethod("length", signature=c("NeuroVecSeq"),
           })
 
 
-#' @rdname series-methods
-#' @export
-setMethod("series", signature(x="NeuroVecSeq", i="integer"),
-          def=function(x, i, j, k) {
-            map(x@vecs, ~ series(., i,j,k)) %>% flatten_dbl()
-          })
-
-
-#' @rdname series-methods
-#' @export
-setMethod("series", signature(x="NeuroVecSeq", i="numeric"),
-          def=function(x, i, j, k) {
-            map(x@vecs, ~ series(., as.integer(i),as.integer(j),as.integer(k))) %>% flatten_dbl()
-          })
-
-
-#' @rdname series-methods
-#' @export
-setMethod("series", signature(x="NeuroVecSeq", i="matrix"),
-          def=function(x,i) {
-            do.call(rbind, map(x@vecs, ~ series(., i)))
-          })
-
-
-#' @rdname series-methods
-#' @export
-setMethod("series_roi", signature(x="NeuroVecSeq", i="matrix"),
-          def=function(x,i) {
-            rois <- map(x@vecs, ~ series_roi(., i))
-            if (length(rois) == 1) {
-              rois[[1]]
-            } else if (length(rois) == 2) {
-              concat(rois[[1]], rois[[2]])
-            } else {
-              f <- partial(concat, rois[[1]], rois[[2]])
-              do.call(f, rois[3:length(rois)])
-            }
-          })
+#' #' @rdname series-methods
+#' #' @export
+#' setMethod("series", signature(x="NeuroVecSeq", i="integer"),
+#'           def=function(x, i, j, k) {
+#'             map(x@vecs, ~ series(., i,j,k)) %>% flatten_dbl()
+#'           })
+#'
+#'
+#' #' @rdname series-methods
+#' #' @export
+#' setMethod("series", signature(x="NeuroVecSeq", i="numeric"),
+#'           def=function(x, i, j, k) {
+#'             map(x@vecs, ~ series(., as.integer(i),as.integer(j),as.integer(k))) %>% flatten_dbl()
+#'           })
+#'
+#'
+#' #' @rdname series-methods
+#' #' @export
+#' setMethod("series", signature(x="NeuroVecSeq", i="matrix"),
+#'           def=function(x,i) {
+#'             do.call(rbind, map(x@vecs, ~ series(., i)))
+#'           })
+#'
+#'
+#' #' @rdname series-methods
+#' #' @export
+#' setMethod("series_roi", signature(x="NeuroVecSeq", i="matrix"),
+#'           def=function(x,i) {
+#'             rois <- map(x@vecs, ~ series_roi(., i))
+#'             if (length(rois) == 1) {
+#'               rois[[1]]
+#'             } else if (length(rois) == 2) {
+#'               concat(rois[[1]], rois[[2]])
+#'             } else {
+#'               f <- partial(concat, rois[[1]], rois[[2]])
+#'               do.call(f, rois[3:length(rois)])
+#'             }
+#'           })
 
 
 
