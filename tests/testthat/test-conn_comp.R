@@ -1,7 +1,8 @@
 
+library(assertthat)
+library(purrr)
 
-library(neuroim2)
-library(testthat)
+context("connected components")
 
 test_that("can compute connected components for random masks", {
 
@@ -31,9 +32,9 @@ test_that("conn_comp finds the correct number of clusters", {
 
   cc <- conn_comp(as.logical(vol))
 
-  expect_equal(sum(cc$index==1), nrow(coords(sphere1)))
-  expect_equal(sum(cc$index == 2), nrow(coords(sphere2)))
-  expect_equal(max(cc$index), 2)
+  expect_equal(sum(cc$index@data==1), nrow(coords(sphere1)))
+  expect_equal(sum(cc$index@data == 2), nrow(coords(sphere2)))
+  expect_equal(max(cc$index@data), 2)
   expect_equal(max(cc$size), max(c(nrow(coords(sphere1)), nrow(coords(sphere2)))))
 
 })

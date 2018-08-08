@@ -18,5 +18,34 @@
 \description{
 [[
 
+#' @rdname series-methods
+#' @export
+setMethod("series", signature(x="NeuroVecSeq", i="numeric"),
+          def=function(x, i, j, k) {
+            map(x@vecs, ~ series(., as.integer(i),as.integer(j),as.integer(k))) %>% flatten_dbl()
+          })
+}
+\details{
+#' @rdname series-methods
+#' @export
+setMethod("series", signature(x="NeuroVecSeq", i="matrix"),
+          def=function(x,i) {
+            do.call(rbind, map(x@vecs, ~ series(., i)))
+          })
+
+#' @rdname series-methods
+#' @export
+setMethod("series_roi", signature(x="NeuroVecSeq", i="matrix"),
+          def=function(x,i) {
+            rois <- map(x@vecs, ~ series_roi(., i))
+            if (length(rois) == 1) {
+              rois[[1]]
+            } else if (length(rois) == 2) {
+              concat(rois[[1]], rois[[2]])
+            } else {
+              f <- partial(concat, rois[[1]], rois[[2]])
+              do.call(f, rois[3:length(rois)])
+            }
+          })
 [[
 }

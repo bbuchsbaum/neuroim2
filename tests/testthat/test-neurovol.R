@@ -1,6 +1,9 @@
 
 gmask <- system.file("extdata", "global_mask.nii", package="neuroim2")
 
+
+context("neurovol")
+
 test_that("can construct NeuroVol from 3D array", {
 	dat <- array(0, c(64,64,64))
 	spc <- NeuroSpace(c(64,64,64))

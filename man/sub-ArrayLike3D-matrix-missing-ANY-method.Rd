@@ -14,8 +14,6 @@
 
 \item{j}{second index}
 
-\item{k}{third index}
-
 \item{...}{additional args}
 
 \item{drop}{dimension}

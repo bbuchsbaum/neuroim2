@@ -576,7 +576,7 @@ setMethod(f="patch_set", signature=signature(x="NeuroVol",
 setMethod(f="mapf", signature=signature(x="NeuroVol", m="Kernel"),
           def=function(x, m, mask=NULL) {
             ovol <- array(0, dim(x))
-            hwidth <- map_int(m@width, function(d) ceiling(d/2 -1)) + 1
+            hwidth <- map_dbl(m@width, function(d) ceiling(d/2 -1)) + 1
             xdim <- dim(x)[1]
             ydim <- dim(x)[2]
             zdim <- dim(x)[3]
@@ -789,7 +789,7 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVol", mask="numeric"),
 
 setMethod(f="linear_access", signature=signature(x = "SparseNeuroVol", i = "numeric"),
           def=function (x, i) {
-            x@data[i]
+            x@data[as.numeric(i)]
           })
 
 

@@ -10,11 +10,30 @@ checkDim <- function(e1,e2) {
 
 }
 
+
+
+setMethod(f="Compare", signature=signature(e1="SparseNeuroVol", e2="numeric"),
+          def=function(e1, e2) {
+            ret <- callGeneric(e1@data,e2)
+          })
+
+
+setMethod(f="Compare", signature=signature(e1="numeric", e2="SparseNeuroVol"),
+          def=function(e1, e2) {
+            callGeneric(e1@data,e2)
+          })
+
+
+
 setMethod(f="Arith", signature=signature(e1="SparseNeuroVol", e2="SparseNeuroVol"),
           def=function(e1, e2) {
             checkDim(e1,e2)
-            res <- callGeneric(e1@data,e2@data)
-            new("SparseNeuroVol", data=res, source=e1@source, space=space(e1))
+            ret <- callGeneric(e1@data,e2@data)
+            if (is.numeric(ret)) {
+              SparseNeuroVol(ret, space(e1), indices=which(ret!=0))
+            } else {
+              SparseNeuroVol(ret@x, space(e1), indices=ret@i)
+            }
 
           })
 
@@ -37,19 +56,6 @@ setMethod(f="Arith", signature=signature(e1="ROIVol", e2="ROIVol"),
 
           })
 
-
-
-setMethod(f="Arith", signature=signature(e1="SparseNeuroVol", e2="SparseNeuroVol"),
-          def=function(e1, e2) {
-            checkDim(e1,e2)
-            ret <- callGeneric(e1@data,e2@data)
-            if (is.numeric(ret)) {
-              SparseNeuroVol(ret, space(e1), indices=which(ret!=0))
-            } else {
-              SparseNeuroVol(ret@x, space(e1), indices=ret@i)
-            }
-
-          })
 
 setMethod(f="Arith", signature=signature(e1="DenseNeuroVol", e2="DenseNeuroVol"),
           def=function(e1, e2) {

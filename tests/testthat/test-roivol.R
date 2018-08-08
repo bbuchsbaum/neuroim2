@@ -1,4 +1,8 @@
 
+
+context("roivol")
+
+
 test_that("can create a spherical roi", {
   sp1 <- NeuroSpace(c(10,10,10), c(1,1,1))
   sphere <- spherical_roi(sp1, c(5,5,5), 3)
@@ -48,17 +52,17 @@ test_that("can add two ROIVols", {
 
 test_that("can construct an ROIVec", {
   sp1 <- NeuroSpace(c(10,10,10,4), c(1,1,1))
-  cube <- cuboid_roi(sp1, c(5,5,5), 3, fill=3)
+  cube <- cuboid_roi(drop_dim(sp1), c(5,5,5), 3, fill=3)
   vec <- ROIVec(sp1, coords(cube), matrix(1, 5, nrow(coords(cube))))
   expect_true(!is.null(vec))
 })
 
 test_that("can convert ROIVec to matrix", {
   sp1 <- NeuroSpace(c(10,10,10,4), c(1,1,1))
-  cube <- cuboid_roi(sp1, c(5,5,5), 3, fill=3)
+  cube <- cuboid_roi(drop_dim(sp1), c(5,5,5), 3, fill=3)
   m <- matrix(1, 5, nrow(coords(cube)))
   vec <- ROIVec(sp1, coords(cube), matrix(1, 5, nrow(coords(cube))))
-  expect_true(class(as.matrix(vec))[1] == "roi_vector_matrix")
+  expect_equal(class(as.matrix(vec))[1], "roi_vector_matrix")
 })
 
 

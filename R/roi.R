@@ -330,6 +330,7 @@ roi_surface_matrix <- function(mat, refspace, indices, coords) {
 
 #' @name as
 #' @rdname as-methods
+#' @export
 setAs(from="ROIVec", to="matrix", function(from) {
   ind <- indices(from)
   roi_vector_matrix(from@.Data, refspace=from@space, indices=ind,
@@ -488,7 +489,7 @@ Kernel <- function(kerndim, vdim, FUN=dnorm, ...) {
   #kern <- array(0, kerndim)
 
   ## the half-width for each dimensions
-  hwidth <- map_int(kerndim, function(d) ceiling(d/2 -1))
+  hwidth <- map_dbl(kerndim, function(d) ceiling(d/2 -1))
 
   ## note, if a kernel dim is even, this will force it to be odd numbered
   grid.vec <- map(hwidth, function(sv) seq(-sv, sv))

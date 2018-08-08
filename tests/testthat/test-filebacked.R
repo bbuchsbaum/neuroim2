@@ -1,5 +1,9 @@
 library(magrittr)
 library(purrr)
+library(testthat)
+library(assertthat)
+
+context("filebacked neurovec")
 
 gmask <- system.file("extdata", "global_mask.nii", package="neuroim2")
 gvec <- FileBackedNeuroVec("test_data/global_mask_v5.nii")
@@ -24,7 +28,7 @@ test_that("can concatenate two or more FileBackedNeuroVecs", {
 })
 
 test_that("can extract a single volume from a FileBackedNeuroVec", {
-  vol1 <- gvec[[1]]
+  vol1 <- drop(gvec[[1]])
   expect_equal(dim(gvec)[1:3], dim(vol1))
 })
 

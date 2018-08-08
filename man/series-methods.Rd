@@ -16,12 +16,8 @@
 \alias{series,NeuroVec,integer-method}
 \alias{series,NeuroVec,numeric-method}
 \alias{series_roi,NeuroVec,numeric-method}
-\alias{series,NeuroVecSeq,integer-method}
-\alias{series,NeuroVecSeq,numeric-method}
-\alias{series,NeuroVecSeq,matrix-method}
-\alias{series_roi,NeuroVecSeq,matrix-method}
 \alias{series,SparseNeuroVec,matrix-method}
-\alias{series,SparseNeuroVec,numeric-method}
+\alias{series,SparseNeuroVec,integer-method}
 \title{Extract one or more series from object and return as ROI object}
 \usage{
 series_roi(x, i, ...)
@@ -44,23 +40,15 @@ series(x, i, ...)
 
 \S4method{series_roi}{NeuroVec,LogicalNeuroVol}(x, i)
 
-\S4method{series}{NeuroVec,integer}(x, i, j, k)
+\S4method{series}{NeuroVec,integer}(x, i, j, k, drop = TRUE)
 
 \S4method{series}{NeuroVec,numeric}(x, i, j, k)
 
 \S4method{series_roi}{NeuroVec,numeric}(x, i, j, k)
 
-\S4method{series}{NeuroVecSeq,integer}(x, i, j, k)
-
-\S4method{series}{NeuroVecSeq,numeric}(x, i, j, k)
-
-\S4method{series}{NeuroVecSeq,matrix}(x, i)
-
-\S4method{series_roi}{NeuroVecSeq,matrix}(x, i)
-
 \S4method{series}{SparseNeuroVec,matrix}(x, i)
 
-\S4method{series}{SparseNeuroVec,numeric}(x, i, j, k)
+\S4method{series}{SparseNeuroVec,integer}(x, i, j, k)
 }
 \arguments{
 \item{x}{the object}
@@ -83,4 +71,17 @@ series(x, i, ...)
 Extract one or more series from object and return as ROI object
 
 Extract one or more series from object
+
+#' @rdname series-methods
+#' @export
+setMethod("series", signature(x="NeuroVec", i="integer"),
+          def=function(x, i, j, k) {
+            if (missing(j) && missing(k)) {
+              vdim <- dim(x)[1:3]
+              mat <- arrayInd(i, vdim)
+              apply(mat, 1, function(i) x[i[1], i[2], i[3],])
+            } else {
+              x[i,j,k,]
+            }
+          })
 }

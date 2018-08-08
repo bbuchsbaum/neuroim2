@@ -17,6 +17,8 @@ gen_dat <- function(d1 = 12,
   DenseNeuroVec(dat, spc)
 }
 
+context("neurovec")
+
 test_that("can construct a DenseNeuroVec", {
 	bv <- gen_dat(12,12,12,4)
 	expect_true(!is.null(bv))
@@ -102,8 +104,8 @@ test_that("can split a NeuroVec into a set of subvectors", {
   ## nested map
   ## first divide into blocks, then convert to vectors, then foreach block/vector compute mean
   res <- bv1 %>% split_blocks(blstruc) %>% map(vectors) %>% map(~ map_dbl(., mean))
-  assert_that(length(res) == length(blks))
-  assert_that(length(res[[1]]) == prod(dim(bv1)[1:3]))
+  expect_equal(length(res), length(blks))
+  expect_equal(length(res[[1]]), prod(dim(bv1)[1:3]))
 
 })
 
@@ -113,8 +115,8 @@ test_that("can split a NeuroVec into a set of clustered ROIs", {
 
   grid <- index_to_coord(space(bv1), as.numeric(1:prod(dim(bv1)[1:3])))
   kres <- kmeans(grid, centers=50)
-  bv1 %>% split_clusters(kres$cluster) %>% map_dbl(~ mean(.))
-
+  res <- bv1 %>% split_clusters(kres$cluster) %>% map_dbl(~ mean(.))
+  expect_true(TRUE)
 })
 
 
@@ -122,18 +124,18 @@ test_that("can extract a list of vectors from a NeuroVec", {
   bv1 <- gen_dat(10,10,10, rand=TRUE)
 
   vecs <- bv1 %>% vectors
-  assert_that(length(vecs) == prod(dim(bv1)[1:3]))
-  assert_that(length(vecs[[1]]) == dim(bv1)[4])
+  expect_equal(length(vecs), prod(dim(bv1)[1:3]))
+  expect_equal(length(vecs[[1]]), dim(bv1)[4])
 
   vecs2 <- bv1 %>% vectors(subset=1:100)
-  assert_that(length(vecs2) == 100)
-  assert_that(length(vecs2[[1]]) == dim(bv1)[4])
+  expect_equal(length(vecs2), 100)
+  expect_equal(length(vecs2[[1]]), dim(bv1)[4])
 
   keep <- runif(prod(dim(bv1)[1:3])) > .5
   vecs3 <- bv1 %>% vectors(subset=keep)
 
-  assert_that(length(vecs3) == sum(keep))
-  assert_that(length(vecs3[[1]]) == dim(bv1)[4])
+  expect_equal(length(vecs3), sum(keep))
+  expect_equal(length(vecs3[[1]]), dim(bv1)[4])
 
 })
 
@@ -170,7 +172,7 @@ test_that("can extract an ROIVec from a NeuroVec", {
 
 
 test_that("can convert NeuroVec to matrix", {
-	bv1 <- gen_dat(5,5,5,5)
+	bv1 <- gen_dat(5,5,5,5, rand=TRUE)
 	mat <- as.matrix(bv1)
 
 	ind <- 1:(5*5*5)

@@ -36,7 +36,75 @@ IntegerVector find_seqnum(IntegerVector clens, IntegerVector idx) {
 // }
 
 // [[Rcpp::export]]
-IntegerVector gridToIndexCpp(IntegerVector array_dim, NumericMatrix voxmat) {
+int grid_to_intvec(IntegerVector D, IntegerVector vox) {
+  int ind = 0;
+  for (int j=D.length()-1; j>0; j--) {
+    ind = ind + D[j-1] * (vox[j]-1);
+  }
+  ind = ind + vox[0];
+  return ind;
+}
+
+// [[Rcpp::export]]
+IntegerVector exgridToIndex3DCpp(IntegerVector array_dim, IntegerVector iind, IntegerVector jind,
+                                 IntegerVector kind) {
+
+  IntegerVector D = IntegerVector(array_dim.length());
+  int cum = 1;
+  for (int i = 0; i < D.length(); i++) {
+    cum = cum * array_dim[i];
+    D[i] = cum;
+  }
+
+  int nels = iind.length()*jind.length()*kind.length();
+  IntegerVector out = IntegerVector(nels);
+
+  int count = 0;
+  for (int k= 0; k < kind.length(); k++) {
+    for (int j=0; j<jind.length(); j++) {
+      for (int i=0; i<iind.length(); i++) {
+        out[count] = grid_to_intvec(D, IntegerVector::create(iind[i],jind[j],kind[k]));
+        count++;
+      }
+    }
+  }
+
+  return out;
+}
+
+
+// [[Rcpp::export]]
+IntegerVector exgridToIndex4DCpp(IntegerVector array_dim, IntegerVector iind, IntegerVector jind,
+                                 IntegerVector kind, IntegerVector mind) {
+
+  IntegerVector D = IntegerVector(array_dim.length());
+  int cum = 1;
+  for (int i = 0; i < D.length(); i++) {
+    cum = cum * array_dim[i];
+    D[i] = cum;
+
+  }
+
+  int nels = iind.length()*jind.length()*kind.length()*mind.length();
+  IntegerVector out = IntegerVector(nels);
+
+  int count = 0;
+  for (int m = 0; m<mind.length(); m++) {
+    for (int k= 0; k < kind.length(); k++) {
+      for (int j=0; j<jind.length(); j++) {
+        for (int i=0; i<iind.length(); i++) {
+          out[count] = grid_to_intvec(D, IntegerVector::create(iind[i],jind[j],kind[k],mind[m]));
+          count++;
+        }
+      }
+    }
+  }
+
+  return out;
+}
+
+// [[Rcpp::export]]
+IntegerVector gridToIndexCpp(IntegerVector array_dim, IntegerMatrix voxmat) {
   IntegerVector D = IntegerVector(array_dim.length());
   IntegerVector out = IntegerVector(voxmat.nrow());
 
@@ -48,16 +116,19 @@ IntegerVector gridToIndexCpp(IntegerVector array_dim, NumericMatrix voxmat) {
   }
 
   for (int i=0; i < voxmat.nrow(); i++) {
-    int ind = 0;
-    for (int j=D.length()-1; j>0; j--) {
-      ind = ind + D[j-1] * (voxmat(i,j)-1);
-    }
-    out[i] = ind + voxmat(i,0);
+    //int ind = 0;
+    //for (int j=D.length()-1; j>0; j--) {
+    //  ind = ind + D[j-1] * (voxmat(i,j)-1);
+    //}
+    //out[i] = ind + voxmat(i,0);
+    IntegerVector v = voxmat(i,_ );
+    out[i] = grid_to_intvec(D, v);
   }
 
   return out;
 
 }
+
 
 
 

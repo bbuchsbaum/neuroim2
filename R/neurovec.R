@@ -676,6 +676,7 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVec", mask="LogicalNeu
 
 
 #' @rdname as.sparse-methods
+#' @export
 setMethod(f="as.sparse", signature=signature(x="DenseNeuroVec", mask="numeric"),
 		def=function(x, mask) {
 			vdim <- dim(x)[1:3]
@@ -736,6 +737,7 @@ setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character",
 #' Create an \code{NeuroVecSeq} instance for a variable length list of \code{NeuroVec} objects.
 #'
 #' @param ... one or more instance of type \code{NeuroVec}
+#' @export
 NeuroVecSeq <- function(...) {
   vecs <- list(...)
   assert_that(all(map_lgl(vecs, ~ inherits(., "NeuroVec"))))
