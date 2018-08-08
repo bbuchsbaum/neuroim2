@@ -267,12 +267,17 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 #' @keywords internal
 #' @importFrom purrr map_dbl
 .gridToIndex <- function(dimensions, vmat) {
-	D <- Reduce("*", dimensions, accumulate=TRUE)
-	apply(vmat, 1, function(vox) {
-		sum(map_dbl(length(D):2, function(i) {
-			D[i-1]*(vox[i]-1)
-		})) + vox[1]
-	})
+  vmat <- as.matrix(vmat)
+  assert_that(length(dimensions) == ncol(vmat))
+
+	# D <- Reduce("*", dimensions, accumulate=TRUE)
+	# apply(vmat, 1, function(vox) {
+	# 	sum(map_dbl(length(D):2, function(i) {
+	# 		D[i-1]*(vox[i]-1)
+	# 	})) + vox[1]
+	# })
+
+  gridToIndexCpp(as.integer(dimensions), vmat)
 
 }
 

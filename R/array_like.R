@@ -14,6 +14,36 @@ setMethod(f="[", signature=signature(x = "ArrayLike4D", i = "matrix", j="missing
           }
 )
 
+#' extractor
+#' @export
+#' @param x the object
+#' @param i first index
+#' @param j second index
+#' @param k third index
+#' @param m third index
+#' @param ... additional args
+#' @param drop drop dimension
+setMethod(f="[", signature=signature(x = "ArrayLike4D", i = "numeric", j = "numeric"),
+          def=function (x, i, j, k, m, ..., drop=TRUE) {
+            if (missing(k)) {
+              k = 1:(dim(x)[3])
+            }
+            if (missing(m)) {
+              m = 1:(dim(x)[4])
+            }
+
+
+            grid <- as.matrix(expand.grid(i=i,j=j,k=k,m=m))
+
+            ## TODO grid_to_index for 4D image doesn't work
+            ind <- .gridToIndex(dim(x), grid)
+
+            vals <- linear_access(x,ind)
+            ret <- array(vals, c(length(i), length(j), length(k), length(m)))
+            if (drop) drop(ret) else ret
+          }
+)
+
 
 
 

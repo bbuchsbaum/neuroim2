@@ -798,11 +798,16 @@ setMethod(f="linear_access", signature=signature(x = "NeuroVecSeq", i = "numeric
           def = function (x, i) {
             ## inprog
             nels <- prod(dim(x)[1:3])
-            els <- cumsum(nels * x@lens)
-            offset <- i %% els
-            vnum <- as.integer(i/els)
-            idx <- cbind(vnum, i)
-            map(x@vecs, ~ .[i]) %>% flatten_dbl()
+            els <- nels * x@lens
+            csum <- cumsum(nels * x@lens)
+            cels <- c(0, csum[-length(csum)])
+            vnum <- find_seqnum(cels, i)
+            offsets <- i - cels[vnum]
+
+            ## split(1:length(vnum), vnum)
+
+            imap(vnum, ~ x@vecs[[.x]][offsets[.y]])
+
           })
 
 

@@ -1,28 +1,50 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
+// [[Rcpp::export]]
+IntegerVector find_seqnum(IntegerVector clens, IntegerVector idx) {
+  IntegerVector out = IntegerVector(idx.length());
+  int maxid = max(idx);
 
-  
+  for (int i=0; i < out.length(); i++) {
+    int min_idx = 0;
+    int min_val = maxid;
+    for (int j = 0; j<clens.length(); j++) {
+      int delta = idx[i] - clens[j];
+      if (delta >= 0 && delta < min_val) {
+        min_val = delta;
+        min_idx = j + 1;
+      }
+    }
+
+    out[i] = min_idx;
+
+  }
+
+  return out;
+
+}
+
 // [[Rcpp::export]]
 IntegerVector gridToIndex3DCpp(IntegerVector array_dim, NumericMatrix voxmat) {
   int slicedim = array_dim[0]*array_dim[1];
   IntegerVector out = IntegerVector(voxmat.nrow());
-  
+
   for (int i=0; i < voxmat.nrow(); i++) {
     out[i] = (int)((slicedim * (voxmat(i,2) -1)) + ((voxmat(i,1)-1) * array_dim(0)) + voxmat(i,0));
   }
-  
+
   return out;
-  
+
 }
-  
+
 // [[Rcpp::export]]
 NumericMatrix indexToGridCpp(IntegerVector idx, IntegerVector array_dim) {
   int rank = array_dim.size();
-  
+
   int N = idx.size();
   NumericMatrix omat(idx.size(), array_dim.size());
-  
+
   for(int i = 0; i < N; i++) {
     int wh1 = idx(i)-1;
     int tmp = 1 + wh1 % array_dim(0);
@@ -35,11 +57,11 @@ NumericMatrix indexToGridCpp(IntegerVector idx, IntegerVector array_dim) {
         wh(j) = 1 + nextd1 % array_dim(j);
       }
     }
-    
+
     omat.row(i) = wh;
-   
+
   }
-  
+
   return omat;
 
 }

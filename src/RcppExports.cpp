@@ -5,6 +5,18 @@
 
 using namespace Rcpp;
 
+// find_seqnum
+IntegerVector find_seqnum(IntegerVector clens, IntegerVector idx);
+RcppExport SEXP _neuroim2_find_seqnum(SEXP clensSEXP, SEXP idxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type clens(clensSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type idx(idxSEXP);
+    rcpp_result_gen = Rcpp::wrap(find_seqnum(clens, idx));
+    return rcpp_result_gen;
+END_RCPP
+}
 // gridToIndex3DCpp
 IntegerVector gridToIndex3DCpp(IntegerVector array_dim, NumericMatrix voxmat);
 RcppExport SEXP _neuroim2_gridToIndex3DCpp(SEXP array_dimSEXP, SEXP voxmatSEXP) {
@@ -31,6 +43,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_neuroim2_find_seqnum", (DL_FUNC) &_neuroim2_find_seqnum, 2},
     {"_neuroim2_gridToIndex3DCpp", (DL_FUNC) &_neuroim2_gridToIndex3DCpp, 2},
     {"_neuroim2_indexToGridCpp", (DL_FUNC) &_neuroim2_indexToGridCpp, 2},
     {NULL, NULL, 0}
