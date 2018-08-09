@@ -36,6 +36,14 @@ test_that("can construct a DenseNeuroVec from a matrix", {
   expect_equal(length(vec1),length(vec2))
 })
 
+test_that("can construct a SparseNeuroVec from NeuroVec constructor", {
+  mask <- read_vol(gmask)
+  idx <- which(mask>0)
+  mat <- matrix(rnorm(length(idx))*5, length(idx), 5)
+  vec <- NeuroVec(mat,add_dim(space(mask),5), mask=as.logical(mask))
+  expect_equal(dim(vec), c(dim(mask),5))
+})
+
 test_that("can construct a DenseNeuroVec from a list of vols", {
   spc <- NeuroSpace(c(10,10,10))
   vol <- NeuroVol(rnorm(10*10*10), spc)

@@ -121,6 +121,17 @@ test_that("can map a searchlight over a FileBackedNeuroVec", {
 })
 
 
+test_that("can convert FileBackedNeuroVec to  a list", {
+  ll <- as.list(gvec)
+  expect_equal(length(ll), dim(gvec)[4])
+})
+
+test_that("can convert FileBackedNeuroVec to  a matrix", {
+  mat <- as(gvec, "matrix")
+  expect_equal(ncol(mat), dim(gvec)[4])
+})
+
+
 
 
 
