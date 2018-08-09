@@ -1,7 +1,13 @@
 
+
+#' plot
+#'
 #' @export
 setGeneric("plot", function(x, y, ...) standardGeneric("plot"))
 
+
+#' drop
+#'
 #' @export
 setGeneric("drop", function(x) standardGeneric("drop"))
 

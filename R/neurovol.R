@@ -158,7 +158,7 @@ LogicalNeuroVol <- function(data, space, label="", indices=NULL) {
 setAs(from="DenseNeuroVol", to="array", def=function(from) from@.Data)
 
 
-#' as
+#' @name as
 #'
 #' conversion from \code{SparseNeuroVol} to \code{array}
 #'
@@ -186,7 +186,7 @@ setMethod(f="as.numeric", signature=signature(x = "SparseNeuroVol"), def=functio
   as(x, "numeric")
 })
 
-
+#' @name as
 #' conversion from NeuroVol to LogicalNeuroVol
 #' @rdname as-methods
 setAs(from="NeuroVol", to="LogicalNeuroVol", def=function(from) {
@@ -194,7 +194,8 @@ setAs(from="NeuroVol", to="LogicalNeuroVol", def=function(from) {
 })
 
 
-
+#' @name as
+#'
 #' conversion from NeuroVol to array
 #' @rdname as-methods
 setAs(from="NeuroVol", to="array", def=function(from) from[,,])
@@ -820,6 +821,9 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 
 
 
+
+#' plot
+#'
 #' @importFrom graphics plot
 #' @param cmap a color map consisting of a vector of colors in hex format (e.g. \code{gray(n=255)})
 #' @param irange the intensity range indicating the low and high values of the color scale.

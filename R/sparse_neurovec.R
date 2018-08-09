@@ -352,7 +352,7 @@ setMethod(f="[[", signature=signature(x="SparseNeuroVec", i="numeric"),
 
 
 
-
+#' @name as
 #' @export
 #' @rdname as-methods
 setAs(from="SparseNeuroVec", to="matrix",

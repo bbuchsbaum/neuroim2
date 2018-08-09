@@ -15,7 +15,6 @@
 #' mask <- NeuroVol(rep(1, 16^3),bspace)
 #' clusvol <- ClusteredNeuroVol(mask, kres$cluster)
 #' @rdname ClusteredNeuroVol-class
-#' @importFrom hash hash
 ClusteredNeuroVol <- function(mask, clusters, label_map=NULL, label="") {
   mask <- as(mask, "LogicalNeuroVol")
   space <- space(mask)
@@ -54,7 +53,8 @@ ClusteredNeuroVol <- function(mask, clusters, label_map=NULL, label="") {
       label_map=label_map, cluster_map=cluster_map, space=space)
 }
 
-
+#' @name
+#'
 #' conversion from ClusteredNeuroVol to LogicalNeuroVol
 #' @rdname as-methods
 setAs(from="ClusteredNeuroVol", to="DenseNeuroVol", def=function(from) {
@@ -82,6 +82,9 @@ setMethod(f="show", signature=signature("ClusteredNeuroVol"),
           }
 )
 
+
+#' split_clusters
+#'
 #' @export
 #' @rdname split_clusters-methods
 #' @examples

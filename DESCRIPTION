@@ -50,7 +50,9 @@ Collate:
 RoxygenNote: 6.0.1.9000
 Imports: purrr,
   assertthat,
-  mmap
+  mmap,
+  Rcpp,
+  RNifti
 Suggests: testthat,
     covr,
     assertthat,

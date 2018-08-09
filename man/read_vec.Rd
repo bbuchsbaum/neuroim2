@@ -4,7 +4,8 @@
 \alias{read_vec}
 \title{read_vec}
 \usage{
-read_vec(file_name, indices = NULL, mask = NULL)
+read_vec(file_name, indices = NULL, mask = NULL, mode = c("normal",
+  "mmap", "filebacked"))
 }
 \arguments{
 \item{file_name}{the name of the file to load}

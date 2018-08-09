@@ -34,6 +34,8 @@ split_clusters(x, clusters, ...)
 }
 \description{
 Generic function to cut an object into a list of spatial or spatiotemporal clusters
+
+split_clusters
 }
 \examples{
 
