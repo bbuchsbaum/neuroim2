@@ -1,9 +1,9 @@
 
-if (!isGeneric("plot"))
-  setGeneric("plot", function(x, y, ...) standardGeneric("plot"))
+#' @export
+setGeneric("plot", function(x, y, ...) standardGeneric("plot"))
 
-if (!isGeneric("drop"))
-  setGeneric("drop", function(x) standardGeneric("drop"))
+#' @export
+setGeneric("drop", function(x) standardGeneric("drop"))
 
 
 

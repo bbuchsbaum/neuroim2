@@ -4,14 +4,14 @@
 \docType{methods}
 \name{as.matrix,FileBackedNeuroVec-method}
 \alias{as.matrix,FileBackedNeuroVec-method}
-\alias{as.matrix,DenseNeuroVec-method}
+\alias{as.matrix,NeuroVec-method}
 \alias{as.matrix,ROIVec-method}
 \alias{as.matrix,SparseNeuroVec-method}
-\title{convert a \code{DenseNeuroVec} to a matrix}
+\title{convert a \code{NeuroVec} to a matrix}
 \usage{
 \S4method{as.matrix}{FileBackedNeuroVec}(x)
 
-\S4method{as.matrix}{DenseNeuroVec}(x)
+\S4method{as.matrix}{NeuroVec}(x)
 
 \S4method{as.matrix}{ROIVec}(x)
 
@@ -25,7 +25,7 @@
 \item{x}{the object}
 }
 \description{
-convert a \code{DenseNeuroVec} to a matrix
+convert a \code{NeuroVec} to a matrix
 
 convert a \code{ROIVec} to a matrix
 

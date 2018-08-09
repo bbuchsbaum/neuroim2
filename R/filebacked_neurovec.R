@@ -17,27 +17,6 @@ FileBackedNeuroVec <- function(file_name) {
 }
 
 
-#' @export
-#' @rdname series-methods
-setMethod(f="series", signature=signature(x="FileBackedNeuroVec", i="numeric"),
-          def=function(x,i,j,k) {
-            if (missing(j) && missing(k)) {
-              linear_access(x,i)
-            } else {
-              idx <- grid_to_index(space(x), cbind(i,j,k))
-              read_mapped_series(x@meta,idx)
-            }
-          })
-
-
-#' @export
-#' @rdname series-methods
-setMethod(f="series", signature=signature(x="FileBackedNeuroVec", i="matrix"),
-          def=function(x,i) {
-            idx <- grid_to_index(x@space, i)
-            callGeneric(x,idx)
-          })
-
 
 #' @export
 #' @rdname sub_vector-methods

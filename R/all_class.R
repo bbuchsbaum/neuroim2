@@ -529,6 +529,7 @@ setClass("ROIVol",
 #' @rdname ROIVolWindow-class
 #' @slot parent_index the 1D index of the center voxel in the parent space.
 #' @slot center_index the location in the coordinate matrix of the center voxel in the window
+#' @export
 setClass("ROIVolWindow",
          contains=c("ROIVol"),
          representation=representation(parent_index="integer", center_index="integer"),

@@ -268,7 +268,7 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 #' @importFrom purrr map_dbl
 .gridToIndex <- function(dimensions, vmat) {
   vmat <- as.matrix(vmat)
-  assert_that(length(dimensions) == ncol(vmat))
+  assert_that(length(dimensions) == ncol(vmat), msg=paste("length(dimensions) not equal to ncol(vmat): ", length(dimensions), "!=", ncol(vmat)))
 
 	# D <- Reduce("*", dimensions, accumulate=TRUE)
 	# apply(vmat, 1, function(vox) {

@@ -7,9 +7,9 @@
 ROIVec(vspace, coords, data = rep(nrow(coords), 1))
 }
 \arguments{
-\item{vspace}{an instance of class \code{NeuroSpace}}
+\item{vspace}{an instance of class \code{NeuroSpace} with four dimenisons}
 
-\item{coords}{matrix of voxel coordinates}
+\item{coords}{a 3 column matrix of voxel coordinates}
 
 \item{data}{the \code{matrix} of data values}
 }

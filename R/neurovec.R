@@ -237,7 +237,11 @@ setMethod("drop", signature(x="NeuroVec"),
 setAs("DenseNeuroVec", "array", function(from) from@.Data)
 
 #' @export
-setAs("NeuroVec", "array", function(from) from[,,,])
+setAs("NeuroVec", "array", function(from) {
+  vals <- from[]
+  dim(vals) <- dim(from)
+  vals
+})
 
 #' show a \code{NeuroVecSource}
 #' @param object the object
@@ -621,6 +625,20 @@ setMethod("series_roi", signature(x="NeuroVec", i="numeric"),
 
 
 
+
+#' @export
+setAs(from="NeuroVec", to="matrix",
+      function(from) {
+        dm <- dim(from)
+        d123 <- prod(dm[1:3])
+        d4 <- dm[4]
+        vals <- from[,]
+        dim(vals) <- c(d123,d4)
+        vals
+
+      })
+
+
 #' @export
 setAs(from="DenseNeuroVec", to="matrix",
 		function(from) {
@@ -645,12 +663,12 @@ setMethod(f="as.list", signature=signature(x = "NeuroVec"), def=function(x) {
 })
 
 
-#' convert a \code{DenseNeuroVec} to a matrix
+#' convert a \code{NeuroVec} to a matrix
 #'
 #' @rdname as.matrix-methods
 #' @param x the object
 #' @export
-setMethod(f="as.matrix", signature=signature(x = "DenseNeuroVec"), def=function(x) {
+setMethod(f="as.matrix", signature=signature(x = "NeuroVec"), def=function(x) {
 			as(x, "matrix")
 		})
 

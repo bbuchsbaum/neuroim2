@@ -7,11 +7,11 @@
 ROIVol(vspace, coords, data = rep(nrow(coords), 1))
 }
 \arguments{
-\item{coords}{matrix of voxel coordinates}
+\item{coords}{a 3-column matrix of voxel coordinates}
 
 \item{data}{the data values, numeric vector}
 
-\item{space}{an instance of class \code{NeuroSpace}}
+\item{space}{an instance of class \code{NeuroSpace} with three dimensions}
 }
 \value{
 an instance of class \code{ROIVol}

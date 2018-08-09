@@ -8,8 +8,8 @@
 
 #' Create an instance of class \code{\linkS4class{ROIVol}}
 #'
-#' @param space an instance of class \code{NeuroSpace}
-#' @param coords matrix of voxel coordinates
+#' @param space an instance of class \code{NeuroSpace} with three dimensions
+#' @param coords a 3-column matrix of voxel coordinates
 #' @param data the data values, numeric vector
 #' @return an instance of class \code{ROIVol}
 #' @rdname ROIVol
@@ -20,8 +20,8 @@ ROIVol <- function(vspace, coords, data=rep(nrow(coords),1)) {
 
 #' Create an instance of class \code{\linkS4class{ROIVec}}
 #'
-#' @param vspace an instance of class \code{NeuroSpace}
-#' @param coords matrix of voxel coordinates
+#' @param vspace an instance of class \code{NeuroSpace} with four dimenisons
+#' @param coords a 3 column matrix of voxel coordinates
 #' @param data the \code{matrix} of data values
 #' @return an instance of class \code{ROIVec}
 #' @rdname ROIVec
@@ -383,7 +383,8 @@ setMethod("indices", signature(x="ROIVol"),
 #' @export
 setMethod("indices", signature(x="ROIVec"),
           function(x) {
-            grid_to_index(x@space, x@coords)
+            .gridToIndex(dim(x)[1:3], x@coords)
+            #grid_to_index(x@space, x@coords)
           })
 
 

@@ -46,21 +46,3 @@ setMethod(f="spacing",signature= signature(x = "NeuroObj"),
             sp <- space(x)
             spacing(sp)
           })
-
-#' convert \code{NeuroObj} instance to matrix
-#' @param x the object
-#' @export
-setMethod(f="as.matrix", signature=signature(x = "NeuroObj"), def=function(x) as(x, "matrix"))
-
-
-
-
-#' convert \code{NeuroObj} instance to array
-#' @param x the object
-#' @export
-setMethod(f="as.array", signature=signature(x = "NeuroObj"), def=function(x) as(x, "array"))
-
-#' convert \code{NeuroObj} instance to vector
-#' @param x the object
-#' @export
-setMethod(f="as.vector", signature=signature(x = "NeuroObj"), def=function(x) as(x, "vector"))

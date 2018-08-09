@@ -6,7 +6,7 @@ library(assertthat)
 context("filebacked neurovec")
 
 gmask <- system.file("extdata", "global_mask.nii", package="neuroim2")
-gvec <- FileBackedNeuroVec("test_data/global_mask_v5.nii")
+gvec <- FileBackedNeuroVec("../../test_data/global_mask_v5.nii")
 
 gen_dat <- function(d1 = 12,
                     d2 = 12,
@@ -22,10 +22,6 @@ gen_dat <- function(d1 = 12,
   DenseNeuroVec(dat, spc)
 }
 
-test_that("can concatenate two or more FileBackedNeuroVecs", {
-
-
-})
 
 test_that("can extract a single volume from a FileBackedNeuroVec", {
   vol1 <- drop(gvec[[1]])
@@ -50,7 +46,7 @@ test_that("can map over first 50 vectors in a FileBackedNeuroVec", {
 
 test_that("can split a FileBackedNeuroVec into a set of clustered ROIs", {
   grid <- index_to_coord(space(gvec), as.numeric(1:prod(dim(gvec)[1:3])))
-  kres <- kmeans(grid, centers=50)
+  kres <- kmeans(grid, centers=50, iter.max=150)
   res <- gvec %>% split_clusters(kres$cluster) %>% map_dbl(~ mean(.))
   expect_equal(length(res), 50)
 
@@ -85,13 +81,15 @@ test_that("can extract an ROIVec from a FileBackedNeuroVec", {
 
 test_that("can convert FileBackedNeuroVec to matrix", {
 
-  mat <- as.matrix(gvec)
+  mat <- as(gvec, "matrix")
 
   ind <- sample(seq(1, prod(dim(gvec)[1:3])),100)
   mat2 <- t(do.call(cbind, lapply(ind, function(i) series(gvec, i))))
 
   expect_equal(mat[ind,], mat2)
 })
+
+
 
 
 

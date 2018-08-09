@@ -377,8 +377,10 @@ setMethod(f="grid_to_index", signature=signature(x="NeuroSpace", coords="matrix"
 			} else if (ncol(coords) == 3) {
 			  assert_that(length(dx) >= 3)
 			  .gridToIndex3D(dx[1:3], coords)
+			} else if (ncol(coords) == 4 ){
+			  .gridToIndex(dim(x), coords)
 			} else {
-			  stop("grid_to_index: 'coords' must be a matrix with 2- or 3-columns that matches dim of 'x'")
+			  stop(paste("grid_to_index: too many dimensions: ", length(dim(x))))
 			}
 		})
 
