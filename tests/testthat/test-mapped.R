@@ -3,12 +3,12 @@ library(purrr)
 library(testthat)
 library(assertthat)
 
-context("filebacked neurovec")
+context("mapped neurovec")
 
-gmask5 <- system.file("extdata", "global_mask_v5.nii", package="neuroim2")
 gmask <- system.file("extdata", "global_mask.nii", package="neuroim2")
+gmask5 <- system.file("extdata", "global_mask_v5.nii", package="neuroim2")
 
-gvec <- FileBackedNeuroVec(gmask5)
+gvec <- read_vec(gmask5, mode="mmap")
 cvec <- read_vec(gmask5)
 
 gen_dat <- function(d1 = 12,
@@ -26,23 +26,23 @@ gen_dat <- function(d1 = 12,
 }
 
 
-test_that("can extract a single volume from a FileBackedNeuroVec", {
+test_that("can extract a single volume from a MappedNeuroVec", {
   vol1 <- drop(gvec[[1]])
   expect_equal(dim(gvec)[1:3], dim(vol1))
 })
 
-test_that("can extract a sub vector from a FileBackedNeuroVec", {
+test_that("can extract a sub vector from a MappedNeuroVec", {
   vec1 <- sub_vector(gvec, 1:2)
   expect_true(inherits(vec1, "NeuroVec"))
   expect_equal(dim(vec1), c(dim(gvec)[1:3],2))
 })
 
-test_that("can map over each volume in a FileBackedNeuroVec", {
+test_that("can map over each volume in a MappedNeuroVec", {
   mean.vol1 <- lapply(vols(gvec), mean)
   expect_equal(length(mean.vol1), dim(gvec)[4])
 })
 
-test_that("can map over first 50 vectors in a FileBackedNeuroVec", {
+test_that("can map over first 50 vectors in a MappedNeuroVec", {
   mean.vec1 <- map_dbl(vectors(gvec, 1:50), mean)
   expect_equal(length(mean.vec1), 50)
 })
@@ -55,13 +55,13 @@ test_that("can split a FileBackedNeuroVec into a set of clustered ROIs", {
 
 })
 
-test_that("can map over a subset of vols in a FileBackedNeuroVec", {
+test_that("can map over a subset of vols in a MappedNeuroVec", {
   mean.vol1 <- lapply(vols(gvec, 2:3), mean)
   expect_equal(length(mean.vol1), 2)
 })
 
 
-test_that("can extract multiple series from a FileBackedNeuroVec", {
+test_that("can extract multiple series from a MappedNeuroVec", {
   expect_equal(as.vector(series(gvec, 1,1,1)), gvec[1,1,1,])
   mat <- rbind(c(1,1,1), c(2,2,2), c(3,3,3))
 
@@ -70,7 +70,7 @@ test_that("can extract multiple series from a FileBackedNeuroVec", {
   expect_equal(r1, r2)
 })
 
-test_that("can extract an ROIVec from a FileBackedNeuroVec", {
+test_that("can extract an ROIVec from a MappedNeuroVec", {
   roi <- series_roi(gvec, 1:10)
   roi2 <- series_roi(gvec, LogicalNeuroVol(data=rep(1, 10), space=drop_dim(space(gvec)), indices=1:10))
   rvol <- ROIVol(space(drop_dim(space(gvec))), coords(roi2), data=rep(1, nrow(coords(roi2))))
@@ -82,7 +82,7 @@ test_that("can extract an ROIVec from a FileBackedNeuroVec", {
 })
 
 
-test_that("can convert FileBackedNeuroVec to matrix", {
+test_that("can convert MappedNeuroVec to matrix", {
 
   mat <- as(gvec, "matrix")
 
@@ -92,7 +92,7 @@ test_that("can convert FileBackedNeuroVec to matrix", {
   expect_equal(mat[ind,], mat2)
 })
 
-test_that("FileBackedNeuroVec can be indexed like a DenseNeuroVec", {
+test_that("MappedNeuroVec can be indexed like a DenseNeuroVec", {
 
   expect_equal(gvec[1,,,], cvec[1,,,])
   expect_equal(gvec[1,2,,], cvec[1,2,,])
@@ -112,20 +112,10 @@ test_that("FileBackedNeuroVec can be indexed like a DenseNeuroVec", {
 
 })
 
-test_that("can map a searchlight over a FileBackedNeuroVec", {
+test_that("can map a searchlight over a MappedNeuroVec", {
   mask <- drop(gvec[[1]])
 
   slight <- searchlight_coords(mask, radius=8)[1:100]
   res <- slight %>% map(~ mean(series(gvec, .))) %>% flatten_dbl()
   expect_equal(mean(res), 1)
 })
-
-
-
-
-
-
-
-
-
-

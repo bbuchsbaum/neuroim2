@@ -47,3 +47,5 @@ setMethod(f="linear_access", signature=signature(x = "MappedNeuroVec", i = "nume
             idx <- i + x@offset
             x@filemap[idx]
           })
+
+

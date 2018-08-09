@@ -48,7 +48,11 @@ Collate:
     'searchlight.R'
     'sparse_neurovec.R'
 RoxygenNote: 6.0.1.9000
+Imports: purrr,
+  assertthat,
+  mmap
 Suggests: testthat,
     covr,
     assertthat,
-    purrr
+    knitr,
+    ggplot2

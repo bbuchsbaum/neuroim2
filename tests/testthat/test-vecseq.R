@@ -2,11 +2,12 @@ library(purrr)
 library(testthat)
 library(assertthat)
 
+gmask5 <- system.file("extdata", "global_mask_v5.nii", package="neuroim2")
 
 context("neurovecseq")
 
 test_that("can construct a NeuroVecSeq", {
-  vec <- read_vec("../../test_data/global_mask_v5.nii")
+  vec <- read_vec(gmask5)
   cvec <- concat(vec,vec,vec)
 
   vs <- NeuroVecSeq(vec,vec,vec)
@@ -16,7 +17,7 @@ test_that("can construct a NeuroVecSeq", {
 })
 
 test_that("can linearly index a NeuroVecSeq", {
-  vec <- read_vec("../../test_data/global_mask_v5.nii")
+  vec <- read_vec(gmask5)
   cvec <- concat(vec,vec,vec)
 
   vs <- NeuroVecSeq(vec,vec,vec)
@@ -28,7 +29,7 @@ test_that("can linearly index a NeuroVecSeq", {
 })
 
 test_that("can array index a NeuroVecSeq", {
-  vec <- read_vec("../../test_data/global_mask_v5.nii")
+  vec <- read_vec(gmask5)
   cvec <- concat(vec,vec,vec)
 
   vs <- NeuroVecSeq(vec,vec,vec)
@@ -47,7 +48,7 @@ test_that("can array index a NeuroVecSeq", {
 })
 
 test_that("can extract vectors from NeuroVecSeq", {
-  vec <- read_vec("../../test_data/global_mask_v5.nii")
+  vec <- read_vec(gmask5)
   cvec <- concat(vec,vec,vec)
 
   vs <- NeuroVecSeq(vec,vec,vec)
@@ -61,7 +62,7 @@ test_that("can extract vectors from NeuroVecSeq", {
 })
 
 test_that("can extract vols from NeuroVecSeq", {
-  vec <- read_vec("../../test_data/global_mask_v5.nii")
+  vec <- read_vec(gmask5)
   cvec <- concat(vec,vec,vec)
 
   vs <- NeuroVecSeq(vec,vec,vec)
@@ -74,10 +75,10 @@ test_that("can extract vols from NeuroVecSeq", {
 })
 
 test_that("can use a MappedNeuroVec as elements in avNeuroVecSeq", {
-  vec <- read_vec("../../test_data/global_mask_v5.nii")
+  vec <- read_vec(gmask5)
   vs <- NeuroVecSeq(vec,vec,vec)
 
-  mvecs <- replicate(3, MappedNeuroVec("../../test_data/global_mask_v5.nii"), simplify=FALSE)
+  mvecs <- replicate(3, MappedNeuroVec(gmask5), simplify=FALSE)
   vs2 <- do.call(NeuroVecSeq, mvecs)
 
 

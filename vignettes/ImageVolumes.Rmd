@@ -87,13 +87,14 @@ Now we reate a `NeuroSpace` instance that describes the geometry of the image in
     vol
 ```
 
-We do not usually have to create `NeuroSpace` objects, because geometric information about an image is automatically determined from infomration stored in the image file. Thus, `NeuroSpace` objects are usually copied from existing images using the `space` extractor function when needed:
+We do not usually have to create `NeuroSpace` objects, because geometric information about an image is automatically determined from infomration stored in the image file header. Thus, `NeuroSpace` objects are usually copied from existing images using the `space` extractor function when needed:
 
 
 ```{r}
     vol2 <- NeuroVol((vol+1)*25, space(vol))
     max(vol2)
     space(vol2)
+  
 ```
 
 ## Writing a NIFTI formatted image volume

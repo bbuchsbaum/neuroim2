@@ -281,9 +281,12 @@ setMethod(f="show", signature=signature("NeuroVec"),
 
 
 
+
+
+
 #' @rdname sub_vector-methods
 #' @export
-setMethod(f="sub_vector", signature=signature(x="DenseNeuroVec", i="numeric"),
+setMethod(f="sub_vector", signature=signature(x="NeuroVec", i="numeric"),
           def=function(x, i) {
             assertthat::assert_that(max(i) <= dim(x)[4])
             xs <- space(x)
