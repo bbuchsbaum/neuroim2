@@ -367,6 +367,7 @@ setMethod(f="grid_to_coord", signature=signature(x="NeuroVol", coords="matrix"),
 setMethod(f="grid_to_index", signature=signature(x="NeuroSpace", coords="matrix"),
 		def=function(x, coords) {
 			dx <- dim(x)
+
 			if (length(dx) == 2) {
 			  assert_that(length(coords) == 2)
 			  dx <- dim(x)
@@ -380,7 +381,7 @@ setMethod(f="grid_to_index", signature=signature(x="NeuroSpace", coords="matrix"
 			} else if (ncol(coords) == 4 ){
 			  .gridToIndex(dim(x), coords)
 			} else {
-			  stop(paste("grid_to_index: too many dimensions: ", length(dim(x))))
+			  stop(paste("grid_to_index: wrong dimensions: ndim = ", length(dim(x)), ", ncol(coords) = ", ncol(coords)))
 			}
 		})
 

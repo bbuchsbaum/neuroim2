@@ -7,6 +7,7 @@ context("filebacked neurovec")
 
 gmask <- system.file("extdata", "global_mask.nii", package="neuroim2")
 gvec <- FileBackedNeuroVec("../../test_data/global_mask_v5.nii")
+cvec <- read_vec("../../test_data/global_mask_v5.nii")
 
 gen_dat <- function(d1 = 12,
                     d2 = 12,
@@ -88,6 +89,28 @@ test_that("can convert FileBackedNeuroVec to matrix", {
 
   expect_equal(mat[ind,], mat2)
 })
+
+test_that("FileBackedNeuroVec can be indexed like a DenseNeuroVec", {
+
+  expect_equal(gvec[1,,,], cvec[1,,,])
+  expect_equal(gvec[1,2,,], cvec[1,2,,])
+  expect_equal(gvec[1,2,3,], cvec[1,2,3,])
+  expect_equal(gvec[1,2,3,4], cvec[1,2,3,4])
+  expect_equal(gvec[1:2,2,3,4], cvec[1:2,2,3,4])
+  expect_equal(gvec[1:2,2,3,3:4], cvec[1:2,2,3,3:4])
+  expect_equal(gvec[1:2,2,,3:4], cvec[1:2,2,,3:4])
+  expect_equal(gvec[1:2,,,3:4], cvec[1:2,,,3:4])
+  expect_equal(gvec[,,,3:4], cvec[,,,3:4])
+
+  ind <- sample(prod(dim(gvec)), 100)
+  cds <- index_to_grid(space(gvec), ind)
+
+  expect_equal(gvec[cds], cvec[cds])
+  expect_equal(gvec[ind], gvec[cds])
+
+})
+
+
 
 
 

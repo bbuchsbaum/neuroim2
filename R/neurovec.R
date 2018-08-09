@@ -436,9 +436,22 @@ setMethod(f="[[", signature=signature(x="NeuroVec", i="numeric"),
 #' @param mask a mask defining the spatial elements to load
 #' @return an \code{\linkS4class{NeuroVec}} object
 #' @export
-read_vec  <- function(file_name, indices=NULL, mask=NULL) {
-	src <- NeuroVecSource(file_name, indices, mask)
-	load_data(src)
+read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap", "filebacked")) {
+  mode <- match.arg(mode)
+  if (mode == "normal") {
+	  src <- NeuroVecSource(file_name, indices, mask)
+	  load_data(src)
+  } else if (mode == "mmap") {
+    if (!is.null(indices)) {
+      stop("memory mapped mode does not currently support volume 'indices'")
+    }
+    src <- MappedNeuroVecSource(file_name)
+    load_data(src)
+  } else if (mode == "filebacked") {
+    FileBackedNeuroVec(file_name)
+  } else {
+    stop()
+  }
 }
 
 
