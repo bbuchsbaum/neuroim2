@@ -152,16 +152,17 @@ LogicalNeuroVol <- function(data, space, label="", indices=NULL) {
 
 
 
-#' conversion from DenseNeuroVol to array
-#' @rdname as-methods
 #' @name as
+#'
+#' @rdname as-methods
 setAs(from="DenseNeuroVol", to="array", def=function(from) from@.Data)
 
 
-
+#' as
+#'
 #' conversion from \code{SparseNeuroVol} to \code{array}
+#'
 #' @rdname as-methods
-#' @name as
 setAs(from="SparseNeuroVol", to="array", def=function(from) {
   vals <- as.numeric(from@data)
   array(vals, dim(from))
@@ -188,7 +189,6 @@ setMethod(f="as.numeric", signature=signature(x = "SparseNeuroVol"), def=functio
 
 #' conversion from NeuroVol to LogicalNeuroVol
 #' @rdname as-methods
-#' @name as
 setAs(from="NeuroVol", to="LogicalNeuroVol", def=function(from) {
 	LogicalNeuroVol(as.array(from), space(from))
 })
@@ -197,7 +197,6 @@ setAs(from="NeuroVol", to="LogicalNeuroVol", def=function(from) {
 
 #' conversion from NeuroVol to array
 #' @rdname as-methods
-#' @name as
 setAs(from="NeuroVol", to="array", def=function(from) from[,,])
 
 #' show a \code{NeuroVol}

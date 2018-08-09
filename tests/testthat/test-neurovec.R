@@ -173,7 +173,7 @@ test_that("can extract an ROIVec from a NeuroVec", {
 
 test_that("can convert NeuroVec to matrix", {
 	bv1 <- gen_dat(5,5,5,5, rand=TRUE)
-	mat <- as.matrix(bv1)
+	mat <- as(bv1, "matrix")
 
 	ind <- 1:(5*5*5)
 	mat2 <- t(do.call(cbind, lapply(ind, function(i) series(bv1, i))))
@@ -269,6 +269,7 @@ test_that("can perform arithmetic on a SparseNeuroVec", {
   bv2 <- bv1 + bv1
   bv3 <- bv1 * bv2
   bv4 <- bv3 - bv1
+  expect_true(TRUE)
 })
 
 test_that("can add/subtract NeuroVol from NeuroVec", {

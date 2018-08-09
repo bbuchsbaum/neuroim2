@@ -6,6 +6,7 @@ if (!isGeneric("drop"))
   setGeneric("drop", function(x) standardGeneric("drop"))
 
 
+
 #' Generic function to print an object
 #'
 #' @param x the object to print

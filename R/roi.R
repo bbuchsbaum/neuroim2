@@ -328,7 +328,7 @@ roi_surface_matrix <- function(mat, refspace, indices, coords) {
 
 
 
-#' @name as
+
 #' @rdname as-methods
 #' @export
 setAs(from="ROIVec", to="matrix", function(from) {
@@ -340,7 +340,6 @@ setAs(from="ROIVec", to="matrix", function(from) {
 })
 
 
-#' @name as
 #' @rdname as-methods
 setAs(from="ROIVol", to="DenseNeuroVol", function(from) {
   NeuroVol(values(from), space(from), indices=indices(from))

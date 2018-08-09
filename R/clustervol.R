@@ -56,7 +56,6 @@ ClusteredNeuroVol <- function(mask, clusters, label_map=NULL, label="") {
 
 
 #' conversion from ClusteredNeuroVol to LogicalNeuroVol
-#' @name as
 #' @rdname as-methods
 setAs(from="ClusteredNeuroVol", to="DenseNeuroVol", def=function(from) {
   data = from@clusters

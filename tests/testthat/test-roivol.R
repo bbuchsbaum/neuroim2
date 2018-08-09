@@ -62,7 +62,7 @@ test_that("can convert ROIVec to matrix", {
   cube <- cuboid_roi(drop_dim(sp1), c(5,5,5), 3, fill=3)
   m <- matrix(1, 5, nrow(coords(cube)))
   vec <- ROIVec(sp1, coords(cube), matrix(1, 5, nrow(coords(cube))))
-  expect_equal(class(as.matrix(vec))[1], "roi_vector_matrix")
+  expect_true(inherits(as.matrix(vec), "matrix"))
 })
 
 

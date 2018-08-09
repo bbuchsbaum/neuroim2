@@ -209,6 +209,7 @@ read_header <- function(file_name) {
 	read_meta_info(desc, file_name)
 }
 
+#' @export
 setAs(from="MetaInfo", to="NIFTIMetaInfo", def=function(from) {
 			if (inherits(from, "NIFTIMetaInfo")) {
 				from

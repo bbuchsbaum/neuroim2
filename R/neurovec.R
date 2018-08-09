@@ -218,6 +218,8 @@ read_vol_list <- function(file_names, mask=NULL) {
 	}
 }
 
+#' drop
+#'
 #' @rdname drop-methods
 #' @export
 setMethod("drop", signature(x="NeuroVec"),
@@ -231,9 +233,10 @@ setMethod("drop", signature(x="NeuroVec"),
           })
 
 
-
+#' @export
 setAs("DenseNeuroVec", "array", function(from) from@.Data)
 
+#' @export
 setAs("NeuroVec", "array", function(from) from[,,,])
 
 #' show a \code{NeuroVecSource}

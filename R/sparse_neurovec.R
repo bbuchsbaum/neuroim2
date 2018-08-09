@@ -354,6 +354,7 @@ setMethod(f="[[", signature=signature(x="SparseNeuroVec", i="numeric"),
 
 
 #' @export
+#' @rdname as-methods
 setAs(from="SparseNeuroVec", to="matrix",
 		  function(from) {
 		    ind <- indices(from)

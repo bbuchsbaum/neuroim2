@@ -52,6 +52,9 @@ setMethod(f="spacing",signature= signature(x = "NeuroObj"),
 #' @export
 setMethod(f="as.matrix", signature=signature(x = "NeuroObj"), def=function(x) as(x, "matrix"))
 
+
+
+
 #' convert \code{NeuroObj} instance to array
 #' @param x the object
 #' @export

@@ -18,7 +18,6 @@ MappedNeuroVecSource <- function(file_name) {
 #'
 #' @param file_name the name of the 4D image file that containing the memory-mapped data source.
 #' @export
-#' @examples
 #' @rdname MappedNeuroVec-class
 MappedNeuroVec <- function(file_name) {
   src <- MappedNeuroVecSource(file_name)

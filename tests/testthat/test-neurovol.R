@@ -169,8 +169,9 @@ test_that("can convert SparseNeuroVol to an array or vector", {
   vol1 <- read_vol(gmask)
   svol1 <- as.sparse(vol1, mask=which(vol1>0))
 
-  arr <- as.array(svol1)
+  arr <- as(svol1, "array")
   vec <- as.numeric(svol1)
+
   expect_equal(dim(arr), dim(vol1))
   expect_equal(sum(vec), sum(svol1))
 })
