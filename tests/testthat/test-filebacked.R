@@ -110,6 +110,14 @@ test_that("FileBackedNeuroVec can be indexed like a DenseNeuroVec", {
 
 })
 
+test_that("can map a searchlight over a FileBackedNeuroVec", {
+  mask <- drop(gvec[[1]])
+
+  slight <- searchlight_coords(mask, radius=8)[1:100]
+  res <- slight %>% map(~ mean(series(gvec, .))) %>% flatten_dbl()
+  expect_equal(mean(res), 1)
+})
+
 
 
 

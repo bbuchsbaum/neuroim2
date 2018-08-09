@@ -36,7 +36,7 @@ Information about the geometry of the image volume is shown here:
 
 
 
-`read_vol` returns an object of class `NeurolVol` object which extends an R `array` and has 3 dimensions (x,y,z).
+`read_vol` returns an object of class `NeuroVol` object which extends an R `array` and has 3 dimensions (x,y,z).
 
 ```{r}
     class(vol)
