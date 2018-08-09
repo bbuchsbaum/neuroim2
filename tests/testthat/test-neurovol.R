@@ -1,8 +1,19 @@
 
 gmask <- system.file("extdata", "global_mask.nii", package="neuroim2")
+gmask_gz <- system.file("extdata", "global_mask2.nii.gz", package="neuroim2")
 
 
 context("neurovol")
+
+test_that("can read a NeuroVol from .nii file", {
+  vol <- read_vol(gmask)
+  expect_equal(dim(vol), c(64,64,25))
+})
+
+test_that("can read a NeuroVol from .nii.gz file", {
+  vol <- read_vol(gmask_gz)
+  expect_equal(dim(vol), c(64,64,25))
+})
 
 test_that("can construct NeuroVol from 3D array", {
 	dat <- array(0, c(64,64,64))

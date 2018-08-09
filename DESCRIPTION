@@ -58,3 +58,5 @@ Suggests: testthat,
     assertthat,
     knitr,
     ggplot2
+    
+Remotes: YeeJeremy/rflann

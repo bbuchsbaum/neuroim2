@@ -383,7 +383,7 @@ setMethod("indices", signature(x="ROIVol"),
 #' @export
 setMethod("indices", signature(x="ROIVec"),
           function(x) {
-            .gridToIndex(dim(x)[1:3], x@coords)
+            .gridToIndex(dim(x@space)[1:3], x@coords)
             #grid_to_index(x@space, x@coords)
           })
 

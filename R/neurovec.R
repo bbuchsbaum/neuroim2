@@ -851,15 +851,28 @@ setMethod(f="[[", signature=signature(x="NeuroVecSeq", i="numeric"),
 setMethod(f="linear_access", signature=signature(x = "NeuroVecSeq", i = "numeric"),
           def = function (x, i) {
             ## inprog
+            #browser()
             nels <- prod(dim(x)[1:3])
             els <- nels * x@lens
             csum <- cumsum(nels * x@lens) +1
             cels <- c(1, csum[-length(csum)])
             vnum <- find_seqnum(cels, i)
             offsets <- i - cels[vnum] + 1
-            ## faster? first split offsets by vnum, then extract once per vec.
-            ## then rearrange outputs.
-            imap_dbl(vnum, ~ x@vecs[[.x]][offsets[.y]])
+
+            soff <- split(offsets, vnum)
+            sind <- split(seq_along(vnum), vnum)
+
+            res <- map(names(soff), function(vnum) {
+              x@vecs[[as.integer(vnum)]][soff[[vnum]]]
+            })
+
+            out <- numeric(length(i))
+
+            for (j in seq_along(res)) {
+              out[sind[[j]]] <- res[[j]]
+            }
+
+            out
 
           })
 

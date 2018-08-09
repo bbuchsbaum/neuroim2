@@ -21,6 +21,29 @@ test_that("can create a cuboid roi", {
   expect_that(cube, is_a("ROIVol"))
 })
 
+test_that("cuboid roi must have three elements", {
+  sp1 <- NeuroSpace(c(10,10,10), c(1,1,1))
+  cube <- expect_error(cuboid_roi(sp1, c(5,5,5,6), 3))
+})
+
+test_that("cuboid roi must have positive surround", {
+  sp1 <- NeuroSpace(c(10,10,10), c(1,1,1))
+  cube <- expect_error(cuboid_roi(sp1, c(5,5,5), -1))
+})
+
+test_that("square roi must have three elements", {
+  sp1 <- NeuroSpace(c(10,10,10), c(1,1,1))
+  cube <- expect_error(cuboid_roi(sp1, c(5,5,5,6), 3))
+})
+
+test_that("square roi must have positive surround", {
+  sp1 <- NeuroSpace(c(10,10,10), c(1,1,1))
+  cube <- expect_error(square_roi(sp1, c(5,5,5), -1))
+})
+
+
+
+
 test_that("can create a square roi", {
   sp1 <- NeuroSpace(c(10,10,10), c(1,1,1))
   square <- square_roi(sp1, c(5,5,5), 1)
@@ -62,7 +85,7 @@ test_that("can convert ROIVec to matrix", {
   cube <- cuboid_roi(drop_dim(sp1), c(5,5,5), 3, fill=3)
   m <- matrix(1, 5, nrow(coords(cube)))
   vec <- ROIVec(sp1, coords(cube), matrix(1, 5, nrow(coords(cube))))
-  expect_true(inherits(as.matrix(vec), "matrix"))
+  expect_true(inherits(as(vec, "matrix"), "matrix"))
 })
 
 
