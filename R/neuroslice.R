@@ -86,7 +86,7 @@ setMethod("plot", signature=signature(x="NeuroSlice"),
 
             cds <- index_to_coord(space(x), 1:length(x))
             df1 <- data.frame(x=cds[,1], y=cds[,2], value=as.vector(imcols))
-            ggplot2::ggplot(aes(x=x, y=y), data=df1) + ggplot2::geom_raster(aes(fill=value)) +
+            ggplot2::ggplot(ggplot2::aes(x=x, y=y), data=df1) + ggplot2::geom_raster(aes(fill=value)) +
               ggplot2::scale_fill_identity() + ggplot2::xlab("") + ggplot2::ylab("")
               ggplot2::theme_bw()
 

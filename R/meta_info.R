@@ -214,7 +214,7 @@ setAs(from="MetaInfo", to="NIFTIMetaInfo", def=function(from) {
 			if (inherits(from, "NIFTIMetaInfo")) {
 				from
 			} else {
-				hdr <- as.nifti.header(from)
+				hdr <- as_nifti_header(from)
 				desc <- find_descriptor(hdr$file_name)
 				NIFTIMetaInfo(desc, hdr)
 			}

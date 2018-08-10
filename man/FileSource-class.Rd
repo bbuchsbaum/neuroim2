@@ -11,6 +11,6 @@ low level IO and image loading functionality.
 \section{Slots}{
 
 \describe{
-\item{\code{metaInfo}}{meta information for the data source}
+\item{\code{meta_info}}{meta information for the data source}
 }}
 

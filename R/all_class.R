@@ -191,7 +191,7 @@ setClass("AFNIMetaInfo",
 #' low level IO and image loading functionality.
 #'
 #' @rdname FileSource-class
-#' @slot metaInfo meta information for the data source
+#' @slot meta_info meta information for the data source
 #' @exportClass FileSource
 setClass("FileSource", representation(meta_info="FileMetaInfo"))
 
@@ -504,8 +504,6 @@ setClass("ROICoords",
 #' A class that represents a volumetric region of interest
 #'
 #' @rdname ROIVol-class
-#' @slot data the \code{numeric} data stored in ROI
-#' @slot coords the voxel coordinates of the ROI
 #' @exportClass ROIVol
 setClass("ROIVol",
          contains=c("ROICoords", "numeric"),
@@ -605,8 +603,8 @@ setClass("Kernel", representation(width="numeric", weights="numeric", voxels="ma
 #' NeuroBucket
 #'
 #' a four-dimensional image that conists of a sequence of labeled image volumes backed by a list
+#'
 #' @rdname NeuroBucket-class
-#' @slot source the data source for the bucket volumes
 #' @slot labels the names of the sub-volumes contained in the bucket
 #' @slot data a list of \code{\linkS4class{NeuroVol}} instances with names corresponding to volume labels
 #' @export

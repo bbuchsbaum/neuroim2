@@ -7,7 +7,7 @@
 FileBackedNeuroVec(file_name)
 }
 \arguments{
-\item{the}{name of the image file}
+\item{file_name}{the name of the image file}
 }
 \description{
 Constuct a \code{FileBackedNeuroVec} instance

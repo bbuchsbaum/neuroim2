@@ -2,7 +2,7 @@
 
 #' Constuct a \code{FileBackedNeuroVec} instance
 #'
-#' @param the name of the image file
+#' @param file_name the name of the image file
 #' @export
 FileBackedNeuroVec <- function(file_name) {
   meta <- read_header(file_name)
