@@ -1,6 +1,8 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
+
+
 // [[Rcpp::export]]
 IntegerVector find_seqnum(IntegerVector clens, IntegerVector idx) {
   IntegerVector out = IntegerVector(idx.length());
