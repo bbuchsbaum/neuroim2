@@ -11,3 +11,4 @@ after_success:
 r_packages:
   - covr
   - devtools
+
