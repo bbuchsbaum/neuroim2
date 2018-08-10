@@ -7,3 +7,7 @@ Imports: rflann
 Remotes: YeeJeremy/rflann
 after_success:
   - Rscript -e 'covr::codecov()'
+
+r_packages:
+  - covr
+  - devtools
