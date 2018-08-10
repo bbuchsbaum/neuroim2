@@ -58,7 +58,8 @@ Suggests: testthat,
     covr,
     assertthat,
     knitr,
-    ggplot2
+    ggplot2,
+    roxygen2
 Remotes: 
   YeeJeremy/rflann
   
