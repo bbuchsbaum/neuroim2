@@ -1,3 +1,5 @@
+[![Build Status](https://img.shields.io/travis/bbuchsbaum/neuroim2/master.svg)](https://travis-ci.org/bbuchsbaum/neuroim2) [![codecov](https://codecov.io/github/bbuchsbaum/neuroim2/branch/master/graphs/badge.svg)](https://codecov.io/github/bbuchsbaum/neuroim2)
+
 The `neuroim2` package is currently in development. The goal of the project is to to provide basic functionality for working with neuroimaging data in R. `neuroim2` It is an effort to modify and upgrade the `neuroim` package (<https://github.com/bbuchsbaum/neuroim>).
 
 Installation
@@ -41,11 +43,6 @@ We can create a 4D image, by concatenating several 3D volumes:
 
 ``` r
 vec <- concat(vol, vol, vol2)
-```
-
-    ## [1] "concat4d"
-
-``` r
 series1 <- vec[1,1,1,]
 length(series1)
 ```
