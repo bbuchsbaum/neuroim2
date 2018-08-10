@@ -59,7 +59,8 @@ Suggests: testthat,
     assertthat,
     knitr,
     ggplot2,
-    roxygen2
+    roxygen2,
+    rmarkdown
 Remotes: 
   YeeJeremy/rflann
   

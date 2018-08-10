@@ -5,3 +5,5 @@ sudo: false
 cache: packages
 Imports: rflann
 Remotes: YeeJeremy/rflann
+after_success:
+  - Rscript -e 'covr::codecov()'

@@ -142,7 +142,7 @@ setMethod(f="Summary", signature=signature(x="SparseNeuroVol", na.rm="ANY"),
 
 setMethod(f="Summary", signature=signature(x="ClusteredNeuroVol", na.rm="ANY"),
           def=function(x, ..., na.rm) {
-            callGeneric(x@svol)
+            callGeneric(x@sv)
           })
 
 
