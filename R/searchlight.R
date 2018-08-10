@@ -142,6 +142,7 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE) {
 #' @param cvol a \code{ClusteredNeuroVol} instance
 #' @param csize the number of clusters (ignored if \code{cvol} is provided)
 #' @return an \code{iter} class
+#' @importFrom stats kmeans
 #' @export
 clustered_searchlight <- function(mask, cvol=NULL, csize=NULL) {
   if (is.null(csize) && is.null(cvol)) {

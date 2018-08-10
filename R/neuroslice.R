@@ -96,6 +96,7 @@ setMethod("plot", signature=signature(x="NeuroSlice"),
 
 #' @import assertthat
 #' @keywords internal
+#' @importFrom grDevices col2rgb gray heat.colors
 mapToColors <- function (imslice, col = heat.colors(128, alpha = 1), zero_col = "#00000000",
                          alpha = 1, irange = range(imslice), threshold = c(0, 0)) {
 

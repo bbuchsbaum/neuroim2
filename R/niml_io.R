@@ -87,6 +87,7 @@ parse_niml_header <- function(fconn) {
 }
 
 #' @keywords internal
+#' @importFrom utils str
 parse_niml_next <- function(fconn) {
   header <- parse_niml_header(fconn)
   if (!is.null(header$attr) && (header$label == "SPARSE_DATA" || header$label == "INDEX_LIST")) {
