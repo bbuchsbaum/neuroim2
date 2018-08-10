@@ -53,7 +53,9 @@ Imports: purrr,
   mmap,
   Rcpp,
   RNifti,
-  rflann
+  rflann,
+  stringr,
+  methods
 Suggests: testthat,
     covr,
     assertthat,
