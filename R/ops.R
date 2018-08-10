@@ -140,11 +140,6 @@ setMethod(f="Summary", signature=signature(x="SparseNeuroVol", na.rm="ANY"),
       callGeneric(x@data)
     })
 
-setMethod(f="Summary", signature=signature(x="ClusteredNeuroVol", na.rm="ANY"),
-          def=function(x, ..., na.rm) {
-            callGeneric(x@sv)
-          })
-
 
 #setMethod("sum", signature()
 

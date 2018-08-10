@@ -107,7 +107,6 @@ assert_that(length(sd_vec) == dim(vec)[4])
 
 ```{r}
 vec <- concat(vol,vol,vol,vol,vol)
-
 mean_vol <- vec %>% vectors %>% map_dbl(~ mean(.)) %>% NeuroVec(., space=space(vol))
 assert_that(all(dim(mean_vol) == dim(vol)))
 ```
