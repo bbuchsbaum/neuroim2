@@ -58,11 +58,7 @@ series(x, i, ...)
 
 \item{k}{index for 3rd dimension}
 
-\item{x}{the object}
-
-\item{i}{the series indices}
-
-\item{...}{additional arguments}
+\item{drop}{whether to drop dimension of length 1}
 }
 \description{
 Extract one or more series from object and return as ROI object

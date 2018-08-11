@@ -62,12 +62,9 @@ setMethod(f="index_to_grid", signature=signature(x = "NeuroSlice", idx="numeric"
 
 
 
-#' plot
-#'
+
 #' @export
 #' @importFrom graphics plot
-#' @param cmap a color map consisting of a vector of colors in hex format (e.g. \code{gray(n=255)})
-#' @param irange the intensity range indicating the low and high values of the color scale.
 #' @rdname plot-methods
 #' @examples
 #'

@@ -10,6 +10,11 @@ which_dim(x, axis)
 
 \S4method{which_dim}{NeuroSpace,NamedAxis}(x, axis)
 }
+\arguments{
+\item{x}{the object}
+
+\item{axis}{the axis to return dimension of}
+}
 \description{
 which_dim
 }

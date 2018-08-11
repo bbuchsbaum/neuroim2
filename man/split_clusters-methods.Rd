@@ -46,6 +46,7 @@ mask.idx <- which(mask != 0)
 grid <- index_to_coord(mask, mask.idx)
 vox <- index_to_grid(mask, mask.idx)
 
+library(purrr)
 ## partition coordinates into 50 clusters using 'kmeans'
 kres <- kmeans(grid, centers=50, iter.max=500)
 kvol <- ClusteredNeuroVol(mask, kres$cluster)

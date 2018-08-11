@@ -6,7 +6,7 @@
 
 #' Create an instance of class \code{\linkS4class{ROIVol}}
 #'
-#' @param space an instance of class \code{NeuroSpace} with three dimensions
+#' @param vspace an instance of class \code{NeuroSpace} with three dimensions
 #' @param coords a 3-column matrix of voxel coordinates
 #' @param data the data values, numeric vector
 #' @return an instance of class \code{ROIVol}
@@ -31,7 +31,6 @@ ROIVec <- function(vspace, coords, data=rep(nrow(coords),1)) {
 #' convert a \code{ROIVec} to a matrix
 #'
 #' @rdname as.matrix-methods
-#' @param x the object
 #' @export
 setMethod(f="as.matrix", signature=signature(x = "ROIVec"), def=function(x) {
   as(x, "matrix")

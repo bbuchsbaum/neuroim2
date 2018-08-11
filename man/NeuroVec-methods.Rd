@@ -11,7 +11,7 @@
 \S4method{[[}{NeuroVecSeq,numeric}(x, i)
 }
 \arguments{
-\item{i}{the volume index}
+\item{x}{the object}
 
 \item{i}{the volume index}
 }

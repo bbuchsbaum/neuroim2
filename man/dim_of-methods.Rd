@@ -10,6 +10,11 @@ dim_of(x, axis)
 
 \S4method{dim_of}{NeuroSpace,NamedAxis}(x, axis)
 }
+\arguments{
+\item{x}{the object}
+
+\item{axis}{the axis to return the dimension of}
+}
 \description{
 dim_of
 }

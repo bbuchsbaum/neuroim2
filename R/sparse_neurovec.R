@@ -340,6 +340,7 @@ setMethod(f="sub_vector", signature=signature(x="SparseNeuroVec", i="numeric"),
 #' [[
 #'
 #' @rdname SparseNeuroVec-methods
+#' @param x the object
 #' @param i the volume index
 #' @export
 setMethod(f="[[", signature=signature(x="SparseNeuroVec", i="numeric"),

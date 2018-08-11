@@ -8,6 +8,8 @@
 \S4method{[[}{SparseNeuroVec,numeric}(x, i)
 }
 \arguments{
+\item{x}{the object}
+
 \item{i}{the volume index}
 }
 \description{

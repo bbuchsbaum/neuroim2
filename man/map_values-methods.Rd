@@ -5,7 +5,7 @@
 \alias{map_values}
 \alias{map_values,NeuroVol,list-method}
 \alias{map_values,NeuroVol,matrix-method}
-\title{Generic function to map values from one set to another using a user-supplied lookup table}
+\title{Generic function to map values from one set of values to another set using a user-supplied lookup table}
 \usage{
 map_values(x, lookup)
 
@@ -22,7 +22,7 @@ map_values(x, lookup)
 a new object where the original values have been filled in with the values in the lookup table
 }
 \description{
-Generic function to map values from one set to another using a user-supplied lookup table
+Generic function to map values from one set of values to another set using a user-supplied lookup table
 }
 \examples{
 x <- NeuroSpace(c(10,10,10), c(1,1,1))
@@ -30,6 +30,7 @@ vol <- NeuroVol(sample(1:10, 10*10*10, replace=TRUE), x)
 
 ## lookup table is list
 lookup <- lapply(1:10, function(i) i*10)
+names(lookup) <- 1:10
 ovol <- map_values(vol, lookup)
 
 ## lookup table is matrix. First column is key, second column is value

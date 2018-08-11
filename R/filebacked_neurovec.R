@@ -54,23 +54,8 @@ setMethod(f="linear_access", signature=signature(x = "FileBackedNeuroVec", i = "
           })
 
 
-#' [[
-#'
-#' @rdname FileBackedNeuroVec-methods
-#' @param i the volume index
-#' @export
-setMethod(f="[[", signature=signature(x="FileBackedNeuroVec", i="numeric"),
-          def = function(x, i) {
-            stopifnot(length(i) == 1)
-            xs <- space(x)
-            drop(sub_vector(x,i))
-
-          })
-
-
 
 #' @rdname as.matrix-methods
-#' @param x the object
 #' @export
 setMethod(f="as.matrix", signature=signature(x = "FileBackedNeuroVec"), def=function(x) {
   as(x, "matrix")

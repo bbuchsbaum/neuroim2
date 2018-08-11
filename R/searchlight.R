@@ -110,6 +110,7 @@ searchlight_coords <- function(mask, radius, nonzero=FALSE) {
 #'
 #' @param mask an image volume containing valid central voxels for roving searchlight
 #' @param radius in mm of spherical searchlight
+#' @param eager if TRUE, then all searchlight coordinates set are generated up front. This is faster but requires more memory to store all coordinates.
 #' @param nonzero only include nonzero values
 #' @return an \code{ROIVolWindow} class
 #' @importFrom rflann RadiusSearch

@@ -1,16 +1,16 @@
 
 
-#' plot
-#'
+
 #' @export
 setGeneric("plot", function(x, y, ...) standardGeneric("plot"))
 
 
-#' drop
-#'
+
 #' @export
 setGeneric("drop", function(x) standardGeneric("drop"))
 
+#' @export
+setGeneric("as.matrix", function(x) standardGeneric("as.matrix"))
 
 
 #' Generic function to print an object
@@ -32,6 +32,7 @@ setGeneric(name="values", def=function(x, ...) standardGeneric("values"))
 #' Generic function to extract values from an array-like object using linear indexing
 #'
 #' @param x a data source
+#' @param i a vector of indices
 #' @param ... additional arguments
 #' @export
 #' @rdname linear_access-methods
@@ -44,7 +45,7 @@ setGeneric(name="linear_access", def=function(x, i, ...) standardGeneric("linear
 #' @param x a data source
 #' @param ... additional arguments
 #' @export
-#' @rdname loadData-methods
+#' @rdname load_data-methods
 setGeneric(name="load_data", def=function(x, ...) standardGeneric("load_data"))
 
 #' Generic function to apply a function to an object
@@ -126,9 +127,10 @@ setGeneric(name="slices", def=function(x, ...) standardGeneric("slices"))
 #' @param ... additional arguments
 #' @export
 #' @examples
-#' x = NeuroSpace(c(10,10,10), c(1,1,1))
+#'
+#' x = NeuroSpace(c(10,10,10), spacing=c(1,1,1))
 #' ndim(x) == 3
-#' x = NeuroSpace(c(10,10,10,3), c(1,1,1,1))
+#' x = NeuroSpace(c(10,10,10,3), spacing=c(1,1,1))
 #' ndim(x) == 4
 #'
 #' @rdname ndim-methods
@@ -136,10 +138,14 @@ setGeneric(name="ndim", def=function(x, ...) standardGeneric("ndim"))
 
 
 #' dim_of
+#' @param x the object
+#' @param axis the axis to return the dimension of
 #' @rdname dim_of-methods
 setGeneric(name="dim_of", def=function(x, axis) standardGeneric("dim_of"))
 
 #' which_dim
+#' @param x the object
+#' @param axis the axis to return dimension of
 #' @rdname which_dim-methods
 setGeneric(name="which_dim", def=function(x, axis) standardGeneric("which_dim"))
 
@@ -207,7 +213,7 @@ setGeneric(name="space", def=function(x, ...) standardGeneric("space"))
 #' ovol2 <- split_fill(vol, fac, rev)
 setGeneric(name="split_fill", def=function(x, fac, FUN) standardGeneric("split_fill"))
 
-#' Generic function to map values from one set to another using a user-supplied lookup table
+#' Generic function to map values from one set of values to another set using a user-supplied lookup table
 #'
 #' @param x the object to map values from
 #' @param lookup the lookup table. The first column is the "key" the second column is the "value".
@@ -219,6 +225,7 @@ setGeneric(name="split_fill", def=function(x, fac, FUN) standardGeneric("split_f
 #'
 #' ## lookup table is list
 #' lookup <- lapply(1:10, function(i) i*10)
+#' names(lookup) <- 1:10
 #' ovol <- map_values(vol, lookup)
 #'
 #' ## lookup table is matrix. First column is key, second column is value
@@ -275,20 +282,20 @@ setGeneric(name="split_scale", def=function(x, f, center, scale) standardGeneric
 #' @export
 #' @examples
 #' mat = matrix(rnorm(100*100), 100, 100)
-#' fac = sample(1:3, nrow(mat), replace=TRUE)
+#' fac = factor(sample(1:3, nrow(mat), replace=TRUE))
 #' ## compute column means of each sub-matrix
-#' ms <- splitReduce(mat, fac)
+#' ms <- split_reduce(mat, fac)
 #' all.equal(row.names(ms), levels(fac))
 #'
 #' ## compute column medians of each sub-matrix
-#' ms <- splitReduce(mat, fac, median)
+#' ms <- split_reduce(mat, fac, median)
 #'
 #' ## compute time-series means grouped over voxels.
 #' ## Here, \code{length(fac)} must equal the number of voxels: \code{prod(dim(bvec)[1:3]}
 #' bvec <- NeuroVec(array(rnorm(24*24*24*24), c(24,24,24,24)), NeuroSpace(c(24,24,24,24), c(1,1,1)))
 #' fac <- factor(sample(1:3, prod(dim(bvec)[1:3]), replace=TRUE))
-#' ms <- splitReduce(bvec, fac)
-#' ms2 <- splitReduce(bvec, fac, mean)
+#' ms <- split_reduce(bvec, fac)
+#' ms2 <- split_reduce(bvec, fac, mean)
 #' all.equal(row.names(ms), levels(fac))
 #' all.equal(ms,ms2)
 #'
@@ -497,7 +504,7 @@ setGeneric(name="grid_to_coord",   def=function(x, coords) standardGeneric("grid
 #' Generic function to convert voxel coordinates in the reference space (LPI) to native array space.
 #'
 #' @param x the object
-#' @param coords a matrix of LPI voxel coordinates
+#' @param vox a matrix of LPI voxel coordinates
 #' @return a matrix of native voxel coordinates
 #' @export
 #' @rdname grid_to_grid-methods
@@ -590,6 +597,7 @@ setGeneric(name="as.mask", def=function(x, indices) standardGeneric("as.mask"))
 #' @param x the object to extract patches from
 #' @param dims a vector indicating the dimensions of the patches
 #' @param mask mask indicating the valid patch area
+#' @param ... additional args
 #' @rdname patch_set-methods
 setGeneric(name="patch_set", def=function(x, dims, mask, ...) standardGeneric("patch_set"))
 
@@ -625,10 +633,8 @@ setGeneric(name="lookup", def=function(x, i, ...) standardGeneric("lookup"))
 
 
 #' Extract one or more series from object and return as ROI object
-#' @param x the object
-#' @param i the series indices
-#' @param ... additional arguments
-#' @export
+#'
+#' @inheritParams series
 #' @rdname series-methods
 setGeneric(name="series_roi", def=function(x, i, ...) standardGeneric("series_roi"))
 

@@ -13,6 +13,9 @@
 
 \S4method{length}{ROIVol}(x)
 }
+\arguments{
+\item{x}{the object}
+}
 \description{
 Get length of \code{NeuroVec}. This is the number of volumes in the volume vector (e.g. the 4th image dimension)
 }

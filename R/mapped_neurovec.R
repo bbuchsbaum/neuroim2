@@ -27,7 +27,7 @@ MappedNeuroVec <- function(file_name) {
 
 #' @export
 #' @rdname load_data-methods
-setMethod(f="load_data", signature=c("MappedNeuroVecSource"),
+setMethod(f="load_data", signature=c(x="MappedNeuroVecSource"),
           def=function(x) {
             meta <- x@meta_info
             fmap <- mmap::mmap(meta@data_file, mode=.getMMapMode(meta@data_type), prot=mmap::mmapFlags("PROT_READ"))

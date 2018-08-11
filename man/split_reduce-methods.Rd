@@ -7,8 +7,8 @@
 \alias{split_reduce,matrix,integer,missing-method}
 \alias{split_reduce,matrix,factor,missing-method}
 \alias{split_reduce,matrix,factor,function-method}
-\alias{split_reduce,NeuroVol,factor,function-method}
-\alias{split_reduce,NeuroVol,factor,missing-method}
+\alias{split_reduce,NeuroVec,factor,function-method}
+\alias{split_reduce,NeuroVec,factor,missing-method}
 \title{Generic function to summarize subsets of an object by first splitting by row and then "reducing" by a summary \code{function}}
 \usage{
 split_reduce(x, fac, FUN)
@@ -21,9 +21,9 @@ split_reduce(x, fac, FUN)
 
 \S4method{split_reduce}{matrix,factor,`function`}(x, fac, FUN)
 
-\S4method{split_reduce}{NeuroVol,factor,`function`}(x, fac, FUN)
+\S4method{split_reduce}{NeuroVec,factor,`function`}(x, fac, FUN)
 
-\S4method{split_reduce}{NeuroVol,factor,missing}(x, fac, FUN)
+\S4method{split_reduce}{NeuroVec,factor,missing}(x, fac, FUN)
 }
 \arguments{
 \item{x}{a numeric matrix(like) object}
@@ -49,20 +49,20 @@ then this can be achieved as follows:
 }
 \examples{
 mat = matrix(rnorm(100*100), 100, 100)
-fac = sample(1:3, nrow(mat), replace=TRUE)
+fac = factor(sample(1:3, nrow(mat), replace=TRUE))
 ## compute column means of each sub-matrix
-ms <- splitReduce(mat, fac)
+ms <- split_reduce(mat, fac)
 all.equal(row.names(ms), levels(fac))
 
 ## compute column medians of each sub-matrix
-ms <- splitReduce(mat, fac, median)
+ms <- split_reduce(mat, fac, median)
 
 ## compute time-series means grouped over voxels.
 ## Here, \\code{length(fac)} must equal the number of voxels: \\code{prod(dim(bvec)[1:3]}
 bvec <- NeuroVec(array(rnorm(24*24*24*24), c(24,24,24,24)), NeuroSpace(c(24,24,24,24), c(1,1,1)))
 fac <- factor(sample(1:3, prod(dim(bvec)[1:3]), replace=TRUE))
-ms <- splitReduce(bvec, fac)
-ms2 <- splitReduce(bvec, fac, mean)
+ms <- split_reduce(bvec, fac)
+ms2 <- split_reduce(bvec, fac, mean)
 all.equal(row.names(ms), levels(fac))
 all.equal(ms,ms2)
 

@@ -29,6 +29,8 @@
 
 \item{k}{third index}
 
+\item{m}{the fourth index}
+
 \item{...}{additional args}
 
 \item{drop}{dimension}

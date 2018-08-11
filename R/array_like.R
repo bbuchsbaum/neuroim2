@@ -6,6 +6,7 @@
 #' @param i first index
 #' @param j second index
 #' @param k third index
+#' @param m the fourth index
 #' @param ... additional args
 #' @param drop dimension
 NULL

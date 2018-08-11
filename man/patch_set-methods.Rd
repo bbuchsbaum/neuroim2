@@ -19,6 +19,8 @@ patch_set(x, dims, mask, ...)
 \item{dims}{a vector indicating the dimensions of the patches}
 
 \item{mask}{mask indicating the valid patch area}
+
+\item{...}{additional args}
 }
 \description{
 generate a set of coordinate "patches" of fixed size from an image object.

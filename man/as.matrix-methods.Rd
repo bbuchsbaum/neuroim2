@@ -19,10 +19,6 @@
 }
 \arguments{
 \item{x}{the object}
-
-\item{x}{the object}
-
-\item{x}{the object}
 }
 \description{
 convert a \code{NeuroVec} to a matrix

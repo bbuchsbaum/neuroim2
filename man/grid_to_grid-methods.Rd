@@ -16,7 +16,7 @@ grid_to_grid(x, vox)
 \arguments{
 \item{x}{the object}
 
-\item{coords}{a matrix of LPI voxel coordinates}
+\item{vox}{a matrix of LPI voxel coordinates}
 }
 \value{
 a matrix of native voxel coordinates

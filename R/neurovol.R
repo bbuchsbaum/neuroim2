@@ -328,8 +328,11 @@ setMethod(f="slices", signature=signature(x="NeuroVol"),
             deferred_list(lis)
           })
 
+
+#' @export
+#' @rdname extractor3d
 setMethod(f="[", signature=signature(x = "NeuroVol", i = "ROICoords", j = "missing"),
-          def=function (x, i, j, k, m, ..., drop=TRUE) {
+          def=function (x, i, j, k, ..., drop=TRUE) {
             callGeneric(x, i@coords)
           }
 )
@@ -357,6 +360,9 @@ setMethod(f="concat", signature=signature(x="DenseNeuroVol", y="DenseNeuroVol"),
 #' @rdname map_values-methods
 setMethod(f="map_values", signature=signature(x="NeuroVol", lookup="list"),
           def=function(x,lookup) {
+            if (is.null(names(lookup))) {
+              names(lookup) <- seq_along(lookup)
+            }
             out <- match(x,as.numeric(names(lookup)))
             DenseNeuroVol(unlist(lookup[out]), space(x))
           })
@@ -786,7 +792,8 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVol", mask="numeric"),
 
 
 
-
+#' @export
+#' @rdname linear_access-methods
 setMethod(f="linear_access", signature=signature(x = "SparseNeuroVol", i = "numeric"),
           def=function (x, i) {
             x@data[as.numeric(i)]
@@ -821,15 +828,17 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 
 
 
-
-#' plot
+#' plot an image
 #'
-#' @importFrom graphics plot
+#' @rdname plot-methods
+#' @param x the object to display
 #' @param cmap a color map consisting of a vector of colors in hex format (e.g. \code{gray(n=255)})
-#' @param irange the intensity range indicating the low and high values of the color scale.
 #' @param zlevels the series of slice indices to display.
+#' @param irange the intensity range indicating the low and high values of the color scale.
+#' @param thresh a 2-element vector indicating the lower and upper transparency thresholds.
+#' @param bgvol a background volume that serves as an image underlay (currently ignored).
 #' @export
-#' @rdname plot
+#' @importFrom graphics plot
 #' @examples
 #'
 #' dat <- matrix(rnorm(100*100), 100, 100)

@@ -160,8 +160,9 @@ NeuroVecSource <- function(file_name, indices=NULL, mask=NULL) {
 #' Get length of \code{NeuroVec}. This is the number of volumes in the volume vector (e.g. the 4th image dimension)
 #'
 #' @export
+#' @param x the object
 #' @rdname length-methods
-setMethod("length", signature=c("NeuroVec"),
+setMethod("length", signature=c(x="NeuroVec"),
 		def=function(x) {
 			dim(x)[4]
 		})
@@ -219,7 +220,7 @@ read_vol_list <- function(file_names, mask=NULL) {
 }
 
 #' drop
-#'
+#' @param x the object
 #' @rdname drop-methods
 #' @export
 setMethod("drop", signature(x="NeuroVec"),
@@ -416,10 +417,12 @@ setMethod(f="split_blocks", signature=signature(x="NeuroVec", indices="integer")
 
 #' [[
 #' @rdname NeuroVec-methods
+#' @param x the object
 #' @param i the volume index
 #' @export
 setMethod(f="[[", signature=signature(x="NeuroVec", i="numeric"),
           def = function(x, i) {
+            ## or ... drop(sub_vector(x,i))
             assert_that(length(i) == 1)
             xs <- space(x)
             dat <- x[,,,i]
@@ -437,6 +440,7 @@ setMethod(f="[[", signature=signature(x="NeuroVec", i="numeric"),
 #' @param file_name the name of the file to load
 #' @param indices the indices of the sub-volumes to load (e.g. if the file is 4-dimensional)
 #' @param mask a mask defining the spatial elements to load
+#' @param mode the IO mode which is one of "normal", "mmap", or "filebacked".
 #' @return an \code{\linkS4class{NeuroVec}} object
 #' @export
 read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap", "filebacked")) {
@@ -578,6 +582,7 @@ setMethod("series_roi", signature(x="NeuroVec", i="LogicalNeuroVol"),
             ROIVec(space(x), coords=index_to_grid(i, which(i == TRUE)), data=as.matrix(mat))
           })
 #' @export
+#' @param drop whether to drop dimension of length 1
 #' @rdname series-methods
 setMethod(f="series", signature=signature(x="NeuroVec", i="integer"),
           def=function(x,i,j,k, drop=TRUE) {
@@ -836,7 +841,6 @@ setMethod("length", signature=c("NeuroVecSeq"),
 
 #' [[
 #' @rdname NeuroVec-methods
-#' @param i the volume index
 #' @export
 setMethod(f="[[", signature=signature(x="NeuroVecSeq", i="numeric"),
           def = function(x, i) {

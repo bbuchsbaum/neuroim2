@@ -7,6 +7,9 @@
 \usage{
 \S4method{drop}{NeuroVec}(x)
 }
+\arguments{
+\item{x}{the object}
+}
 \description{
 drop
 }

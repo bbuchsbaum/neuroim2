@@ -11,6 +11,8 @@ searchlight(mask, radius, eager = FALSE, nonzero = FALSE)
 
 \item{radius}{in mm of spherical searchlight}
 
+\item{eager}{if TRUE, then all searchlight coordinates set are generated up front. This is faster but requires more memory to store all coordinates.}
+
 \item{nonzero}{only include nonzero values}
 }
 \value{

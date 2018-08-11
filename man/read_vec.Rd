@@ -13,6 +13,8 @@ read_vec(file_name, indices = NULL, mask = NULL, mode = c("normal",
 \item{indices}{the indices of the sub-volumes to load (e.g. if the file is 4-dimensional)}
 
 \item{mask}{a mask defining the spatial elements to load}
+
+\item{mode}{the IO mode which is one of "normal", "mmap", or "filebacked".}
 }
 \value{
 an \code{\linkS4class{NeuroVec}} object

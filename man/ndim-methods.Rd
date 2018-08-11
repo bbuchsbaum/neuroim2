@@ -26,9 +26,10 @@ ndim(x, ...)
 Generic function to extract the number of dimensions of an object
 }
 \examples{
-x = NeuroSpace(c(10,10,10), c(1,1,1))
+
+x = NeuroSpace(c(10,10,10), spacing=c(1,1,1))
 ndim(x) == 3
-x = NeuroSpace(c(10,10,10,3), c(1,1,1,1))
+x = NeuroSpace(c(10,10,10,3), spacing=c(1,1,1))
 ndim(x) == 4
 
 }

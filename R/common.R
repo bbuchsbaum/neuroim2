@@ -49,7 +49,7 @@ setMethod(f="split_reduce", signature=signature(x = "matrix", fac="factor", FUN=
 
 #' @export
 #' @rdname split_reduce-methods
-setMethod(f="split_reduce", signature=signature(x = "NeuroVol", fac="factor", FUN="function"),
+setMethod(f="split_reduce", signature=signature(x = "NeuroVec", fac="factor", FUN="function"),
           def=function(x, fac, FUN) {
             if (length(fac) == prod(dim(x)[1:3])) {
               split_by_voxel <- TRUE
@@ -78,7 +78,7 @@ setMethod(f="split_reduce", signature=signature(x = "NeuroVol", fac="factor", FU
 
 #' @export
 #' @rdname split_reduce-methods
-setMethod(f="split_reduce", signature=signature(x = "NeuroVol", fac="factor", FUN="missing"),
+setMethod(f="split_reduce", signature=signature(x = "NeuroVec", fac="factor", FUN="missing"),
           def=function(x, fac, FUN) {
             if (length(fac) == prod(dim(x)[1:3])) {
               split_by_voxel <- TRUE
