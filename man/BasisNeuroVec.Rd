@@ -17,6 +17,6 @@ corresponding set of coefficients.
 
 \item{\code{coeffs}}{the \code{sparseMatrix} of coefficients}
 
-\item{\code{map}}{instance of class \code{\linkS4class{IndexLookupVolume}} is used to map between spatial and index/row coordinates}
+\item{\code{map}}{instance of class \code{\linkS4class{IndexLookupVol}} is used to map between spatial and index/row coordinates}
 }}
 

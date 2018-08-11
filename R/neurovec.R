@@ -848,6 +848,7 @@ setMethod(f="[[", signature=signature(x="NeuroVecSeq", i="numeric"),
           })
 
 #' @export
+#' @rdname linear_access-methods
 setMethod(f="linear_access", signature=signature(x = "NeuroVecSeq", i = "numeric"),
           def = function (x, i) {
             ## inprog

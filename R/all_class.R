@@ -454,7 +454,7 @@ setClass("NeuroVecSeq",
 #' @slot mask the mask defining the sparse domain
 #' @slot basis the matrix of bases, were each column is a basis vector.
 #' @slot coeffs the \code{sparseMatrix} of coefficients
-#' @slot map instance of class \code{\linkS4class{IndexLookupVolume}} is used to map between spatial and index/row coordinates
+#' @slot map instance of class \code{\linkS4class{IndexLookupVol}} is used to map between spatial and index/row coordinates
 #' @export
 setClass("BasisNeuroVec",
          representation(mask="LogicalNeuroVol",

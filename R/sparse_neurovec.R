@@ -169,7 +169,8 @@ setMethod(f="series", signature=signature(x="SparseNeuroVec", i="matrix"),
          })
 
 
-
+#' @export
+#' @rdname series-methods
 setMethod("series", signature(x="SparseNeuroVec", i="numeric"),
           def=function(x,i, j, k) {
             if (missing(j) && missing(k)) {
@@ -256,7 +257,8 @@ setMethod(f="lookup", signature=signature(x="SparseNeuroVec", i="numeric"),
             lookup(x@map, i)
           })
 
-
+#' @export
+#' @rdname linear_access-methods
 setMethod(f="linear_access", signature=signature(x = "SparseNeuroVec", i = "numeric"),
           def=function (x, i) {
             nels <- prod(dim(x)[1:3])

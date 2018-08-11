@@ -9,3 +9,5 @@
 #' @name neuroim2
 #' @details none
 NULL
+
+if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))

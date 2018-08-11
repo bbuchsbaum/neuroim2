@@ -26,8 +26,8 @@ Extract connected components from a 3D mask
 \examples{
 
 dat <- array(as.logical(rnorm(10*10*10)>.5), c(10, 10, 10))
-res1 <- conn_comp3D(dat, connect="6-connect")
-res2 <- conn_comp3D(dat, connect="18-connect")
-res3 <- conn_comp3D(dat, connect="26-connect")
+res1 <- conn_comp_3D(dat, connect="6-connect")
+res2 <- conn_comp_3D(dat, connect="18-connect")
+res3 <- conn_comp_3D(dat, connect="26-connect")
 
 }

@@ -41,7 +41,8 @@ setMethod(f="load_data", signature=c("MappedNeuroVecSource"),
           })
 
 
-
+#' @export
+#' @rdname linear_access-methods
 setMethod(f="linear_access", signature=signature(x = "MappedNeuroVec", i = "numeric"),
           def=function (x, i) {
             idx <- i + x@offset

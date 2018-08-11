@@ -7,30 +7,21 @@
 
   if (.Platform$endian != meta@endian) {
     stop(".read_mmap: swapped endian data not supported.")
-    ## read raw bytes
-    rawbytes <- mmap::mmap(meta@dataFile, mode=mmap::char(),
-                           prot=mmap::mmapFlags("PROT_READ"))
-    rawbytes <- rawbytes[(meta@dataOffset+1):length(rawbytes)]
-
-    mmap::munmap(rawbytes)
-    readBin(rawbytes, what=.getRStorage(meta@dataType), size=.getDataSize(meta@dataType), n=nels, endian=meta@endian)
-  } else {
-    #mmap::mmap(meta@dataFile, mode=.getMMapMode(meta@dataType), off=meta@dataOffset,prot=mmap::mmapFlags("PROT_READ"),
-    #flags=mmap::mmapFlags("MAP_PRIVATE"))
-    ret <- mmap::mmap(meta@data_file, mode=.getMMapMode(meta@data_type), prot=mmap::mmapFlags("PROT_READ"))
-    offset <- meta@data_offset/.getDataSize(meta@data_type)
-    idx_off <- idx + offset
-    vals <- ret[idx_off]
-    mmap::munmap(ret)
-    vals
   }
 
-
+  ret <- mmap::mmap(meta@data_file, mode=.getMMapMode(meta@data_type), prot=mmap::mmapFlags("PROT_READ"))
+  offset <- meta@data_offset/.getDataSize(meta@data_type)
+  idx_off <- idx + offset
+  vals <- ret[idx_off]
+  mmap::munmap(ret)
+  vals
 }
+
+
 
 read_mapped_series <- function(meta, idx) {
   if (endsWith(meta@data_file, ".gz")) {
-    stop(paste("Cannot create series_reader with gzipped file", file_name))
+    stop(paste("Cannot create series_reader with gzipped file", meta@data_file))
   }
 
   assert_that(length(meta@dims) == 4, msg="'file_name' argument must refer to a 4-dimensional image")
@@ -44,7 +35,7 @@ read_mapped_series <- function(meta, idx) {
 
 read_mapped_data <- function(meta, idx) {
   if (endsWith(meta@data_file, ".gz")) {
-    stop(paste("Cannot create series_reader with gzipped file", file_name))
+    stop(paste("Cannot create series_reader with gzipped file", meta@data_file))
   }
 
   assert_that(length(meta@dims) == 4, msg="'file_name' argument must refer to a 4-dimensional image")
@@ -57,7 +48,7 @@ read_mapped_data <- function(meta, idx) {
 
 read_mapped_vols <- function(meta, idx) {
   if (endsWith(meta@data_file, ".gz")) {
-    stop(paste("Cannot create series_reader with gzipped file", file_name))
+    stop(paste("Cannot create series_reader with gzipped file", meta@data_file))
   }
 
   assert_that(length(meta@dims) == 4, msg="'file_name' argument must refer to a 4-dimensional image")

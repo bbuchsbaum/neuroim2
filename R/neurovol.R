@@ -856,6 +856,7 @@ setMethod("plot", signature=signature(x="NeuroVol"),
               data.frame(x=cds[,1], y=cds[,2], z=i, value=as.vector(imcols))
             }))
 
+            {y=value=NULL}
 
             ggplot2::ggplot(ggplot2::aes(x=x, y=y), data=df1) +
               ggplot2::geom_raster(ggplot2::aes(fill=value)) +

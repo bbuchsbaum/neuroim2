@@ -15,6 +15,7 @@
 \alias{series,NeuroVec,numeric-method}
 \alias{series_roi,NeuroVec,numeric-method}
 \alias{series,SparseNeuroVec,matrix-method}
+\alias{series,SparseNeuroVec,numeric-method}
 \alias{series,SparseNeuroVec,integer-method}
 \title{Extract one or more series from object and return as ROI object}
 \usage{
@@ -41,6 +42,8 @@ series(x, i, ...)
 \S4method{series_roi}{NeuroVec,numeric}(x, i, j, k)
 
 \S4method{series}{SparseNeuroVec,matrix}(x, i)
+
+\S4method{series}{SparseNeuroVec,numeric}(x, i, j, k)
 
 \S4method{series}{SparseNeuroVec,integer}(x, i, j, k)
 }

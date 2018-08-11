@@ -45,6 +45,9 @@ setMethod(f="as.list", signature=signature(x = "FileBackedNeuroVec"), def=functi
 
 })
 
+
+#' @export
+#' @rdname linear_access-methods
 setMethod(f="linear_access", signature=signature(x = "FileBackedNeuroVec", i = "numeric"),
           def=function (x, i) {
             read_mapped_data(x@meta, i)
