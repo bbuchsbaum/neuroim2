@@ -6,13 +6,13 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>load_data — load_data,NeuroVecSource-method • neuroim2</title>
+<title>Generic function to load data from a data source — load_data • neuroim2</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
+<link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/flatly/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 
-<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
@@ -30,9 +30,10 @@
 
 
 
-<meta property="og:title" content="load_data — load_data,NeuroVecSource-method" />
+<meta property="og:title" content="Generic function to load data from a data source — load_data" />
 
-<meta property="og:description" content="load_data
+<meta property="og:description" content="Generic function to load data from a data source
+load_data
 load a NeuroVol" />
 <meta name="twitter:card" content="summary" />
 
@@ -114,27 +115,46 @@ load a NeuroVol" />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>load_data</h1>
+    <h1>Generic function to load data from a data source</h1>
     
     <div class="hidden name"><code>load_data-methods.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>load_data</p>
+    <p>Generic function to load data from a data source</p>
+<p>load_data</p>
 <p>load a NeuroVol</p>
     
     </div>
 
-    <pre class="usage"><span class='co'># S4 method for NeuroVecSource</span>
-<span class='fu'><a href='loadData-methods.html'>load_data</a></span>(<span class='no'>x</span>)
+    <pre class="usage"><span class='fu'>load_data</span>(<span class='no'>x</span>, <span class='no'>...</span>)
+
+<span class='co'># S4 method for MappedNeuroVecSource</span>
+<span class='fu'>load_data</span>(<span class='no'>x</span>)
+
+<span class='co'># S4 method for NeuroVecSource</span>
+<span class='fu'>load_data</span>(<span class='no'>x</span>)
 
 <span class='co'># S4 method for NeuroVolSource</span>
-<span class='fu'><a href='loadData-methods.html'>load_data</a></span>(<span class='no'>x</span>)
+<span class='fu'>load_data</span>(<span class='no'>x</span>)
 
 <span class='co'># S4 method for SparseNeuroVecSource</span>
-<span class='fu'><a href='loadData-methods.html'>load_data</a></span>(<span class='no'>x</span>)</pre>
-        
+<span class='fu'>load_data</span>(<span class='no'>x</span>)</pre>
+    
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>x</th>
+      <td><p>a data source</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>additional arguments</p></td>
+    </tr>
+    </table>
+    
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>an instance of class <code><a href='NeuroVec-class.html'>NeuroVec</a></code></p>
@@ -144,6 +164,7 @@ load a NeuroVol" />
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
+      <li><a href="#arguments">Arguments</a></li>
       
       <li><a href="#value">Value</a></li>
           </ul>

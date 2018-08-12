@@ -11,8 +11,8 @@
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
+<link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/flatly/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 
-<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
@@ -157,10 +157,8 @@ Construct a ClusteredNeuroVol instance" />
 
     
     <dl class='dl-horizontal'>
-<dt><code>svol</code></dt><dd><p>a <code><a href='SparseNeuroVol-class.html'>SparseNeuroVol</a></code> containing cluster indices in 3D space</p></dd>
-    <dt><code>mask</code></dt><dd><p>the <code>logical</code> mask indicating the spatial domain of the set of clusters</p></dd>
+<dt><code>mask</code></dt><dd><p>the <code>logical</code> mask indicating the spatial domain of the set of clusters</p></dd>
     <dt><code>clusters</code></dt><dd><p>an integer index indicating the cluster number for each voxel in the mask</p></dd>
-    <dt><code>centers</code></dt><dd><p>the cluster centers</p></dd>
     <dt><code>label_map</code></dt><dd><p>a list mapping from name to cluster id</p></dd>
     <dt><code>cluster_map</code></dt><dd><p>an <code>environment</code> mapping from cluster id to the set of 1D spatial indices</p></dd>
 </dl>
@@ -169,8 +167,10 @@ Construct a ClusteredNeuroVol instance" />
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
 <span class='no'>bspace</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='neuro_space.html'>NeuroSpace</a></span>(<span class='fu'>c</span>(<span class='fl'>16</span>,<span class='fl'>16</span>,<span class='fl'>16</span>), <span class='kw'>spacing</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='fl'>1</span>,<span class='fl'>1</span>,<span class='fl'>1</span>))
-<span class='no'>grid</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='index_to_grid-methods.html'>index_to_grid</a></span>(<span class='no'>bspace</span>, <span class='fl'>1</span>:(<span class='fl'>16</span>*<span class='fl'>16</span>*<span class='fl'>16</span>))</div><div class='output co'>#&gt; <span class='error'>Error in assert_that(all(idx &gt; 0 &amp; idx &lt;= prod(array.dim))): could not find function "assert_that"</span></div><div class='input'><span class='no'>kres</span> <span class='kw'>&lt;-</span> <span class='fu'>kmeans</span>(<span class='no'>grid</span>, <span class='kw'>centers</span><span class='kw'>=</span><span class='fl'>10</span>)</div><div class='output co'>#&gt; <span class='error'>Error in as.vector(x, mode): cannot coerce type 'closure' to vector of type 'any'</span></div><div class='input'><span class='no'>mask</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='NeuroVol.html'>NeuroVol</a></span>(<span class='fu'>rep</span>(<span class='fl'>1</span>, <span class='fl'>16</span>^<span class='fl'>3</span>),<span class='no'>bspace</span>)
-<span class='no'>clusvol</span> <span class='kw'>&lt;-</span> <span class='fu'>ClusteredNeuroVol</span>(<span class='no'>mask</span>, <span class='no'>kres</span>$<span class='no'>cluster</span>)</div><div class='output co'>#&gt; <span class='error'>Error in unique(clusters): object 'kres' not found</span></div></pre>
+<span class='no'>grid</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='index_to_grid-methods.html'>index_to_grid</a></span>(<span class='no'>bspace</span>, <span class='fl'>1</span>:(<span class='fl'>16</span>*<span class='fl'>16</span>*<span class='fl'>16</span>))
+<span class='no'>kres</span> <span class='kw'>&lt;-</span> <span class='fu'>kmeans</span>(<span class='no'>grid</span>, <span class='kw'>centers</span><span class='kw'>=</span><span class='fl'>10</span>)
+<span class='no'>mask</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='NeuroVol.html'>NeuroVol</a></span>(<span class='fu'>rep</span>(<span class='fl'>1</span>, <span class='fl'>16</span>^<span class='fl'>3</span>),<span class='no'>bspace</span>)
+<span class='no'>clusvol</span> <span class='kw'>&lt;-</span> <span class='fu'>ClusteredNeuroVol</span>(<span class='no'>mask</span>, <span class='no'>kres</span>$<span class='no'>cluster</span>)</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

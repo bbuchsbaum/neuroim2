@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Generic function to map values from one set of values to another set using a user-supplied lookup table — map_values • neuroim2</title>
+<title>Array-like access for 4-dimensional data structures — extractor4d • neuroim2</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -30,9 +30,9 @@
 
 
 
-<meta property="og:title" content="Generic function to map values from one set of values to another set using a user-supplied lookup table — map_values" />
+<meta property="og:title" content="Array-like access for 4-dimensional data structures — extractor4d" />
 
-<meta property="og:description" content="Generic function to map values from one set of values to another set using a user-supplied lookup table" />
+<meta property="og:description" content="Array-like access for 4-dimensional data structures" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -113,68 +113,72 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Generic function to map values from one set of values to another set using a user-supplied lookup table</h1>
+    <h1>Array-like access for 4-dimensional data structures</h1>
     
-    <div class="hidden name"><code>map_values-methods.Rd</code></div>
+    <div class="hidden name"><code>extractor4d.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Generic function to map values from one set of values to another set using a user-supplied lookup table</p>
+    <p>Array-like access for 4-dimensional data structures</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>map_values</span>(<span class='no'>x</span>, <span class='no'>lookup</span>)
+    <pre class="usage"># S4 method for ArrayLike4D,matrix,missing,ANY
+[(x, i, j, k, m, ..., drop = TRUE)
 
-<span class='co'># S4 method for NeuroVol,list</span>
-<span class='fu'>map_values</span>(<span class='no'>x</span>, <span class='no'>lookup</span>)
+# S4 method for ArrayLike4D,numeric,numeric,ANY
+[(x, i, j, k, m, ..., drop = TRUE)
 
-<span class='co'># S4 method for NeuroVol,matrix</span>
-<span class='fu'>map_values</span>(<span class='no'>x</span>, <span class='no'>lookup</span>)</pre>
+# S4 method for ArrayLike4D,numeric,missing,ANY
+[(x, i, j, k, m, ..., drop = TRUE)
+
+# S4 method for ArrayLike4D,missing,missing,ANY
+[(x, i, j, k, m, ..., drop = TRUE)
+
+# S4 method for ArrayLike4D,missing,numeric,ANY
+[(x, i, j, k, m, ..., drop = TRUE)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>the object to map values from</p></td>
+      <td><p>the object</p></td>
     </tr>
     <tr>
-      <th>lookup</th>
-      <td><p>the lookup table. The first column is the "key" the second column is the "value".</p></td>
+      <th>i</th>
+      <td><p>first index</p></td>
+    </tr>
+    <tr>
+      <th>j</th>
+      <td><p>second index</p></td>
+    </tr>
+    <tr>
+      <th>k</th>
+      <td><p>third index</p></td>
+    </tr>
+    <tr>
+      <th>m</th>
+      <td><p>the fourth index</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>additional args</p></td>
+    </tr>
+    <tr>
+      <th>drop</th>
+      <td><p>dimension</p></td>
     </tr>
     </table>
     
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>a new object where the original values have been filled in with the values in the lookup table</p>
-    
-
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>x</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='neuro_space.html'>NeuroSpace</a></span>(<span class='fu'>c</span>(<span class='fl'>10</span>,<span class='fl'>10</span>,<span class='fl'>10</span>), <span class='fu'>c</span>(<span class='fl'>1</span>,<span class='fl'>1</span>,<span class='fl'>1</span>))
-<span class='no'>vol</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='NeuroVol.html'>NeuroVol</a></span>(<span class='fu'>sample</span>(<span class='fl'>1</span>:<span class='fl'>10</span>, <span class='fl'>10</span>*<span class='fl'>10</span>*<span class='fl'>10</span>, <span class='kw'>replace</span><span class='kw'>=</span><span class='fl'>TRUE</span>), <span class='no'>x</span>)
-
-<span class='co'>## lookup table is list</span>
-<span class='no'>lookup</span> <span class='kw'>&lt;-</span> <span class='fu'>lapply</span>(<span class='fl'>1</span>:<span class='fl'>10</span>, <span class='kw'>function</span>(<span class='no'>i</span>) <span class='no'>i</span>*<span class='fl'>10</span>)
-<span class='fu'>names</span>(<span class='no'>lookup</span>) <span class='kw'>&lt;-</span> <span class='fl'>1</span>:<span class='fl'>10</span>
-<span class='no'>ovol</span> <span class='kw'>&lt;-</span> <span class='fu'>map_values</span>(<span class='no'>vol</span>, <span class='no'>lookup</span>)
-
-<span class='co'>## lookup table is matrix. First column is key, second column is value</span>
-<span class='fu'>names</span>(<span class='no'>lookup</span>) <span class='kw'>&lt;-</span> <span class='fl'>1</span>:<span class='fu'>length</span>(<span class='no'>lookup</span>)
-<span class='no'>lookup.mat</span> <span class='kw'>&lt;-</span> <span class='fu'>cbind</span>(<span class='fu'>as.numeric</span>(<span class='fu'>names</span>(<span class='no'>lookup</span>)), <span class='fu'>unlist</span>(<span class='no'>lookup</span>))
-<span class='no'>ovol2</span> <span class='kw'>&lt;-</span> <span class='fu'>map_values</span>(<span class='no'>vol</span>, <span class='no'>lookup.mat</span>)
-<span class='fu'>all.equal</span>(<span class='fu'>as.vector</span>(<span class='no'>ovol2</span>), <span class='fu'>as.vector</span>(<span class='no'>ovol</span>))</div><div class='output co'>#&gt; [1] TRUE</div><div class='input'>
-</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-      
-      <li><a href="#value">Value</a></li>
-      
-      <li><a href="#examples">Examples</a></li>
-    </ul>
+                </ul>
 
   </div>
 </div>

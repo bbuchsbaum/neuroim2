@@ -11,8 +11,8 @@
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
+<link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/flatly/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 
-<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
@@ -33,7 +33,7 @@
 <meta property="og:title" content="SparseNeuroVec — SparseNeuroVec-class" />
 
 <meta property="og:description" content="a sparse four-dimensional brain image, backed by a matrix, where each column represents
-a vector spanning the fourth dimension (e.g. time)
+a non-zero vector spanning the fourth dimension (e.g. time), and defined by a volumetric mask.
 constructs a SparseNeuroVec object" />
 <meta name="twitter:card" content="summary" />
 
@@ -123,7 +123,7 @@ constructs a SparseNeuroVec object" />
     <div class="ref-description">
     
     <p>a sparse four-dimensional brain image, backed by a <code>matrix</code>, where each column represents
-a vector spanning the fourth dimension (e.g. time)</p>
+a non-zero vector spanning the fourth dimension (e.g. time), and defined by a volumetric mask.</p>
 <p>constructs a SparseNeuroVec object</p>
     
     </div>
@@ -147,7 +147,7 @@ a vector spanning the fourth dimension (e.g. time)</p>
     </tr>
     <tr>
       <th>source</th>
-      <td><p>the data source -- an instance of class <code>BrainSource</code></p></td>
+      <td><p>the data source -- an instance of class <code><a href='FileSource-class.html'>FileSource</a></code></p></td>
     </tr>
     <tr>
       <th>label</th>

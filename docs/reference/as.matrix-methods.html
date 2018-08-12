@@ -6,13 +6,13 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>convert a <code>DenseNeuroVec</code> to a matrix — as.matrix,DenseNeuroVec-method • neuroim2</title>
+<title>convert a <code>NeuroVec</code> to a matrix — as.matrix,FileBackedNeuroVec-method • neuroim2</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
+<link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/flatly/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 
-<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
@@ -30,9 +30,9 @@
 
 
 
-<meta property="og:title" content="convert a <code>DenseNeuroVec</code> to a matrix — as.matrix,DenseNeuroVec-method" />
+<meta property="og:title" content="convert a <code>NeuroVec</code> to a matrix — as.matrix,FileBackedNeuroVec-method" />
 
-<meta property="og:description" content="convert a DenseNeuroVec to a matrix
+<meta property="og:description" content="convert a NeuroVec to a matrix
 convert a ROIVec to a matrix
 convert SparseNeuroVec to matrix" />
 <meta name="twitter:card" content="summary" />
@@ -115,20 +115,23 @@ convert SparseNeuroVec to matrix" />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>convert a <code>DenseNeuroVec</code> to a matrix</h1>
+    <h1>convert a <code>NeuroVec</code> to a matrix</h1>
     
     <div class="hidden name"><code>as.matrix-methods.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>convert a <code>DenseNeuroVec</code> to a matrix</p>
+    <p>convert a <code>NeuroVec</code> to a matrix</p>
 <p>convert a <code>ROIVec</code> to a matrix</p>
 <p>convert SparseNeuroVec to matrix</p>
     
     </div>
 
-    <pre class="usage"><span class='co'># S4 method for DenseNeuroVec</span>
+    <pre class="usage"><span class='co'># S4 method for FileBackedNeuroVec</span>
+<span class='fu'>as.matrix</span>(<span class='no'>x</span>)
+
+<span class='co'># S4 method for NeuroVec</span>
 <span class='fu'>as.matrix</span>(<span class='no'>x</span>)
 
 <span class='co'># S4 method for ROIVec</span>
@@ -140,10 +143,6 @@ convert SparseNeuroVec to matrix" />
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>x</th>
-      <td><p>the object</p></td>
-    </tr>
     <tr>
       <th>x</th>
       <td><p>the object</p></td>

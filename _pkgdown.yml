@@ -1,3 +1,28 @@
 template:
   params:
     bootswatch: flatly
+
+
+reference:
+  - title: read and write brain images
+    desc: >
+      read and write 3D or 4D NIFTI neuroimaging files into R
+    contents:
+    - read_vol
+    - write_vol
+    - read_vec
+    - write_vec
+    - read_header
+
+  - title: create image data structures
+    desc: >
+      constructor function for 2D, 3D, and 4D imaging data structures.
+    contents:
+    - NeuroSlice
+    - NeuroVol
+    - SparseNeuroVol
+    - ClusteredNeuroVol
+    - SparseNeuroVec
+    - NeuroVecSeq
+    - MappedNeuroVec
+    - FileBackedNeuroVec

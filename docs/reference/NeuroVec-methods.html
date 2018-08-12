@@ -11,8 +11,8 @@
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
+<link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/flatly/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 
-<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
@@ -32,7 +32,13 @@
 
 <meta property="og:title" content="[[ — [[,NeuroVec,numeric-method" />
 
-<meta property="og:description" content="[[" />
+<meta property="og:description" content="[[
+#' @rdname series-methods
+#' @export
+setMethod(&quot;series&quot;, signature(x=&quot;NeuroVecSeq&quot;, i=&quot;numeric&quot;),
+          def=function(x, i, j, k) 
+            map(x@vecs, ~ series(., as.integer(i),as.integer(j),as.integer(k))) 
+          )" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -121,20 +127,56 @@
     <div class="ref-description">
     
     <p>[[</p>
+<p>#' @rdname series-methods
+#' @export
+setMethod("series", signature(x="NeuroVecSeq", i="numeric"),
+          def=function(x, i, j, k) 
+            map(x@vecs, ~ series(., as.integer(i),as.integer(j),as.integer(k))) <!-- %&gt;% flatten_dbl() -->
+          )</p>
     
     </div>
 
     <pre class="usage"># S4 method for NeuroVec,numeric
+[[(x, i)
+
+# S4 method for NeuroVecSeq,numeric
 [[(x, i)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
+      <th>x</th>
+      <td><p>the object</p></td>
+    </tr>
+    <tr>
       <th>i</th>
       <td><p>the volume index</p></td>
     </tr>
     </table>
+    
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>#' @rdname series-methods
+#' @export
+setMethod("series", signature(x="NeuroVecSeq", i="matrix"),
+          def=function(x,i) 
+            do.call(rbind, map(x@vecs, ~ series(., i)))
+          )</p>
+<p>#' @rdname series-methods
+#' @export
+setMethod("series_roi", signature(x="NeuroVecSeq", i="matrix"),
+          def=function(x,i) 
+            rois &lt;- map(x@vecs, ~ series_roi(., i))
+            if (length(rois) == 1) 
+              rois[[1]]
+             else if (length(rois) == 2) 
+              concat(rois[[1]], rois[[2]])
+             else 
+              f &lt;- partial(concat, rois[[1]], rois[[2]])
+              do.call(f, rois[3:length(rois)])
+    )
+[[</p>
     
 
   </div>
@@ -142,7 +184,9 @@
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-                </ul>
+      
+      <li><a href="#details">Details</a></li>
+          </ul>
 
   </div>
 </div>

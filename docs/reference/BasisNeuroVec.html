@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Get length of <code>NeuroVec</code>. This is the number of volumes in the volume vector (e.g. the 4th image dimension) — length,NeuroVec-method • neuroim2</title>
+<title>BasisNeuroVec — BasisNeuroVec-class • neuroim2</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -30,9 +30,10 @@
 
 
 
-<meta property="og:title" content="Get length of <code>NeuroVec</code>. This is the number of volumes in the volume vector (e.g. the 4th image dimension) — length,NeuroVec-method" />
+<meta property="og:title" content="BasisNeuroVec — BasisNeuroVec-class" />
 
-<meta property="og:description" content="Get length of NeuroVec. This is the number of volumes in the volume vector (e.g. the 4th image dimension)" />
+<meta property="og:description" content="a class that stores a represents a 4-dimensional array as a set of basis functions (dictionary) and
+corresponding set of coefficients." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -113,42 +114,37 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Get length of <code>NeuroVec</code>. This is the number of volumes in the volume vector (e.g. the 4th image dimension)</h1>
+    <h1>BasisNeuroVec</h1>
     
-    <div class="hidden name"><code>length-methods.Rd</code></div>
+    <div class="hidden name"><code>BasisNeuroVec.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Get length of <code>NeuroVec</code>. This is the number of volumes in the volume vector (e.g. the 4th image dimension)</p>
+    <p>a class that stores a represents a 4-dimensional array as a set of basis functions (dictionary) and
+corresponding set of coefficients.</p>
     
     </div>
 
-    <pre class="usage"><span class='co'># S4 method for NeuroVec</span>
-<span class='fu'>length</span>(<span class='no'>x</span>)
+        
+    <h2 class="hasAnchor" id="slots"><a class="anchor" href="#slots"></a>Slots</h2>
 
-<span class='co'># S4 method for NeuroVecSeq</span>
-<span class='fu'>length</span>(<span class='no'>x</span>)
-
-<span class='co'># S4 method for ROIVol</span>
-<span class='fu'>length</span>(<span class='no'>x</span>)</pre>
     
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>x</th>
-      <td><p>the object</p></td>
-    </tr>
-    </table>
+    <dl class='dl-horizontal'>
+<dt><code>mask</code></dt><dd><p>the mask defining the sparse domain</p></dd>
+    <dt><code>basis</code></dt><dd><p>the matrix of bases, were each column is a basis vector.</p></dd>
+    <dt><code>coeffs</code></dt><dd><p>the <code>sparseMatrix</code> of coefficients</p></dd>
+    <dt><code>map</code></dt><dd><p>instance of class <code><a href='IndexLookupVol-class.html'>IndexLookupVol</a></code> is used to map between spatial and index/row coordinates</p></dd>
+</dl>
     
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-                </ul>
+      
+      <li><a href="#slots">Slots</a></li>
+          </ul>
 
   </div>
 </div>

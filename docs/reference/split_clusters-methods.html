@@ -11,8 +11,8 @@
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
+<link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/flatly/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 
-<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
@@ -32,7 +32,8 @@
 
 <meta property="og:title" content="Generic function to cut an object into a list of spatial or spatiotemporal clusters — split_clusters" />
 
-<meta property="og:description" content="Generic function to cut an object into a list of spatial or spatiotemporal clusters" />
+<meta property="og:description" content="Generic function to cut an object into a list of spatial or spatiotemporal clusters
+split_clusters" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -121,6 +122,7 @@
     <div class="ref-description">
     
     <p>Generic function to cut an object into a list of spatial or spatiotemporal clusters</p>
+<p>split_clusters</p>
     
     </div>
 
@@ -168,15 +170,26 @@
 <span class='no'>vol</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='NeuroVol.html'>NeuroVol</a></span>(<span class='fu'>array</span>(<span class='fu'>runif</span>(<span class='fl'>10</span>*<span class='fl'>10</span>*<span class='fl'>10</span>),<span class='fu'>c</span>(<span class='fl'>10</span>,<span class='fl'>10</span>,<span class='fl'>10</span>)), <span class='fu'><a href='neuro_space.html'>NeuroSpace</a></span>(<span class='fu'>c</span>(<span class='fl'>10</span>,<span class='fl'>10</span>,<span class='fl'>10</span>)))
 <span class='no'>mask</span> <span class='kw'>&lt;-</span> <span class='fu'>as.logical</span>(<span class='no'>vol</span> <span class='kw'>&gt;</span> <span class='fl'>.5</span>)
 <span class='no'>mask.idx</span> <span class='kw'>&lt;-</span> <span class='fu'>which</span>(<span class='no'>mask</span> <span class='kw'>!=</span> <span class='fl'>0</span>)
-<span class='no'>grid</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='index_to_coord-methods.html'>index_to_coord</a></span>(<span class='no'>mask</span>, <span class='no'>mask.idx</span>)</div><div class='output co'>#&gt; <span class='error'>Error in assert_that(all(idx &gt; 0 &amp; idx &lt;= prod(array.dim))): could not find function "assert_that"</span></div><div class='input'><span class='no'>vox</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='index_to_grid-methods.html'>index_to_grid</a></span>(<span class='no'>mask</span>, <span class='no'>mask.idx</span>)</div><div class='output co'>#&gt; <span class='error'>Error in assert_that(all(idx &gt; 0 &amp; idx &lt;= prod(array.dim))): could not find function "assert_that"</span></div><div class='input'>
-<span class='co'>## partition coordinates into 50 clusters using 'kmeans'</span>
-<span class='no'>kres</span> <span class='kw'>&lt;-</span> <span class='fu'>kmeans</span>(<span class='no'>grid</span>, <span class='kw'>centers</span><span class='kw'>=</span><span class='fl'>50</span>, <span class='kw'>iter.max</span><span class='kw'>=</span><span class='fl'>500</span>)</div><div class='output co'>#&gt; <span class='error'>Error in as.vector(x, mode): cannot coerce type 'closure' to vector of type 'any'</span></div><div class='input'><span class='no'>kvol</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='ClusteredNeuroVol-class.html'>ClusteredNeuroVol</a></span>(<span class='no'>mask</span>, <span class='no'>kres</span>$<span class='no'>cluster</span>)</div><div class='output co'>#&gt; <span class='error'>Error in unique(clusters): object 'kres' not found</span></div><div class='input'><span class='no'>klis</span> <span class='kw'>&lt;-</span> <span class='fu'>split_clusters</span>(<span class='no'>mask</span>, <span class='no'>kvol</span>)</div><div class='output co'>#&gt; <span class='error'>Error in split_clusters(mask, kvol): object 'kvol' not found</span></div><div class='input'><span class='no'>ret1</span> <span class='kw'>&lt;-</span> <span class='no'>vol</span> <span class='kw'>%&gt;%</span> <span class='fu'>split_clusters</span>(<span class='no'>kvol</span>) <span class='kw'>%&gt;%</span> <span class='kw pkg'>purrr</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/purrr/topics/map'>map_dbl</a></span>(~ <span class='fu'>mean</span>(<span class='fu'><a href='values-methods.html'>values</a></span>(<span class='no'>.</span>)))</div><div class='output co'>#&gt; <span class='error'>Error in vol %&gt;% split_clusters(kvol) %&gt;% purrr::map_dbl(~mean(values(.))): could not find function "%&gt;%"</span></div><div class='input'>
+<span class='no'>grid</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='index_to_coord-methods.html'>index_to_coord</a></span>(<span class='no'>mask</span>, <span class='no'>mask.idx</span>)
+<span class='no'>vox</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='index_to_grid-methods.html'>index_to_grid</a></span>(<span class='no'>mask</span>, <span class='no'>mask.idx</span>)
+
+<span class='fu'>library</span>(<span class='no'>purrr</span>)</div><div class='output co'>#&gt; <span class='message'></span>
+#&gt; <span class='message'>Attaching package: ‘purrr’</span></div><div class='output co'>#&gt; <span class='message'>The following object is masked from ‘package:magrittr’:</span>
+#&gt; <span class='message'></span>
+#&gt; <span class='message'>    set_names</span></div><div class='input'><span class='co'>## partition coordinates into 50 clusters using 'kmeans'</span>
+<span class='no'>kres</span> <span class='kw'>&lt;-</span> <span class='fu'>kmeans</span>(<span class='no'>grid</span>, <span class='kw'>centers</span><span class='kw'>=</span><span class='fl'>50</span>, <span class='kw'>iter.max</span><span class='kw'>=</span><span class='fl'>500</span>)
+<span class='no'>kvol</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='ClusteredNeuroVol-class.html'>ClusteredNeuroVol</a></span>(<span class='no'>mask</span>, <span class='no'>kres</span>$<span class='no'>cluster</span>)
+<span class='no'>klis</span> <span class='kw'>&lt;-</span> <span class='fu'>split_clusters</span>(<span class='no'>mask</span>, <span class='no'>kvol</span>)
+<span class='no'>ret1</span> <span class='kw'>&lt;-</span> <span class='no'>vol</span> <span class='kw'>%&gt;%</span> <span class='fu'>split_clusters</span>(<span class='no'>kvol</span>) <span class='kw'>%&gt;%</span> <span class='kw pkg'>purrr</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/purrr/topics/map'>map_dbl</a></span>(~ <span class='fu'>mean</span>(<span class='fu'><a href='values-methods.html'>values</a></span>(<span class='no'>.</span>)))
+
 <span class='co'>## split NeuroVol with 'integer' vector of clusters.</span>
 <span class='no'>indices</span> <span class='kw'>&lt;-</span> <span class='fu'>numeric</span>(<span class='fu'>prod</span>(<span class='fu'>dim</span>(<span class='no'>mask</span>)[<span class='fl'>1</span>:<span class='fl'>3</span>]))
 
 <span class='co'>## locations with a cluster value of 0 are ignored</span>
-<span class='no'>indices</span>[<span class='no'>mask.idx</span>] <span class='kw'>&lt;-</span> <span class='no'>kres</span>$<span class='no'>cluster</span></div><div class='output co'>#&gt; <span class='error'>Error in eval(expr, envir, enclos): object 'kres' not found</span></div><div class='input'>
-<span class='no'>ret2</span> <span class='kw'>&lt;-</span> <span class='no'>vol</span> <span class='kw'>%&gt;%</span> <span class='fu'>split_clusters</span>(<span class='fu'>as.integer</span>(<span class='no'>indices</span>)) <span class='kw'>%&gt;%</span> <span class='kw pkg'>purrr</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/purrr/topics/map'>map_dbl</a></span>(~ <span class='fu'>mean</span>(<span class='fu'><a href='values-methods.html'>values</a></span>(<span class='no'>.</span>)))</div><div class='output co'>#&gt; <span class='error'>Error in vol %&gt;% split_clusters(as.integer(indices)) %&gt;% purrr::map_dbl(~mean(values(.))): could not find function "%&gt;%"</span></div><div class='input'><span class='fu'>all</span>(<span class='no'>ret1</span> <span class='kw'>==</span> <span class='no'>ret1</span>)</div><div class='output co'>#&gt; <span class='error'>Error in eval(expr, envir, enclos): object 'ret1' not found</span></div><div class='input'>
+<span class='no'>indices</span>[<span class='no'>mask.idx</span>] <span class='kw'>&lt;-</span> <span class='no'>kres</span>$<span class='no'>cluster</span>
+
+<span class='no'>ret2</span> <span class='kw'>&lt;-</span> <span class='no'>vol</span> <span class='kw'>%&gt;%</span> <span class='fu'>split_clusters</span>(<span class='fu'>as.integer</span>(<span class='no'>indices</span>)) <span class='kw'>%&gt;%</span> <span class='kw pkg'>purrr</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/purrr/topics/map'>map_dbl</a></span>(~ <span class='fu'>mean</span>(<span class='fu'><a href='values-methods.html'>values</a></span>(<span class='no'>.</span>)))
+<span class='fu'>all</span>(<span class='no'>ret1</span> <span class='kw'>==</span> <span class='no'>ret1</span>)</div><div class='output co'>#&gt; [1] TRUE</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

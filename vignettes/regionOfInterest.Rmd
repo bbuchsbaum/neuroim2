@@ -25,7 +25,7 @@ In **neuroim2** there is basic support for creating regions of interest (ROI). T
 To create a spherical region of interest with a 5mm radius around a central voxel at i=20, j=20, k=20, we first read in an image.
 
 ```{r}
-  
+      library(neuroim2)        
       file_name <- system.file("extdata", "global_mask.nii", package="neuroim2")
       vol <- read_vol(file_name)
 ```
@@ -73,7 +73,7 @@ Now we convert back to real-world coordinates
     
 ## Converting an ROI to a SparseNeuroVol
 
-We may want to convert a region of interest to a NeuroVol instance. But we don't want to store every value in dense grid. Here we can make use of the `SparseNeuroVol` class which only stores non-zero values. 
+We may want to convert a region of interest to a NeuroVol instance. But we don't want to store every value in a dense array. Here we can make use of the `SparseNeuroVol` class which only stores non-zero values my using a `Matrix::sparseVector` under the hood.
 
 ```{r}
     
@@ -91,14 +91,17 @@ Now we construct a `SparseNeuroVol` and fill it with the values stored in the RO
 
 ## Carrying out simple "searchlight" ROI analyses
 
-The so-called roving "searchlight" is often used to perform multivariate statistical analyses in a local neighborhood of each voxel of an image. Several functions that can be used to carry out searchlight analyses. These functions produces `list`s of the `ROIVol` instances that encapsulate the local neighborhood around each voxel.
+The so-called roving "searchlight" is often used to perform multivariate statistical analyses in a local neighborhood of each voxel of an image. Several functions in `neuroim2` can be used to carry out searchlight analyses. These functions produces `list`s of the `ROIVol` instances that encapsulate the local neighborhood around each voxel.
 
 Here, we compute the mean value in an exhaustive set of spherical searchlights in an image volume.
 
 ```{r}
 library(purrr)
 
+## generate a list of searchlight ROIs
 slist <- searchlight(vol, eager=TRUE, radius=8)
+
+## compute the mean value in each searchlight ROI.
 ret <- slist %>% purrr::map(~ mean(vol[coords(.)]))
 ```
 

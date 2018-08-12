@@ -11,8 +11,8 @@
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
+<link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/flatly/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 
-<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
@@ -33,7 +33,19 @@
 <meta property="og:title" content="Extract one or more series from object and return as ROI object — series_roi" />
 
 <meta property="og:description" content="Extract one or more series from object and return as ROI object
-Extract one or more series from object" />
+Extract one or more series from object
+#' @rdname series-methods
+#' @export
+setMethod(&quot;series&quot;, signature(x=&quot;NeuroVec&quot;, i=&quot;integer&quot;),
+          def=function(x, i, j, k) 
+            if (missing(j) &amp;amp;&amp;amp; missing(k)) 
+              vdim &amp;lt;- dim(x)[1:3]
+              mat &amp;lt;- arrayInd(i, vdim)
+              apply(mat, 1, function(i) x[i[1], i[2], i[3],])
+             else 
+              x[i,j,k,]" />
+
+<meta property="og:description" content=")" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -123,6 +135,18 @@ Extract one or more series from object" />
     
     <p>Extract one or more series from object and return as ROI object</p>
 <p>Extract one or more series from object</p>
+<p>#' @rdname series-methods
+#' @export
+setMethod("series", signature(x="NeuroVec", i="integer"),
+          def=function(x, i, j, k) 
+            if (missing(j) &amp;&amp; missing(k)) 
+              vdim &lt;- dim(x)[1:3]
+              mat &lt;- arrayInd(i, vdim)
+              apply(mat, 1, function(i) x[i[1], i[2], i[3],])
+             else 
+              x[i,j,k,]
+
+    )</p>
     
     </div>
 
@@ -148,6 +172,9 @@ Extract one or more series from object" />
 <span class='co'># S4 method for NeuroVec,LogicalNeuroVol</span>
 <span class='fu'>series_roi</span>(<span class='no'>x</span>, <span class='no'>i</span>)
 
+<span class='co'># S4 method for NeuroVec,integer</span>
+<span class='fu'>series</span>(<span class='no'>x</span>, <span class='no'>i</span>, <span class='no'>j</span>, <span class='no'>k</span>, <span class='kw'>drop</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
+
 <span class='co'># S4 method for NeuroVec,numeric</span>
 <span class='fu'>series</span>(<span class='no'>x</span>, <span class='no'>i</span>, <span class='no'>j</span>, <span class='no'>k</span>)
 
@@ -158,6 +185,9 @@ Extract one or more series from object" />
 <span class='fu'>series</span>(<span class='no'>x</span>, <span class='no'>i</span>)
 
 <span class='co'># S4 method for SparseNeuroVec,numeric</span>
+<span class='fu'>series</span>(<span class='no'>x</span>, <span class='no'>i</span>, <span class='no'>j</span>, <span class='no'>k</span>)
+
+<span class='co'># S4 method for SparseNeuroVec,integer</span>
 <span class='fu'>series</span>(<span class='no'>x</span>, <span class='no'>i</span>, <span class='no'>j</span>, <span class='no'>k</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -184,16 +214,8 @@ Extract one or more series from object" />
       <td><p>index for 3rd dimension</p></td>
     </tr>
     <tr>
-      <th>x</th>
-      <td><p>the object</p></td>
-    </tr>
-    <tr>
-      <th>i</th>
-      <td><p>the series indices</p></td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td><p>additional arguments</p></td>
+      <th>drop</th>
+      <td><p>whether to drop dimension of length 1</p></td>
     </tr>
     </table>
     
