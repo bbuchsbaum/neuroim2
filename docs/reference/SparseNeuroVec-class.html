@@ -128,7 +128,7 @@ a non-zero vector spanning the fourth dimension (e.g. time), and defined by a vo
     
     </div>
 
-    <pre class="usage"><span class='fu'>SparseNeuroVec</span>(<span class='no'>data</span>, <span class='no'>space</span>, <span class='no'>mask</span>, <span class='kw'>source</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>label</span> <span class='kw'>=</span> <span class='st'>""</span>)</pre>
+    <pre class="usage"><span class='fu'>SparseNeuroVec</span>(<span class='no'>data</span>, <span class='no'>space</span>, <span class='no'>mask</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -143,15 +143,7 @@ a non-zero vector spanning the fourth dimension (e.g. time), and defined by a vo
     </tr>
     <tr>
       <th>mask</th>
-      <td><p>a 3D <code>array</code> of type <code>logical</code></p></td>
-    </tr>
-    <tr>
-      <th>source</th>
-      <td><p>the data source -- an instance of class <code><a href='FileSource-class.html'>FileSource</a></code></p></td>
-    </tr>
-    <tr>
-      <th>label</th>
-      <td><p>associated sub-image labels</p></td>
+      <td><p>a 3D <code>array</code>, 1D <code>vector</code> of type <code>logical</code>, or an instance of type <code>LogicalNeuroVol</code></p></td>
     </tr>
     </table>
     

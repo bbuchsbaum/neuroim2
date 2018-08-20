@@ -7,7 +7,6 @@
 \alias{space,IndexLookupVol-method}
 \alias{space,ROICoords-method}
 \alias{space,NeuroObj-method}
-\alias{trans,NeuroObj-method}
 \alias{space,NeuroSpace-method}
 \title{Generic function to extract geometric properties of an image.}
 \usage{
@@ -18,8 +17,6 @@ space(x, ...)
 \S4method{space}{ROICoords}(x)
 
 \S4method{space}{NeuroObj}(x)
-
-\S4method{trans}{NeuroObj}(x)
 
 \S4method{space}{NeuroSpace}(x)
 }

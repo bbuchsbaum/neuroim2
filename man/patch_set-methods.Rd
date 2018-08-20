@@ -5,7 +5,7 @@
 \alias{patch_set}
 \alias{patch_set,NeuroVol,numeric,missing-method}
 \alias{patch_set,NeuroVol,numeric,LogicalNeuroVol-method}
-\title{patch_set}
+\title{Extract set of patches}
 \usage{
 patch_set(x, dims, mask, ...)
 

@@ -6,18 +6,14 @@
 \alias{SparseNeuroVec}
 \title{SparseNeuroVec}
 \usage{
-SparseNeuroVec(data, space, mask, source = NULL, label = "")
+SparseNeuroVec(data, space, mask)
 }
 \arguments{
 \item{data}{an array which can be a \code{matrix} or 4-D \code{array}}
 
 \item{space}{a NeuroSpace instance}
 
-\item{mask}{a 3D \code{array} of type \code{logical}}
-
-\item{source}{the data source -- an instance of class \code{\linkS4class{FileSource}}}
-
-\item{label}{associated sub-image labels}
+\item{mask}{a 3D \code{array}, 1D \code{vector} of type \code{logical}, or an instance of type \code{LogicalNeuroVol}}
 }
 \description{
 a sparse four-dimensional brain image, backed by a \code{matrix}, where each column represents

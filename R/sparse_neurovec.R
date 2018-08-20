@@ -10,14 +10,23 @@
 #' constructs a SparseNeuroVecSource object
 #'
 #' @param meta_info an object of class \code{\linkS4class{MetaInfo}}
-#' @param indices a vector of 1D indices
-#' @param mask a 3D \code{array} of type \code{logical}
+#' @param indices an optional vector of 1D indices the subset of volumes to load
+#' @param mask a logical 3D \code{array},  a logical 1D \code{vector} or a \code{LogicalNeuroVol}
 #' @export
 #' @rdname SparseNeuroVecSource-class
-SparseNeuroVecSource <- function(meta_info, indices, mask) {
+#' @examples
+#'  mask_name <- system.file("extdata", "global_mask.nii", package="neuroim2")
+#'  vec_name <- system.file("extdata", "global_mask_v5.nii", package="neuroim2")
+#'  mask <- as.logical(read_vol(mask_name))
+#'
+#'  src <- SparseNeuroVecSource(read_header(vec_name), mask=mask)
+SparseNeuroVecSource <- function(meta_info, indices=NULL, mask) {
 
+  if (is.null(indices)) {
+    indices <- seq(1, dim(meta_info)[4])
+  }
 
-	stopifnot(length(dim(meta_info)) >= 3)
+	assert_that(length(dim(meta_info)) >= 3)
 	stopifnot(all(indices >= 1 & indices <= dim(meta_info)[4]))
 
 	D <- dim(meta_info)[1:3]
@@ -53,9 +62,7 @@ SparseNeuroVecSource <- function(meta_info, indices, mask) {
 #'
 #' @param data an array which can be a \code{matrix} or 4-D \code{array}
 #' @param space a NeuroSpace instance
-#' @param mask a 3D \code{array} of type \code{logical}
-#' @param source the data source -- an instance of class \code{\linkS4class{FileSource}}
-#' @param label associated sub-image labels
+#' @param mask a 3D \code{array}, 1D \code{vector} of type \code{logical}, or an instance of type \code{LogicalNeuroVol}
 #' @export
 #' @examples
 #'
@@ -65,7 +72,7 @@ SparseNeuroVecSource <- function(meta_info, indices, mask) {
 #' svec <- SparseNeuroVec(mat, bspace,mask)
 #' length(indices(svec)) == sum(mask)
 #' @rdname SparseNeuroVec-class
-SparseNeuroVec <- function(data, space, mask, source=NULL, label="") {
+SparseNeuroVec <- function(data, space, mask) {
 	stopifnot(inherits(space, "NeuroSpace"))
 
 	if (!inherits(mask, "LogicalNeuroVol")) {

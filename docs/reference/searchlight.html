@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>searchlight — searchlight • neuroim2</title>
+<title>bootstrap_searchlight — bootstrap_searchlight • neuroim2</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -30,9 +30,12 @@
 
 
 
-<meta property="og:title" content="searchlight — searchlight" />
+<meta property="og:title" content="bootstrap_searchlight — bootstrap_searchlight" />
 
-<meta property="og:description" content="Create an exhaustive searchlight iterator" />
+<meta property="og:description" content="Create a spherical searchlight iterator that samples regions from within a mask.
+Create an exhaustive searchlight iterator that only returns voxel coordinates
+Generates an ROIVol around each non-zero voxel in a 3D image mask
+Create a clustered searchlight iterator" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -113,18 +116,27 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>searchlight</h1>
+    <h1>bootstrap_searchlight</h1>
     
     <div class="hidden name"><code>searchlight.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Create an exhaustive searchlight iterator</p>
+    <p>Create a spherical searchlight iterator that samples regions from within a mask.</p>
+<p>Create an exhaustive searchlight iterator that only returns voxel coordinates</p>
+<p>Generates an <code>ROIVol</code> around each non-zero voxel in a 3D image mask</p>
+<p>Create a clustered searchlight iterator</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>searchlight</span>(<span class='no'>mask</span>, <span class='no'>radius</span>, <span class='kw'>eager</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>nonzero</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
+    <pre class="usage"><span class='fu'><a href='bootstrap_searchlight.html'>bootstrap_searchlight</a></span>(<span class='no'>mask</span>, <span class='kw'>radius</span> <span class='kw'>=</span> <span class='fl'>8</span>, <span class='kw'>iter</span> <span class='kw'>=</span> <span class='fl'>100</span>)
+
+<span class='fu'><a href='searchlight_coords.html'>searchlight_coords</a></span>(<span class='no'>mask</span>, <span class='no'>radius</span>, <span class='kw'>nonzero</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
+
+<span class='fu'>searchlight</span>(<span class='no'>mask</span>, <span class='no'>radius</span>, <span class='kw'>eager</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>nonzero</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
+
+<span class='fu'><a href='clustered_searchlight.html'>clustered_searchlight</a></span>(<span class='no'>mask</span>, <span class='kw'>cvol</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>csize</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -138,18 +150,36 @@
       <td><p>in mm of spherical searchlight</p></td>
     </tr>
     <tr>
+      <th>iter</th>
+      <td><p>the total number of searchlights to sample (default is 100).</p></td>
+    </tr>
+    <tr>
+      <th>nonzero</th>
+      <td><p>only include nonzero coordinates</p></td>
+    </tr>
+    <tr>
       <th>eager</th>
       <td><p>if TRUE, then all searchlight coordinates set are generated up front. This is faster but requires more memory to store all coordinates.</p></td>
     </tr>
     <tr>
-      <th>nonzero</th>
-      <td><p>only include nonzero values</p></td>
+      <th>cvol</th>
+      <td><p>a <code>ClusteredNeuroVol</code> instance</p></td>
+    </tr>
+    <tr>
+      <th>csize</th>
+      <td><p>the number of clusters (ignored if <code>cvol</code> is provided)</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>an <code>ROIVolWindow</code> class</p>
+    <p>a list ofmatrices containing of integer-valued voxel coordinates</p>
+<p>a list of <code>ROIVolWindow</code> objects</p>
+<p>an <code>iter</code> class</p>
+    
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>searchlight centers are sampled without replacement, but the same surround voxel can belong to multiple searchlight samples.</p>
     
 
   </div>
@@ -159,6 +189,8 @@
       <li><a href="#arguments">Arguments</a></li>
       
       <li><a href="#value">Value</a></li>
+
+      <li><a href="#details">Details</a></li>
           </ul>
 
   </div>

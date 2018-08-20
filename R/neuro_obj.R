@@ -13,6 +13,7 @@ setMethod(f="ndim", signature=signature(x = "NeuroObj"),
 
 #' dim of \code{NeuroObj} object
 #' @param x the object
+#' @rdname dim-methods
 #' @export
 setMethod(f="dim", signature=signature(x = "NeuroObj"),
           def=function(x) dim(x@space))
@@ -34,7 +35,7 @@ setMethod(f="space", signature=signature(x = "NeuroObj"),
           def=function(x) x@space)
 
 #' @export
-#' @rdname space-methods
+#' @rdname trans-methods
 setMethod(f="trans", signature=signature(x = "NeuroObj"),
           def=function(x) trans(x@space))
 

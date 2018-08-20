@@ -214,6 +214,163 @@
           <p><code><a href="FileBackedNeuroVec.html">FileBackedNeuroVec()</a></code> </p>
         </td>
         <td><p>Constuct a <code>FileBackedNeuroVec</code> instance</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="ROIVol.html">ROIVol()</a></code> </p>
+        </td>
+        <td><p>Create an instance of class <code>ROIVol</code></p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="ROIVec.html">ROIVec()</a></code> </p>
+        </td>
+        <td><p>Create an instance of class <code>ROIVec</code></p></td>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-get-information-about-data-structures" class="hasAnchor"><a href="#section-get-information-about-data-structures" class="anchor"></a>get information about data structures</h2>
+          <p class="section-desc"><p>Functions to access information about the shape, size, and structure of images</p></p>
+        </th>
+      </tr>
+      <tr>
+        
+        <td>
+          <p><code><a href="space-methods.html">space()</a></code> </p>
+        </td>
+        <td><p>Generic function to extract geometric properties of an image.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="ndim-methods.html">ndim()</a></code> </p>
+        </td>
+        <td><p>Generic function to extract the number of dimensions of an object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="spacing-methods.html">spacing()</a></code> </p>
+        </td>
+        <td><p>Generic function to extract the voxel dimensions of an image</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="which_dim-methods.html">which_dim()</a></code> </p>
+        </td>
+        <td><p>which_dim</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="dim_of-methods.html">dim_of()</a></code> </p>
+        </td>
+        <td><p>dim_of</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="axes-methods.html">axes()</a></code> </p>
+        </td>
+        <td><p>Generic getter function to extract image axes</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="bounds-methods.html">bounds()</a></code> </p>
+        </td>
+        <td><p>Generic function to extract the spatial bounds (origin + dim * spacing) of an image
+param x the object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="origin-methods.html">origin()</a></code> </p>
+        </td>
+        <td><p>Generic getter to extract image origin</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="trans-methods.html">trans()</a></code> </p>
+        </td>
+        <td><p>Generic getter to extract image coordinate transformation</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="voxels-methods.html">voxels()</a></code> </p>
+        </td>
+        <td><p>extract voxel coordinates</p></td>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-querying-dividing-slicing-and-extracting-data-from-image-data-structures" class="hasAnchor"><a href="#section-querying-dividing-slicing-and-extracting-data-from-image-data-structures" class="anchor"></a>querying, dividing, slicing, and extracting data from image data structures</h2>
+          <p class="section-desc"><p>Functions to extract portions of data or split up data into sub-regions for further processing</p></p>
+        </th>
+      </tr>
+      <tr>
+        
+        <td>
+          <p><code><a href="vols-methods.html">vols()</a></code> </p>
+        </td>
+        <td><p>Generic function to extract an ordered series of 3D volumes</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="vectors-methods.html">vectors()</a></code> </p>
+        </td>
+        <td><p>Generic function to extract an ordered series of 1D vectors</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="split_clusters-methods.html">split_clusters()</a></code> </p>
+        </td>
+        <td><p>Generic function to cut an object into a list of spatial or spatiotemporal clusters</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="split_blocks-methods.html">split_blocks()</a></code> </p>
+        </td>
+        <td><p>Generic function to cut a vector-valued object into a list of sub-blocks</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="patch_set-methods.html">patch_set()</a></code> </p>
+        </td>
+        <td><p>Extract set of patches</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="slices-methods.html">slices()</a></code> </p>
+        </td>
+        <td><p>Generic function to extract an ordered series of 2D slices</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="series-methods.html">series_roi()</a></code> <code><a href="series-methods.html">series()</a></code> </p>
+        </td>
+        <td><p>Extract one or more series from object and return as ROI object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="partition-methods.html">partition()</a></code> </p>
+        </td>
+        <td><p>Generic function to partition an image into a set of disjoint clusters</p></td>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-searchlight-functions" class="hasAnchor"><a href="#section-searchlight-functions" class="anchor"></a>searchlight functions</h2>
+          <p class="section-desc"><p>Functions to support “searchlight” analyses of image data</p></p>
+        </th>
+      </tr>
+      <tr>
+        
+        <td>
+          <p><code><a href="searchlight.html">bootstrap_searchlight()</a></code> <code><a href="searchlight.html">searchlight_coords()</a></code> <code><a href="searchlight.html">searchlight()</a></code> <code><a href="searchlight.html">clustered_searchlight()</a></code> </p>
+        </td>
+        <td><p>bootstrap_searchlight</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="random_searchlight.html">random_searchlight()</a></code> </p>
+        </td>
+        <td><p>random_searchlight</p></td>
       </tr>
     </tbody>
     </table>
@@ -224,6 +381,9 @@
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#section-read-and-write-brain-images">read and write brain images</a></li>
       <li><a href="#section-create-image-data-structures">create image data structures</a></li>
+      <li><a href="#section-get-information-about-data-structures">get information about data structures</a></li>
+      <li><a href="#section-querying-dividing-slicing-and-extracting-data-from-image-data-structures">querying, dividing, slicing, and extracting data from image data structures</a></li>
+      <li><a href="#section-searchlight-functions">searchlight functions</a></li>
     </ul>
   </div>
 </div>

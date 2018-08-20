@@ -6,14 +6,14 @@
 \alias{SparseNeuroVecSource}
 \title{SparseNeuroVecSource}
 \usage{
-SparseNeuroVecSource(meta_info, indices, mask)
+SparseNeuroVecSource(meta_info, indices = NULL, mask)
 }
 \arguments{
 \item{meta_info}{an object of class \code{\linkS4class{MetaInfo}}}
 
-\item{indices}{a vector of 1D indices}
+\item{indices}{an optional vector of 1D indices the subset of volumes to load}
 
-\item{mask}{a 3D \code{array} of type \code{logical}}
+\item{mask}{a logical 3D \code{array},  a logical 1D \code{vector} or a \code{LogicalNeuroVol}}
 }
 \description{
 A class that is used to produce a \code{\linkS4class{SparseNeuroVec}} instance
@@ -26,3 +26,10 @@ constructs a SparseNeuroVecSource object
 \item{\code{mask}}{the subset of voxels that will be stored in memory}
 }}
 
+\examples{
+ mask_name <- system.file("extdata", "global_mask.nii", package="neuroim2")
+ vec_name <- system.file("extdata", "global_mask_v5.nii", package="neuroim2")
+ mask <- as.logical(read_vol(mask_name))
+
+ src <- SparseNeuroVecSource(read_header(vec_name), mask=mask)
+}

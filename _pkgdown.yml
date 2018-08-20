@@ -26,3 +26,46 @@ reference:
     - NeuroVecSeq
     - MappedNeuroVec
     - FileBackedNeuroVec
+    - ROIVol
+    - ROIVec
+
+  - title: get information about data structures
+    desc: >
+      Functions to access information about the shape, size, and structure of images
+    contents:
+    - space
+    - ndim
+    - spacing
+    - which_dim
+    - dim_of
+    - axes
+    - bounds
+    - origin
+    - trans
+    - voxels
+
+  - title: querying, dividing, slicing, and extracting data from image data structures
+    desc: >
+      Functions to extract portions of data or split up data into sub-regions for further processing
+    contents:
+    - vols
+    - vectors
+    - split_clusters
+    - split_blocks
+    - patch_set
+    - slices
+    - series
+    - series_roi
+    - partition
+
+  - title: searchlight functions
+    desc: >
+      Functions to support "searchlight" analyses of image data
+    contents:
+    - searchlight
+    - searchlight_coords
+    - clustered_searchlight
+    - random_searchlight
+    - bootstrap_searchlight
+
+

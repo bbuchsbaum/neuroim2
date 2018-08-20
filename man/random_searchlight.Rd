@@ -7,10 +7,9 @@
 random_searchlight(mask, radius)
 }
 \arguments{
-\item{mask}{an volumetric image mask of type \code{\linkS4class{NeuroVol}}
-containing valid searchlight voxel set.}
+\item{mask}{an image volume containing valid central voxels for roving searchlight}
 
-\item{radius}{width in mm of spherical searchlight}
+\item{radius}{in mm of spherical searchlight}
 }
 \description{
 Create an spherical random searchlight iterator

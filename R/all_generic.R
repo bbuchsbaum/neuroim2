@@ -60,10 +60,18 @@ setGeneric(name="mapf", def=function(x, m, ...) standardGeneric("mapf"))
 #' Generic function to extract an ordered series of 3D volumes
 #'
 #' @param x the object that supplies the volume data
-#' @param indices the indices of the volumes
+#' @param indices the subset of volumes to extract
 #' @param ... additional arguments
 #' @export
 #' @rdname vols-methods
+#' @examples
+#'
+#' vec <- read_vec(system.file("extdata", "global_mask_v5.nii", package="neuroim2"))
+#' vs <- vols(vec)
+#' length(vs) == dim(vec)[4]
+#'
+#' vs <- vols(vec, indices=1:3)
+#' length(vs) == 3
 setGeneric(name="vols", def=function(x, indices, ...) standardGeneric("vols"))
 
 #' Generic function to extract an ordered series of 1D vectors
@@ -590,7 +598,7 @@ setGeneric(name="as.dense", def=function(x) standardGeneric("as.dense"))
 setGeneric(name="as.mask", def=function(x, indices) standardGeneric("as.mask"))
 
 
-#' patch_set
+#' Extract set of patches
 #'
 #' generate a set of coordinate "patches" of fixed size from an image object.
 #'

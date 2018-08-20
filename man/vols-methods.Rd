@@ -16,10 +16,19 @@ vols(x, indices, ...)
 \arguments{
 \item{x}{the object that supplies the volume data}
 
-\item{indices}{the indices of the volumes}
+\item{indices}{the subset of volumes to extract}
 
 \item{...}{additional arguments}
 }
 \description{
 Generic function to extract an ordered series of 3D volumes
+}
+\examples{
+
+vec <- read_vec(system.file("extdata", "global_mask_v5.nii", package="neuroim2"))
+vs <- vols(vec)
+length(vs) == dim(vec)[4]
+
+vs <- vols(vec, indices=1:3)
+length(vs) == 3
 }

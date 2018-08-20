@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>searchlight — searchlight_coords • neuroim2</title>
+<title>dim of <code>NeuroObj</code> object — dim,NeuroObj-method • neuroim2</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -30,9 +30,9 @@
 
 
 
-<meta property="og:title" content="searchlight — searchlight_coords" />
+<meta property="og:title" content="dim of <code>NeuroObj</code> object — dim,NeuroObj-method" />
 
-<meta property="og:description" content="Create an exhaustive searchlight iterator that only returns voxel coordinates" />
+<meta property="og:description" content="dim of NeuroObj object" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -113,39 +113,28 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>searchlight</h1>
+    <h1>dim of <code>NeuroObj</code> object</h1>
     
-    <div class="hidden name"><code>searchlight_coords.Rd</code></div>
+    <div class="hidden name"><code>dim-methods.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Create an exhaustive searchlight iterator that only returns voxel coordinates</p>
+    <p>dim of <code>NeuroObj</code> object</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>searchlight_coords</span>(<span class='no'>mask</span>, <span class='no'>radius</span>, <span class='kw'>nonzero</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
+    <pre class="usage"><span class='co'># S4 method for NeuroObj</span>
+<span class='fu'>dim</span>(<span class='no'>x</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>mask</th>
-      <td><p>an image volume containing valid central voxels for roving searchlight</p></td>
-    </tr>
-    <tr>
-      <th>radius</th>
-      <td><p>in mm of spherical searchlight</p></td>
-    </tr>
-    <tr>
-      <th>nonzero</th>
-      <td><p>only include nonzero coordinates</p></td>
+      <th>x</th>
+      <td><p>the object</p></td>
     </tr>
     </table>
-    
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
-    <p>a list ofmatrices containing of integer-valued voxel coordinates</p>
     
 
   </div>
@@ -153,9 +142,7 @@
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-      
-      <li><a href="#value">Value</a></li>
-          </ul>
+                </ul>
 
   </div>
 </div>

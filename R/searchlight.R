@@ -3,9 +3,7 @@
 #'
 #' Create an spherical random searchlight iterator
 #'
-#' @param mask an volumetric image mask of type \code{\linkS4class{NeuroVol}}
-#'       containing valid searchlight voxel set.
-#' @param radius width in mm of spherical searchlight
+#' @inheritParams searchlight_coords
 #' @export
 random_searchlight <- function(mask, radius) {
   assert_that(inherits(mask, "NeuroVol"))
@@ -56,10 +54,10 @@ random_searchlight <- function(mask, radius) {
 #'
 #' Create a spherical searchlight iterator that samples regions from within a mask.
 #'
-#' @param mask an image volume containing valid central voxels for roving searchlight
-#' @param radius in mm of spherical searchlight (can be a vector which is randomly sampled)
+#' @inheritParams searchlight_coords
 #' @param iter the total number of searchlights to sample (default is 100).
 #' @export
+#' @rdname searchlight
 #' @details searchlight centers are sampled without replacement, but the same surround voxel can belong to multiple searchlight samples.
 bootstrap_searchlight <- function(mask, radius=8, iter=100) {
   mask.idx <- which(mask != 0)
@@ -72,14 +70,15 @@ bootstrap_searchlight <- function(mask, radius=8, iter=100) {
   dlis <- deferred_list(lapply(1:iter, function(i) f))
 }
 
-#' searchlight
+#' searchlight_coords
 #'
 #' Create an exhaustive searchlight iterator that only returns voxel coordinates
 #'
 #' @param mask an image volume containing valid central voxels for roving searchlight
 #' @param radius in mm of spherical searchlight
 #' @param nonzero only include nonzero coordinates
-#' @return a list of three-dimensional matrices containingof integer-valued voxel coordinates
+#' @return a list ofmatrices containing of integer-valued voxel coordinates
+#' @rdname searchlight
 #' @importFrom rflann RadiusSearch
 #' @export
 searchlight_coords <- function(mask, radius, nonzero=FALSE) {
@@ -104,15 +103,15 @@ searchlight_coords <- function(mask, radius, nonzero=FALSE) {
 }
 
 
-#' searchlight
-#'
+
 #' Create an exhaustive searchlight iterator
 #'
-#' @param mask an image volume containing valid central voxels for roving searchlight
-#' @param radius in mm of spherical searchlight
+#' Generates an \code{ROIVol} around each non-zero voxel in a 3D image mask
+#'
+#' @inheritParams searchlight_coords
 #' @param eager if TRUE, then all searchlight coordinates set are generated up front. This is faster but requires more memory to store all coordinates.
-#' @param nonzero only include nonzero values
-#' @return an \code{ROIVolWindow} class
+#' @return a list of \code{ROIVolWindow} objects
+#' @rdname searchlight
 #' @importFrom rflann RadiusSearch
 #' @export
 searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE) {
@@ -139,11 +138,12 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE) {
 
 #' Create a clustered searchlight iterator
 #'
-#' @param mask an image volume containing valid central voxels for roving searchlight
+#' @inheritParams searchlight_coords
 #' @param cvol a \code{ClusteredNeuroVol} instance
 #' @param csize the number of clusters (ignored if \code{cvol} is provided)
 #' @return an \code{iter} class
 #' @importFrom stats kmeans
+#' @rdname searchlight
 #' @export
 clustered_searchlight <- function(mask, cvol=NULL, csize=NULL) {
   if (is.null(csize) && is.null(cvol)) {
