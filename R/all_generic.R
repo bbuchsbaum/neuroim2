@@ -378,6 +378,14 @@ setGeneric(name="inverse_trans", def=function(x) standardGeneric("inverse_trans"
 #' @rdname read_elements-methods
 setGeneric(name="read_elements", def=function(x, num_elements) standardGeneric("read_elements"))
 
+#' Generic function to read a set of column vector from an input source (e.g. \code{ColumnReader})
+#' @param x the input channel
+#' @param column_indices the column indices
+#' @return a \code{matrix} consisting of the requested column vectors
+#' @export
+#' @rdname read_columns-methods
+setGeneric(name="read_columns", def=function(x, columnIndices) standardGeneric("read_columns"))
+
 
 #' Generic function to write a sequence of elements from an input source
 #' @param x the output channel
@@ -743,6 +751,7 @@ if (!isGeneric("as.raster"))
 #' @param file_name file name to be matched
 #' @return TRUE for match, FALSE otherwise
 #' @rdname file_matches-methods
+#' @export
 setGeneric(name="file_matches", def=function(x, file_name) standardGeneric("file_matches"))
 
 
@@ -751,6 +760,7 @@ setGeneric(name="file_matches", def=function(x, file_name) standardGeneric("file
 #' @param x object for which the file name is to matched to
 #' @param file_name file name to be matched
 #' @return TRUE for match, FALSE otherwise
+#' @export
 #' @rdname header_file_matches-methods
 setGeneric(name="header_file_matches", def=function(x, file_name) standardGeneric("header_file_matches"))
 
@@ -759,6 +769,7 @@ setGeneric(name="header_file_matches", def=function(x, file_name) standardGeneri
 #' @param x object for which the file name is to matched to
 #' @param file_name file name to be matched
 #' @return TRUE for match, FALSE otherwise
+#' @export
 #' @rdname data_file_matches-methods
 setGeneric(name="data_file_matches", def=function(x, file_name) standardGeneric("data_file_matches"))
 
@@ -767,12 +778,14 @@ setGeneric(name="data_file_matches", def=function(x, file_name) standardGeneric(
 #' @param file_name file name to be stripped of its extension
 #' @return the correct header name
 #' @rdname header_file-methods
+#' @export
 setGeneric(name="header_file", def=function(x, file_name) standardGeneric("header_file"))
 
 #' Generic function to get the name of the data file, given a file name and a \code{\linkS4class{FileFormat}} instance.
 #' @param x descriptor instance
 #' @param file_name file name to be stripped of its extension
 #' @return the correct header name
+#' @export
 #' @rdname data_file-methods
 setGeneric(name="data_file", def=function(x, file_name) standardGeneric("data_file"))
 
@@ -780,6 +793,7 @@ setGeneric(name="data_file", def=function(x, file_name) standardGeneric("data_fi
 #' @param x descriptor instance
 #' @param file_name file name to be stripped of its extension
 #' @return file_name without extension
+#' @export
 #' @rdname strip_extension-methods
 setGeneric(name="strip_extension", def=function(x, file_name) standardGeneric("strip_extension"))
 

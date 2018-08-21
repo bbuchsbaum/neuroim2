@@ -218,3 +218,19 @@ setMethod(f="close", signature=signature(con= "BinaryWriter"),
 		def=function(con) {
 			base::close(con@output)
 		})
+
+
+#' ColumnReader
+#'
+#' Constructor for  \code{\linkS4class{ColumnReader}} class
+#'
+#' @param nrow the number of rows
+#' @param ncol the number of columns
+#' @param reader a function that takes a set of column indices and returns a \code{matrix}
+#' @rdname ColumnReader
+#' @export
+ColumnReader <- function(nrow, ncol, reader) {
+  stopifnot(is.function(reader))
+  new("ColumnReader", nrow=as.integer(nrow), ncol=as.integer(ncol), reader)
+}
+

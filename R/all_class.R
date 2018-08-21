@@ -621,4 +621,15 @@ setClass("NeuroBucket",
          contains=c("NeuroVec"))
 
 
+#' ColumnReader
+#'
+#' This class supports reading of data froma matrix-like stroage format
+#' @rdname ColumnReader-class
+#' @slot nrow the number of rows
+#' @slot ncol the number of columns
+#' @slot reader a function that takes a set of column indices and returns a \code{matrix}
+#' @export
+setClass("ColumnReader", representation=
+           representation(nrow="integer", ncol="integer", reader="function"))
+
 

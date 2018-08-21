@@ -8,8 +8,9 @@ parse_niml_element <- function(el) {
       keyval <- strsplit(it, "=")[[1]]
       c(key=keyval[1], val=keyval[2])
     })
-    keys <- map_chr(els, "[[", "key")
-    vals <- map(els, "[[", "val")
+    keys <- sapply(els, "[[", "key")
+    #keys <- unlist(map(els, "[[", "key"))
+    vals <- lapply(els, "[[", "val")
     names(vals) <- keys
     list(label=label, attr=vals)
   } else if (length(items) == 1) {
@@ -60,8 +61,9 @@ parse_niml_header <- function(fconn) {
   out <- c()
   STATE <- "BEGIN"
   while(TRUE ) {
-    ch <- readChar(fconn,1)
 
+    ch <- readChar(fconn,1)
+    #print(ch)
     if (length(ch) == 0) {
       break
     } else if (ch == "<" && STATE == "BEGIN") {
@@ -118,8 +120,8 @@ parse_niml_next <- function(fconn) {
 
 #' @keywords internal
 parse_niml_file <- function(fname, maxels=10000) {
-  fconn <- file(fname)
-  open(fconn, open="rb")
+  fconn <- file(fname, open="rb")
+  #open(fconn, open="rb")
   fsize <- file.info(fname)$size
   out <- list()
   elcount <- 1
