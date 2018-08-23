@@ -3,6 +3,30 @@ using namespace Rcpp;
 
 
 
+
+// NumericMatrix nn3d(IntegerVector pt, IntegerVector spacing, IntegerVector dim, double radius) {
+//   int i_rad = floor(radius/spacing[0]);
+//   int j_rad = floor(radius/spacing[1]);
+//   int k_rad = floor(radius/spacing[2]);
+//
+//   NumericMatrix out((i_rad*2+1)*(j_rad*2+1)*(k_rad*2+1), 3);
+//   NumericVector cd = NumericVector::create(pt[0]*spacing[0], pt[1]*spacing[1], pt[2]*spacing[2]);
+//
+//   for (int i = -i_rad; i <= i_rad; i++) {
+//     for (int j = -j_rad; j <= j_rad; j++) {
+//       for (int k = -k_rad; k <= k_rad; k++) {
+//         double x = i*spacing[0];
+//         double y = j*spacing[1];
+//         double z = k*spacing[2];
+//
+//         double d = sqrt(pow(x,2) + pow(y,2) + pow(z,2));
+//
+//       }
+//     }
+//   }
+//
+// }
+
 // [[Rcpp::export]]
 IntegerVector find_seqnum(IntegerVector clens, IntegerVector idx) {
   IntegerVector out = IntegerVector(idx.length());

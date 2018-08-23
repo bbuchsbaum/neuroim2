@@ -234,7 +234,15 @@ make_spherical_grid <- function(bvol, centroid, radius) {
 
 }
 
-
+# masked_roi <- function(mask, vox, vox_offset) {
+#   out <- t(vox + t(vox_offset))
+#   d <- dim(mask)
+#   keep <- (out[,1] > 0 & out[,1] < d[1]) & (out[,2] > 0 & out[,2] < d[2]) & (out[,3] > 0 & out[,3] < d[3])
+#   out <- out[keep,]
+#   vals <- mask[out]
+#   out <- out[vals > 0,]
+#   ROIVol(space(mask), out)
+# }
 
 #' @title Create a Spherical Region of Interest
 #'
