@@ -849,31 +849,54 @@ setMethod("plot", signature=signature(x="NeuroVol"),
                                    zlevels=unique(round(seq(1, dim(x)[3], length.out=6))),
                                    irange=range(x),
                                    thresh=c(0,0),
-                                   bgvol=NULL) {
+                                   alpha=1,
+                                   bgvol=NULL,
+                                   bgcmap=gray(seq(0,1,length.out=255))) {
 
             if (!requireNamespace("ggplot2", quietly = TRUE)) {
               stop("Package \"ggplot2\" needed for this function to work. Please install it.",
                    call. = FALSE)
             }
 
+            if (!is.null(bgvol)) {
+              assert_that(all(dim(x) == dim(bgvol)))
+              assert_that(all(spacing(x) == spacing(bgvol)))
+            }
+
+
             df1 <- do.call(rbind, purrr::map(zlevels, function(i) {
+              if (!is.null(bgvol)) {
+                bgslice <- slice(bgvol, zlevel=i, along=3)
+                bgplane <- colorplane::IntensityColorPlane(as.numeric(bgslice), cols=bgcmap)
+                bgcols <- colorplane::map_colors(bgplane)
+              }
 
               imslice <- slice(x, zlevel=i, along=3)
-              imcols <- mapToColors(imslice, cmap, alpha=1, irange=irange, zero_col="#000000")
+              implane <- colorplane::IntensityColorPlane(as.numeric(imslice), cols=cmap, alpha=alpha)
+              fgcols <- colorplane::map_colors(implane, threshold=thresh, irange=irange)
+
+              if (!is.null(bgvol)) {
+                fgcols <- colorplane::as_hexcol(blend_colors(bgcols, fgcols, alpha=alpha))
+              }
 
               cds <- index_to_coord(space(imslice), 1:length(imslice))
-              data.frame(x=cds[,1], y=cds[,2], z=i, value=as.vector(imcols))
+              data.frame(x=cds[,1], y=cds[,2], z=i, value=as.vector(fgcols))
+
             }))
 
             {y=value=NULL}
 
-            ggplot2::ggplot(ggplot2::aes(x=x, y=y), data=df1) +
-              ggplot2::geom_raster(ggplot2::aes(fill=value)) +
+            p <-
+              ggplot2::ggplot(ggplot2::aes(x=x, y=y), data=df1) +
+              ggplot2::coord_fixed() +
+              ggplot2::geom_raster(ggplot2::aes(x=x,y=y, fill=value)) +
               ggplot2::scale_fill_identity() + ggplot2::xlab("") + ggplot2::ylab("") +
               ggplot2::scale_x_continuous(expand=c(0,0)) +
               ggplot2::scale_y_continuous(expand=c(0,0)) +
               ggplot2::facet_wrap(~ z) +
-              ggplot2::theme_bw()
+              ggplot2::theme_classic()
+
+            p
 
           })
 
