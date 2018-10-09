@@ -392,7 +392,7 @@ setGeneric(name="read_elements", def=function(x, num_elements) standardGeneric("
 #' @return a \code{matrix} consisting of the requested column vectors
 #' @export
 #' @rdname read_columns-methods
-setGeneric(name="read_columns", def=function(x, columnIndices) standardGeneric("read_columns"))
+setGeneric(name="read_columns", def=function(x, column_indices) standardGeneric("read_columns"))
 
 
 #' Generic function to write a sequence of elements from an input source

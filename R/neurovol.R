@@ -502,7 +502,7 @@ setMethod(f="coord_to_grid", signature=signature(x="NeuroVol", coords="numeric")
 		if (length(keepIndices) == 1) {
 			keepIndices
 		} else {
-			ret <- rflann::Neighbour(coord.set[keepIndices,], coord.set[keepIndices,], k=2)
+			ret <- rflann::Neighbour(coord.set[keepIndices,], coord.set[keepIndices,], k=2, build="kdtree", cores=0, checks=1)
 			ind <- ret$indices[, 2]
 			ds <- sqrt(ret$distances[, 2])
 			v <- vals[keepIndices]

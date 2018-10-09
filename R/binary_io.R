@@ -231,6 +231,6 @@ setMethod(f="close", signature=signature(con= "BinaryWriter"),
 #' @export
 ColumnReader <- function(nrow, ncol, reader) {
   stopifnot(is.function(reader))
-  new("ColumnReader", nrow=as.integer(nrow), ncol=as.integer(ncol), reader)
+  new("ColumnReader", nrow=as.integer(nrow), ncol=as.integer(ncol), reader=reader)
 }
 

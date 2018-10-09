@@ -5,7 +5,7 @@
 \alias{ColumnReader-class}
 \title{ColumnReader}
 \description{
-This class supports reading of data froma matrix-like stroage format
+This class supports reading of data froma matrix-like storage format
 }
 \section{Slots}{
 

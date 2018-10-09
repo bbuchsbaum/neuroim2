@@ -228,7 +228,8 @@ make_spherical_grid <- function(bvol, centroid, radius) {
 
   coords <- t(t(cube) * vspacing)
 
-  res <- rflann::RadiusSearch(matrix(centroid * vspacing, ncol=3), coords, radius=radius^2, max_neighbour=nrow(cube))
+  res <- rflann::RadiusSearch(matrix(centroid * vspacing, ncol=3), coords, radius=radius^2,
+                              max_neighbour=nrow(cube), build="kdtree")
 
   cube[res$indices[[1]],,drop=FALSE]
 
