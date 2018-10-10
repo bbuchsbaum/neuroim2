@@ -3,8 +3,12 @@
 language: R
 sudo: false
 cache: packages
-Imports: rflann
-Remotes: YeeJeremy/rflann
+Imports:
+  - rflann
+  - colorplane
+Remotes:
+  - YeeJeremy/rflann
+  - bbuchsbaum/colorplane
 after_success:
   - Rscript -e 'covr::codecov()'
 
