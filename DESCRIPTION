@@ -68,4 +68,3 @@ Suggests: testthat,
 Remotes: 
   YeeJeremy/rflann
   bbuchsbaum/colorplane
-  
