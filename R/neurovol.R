@@ -877,6 +877,8 @@ setMethod("plot", signature=signature(x="NeuroVol"),
 
               if (!is.null(bgvol)) {
                 fgcols <- colorplane::as_hexcol(blend_colors(bgcols, fgcols, alpha=alpha))
+              } else {
+                fgcols <- colorplane::as_hexcol(fgcols)
               }
 
               cds <- index_to_coord(space(imslice), 1:length(imslice))
