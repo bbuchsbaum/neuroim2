@@ -876,7 +876,7 @@ setMethod("plot", signature=signature(x="NeuroVol"),
               fgcols <- colorplane::map_colors(implane, threshold=thresh, irange=irange)
 
               if (!is.null(bgvol)) {
-                fgcols <- colorplane::as_hexcol(blend_colors(bgcols, fgcols, alpha=alpha))
+                fgcols <- colorplane::as_hexcol(colorplane::blend_colors(bgcols, fgcols, alpha=alpha))
               } else {
                 fgcols <- colorplane::as_hexcol(fgcols)
               }

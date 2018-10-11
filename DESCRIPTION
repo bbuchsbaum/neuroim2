@@ -66,5 +66,5 @@ Suggests: testthat,
     roxygen2,
     rmarkdown
 Remotes: 
-  YeeJeremy/rflann
+  YeeJeremy/rflann,
   bbuchsbaum/colorplane
