@@ -157,18 +157,6 @@ NeuroVecSource <- function(file_name, indices=NULL, mask=NULL) {
 }
 
 
-#' Get length of \code{NeuroVec}. This is the number of volumes in the volume vector (e.g. the 4th image dimension)
-#'
-#' @export
-#' @param x the object
-#' @rdname length-methods
-setMethod("length", signature=c(x="NeuroVec"),
-		def=function(x) {
-			dim(x)[4]
-		})
-
-
-
 #' read_vol_list
 #'
 #' load a list of image volumes and return a \code{\linkS4class{NeuroVec}} instance
@@ -789,13 +777,6 @@ NeuroVecSeq <- function(...) {
 
   new("NeuroVecSeq", space=sp, vecs=vecs, lens=lens)
 }
-
-#' @export
-#' @rdname length-methods
-setMethod("length", signature=c("NeuroVecSeq"),
-          def=function(x) {
-            sum(map_dbl(x@vecs, ~ length(.)))
-          })
 
 
 #' #' @rdname series-methods

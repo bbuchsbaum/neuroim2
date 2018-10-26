@@ -11,7 +11,8 @@
 
 \S4method{plot}{NeuroVol}(x, cmap = gray(seq(0, 1, length.out = 255)),
   zlevels = unique(round(seq(1, dim(x)[3], length.out = 6))),
-  irange = range(x), thresh = c(0, 0), bgvol = NULL)
+  irange = range(x), thresh = c(0, 0), alpha = 1, bgvol = NULL,
+  bgcmap = gray(seq(0, 1, length.out = 255)))
 }
 \arguments{
 \item{x}{the object to display}
