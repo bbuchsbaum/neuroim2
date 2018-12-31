@@ -4,7 +4,7 @@
 \alias{read_columns}
 \title{Generic function to read a set of column vector from an input source (e.g. \code{ColumnReader})}
 \usage{
-read_columns(x, columnIndices)
+read_columns(x, column_indices)
 }
 \arguments{
 \item{x}{the input channel}

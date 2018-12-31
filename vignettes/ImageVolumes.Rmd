@@ -125,6 +125,3 @@ Now we can display it using the `plot` command. We will show every 15th slice.
     
 ```
 
-
-
-

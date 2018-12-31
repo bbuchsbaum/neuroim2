@@ -502,7 +502,7 @@ setMethod(f="coord_to_grid", signature=signature(x="NeuroVol", coords="numeric")
 		if (length(keepIndices) == 1) {
 			keepIndices
 		} else {
-			ret <- rflann::Neighbour(coord.set[keepIndices,], coord.set[keepIndices,], k=2)
+			ret <- rflann::Neighbour(coord.set[keepIndices,], coord.set[keepIndices,], k=2, build="kdtree", cores=0, checks=1)
 			ind <- ret$indices[, 2]
 			ds <- sqrt(ret$distances[, 2])
 			v <- vals[keepIndices]
@@ -876,7 +876,9 @@ setMethod("plot", signature=signature(x="NeuroVol"),
               fgcols <- colorplane::map_colors(implane, threshold=thresh, irange=irange)
 
               if (!is.null(bgvol)) {
-                fgcols <- colorplane::as_hexcol(blend_colors(bgcols, fgcols, alpha=alpha))
+                fgcols <- colorplane::as_hexcol(colorplane::blend_colors(bgcols, fgcols, alpha=alpha))
+              } else {
+                fgcols <- colorplane::as_hexcol(fgcols)
               }
 
               cds <- index_to_coord(space(imslice), 1:length(imslice))

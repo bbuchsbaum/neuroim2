@@ -99,20 +99,19 @@ setMethod("plot", signature=signature(x="NeuroSlice"),
 #' @keywords internal
 #' @importFrom grDevices col2rgb gray heat.colors
 mapToColors <- function (imslice, col = heat.colors(128, alpha = 1), zero_col = "#00000000",
-                         alpha = 1, irange = range(imslice), threshold = c(0, 0), format=c("hex", "rgb")) {
+                         alpha = 1, irange = range(imslice), threshold = c(0, 0)) {
 
   assertthat::assert_that(diff(irange) >= 0)
-  format <- match.arg(format)
-
   drange <- diff(irange)
-  mcols <- (imslice - irange[1])/diff(irange) * (length(col) -
-                                                   1) + 1
+  mcols <- (imslice - irange[1])/diff(irange) * (length(col) -1) + 1
   mcols[mcols < 1] <- 1
   mcols[mcols > length(col)] <- length(col)
   imcols <- col[mcols]
+
   if (!is.vector(imslice)) {
     dim(imcols) <- dim(imslice)
   }
+
   imcols[imslice == 0] <- zero_col
 
   if (diff(threshold) > 0) {
@@ -124,14 +123,10 @@ mapToColors <- function (imslice, col = heat.colors(128, alpha = 1), zero_col = 
     rgbmat <- rgbmat/255
     rgbmat[4, ] <- rgbmat[4, ] * alpha
 
-    if (format == "hex") {
-      rgb(rgbmat[1,], rgbmat[2,], rgbmat[3,], rgbmat[4,])
+    if (is.vector(imslice)) {
+      array(t(rgbmat), c(length(imslice), 4))
     } else {
-      if (is.vector(imslice)) {
-        array(t(rgbmat), c(length(imslice), 4))
-      } else {
-        array(t(rgbmat), c(dim(imslice), 4))
-      }
+      array(t(rgbmat), c(dim(imslice), 4))
     }
   }
   else {
