@@ -86,7 +86,9 @@ searchlight_coords <- function(mask, radius, nonzero=FALSE) {
 
   grid <- index_to_grid(mask, mask.idx)
   cds <- index_to_coord(mask, mask.idx)
-  rad <- rflann::RadiusSearch(cds, cds, radius=radius^2, max_neighbour=radius^3, build="kdtree", cores=0, checks=1)
+
+  rad <- rflann::RadiusSearch(cds, cds, radius=radius^2, max_neighbour=as.integer((radius+1))^3, build="kdtree", cores=0, checks=1)
+
   spmask <- space(mask)
 
   f <- function(i) {
@@ -123,7 +125,8 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE) {
     deferred_list(lapply(1:nrow(grid), function(i) f))
   } else {
     cds <- index_to_coord(mask, mask.idx)
-    rad <- rflann::RadiusSearch(cds, cds, radius=radius^2, max_neighbour=radius^3, build="kdtree", cores=0, checks=1)
+    rad <- rflann::RadiusSearch(cds, cds, radius=radius^2, max_neighbour=as.integer((radius+1))^3, build="kdtree", cores=0, checks=1)
+
     spmask <- space(mask)
     purrr::map(seq_along(rad$indices), function(i) {
       ind <- rad$indices[[i]]

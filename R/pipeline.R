@@ -18,7 +18,7 @@ print.deferred_list <- function(x,...) {
 #' @export
 #' @method as.list deferred_list
 as.list.deferred_list <- function(x,...) {
-  map(1:length(x), function(i) x[[i]])
+  map(seq_along(x), function(i) x[[i]])
 }
 
 
@@ -27,13 +27,15 @@ as.list.deferred_list <- function(x,...) {
 `[[.deferred_list` <- function (x, i)  {
  ff <- NextMethod()
  ff(i)
+
 }
 
 #' @keywords internal
 #' @export
 `[.deferred_list` <- function (x, i)  {
   ff <- NextMethod()
-  deferred_list(ff)
+  lapply(seq_along(i), function(j) ff[[j]](i[j]))
+
 }
 
 
