@@ -35,6 +35,7 @@ as.list.deferred_list <- function(x,...) {
 `[.deferred_list` <- function (x, i)  {
   ff <- NextMethod()
   lapply(seq_along(i), function(j) ff[[j]](i[j]))
+
 }
 
 
