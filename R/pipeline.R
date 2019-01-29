@@ -27,13 +27,14 @@ as.list.deferred_list <- function(x,...) {
 `[[.deferred_list` <- function (x, i)  {
  ff <- NextMethod()
  ff(i)
+
 }
 
 #' @keywords internal
 #' @export
 `[.deferred_list` <- function (x, i)  {
   ff <- NextMethod()
-  deferred_list(ff)
+  lapply(seq_along(i), function(j) ff[[j]](i[j]))
 }
 
 

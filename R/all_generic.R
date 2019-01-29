@@ -94,9 +94,6 @@ setGeneric(name="split_blocks", def=function(x, indices, ...) standardGeneric("s
 
 
 
-
-
-
 #' Generic function to partition an image into a set of disjoint clusters
 #'
 #' @param x the object to partition

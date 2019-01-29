@@ -415,6 +415,20 @@ setMethod(f="split_blocks", signature=signature(x="NeuroVec", indices="integer")
             ret
           })
 
+
+#' @export
+#' @rdname split_blocks-methods
+setMethod(f="split_blocks", signature=signature(x="NeuroVec", indices="factor"),
+          def = function(x, indices,...) {
+            assert_that(length(indices) == dim(x)[4])
+            ind <- as.integer(indices)
+            ret <- callGeneric(x, ind)
+
+            names(ret) <- levels(indices)
+            ret
+          })
+
+
 #' [[
 #' @rdname NeuroVec-methods
 #' @param x the object
@@ -437,27 +451,36 @@ setMethod(f="[[", signature=signature(x="NeuroVec", i="numeric"),
 #'
 #' load an image volume from a file
 #'
-#' @param file_name the name of the file to load
+#' @param file_name the name(s) of the file(s) to load. If more than one file_name is specified, the files are loaded and concatenated.
 #' @param indices the indices of the sub-volumes to load (e.g. if the file is 4-dimensional)
 #' @param mask a mask defining the spatial elements to load
 #' @param mode the IO mode which is one of "normal", "mmap", or "filebacked".
 #' @return an \code{\linkS4class{NeuroVec}} object
+#'
+#'
 #' @export
 read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap", "filebacked")) {
   mode <- match.arg(mode)
-  if (mode == "normal") {
-	  src <- NeuroVecSource(file_name, indices, mask)
-	  load_data(src)
+  vecs <- if (mode == "normal") {
+	  lapply(file_name, function(fn) load_data(NeuroVecSource(fn, indices, mask)))
+	  #load_data(src)
   } else if (mode == "mmap") {
     if (!is.null(indices)) {
       stop("memory mapped mode does not currently support volume 'indices'")
     }
-    src <- MappedNeuroVecSource(file_name)
-    load_data(src)
+    lapply(file_name, function(fn) load_data(MappedNeuroVecSource(fn)))
+
   } else if (mode == "filebacked") {
-    FileBackedNeuroVec(file_name)
+    lapply(file_name, function(fn) FileBackedNeuroVec(fn))
+
   } else {
     stop()
+  }
+
+  if (length(vecs) == 1) {
+    vecs[[1]]
+  } else {
+    NeuroVecSeq(vecs)
   }
 }
 
