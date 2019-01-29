@@ -85,7 +85,7 @@ Now we reate a `NeuroSpace` instance that describes the geometry of the image in
     vol
 ```
 
-We do not usually have to create `NeuroSpace` objects, because geometric information about an image is automatically determined from infomration stored in the image file header. Thus, `NeuroSpace` objects are usually copied from existing images using the `space` extractor function when needed:
+We do not usually have to create `NeuroSpace` objects, because geometric information about an image is automatically determined from information stored in the image file header. Thus, `NeuroSpace` objects are usually copied from existing images using the `space` extractor function when needed:
 
 
 ```{r}
@@ -99,11 +99,11 @@ We do not usually have to create `NeuroSpace` objects, because geometric informa
 
 When we're ready to write an image volume to disk, we use `write_vol`
 
-```{r}
-    #write_vol(vol2, "output.nii")
+```{r eval=FALSE}
+    write_vol(vol2, "output.nii")
     
     ## adding a '.gz' extension results ina gzipped file.
-    #write_vol(vol2, "output.nii.gz")
+    write_vol(vol2, "output.nii.gz")
 ```
 
 We can also display a `NeuroVol` instance. Lets download an MNI image from the web and plot it.
