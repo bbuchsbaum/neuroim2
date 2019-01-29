@@ -443,6 +443,7 @@ setMethod(f="[[", signature=signature(x="NeuroVec", i="numeric"),
 #' @param mode the IO mode which is one of "normal", "mmap", or "filebacked".
 #' @return an \code{\linkS4class{NeuroVec}} object
 #' @export
+#' @note memory-mapping a gzipped file is not allowed.
 read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap", "filebacked")) {
   mode <- match.arg(mode)
   if (mode == "normal") {
@@ -452,9 +453,18 @@ read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap
     if (!is.null(indices)) {
       stop("memory mapped mode does not currently support volume 'indices'")
     }
+    if (stringr::str_match(file_name, ".*gz$")) {
+      stop("cannot memory map a compressed file.")
+    }
     src <- MappedNeuroVecSource(file_name)
     load_data(src)
   } else if (mode == "filebacked") {
+    if (!is.null(indices)) {
+      stop("memory mapped mode does not currently support volume 'indices'")
+    }
+    if (stringr::str_match(file_name, ".*gz$")) {
+      stop("cannot memory map a compressed file.")
+    }
     FileBackedNeuroVec(file_name)
   } else {
     stop()
