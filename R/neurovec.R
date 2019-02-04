@@ -390,7 +390,7 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="numeri
 setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="ClusteredNeuroVol"),
           def = function(x, clusters,...) {
             assert_that(prod(dim(x)[1:3]) == length(clusters@mask))
-            m <- which(clusters@mask)
+            m <- which(clusters@mask > 0)
             clus <- rep(0, length(clusters@mask))
             clus[m] <- clusters@clusters
             split_clusters(x,clus)

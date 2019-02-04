@@ -82,6 +82,8 @@ setMethod(f="show", signature=signature("ClusteredNeuroVol"),
           }
 )
 
+## TODO add split_clusters for neurovec
+
 
 #' split_clusters
 #'
