@@ -97,14 +97,21 @@ setMethod(f="load_data", signature=c("NeuroVecSource"),
 			if (.hasSlot(meta, "slope")) {
 
         if (meta@slope != 0) {
-			    arr <- arr* meta@slope
+			    arr <- arr * meta@slope
         }
 			}
 
       bspace <- NeuroSpace(c(meta@dims[1:3], length(ind)),meta@spacing, meta@origin,
                            meta@spatial_axes, trans(meta))
-			DenseNeuroVec(arr[,,,ind,drop=FALSE], bspace, x)
 
+      if (length(dim(arr)) == 3) {
+        dim(arr) <- c(dim(arr),1)
+        DenseNeuroVec(unclass(arr), bspace, x)
+      else if (length(dim(arr)) == 4) {
+        DenseNeuroVec(arr[,,,ind,drop=FALSE], bspace, x)
+      } else {
+        stop("NeuroVecSource::load_data: array dimension must be equal to 3 or 4.")
+      }
 		})
 
 
