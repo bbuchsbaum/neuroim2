@@ -824,7 +824,7 @@ setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character",
 ## NeuroVecSeq methods
 
 #' Create an \code{NeuroVecSeq} instance for a variable length list of \code{NeuroVec} objects.
-Science Wing, Toronto, ON#'
+#'
 #' @param ... one or more instance of type \code{NeuroVec}
 #' @export
 #'

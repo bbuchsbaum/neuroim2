@@ -8,7 +8,7 @@ read_vec(file_name, indices = NULL, mask = NULL, mode = c("normal",
   "mmap", "filebacked"))
 }
 \arguments{
-\item{file_name}{the name of the file to load}
+\item{file_name}{the name(s) of the file(s) to load. If more than one file_name is specified, the files are loaded and concatenated.}
 
 \item{indices}{the indices of the sub-volumes to load (e.g. if the file is 4-dimensional)}
 
@@ -21,4 +21,7 @@ an \code{\linkS4class{NeuroVec}} object
 }
 \description{
 load an image volume from a file
+}
+\note{
+memory-mapping a gzipped file is not allowed.
 }
