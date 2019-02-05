@@ -97,14 +97,21 @@ setMethod(f="load_data", signature=c("NeuroVecSource"),
 			if (.hasSlot(meta, "slope")) {
 
         if (meta@slope != 0) {
-			    arr <- arr* meta@slope
+			    arr <- arr * meta@slope
         }
 			}
 
       bspace <- NeuroSpace(c(meta@dims[1:3], length(ind)),meta@spacing, meta@origin,
                            meta@spatial_axes, trans(meta))
-			DenseNeuroVec(arr[,,,ind,drop=FALSE], bspace, x)
 
+      if (length(dim(arr)) == 3) {
+        dim(arr) <- c(dim(arr),1)
+        DenseNeuroVec(unclass(arr), bspace, x)
+      else if (length(dim(arr)) == 4) {
+        DenseNeuroVec(arr[,,,ind,drop=FALSE], bspace, x)
+      } else {
+        stop("NeuroVecSource::load_data: array dimension must be equal to 3 or 4.")
+      }
 		})
 
 
@@ -390,7 +397,7 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="numeri
 setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="ClusteredNeuroVol"),
           def = function(x, clusters,...) {
             assert_that(prod(dim(x)[1:3]) == length(clusters@mask))
-            m <- which(clusters@mask)
+            m <- which(clusters@mask > 0)
             clus <- rep(0, length(clusters@mask))
             clus[m] <- clusters@clusters
             split_clusters(x,clus)
@@ -459,6 +466,7 @@ setMethod(f="[[", signature=signature(x="NeuroVec", i="numeric"),
 #'
 #'
 #' @export
+#' @note memory-mapping a gzipped file is not allowed.
 read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap", "filebacked")) {
   mode <- match.arg(mode)
   vecs <- if (mode == "normal") {
@@ -468,11 +476,25 @@ read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap
     if (!is.null(indices)) {
       stop("memory mapped mode does not currently support volume 'indices'")
     }
+# <<<<<<< HEAD
+#     if (stringr::str_match(file_name, ".*gz$")) {
+#       stop("cannot memory map a compressed file.")
+#     }
+#     src <- MappedNeuroVecSource(file_name)
+#     load_data(src)
+#   } else if (mode == "filebacked") {
+#     if (!is.null(indices)) {
+#       stop("memory mapped mode does not currently support volume 'indices'")
+#     }
+#     if (stringr::str_match(file_name, ".*gz$")) {
+#       stop("cannot memory map a compressed file.")
+#     }
+#     FileBackedNeuroVec(file_name)
+# =======
     lapply(file_name, function(fn) load_data(MappedNeuroVecSource(fn)))
 
   } else if (mode == "filebacked") {
     lapply(file_name, function(fn) FileBackedNeuroVec(fn))
-
   } else {
     stop()
   }

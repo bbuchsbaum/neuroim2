@@ -95,6 +95,7 @@ setMethod(f="centroids", signature=signature(x="ClusteredNeuroVol"),
             }
           })
 
+## TODO add split_clusters for neurovec
 
 #' split_clusters
 #'
