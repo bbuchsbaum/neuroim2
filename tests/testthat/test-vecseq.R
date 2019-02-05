@@ -3,6 +3,7 @@ library(testthat)
 library(assertthat)
 
 gmask5 <- system.file("extdata", "global_mask_v5.nii", package="neuroim2")
+mask <- system.file("extdata", "global_mask.nii", package="neuroim2")
 
 context("neurovecseq")
 
@@ -74,7 +75,14 @@ test_that("can extract vols from NeuroVecSeq", {
 
 })
 
-test_that("can use a MappedNeuroVec as elements in avNeuroVecSeq", {
+test_that("can subset a NeuroVecSeq", {
+  vec <- read_vec(c(gmask5, gmask5, gmask5))
+  vec5 <- sub_vector(vec, 1:5)
+  vec2 <- read_vec(gmask5)
+  expect_true(all(vec5 == vec2))
+})
+
+test_that("can use a MappedNeuroVec as elements in a NeuroVecSeq", {
   vec <- read_vec(gmask5)
   vs <- NeuroVecSeq(vec,vec,vec)
 

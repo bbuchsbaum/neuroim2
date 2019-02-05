@@ -107,7 +107,7 @@ setMethod(f="load_data", signature=c("NeuroVecSource"),
       if (length(dim(arr)) == 3) {
         dim(arr) <- c(dim(arr),1)
         DenseNeuroVec(unclass(arr), bspace, x)
-      else if (length(dim(arr)) == 4) {
+      } else if (length(dim(arr)) == 4) {
         DenseNeuroVec(arr[,,,ind,drop=FALSE], bspace, x)
       } else {
         stop("NeuroVecSource::load_data: array dimension must be equal to 3 or 4.")
@@ -158,6 +158,8 @@ NeuroVecSource <- function(file_name, indices=NULL, mask=NULL) {
 	if (is.null(mask)) {
 		new("NeuroVecSource", meta_info=meta_info, indices=as.integer(indices))
 	} else {
+	  mask <- as.logical(mask)
+	  assert_that(!is.na(mask))
 		SparseNeuroVecSource(meta_info, as.integer(indices), mask)
 	}
 
@@ -502,7 +504,7 @@ read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap
   if (length(vecs) == 1) {
     vecs[[1]]
   } else {
-    NeuroVecSeq(vecs)
+    do.call(NeuroVecSeq, vecs)
   }
 }
 
