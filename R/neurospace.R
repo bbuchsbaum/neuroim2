@@ -148,6 +148,14 @@ setMethod(f="dim", signature=signature(x = "NeuroSpace"),
 setMethod(f="ndim", signature=signature(x = "NeuroSpace"),
 		def=function(x) length(x@dim))
 
+#' @export
+#' @rdname centroid-methods
+setMethod(f="centroid", signature=signature(x = "NeuroSpace"),
+          def=function(x)  {
+            ind <- 1:prod(dim(x))
+            colMeans(index_to_coord(bspace,ind))
+          })
+
 
 #' @export
 #' @rdname dim_of-methods

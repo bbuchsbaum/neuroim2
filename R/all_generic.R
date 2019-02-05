@@ -349,6 +349,29 @@ setGeneric(name="axes",  def=function(x) standardGeneric("axes"))
 setGeneric(name="origin", def=function(x) standardGeneric("origin"))
 
 
+#' return the centroid of an object
+#'
+#' @param x an object with a centroid
+#' @param extra args
+#' @export
+#' @examples
+#' bspace <- NeuroSpace(c(10,10,10), c(2,2,2))
+#' centroid(bspace)
+#'
+#' @rdname centroid-methods
+setGeneric(name="centroid", def=function(x, ...) standardGeneric("centroid"))
+
+#' return a matrix of centroids of an object
+#'
+#' @param x an object with multiple centroids (e.g. a \code{ClusteredNeuroVol})
+#' @param extra args
+#' @export
+#' @examples
+#'
+#'
+#' @rdname centroid-methods
+setGeneric(name="centroids", def=function(x, ...) standardGeneric("centroids"))
+
 
 
 #' Generic getter to extract image coordinate transformation
