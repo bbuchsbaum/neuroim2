@@ -364,6 +364,15 @@ setMethod("as.dense", signature(x="ROIVol"),
             #NeuroVol(values(x), space(x), indices=indices(x))
 })
 
+#' @export
+#' @rdname centroid-methods
+setMethod(f="centroid", signature=signature(x = "ROICoords"),
+          def=function(x)  {
+            cds = coords(x, real=TRUE)
+            colMeans(cds)
+          })
+
+
 
 #' @rdname values-methods
 #' @export

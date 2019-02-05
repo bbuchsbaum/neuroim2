@@ -800,9 +800,18 @@ setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character",
 ## NeuroVecSeq methods
 
 #' Create an \code{NeuroVecSeq} instance for a variable length list of \code{NeuroVec} objects.
-#'
+Science Wing, Toronto, ON#'
 #' @param ... one or more instance of type \code{NeuroVec}
 #' @export
+#'
+#' @examples
+#'
+#' v1 <- NeuroVec(array(0,c(5,5,5,2)), space=NeuroSpace(dim=c(5,5,5,2)))
+#' v2 <- NeuroVec(array(0,c(5,5,5,4)), space=NeuroSpace(dim=c(5,5,5,4)))
+#' v3 <- NeuroVec(array(0,c(5,5,5,6)), space=NeuroSpace(dim=c(5,5,5,6)))
+#' vs <- NeuroVecSeq(v1,v2,v3)
+#' blks <- split_blocks(vs, rep(1:3, each=4))
+#' res <- blks %>% purrr::map( ~ dim(.))
 NeuroVecSeq <- function(...) {
   vecs <- list(...)
   assert_that(all(map_lgl(vecs, ~ inherits(., "NeuroVec"))))
