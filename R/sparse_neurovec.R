@@ -214,6 +214,28 @@ setMethod("series", signature(x="SparseNeuroVec", i="numeric"),
 
 		 })
 
+
+#' @param nonzero only include nonzero vectors in output list
+#' @export
+#' @rdname vectors-methods
+setMethod(f="vectors", signature=signature(x="SparseNeuroVec", subset="missing"),
+          def = function(x, nonzero=FALSE) {
+            if (nonzero) {
+              ind <- indices(svec)
+              f <- function(i) series(x, ind[i])
+              lis <- lapply(seq_along(ind), function(i) f)
+              deferred_list(lis)
+            } else {
+              ind <- 1:prod(dim(x)[1:3])
+              vox <- index_to_grid(x, ind)
+              f <- function(i) series(x, vox[i,1], vox[i,2], vox[i,3])
+              lis <- map(ind, function(i) f)
+              deferred_list(lis)
+            }
+
+          })
+
+
 #' @rdname concat-methods
 #' @export
 setMethod(f="concat", signature=signature(x="SparseNeuroVec", y="missing"),
