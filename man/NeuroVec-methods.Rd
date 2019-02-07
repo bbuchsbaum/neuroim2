@@ -16,8 +16,6 @@
 \item{i}{the volume index}
 }
 \description{
-[[
-
 #' @rdname series-methods
 #' @export
 setMethod("series", signature(x="NeuroVecSeq", i="numeric"),

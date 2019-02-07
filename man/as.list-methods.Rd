@@ -20,7 +20,5 @@
 \description{
 convert FileBackedNeuroVec to list of \code{\linkS4class{DenseNeuroVol}}
 
-convert a \code{NeuroVec} to \code{list} of volumes.
-
 convert SparseNeuroVec to list of \code{\linkS4class{DenseNeuroVol}}
 }

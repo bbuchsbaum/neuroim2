@@ -34,8 +34,7 @@
 
 <meta property="og:description" content="Create a spherical searchlight iterator that samples regions from within a mask.
 Create an exhaustive searchlight iterator that only returns voxel coordinates
-Generates an ROIVol around each non-zero voxel in a 3D image mask
-Create a clustered searchlight iterator" />
+Generates an ROIVol around each non-zero voxel in a 3D image mask" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -126,17 +125,16 @@ Create a clustered searchlight iterator" />
     <p>Create a spherical searchlight iterator that samples regions from within a mask.</p>
 <p>Create an exhaustive searchlight iterator that only returns voxel coordinates</p>
 <p>Generates an <code>ROIVol</code> around each non-zero voxel in a 3D image mask</p>
-<p>Create a clustered searchlight iterator</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'><a href='bootstrap_searchlight.html'>bootstrap_searchlight</a></span>(<span class='no'>mask</span>, <span class='kw'>radius</span> <span class='kw'>=</span> <span class='fl'>8</span>, <span class='kw'>iter</span> <span class='kw'>=</span> <span class='fl'>100</span>)
+    <pre class="usage"><span class='fu'>bootstrap_searchlight</span>(<span class='no'>mask</span>, <span class='kw'>radius</span> <span class='kw'>=</span> <span class='fl'>8</span>, <span class='kw'>iter</span> <span class='kw'>=</span> <span class='fl'>100</span>)
 
-<span class='fu'><a href='searchlight_coords.html'>searchlight_coords</a></span>(<span class='no'>mask</span>, <span class='no'>radius</span>, <span class='kw'>nonzero</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
+<span class='fu'>searchlight_coords</span>(<span class='no'>mask</span>, <span class='no'>radius</span>, <span class='kw'>nonzero</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
 
 <span class='fu'>searchlight</span>(<span class='no'>mask</span>, <span class='no'>radius</span>, <span class='kw'>eager</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>nonzero</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
 
-<span class='fu'><a href='clustered_searchlight.html'>clustered_searchlight</a></span>(<span class='no'>mask</span>, <span class='kw'>cvol</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>csize</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+<span class='fu'>clustered_searchlight</span>(<span class='no'>mask</span>, <span class='kw'>cvol</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>csize</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">

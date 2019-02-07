@@ -43,8 +43,6 @@ Create a spherical searchlight iterator that samples regions from within a mask.
 Create an exhaustive searchlight iterator that only returns voxel coordinates
 
 Generates an \code{ROIVol} around each non-zero voxel in a 3D image mask
-
-Create a clustered searchlight iterator
 }
 \details{
 searchlight centers are sampled without replacement, but the same surround voxel can belong to multiple searchlight samples.

@@ -12,8 +12,8 @@
 \usage{
 split_scale(x, f, center, scale)
 
-\S4method{split_scale}{matrix,factor,logical,logical}(x, f, center = TRUE,
-  scale = TRUE)
+\S4method{split_scale}{matrix,factor,logical,logical}(x, f,
+  center = TRUE, scale = TRUE)
 
 \S4method{split_scale}{matrix,factor,missing,missing}(x, f)
 

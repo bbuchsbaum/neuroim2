@@ -5,7 +5,8 @@
 \alias{[,SparseNeuroVol,numeric,numeric,ANY-method}
 \title{extractor}
 \usage{
-\S4method{[}{SparseNeuroVol,numeric,numeric,ANY}(x, i, j, k, ..., drop = TRUE)
+\S4method{[}{SparseNeuroVol,numeric,numeric,ANY}(x, i, j, k, ...,
+  drop = TRUE)
 }
 \arguments{
 \item{x}{the object}

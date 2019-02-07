@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>show a <code>SparseNeuroVol</code> — show,SparseNeuroVol-method • neuroim2</title>
+<title>Generic function to read a set of column vector from an input source (e.g. <code>ColumnReader</code>) — read_columns • neuroim2</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -30,9 +30,9 @@
 
 
 
-<meta property="og:title" content="show a <code>SparseNeuroVol</code> — show,SparseNeuroVol-method" />
+<meta property="og:title" content="Generic function to read a set of column vector from an input source (e.g. <code>ColumnReader</code>) — read_columns" />
 
-<meta property="og:description" content="show a SparseNeuroVol" />
+<meta property="og:description" content="Generic function to read a set of column vector from an input source (e.g. ColumnReader)" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -113,28 +113,35 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>show a <code>SparseNeuroVol</code></h1>
+    <h1>Generic function to read a set of column vector from an input source (e.g. <code>ColumnReader</code>)</h1>
     
-    <div class="hidden name"><code>show-SparseNeuroVol-method.Rd</code></div>
+    <div class="hidden name"><code>read_columns-methods.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>show a <code>SparseNeuroVol</code></p>
+    <p>Generic function to read a set of column vector from an input source (e.g. <code>ColumnReader</code>)</p>
     
     </div>
 
-    <pre class="usage"><span class='co'># S4 method for SparseNeuroVol</span>
-<span class='fu'>show</span>(<span class='no'>object</span>)</pre>
+    <pre class="usage"><span class='fu'>read_columns</span>(<span class='no'>x</span>, <span class='no'>column_indices</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>object</th>
-      <td><p>the object</p></td>
+      <th>x</th>
+      <td><p>the input channel</p></td>
+    </tr>
+    <tr>
+      <th>column_indices</th>
+      <td><p>the column indices</p></td>
     </tr>
     </table>
+    
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>a <code>matrix</code> consisting of the requested column vectors</p>
     
 
   </div>
@@ -142,7 +149,9 @@
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-                </ul>
+      
+      <li><a href="#value">Value</a></li>
+          </ul>
 
   </div>
 </div>

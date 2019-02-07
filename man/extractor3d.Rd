@@ -10,15 +10,20 @@
 \alias{[,NeuroVol,ROICoords,missing,ANY-method}
 \title{Array-like access for 3-dimensional data structures}
 \usage{
-\S4method{[}{ArrayLike3D,numeric,missing,ANY}(x, i, j, k, ..., drop = TRUE)
+\S4method{[}{ArrayLike3D,numeric,missing,ANY}(x, i, j, k, ...,
+  drop = TRUE)
 
-\S4method{[}{ArrayLike3D,matrix,missing,ANY}(x, i, j, k, ..., drop = TRUE)
+\S4method{[}{ArrayLike3D,matrix,missing,ANY}(x, i, j, k, ...,
+  drop = TRUE)
 
-\S4method{[}{ArrayLike3D,missing,missing,ANY}(x, i, j, k, ..., drop = TRUE)
+\S4method{[}{ArrayLike3D,missing,missing,ANY}(x, i, j, k, ...,
+  drop = TRUE)
 
-\S4method{[}{ArrayLike3D,missing,numeric,ANY}(x, i, j, k, ..., drop = TRUE)
+\S4method{[}{ArrayLike3D,missing,numeric,ANY}(x, i, j, k, ...,
+  drop = TRUE)
 
-\S4method{[}{NeuroVol,ROICoords,missing,ANY}(x, i, j, k, ..., drop = TRUE)
+\S4method{[}{NeuroVol,ROICoords,missing,ANY}(x, i, j, k, ...,
+  drop = TRUE)
 }
 \arguments{
 \item{x}{the object}

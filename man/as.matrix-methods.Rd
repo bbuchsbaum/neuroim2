@@ -21,9 +21,5 @@
 \item{x}{the object}
 }
 \description{
-convert a \code{NeuroVec} to a matrix
-
-convert a \code{ROIVec} to a matrix
-
 convert SparseNeuroVec to matrix
 }

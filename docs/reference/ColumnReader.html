@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>show a <code>SparseNeuroVol</code> — show,SparseNeuroVol-method • neuroim2</title>
+<title>ColumnReader — ColumnReader • neuroim2</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -30,9 +30,9 @@
 
 
 
-<meta property="og:title" content="show a <code>SparseNeuroVol</code> — show,SparseNeuroVol-method" />
+<meta property="og:title" content="ColumnReader — ColumnReader" />
 
-<meta property="og:description" content="show a SparseNeuroVol" />
+<meta property="og:description" content="Constructor for  ColumnReader class" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -113,26 +113,33 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>show a <code>SparseNeuroVol</code></h1>
+    <h1>ColumnReader</h1>
     
-    <div class="hidden name"><code>show-SparseNeuroVol-method.Rd</code></div>
+    <div class="hidden name"><code>ColumnReader.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>show a <code>SparseNeuroVol</code></p>
+    <p>Constructor for  <code><a href='ColumnReader-class.html'>ColumnReader</a></code> class</p>
     
     </div>
 
-    <pre class="usage"><span class='co'># S4 method for SparseNeuroVol</span>
-<span class='fu'>show</span>(<span class='no'>object</span>)</pre>
+    <pre class="usage"><span class='fu'>ColumnReader</span>(<span class='no'>nrow</span>, <span class='no'>ncol</span>, <span class='no'>reader</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>object</th>
-      <td><p>the object</p></td>
+      <th>nrow</th>
+      <td><p>the number of rows</p></td>
+    </tr>
+    <tr>
+      <th>ncol</th>
+      <td><p>the number of columns</p></td>
+    </tr>
+    <tr>
+      <th>reader</th>
+      <td><p>a function that takes a set of column indices and returns a <code>matrix</code></p></td>
     </tr>
     </table>
     

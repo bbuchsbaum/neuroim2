@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The neuroim2 package • neuroim2</title>
-<!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/flatly/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
 <script src="../pkgdown.js"></script><meta property="og:title" content="The neuroim2 package">
@@ -80,7 +80,7 @@
     <div class="page-header toc-ignore">
       <h1>The neuroim2 package</h1>
             
-            <h4 class="date">2018-07-02</h4>
+            <h4 class="date">2019-02-06</h4>
       
       
       <div class="hidden name"><code>neuroim.Rmd</code></div>
@@ -96,14 +96,25 @@
 <p>A brief summary of most important functions is below. More extended documentation can be found in the associated vignettes.</p>
 <div id="loading-an-image-volume" class="section level2">
 <h2 class="hasAnchor">
-<a href="#loading-an-image-volume" class="anchor"></a>loading an image volume</h2>
-<p><code>read_vol</code></p>
-<p>example:</p>
-<p><code><a href="../reference/read_vol.html">read_vol("example.nii")</a></code></p>
+<a href="#loading-an-image-volume" class="anchor"></a>Loading an image volume</h2>
+<p>To load a three-dimensional image volume into R, use the <code>read_vol</code> function. For example, if we wish to read in a file from disk, we can use the <code>read_vol</code> command. Here we load an example file included with the package:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">file_name &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="st">"extdata"</span>, <span class="st">"global_mask.nii"</span>, <span class="dt">package=</span><span class="st">"neuroim2"</span>)
+<span class="kw"><a href="../reference/print-methods.html">print</a></span>(file_name)
+<span class="co">#&gt; [1] "/Users/bbuchsbaum/Library/R/3.5/library/neuroim2/extdata/global_mask.nii"</span>
+vol &lt;-<span class="st"> </span><span class="kw"><a href="../reference/read_vol.html">read_vol</a></span>(file_name)</code></pre></div>
+<p>The variable <code>vol</code> now can be used to access the three-dimensional image data and is a instance of the <code>DenseNeuroVol</code> class. This is basically a three-dimensonal R array with some additional meta-information that describes the geometry of the image.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/print-methods.html">print</a></span>(vol)
+<span class="co">#&gt; NeuroVol</span>
+<span class="co">#&gt;   Type           : DenseNeuroVol </span>
+<span class="co">#&gt;   Dimension      : 64 64 25 </span>
+<span class="co">#&gt;   Spacing        : 3.5  X  3.5  X  3.7 </span>
+<span class="co">#&gt;   Origin         : 110  X  -110  X  -46.2 </span>
+<span class="co">#&gt;   Axes           : Right-to-Left Posterior-to-Anterior Inferior-to-Superior</span></code></pre></div>
+<p>To access infromation about</p>
 </div>
 <div id="writing-an-image-volume-to-disk" class="section level2">
 <h2 class="hasAnchor">
-<a href="#writing-an-image-volume-to-disk" class="anchor"></a>writing an image volume to disk</h2>
+<a href="#writing-an-image-volume-to-disk" class="anchor"></a>Writing an image volume to disk</h2>
 <p><code>write_vol</code></p>
 <p>example:</p>
 <p><code><a href="../reference/write_vol-methods.html">write_vol(vol, "example.nii")</a></code></p>
@@ -117,20 +128,20 @@
 </div>
 <div id="writing-a-4-dimensional-image-e-g-for-fmri" class="section level2">
 <h2 class="hasAnchor">
-<a href="#writing-a-4-dimensional-image-e-g-for-fmri" class="anchor"></a>writing a 4-dimensional image (e.g. for fMRI)</h2>
+<a href="#writing-a-4-dimensional-image-e-g-for-fmri" class="anchor"></a>Writing a 4-dimensional image (e.g. for fMRI)</h2>
 <p><code>write_vec</code></p>
 <p>example:</p>
 <p><code><a href="../reference/write_vec-methods.html">write_vec(bvec, "example_4d.nii")</a></code></p>
 </div>
 <div id="extract-a-time-series-from-a-single-voxel-in-a-4-dimensional-image" class="section level2">
 <h2 class="hasAnchor">
-<a href="#extract-a-time-series-from-a-single-voxel-in-a-4-dimensional-image" class="anchor"></a>extract a time-series from a single voxel in a 4-dimensional image</h2>
+<a href="#extract-a-time-series-from-a-single-voxel-in-a-4-dimensional-image" class="anchor"></a>Extract a time-series from a single voxel in a 4-dimensional image</h2>
 <p><code>series</code></p>
 <p>example: <code><a href="../reference/series-methods.html">series(bvec, 12,12,12)  ## voxel coordinates are [12,12,12] in grid units starting at [1,1,1]</a></code></p>
 </div>
 <div id="extract-a-time-series-matrix-from-a-set-of-voxels-in-a-4-dimensional-image" class="section level2">
 <h2 class="hasAnchor">
-<a href="#extract-a-time-series-matrix-from-a-set-of-voxels-in-a-4-dimensional-image" class="anchor"></a>extract a time-series matrix from a set of voxels in a 4-dimensional image</h2>
+<a href="#extract-a-time-series-matrix-from-a-set-of-voxels-in-a-4-dimensional-image" class="anchor"></a>Extract a time-series matrix from a set of voxels in a 4-dimensional image</h2>
 <p><code>series</code></p>
 <p>example: `series(bvec, voxmat) ## voxmat is an N by 3 matrix of voxel coordinates</p>
 </div>
@@ -144,12 +155,12 @@
       <ul class="nav nav-pills nav-stacked">
 <li>
 <a href="#the-neuroim2-package">The <strong>neuroim2</strong> package</a><ul class="nav nav-pills nav-stacked">
-<li><a href="#loading-an-image-volume">loading an image volume</a></li>
-      <li><a href="#writing-an-image-volume-to-disk">writing an image volume to disk</a></li>
+<li><a href="#loading-an-image-volume">Loading an image volume</a></li>
+      <li><a href="#writing-an-image-volume-to-disk">Writing an image volume to disk</a></li>
       <li><a href="#loading-a-4-dimensional-image-e-g-for-fmri">loading a 4-dimensional image (e.g. for fMRI)</a></li>
-      <li><a href="#writing-a-4-dimensional-image-e-g-for-fmri">writing a 4-dimensional image (e.g. for fMRI)</a></li>
-      <li><a href="#extract-a-time-series-from-a-single-voxel-in-a-4-dimensional-image">extract a time-series from a single voxel in a 4-dimensional image</a></li>
-      <li><a href="#extract-a-time-series-matrix-from-a-set-of-voxels-in-a-4-dimensional-image">extract a time-series matrix from a set of voxels in a 4-dimensional image</a></li>
+      <li><a href="#writing-a-4-dimensional-image-e-g-for-fmri">Writing a 4-dimensional image (e.g. for fMRI)</a></li>
+      <li><a href="#extract-a-time-series-from-a-single-voxel-in-a-4-dimensional-image">Extract a time-series from a single voxel in a 4-dimensional image</a></li>
+      <li><a href="#extract-a-time-series-matrix-from-a-set-of-voxels-in-a-4-dimensional-image">Extract a time-series matrix from a set of voxels in a 4-dimensional image</a></li>
       </ul>
 </li>
       </ul>

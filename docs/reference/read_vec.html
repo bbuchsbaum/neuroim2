@@ -132,7 +132,7 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>file_name</th>
-      <td><p>the name of the file to load</p></td>
+      <td><p>the name(s) of the file(s) to load. If more than one file_name is specified, the files are loaded and concatenated.</p></td>
     </tr>
     <tr>
       <th>indices</th>
@@ -152,6 +152,10 @@
 
     <p>an <code><a href='NeuroVec-class.html'>NeuroVec</a></code> object</p>
     
+    <h2 class="hasAnchor" id="note"><a class="anchor" href="#note"></a>Note</h2>
+
+    <p>memory-mapping a gzipped file is not allowed.</p>
+    
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -160,6 +164,8 @@
       <li><a href="#arguments">Arguments</a></li>
       
       <li><a href="#value">Value</a></li>
+
+      <li><a href="#note">Note</a></li>
           </ul>
 
   </div>

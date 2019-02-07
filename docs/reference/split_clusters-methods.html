@@ -173,14 +173,12 @@ split_clusters" />
 <span class='no'>grid</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='index_to_coord-methods.html'>index_to_coord</a></span>(<span class='no'>mask</span>, <span class='no'>mask.idx</span>)
 <span class='no'>vox</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='index_to_grid-methods.html'>index_to_grid</a></span>(<span class='no'>mask</span>, <span class='no'>mask.idx</span>)
 
-<span class='fu'>library</span>(<span class='no'>purrr</span>)</div><div class='output co'>#&gt; <span class='message'></span>
-#&gt; <span class='message'>Attaching package: ‘purrr’</span></div><div class='output co'>#&gt; <span class='message'>The following object is masked from ‘package:magrittr’:</span>
-#&gt; <span class='message'></span>
-#&gt; <span class='message'>    set_names</span></div><div class='input'><span class='co'>## partition coordinates into 50 clusters using 'kmeans'</span>
+<span class='fu'>library</span>(<span class='no'>purrr</span>)
+<span class='co'>## partition coordinates into 50 clusters using 'kmeans'</span>
 <span class='no'>kres</span> <span class='kw'>&lt;-</span> <span class='fu'>kmeans</span>(<span class='no'>grid</span>, <span class='kw'>centers</span><span class='kw'>=</span><span class='fl'>50</span>, <span class='kw'>iter.max</span><span class='kw'>=</span><span class='fl'>500</span>)
 <span class='no'>kvol</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='ClusteredNeuroVol-class.html'>ClusteredNeuroVol</a></span>(<span class='no'>mask</span>, <span class='no'>kres</span>$<span class='no'>cluster</span>)
 <span class='no'>klis</span> <span class='kw'>&lt;-</span> <span class='fu'>split_clusters</span>(<span class='no'>mask</span>, <span class='no'>kvol</span>)
-<span class='no'>ret1</span> <span class='kw'>&lt;-</span> <span class='no'>vol</span> <span class='kw'>%&gt;%</span> <span class='fu'>split_clusters</span>(<span class='no'>kvol</span>) <span class='kw'>%&gt;%</span> <span class='kw pkg'>purrr</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/purrr/topics/map'>map_dbl</a></span>(~ <span class='fu'>mean</span>(<span class='fu'><a href='values-methods.html'>values</a></span>(<span class='no'>.</span>)))
+<span class='no'>ret1</span> <span class='kw'>&lt;-</span> <span class='no'>vol</span> <span class='kw'>%&gt;%</span> <span class='fu'>split_clusters</span>(<span class='no'>kvol</span>) <span class='kw'>%&gt;%</span> <span class='kw pkg'>purrr</span><span class='kw ns'>::</span><span class='fu'><a href='https://purrr.tidyverse.org/reference/map.html'>map_dbl</a></span>(~ <span class='fu'>mean</span>(<span class='fu'><a href='values-methods.html'>values</a></span>(<span class='no'>.</span>)))
 
 <span class='co'>## split NeuroVol with 'integer' vector of clusters.</span>
 <span class='no'>indices</span> <span class='kw'>&lt;-</span> <span class='fu'>numeric</span>(<span class='fu'>prod</span>(<span class='fu'>dim</span>(<span class='no'>mask</span>)[<span class='fl'>1</span>:<span class='fl'>3</span>]))
@@ -188,7 +186,7 @@ split_clusters" />
 <span class='co'>## locations with a cluster value of 0 are ignored</span>
 <span class='no'>indices</span>[<span class='no'>mask.idx</span>] <span class='kw'>&lt;-</span> <span class='no'>kres</span>$<span class='no'>cluster</span>
 
-<span class='no'>ret2</span> <span class='kw'>&lt;-</span> <span class='no'>vol</span> <span class='kw'>%&gt;%</span> <span class='fu'>split_clusters</span>(<span class='fu'>as.integer</span>(<span class='no'>indices</span>)) <span class='kw'>%&gt;%</span> <span class='kw pkg'>purrr</span><span class='kw ns'>::</span><span class='fu'><a href='http://www.rdocumentation.org/packages/purrr/topics/map'>map_dbl</a></span>(~ <span class='fu'>mean</span>(<span class='fu'><a href='values-methods.html'>values</a></span>(<span class='no'>.</span>)))
+<span class='no'>ret2</span> <span class='kw'>&lt;-</span> <span class='no'>vol</span> <span class='kw'>%&gt;%</span> <span class='fu'>split_clusters</span>(<span class='fu'>as.integer</span>(<span class='no'>indices</span>)) <span class='kw'>%&gt;%</span> <span class='kw pkg'>purrr</span><span class='kw ns'>::</span><span class='fu'><a href='https://purrr.tidyverse.org/reference/map.html'>map_dbl</a></span>(~ <span class='fu'>mean</span>(<span class='fu'><a href='values-methods.html'>values</a></span>(<span class='no'>.</span>)))
 <span class='fu'>all</span>(<span class='no'>ret1</span> <span class='kw'>==</span> <span class='no'>ret1</span>)</div><div class='output co'>#&gt; [1] TRUE</div><div class='input'>
 </div></pre>
   </div>

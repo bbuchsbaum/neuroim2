@@ -7,15 +7,11 @@
 \alias{as
 
 conversion from \code{SparseNeuroVol} to \code{array}}
-\alias{as}
 \alias{as
 conversion from NeuroVol to LogicalNeuroVol}
 \alias{as
 
 conversion from NeuroVol to array}
-\alias{as}
-\alias{as}
-\alias{as}
 \title{conversion from SparseNeuroVol to numeric}
 \description{
 conversion from SparseNeuroVol to numeric

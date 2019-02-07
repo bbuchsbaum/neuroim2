@@ -43,6 +43,8 @@ reference:
     - origin
     - trans
     - voxels
+    - centroid
+    - centroids
 
   - title: querying, dividing, slicing, and extracting data from image data structures
     desc: >
@@ -57,6 +59,7 @@ reference:
     - series
     - series_roi
     - partition
+    - sub_vector
 
   - title: searchlight functions
     desc: >
