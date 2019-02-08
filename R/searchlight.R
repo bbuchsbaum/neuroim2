@@ -65,9 +65,11 @@ bootstrap_searchlight <- function(mask, radius=8, iter=100) {
 
   sample.idx <- sample(1:nrow(grid), iter)
 
+  force(mask)
   f <- function(i) spherical_roi(mask, grid[sample.idx[i],], radius, nonzero=TRUE)
 
-  dlis <- deferred_list(lapply(1:iter, function(i) f))
+  #dlis <- deferred_list(lapply(1:iter, function(i) f))
+  deferred_list(f, iter)
 }
 
 #' searchlight_coords
@@ -96,7 +98,9 @@ searchlight_coords <- function(mask, radius, nonzero=FALSE) {
     grid[ind,,drop=FALSE]
   }
 
-  deferred_list(map(seq_along(rad$indices), ~ f))
+  #deferred_list(map(seq_along(rad$indices), ~ f))
+  len <- nrow(cds)
+  deferred_list2(f, len)
 
   #purrr::map(seq_along(rad$indices), function(i) {
   #    ind <- rad$indices[[i]]
@@ -121,8 +125,11 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE) {
 
   grid <- index_to_grid(mask, mask.idx)
   if (!eager) {
+    force(mask)
+    force(radius)
     f <- function(i) { spherical_roi(mask, grid[i,], radius, nonzero=nonzero) }
-    deferred_list(lapply(1:nrow(grid), function(i) f))
+    #deferred_list(lapply(1:nrow(grid), function(i) f))
+    deferred_list2(f, nrow(grid))
   } else {
     cds <- index_to_coord(mask, mask.idx)
     rad <- rflann::RadiusSearch(cds, cds, radius=radius^2, max_neighbour=as.integer((radius+1))^3, build="kdtree", cores=0, checks=1)
@@ -171,7 +178,9 @@ clustered_searchlight <- function(mask, cvol=NULL, csize=NULL) {
     ROIVol(sp, index_to_grid(sp,ind), data=rep(1, length(ind)))
   }
 
-  dlis <- deferred_list(lapply(1:csize, function(i) f))
-  dlis
+  #dlis <- deferred_list(lapply(1:csize, function(i) f))
+  #dlis
+
+  deferred_list2(f, csize)
 
 }
