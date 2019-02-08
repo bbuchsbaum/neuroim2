@@ -59,6 +59,11 @@ random_searchlight <- function(mask, radius) {
 #' @export
 #' @rdname searchlight
 #' @details searchlight centers are sampled without replacement, but the same surround voxel can belong to multiple searchlight samples.
+#' @examples
+#'
+#' mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
+#' slight <- bootstrap_searchlight(mask, 6)
+#'
 bootstrap_searchlight <- function(mask, radius=8, iter=100) {
   mask.idx <- which(mask != 0)
   grid <- index_to_grid(mask, mask.idx)
@@ -69,7 +74,7 @@ bootstrap_searchlight <- function(mask, radius=8, iter=100) {
   f <- function(i) spherical_roi(mask, grid[sample.idx[i],], radius, nonzero=TRUE)
 
   #dlis <- deferred_list(lapply(1:iter, function(i) f))
-  deferred_list(f, iter)
+  deferred_list2(f, iter)
 }
 
 #' searchlight_coords
