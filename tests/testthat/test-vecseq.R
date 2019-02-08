@@ -82,6 +82,14 @@ test_that("can subset a NeuroVecSeq", {
   expect_true(all(vec5 == vec2))
 })
 
+test_that("can read a sparse NeuroVecSeq", {
+  m <- read_vol(mask)
+  vec <- read_vec(c(gmask5, gmask5, gmask5), mask=as.logical(mask))
+  vec5 <- sub_vector(vec, 1:5)
+  vec2 <- read_vec(gmask5, mask=as.logical(m))
+  expect_true(all(vec5 == vec2))
+})
+
 test_that("can use a MappedNeuroVec as elements in a NeuroVecSeq", {
   vec <- read_vec(gmask5)
   vs <- NeuroVecSeq(vec,vec,vec)

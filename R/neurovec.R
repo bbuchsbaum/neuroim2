@@ -313,8 +313,11 @@ setMethod(f="sub_vector", signature=signature(x="NeuroVec", i="numeric"),
 setMethod(f="vols", signature=signature(x="NeuroVec", indices="numeric"),
           def = function(x, indices) {
             assert_that(min(indices) > 0 && max(indices) <= dim(x)[4])
-            lis <- lapply(indices, function(i) function(i) x[[i]])
-            deferred_list(lis)
+            force(x)
+            f <- function(i) x[[indices[i]]]
+            #lis <- lapply(indices, function(i) function(i) x[[i]])
+            #deferred_list(lis)
+            deferred_list2(f, length(indices))
           })
 
 #' @export
