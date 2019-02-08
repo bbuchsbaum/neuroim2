@@ -87,6 +87,9 @@
       <a href="../articles/ImageVolumes.html">Working with Image Volumes</a>
     </li>
     <li>
+      <a href="../articles/NeuroVector.html">Four dimensional neuroimaging data</a>
+    </li>
+    <li>
       <a href="../articles/neuroim.html">The neuroim2 package</a>
     </li>
     <li>
@@ -131,7 +134,8 @@
 <span class='co'># S4 method for NeuroVol</span>
 <span class='fu'>plot</span>(<span class='no'>x</span>, <span class='kw'>cmap</span> <span class='kw'>=</span> <span class='fu'>gray</span>(<span class='fu'>seq</span>(<span class='fl'>0</span>, <span class='fl'>1</span>, <span class='kw'>length.out</span> <span class='kw'>=</span> <span class='fl'>255</span>)),
   <span class='kw'>zlevels</span> <span class='kw'>=</span> <span class='fu'>unique</span>(<span class='fu'>round</span>(<span class='fu'>seq</span>(<span class='fl'>1</span>, <span class='fu'>dim</span>(<span class='no'>x</span>)[<span class='fl'>3</span>], <span class='kw'>length.out</span> <span class='kw'>=</span> <span class='fl'>6</span>))),
-  <span class='kw'>irange</span> <span class='kw'>=</span> <span class='fu'>range</span>(<span class='no'>x</span>), <span class='kw'>thresh</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>0</span>, <span class='fl'>0</span>), <span class='kw'>bgvol</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+  <span class='kw'>irange</span> <span class='kw'>=</span> <span class='fu'>range</span>(<span class='no'>x</span>), <span class='kw'>thresh</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>0</span>, <span class='fl'>0</span>), <span class='kw'>alpha</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>bgvol</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>bgcmap</span> <span class='kw'>=</span> <span class='fu'>gray</span>(<span class='fu'>seq</span>(<span class='fl'>0</span>, <span class='fl'>1</span>, <span class='kw'>length.out</span> <span class='kw'>=</span> <span class='fl'>255</span>)))</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">

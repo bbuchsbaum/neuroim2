@@ -16,7 +16,8 @@ write_vec(x, file_name, format, data_type)
 
 \S4method{write_vec}{NeuroVec,character,missing,missing}(x, file_name)
 
-\S4method{write_vec}{NeuroVec,character,character,missing}(x, file_name, format)
+\S4method{write_vec}{NeuroVec,character,character,missing}(x, file_name,
+  format)
 
 \S4method{write_vec}{NeuroVec,character,missing,character}(x, file_name,
   data_type)

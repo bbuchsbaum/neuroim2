@@ -15,8 +15,6 @@ NeuroVolSource(input, index = 1)
 }
 \description{
 A class is used to produce a \code{\linkS4class{NeuroVol}} instance
-
-Constructor for NeuroVolSource
 }
 \section{Slots}{
 

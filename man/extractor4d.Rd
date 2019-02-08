@@ -10,15 +10,20 @@
 \alias{[,ArrayLike4D,missing,numeric,ANY-method}
 \title{Array-like access for 4-dimensional data structures}
 \usage{
-\S4method{[}{ArrayLike4D,matrix,missing,ANY}(x, i, j, k, m, ..., drop = TRUE)
+\S4method{[}{ArrayLike4D,matrix,missing,ANY}(x, i, j, k, m, ...,
+  drop = TRUE)
 
-\S4method{[}{ArrayLike4D,numeric,numeric,ANY}(x, i, j, k, m, ..., drop = TRUE)
+\S4method{[}{ArrayLike4D,numeric,numeric,ANY}(x, i, j, k, m, ...,
+  drop = TRUE)
 
-\S4method{[}{ArrayLike4D,numeric,missing,ANY}(x, i, j, k, m, ..., drop = TRUE)
+\S4method{[}{ArrayLike4D,numeric,missing,ANY}(x, i, j, k, m, ...,
+  drop = TRUE)
 
-\S4method{[}{ArrayLike4D,missing,missing,ANY}(x, i, j, k, m, ..., drop = TRUE)
+\S4method{[}{ArrayLike4D,missing,missing,ANY}(x, i, j, k, m, ...,
+  drop = TRUE)
 
-\S4method{[}{ArrayLike4D,missing,numeric,ANY}(x, i, j, k, m, ..., drop = TRUE)
+\S4method{[}{ArrayLike4D,missing,numeric,ANY}(x, i, j, k, m, ...,
+  drop = TRUE)
 }
 \arguments{
 \item{x}{the object}

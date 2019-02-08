@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pipelines • neuroim2</title>
-<!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<!-- jquery --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/flatly/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script><!-- Font Awesome icons --><link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
 <script src="../pkgdown.js"></script><meta property="og:title" content="Pipelines">
@@ -55,6 +55,9 @@
       <a href="../articles/ImageVolumes.html">Working with Image Volumes</a>
     </li>
     <li>
+      <a href="../articles/NeuroVector.html">Four dimensional neuroimaging data</a>
+    </li>
+    <li>
       <a href="../articles/neuroim.html">The neuroim2 package</a>
     </li>
     <li>
@@ -80,7 +83,7 @@
     <div class="page-header toc-ignore">
       <h1>Pipelines</h1>
             
-            <h4 class="date">2018-07-02</h4>
+            <h4 class="date">2019-02-08</h4>
       
       
       <div class="hidden name"><code>pipelines.Rmd</code></div>
@@ -109,16 +112,16 @@
 <p><img src="pipelines_files/figure-html/unnamed-chunk-2-1.png" width="700"></p>
 <p>Now we want to find the average value in each of the connected components using the <code>split_clusters</code> function. Since <code>conn_comp</code> returns a <code>ClusteredNeuroVol</code> containing the cluster indices, we use that to split the original volume into a list of <code>ROIVol</code>s and compute the mean over each one.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
-mvals &lt;-<span class="st"> </span>vol <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/split_clusters-methods.html">split_clusters</a></span>(comp<span class="op">$</span>index) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/purrr/topics/map">map_dbl</a></span>( <span class="op">~</span><span class="st"> </span><span class="kw">mean</span>(.))</code></pre></div>
+mvals &lt;-<span class="st"> </span>vol <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/split_clusters-methods.html">split_clusters</a></span>(comp<span class="op">$</span>index) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://purrr.tidyverse.org/reference/map.html">map_dbl</a></span>( <span class="op">~</span><span class="st"> </span><span class="kw">mean</span>(.))</code></pre></div>
 <p>Suppose we want to compute the local standard deviation within a 4mm radius of each voxel. We can use the <code>searchlight</code> function to construct a list of spherical ROIs centered on every voxel in the input set.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
-sdvol &lt;-<span class="st"> </span>vol <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/searchlight.html">searchlight</a></span>(<span class="dt">radius=</span><span class="dv">5</span>, <span class="dt">eager=</span><span class="ot">TRUE</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/purrr/topics/map">map_dbl</a></span>( <span class="op">~</span><span class="st"> </span><span class="kw">sd</span>(.)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/NeuroVol.html">NeuroVol</a></span>(<span class="dt">space=</span><span class="kw"><a href="../reference/space-methods.html">space</a></span>(vol), <span class="dt">indices=</span><span class="kw">which</span>(vol<span class="op">!=</span><span class="dv">0</span>))
+sdvol &lt;-<span class="st"> </span>vol <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/searchlight.html">searchlight</a></span>(<span class="dt">radius=</span><span class="dv">5</span>, <span class="dt">eager=</span><span class="ot">TRUE</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://purrr.tidyverse.org/reference/map.html">map_dbl</a></span>( <span class="op">~</span><span class="st"> </span><span class="kw">sd</span>(.)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/NeuroVol.html">NeuroVol</a></span>(<span class="dt">space=</span><span class="kw"><a href="../reference/space-methods.html">space</a></span>(vol), <span class="dt">indices=</span><span class="kw">which</span>(vol<span class="op">!=</span><span class="dv">0</span>))
 <span class="kw">plot</span>(sdvol, <span class="dt">cmap=</span><span class="kw">rainbow</span>(<span class="dv">255</span>))</code></pre></div>
 <p><img src="pipelines_files/figure-html/unnamed-chunk-4-1.png" width="700"></p>
 <p>Another thing we might to is compute the k nearest neighbors in each searchlight and replace the center voxel with the average intensity of its neighbors:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
 k &lt;-<span class="st"> </span><span class="dv">12</span>
-knnfvol &lt;-<span class="st"> </span>vol <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/searchlight.html">searchlight</a></span>(<span class="dt">radius=</span><span class="dv">12</span>, <span class="dt">eager=</span><span class="ot">TRUE</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/purrr/topics/map">map_dbl</a></span>(<span class="cf">function</span>(x) {
+knnfvol &lt;-<span class="st"> </span>vol <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/searchlight.html">searchlight</a></span>(<span class="dt">radius=</span><span class="dv">12</span>, <span class="dt">eager=</span><span class="ot">TRUE</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://purrr.tidyverse.org/reference/map.html">map_dbl</a></span>(<span class="cf">function</span>(x) {
   ind &lt;-<span class="st"> </span><span class="kw">order</span>((x[x<span class="op">@</span>center_index] <span class="op">-</span><span class="st"> </span>x)<span class="op">^</span><span class="dv">2</span>)[<span class="dv">1</span><span class="op">:</span>k]
   <span class="kw">mean</span>(x[ind])
 }) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/NeuroVol.html">NeuroVol</a></span>(<span class="dt">space=</span><span class="kw"><a href="../reference/space-methods.html">space</a></span>(vol), <span class="dt">indices=</span><span class="kw">which</span>(vol<span class="op">!=</span><span class="dv">0</span>))
@@ -126,17 +129,28 @@ knnfvol &lt;-<span class="st"> </span>vol <span class="op">%&gt;%</span><span cl
 <span class="kw">plot</span>(knnfvol, <span class="dt">cmap=</span><span class="kw">rainbow</span>(<span class="dv">255</span>), <span class="dt">zlevels=</span><span class="kw">seq</span>(<span class="dv">1</span>,<span class="dv">25</span>,<span class="dt">by=</span><span class="dv">3</span>))</code></pre></div>
 <p><img src="pipelines_files/figure-html/unnamed-chunk-5-1.png" width="700"> If we only need access to the searchlight coordinates (in voxel space), we can use the <code>searchlight_coords</code> function. Here, we simply replace the center voxel with the average of its neighbors in searchlight space:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
-avgvol &lt;-<span class="st"> </span>vol <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/searchlight_coords.html">searchlight_coords</a></span>(<span class="dt">radius=</span><span class="dv">12</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/purrr/topics/map">map_dbl</a></span>(<span class="cf">function</span>(x) {
+avgvol &lt;-<span class="st"> </span>vol <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/searchlight.html">searchlight_coords</a></span>(<span class="dt">radius=</span><span class="dv">12</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://purrr.tidyverse.org/reference/map.html">map_dbl</a></span>(<span class="cf">function</span>(x) {
   vals &lt;-<span class="st"> </span>vol[x]
   <span class="kw">mean</span>(vals[vals<span class="op">!=</span><span class="dv">0</span>])
 }) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/NeuroVol.html">NeuroVol</a></span>(<span class="dt">space=</span><span class="kw"><a href="../reference/space-methods.html">space</a></span>(vol), <span class="dt">indices=</span><span class="kw">which</span>(vol<span class="op">!=</span><span class="dv">0</span>))
 
 <span class="kw">plot</span>(avgvol, <span class="dt">cmap=</span><span class="kw">rainbow</span>(<span class="dv">255</span>), <span class="dt">zlevels=</span><span class="kw">seq</span>(<span class="dv">1</span>,<span class="dv">25</span>,<span class="dt">by=</span><span class="dv">3</span>))</code></pre></div>
-<p><img src="pipelines_files/figure-html/unnamed-chunk-6-1.png" width="700"> ## Mapping a function over each volume of a <code>NeuroVec</code> object</p>
+<p><img src="pipelines_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
+</div>
+<div id="mapping-a-function-over-every-slice-of-a-neurovol" class="section level2">
+<h2 class="hasAnchor">
+<a href="#mapping-a-function-over-every-slice-of-a-neurovol" class="anchor"></a>Mapping a function over every slice of a <code>NeuroVol</code>
+</h2>
+<p>Suppose we want to split up an image volume by slice and apply a function to each slice. We can use the <code>slices</code> function to achieve this as follows:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
+slice_means &lt;-<span class="st"> </span>vol <span class="op">%&gt;%</span><span class="st"> </span>slices <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://purrr.tidyverse.org/reference/map.html">map_dbl</a></span>(<span class="op">~</span><span class="st"> </span><span class="kw">mean</span>(.))
+<span class="kw">plot</span>(slice_means, <span class="dt">type=</span><span class="st">'l'</span>, <span class="dt">ylab=</span><span class="st">"mean intensity"</span>, <span class="dt">xlab=</span><span class="st">"slice number"</span>)</code></pre></div>
+<p><img src="pipelines_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Mapping a function over each volume of a `NeuroVec` object</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
 vec &lt;-<span class="st"> </span><span class="kw"><a href="../reference/concat-methods.html">concat</a></span>(vol,vol,vol,vol,vol)
-mean_vec &lt;-<span class="st"> </span>vec <span class="op">%&gt;%</span><span class="st"> </span>vols <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/purrr/topics/map">map_dbl</a></span>(<span class="op">~</span><span class="st"> </span><span class="kw">mean</span>(.))
-sd_vec &lt;-<span class="st"> </span>vec <span class="op">%&gt;%</span><span class="st"> </span>vols <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/purrr/topics/map">map_dbl</a></span>(<span class="op">~</span><span class="st"> </span><span class="kw">sd</span>(.))
+mean_vec &lt;-<span class="st"> </span>vec <span class="op">%&gt;%</span><span class="st"> </span>vols <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://purrr.tidyverse.org/reference/map.html">map_dbl</a></span>(<span class="op">~</span><span class="st"> </span><span class="kw">mean</span>(.))
+sd_vec &lt;-<span class="st"> </span>vec <span class="op">%&gt;%</span><span class="st"> </span>vols <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://purrr.tidyverse.org/reference/map.html">map_dbl</a></span>(<span class="op">~</span><span class="st"> </span><span class="kw">sd</span>(.))
 <span class="kw">assert_that</span>(<span class="kw">length</span>(mean_vec) <span class="op">==</span><span class="st"> </span><span class="kw">dim</span>(vec)[<span class="dv">4</span>])
 <span class="co">#&gt; [1] TRUE</span>
 <span class="kw">assert_that</span>(<span class="kw">length</span>(sd_vec) <span class="op">==</span><span class="st"> </span><span class="kw">dim</span>(vec)[<span class="dv">4</span>])
@@ -146,8 +160,7 @@ sd_vec &lt;-<span class="st"> </span>vec <span class="op">%&gt;%</span><span cla
 <h2 class="hasAnchor">
 <a href="#mapping-a-function-over-each-vector-of-a-neurovec-object" class="anchor"></a>Mapping a function over each vector of a <code>NeuroVec</code> object</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">vec &lt;-<span class="st"> </span><span class="kw"><a href="../reference/concat-methods.html">concat</a></span>(vol,vol,vol,vol,vol)
-f &lt;-<span class="st"> </span><span class="cf">function</span>(x) { <span class="kw">browser</span>() }
-mean_vol &lt;-<span class="st"> </span>vec <span class="op">%&gt;%</span><span class="st"> </span>vectors <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/purrr/topics/map">map_dbl</a></span>(<span class="op">~</span><span class="st"> </span><span class="kw">mean</span>(.)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/NeuroVec-class.html">NeuroVec</a></span>(., <span class="dt">space=</span><span class="kw"><a href="../reference/space-methods.html">space</a></span>(vol))
+mean_vol &lt;-<span class="st"> </span>vec <span class="op">%&gt;%</span><span class="st"> </span>vectors <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://purrr.tidyverse.org/reference/map.html">map_dbl</a></span>(<span class="op">~</span><span class="st"> </span><span class="kw">mean</span>(.)) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/NeuroVec-class.html">NeuroVec</a></span>(., <span class="dt">space=</span><span class="kw"><a href="../reference/space-methods.html">space</a></span>(vol))
 <span class="kw">assert_that</span>(<span class="kw">all</span>(<span class="kw">dim</span>(mean_vol) <span class="op">==</span><span class="st"> </span><span class="kw">dim</span>(vol)))
 <span class="co">#&gt; [1] TRUE</span></code></pre></div>
 </div>
@@ -162,6 +175,7 @@ mean_vol &lt;-<span class="st"> </span>vec <span class="op">%&gt;%</span><span c
 <li>
 <a href="#pipelining-operations-using-a-functional-approach">Pipelining operations using a functional approach</a><ul class="nav nav-pills nav-stacked">
 <li><a href="#splitting-an-image-into-connected-components">Splitting an image into connected components</a></li>
+      <li><a href="#mapping-a-function-over-every-slice-of-a-neurovol">Mapping a function over every slice of a <code>NeuroVol</code></a></li>
       <li><a href="#mapping-a-function-over-each-vector-of-a-neurovec-object">Mapping a function over each vector of a <code>NeuroVec</code> object</a></li>
       </ul>
 </li>

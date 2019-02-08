@@ -12,6 +12,7 @@ vignette: >
 knitr::opts_chunk$set(collapse = T, comment = "#>")
 library(purrr)
 library(assertthat)
+library(neuroim2)
 ```
 
 Pipelining operations using a functional approach

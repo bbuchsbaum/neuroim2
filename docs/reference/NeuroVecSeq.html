@@ -87,6 +87,9 @@
       <a href="../articles/ImageVolumes.html">Working with Image Volumes</a>
     </li>
     <li>
+      <a href="../articles/NeuroVector.html">Four dimensional neuroimaging data</a>
+    </li>
+    <li>
       <a href="../articles/neuroim.html">The neuroim2 package</a>
     </li>
     <li>
@@ -136,12 +139,22 @@
     </table>
     
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'>
+<span class='no'>v1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='NeuroVec-class.html'>NeuroVec</a></span>(<span class='fu'>array</span>(<span class='fl'>0</span>,<span class='fu'>c</span>(<span class='fl'>5</span>,<span class='fl'>5</span>,<span class='fl'>5</span>,<span class='fl'>2</span>)), <span class='kw'>space</span><span class='kw'>=</span><span class='fu'><a href='neuro_space.html'>NeuroSpace</a></span>(<span class='kw'>dim</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='fl'>5</span>,<span class='fl'>5</span>,<span class='fl'>5</span>,<span class='fl'>2</span>)))
+<span class='no'>v2</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='NeuroVec-class.html'>NeuroVec</a></span>(<span class='fu'>array</span>(<span class='fl'>0</span>,<span class='fu'>c</span>(<span class='fl'>5</span>,<span class='fl'>5</span>,<span class='fl'>5</span>,<span class='fl'>4</span>)), <span class='kw'>space</span><span class='kw'>=</span><span class='fu'><a href='neuro_space.html'>NeuroSpace</a></span>(<span class='kw'>dim</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='fl'>5</span>,<span class='fl'>5</span>,<span class='fl'>5</span>,<span class='fl'>4</span>)))
+<span class='no'>v3</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='NeuroVec-class.html'>NeuroVec</a></span>(<span class='fu'>array</span>(<span class='fl'>0</span>,<span class='fu'>c</span>(<span class='fl'>5</span>,<span class='fl'>5</span>,<span class='fl'>5</span>,<span class='fl'>6</span>)), <span class='kw'>space</span><span class='kw'>=</span><span class='fu'><a href='neuro_space.html'>NeuroSpace</a></span>(<span class='kw'>dim</span><span class='kw'>=</span><span class='fu'>c</span>(<span class='fl'>5</span>,<span class='fl'>5</span>,<span class='fl'>5</span>,<span class='fl'>6</span>)))
+<span class='no'>vs</span> <span class='kw'>&lt;-</span> <span class='fu'>NeuroVecSeq</span>(<span class='no'>v1</span>,<span class='no'>v2</span>,<span class='no'>v3</span>)
+<span class='no'>blks</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='split_blocks-methods.html'>split_blocks</a></span>(<span class='no'>vs</span>, <span class='fu'>rep</span>(<span class='fl'>1</span>:<span class='fl'>3</span>, <span class='kw'>each</span><span class='kw'>=</span><span class='fl'>4</span>))
+<span class='no'>res</span> <span class='kw'>&lt;-</span> <span class='no'>blks</span> <span class='kw'>%&gt;%</span> <span class='kw pkg'>purrr</span><span class='kw ns'>::</span><span class='fu'><a href='https://purrr.tidyverse.org/reference/map.html'>map</a></span>( ~ <span class='fu'>dim</span>(<span class='no'>.</span>))</div><div class='output co'>#&gt; <span class='error'>Error in blks %&gt;% purrr::map(~dim(.)): could not find function "%&gt;%"</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-                </ul>
+            
+      <li><a href="#examples">Examples</a></li>
+    </ul>
 
   </div>
 </div>

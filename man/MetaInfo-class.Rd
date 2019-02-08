@@ -8,7 +8,8 @@
 \usage{
 MetaInfo(Dim, spacing, origin = rep(0, length(spacing)),
   data_type = "FLOAT", label = "",
-  spatial_axes = OrientationList3D$AXIAL_LPI, additional_axes = NullAxis)
+  spatial_axes = OrientationList3D$AXIAL_LPI,
+  additional_axes = NullAxis)
 }
 \arguments{
 \item{Dim}{image dimensions}
@@ -30,8 +31,6 @@ an instance of class \code{\linkS4class{MetaInfo}}
 }
 \description{
 This class contains meta information for an image data type
-
-This class contains meta information for an image
 }
 \section{Slots}{
 
