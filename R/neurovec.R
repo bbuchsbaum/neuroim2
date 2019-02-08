@@ -641,7 +641,7 @@ setMethod(f="series", signature=signature(x="NeuroVec", i="integer"),
               ret <- matrix(vals, dim(x)[4], length(i))
               if (drop) drop(ret) else ret
             } else {
-              assert_that(length(i) == 1 && length(j) ==1 && length(k) ==1)
+              assert_that(length(i) == 1 && length(j) == 1 && length(k) ==1)
               ret <- x[i,j,k,]
               if (drop) drop(ret) else ret
             }
@@ -667,7 +667,11 @@ setMethod(f="series", signature=signature(x="NeuroVec", i="integer"),
 #' @export
 setMethod("series", signature(x="NeuroVec", i="numeric"),
 		def=function(x, i, j, k) {
-			callGeneric(x,as.integer(i),as.integer(j),as.integer(k))
+		  if (missing(j) && missing(k)) {
+			  callGeneric(x,as.integer(i))
+		  } else {
+		    callGeneric(x,as.integer(i), as.integer(j), as.integer(k))
+		  }
 		})
 
 

@@ -1,0 +1,60 @@
+---
+title: "Four dimensional neuroimaging data"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Pipelines}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r, echo = FALSE, message = FALSE}
+knitr::opts_chunk$set(collapse = T, comment = "#>")
+library(purrr)
+library(assertthat)
+library(neuroim2)
+```
+
+Working with four-dimensional neuroimaging data
+===================
+
+The `neuroim2` package contains data structures and functions for reading, accessing, and processing 4-dimensional neuroimaging data. The 
+
+## Reading a four-dimensional NifTI image with read_vec
+
+Here we read in a 4D image consisting of 5 time points,
+
+```{r}
+      library(purrr)
+      library(ggplot2)
+      file_name <- system.file("extdata", "global_mask_v5.nii", package="neuroim2")
+      vec <- read_vec(file_name)
+      dim(vec)
+```
+
+Now imagine we have a set of 4D images. We can read them in with `read_vec` as follows:
+
+
+```{r}
+    
+      file_name <- system.file("extdata", "global_mask_v5.nii", package="neuroim2")
+      vec <- read_vec(c(file_name, file_name, file_name))
+      dim(vec)
+```
+
+To extract a subset of volumes we can use the `sub_vector` function:
+
+```{r}
+    
+      vec_1_6 <- sub_vector(vec, 1:6)
+      dim(vec_1_6)
+```
+
+To get the time-series at voxel (1,1,1) we can use the `series` function:
+
+```{r}
+      
+      series(vec_1_6, 1,1,1)
+```
+
+
