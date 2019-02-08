@@ -4,11 +4,14 @@
 \name{split_blocks}
 \alias{split_blocks}
 \alias{split_blocks,NeuroVec,integer-method}
+\alias{split_blocks,NeuroVec,factor-method}
 \title{Generic function to cut a vector-valued object into a list of sub-blocks}
 \usage{
 split_blocks(x, indices, ...)
 
 \S4method{split_blocks}{NeuroVec,integer}(x, indices, ...)
+
+\S4method{split_blocks}{NeuroVec,factor}(x, indices, ...)
 }
 \arguments{
 \item{x}{the object to split}
