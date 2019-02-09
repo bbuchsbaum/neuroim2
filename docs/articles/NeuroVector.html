@@ -83,7 +83,7 @@
     <div class="page-header toc-ignore">
       <h1>Four dimensional neuroimaging data</h1>
             
-            <h4 class="date">2019-02-08</h4>
+            <h4 class="date">2019-02-09</h4>
       
       
       <div class="hidden name"><code>NeuroVector.Rmd</code></div>
@@ -106,12 +106,22 @@
       vec &lt;-<span class="st"> </span><span class="kw"><a href="../reference/read_vec.html">read_vec</a></span>(file_name)
       <span class="kw">dim</span>(vec)
 <span class="co">#&gt; [1] 64 64 25  5</span></code></pre></div>
-<p>Now imagine we have a set of 4D images. We can read them in with <code>read_vec</code> as follows:</p>
+<p>Now imagine we have a set of 4d images. We can read them in with <code>read_vec</code>. (Here we are just using three versions of the same file for the example).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    
       file_name &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="st">"extdata"</span>, <span class="st">"global_mask_v5.nii"</span>, <span class="dt">package=</span><span class="st">"neuroim2"</span>)
       vec &lt;-<span class="st"> </span><span class="kw"><a href="../reference/read_vec.html">read_vec</a></span>(<span class="kw">c</span>(file_name, file_name, file_name))
       <span class="kw">dim</span>(vec)
-<span class="co">#&gt; [1] 64 64 25 15</span></code></pre></div>
+<span class="co">#&gt; [1] 64 64 25 15</span>
+      
+      vec2 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/read_vec.html">read_vec</a></span>(<span class="kw">rep</span>(file_name, <span class="dv">10</span>))
+      vec2
+<span class="co">#&gt; NeuroVecSeq </span>
+<span class="co">#&gt;   Type           : NeuroVecSeq </span>
+<span class="co">#&gt;   Dimension      : 64 64 25 50 </span>
+<span class="co">#&gt;   Spacing        : 3.5  X  3.5  X  3.7 </span>
+<span class="co">#&gt;   Origin         : 112  X  -108  X  -46.2 </span>
+<span class="co">#&gt;   Axes           : Right-to-Left Posterior-to-Anterior Inferior-to-Superior </span>
+<span class="co">#&gt;   Coordinate Transform : -3.5 0 0 0 0 3.5 0 0 0 0 3.7 0 112 -108 -46.2 1</span></code></pre></div>
 <p>To extract a subset of volumes we can use the <code>sub_vector</code> function:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    
       vec_1_<span class="dv">6</span> &lt;-<span class="st"> </span><span class="kw"><a href="../reference/sub_vector-methods.html">sub_vector</a></span>(vec, <span class="dv">1</span><span class="op">:</span><span class="dv">6</span>)
@@ -121,6 +131,62 @@
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">      
       <span class="kw"><a href="../reference/series-methods.html">series</a></span>(vec_1_<span class="dv">6</span>, <span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>)
 <span class="co">#&gt; [1] 0 0 0 0 0 0</span></code></pre></div>
+<p>We can extract a 4d region of interest with the <code>series_roi</code> as follows:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">      file_name &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="st">"extdata"</span>, <span class="st">"global_mask.nii"</span>, <span class="dt">package=</span><span class="st">"neuroim2"</span>)
+      vol &lt;-<span class="st"> </span><span class="kw"><a href="../reference/read_vol.html">read_vol</a></span>(file_name)
+      roi &lt;-<span class="st"> </span><span class="kw"><a href="../reference/spherical_roi.html">spherical_roi</a></span>(vol, <span class="kw">c</span>(<span class="dv">12</span>,<span class="dv">12</span>,<span class="dv">12</span>), <span class="dt">radius=</span><span class="dv">8</span>)
+      rvec1 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/series-methods.html">series_roi</a></span>(vec, roi)
+      
+      ## or alternatively as a pipeline
+      rvec2 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/read_vol.html">read_vol</a></span>(file_name) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/spherical_roi.html">spherical_roi</a></span>(<span class="kw">c</span>(<span class="dv">12</span>,<span class="dv">12</span>,<span class="dv">12</span>), <span class="dt">radius=</span><span class="dv">8</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="../reference/series-methods.html">series_roi</a></span>(vec,.)
+      rvec2
+<span class="co">#&gt; </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; ROIVec </span>
+<span class="co">#&gt;   ncol:            49 </span>
+<span class="co">#&gt;   nrow:            15 </span>
+<span class="co">#&gt;   Parent Dim:      64 64 25 15 </span>
+<span class="co">#&gt;   Voxel Cen. Mass: 12 12 12</span>
+      
+      ## we can extract the ROI values with the `values` method.
+      assertthat<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/assertthat/topics/assert_that">assert_that</a></span>(<span class="kw">all</span>(<span class="kw"><a href="../reference/values-methods.html">values</a></span>(rvec1) <span class="op">==</span><span class="st"> </span><span class="kw"><a href="../reference/values-methods.html">values</a></span>(rvec2)))
+<span class="co">#&gt; [1] TRUE</span>
+      assertthat<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/assertthat/topics/assert_that">assert_that</a></span>(<span class="kw">all</span>(<span class="kw"><a href="../reference/coords-methods.html">coords</a></span>(rvec1) <span class="op">==</span><span class="st"> </span><span class="kw"><a href="../reference/coords-methods.html">coords</a></span>(rvec2)))
+<span class="co">#&gt; [1] TRUE</span></code></pre></div>
+<p>We can also extract an ROI using 1d indices:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
+r1 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/series-methods.html">series_roi</a></span>(vec, <span class="dv">1</span><span class="op">:</span><span class="dv">100</span>)
+r1
+<span class="co">#&gt; </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; ROIVec </span>
+<span class="co">#&gt;   ncol:            100 </span>
+<span class="co">#&gt;   nrow:            15 </span>
+<span class="co">#&gt;   Parent Dim:      64 64 25 15 </span>
+<span class="co">#&gt;   Voxel Cen. Mass: 27.46 1.36 1</span></code></pre></div>
+<p>Or we can extract a plain matrix using the <code>series</code> function:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">r2 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/series-methods.html">series</a></span>(vec, <span class="dv">1</span><span class="op">:</span><span class="dv">100</span>)
+<span class="kw">dim</span>(r2)
+<span class="co">#&gt; [1]  15 100</span></code></pre></div>
+<p>We can also use coordinate indexing using voxel coordinates, as follows:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## first we load a binary mask with the same spatial dimensions as our NeuroVec
+mask &lt;-<span class="st"> </span><span class="kw"><a href="../reference/read_vol.html">read_vol</a></span>(<span class="kw">system.file</span>(<span class="st">"extdata"</span>, <span class="st">"global_mask.nii"</span>, <span class="dt">package=</span><span class="st">"neuroim2"</span>))
+## now we convert indices to voxels
+vox &lt;-<span class="st"> </span><span class="kw"><a href="../reference/index_to_grid-methods.html">index_to_grid</a></span>(mask, <span class="dv">1</span><span class="op">:</span><span class="dv">100</span>)
+
+r3 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/series-methods.html">series</a></span>(vec, vox)
+<span class="kw">dim</span>(r3)
+<span class="co">#&gt; [1]  15 100</span></code></pre></div>
+<p>And the same using <code>series_roi</code>:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">r4 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/series-methods.html">series_roi</a></span>(vec,vox)
+r4
+<span class="co">#&gt; </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; ROIVec </span>
+<span class="co">#&gt;   ncol:            100 </span>
+<span class="co">#&gt;   nrow:            15 </span>
+<span class="co">#&gt;   Parent Dim:      64 64 25 15 </span>
+<span class="co">#&gt;   Voxel Cen. Mass: 27.46 1.36 1</span></code></pre></div>
 </div>
 </div>
   </div>
