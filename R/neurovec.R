@@ -82,7 +82,7 @@ DenseNeuroVec <- function(data, space, label="") {
 #' @rdname load_data-methods
 setMethod(f="load_data", signature=c("NeuroVecSource"),
 		def=function(x) {
-
+      #browser()
 			meta <- x@meta_info
 
 			stopifnot(length(meta@dims) == 4)
