@@ -15,12 +15,11 @@ library(assertthat)
 library(neuroim2)
 ```
 
-Working with four-dimensional neuroimaging data
-===================
+## Working with neuorimaging time-series data
 
-The `neuroim2` package contains data structures and functions for reading, accessing, and processing 4-dimensional neuroimaging data. The 
+The `neuroim2` package contains data structures and functions for reading, accessing, and processing 4-dimensional neuroimaging data. 
 
-## Reading a four-dimensional NifTI image with read_vec
+### Reading a four-dimensional NifTI image with read_vec
 
 Here we read in a 4D image consisting of 5 time points,
 
@@ -32,7 +31,7 @@ Here we read in a 4D image consisting of 5 time points,
       dim(vec)
 ```
 
-Now imagine we have a set of 4D images. We can read them in with `read_vec` as follows:
+Now imagine we have a set of 4d images. We can read them in with `read_vec`. (Here we are just using three versions of the same file for the example).
 
 
 ```{r}
@@ -40,6 +39,9 @@ Now imagine we have a set of 4D images. We can read them in with `read_vec` as f
       file_name <- system.file("extdata", "global_mask_v5.nii", package="neuroim2")
       vec <- read_vec(c(file_name, file_name, file_name))
       dim(vec)
+      
+      vec2 <- read_vec(rep(file_name, 10))
+      vec2
 ```
 
 To extract a subset of volumes we can use the `sub_vector` function:
@@ -50,11 +52,71 @@ To extract a subset of volumes we can use the `sub_vector` function:
       dim(vec_1_6)
 ```
 
+### Extracting time-series data using the `series` and `series_roi` functions
+
 To get the time-series at voxel (1,1,1) we can use the `series` function:
 
 ```{r}
       
       series(vec_1_6, 1,1,1)
 ```
+
+We can extract a 4d region of interest with the `series_roi` as follows:
+
+
+```{r}
+      file_name <- system.file("extdata", "global_mask.nii", package="neuroim2")
+      vol <- read_vol(file_name)
+      roi <- spherical_roi(vol, c(12,12,12), radius=8)
+      rvec1 <- series_roi(vec, roi)
+      
+      ## or alternatively as a pipeline
+      rvec2 <- read_vol(file_name) %>% spherical_roi(c(12,12,12), radius=8) %>% series_roi(vec,.)
+      rvec2
+      
+      ## we can extract the ROI values with the `values` method.
+      assertthat::assert_that(all(values(rvec1) == values(rvec2)))
+      assertthat::assert_that(all(coords(rvec1) == coords(rvec2)))
+      
+```
+
+We can also extract an ROI using 1d indices:
+
+```{r}
+
+r1 <- series_roi(vec, 1:100)
+r1
+```
+
+Or we can extract a plain matrix using the `series` function:
+
+```{r}
+r2 <- series(vec, 1:100)
+dim(r2)
+```
+
+We can also use coordinate indexing using voxel coordinates, as follows:
+
+```{r}
+## first we load a binary mask with the same spatial dimensions as our NeuroVec
+mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
+## now we convert indices to voxels
+vox <- index_to_grid(mask, 1:100)
+
+r3 <- series(vec, vox)
+dim(r3)
+```
+
+And the same using `series_roi`:
+
+```{r}
+r4 <- series_roi(vec,vox)
+r4
+```
+
+
+
+
+
 
 

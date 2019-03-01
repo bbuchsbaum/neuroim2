@@ -388,6 +388,40 @@ setMethod("values", signature(x="ROIVec"),
             x@.Data
           })
 
+#' @rdname vectors-methods
+#' @export
+setMethod("vectors", signature(x="ROIVec", subset="missing"),
+          function(x) {
+            ind <- 1:nrow(x@coords)
+            f <- function(i) x@.Data[,i]
+            #lis <- map(ind, function(i) f)
+            deferred_list2(f, length(ind))
+          })
+
+#' @rdname vectors-methods
+#' @export
+setMethod("vectors", signature(x="ROIVec", subset="integer"),
+          function(x, subset) {
+            ind <- (1:nrow(x@coords))[subset]
+            f <- function(i) x@.Data[,ind[i]]
+            #lis <- map(ind, function(i) f)
+            deferred_list2(f, length(ind))
+          })
+
+#' @rdname vectors-methods
+#' @export
+setMethod("vectors", signature(x="ROIVec", subset="numeric"),
+          function(x, subset) {
+            callGeneric(x, as.integer(subset))
+          })
+
+#' @rdname vectors-methods
+#' @export
+setMethod("vectors", signature(x="ROIVec", subset="logical"),
+          function(x, subset) {
+            callGeneric(x, as.integer(which(subset)))
+          })
+
 
 #' @rdname indices-methods
 #' @export

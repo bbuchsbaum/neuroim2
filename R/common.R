@@ -225,7 +225,6 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
   }
 
 
-
   out <- do.call(cbind, clist)
 
   nvols <- ncol(out)
