@@ -79,6 +79,13 @@ as.list.deferred_list2 <- function(x,...) {
   lapply(seq_along(i), function(j) x(i[j]))
 }
 
+#' @keywords internal
+#' @export
+length.deferred_list2 <- function (x)  {
+  attr(x, "len")
+}
+
+
 
 
 #' #' @keywords internal

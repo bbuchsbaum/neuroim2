@@ -92,13 +92,13 @@
 
     
     
-<div id="working-with-four-dimensional-neuroimaging-data" class="section level1">
-<h1 class="hasAnchor">
-<a href="#working-with-four-dimensional-neuroimaging-data" class="anchor"></a>Working with four-dimensional neuroimaging data</h1>
-<p>The <code>neuroim2</code> package contains data structures and functions for reading, accessing, and processing 4-dimensional neuroimaging data. The</p>
-<div id="reading-a-four-dimensional-nifti-image-with-read_vec" class="section level2">
+<div id="working-with-neuorimaging-time-series-data" class="section level2">
 <h2 class="hasAnchor">
-<a href="#reading-a-four-dimensional-nifti-image-with-read_vec" class="anchor"></a>Reading a four-dimensional NifTI image with read_vec</h2>
+<a href="#working-with-neuorimaging-time-series-data" class="anchor"></a>Working with neuorimaging time-series data</h2>
+<p>The <code>neuroim2</code> package contains data structures and functions for reading, accessing, and processing 4-dimensional neuroimaging data.</p>
+<div id="reading-a-four-dimensional-nifti-image-with-read_vec" class="section level3">
+<h3 class="hasAnchor">
+<a href="#reading-a-four-dimensional-nifti-image-with-read_vec" class="anchor"></a>Reading a four-dimensional NifTI image with read_vec</h3>
 <p>Here we read in a 4D image consisting of 5 time points,</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">      <span class="kw">library</span>(purrr)
       <span class="kw">library</span>(ggplot2)
@@ -127,6 +127,10 @@
       vec_1_<span class="dv">6</span> &lt;-<span class="st"> </span><span class="kw"><a href="../reference/sub_vector-methods.html">sub_vector</a></span>(vec, <span class="dv">1</span><span class="op">:</span><span class="dv">6</span>)
       <span class="kw">dim</span>(vec_1_<span class="dv">6</span>)
 <span class="co">#&gt; [1] 64 64 25  6</span></code></pre></div>
+</div>
+<div id="extracting-time-series-data-using-the-series-and-series_roi-functions" class="section level3">
+<h3 class="hasAnchor">
+<a href="#extracting-time-series-data-using-the-series-and-series_roi-functions" class="anchor"></a>Extracting time-series data using the <code>series</code> and <code>series_roi</code> functions</h3>
 <p>To get the time-series at voxel (1,1,1) we can use the <code>series</code> function:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">      
       <span class="kw"><a href="../reference/series-methods.html">series</a></span>(vec_1_<span class="dv">6</span>, <span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>)
@@ -196,11 +200,7 @@ r4
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
-<li>
-<a href="#working-with-four-dimensional-neuroimaging-data">Working with four-dimensional neuroimaging data</a><ul class="nav nav-pills nav-stacked">
-<li><a href="#reading-a-four-dimensional-nifti-image-with-read_vec">Reading a four-dimensional NifTI image with read_vec</a></li>
-      </ul>
-</li>
+<li><a href="#working-with-neuorimaging-time-series-data">Working with neuorimaging time-series data</a></li>
       </ul>
 </div>
       </div>
