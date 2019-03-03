@@ -58,7 +58,8 @@ Imports:
   rflann,
   stringr,
   methods,
-  colorplane
+  colorplane,
+  Gmedian
 Suggests: testthat,
     covr,
     knitr,

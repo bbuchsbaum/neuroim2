@@ -47,3 +47,9 @@ Generates an \code{ROIVol} around each non-zero voxel in a 3D image mask
 \details{
 searchlight centers are sampled without replacement, but the same surround voxel can belong to multiple searchlight samples.
 }
+\examples{
+
+mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
+slight <- bootstrap_searchlight(mask, 6)
+
+}

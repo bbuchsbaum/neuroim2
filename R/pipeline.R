@@ -46,20 +46,22 @@ as.list.deferred_list <- function(x,...) {
 #' @export
 deferred_list2 <- function(f, len=1) {
   assert_that(is.function(f))
-  structure(f, len=len, class=c("deferred_list2"))
+  ret <- list(f=f, len=len)
+  class(ret) <- c("deferred_list2", "list")
+  ret
 }
 
 
 #' @export
-#' @method print deferred_list
+#' @method print deferred_list2
 print.deferred_list2 <- function(x,...) {
-  cat("deferred_list2: ", attr(x, "len"), " elements. \n")
+  cat("deferred_list2: ", x$len, " elements. \n")
 }
 
 #' @export
-#' @method as.list deferred_list
+#' @method as.list deferred_list2
 as.list.deferred_list2 <- function(x,...) {
-  purrr::map(seq(1,attr(x, "len")), ~ x[[.]])
+  purrr::map(seq(1,x$len), ~ x[[.]])
 }
 
 
@@ -68,21 +70,21 @@ as.list.deferred_list2 <- function(x,...) {
 `[[.deferred_list2` <- function (x, i)  {
   #ff <- NextMethod()
   #ff(i)
-  stopifnot(i <= attr(x, "len"))
-  x(i)
+  stopifnot(i <= x$len)
+  x$f(i)
 }
 
 #' @keywords internal
 #' @export
 `[.deferred_list2` <- function (x, i)  {
   #ff <- NextMethod()
-  lapply(seq_along(i), function(j) x(i[j]))
+  lapply(seq_along(i), function(j) x$f(i[j]))
 }
 
 #' @keywords internal
 #' @export
 length.deferred_list2 <- function (x)  {
-  attr(x, "len")
+  x$len
 }
 
 

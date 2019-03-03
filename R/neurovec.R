@@ -33,7 +33,8 @@ NeuroVec <- function(data, space=NULL, mask=NULL, label="") {
 	  }
 		DenseNeuroVec(data,space, label)
 	} else {
-		SparseNeuroVec(data,space,mask,label)
+		#SparseNeuroVec(data,space,mask,label)
+	  SparseNeuroVec(data,space,mask)
 	}
 
 }
@@ -223,7 +224,8 @@ read_vol_list <- function(file_names, mask=NULL) {
 		}
 
 
-		SparseNeuroVec(mat[mask,], dspace, mask=mask, label=map_chr(meta_info, function(m) m@label))
+		#SparseNeuroVec(mat[mask,], dspace, mask=mask, label=map_chr(meta_info, function(m) m@label))
+		SparseNeuroVec(mat[mask,], dspace, mask=mask)
 
 	}
 }
