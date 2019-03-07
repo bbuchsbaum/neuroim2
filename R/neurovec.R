@@ -94,6 +94,12 @@ setMethod(f="load_data", signature=c("NeuroVecSource"),
 			## use RNifti, fails to work with other formats, though...
 			arr <- RNifti::readNifti(meta@data_file)
 
+			if (length(dim(arr)) == 5 && dim(arr)[4] == 1) {
+			  ## if 4th dimension is of length 1, drop it
+			  arr <- drop(arr)
+			}
+
+
 			## bit of a hack to deal with scale factors
 			if (.hasSlot(meta, "slope")) {
 

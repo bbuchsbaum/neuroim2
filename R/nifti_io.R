@@ -186,6 +186,8 @@ read_nifti_header <- function(fname) {
 
 	readBin(conn, what=integer(), n=10+18+4+2+1, size=1)
 
+	#browser()
+
 	header$diminfo <- readBin(conn, what=integer(), n=1, size=1)
 	header$dimensions <- readBin(conn, integer(), n=8, size=2, endian=endian)
 
@@ -193,8 +195,15 @@ read_nifti_header <- function(fname) {
 
 	.checkDimensions(header$dimensions)
 
-
 	header$num_dimensions <- header$dimensions[1]
+
+	if (header$num_dimensions == 5 && header$dimensions[5] == 1) {
+	  warning("read_nifti_header: collapsing fourth dimension because it has length = 1")
+	  newdim <- header$dimensions[c(1:4, 6)]
+	  header$num_dimensions <- 4
+	  header$dimensions <- c(newdim, rep(1,3))
+	  header$dimensions[1] <- 4
+	}
 
 	header$intent1 <-  readBin(conn, double(), n=1, size=4, endian=endian)
 	header$intent2 <-  readBin(conn, double(), n=1, size=4, endian=endian)
