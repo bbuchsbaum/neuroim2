@@ -166,7 +166,7 @@ NeuroVecSource <- function(file_name, indices=NULL, mask=NULL) {
 		new("NeuroVecSource", meta_info=meta_info, indices=as.integer(indices))
 	} else {
 	  mask <- as.logical(mask)
-	  assert_that(!is.na(mask))
+	  assert_that(!any(is.na(mask)))
 		SparseNeuroVecSource(meta_info, as.integer(indices), mask)
 	}
 
