@@ -60,8 +60,8 @@ DenseNeuroVol <- function(data, space, label="", indices=NULL) {
 	}
 
 
-
 	if (!is.null(indices)) {
+	  assert_that(length(indices) == length(data))
 		newdat <- array(0, dim(space))
 		newdat[indices] <- data
 		data <- newdat
