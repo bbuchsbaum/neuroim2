@@ -27,7 +27,7 @@ random_searchlight <- function(mask, radius) {
 
   while (len > 0) {
 
-    center <- as.integer(keys[1])
+    center <- as.integer(sample(keys,1))
 
     search <- spherical_roi(mask, grid[center,], radius, nonzero=TRUE)
     vox <- coords(search)
