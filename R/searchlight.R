@@ -13,7 +13,7 @@ random_searchlight <- function(mask, radius) {
   mask.idx <- which(mask != 0)
 
   grid <- index_to_grid(mask, as.numeric(mask.idx))
-  hmap <- as.list(mask.idx)
+  hmap <- as.list(sample(mask.idx))
   names(hmap) <- 1:length(hmap)
   hmap <- list2env(hmap)
 
