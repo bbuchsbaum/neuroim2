@@ -13,7 +13,7 @@ random_searchlight <- function(mask, radius) {
   mask.idx <- which(mask != 0)
 
   grid <- index_to_grid(mask, as.numeric(mask.idx))
-  hmap <- as.list(sample(mask.idx))
+  hmap <- as.list(mask.idx)
   names(hmap) <- 1:length(hmap)
   hmap <- list2env(hmap)
 
@@ -27,7 +27,7 @@ random_searchlight <- function(mask, radius) {
 
   while (len > 0) {
 
-    center <- as.integer(keys[1])
+    center <- as.integer(sample(keys,1))
 
     search <- spherical_roi(mask, grid[center,], radius, nonzero=TRUE)
     vox <- coords(search)
