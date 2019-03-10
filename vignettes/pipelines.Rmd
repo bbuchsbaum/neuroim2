@@ -70,10 +70,10 @@ If we only need access to the searchlight coordinates (in voxel space), we can u
 
 ```{r}
 
-avgvol <- vol %>% searchlight_coords(radius=12) %>% lapply(function(x) {
+avgvol <- vol %>% searchlight_coords(radius=12) %>% map_dbl(function(x) {
   vals <- vol[x]
   mean(vals[vals!=0])
-}) %>% unlist() %>% NeuroVol(space=space(vol), indices=which(vol!=0))
+}) %>% NeuroVol(space=space(vol), indices=which(vol!=0))
 
 plot(avgvol, cmap=rainbow(255), zlevels=seq(1,25,by=3))
 
