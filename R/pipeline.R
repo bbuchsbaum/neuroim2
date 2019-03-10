@@ -47,7 +47,7 @@ as.list.deferred_list <- function(x,...) {
 deferred_list2 <- function(f, len=1) {
   assert_that(is.function(f))
   #deferred_list(replicate(len, f))
-  ret <- structure(vector(mode="list", length=0), f=f, len=len, class=c("deferred_list2", "pairlist"))
+  ret <- structure(vector(mode="list", length=len), f=f, len=len, class=c("deferred_list2", "pairlist"))
   class(ret) <- c("deferred_list2", "list")
   ret
 }
