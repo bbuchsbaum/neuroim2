@@ -19,5 +19,5 @@ v2 <- NeuroVec(array(0,c(5,5,5,4)), space=NeuroSpace(dim=c(5,5,5,4)))
 v3 <- NeuroVec(array(0,c(5,5,5,6)), space=NeuroSpace(dim=c(5,5,5,6)))
 vs <- NeuroVecSeq(v1,v2,v3)
 blks <- split_blocks(vs, rep(1:3, each=4))
-res <- blks \%>\% purrr::map( ~ dim(.))
+#res <- blks \%>\% purrr::map( ~ dim(.))
 }
