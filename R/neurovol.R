@@ -843,7 +843,7 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 #'
 #' dat <- matrix(rnorm(100*100), 100, 100)
 #' slice <- NeuroSlice(dat, NeuroSpace(c(100,100)))
-#' plot(slice)
+#' #plot(slice)
 setMethod("plot", signature=signature(x="NeuroVol"),
           def=function(x,cmap=gray(seq(0,1,length.out=255)),
                                    zlevels=unique(round(seq(1, dim(x)[3], length.out=6))),
