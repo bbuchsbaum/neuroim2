@@ -70,7 +70,7 @@ setMethod(f="index_to_grid", signature=signature(x = "NeuroSlice", idx="numeric"
 #'
 #' dat <- matrix(rnorm(100*100), 100, 100)
 #' slice <- NeuroSlice(dat, NeuroSpace(c(100,100)))
-#' plot(slice)
+#' #plot(slice)
 setMethod("plot", signature=signature(x="NeuroSlice"),
           def=function(x,cmap=gray(seq(0,1,length.out=255)), irange=range(x)) {
             if (!requireNamespace("ggplot2", quietly = TRUE)) {
