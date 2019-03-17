@@ -69,3 +69,5 @@ Suggests: testthat,
 Remotes: 
   YeeJeremy/rflann,
   bbuchsbaum/colorplane
+URL: https://github.com/bbuchsbaum/neuroim2
+BugReports: https://github.com/bbuchsbaum/neuroim2/issues
