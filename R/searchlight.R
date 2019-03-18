@@ -26,7 +26,6 @@ random_searchlight <- function(mask, radius) {
   keys <- ls(hmap,sorted=FALSE)
 
   while (len > 0) {
-    print(len)
     ## select a center voxel from remaining indices
     center <- as.integer(sample(keys,1))
 
