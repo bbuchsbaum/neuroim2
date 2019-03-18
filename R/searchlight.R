@@ -83,12 +83,12 @@ bootstrap_searchlight <- function(mask, radius=8, iter=100) {
 
 #' searchlight_coords
 #'
-#' Create an exhaustive searchlight iterator that only returns voxel coordinates
+#' Create an exhaustive searchlight iterator that only returns voxel coordinates.
 #'
-#' @param mask an image volume containing valid central voxels for roving searchlight
-#' @param radius in mm of spherical searchlight
-#' @param nonzero only include nonzero coordinates
-#' @return a list ofmatrices containing of integer-valued voxel coordinates
+#' @param mask an image volume containing valid central voxels for roving searchlight.
+#' @param radius in mm of spherical searchlight.
+#' @param nonzero only include coordinates with nonzero values in the supplied mask.
+#' @return a list ofmatrices containing of integer-valued voxel coordinates.
 #' @rdname searchlight
 #' @importFrom rflann RadiusSearch
 #' @export

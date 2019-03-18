@@ -16,13 +16,13 @@ searchlight(mask, radius, eager = FALSE, nonzero = FALSE)
 clustered_searchlight(mask, cvol = NULL, csize = NULL)
 }
 \arguments{
-\item{mask}{an image volume containing valid central voxels for roving searchlight}
+\item{mask}{an image volume containing valid central voxels for roving searchlight.}
 
-\item{radius}{in mm of spherical searchlight}
+\item{radius}{in mm of spherical searchlight.}
 
 \item{iter}{the total number of searchlights to sample (default is 100).}
 
-\item{nonzero}{only include nonzero coordinates}
+\item{nonzero}{only include coordinates with nonzero values in the supplied mask.}
 
 \item{eager}{if TRUE, then all searchlight coordinates set are generated up front. This is faster but requires more memory to store all coordinates.}
 
@@ -31,7 +31,7 @@ clustered_searchlight(mask, cvol = NULL, csize = NULL)
 \item{csize}{the number of clusters (ignored if \code{cvol} is provided)}
 }
 \value{
-a list ofmatrices containing of integer-valued voxel coordinates
+a list ofmatrices containing of integer-valued voxel coordinates.
 
 a list of \code{ROIVolWindow} objects
 
@@ -40,7 +40,7 @@ an \code{iter} class
 \description{
 Create a spherical searchlight iterator that samples regions from within a mask.
 
-Create an exhaustive searchlight iterator that only returns voxel coordinates
+Create an exhaustive searchlight iterator that only returns voxel coordinates.
 
 Generates an \code{ROIVol} around each non-zero voxel in a 3D image mask
 }

@@ -95,12 +95,15 @@ r2 <- series(vec, 1:100)
 dim(r2)
 ```
 
-We can also use coordinate indexing using voxel coordinates, as follows:
+We can also use coordinate indexing using voxel coordinates. First we load a binary mask with the same spatial dimensions as our NeuroVec:
 
 ```{r}
-## first we load a binary mask with the same spatial dimensions as our NeuroVec
 mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
-## now we convert indices to voxels
+```
+
+Now we convert indices to voxels and extract a matrix of values at the specified locations:
+
+```{r}
 vox <- index_to_grid(mask, 1:100)
 
 r3 <- series(vec, vox)

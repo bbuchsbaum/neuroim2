@@ -18,63 +18,6 @@ The **neuroim2** package
 
 The **neuroim2** package is a library of S4 classes and functions supporting neuroimaigng analysis in R. It contains data structures for 3D and 4D images and rotines for reading and writing NIFTI formatted images. It currently has experimental/limited support for reading AFNI formatted images.
 
-A brief summary of most important functions is below. More extended documentation can be found in the associated vignettes.
-
-## Loading an image volume
-
-To load a three-dimensional image volume into R, use the `read_vol` function. For example, if we wish to read in a file from disk, we can use the `read_vol` command. Here we load an example file included with the package:
-
-```{r}
-file_name <- system.file("extdata", "global_mask.nii", package="neuroim2")
-print(file_name)
-vol <- read_vol(file_name)
-```
-
-The variable `vol` now can be used to access the three-dimensional image data and is a instance of the `DenseNeuroVol` class. This is basically a three-dimensonal R array with some additional meta-information that describes the geometry of the image.
-
-```{r}
-print(vol)
-```
-
-To access infromation about 
-
-## Writing an image volume to disk
-
-`write_vol`
-
-example:
-
-`write_vol(vol, "example.nii")`
-
-## loading a 4-dimensional image (e.g. for fMRI)
-
-`read_vec`
-
-example: 
-
-`read_vec("example_4d.nii")`
-
-## Writing a 4-dimensional image (e.g. for fMRI)
-
-`write_vec`
-
-example: 
-
-`write_vec(bvec, "example_4d.nii")`
-
-## Extract a time-series from a single voxel in a 4-dimensional image
-
-`series`
-
-example: `series(bvec, 12,12,12)  ## voxel coordinates are [12,12,12] in grid units starting at [1,1,1]`
-
-## Extract a time-series matrix from a set of voxels in a 4-dimensional image
-
-`series`
-
-example: `series(bvec, voxmat)  ## voxmat is an N by 3 matrix of voxel coordinates
-
-
 
 
 
