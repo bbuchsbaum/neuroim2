@@ -605,8 +605,7 @@ setMethod("series_roi", signature(x="NeuroVec", i="matrix"),
 #' @export
 setMethod("series", signature(x="NeuroVec", i="ROICoords"),
           def=function(x,i) {
-            grid <- coords(i)
-            callGeneric(x, grid)
+            callGeneric(x, coords(i))
           })
 
 

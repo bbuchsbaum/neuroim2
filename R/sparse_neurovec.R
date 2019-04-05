@@ -172,8 +172,7 @@ setMethod(f="coords", signature=signature(x="SparseNeuroVec"),
 #' @export
 setMethod("series", signature(x="SparseNeuroVec", i="ROICoords"),
           def=function(x,i) {
-            grid <- coords(i)
-            callGeneric(x, grid)
+            callGeneric(x, coords(i))
           })
 
 
