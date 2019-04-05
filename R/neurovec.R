@@ -614,7 +614,7 @@ setMethod("series", signature(x="NeuroVec", i="ROICoords"),
 #' @export
 setMethod("series_roi", signature(x="NeuroVec", i="ROICoords"),
           def=function(x,i) {
-            rvol <- series(x, i)
+            rvol <- series(x, coords(i))
             ROIVec(space(x), coords=coords(i), data=rvol)
           })
 
