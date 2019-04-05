@@ -26,19 +26,22 @@ random_searchlight <- function(mask, radius) {
   keys <- ls(hmap,sorted=FALSE)
 
   while (len > 0) {
-
+    ## select a center voxel from remaining indices
     center <- as.integer(sample(keys,1))
 
+    ## get a searchlight surrounding the key
     search <- spherical_roi(mask, grid[center,], radius, nonzero=TRUE)
+
+
     vox <- coords(search)
     idx <- lookup[vox]
-    ret <- mget(as.character(idx), envir=hmap, ifnotfound=NA)
+    ret <- mget(format(idx, scientific=FALSE, trim=TRUE), envir=hmap, ifnotfound=NA)
     keep <- !is.na(unlist(ret))
 
     search2 <- new("ROIVolWindow", rep(1,sum(keep)), space=space(mask), coords=coords(search)[keep,,drop=FALSE],
                    center_index=as.integer(1), parent_index=as.integer(search@parent_index))
 
-    rm(list=as.character(idx[keep]),envir=hmap)
+    rm(list=format(idx[keep], scientific=FALSE, trim=TRUE),envir=hmap)
     slist[[counter]] <- search2
     counter <- counter+1
 
