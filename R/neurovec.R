@@ -316,6 +316,33 @@ setMethod(f="sub_vector", signature=signature(x="NeuroVec", i="numeric"),
           })
 
 
+
+#' @rdname sub_vector-methods
+#' @export
+setMethod(f="sub_vector", signature=signature(x="NeuroVecSeq", i="numeric"),
+          def=function(x, i) {
+            assertthat::assert_that(max(i) <= dim(x)[4])
+            lens <- sapply(x@vecs, function(v) dim(v)[4])
+            offset <- c(0, cumsum(lens)) + 1
+
+            vmap <- do.call(rbind, lapply(1:length(lens), function(i) {
+              data.frame(i=i, offset=seq(offset[i], offset[i] + lens[i]-1), lind=1:lens[i])
+            }))
+
+            probe <- vmap[i,]
+            smap <- split(probe$lind, probe$i)
+            runs <- as.integer(names(smap))
+            assertthat::assert_that(length(runs) > 0)
+
+            svecs <- lapply(runs, function(rnum) {
+              neuroim2::sub_vector(x@vecs[[rnum]], smap[[rnum]])
+            })
+
+            do.call(NeuroVecSeq, svecs)
+          })
+
+
+
 #' @export
 #' @rdname vols-methods
 setMethod(f="vols", signature=signature(x="NeuroVec", indices="numeric"),
@@ -605,8 +632,7 @@ setMethod("series_roi", signature(x="NeuroVec", i="matrix"),
 #' @export
 setMethod("series", signature(x="NeuroVec", i="ROICoords"),
           def=function(x,i) {
-            grid <- coords(i)
-            callGeneric(x, grid)
+            callGeneric(x, coords(i))
           })
 
 
@@ -614,7 +640,7 @@ setMethod("series", signature(x="NeuroVec", i="ROICoords"),
 #' @export
 setMethod("series_roi", signature(x="NeuroVec", i="ROICoords"),
           def=function(x,i) {
-            rvol <- series(x, i)
+            rvol <- series(x, coords(i))
             ROIVec(space(x), coords=coords(i), data=rvol)
           })
 

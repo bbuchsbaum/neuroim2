@@ -28,15 +28,15 @@ using namespace Rcpp;
 // }
 
 // [[Rcpp::export]]
-IntegerVector find_seqnum(IntegerVector clens, IntegerVector idx) {
-  IntegerVector out = IntegerVector(idx.length());
-  int maxid = max(idx);
+NumericVector find_seqnum(NumericVector clens, NumericVector idx) {
+  NumericVector out = NumericVector(idx.length());
+  long long maxid = max(idx);
 
   for (int i=0; i < out.length(); i++) {
-    int min_idx = 0;
-    int min_val = maxid;
+    long long min_idx = 0;
+    long long min_val = maxid;
     for (int j = 0; j<clens.length(); j++) {
-      int delta = idx[i] - clens[j];
+      long long delta = idx[i] - clens[j];
       if (delta >= 0 && delta < min_val) {
         min_val = delta;
         min_idx = j + 1;
