@@ -357,6 +357,19 @@ test_that("can extract ROI from NeuroVec", {
 
 })
 
+test_that("can extract ROI from SparseNeuroVec", {
+  mask <- read_vol(gmask)
+  maskvec <- concat(mask,mask,mask,mask)
+  maskvec <- SparseNeuroVec(maskvec@.Data, space(maskvec), mask=mask)
+  roi <- spherical_roi(mask, centroid=c(17,17,10), radius=8)
+  cds <- coords(roi)
+  roi <- series_roi(maskvec, cds)
+  vec <- as(roi, "SparseNeuroVec")
+  expect_equivalent(class(vec), "SparseNeuroVec")
+  expect_equivalent(nrow(roi@coords), sum(vec@mask))
+
+})
+
 
 # test.NeuroVec.roundtrip.io <- function() {
 #   bvec <- loadVector("data/qrscan01.nii.gz", indices=1:4)
