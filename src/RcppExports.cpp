@@ -6,13 +6,13 @@
 using namespace Rcpp;
 
 // find_seqnum
-IntegerVector find_seqnum(IntegerVector clens, IntegerVector idx);
+NumericVector find_seqnum(NumericVector clens, NumericVector idx);
 RcppExport SEXP _neuroim2_find_seqnum(SEXP clensSEXP, SEXP idxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< IntegerVector >::type clens(clensSEXP);
-    Rcpp::traits::input_parameter< IntegerVector >::type idx(idxSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type clens(clensSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type idx(idxSEXP);
     rcpp_result_gen = Rcpp::wrap(find_seqnum(clens, idx));
     return rcpp_result_gen;
 END_RCPP
