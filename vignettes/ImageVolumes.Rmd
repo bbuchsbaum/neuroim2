@@ -1,7 +1,10 @@
 ---
 title: "Working with Image Volumes"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: 
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
 vignette: >
   %\VignetteIndexEntry{Working with Image Volumes}
   %\VignetteEngine{knitr::rmarkdown}

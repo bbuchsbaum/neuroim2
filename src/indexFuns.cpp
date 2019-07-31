@@ -62,8 +62,8 @@ NumericVector find_seqnum(NumericVector clens, NumericVector idx) {
 // }
 
 // [[Rcpp::export]]
-int grid_to_intvec(IntegerVector D, IntegerVector vox) {
-  int ind = 0;
+long long grid_to_intvec(IntegerVector D, IntegerVector vox) {
+  long long ind = 0;
   for (int j=D.length()-1; j>0; j--) {
     ind = ind + D[j-1] * (vox[j]-1);
   }
@@ -72,7 +72,7 @@ int grid_to_intvec(IntegerVector D, IntegerVector vox) {
 }
 
 // [[Rcpp::export]]
-IntegerVector exgridToIndex3DCpp(IntegerVector array_dim, IntegerVector iind, IntegerVector jind,
+NumericVector exgridToIndex3DCpp(IntegerVector array_dim, IntegerVector iind, IntegerVector jind,
                                  IntegerVector kind) {
 
   IntegerVector D = IntegerVector(array_dim.length());
@@ -83,7 +83,7 @@ IntegerVector exgridToIndex3DCpp(IntegerVector array_dim, IntegerVector iind, In
   }
 
   int nels = iind.length()*jind.length()*kind.length();
-  IntegerVector out = IntegerVector(nels);
+  NumericVector out = NumericVector(nels);
 
   int count = 0;
   for (int k= 0; k < kind.length(); k++) {
@@ -100,7 +100,7 @@ IntegerVector exgridToIndex3DCpp(IntegerVector array_dim, IntegerVector iind, In
 
 
 // [[Rcpp::export]]
-IntegerVector exgridToIndex4DCpp(IntegerVector array_dim, IntegerVector iind, IntegerVector jind,
+NumericVector exgridToIndex4DCpp(IntegerVector array_dim, IntegerVector iind, IntegerVector jind,
                                  IntegerVector kind, IntegerVector mind) {
 
   IntegerVector D = IntegerVector(array_dim.length());
@@ -111,8 +111,8 @@ IntegerVector exgridToIndex4DCpp(IntegerVector array_dim, IntegerVector iind, In
 
   }
 
-  int nels = iind.length()*jind.length()*kind.length()*mind.length();
-  IntegerVector out = IntegerVector(nels);
+  long long nels = iind.length()*jind.length()*kind.length()*mind.length();
+  NumericVector out = NumericVector(nels);
 
   int count = 0;
   for (int m = 0; m<mind.length(); m++) {
