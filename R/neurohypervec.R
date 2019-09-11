@@ -5,9 +5,9 @@
 #'
 #' @examples
 #'
-#' v1 <- NeuroVec(array(0,c(5,5,5,2)), space=NeuroSpace(dim=c(5,5,5,2)))
+#' v1 <- NeuroVec(array(0,c(5,5,5,4)), space=NeuroSpace(dim=c(5,5,5,4)))
 #' v2 <- NeuroVec(array(0,c(5,5,5,4)), space=NeuroSpace(dim=c(5,5,5,4)))
-#' v3 <- NeuroVec(array(0,c(5,5,5,6)), space=NeuroSpace(dim=c(5,5,5,6)))
+#' v3 <- NeuroVec(array(0,c(5,5,5,4)), space=NeuroSpace(dim=c(5,5,5,4)))
 #' hv <- NeuroHyperVec(v1,v2,v3)
 NeuroHyperVec <- function(...) {
   vecs <- list(...)
@@ -25,8 +25,8 @@ NeuroHyperVec <- function(...) {
 
 #' @rdname series-methods
 #' @export
-setMethod("series", signature(x="NeuroHyperVec", i="ROICoords"),
+setMethod("series", signature(x="NeuroHyperVec", i="matrix"),
           def=function(x,i) {
-            callGeneric(x, coords(i))
+            do.call(cbind, map(x@vecs, ~ series(., i)))
           })
 
