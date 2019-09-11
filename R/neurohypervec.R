@@ -27,6 +27,12 @@ NeuroHyperVec <- function(...) {
 #' @export
 setMethod("series", signature(x="NeuroHyperVec", i="matrix"),
           def=function(x,i) {
-            do.call(cbind, map(x@vecs, ~ series(., i)))
+            out <- array(0, c(dim(x)[4], nrow(i), length(x@vecs)))
+            for (j in seq_along(x@vecs)) {
+              out[,,j] <- series(x@vecs[[j]], i)
+            }
+
+            out
+            #do.call(cbind, map(x@vecs, ~ series(., i)))
           })
 
