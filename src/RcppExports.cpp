@@ -18,7 +18,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // grid_to_intvec
-int grid_to_intvec(IntegerVector D, IntegerVector vox);
+long long grid_to_intvec(IntegerVector D, IntegerVector vox);
 RcppExport SEXP _neuroim2_grid_to_intvec(SEXP DSEXP, SEXP voxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -30,7 +30,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // exgridToIndex3DCpp
-IntegerVector exgridToIndex3DCpp(IntegerVector array_dim, IntegerVector iind, IntegerVector jind, IntegerVector kind);
+NumericVector exgridToIndex3DCpp(IntegerVector array_dim, IntegerVector iind, IntegerVector jind, IntegerVector kind);
 RcppExport SEXP _neuroim2_exgridToIndex3DCpp(SEXP array_dimSEXP, SEXP iindSEXP, SEXP jindSEXP, SEXP kindSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -44,7 +44,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // exgridToIndex4DCpp
-IntegerVector exgridToIndex4DCpp(IntegerVector array_dim, IntegerVector iind, IntegerVector jind, IntegerVector kind, IntegerVector mind);
+NumericVector exgridToIndex4DCpp(IntegerVector array_dim, IntegerVector iind, IntegerVector jind, IntegerVector kind, IntegerVector mind);
 RcppExport SEXP _neuroim2_exgridToIndex4DCpp(SEXP array_dimSEXP, SEXP iindSEXP, SEXP jindSEXP, SEXP kindSEXP, SEXP mindSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;

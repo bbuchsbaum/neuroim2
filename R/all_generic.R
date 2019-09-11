@@ -4,13 +4,12 @@
 #' @export
 setGeneric("plot", function(x, y, ...) standardGeneric("plot"))
 
-
-
 #' @export
 setGeneric("drop", function(x) standardGeneric("drop"))
 
 #' @export
 setGeneric("as.matrix", function(x) standardGeneric("as.matrix"))
+
 
 
 #' Generic function to print an object
@@ -725,7 +724,8 @@ setGeneric(name="render_slice", def=function(x, zpos, width, height, colmap,...)
 #' @rdname perm_mat-methods
 setGeneric(name="perm_mat", def=function(x, ...) standardGeneric("perm_mat"))
 
-#' Concatenate two objects
+#' Concatenate two objects in the time dimension
+#'
 #' @param x the first object, typically \code{NeuroVol} or \code{NeuroVec}
 #' @param y the second object, typically \code{NeuroVol} or \code{NeuroVec}
 #' @details The \code{x} and \code{y} images must have compatible dimensions. a \code{NeuroVol} can be concatenated to \code{NeuroVec}, and vice versa. See examples.
@@ -748,6 +748,7 @@ setGeneric(name="perm_mat", def=function(x, ...) standardGeneric("perm_mat"))
 #' @export
 #' @rdname concat-methods
 setGeneric(name="concat", def=function(x,y, ...) standardGeneric("concat"))
+
 
 #' Find connected components
 #' @name conn_comp
