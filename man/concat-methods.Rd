@@ -12,7 +12,7 @@
 \alias{concat,DenseNeuroVol,DenseNeuroVol-method}
 \alias{concat,SparseNeuroVec,missing-method}
 \alias{concat,SparseNeuroVec,SparseNeuroVec-method}
-\title{Concatenate two objects}
+\title{Concatenate two objects in the time dimension}
 \usage{
 concat(x, y, ...)
 
@@ -40,7 +40,7 @@ concat(x, y, ...)
 \item{...}{additional objects}
 }
 \description{
-Concatenate two objects
+Concatenate two objects in the time dimension
 }
 \details{
 The \code{x} and \code{y} images must have compatible dimensions. a \code{NeuroVol} can be concatenated to \code{NeuroVec}, and vice versa. See examples.
