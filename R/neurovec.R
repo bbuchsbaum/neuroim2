@@ -380,7 +380,7 @@ setMethod(f="vectors", signature=signature(x="NeuroVec", subset="missing"),
 setMethod(f="vectors", signature=signature(x="NeuroVec", subset="numeric"),
           def = function(x, subset) {
             ind <- subset
-            assert_that(max(ind) < prod(dim(x)[1:3]))
+            assert_that(max(ind) <= prod(dim(x)[1:3]))
             vox <- index_to_grid(x, ind)
             f <- function(i) series(x, ind[i])
             lis <- lapply(seq_along(ind), function(i) f)
