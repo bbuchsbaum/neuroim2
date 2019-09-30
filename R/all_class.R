@@ -456,6 +456,7 @@ setClass("FileBackedNeuroVec",
 #'
 #' @rdname NeuroVecSeq-class
 #' @slot vecs the sequences of \code{NeuroVec} instances
+#' @export
 setClass("NeurVecSeq",
          representation(vecs="list", lens="numeric"),
          contains=c("NeuroVec", "ArrayLike4D"),
