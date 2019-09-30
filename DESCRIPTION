@@ -39,6 +39,7 @@ Collate:
     'neuroslice.R'
     'neurospace.R'
     'neurovec.R'
+    'neurohypervec.R'
     'neurovol.R'
     'nifti_io.R'
     'niml_io.R'
