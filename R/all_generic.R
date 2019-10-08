@@ -13,6 +13,9 @@ setGeneric("drop", function(x) standardGeneric("drop"))
 setGeneric("as.matrix", function(x) standardGeneric("as.matrix"))
 
 
+setGeneric("scale")
+
+
 #' Generic function to print an object
 #'
 #' @param x the object to print

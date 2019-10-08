@@ -29,3 +29,7 @@ indexToGridCpp <- function(idx, array_dim) {
     .Call('_neuroim2_indexToGridCpp', PACKAGE = 'neuroim2', idx, array_dim)
 }
 
+kernel_filt_3d_cpp <- function(data, kernel) {
+    .Call('_neuroim2_kernel_filt_3d_cpp', PACKAGE = 'neuroim2', data, kernel)
+}
+

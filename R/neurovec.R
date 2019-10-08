@@ -52,6 +52,7 @@ NeuroVec <- function(data, space=NULL, mask=NULL, label="") {
 #' @rdname DenseNeuroVec-class
 DenseNeuroVec <- function(data, space, label="") {
 
+
 	if (is.matrix(data)) {
 		splen <- prod(dim(space)[1:3])
 		data <- if (ncol(data) == splen) {
@@ -66,6 +67,13 @@ DenseNeuroVec <- function(data, space, label="") {
     }
 
 		dim(data) <- dim(space)
+	} else if (is.array(data) && length(dim(data) == 3)) {
+	  ## 3d data. This is a volume, need to add time dimension
+	  arr <- array(0,c(dim(data), 1))
+	  arr[,,,1] <- data
+	  data <- arr
+	} else if (is.array(data)) {
+	  assertthat::assert_that(length(dim(data)) == 4)
 	}
 
 
@@ -460,6 +468,33 @@ setMethod(f="split_blocks", signature=signature(x="NeuroVec", indices="integer")
             ret <- deferred_list(out)
             names(ret) <- names(isplit)
             ret
+          })
+
+
+
+#' @export
+#' @rdname split_blocks-methods
+setMethod(f="scale", signature=signature(x="NeuroVec", center="logical", scale="logical"),
+          def=function(x,center,scale) {
+            m <- as.matrix(x)
+            ms <- scale(t(m), center=center, scale=scale)
+            DenseNeuroVec(ms, space(x))
+          })
+
+
+#' @export
+#' @rdname split_blocks-methods
+setMethod(f="scale", signature=signature(x="NeuroVec", center="logical", scale="missing"),
+          def=function(x,center,scale) {
+            callGeneric(x, center, TRUE)
+          })
+
+
+#' @export
+#' @rdname split_blocks-methods
+setMethod(f="scale", signature=signature(x="NeuroVec", center="missing", scale="missing"),
+          def=function(x,center,scale) {
+            callGeneric(x,TRUE, TRUE)
           })
 
 
