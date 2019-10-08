@@ -35,6 +35,7 @@ Collate:
     'mapped_neurovec.R'
     'meta_info.R'
     'neuro_obj.R'
+    'neurohypervec.R'
     'neuroim.R'
     'neuroslice.R'
     'neurospace.R'

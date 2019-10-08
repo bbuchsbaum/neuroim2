@@ -8,6 +8,7 @@ setOldClass(c("gzfile", "connection"))
 setOldClass("environment")
 setOldClass("mmap")
 
+setClass("ArrayLike5D")
 setClass("ArrayLike4D")
 setClass("ArrayLike3D")
 
@@ -379,12 +380,35 @@ setClass("IndexLookupVol",
 #' @export
 setClass("NeuroVec", contains="NeuroObj")
 
+
+#' NeuroHyperVec
+#'
+#' Five-dimensional brain image
+#'
+#' @rdname NeuroHyperVec-class
+#' @export
+setClass("NeuroHyperVec", contains="NeuroObj",
+         representation(vecs="list"),
+
+    validity = function(object) {
+      assert_that(all(purrr::map_lgl(object@vecs, ~ inherits(., "NeuroVec"))))
+      dimlist <- purrr::map(object@vecs, ~ dim(.)[1:3])
+      d4 <- purrr::map(object@vecs, ~ dim(.)[4])
+      splist <- purrr::map(object@vecs, ~ spacing(.))
+      assert_that(all(purrr::map_lgl(dimlist, ~ all(dimlist[[1]] == .))))
+      assert_that(all(purrr::map_lgl(splist, ~ all(splist[[1]] == .))))
+      assert_that(all(purrr::map_lgl(d4, ~ all(d4[[1]] == .))))
+    }
+)
+
+
 #' DenseNeuroVec
 #'
 #' Four-dimensional brain image, backed by an array
 #' @name DenseNeuroVec-class
 #' @export
 setClass("DenseNeuroVec",  contains=c("NeuroVec", "array"))
+
 
 
 #' MappedNeuroVec
@@ -413,6 +437,7 @@ setClass("SparseNeuroVec",
          contains=c("NeuroVec", "ArrayLike4D"))
 
 
+
 #' FileBackedNeuroVec
 #'
 #' a four-dimensional brain image that is read in to memory "on demand" using memory-mapped file access.
@@ -431,6 +456,7 @@ setClass("FileBackedNeuroVec",
 #'
 #' @rdname NeuroVecSeq-class
 #' @slot vecs the sequences of \code{NeuroVec} instances
+#' @export
 setClass("NeuroVecSeq",
          representation(vecs="list", lens="numeric"),
          contains=c("NeuroVec", "ArrayLike4D"),
