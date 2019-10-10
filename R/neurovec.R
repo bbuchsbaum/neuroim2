@@ -67,7 +67,7 @@ DenseNeuroVec <- function(data, space, label="") {
     }
 
 		dim(data) <- dim(space)
-	} else if (is.array(data) && length(dim(data) == 3)) {
+	} else if (is.array(data) && length(dim(data)) == 3) {
 	  ## 3d data. This is a volume, need to add time dimension
 	  arr <- array(0,c(dim(data), 1))
 	  arr[,,,1] <- data
