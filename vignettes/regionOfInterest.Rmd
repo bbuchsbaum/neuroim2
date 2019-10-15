@@ -1,7 +1,10 @@
 ---
 title: "Regions of Interest"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: 
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
 vignette: >
   %\VignetteIndexEntry{Regions of Interest}
   %\VignetteEngine{knitr::rmarkdown}

@@ -61,7 +61,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // grid_to_intvec
-int grid_to_intvec(IntegerVector D, IntegerVector vox);
+long long grid_to_intvec(IntegerVector D, IntegerVector vox);
 RcppExport SEXP _neuroim2_grid_to_intvec(SEXP DSEXP, SEXP voxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -73,7 +73,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // exgridToIndex3DCpp
-IntegerVector exgridToIndex3DCpp(IntegerVector array_dim, IntegerVector iind, IntegerVector jind, IntegerVector kind);
+NumericVector exgridToIndex3DCpp(IntegerVector array_dim, IntegerVector iind, IntegerVector jind, IntegerVector kind);
 RcppExport SEXP _neuroim2_exgridToIndex3DCpp(SEXP array_dimSEXP, SEXP iindSEXP, SEXP jindSEXP, SEXP kindSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -87,7 +87,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // exgridToIndex4DCpp
-IntegerVector exgridToIndex4DCpp(IntegerVector array_dim, IntegerVector iind, IntegerVector jind, IntegerVector kind, IntegerVector mind);
+NumericVector exgridToIndex4DCpp(IntegerVector array_dim, IntegerVector iind, IntegerVector jind, IntegerVector kind, IntegerVector mind);
 RcppExport SEXP _neuroim2_exgridToIndex4DCpp(SEXP array_dimSEXP, SEXP iindSEXP, SEXP jindSEXP, SEXP kindSEXP, SEXP mindSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -126,6 +126,20 @@ BEGIN_RCPP
 END_RCPP
 }
 
+// kernel_filt_3d_cpp
+NumericMatrix kernel_filt_3d_cpp(NumericMatrix data, NumericMatrix kernel);
+RcppExport SEXP _neuroim2_kernel_filt_3d_cpp(SEXP dataSEXP, SEXP kernelSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type kernel(kernelSEXP);
+    rcpp_result_gen = Rcpp::wrap(kernel_filt_3d_cpp(data, kernel));
+    return rcpp_result_gen;
+END_RCPP
+}
+
+
 static const R_CallMethodDef CallEntries[] = {
     {"_neuroim2_indexToGridCpp", (DL_FUNC) &_neuroim2_indexToGridCpp, 2},
     {"_neuroim2_box_nbhd", (DL_FUNC) &_neuroim2_box_nbhd, 8},
@@ -136,6 +150,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_neuroim2_exgridToIndex4DCpp", (DL_FUNC) &_neuroim2_exgridToIndex4DCpp, 5},
     {"_neuroim2_gridToIndexCpp", (DL_FUNC) &_neuroim2_gridToIndexCpp, 2},
     {"_neuroim2_gridToIndex3DCpp", (DL_FUNC) &_neuroim2_gridToIndex3DCpp, 2},
+    {"_neuroim2_kernel_filt_3d_cpp", (DL_FUNC) &_neuroim2_kernel_filt_3d_cpp, 2},
     {NULL, NULL, 0}
 };
 

@@ -1,7 +1,10 @@
 ---
 title: "The neuroim2 package"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: 
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
 vignette: >
   %\VignetteIndexEntry{The neuroim package}
   %\VignetteEngine{knitr::rmarkdown}

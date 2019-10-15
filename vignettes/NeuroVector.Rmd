@@ -1,7 +1,10 @@
 ---
 title: "Four dimensional neuroimaging data"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: 
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
 vignette: >
   %\VignetteIndexEntry{Pipelines}
   %\VignetteEngine{knitr::rmarkdown}
@@ -15,7 +18,7 @@ library(assertthat)
 library(neuroim2)
 ```
 
-## Working with neuorimaging time-series data
+## Working with neuroimaging time-series data
 
 The `neuroim2` package contains data structures and functions for reading, accessing, and processing 4-dimensional neuroimaging data. 
 

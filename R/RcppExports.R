@@ -37,3 +37,14 @@ gridToIndex3DCpp <- function(array_dim, voxmat) {
     .Call('_neuroim2_gridToIndex3DCpp', PACKAGE = 'neuroim2', array_dim, voxmat)
 }
 
+<<<<<<< HEAD
+=======
+indexToGridCpp <- function(idx, array_dim) {
+    .Call('_neuroim2_indexToGridCpp', PACKAGE = 'neuroim2', idx, array_dim)
+}
+
+kernel_filt_3d_cpp <- function(data, kernel) {
+    .Call('_neuroim2_kernel_filt_3d_cpp', PACKAGE = 'neuroim2', data, kernel)
+}
+
+>>>>>>> e10d754386b3619227e9a5371e8104ec0f68c08a
