@@ -5,6 +5,49 @@
 
 using namespace Rcpp;
 
+// indexToGridCpp
+NumericMatrix indexToGridCpp(IntegerVector idx, IntegerVector array_dim);
+RcppExport SEXP _neuroim2_indexToGridCpp(SEXP idxSEXP, SEXP array_dimSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type idx(idxSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type array_dim(array_dimSEXP);
+    rcpp_result_gen = Rcpp::wrap(indexToGridCpp(idx, array_dim));
+    return rcpp_result_gen;
+END_RCPP
+}
+// box_nbhd
+NumericVector box_nbhd(NumericVector arr, IntegerVector dims, int x, int y, int z, int window, NumericVector out, int slicedim);
+RcppExport SEXP _neuroim2_box_nbhd(SEXP arrSEXP, SEXP dimsSEXP, SEXP xSEXP, SEXP ySEXP, SEXP zSEXP, SEXP windowSEXP, SEXP outSEXP, SEXP slicedimSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type arr(arrSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type dims(dimsSEXP);
+    Rcpp::traits::input_parameter< int >::type x(xSEXP);
+    Rcpp::traits::input_parameter< int >::type y(ySEXP);
+    Rcpp::traits::input_parameter< int >::type z(zSEXP);
+    Rcpp::traits::input_parameter< int >::type window(windowSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type out(outSEXP);
+    Rcpp::traits::input_parameter< int >::type slicedim(slicedimSEXP);
+    rcpp_result_gen = Rcpp::wrap(box_nbhd(arr, dims, x, y, z, window, out, slicedim));
+    return rcpp_result_gen;
+END_RCPP
+}
+// box_blur
+NumericVector box_blur(NumericVector arr, IntegerVector mask_idx, int window);
+RcppExport SEXP _neuroim2_box_blur(SEXP arrSEXP, SEXP mask_idxSEXP, SEXP windowSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type arr(arrSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type mask_idx(mask_idxSEXP);
+    Rcpp::traits::input_parameter< int >::type window(windowSEXP);
+    rcpp_result_gen = Rcpp::wrap(box_blur(arr, mask_idx, window));
+    return rcpp_result_gen;
+END_RCPP
+}
 // find_seqnum
 NumericVector find_seqnum(NumericVector clens, NumericVector idx);
 RcppExport SEXP _neuroim2_find_seqnum(SEXP clensSEXP, SEXP idxSEXP) {
@@ -82,27 +125,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// indexToGridCpp
-NumericMatrix indexToGridCpp(IntegerVector idx, IntegerVector array_dim);
-RcppExport SEXP _neuroim2_indexToGridCpp(SEXP idxSEXP, SEXP array_dimSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< IntegerVector >::type idx(idxSEXP);
-    Rcpp::traits::input_parameter< IntegerVector >::type array_dim(array_dimSEXP);
-    rcpp_result_gen = Rcpp::wrap(indexToGridCpp(idx, array_dim));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_neuroim2_indexToGridCpp", (DL_FUNC) &_neuroim2_indexToGridCpp, 2},
+    {"_neuroim2_box_nbhd", (DL_FUNC) &_neuroim2_box_nbhd, 8},
+    {"_neuroim2_box_blur", (DL_FUNC) &_neuroim2_box_blur, 3},
     {"_neuroim2_find_seqnum", (DL_FUNC) &_neuroim2_find_seqnum, 2},
     {"_neuroim2_grid_to_intvec", (DL_FUNC) &_neuroim2_grid_to_intvec, 2},
     {"_neuroim2_exgridToIndex3DCpp", (DL_FUNC) &_neuroim2_exgridToIndex3DCpp, 4},
     {"_neuroim2_exgridToIndex4DCpp", (DL_FUNC) &_neuroim2_exgridToIndex4DCpp, 5},
     {"_neuroim2_gridToIndexCpp", (DL_FUNC) &_neuroim2_gridToIndexCpp, 2},
     {"_neuroim2_gridToIndex3DCpp", (DL_FUNC) &_neuroim2_gridToIndex3DCpp, 2},
-    {"_neuroim2_indexToGridCpp", (DL_FUNC) &_neuroim2_indexToGridCpp, 2},
     {NULL, NULL, 0}
 };
 

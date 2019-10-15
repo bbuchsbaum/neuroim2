@@ -157,6 +157,13 @@ LogicalNeuroVol <- function(data, space, label="", indices=NULL) {
 #' @rdname as-methods
 setAs(from="DenseNeuroVol", to="array", def=function(from) from@.Data)
 
+#' @name as
+#'
+#' @rdname as-methods
+setAs(from="DenseNeuroVol", to="H5NeuroVol", def=function(from) {
+  to_nih5_vol(from, file_name=NULL, data_type="FLOAT")
+})
+
 
 #' @name as
 #'
@@ -533,7 +540,6 @@ setMethod(f="patch_set", signature=signature(x="NeuroVol",
           def=function(x, dims, ...) {
             mask <- LogicalNeuroVol(array(1, dim(x)), space=space(x))
             callGeneric(x, dims, mask)
-
           })
 
 
@@ -563,7 +569,9 @@ setMethod(f="patch_set", signature=signature(x="NeuroVol",
               m[,1] <- pmax(pmin(m[,1], xdim[1]), 1)
               m[,2] <- pmax(pmin(m[,2], xdim[2]), 1)
               m[,3] <- pmax(pmin(m[,3], xdim[3]), 1)
-              x[m]
+              ret <- x[m]
+              attr(ret, "idx") <- grid_to_index(x, m)
+              ret
 
             }
 

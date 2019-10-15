@@ -6,6 +6,7 @@
 \alias{sub_vector}
 \alias{sub_vector,FileBackedNeuroVec,numeric-method}
 \alias{sub_vector,NeuroVec,numeric-method}
+\alias{sub_vector,NeuroVecSeq,numeric-method}
 \alias{sub_vector,SparseNeuroVec,numeric-method}
 \title{Generic function to extract a sub-vector from a \code{NeuroVec} object.}
 \usage{
@@ -14,6 +15,8 @@ sub_vector(x, i, ...)
 \S4method{sub_vector}{FileBackedNeuroVec,numeric}(x, i)
 
 \S4method{sub_vector}{NeuroVec,numeric}(x, i)
+
+\S4method{sub_vector}{NeuroVecSeq,numeric}(x, i)
 
 \S4method{sub_vector}{SparseNeuroVec,numeric}(x, i)
 }

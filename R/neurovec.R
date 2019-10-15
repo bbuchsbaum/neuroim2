@@ -40,6 +40,7 @@ NeuroVec <- function(data, space=NULL, mask=NULL, label="") {
 }
 
 
+
 #' DenseNeuroVec
 #'
 #' constructor function for class \code{\linkS4class{DenseNeuroVec}}
@@ -503,18 +504,16 @@ setMethod(f="[[", signature=signature(x="NeuroVec", i="numeric"),
 #' @param mask a mask defining the spatial elements to load
 #' @param mode the IO mode which is one of "normal", "mmap", or "filebacked".
 #' @return an \code{\linkS4class{NeuroVec}} object
-#'
-#'
 #' @export
 #' @note memory-mapping a gzipped file is not allowed.
-read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap", "filebacked")) {
+read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap", "bigvec", "filebacked")) {
   mode <- match.arg(mode)
   vecs <- if (mode == "normal") {
 	  lapply(file_name, function(fn) load_data(NeuroVecSource(fn, indices, mask)))
 	  #load_data(src)
   } else if (mode == "mmap") {
     if (!is.null(indices)) {
-      stop("memory mapped mode does not currently support volume 'indices'")
+      stop("read_vec: memory mapped mode does not currently support volume 'indices'")
     }
 # <<<<<<< HEAD
 #     if (stringr::str_match(file_name, ".*gz$")) {
@@ -531,8 +530,19 @@ read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap
 #     }
 #     FileBackedNeuroVec(file_name)
 # =======
+    out <- vector(length(file_name), mode="list")
     lapply(file_name, function(fn) load_data(MappedNeuroVecSource(fn)))
 
+  } else if (mode == "bigvec") {
+    if (is.null(mask)) {
+      stop("read_vec: 'bigvec' mode requires a mask")
+    }
+
+    out <- list(length(file_name), mode="vector")
+    for (i  in seq_along(file_name)) {
+      v <- load_data(NeuroVecSource(file_name[i], indices, mask))
+      out[[i]] <- BigNeuroVec(v@data, space(v), mask)
+    }
   } else if (mode == "filebacked") {
     lapply(file_name, function(fn) FileBackedNeuroVec(fn))
   } else {

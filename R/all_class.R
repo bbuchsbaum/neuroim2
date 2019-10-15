@@ -7,6 +7,7 @@ setOldClass(c("file", "connection"))
 setOldClass(c("gzfile", "connection"))
 setOldClass("environment")
 setOldClass("mmap")
+setOldClass("H5File")
 
 setClass("ArrayLike4D")
 setClass("ArrayLike3D")
@@ -396,6 +397,13 @@ setClass("DenseNeuroVec",  contains=c("NeuroVec", "array"))
 setClass("MappedNeuroVec",  representation(filemap="mmap", offset="integer"), contains=c("NeuroVec", "ArrayLike4D"))
 
 
+#' AbstractSparseNeuroVec
+#'
+#' @slot mask the mask defining the sparse domain
+#' @slot map instance of class \code{\linkS4class{IndexLookupVol}} is used to map between spatial and index/row coordinates
+setClass("AbstractSparseNeuroVec",
+         representation(mask="LogicalNeuroVol", map="IndexLookupVol"),
+         contains=c("NeuroVec", "ArrayLike4D"))
 
 
 #' SparseNeuroVec
@@ -403,14 +411,24 @@ setClass("MappedNeuroVec",  representation(filemap="mmap", offset="integer"), co
 #' a sparse four-dimensional brain image, backed by a \code{matrix}, where each column represents
 #' a non-zero vector spanning the fourth dimension (e.g. time), and defined by a volumetric mask.
 #'
-#' @rdname SparseNeuroVec-class
-#' @slot mask the mask defining the sparse domain
 #' @slot data the matrix of series, where rows span across voxel space and columns span the fourth dimensions
-#' @slot map instance of class \code{\linkS4class{IndexLookupVol}} is used to map between spatial and index/row coordinates
-#' @export
+#'
+#' @rdname SparseNeuroVec-class
 setClass("SparseNeuroVec",
-         representation(mask="LogicalNeuroVol",data="matrix", map="IndexLookupVol"),
-         contains=c("NeuroVec", "ArrayLike4D"))
+         representation(data="matrix"),
+         contains=c("NeuroVec", "AbstractSparseNeuroVec", "ArrayLike4D"))
+
+#' BigNeuroVec
+#'
+#' a four-dimensional brain image that is backed by a disk-based big-matrix
+#'
+#' @rdname BigNeuroVec-class
+#' @slot meta the file meta information of type \code{\linkS4class{FileMetaInfo}}
+setClass("BigNeuroVec",
+         representation(data="FBM"),
+         contains=c("NeuroVec", "AbstractSparseNeuroVec", "ArrayLike4D"))
+
+
 
 
 #' FileBackedNeuroVec
@@ -423,6 +441,19 @@ setClass("FileBackedNeuroVec",
          representation(meta="FileMetaInfo"),
          contains=c("NeuroVec", "ArrayLike4D"))
 
+
+
+
+
+#' H5NeuroVol
+#'
+#' a three-dimensional brain image backed by an HDF5 dataset
+#'
+#' @rdname H5NeuroVol-class
+#' @importClassesFrom hdf5r H5File
+setClass("H5NeuroVol",
+         representation(h5obj="H5File"),
+         contains=c("NeuroVol", "ArrayLike3D"))
 
 
 #' NeuroVecSeq

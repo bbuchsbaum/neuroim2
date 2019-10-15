@@ -14,6 +14,7 @@
 \alias{series,NeuroVec,integer-method}
 \alias{series,NeuroVec,numeric-method}
 \alias{series_roi,NeuroVec,numeric-method}
+\alias{series,SparseNeuroVec,ROICoords-method}
 \alias{series,SparseNeuroVec,matrix-method}
 \alias{series,SparseNeuroVec,numeric-method}
 \alias{series,SparseNeuroVec,integer-method}
@@ -40,6 +41,8 @@ series(x, i, ...)
 \S4method{series}{NeuroVec,numeric}(x, i, j, k)
 
 \S4method{series_roi}{NeuroVec,numeric}(x, i, j, k)
+
+\S4method{series}{SparseNeuroVec,ROICoords}(x, i)
 
 \S4method{series}{SparseNeuroVec,matrix}(x, i)
 

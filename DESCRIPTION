@@ -31,6 +31,7 @@ Collate:
     'datadoc.R'
     'file_format.R'
     'filebacked_neurovec.R'
+    'h5_io.R'
     'index_vol.R'
     'mapped_neurovec.R'
     'meta_info.R'
@@ -47,6 +48,7 @@ Collate:
     'roi.R'
     'searchlight.R'
     'sparse_neurovec.R'
+    'spat_filter.R'
 RoxygenNote: 6.1.1
 Imports: 
   magrittr,
@@ -65,7 +67,8 @@ Suggests: testthat,
     knitr,
     ggplot2,
     roxygen2,
-    rmarkdown
+    rmarkdown,
+    hdf5r
 Remotes: 
   YeeJeremy/rflann,
   bbuchsbaum/colorplane

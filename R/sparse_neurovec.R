@@ -56,6 +56,51 @@ SparseNeuroVecSource <- function(meta_info, indices=NULL, mask) {
 }
 
 
+
+prep_sparsenvec <- function(data, space, mask) {
+  if (!inherits(mask, "LogicalNeuroVol")) {
+    mspace <- NeuroSpace(dim(space)[1:3],
+                 spacing(space),
+                 origin(space),
+                 axes(space),
+                 trans(space))
+    mask <- LogicalNeuroVol(as.logical(mask), mspace)
+  }
+
+  stopifnot(inherits(mask, "LogicalNeuroVol"))
+
+  D4 <- if (is.matrix(data)) {
+    Nind <- sum(mask == TRUE)
+    if (nrow(data) == Nind) {
+      data <- t(data)
+      nrow(data)
+    } else if (ncol(data) == Nind) {
+      nrow(data)
+    } else {
+      stop(paste(
+        "matrix with dim:",
+        dim(data),
+        " does not match mask cardinality: ",
+        Nind
+      ))
+    }
+  } else if (length(dim(data)) == 4) {
+    mat <- apply(data, 4, function(vals)
+      vals)
+    data <- t(mat[mask == TRUE, ])
+    dim(data)[4]
+  }
+
+  if (ndim(space) == 3) {
+    space <- add_dim(space, D4)
+  }
+
+  stopifnot(ndim(space) == 4)
+
+  list(mask=mask, data=data, space=space)
+}
+
+
 #' SparseNeuroVec
 #'
 #' constructs a SparseNeuroVec object
@@ -74,39 +119,10 @@ SparseNeuroVecSource <- function(meta_info, indices=NULL, mask) {
 #' @rdname SparseNeuroVec-class
 SparseNeuroVec <- function(data, space, mask) {
 	stopifnot(inherits(space, "NeuroSpace"))
+  p <- prep_sparsenvec(data,space, mask)
 
-	if (!inherits(mask, "LogicalNeuroVol")) {
-		mspace <- NeuroSpace(dim(space)[1:3], spacing(space), origin(space), axes(space), trans(space))
-		mask <- LogicalNeuroVol(as.logical(mask), mspace)
-	}
-
-	stopifnot(inherits(mask, "LogicalNeuroVol"))
-
-
-	D4 <- if (is.matrix(data)) {
-		Nind <- sum(mask == TRUE)
-		if (nrow(data) == Nind) {
-			data <- t(data)
-			nrow(data)
-		} else if (ncol(data) == Nind) {
-			nrow(data)
-		} else {
-			stop(paste("matrix with dim:", dim(data), " does not match mask cardinality: ", Nind))
-		}
-	} else if (length(dim(data)) == 4) {
-		mat <- apply(data, 4, function(vals) vals)
-		data <- t(mat[mask==TRUE,])
-		dim(data)[4]
-	}
-
-	if (ndim(space) == 3) {
-		space <- add_dim(space, nrow(data))
-	}
-
-  stopifnot(ndim(space) == 4)
-
-	new("SparseNeuroVec", space=space, mask=mask,
-	    data=data, map=IndexLookupVol(space(mask), as.integer(which(mask))))
+	new("SparseNeuroVec", space=p$space, mask=p$mask,
+	    map=IndexLookupVol(space(p$mask), as.integer(which(p$mask))), data=p$data)
 
 }
 

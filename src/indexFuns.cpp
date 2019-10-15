@@ -2,6 +2,34 @@
 using namespace Rcpp;
 
 
+// [[Rcpp::export]]
+NumericMatrix indexToGridCpp(IntegerVector idx, IntegerVector array_dim) {
+  int rank = array_dim.size();
+
+  int N = idx.size();
+  NumericMatrix omat(idx.size(), array_dim.size());
+
+  for(int i = 0; i < N; i++) {
+    int wh1 = idx(i)-1;
+    int tmp = 1 + wh1 % array_dim(0);
+    IntegerVector wh = IntegerVector(rank, tmp);
+    if (rank >= 2) {
+      int denom = 1;
+      for (int j = 1; j < rank; j++) {
+        denom = denom * array_dim(j-1);
+        int nextd1 = (int)wh1/denom;
+        wh(j) = 1 + nextd1 % array_dim(j);
+      }
+    }
+
+    omat.row(i) = wh;
+
+  }
+
+  return omat;
+
+}
+
 
 
 // NumericMatrix nn3d(IntegerVector pt, IntegerVector spacing, IntegerVector dim, double radius) {
@@ -26,6 +54,54 @@ using namespace Rcpp;
 //   }
 //
 // }
+
+int coord3d_to_index(int x, int y, int z, int dx, int dy, int dz, int slicedim) {
+  return (slicedim * z) + (y * dx) + x;
+}
+
+
+// [[Rcpp::export]]
+NumericVector box_nbhd(NumericVector arr, IntegerVector dims, int x, int y, int z, int window, NumericVector out, int slicedim) {
+  int count = 0;
+  //NumericVector out = NumericVector( pow((window*2)+1, 3));
+  for (int i = x - window; i <= x + window; i++) {
+    for (int j = y - window; j <= y + window; j++) {
+      for (int k = z - window; k <= z + window; k++) {
+        int ind = coord3d_to_index(i,j,k, dims[0], dims[1], dims[2], slicedim);
+        if (ind < 0 || ind >= arr.length()) {
+          out[count] = 0;
+        } else {
+          out[count] = arr[ind];
+        }
+        count = count +1;
+      }
+    }
+  }
+
+  return out;
+
+}
+
+// [[Rcpp::export]]
+NumericVector box_blur(NumericVector arr, IntegerVector mask_idx, int window) {
+  IntegerVector dims = arr.attr("dim");
+  NumericVector out = NumericVector(arr.length());
+  NumericVector local = NumericVector( pow((window*2)+1, 3));
+
+  NumericMatrix cds = indexToGridCpp(mask_idx, dims);
+  int slicedim = dims[0]*dims[1];
+
+  for (int i = 0; i < mask_idx.length(); i++) {
+    NumericVector ret = box_nbhd(arr, dims, cds(i,0)-1, cds(i,1)-1, cds(i,2)-1, window, local, slicedim);
+    out[mask_idx[i]-1] = mean(ret);
+  }
+
+  out.attr("dim") = dims;
+  return out;
+
+
+}
+
 
 // [[Rcpp::export]]
 NumericVector find_seqnum(NumericVector clens, NumericVector idx) {
@@ -168,34 +244,6 @@ IntegerVector gridToIndex3DCpp(IntegerVector array_dim, NumericMatrix voxmat) {
   }
 
   return out;
-
-}
-
-// [[Rcpp::export]]
-NumericMatrix indexToGridCpp(IntegerVector idx, IntegerVector array_dim) {
-  int rank = array_dim.size();
-
-  int N = idx.size();
-  NumericMatrix omat(idx.size(), array_dim.size());
-
-  for(int i = 0; i < N; i++) {
-    int wh1 = idx(i)-1;
-    int tmp = 1 + wh1 % array_dim(0);
-    IntegerVector wh = IntegerVector(rank, tmp);
-    if (rank >= 2) {
-      int denom = 1;
-      for (int j = 1; j < rank; j++) {
-        denom = denom * array_dim(j-1);
-        int nextd1 = (int)wh1/denom;
-        wh(j) = 1 + nextd1 % array_dim(j);
-      }
-    }
-
-    omat.row(i) = wh;
-
-  }
-
-  return omat;
 
 }
 
