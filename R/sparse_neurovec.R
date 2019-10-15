@@ -166,7 +166,7 @@ setMethod(f="load_data", signature=c("SparseNeuroVecSource"),
 
 #' @export
 #' @rdname indices-methods
-setMethod(f="indices", signature=signature(x="SparseNeuroVec"),
+setMethod(f="indices", signature=signature(x="AbstractSparseNeuroVec"),
           def=function(x) {
             indices(x@map)
           })
@@ -174,7 +174,7 @@ setMethod(f="indices", signature=signature(x="SparseNeuroVec"),
 
 #' @export
 #' @rdname coords-methods
-setMethod(f="coords", signature=signature(x="SparseNeuroVec"),
+setMethod(f="coords", signature=signature(x="AbstractSparseNeuroVec"),
           def=function(x,i) {
             if (missing(i)) {
               return(coords(x@map, indices(x@map)))
@@ -186,7 +186,7 @@ setMethod(f="coords", signature=signature(x="SparseNeuroVec"),
 
 #' @rdname series-methods
 #' @export
-setMethod("series", signature(x="SparseNeuroVec", i="ROICoords"),
+setMethod("series", signature(x="AbstractSparseNeuroVec", i="ROICoords"),
           def=function(x,i) {
             callGeneric(x, coords(i))
           })
@@ -194,7 +194,7 @@ setMethod("series", signature(x="SparseNeuroVec", i="ROICoords"),
 
 #' @export
 #' @rdname series-methods
-setMethod(f="series", signature=signature(x="SparseNeuroVec", i="matrix"),
+setMethod(f="series", signature=signature(x="AbstractSparseNeuroVec", i="matrix"),
          def=function(x,i) {
            idx <- grid_to_index(x@mask, i)
            callGeneric(x,idx)
@@ -203,7 +203,7 @@ setMethod(f="series", signature=signature(x="SparseNeuroVec", i="matrix"),
 
 #' @export
 #' @rdname series-methods
-setMethod("series", signature(x="SparseNeuroVec", i="numeric"),
+setMethod("series", signature(x="AbstractSparseNeuroVec", i="numeric"),
           def=function(x,i, j, k) {
             if (missing(j) && missing(k)) {
               callGeneric(x, as.integer(i))
@@ -217,7 +217,7 @@ setMethod("series", signature(x="SparseNeuroVec", i="numeric"),
  #' @rdname series-methods
  #' @param j index for 2nd dimension
  #' @param k index for 3rd dimension
- setMethod("series", signature(x="SparseNeuroVec", i="integer"),
+ setMethod("series", signature(x="AbstractSparseNeuroVec", i="integer"),
 		 def=function(x,i, j, k) {
 			 if (missing(j) && missing(k)) {
 				 idx <- lookup(x, as.integer(i))
@@ -264,7 +264,7 @@ setMethod(f="vectors", signature=signature(x="SparseNeuroVec", subset="missing")
 
 #' @rdname concat-methods
 #' @export
-setMethod(f="concat", signature=signature(x="SparseNeuroVec", y="missing"),
+setMethod(f="concat", signature=signature(x="AbstractSparseNeuroVec", y="missing"),
           def=function(x,y,...) {
             x
           })
@@ -307,14 +307,14 @@ setMethod(f="concat", signature=signature(x="SparseNeuroVec", y="SparseNeuroVec"
 
 #' @export
 #' @rdname lookup-methods
-setMethod(f="lookup", signature=signature(x="SparseNeuroVec", i="numeric"),
+setMethod(f="lookup", signature=signature(x="AbstractSparseNeuroVec", i="numeric"),
          def=function(x,i) {
             lookup(x@map, i)
           })
 
 #' @export
 #' @rdname linear_access-methods
-setMethod(f="linear_access", signature=signature(x = "SparseNeuroVec", i = "numeric"),
+setMethod(f="linear_access", signature=signature(x = "AbstractSparseNeuroVec", i = "numeric"),
           def=function (x, i) {
             nels <- prod(dim(x)[1:3])
             n <- as.integer(i / nels) + 1
@@ -341,7 +341,7 @@ setMethod(f="linear_access", signature=signature(x = "SparseNeuroVec", i = "nume
 #' @param m the fourth index
 #' @param ... additional args
 #' @param drop dimension
-setMethod(f="[", signature=signature(x = "SparseNeuroVec", i = "numeric", j = "numeric"),
+setMethod(f="[", signature=signature(x = "AbstractSparseNeuroVec", i = "numeric", j = "numeric"),
           def = function (x, i, j, k, m, ..., drop = TRUE) {
             if (missing(k))
               k = 1:(dim(x)[3])

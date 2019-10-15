@@ -53,7 +53,6 @@ NeuroVec <- function(data, space=NULL, mask=NULL, label="") {
 #' @rdname DenseNeuroVec-class
 DenseNeuroVec <- function(data, space, label="") {
 
-
 	if (is.matrix(data)) {
 		splen <- prod(dim(space)[1:3])
 		data <- if (ncol(data) == splen) {
@@ -68,13 +67,6 @@ DenseNeuroVec <- function(data, space, label="") {
     }
 
 		dim(data) <- dim(space)
-	} else if (is.array(data) && length(dim(data)) == 3) {
-	  ## 3d data. This is a volume, need to add time dimension
-	  arr <- array(0,c(dim(data), 1))
-	  arr[,,,1] <- data
-	  data <- arr
-	} else if (is.array(data)) {
-	  assertthat::assert_that(length(dim(data)) == 4)
 	}
 
 
@@ -389,9 +381,9 @@ setMethod(f="vectors", signature=signature(x="NeuroVec", subset="missing"),
 setMethod(f="vectors", signature=signature(x="NeuroVec", subset="numeric"),
           def = function(x, subset) {
             ind <- subset
-            assert_that(max(ind) <= prod(dim(x)[1:3]))
+            assert_that(max(ind) < prod(dim(x)[1:3]))
             vox <- index_to_grid(x, ind)
-            f <- function(i) series(x, ind[i])
+            f <- function(i) series(x, vox[i,1], vox[i,2], vox[i,3])
             lis <- lapply(seq_along(ind), function(i) f)
             deferred_list(lis)
           })
@@ -472,33 +464,6 @@ setMethod(f="split_blocks", signature=signature(x="NeuroVec", indices="integer")
           })
 
 
-
-#' @export
-#' @rdname split_blocks-methods
-setMethod(f="scale", signature=signature(x="NeuroVec", center="logical", scale="logical"),
-          def=function(x,center,scale) {
-            m <- as.matrix(x)
-            ms <- scale(t(m), center=center, scale=scale)
-            DenseNeuroVec(ms, space(x))
-          })
-
-
-#' @export
-#' @rdname split_blocks-methods
-setMethod(f="scale", signature=signature(x="NeuroVec", center="logical", scale="missing"),
-          def=function(x,center,scale) {
-            callGeneric(x, center, TRUE)
-          })
-
-
-#' @export
-#' @rdname split_blocks-methods
-setMethod(f="scale", signature=signature(x="NeuroVec", center="missing", scale="missing"),
-          def=function(x,center,scale) {
-            callGeneric(x,TRUE, TRUE)
-          })
-
-
 #' @export
 #' @rdname split_blocks-methods
 setMethod(f="split_blocks", signature=signature(x="NeuroVec", indices="factor"),
@@ -574,6 +539,7 @@ read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap
     }
 
     out <- list(length(file_name), mode="vector")
+
     for (i  in seq_along(file_name)) {
       v <- load_data(NeuroVecSource(file_name[i], indices, mask))
       out[[i]] <- BigNeuroVec(v@data, space(v), mask)
@@ -911,7 +877,7 @@ setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character",
 
 #' Create an \code{NeuroVecSeq} instance for a variable length list of \code{NeuroVec} objects.
 #'
-#' @param ... one or more instances of type \code{NeuroVec}
+#' @param ... one or more instance of type \code{NeuroVec}
 #' @export
 #'
 #' @examples
