@@ -476,7 +476,7 @@ setClass("FileBackedNeuroVec",
 #' a three-dimensional brain image backed by an HDF5 dataset
 #'
 #' @rdname H5NeuroVol-class
-#' @importClassesFrom hdf5r H5File
+# @importClassesFrom hdf5r H5File
 setClass("H5NeuroVol",
          representation(h5obj="H5File"),
          contains=c("NeuroVol", "ArrayLike3D"))
