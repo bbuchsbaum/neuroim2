@@ -7,7 +7,7 @@
 NeuroVecSeq(...)
 }
 \arguments{
-\item{...}{one or more instances of type \code{NeuroVec}}
+\item{...}{one or more instance of type \code{NeuroVec}}
 }
 \description{
 Create an \code{NeuroVecSeq} instance for a variable length list of \code{NeuroVec} objects.

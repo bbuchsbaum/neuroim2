@@ -6,7 +6,7 @@
 \alias{coords}
 \alias{coords,IndexLookupVol-method}
 \alias{coords,ROICoords-method}
-\alias{coords,SparseNeuroVec-method}
+\alias{coords,AbstractSparseNeuroVec-method}
 \title{Extract coordinates}
 \usage{
 coords(x, ...)
@@ -15,7 +15,7 @@ coords(x, ...)
 
 \S4method{coords}{ROICoords}(x, real = FALSE)
 
-\S4method{coords}{SparseNeuroVec}(x, i)
+\S4method{coords}{AbstractSparseNeuroVec}(x, i)
 }
 \arguments{
 \item{x}{the object to extract coordinates from}

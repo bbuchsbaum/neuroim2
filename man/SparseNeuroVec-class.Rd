@@ -24,11 +24,7 @@ constructs a SparseNeuroVec object
 \section{Slots}{
 
 \describe{
-\item{\code{mask}}{the mask defining the sparse domain}
-
 \item{\code{data}}{the matrix of series, where rows span across voxel space and columns span the fourth dimensions}
-
-\item{\code{map}}{instance of class \code{\linkS4class{IndexLookupVol}} is used to map between spatial and index/row coordinates}
 }}
 
 \examples{

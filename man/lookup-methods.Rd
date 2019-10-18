@@ -5,14 +5,14 @@
 \name{lookup}
 \alias{lookup}
 \alias{lookup,IndexLookupVol,numeric-method}
-\alias{lookup,SparseNeuroVec,numeric-method}
+\alias{lookup,AbstractSparseNeuroVec,numeric-method}
 \title{Index Lookup operation}
 \usage{
 lookup(x, i, ...)
 
 \S4method{lookup}{IndexLookupVol,numeric}(x, i)
 
-\S4method{lookup}{SparseNeuroVec,numeric}(x, i)
+\S4method{lookup}{AbstractSparseNeuroVec,numeric}(x, i)
 }
 \arguments{
 \item{x}{the object to query}

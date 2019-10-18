@@ -5,7 +5,7 @@
 \title{read_vec}
 \usage{
 read_vec(file_name, indices = NULL, mask = NULL, mode = c("normal",
-  "mmap", "filebacked"))
+  "mmap", "bigvec", "filebacked"))
 }
 \arguments{
 \item{file_name}{the name(s) of the file(s) to load. If more than one file_name is specified, the files are loaded and concatenated.}

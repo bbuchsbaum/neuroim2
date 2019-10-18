@@ -8,6 +8,7 @@ setOldClass(c("gzfile", "connection"))
 setOldClass("environment")
 setOldClass("mmap")
 setOldClass("H5File")
+setOldClass("FBM")
 
 setClass("ArrayLike5D")
 setClass("ArrayLike4D")

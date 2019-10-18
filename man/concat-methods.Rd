@@ -10,7 +10,7 @@
 \alias{concat,ROIVec,ROIVec-method}
 \alias{concat,DenseNeuroVol,missing-method}
 \alias{concat,DenseNeuroVol,DenseNeuroVol-method}
-\alias{concat,SparseNeuroVec,missing-method}
+\alias{concat,AbstractSparseNeuroVec,missing-method}
 \alias{concat,SparseNeuroVec,SparseNeuroVec-method}
 \title{Concatenate two objects in the time dimension}
 \usage{
@@ -28,7 +28,7 @@ concat(x, y, ...)
 
 \S4method{concat}{DenseNeuroVol,DenseNeuroVol}(x, y, ...)
 
-\S4method{concat}{SparseNeuroVec,missing}(x, y, ...)
+\S4method{concat}{AbstractSparseNeuroVec,missing}(x, y, ...)
 
 \S4method{concat}{SparseNeuroVec,SparseNeuroVec}(x, y, ...)
 }
