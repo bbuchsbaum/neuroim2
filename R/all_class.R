@@ -8,7 +8,7 @@ setOldClass(c("gzfile", "connection"))
 setOldClass("environment")
 setOldClass("mmap")
 setOldClass("H5File")
-setOldClass("FBM")
+#setOldClass("FBM")
 
 setClass("ArrayLike5D")
 setClass("ArrayLike4D")
@@ -445,10 +445,12 @@ setClass("SparseNeuroVec",
 
 #' BigNeuroVec
 #'
-#' a four-dimensional brain image that is backed by a disk-based big-matrix
+#' a sparse four-dimensional brain image that is backed by a disk-based big-matrix
 #'
 #' @rdname BigNeuroVec-class
-#' @slot meta the file meta information of type \code{\linkS4class{FileMetaInfo}}
+#'
+#' @slot data an instance of class \code{FBM} from \code{bigstatsr} package which contains time-series data.
+#' @importFrom bigstatsr FBM
 setClass("BigNeuroVec",
          representation(data="FBM"),
          contains=c("NeuroVec", "AbstractSparseNeuroVec", "ArrayLike4D"))
@@ -466,8 +468,6 @@ setClass("BigNeuroVec",
 setClass("FileBackedNeuroVec",
          representation(meta="FileMetaInfo"),
          contains=c("NeuroVec", "ArrayLike4D"))
-
-
 
 
 

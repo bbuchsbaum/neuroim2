@@ -125,7 +125,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-
 // kernel_filt_3d_cpp
 NumericMatrix kernel_filt_3d_cpp(NumericMatrix data, NumericMatrix kernel);
 RcppExport SEXP _neuroim2_kernel_filt_3d_cpp(SEXP dataSEXP, SEXP kernelSEXP) {
@@ -138,7 +137,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-
 
 static const R_CallMethodDef CallEntries[] = {
     {"_neuroim2_indexToGridCpp", (DL_FUNC) &_neuroim2_indexToGridCpp, 2},

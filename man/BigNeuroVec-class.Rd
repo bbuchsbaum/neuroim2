@@ -5,11 +5,11 @@
 \alias{BigNeuroVec-class}
 \title{BigNeuroVec}
 \description{
-a four-dimensional brain image that is backed by a disk-based big-matrix
+a sparse four-dimensional brain image that is backed by a disk-based big-matrix
 }
 \section{Slots}{
 
 \describe{
-\item{\code{meta}}{the file meta information of type \code{\linkS4class{FileMetaInfo}}}
+\item{\code{data}}{an instance of class \code{FBM} from \code{bigstatsr} package which contains time-series data.}
 }}
 

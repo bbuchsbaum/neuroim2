@@ -70,7 +70,8 @@ Suggests: testthat,
     ggplot2,
     roxygen2,
     rmarkdown,
-    hdf5r
+    hdf5r,
+    bigstatsr
 Remotes: 
   YeeJeremy/rflann,
   bbuchsbaum/colorplane
