@@ -19,7 +19,6 @@ setMethod(f="file_matches", signature=signature(x= "FileFormat", file_name="char
 setMethod(f="header_file_matches", signature=signature(x= "FileFormat", file_name="character"),
 		def=function(x, file_name) {
 			regexpr(paste(".*", x@header_extension, "$", sep=""), file_name) > 0
-
 		})
 
 #' @rdname data_file_matches-methods
