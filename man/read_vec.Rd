@@ -5,7 +5,7 @@
 \title{read_vec}
 \usage{
 read_vec(file_name, indices = NULL, mask = NULL, mode = c("normal",
-  "mmap", "filebacked"))
+  "mmap", "bigvec", "filebacked"))
 }
 \arguments{
 \item{file_name}{the name(s) of the file(s) to load. If more than one file_name is specified, the files are loaded and concatenated.}
@@ -14,7 +14,7 @@ read_vec(file_name, indices = NULL, mask = NULL, mode = c("normal",
 
 \item{mask}{a mask defining the spatial elements to load}
 
-\item{mode}{the IO mode which is one of "normal", "mmap", or "filebacked".}
+\item{mode}{the IO mode which is one of "normal", "mmap", "bigvec", or "filebacked".}
 }
 \value{
 an \code{\linkS4class{NeuroVec}} object
@@ -23,5 +23,5 @@ an \code{\linkS4class{NeuroVec}} object
 load an image volume from a file
 }
 \note{
-memory-mapping a gzipped file is not allowed.
+memory-mapping a gzipped file is not currently allowed.
 }

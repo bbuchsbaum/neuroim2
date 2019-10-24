@@ -1,4 +1,4 @@
-library(hdf5r)
+#library(hdf5r)
 
 to_nih5_header <- function(vol, h5obj) {
   hdr <- as_nifti_header(vol, file_name=h5obj$filename)

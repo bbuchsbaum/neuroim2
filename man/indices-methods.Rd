@@ -7,7 +7,7 @@
 \alias{indices,IndexLookupVol-method}
 \alias{indices,ROIVol-method}
 \alias{indices,ROIVec-method}
-\alias{indices,SparseNeuroVec-method}
+\alias{indices,AbstractSparseNeuroVec-method}
 \title{Extract indices}
 \usage{
 indices(x)
@@ -18,7 +18,7 @@ indices(x)
 
 \S4method{indices}{ROIVec}(x)
 
-\S4method{indices}{SparseNeuroVec}(x)
+\S4method{indices}{AbstractSparseNeuroVec}(x)
 }
 \arguments{
 \item{x}{the object to extract indices}

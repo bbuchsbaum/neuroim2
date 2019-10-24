@@ -24,6 +24,7 @@ Collate:
     'all_class.R'
     'array_like.R'
     'axis.R'
+    'big_neurovec.R'
     'binary_io.R'
     'clustervol.R'
     'common.R'
@@ -69,7 +70,8 @@ Suggests: testthat,
     ggplot2,
     roxygen2,
     rmarkdown,
-    hdf5r
+    hdf5r,
+    bigstatsr
 Remotes: 
   YeeJeremy/rflann,
   bbuchsbaum/colorplane

@@ -502,10 +502,10 @@ setMethod(f="[[", signature=signature(x="NeuroVec", i="numeric"),
 #' @param file_name the name(s) of the file(s) to load. If more than one file_name is specified, the files are loaded and concatenated.
 #' @param indices the indices of the sub-volumes to load (e.g. if the file is 4-dimensional)
 #' @param mask a mask defining the spatial elements to load
-#' @param mode the IO mode which is one of "normal", "mmap", or "filebacked".
+#' @param mode the IO mode which is one of "normal", "mmap", "bigvec", or "filebacked".
 #' @return an \code{\linkS4class{NeuroVec}} object
 #' @export
-#' @note memory-mapping a gzipped file is not allowed.
+#' @note memory-mapping a gzipped file is not currently allowed.
 read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap", "bigvec", "filebacked")) {
   mode <- match.arg(mode)
   vecs <- if (mode == "normal") {
@@ -538,12 +538,14 @@ read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap
       stop("read_vec: 'bigvec' mode requires a mask")
     }
 
-    out <- list(length(file_name), mode="vector")
+    out <- vector(length(file_name), mode="list")
 
     for (i  in seq_along(file_name)) {
       v <- load_data(NeuroVecSource(file_name[i], indices, mask))
       out[[i]] <- BigNeuroVec(v@data, space(v), mask)
     }
+
+    out
   } else if (mode == "filebacked") {
     lapply(file_name, function(fn) FileBackedNeuroVec(fn))
   } else {

@@ -8,7 +8,7 @@
 \alias{linear_access,MappedNeuroVec,numeric-method}
 \alias{linear_access,NeuroVecSeq,numeric-method}
 \alias{linear_access,SparseNeuroVol,numeric-method}
-\alias{linear_access,SparseNeuroVec,numeric-method}
+\alias{linear_access,AbstractSparseNeuroVec,numeric-method}
 \title{Generic function to extract values from an array-like object using linear indexing}
 \usage{
 linear_access(x, i, ...)
@@ -21,7 +21,7 @@ linear_access(x, i, ...)
 
 \S4method{linear_access}{SparseNeuroVol,numeric}(x, i)
 
-\S4method{linear_access}{SparseNeuroVec,numeric}(x, i)
+\S4method{linear_access}{AbstractSparseNeuroVec,numeric}(x, i)
 }
 \arguments{
 \item{x}{a data source}
