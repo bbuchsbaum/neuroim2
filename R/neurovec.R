@@ -954,11 +954,15 @@ setMethod("length", signature=c("NeuroVecSeq"),
 #' @export
 setMethod(f="[[", signature=signature(x="NeuroVecSeq", i="numeric"),
           def = function(x, i) {
-            xs <- space(x)
-            dat <- x[,,,i]
-            newdim <- dim(x)[1:3]
-            bspace <- NeuroSpace(newdim, spacing=spacing(xs), origin=origin(xs), axes(xs), trans(xs))
-            DenseNeuroVol(dat, bspace)
+            assert_that(length(i) == 1 && i > 0 && i <= dim(x)[4])
+
+            offsets <- cumsum(c(1, x@lens))[1:(length(x@lens))] -1
+            vnum <- i - offsets
+            vnum[vnum < 0] <- Inf
+            bucket <- which.min(vnum)
+            bucket_elnum <- vnum[bucket]
+
+            x@vecs[[bucket]][[bucket_elnum]]
           })
 
 #' @export
