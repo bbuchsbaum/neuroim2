@@ -67,14 +67,18 @@ prep_sparsenvec <- function(data, space, mask) {
     mask <- LogicalNeuroVol(as.logical(mask), mspace)
   }
 
+  cardinality <- sum(mask)
+
   stopifnot(inherits(mask, "LogicalNeuroVol"))
 
   D4 <- if (is.matrix(data)) {
     Nind <- sum(mask == TRUE)
     if (nrow(data) == Nind) {
       data <- t(data)
+      assert_that(ncol(data) == cardinality, msg="data matrix must must match cardinality of `mask`")
       nrow(data)
     } else if (ncol(data) == Nind) {
+      assert_that(ncol(data) == cardinality, msg="data matrix must must match cardinality of `mask`")
       nrow(data)
     } else {
       stop(paste(
@@ -260,6 +264,18 @@ setMethod(f="vectors", signature=signature(x="SparseNeuroVec", subset="missing")
             }
 
           })
+
+
+
+#' @export
+#' @rdname vols-methods
+setMethod(f="vols", signature=signature(x="SparseNeuroVec", indices="missing"),
+          def = function(x) {
+            f <- function(i) x@data[i,]
+            lis <- lapply(1:(dim(x)[4]), function(i) f)
+            deferred_list(lis)
+          })
+
 
 
 #' @rdname concat-methods

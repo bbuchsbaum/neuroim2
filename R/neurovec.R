@@ -950,7 +950,7 @@ setMethod("length", signature=c("NeuroVecSeq"),
 
 
 #' [[
-#' @rdname NeuroVec-methods
+#' @rdname NeuroVecSeq-methods
 #' @export
 setMethod(f="[[", signature=signature(x="NeuroVecSeq", i="numeric"),
           def = function(x, i) {
