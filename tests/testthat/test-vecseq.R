@@ -75,6 +75,17 @@ test_that("can extract vols from NeuroVecSeq", {
 
 })
 
+
+test_that("can map over vols from NeuroVecSeq", {
+  vec <- read_vec(gmask5)
+  cvec <- concat(vec,vec,vec)
+
+  vs <- NeuroVecSeq(vec,vec,vec)
+  out <- vs2 <- vs %>% vols() %>% purrr::map( ~ .) %>% purrr::invoke(concat,.)
+  #out <- do.call(concat, vlist)
+  expect_true(all(as.vector(cvec) == as.vector(out)))
+})
+
 test_that("can subset a NeuroVecSeq", {
   vec <- read_vec(c(gmask5, gmask5, gmask5))
   vec5 <- sub_vector(vec, 1:5)

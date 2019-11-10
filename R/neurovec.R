@@ -954,14 +954,16 @@ setMethod("length", signature=c("NeuroVecSeq"),
 #' @export
 setMethod(f="[[", signature=signature(x="NeuroVecSeq", i="numeric"),
           def = function(x, i) {
+
             assert_that(length(i) == 1 && i > 0 && i <= dim(x)[4])
 
-            offsets <- cumsum(c(1, x@lens))[1:(length(x@lens))] -1
+            offsets <- cumsum(c(1, x@lens))[1:(length(x@lens))]
             vnum <- i - offsets
             vnum[vnum < 0] <- Inf
             bucket <- which.min(vnum)
-            bucket_elnum <- vnum[bucket]
-
+            bucket_elnum <- vnum[bucket] + 1
+            #print(bucket)
+            #print(bucket_elnum)
             x@vecs[[bucket]][[bucket_elnum]]
           })
 
