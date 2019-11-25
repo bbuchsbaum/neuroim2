@@ -64,7 +64,8 @@ Imports:
   methods,
   colorplane,
   Gmedian,
-  bigstatsr
+  bigstatsr,
+  prettydoc
 Suggests: 
   testthat,
   covr,
