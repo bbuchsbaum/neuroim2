@@ -6,7 +6,7 @@ output:
     theme: cayman
     highlight: github
 vignette: >
-  %\VignetteIndexEntry{The neuroim package}
+  %\VignetteIndexEntry{The neuroim2 package}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
