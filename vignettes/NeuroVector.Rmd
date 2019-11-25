@@ -6,7 +6,7 @@ output:
     theme: cayman
     highlight: github
 vignette: >
-  %\VignetteIndexEntry{Pipelines}
+  %\VignetteIndexEntry{Four dimensional neuroimaging data}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
