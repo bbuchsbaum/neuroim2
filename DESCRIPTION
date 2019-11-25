@@ -63,15 +63,16 @@ Imports:
   stringr,
   methods,
   colorplane,
-  Gmedian
-Suggests: testthat,
-    covr,
-    knitr,
-    ggplot2,
-    roxygen2,
-    rmarkdown,
-    hdf5r,
-    bigstatsr
+  Gmedian,
+  bigstatsr
+Suggests: 
+  testthat,
+  covr,
+  knitr,
+  ggplot2,
+  roxygen2,
+  rmarkdown,
+  hdf5r
 Remotes: 
   YeeJeremy/rflann,
   bbuchsbaum/colorplane
