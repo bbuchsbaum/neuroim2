@@ -267,15 +267,6 @@ setMethod(f="vectors", signature=signature(x="SparseNeuroVec", subset="missing")
 
 
 
-#' @export
-#' @rdname vols-methods
-setMethod(f="vols", signature=signature(x="SparseNeuroVec", indices="missing"),
-          def = function(x) {
-            f <- function(i) x@data[i,]
-            lis <- lapply(1:(dim(x)[4]), function(i) f)
-            deferred_list(lis)
-          })
-
 
 
 #' @rdname concat-methods
