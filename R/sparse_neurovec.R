@@ -251,7 +251,7 @@ setMethod(f="vectors", signature=signature(x="SparseNeuroVec", subset="missing")
           def = function(x, nonzero=FALSE) {
             if (nonzero) {
               force(x)
-              ind <- indices(svec)
+              ind <- indices(x)
               f <- function(i) series(x, ind[i])
               #lis <- lapply(seq_along(ind), function(i) f)
               deferred_list2(f, length(ind))

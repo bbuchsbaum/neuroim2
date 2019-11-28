@@ -488,6 +488,7 @@ setClass("H5NeuroVol",
 #'
 #' @rdname NeuroVecSeq-class
 #' @slot vecs the sequences of \code{NeuroVec} instances
+#' @slot lens the number of volumes in each \code{NeuroVec} sequence
 #' @export
 setClass("NeuroVecSeq",
          representation(vecs="list", lens="numeric"),

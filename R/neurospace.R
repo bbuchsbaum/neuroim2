@@ -153,7 +153,7 @@ setMethod(f="ndim", signature=signature(x = "NeuroSpace"),
 setMethod(f="centroid", signature=signature(x = "NeuroSpace"),
           def=function(x)  {
             ind <- 1:prod(dim(x))
-            colMeans(index_to_coord(bspace,ind))
+            colMeans(index_to_coord(x,ind))
           })
 
 

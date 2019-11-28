@@ -1,0 +1,9 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^.travis.yml
+README.md
+README.rmd
+codecov.yml
+_pkgdown.yml
+docs
+test_data

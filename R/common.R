@@ -1,4 +1,5 @@
 #' @export
+#' @rdname read_columns-methods
 setMethod(f="read_columns", signature=c(x="ColumnReader", column_indices="integer"),
           def=function(x, column_indices) {
             x@reader(column_indices)

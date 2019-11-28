@@ -90,7 +90,7 @@ test_that("can subset a NeuroVecSeq", {
   vec <- read_vec(c(gmask5, gmask5, gmask5))
   vec5 <- sub_vector(vec, 1:5)
   vec2 <- read_vec(gmask5)
-  expect_true(all(vec5 == vec2))
+  expect_true(all(vec5[] == vec2[]))
 })
 
 test_that("can read a sparse NeuroVecSeq", {

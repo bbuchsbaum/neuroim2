@@ -951,6 +951,8 @@ setMethod("length", signature=c("NeuroVecSeq"),
 
 #' [[
 #' @rdname NeuroVecSeq-methods
+#' @param x the object
+#' @param i the indices
 #' @export
 setMethod(f="[[", signature=signature(x="NeuroVecSeq", i="numeric"),
           def = function(x, i) {
