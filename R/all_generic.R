@@ -15,7 +15,7 @@ setGeneric("scale")
 
 
 
-#' Generic function to print an object
+#' print an object
 #'
 #' @param x the object to print
 #' @param ... additional arguments
@@ -23,7 +23,7 @@ setGeneric("scale")
 #' @rdname print-methods
 setGeneric(name="print", def=function(x, ...) standardGeneric("print"))
 
-#' Generic function to extract data values of object
+#' extract data values of object
 #'
 #' @param x the object to get values from
 #' @param ... additional arguments
@@ -31,7 +31,7 @@ setGeneric(name="print", def=function(x, ...) standardGeneric("print"))
 #' @rdname values-methods
 setGeneric(name="values", def=function(x, ...) standardGeneric("values"))
 
-#' Generic function to extract values from an array-like object using linear indexing
+#' extract values from an array-like object using linear indexing
 #'
 #' @param x a data source
 #' @param i a vector of indices
@@ -42,7 +42,7 @@ setGeneric(name="linear_access", def=function(x, i, ...) standardGeneric("linear
 
 
 
-#' Generic function to load data from a data source
+#' load data from a data source
 #'
 #' @param x a data source
 #' @param ... additional arguments
@@ -50,7 +50,7 @@ setGeneric(name="linear_access", def=function(x, i, ...) standardGeneric("linear
 #' @rdname load_data-methods
 setGeneric(name="load_data", def=function(x, ...) standardGeneric("load_data"))
 
-#' Generic function to apply a function to an object
+#' apply a function to an object
 #'
 #' @param x the object that is mapped
 #' @param m the mapping object
@@ -59,7 +59,7 @@ setGeneric(name="load_data", def=function(x, ...) standardGeneric("load_data"))
 #' @rdname map-methods
 setGeneric(name="mapf", def=function(x, m, ...) standardGeneric("mapf"))
 
-#' Generic function to extract an ordered series of 3D volumes
+#' extract an ordered series of 3d volumes
 #'
 #' @param x the object that supplies the volume data
 #' @param indices the subset of volumes to extract
@@ -76,7 +76,7 @@ setGeneric(name="mapf", def=function(x, m, ...) standardGeneric("mapf"))
 #' length(vs) == 3
 setGeneric(name="vols", def=function(x, indices, ...) standardGeneric("vols"))
 
-#' Generic function to extract an ordered series of 1D vectors
+#' extract an ordered list of 1d vectors
 #'
 #' @param x the object that supplies the vector data
 #' @param subset the subset of vectors to extract
@@ -85,7 +85,7 @@ setGeneric(name="vols", def=function(x, indices, ...) standardGeneric("vols"))
 #' @rdname vectors-methods
 setGeneric(name="vectors", def=function(x, subset, ...) standardGeneric("vectors"))
 
-#' Generic function to cut a vector-valued object into a list of sub-blocks
+#' cut a vector-valued object into a list of sub-blocks
 #'
 #' @param x the object to split
 #' @param indices a vector of indices for the blocks. Must match the length of the inut vector.
@@ -96,7 +96,7 @@ setGeneric(name="split_blocks", def=function(x, indices, ...) standardGeneric("s
 
 
 
-#' Generic function to partition an image into a set of disjoint clusters
+#' partition an image into a set of disjoint clusters
 #'
 #' @param x the object to partition
 #' @param k the number of clusters
@@ -107,7 +107,7 @@ setGeneric(name="partition", def=function(x, k, ...) standardGeneric("partition"
 
 
 
-#' Generic function to cut an object into a list of spatial or spatiotemporal clusters
+#' cut an object into a list of spatial or spatiotemporal clusters
 #'
 #' @param x the object to split
 #' @param clusters a vector of cluster indices to split by
@@ -117,7 +117,7 @@ setGeneric(name="partition", def=function(x, k, ...) standardGeneric("partition"
 setGeneric(name="split_clusters", def=function(x, clusters, ...) standardGeneric("split_clusters"))
 
 
-#' Generic function to extract an ordered series of 2D slices
+#' extract an ordered series of 2d slices
 #'
 #' @param x the object that supplies the slices
 #' @param ... additional arguments
@@ -128,7 +128,7 @@ setGeneric(name="slices", def=function(x, ...) standardGeneric("slices"))
 
 
 
-#' Generic function to extract the number of dimensions of an object
+#' extract the number of dimensions of an object
 #'
 #' @param x n-dimensional object
 #' @param ... additional arguments
@@ -144,20 +144,22 @@ setGeneric(name="slices", def=function(x, ...) standardGeneric("slices"))
 setGeneric(name="ndim", def=function(x, ...) standardGeneric("ndim"))
 
 
-#' dim_of
+#' get dimensions of an axis
+#'
 #' @param x the object
 #' @param axis the axis to return the dimension of
 #' @rdname dim_of-methods
 setGeneric(name="dim_of", def=function(x, axis) standardGeneric("dim_of"))
 
-#' which_dim
+#' find dimensions of a given axis
+#'
 #' @param x the object
 #' @param axis the axis to return dimension of
 #' @rdname which_dim-methods
 setGeneric(name="which_dim", def=function(x, axis) standardGeneric("which_dim"))
 
 
-#' Generic function to add a dimension to an object
+#' add a dimension to an object
 #'
 #' @param x a dimensioned object
 #' @param n the size of the dimension to add
@@ -170,7 +172,7 @@ setGeneric(name="which_dim", def=function(x, axis) standardGeneric("which_dim"))
 #' dim(x1)[4] == 10
 setGeneric(name="add_dim", def=function(x, n) standardGeneric("add_dim"))
 
-#' Generic function to drop a dimension from an object
+#' drop a dimension from an object
 #'
 #' @param x a dimensioned object
 #' @param dimnum the index of the dimension to drop
@@ -183,7 +185,7 @@ setGeneric(name="add_dim", def=function(x, n) standardGeneric("add_dim"))
 #' dim(x1)[2] == 10
 setGeneric(name="drop_dim", def=function(x, dimnum) standardGeneric("drop_dim"))
 
-#' Generic function to extract geometric properties of an image.
+#' extract geometric properties of an image.
 #'
 #' @param x the object to query, e.g. an instance of \code{\linkS4class{NeuroVol}} or \code{\linkS4class{NeuroVec}}
 #' @param ... additional arguments
@@ -197,7 +199,7 @@ setGeneric(name="drop_dim", def=function(x, dimnum) standardGeneric("drop_dim"))
 #' @rdname space-methods
 setGeneric(name="space", def=function(x, ...) standardGeneric("space"))
 
-#' Generic function to fill disjoint sets of values with the output of a function
+#' fill disjoint sets of values with the output of a function
 #'
 #' @param x the object to split
 #' @param fac the \code{factor} to split by
@@ -220,7 +222,7 @@ setGeneric(name="space", def=function(x, ...) standardGeneric("space"))
 #' ovol2 <- split_fill(vol, fac, rev)
 setGeneric(name="split_fill", def=function(x, fac, FUN) standardGeneric("split_fill"))
 
-#' Generic function to map values from one set of values to another set using a user-supplied lookup table
+#' map values from one set of values to another set using a user-supplied lookup table
 #'
 #' @param x the object to map values from
 #' @param lookup the lookup table. The first column is the "key" the second column is the "value".
@@ -246,7 +248,7 @@ setGeneric(name="map_values", def=function(x, lookup) standardGeneric("map_value
 
 
 
-#' Generic function to center/scale row-subsets of a matrix or matrix-like object
+#' center/scale row-subsets of a matrix or matrix-like object
 #'
 #' @param x a numeric matrix or matrix-like object
 #' @param f the splitting object, typically a \code{factor} or set of \code{integer} indices. must be equal to number of rows of matrix.
@@ -271,7 +273,8 @@ setGeneric(name="map_values", def=function(x, lookup) standardGeneric("map_value
 #' @rdname split_scale-methods
 setGeneric(name="split_scale", def=function(x, f, center, scale) standardGeneric("split_scale"))
 
-#' Generic function to summarize subsets of an object by first splitting by row and then "reducing" by a summary \code{function}
+#' summarize subsets of an object by first splitting by row and then "reducing" by a summary \code{function}
+#'
 #' @param x a numeric matrix(like) object
 #' @param fac the factor to define subsets of the object
 #' @param FUN the function to apply to each subset. if \code{FUN} is missing, than the mean of each sub-matrix column is computed.
@@ -310,7 +313,8 @@ setGeneric(name="split_scale", def=function(x, f, center, scale) standardGeneric
 setGeneric(name="split_reduce", def=function(x, fac, FUN) standardGeneric("split_reduce"))
 
 
-#' Generic function to extract the voxel dimensions of an image
+#' extract the voxel dimensions of an image
+#'
 #' @param x the object
 #' @return a numeric vector
 #' @export
@@ -320,7 +324,7 @@ setGeneric(name="split_reduce", def=function(x, fac, FUN) standardGeneric("split
 #' @rdname spacing-methods
 setGeneric(name="spacing", def=function(x) standardGeneric("spacing"))
 
-#' Generic function to extract the spatial bounds (origin + dim * spacing) of an image
+#' extract the spatial bounds (origin + dim * spacing) of an image
 #' param x the object
 
 #' @param x the object with \code{bounds} property
@@ -334,13 +338,15 @@ setGeneric(name="spacing", def=function(x) standardGeneric("spacing"))
 setGeneric(name="bounds",     def=function(x) standardGeneric("bounds"))
 
 
-#' Generic getter function to extract image axes
+#' extract image axes
+#'
 #' @param x an object with a set of axes
 #' @export
 #' @rdname axes-methods
 setGeneric(name="axes",  def=function(x) standardGeneric("axes"))
 
-#' Generic getter to extract image origin
+#' extract image origin
+#'
 #' @param x an object with an origin
 #' @export
 #' @examples
@@ -376,7 +382,8 @@ setGeneric(name="centroids", def=function(x, ...) standardGeneric("centroids"))
 
 
 
-#' Generic getter to extract image coordinate transformation
+#' extract image coordinate transformation
+#'
 #' @param x an object with a transformation
 #' @export
 #' @details
@@ -390,7 +397,8 @@ setGeneric(name="centroids", def=function(x, ...) standardGeneric("centroids"))
 #' @rdname trans-methods
 setGeneric(name="trans",  def=function(x) standardGeneric("trans"))
 
-#' Generic getter to extract inverse image coordinate transformation
+#' extract inverse image coordinate transformation
+#'
 #' @param x an object
 #' @export
 #' @examples
@@ -400,7 +408,8 @@ setGeneric(name="trans",  def=function(x) standardGeneric("trans"))
 #' @rdname inverse_trans-methods
 setGeneric(name="inverse_trans", def=function(x) standardGeneric("inverse_trans"))
 
-#' Generic function to read a sequence of elements from an input source
+#' read a sequence of elements from an input source
+#'
 #' @param x the input channel
 #' @param num_elements the number of elements to read
 #' @return the elements as a vector
@@ -408,7 +417,7 @@ setGeneric(name="inverse_trans", def=function(x) standardGeneric("inverse_trans"
 #' @rdname read_elements-methods
 setGeneric(name="read_elements", def=function(x, num_elements) standardGeneric("read_elements"))
 
-#' Generic function to read a set of column vector from an input source (e.g. \code{ColumnReader})
+#' read a set of column vector from an input source (e.g. \code{ColumnReader})
 #' @param x the input channel
 #' @param column_indices the column indices
 #' @return a \code{matrix} consisting of the requested column vectors
@@ -417,7 +426,8 @@ setGeneric(name="read_elements", def=function(x, num_elements) standardGeneric("
 setGeneric(name="read_columns", def=function(x, column_indices) standardGeneric("read_columns"))
 
 
-#' Generic function to write a sequence of elements from an input source
+#' write a sequence of elements from an input source
+#'
 #' @param x the output channel
 #' @param els the elements to write
 #' @export
@@ -425,8 +435,9 @@ setGeneric(name="read_columns", def=function(x, column_indices) standardGeneric(
 setGeneric(name="write_elements", def=function(x, els) standardGeneric("write_elements"))
 
 
-#' Generic function to write a 3D image volume to disk
-#' @param x an image object, typically a \code{NeuroVol} instance.
+#' write a 3d image volume to disk
+#'
+#' @param x an image object, typically a \code{\linkS4class{NeuroVol}} instance.
 #' @param file_name output file name
 #' @param format file format string. Since "NIFTI" is the only currently supported format, this parameter can be safely ignored and omitted.
 #' @param data_type output data type, If specified should be a \code{character} vector of: "BINARY", "UBYTE", "SHORT", "INT", "FLOAT", "DOUBLE".
@@ -453,7 +464,8 @@ setGeneric(name="write_elements", def=function(x, els) standardGeneric("write_el
 setGeneric(name="write_vol",  def=function(x, file_name, format, data_type) standardGeneric("write_vol"))
 
 
-#' Generic function to write a 4D image vector to disk
+#' write a 4d image vector to disk
+#'
 #' @param x an image object, typically a \code{NeuroVec} instance.
 #' @param file_name output file name.
 #' @param format file format string. Since "NIFTI" is the only currently supported format, this parameter can be safely ignored and omitted.
@@ -474,7 +486,7 @@ setGeneric(name="write_vec",  def=function(x, file_name, format, data_type) stan
 
 
 
-#' Generic function to remap the grid-to-world coordinates mapping of an image.
+#' remap the grid-to-world coordinates mapping of an image.
 #'
 #' @param x the object
 #' @param orient the orientation code indcating the "remapped" axes.
@@ -484,9 +496,9 @@ setGeneric(name="write_vec",  def=function(x, file_name, format, data_type) stan
 setGeneric(name="reorient", def=function(x, orient) standardGeneric("reorient"))
 
 
-#' Generic function to convert 1D indices to N-dimensional grid coordinates
+#' convert 1d indices to n-dimensional grid coordinates
 #' @param x the object
-#' @param idx the 1D \code{vector} of indices
+#' @param idx the 1d \code{vector} of indices
 #' @return a matrix of grid coordinates
 #' @export
 #' @examples
@@ -499,7 +511,8 @@ setGeneric(name="reorient", def=function(x, orient) standardGeneric("reorient"))
 #' @rdname index_to_grid-methods
 setGeneric(name="index_to_grid",   def=function(x, idx) standardGeneric("index_to_grid"))
 
-#' Generic function to convert 1D indices to N-dimensional real world coordinates
+#' convert 1d indices to n-dimensional real world coordinates
+#'
 #' @param x the object
 #' @param idx the 1D indices
 #' @return a matrix of real coordinates
@@ -513,7 +526,8 @@ setGeneric(name="index_to_grid",   def=function(x, idx) standardGeneric("index_t
 #' @rdname index_to_coord-methods
 setGeneric(name="index_to_coord",   def=function(x, idx) standardGeneric("index_to_coord"))
 
-#' Generic function to convert N-dimensional real world coordinates to 1D indices
+#' convert n-dimensional real world coordinates to 1D indices
+#'
 #' @param x the object
 #' @param coords a matrix of real world coordinates
 #' @return a vector of indices
@@ -521,7 +535,7 @@ setGeneric(name="index_to_coord",   def=function(x, idx) standardGeneric("index_
 #' @rdname coord_to_index-methods
 setGeneric(name="coord_to_index",   def=function(x, coords) standardGeneric("coord_to_index"))
 
-#' Generic function to convert N-dimensional real world coordinates to grid coordinates
+#' convert n-dimensional real world coordinates to grid coordinates
 #'
 #' @param x the object
 #' @param coords a matrix of real world coordinates
