@@ -2,7 +2,7 @@
 % Please edit documentation in R/all_generic.R
 \name{read_columns}
 \alias{read_columns}
-\title{Generic function to read a set of column vector from an input source (e.g. \code{ColumnReader})}
+\title{read a set of column vector from an input source (e.g. \code{ColumnReader})}
 \usage{
 read_columns(x, column_indices)
 }
@@ -15,5 +15,5 @@ read_columns(x, column_indices)
 a \code{matrix} consisting of the requested column vectors
 }
 \description{
-Generic function to read a set of column vector from an input source (e.g. \code{ColumnReader})
+read a set of column vector from an input source (e.g. \code{ColumnReader})
 }

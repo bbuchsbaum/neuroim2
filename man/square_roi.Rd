@@ -4,8 +4,7 @@
 \alias{square_roi}
 \title{Create a square region of interest where the z-dimension is fixed at one voxel coordinate.}
 \usage{
-square_roi(bvol, centroid, surround, fill = NULL, nonzero = FALSE,
-  fixdim = 3)
+square_roi(bvol, centroid, surround, fill = NULL, nonzero = FALSE, fixdim = 3)
 }
 \arguments{
 \item{bvol}{an \code{NeuroVol} or \code{NeuroSpace} instance.}

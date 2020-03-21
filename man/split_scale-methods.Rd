@@ -8,12 +8,11 @@
 \alias{split_scale,DenseNeuroVec,factor,missing,missing-method}
 \alias{split_scale,DenseNeuroVec,factor,logical,missing-method}
 \alias{split_scale,DenseNeuroVec,factor,logical,logical-method}
-\title{Generic function to center/scale row-subsets of a matrix or matrix-like object}
+\title{center/scale row-subsets of a matrix or matrix-like object}
 \usage{
 split_scale(x, f, center, scale)
 
-\S4method{split_scale}{matrix,factor,logical,logical}(x, f,
-  center = TRUE, scale = TRUE)
+\S4method{split_scale}{matrix,factor,logical,logical}(x, f, center = TRUE, scale = TRUE)
 
 \S4method{split_scale}{matrix,factor,missing,missing}(x, f)
 
@@ -21,8 +20,7 @@ split_scale(x, f, center, scale)
 
 \S4method{split_scale}{DenseNeuroVec,factor,logical,missing}(x, f, center)
 
-\S4method{split_scale}{DenseNeuroVec,factor,logical,logical}(x, f, center,
-  scale)
+\S4method{split_scale}{DenseNeuroVec,factor,logical,logical}(x, f, center, scale)
 }
 \arguments{
 \item{x}{a numeric matrix or matrix-like object}
@@ -37,7 +35,7 @@ split_scale(x, f, center, scale)
 a new matrix or matrix-like object where the original rows have been grouped by \code{f} and then centered and/or scaled for each grouping
 }
 \description{
-Generic function to center/scale row-subsets of a matrix or matrix-like object
+center/scale row-subsets of a matrix or matrix-like object
 }
 \examples{
 

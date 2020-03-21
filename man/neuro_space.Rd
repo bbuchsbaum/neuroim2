@@ -4,8 +4,7 @@
 \alias{NeuroSpace}
 \title{Constructor function for \code{\linkS4class{NeuroSpace}} class}
 \usage{
-NeuroSpace(dim, spacing = NULL, origin = NULL, axes = NULL,
-  trans = NULL)
+NeuroSpace(dim, spacing = NULL, origin = NULL, axes = NULL, trans = NULL)
 }
 \arguments{
 \item{dim}{a vector describing the dimensions of the image grid}

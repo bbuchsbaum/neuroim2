@@ -13,6 +13,14 @@ box_blur <- function(arr, mask_idx, window) {
     .Call('_neuroim2_box_blur', PACKAGE = 'neuroim2', arr, mask_idx, window)
 }
 
+gaussian_weights <- function(window, sigma, spacing) {
+    .Call('_neuroim2_gaussian_weights', PACKAGE = 'neuroim2', window, sigma, spacing)
+}
+
+gaussian_blur_cpp <- function(arr, mask_idx, window, sigma, spacing) {
+    .Call('_neuroim2_gaussian_blur_cpp', PACKAGE = 'neuroim2', arr, mask_idx, window, sigma, spacing)
+}
+
 find_seqnum <- function(clens, idx) {
     .Call('_neuroim2_find_seqnum', PACKAGE = 'neuroim2', clens, idx)
 }

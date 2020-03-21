@@ -9,7 +9,7 @@
 \alias{split_reduce,matrix,factor,function-method}
 \alias{split_reduce,NeuroVec,factor,function-method}
 \alias{split_reduce,NeuroVec,factor,missing-method}
-\title{Generic function to summarize subsets of an object by first splitting by row and then "reducing" by a summary \code{function}}
+\title{summarize subsets of an object by first splitting by row and then "reducing" by a summary \code{function}}
 \usage{
 split_reduce(x, fac, FUN)
 
@@ -36,7 +36,7 @@ split_reduce(x, fac, FUN)
 a new \code{matrix} where the original values have been "reduced" by the supplied function.
 }
 \description{
-Generic function to summarize subsets of an object by first splitting by row and then "reducing" by a summary \code{function}
+summarize subsets of an object by first splitting by row and then "reducing" by a summary \code{function}
 }
 \details{
 if \code{FUN} is supplied it must take a vector and return a single scalar value. If it returns more than one value, an error will occur.
@@ -58,7 +58,7 @@ all.equal(row.names(ms), levels(fac))
 ms <- split_reduce(mat, fac, median)
 
 ## compute time-series means grouped over voxels.
-## Here, \\code{length(fac)} must equal the number of voxels: \\code{prod(dim(bvec)[1:3]}
+## Here, \code{length(fac)} must equal the number of voxels: \code{prod(dim(bvec)[1:3]}
 bvec <- NeuroVec(array(rnorm(24*24*24*24), c(24,24,24,24)), NeuroSpace(c(24,24,24,24), c(1,1,1)))
 fac <- factor(sample(1:3, prod(dim(bvec)[1:3]), replace=TRUE))
 ms <- split_reduce(bvec, fac)

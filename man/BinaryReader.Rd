@@ -4,8 +4,13 @@
 \alias{BinaryReader}
 \title{BinaryReader}
 \usage{
-BinaryReader(input, byte_offset, data_type, bytes_per_element,
-  endian = .Platform$endian)
+BinaryReader(
+  input,
+  byte_offset,
+  data_type,
+  bytes_per_element,
+  endian = .Platform$endian
+)
 }
 \arguments{
 \item{input}{file name to read from or else a \code{connection} object}

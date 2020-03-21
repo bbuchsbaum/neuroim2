@@ -98,8 +98,55 @@ NumericVector box_blur(NumericVector arr, IntegerVector mask_idx, int window) {
 
   out.attr("dim") = dims;
   return out;
+}
+// H(x) = exp(-x2/ (2s2)) / sqrt(2* pi*s2)
+// I(y) = exp(-y2/ (2t2)) / sqrt(2* pi*t2)
+
+// [[Rcpp::export]]
+NumericVector gaussian_weights(int window, double sigma, NumericVector spacing) {
+  int count = 0;
+  NumericVector out = NumericVector( pow((window*2)+1, 3));
+  double denom = 2 * pow(sigma,2);
+
+  int ind = 0;
+  for (int i = -window; i <= window; i++) {
+    for (int j = -window; j <= window; j++) {
+      for (int k = -window; k <= window; k++) {
+          out[ind] = std::exp(-std::pow(i * spacing[0],2)/denom)*std::sqrt(2 * M_PI * sigma) *
+            std::exp(-std::pow(j * spacing[1],2)/denom)*std::sqrt(2 * M_PI * sigma) *
+            std::exp(-std::pow(k * spacing[2],2)/denom)*std::sqrt(2 * M_PI * sigma);
+          ind = ind +1;
+      }
+    }
+  }
+
+  double tot = std::accumulate(out.begin(), out.end(), 0.0);
+  return out/tot;
 
 
+}
+
+
+// [[Rcpp::export]]
+NumericVector gaussian_blur_cpp(NumericVector arr, IntegerVector mask_idx, int window, double sigma, NumericVector spacing) {
+  IntegerVector dims = arr.attr("dim");
+  NumericVector out = NumericVector(arr.length());
+  NumericVector local = NumericVector( pow((window*2)+1, 3));
+
+  NumericVector wts = gaussian_weights(window, sigma, spacing);
+
+  //Rcout << "weights are" << std::endl << wts << std::endl;
+
+  NumericMatrix cds = indexToGridCpp(mask_idx, dims);
+  int slicedim = dims[0]*dims[1];
+
+  for (int i = 0; i < mask_idx.length(); i++) {
+    NumericVector ret = box_nbhd(arr, dims, cds(i,0)-1, cds(i,1)-1, cds(i,2)-1, window, local, slicedim);
+    out[mask_idx[i]-1] = sum(ret*wts);
+  }
+
+  out.attr("dim") = dims;
+  return out;
 }
 
 

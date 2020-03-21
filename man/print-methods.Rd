@@ -2,7 +2,7 @@
 % Please edit documentation in R/all_generic.R
 \name{print}
 \alias{print}
-\title{Generic function to print an object}
+\title{print an object}
 \usage{
 print(x, ...)
 }
@@ -12,5 +12,5 @@ print(x, ...)
 \item{...}{additional arguments}
 }
 \description{
-Generic function to print an object
+print an object
 }

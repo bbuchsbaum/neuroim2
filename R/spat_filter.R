@@ -1,4 +1,32 @@
 
+
+#' Blur a volumetric image with an isotropic discrete Gaussian kernel
+#'
+#' @param the image volume as a \code{NeuroVol}
+#' @param an image mask as a \code{LogicalNeuroVol}
+#' @param sigma the standard deviation of the Gaussian
+#' @param window the number of voxels around the center voxel to include on each side (window=1 for a 3x3x3 kernel).
+#'
+#' @return a smoothed image of class \code{NeuroVol}
+#' @export
+gaussian_blur <- function(vol, mask, sigma=2, window=1) {
+  assert_that(window >= 1)
+  assert_that(sigma > 0)
+
+  if (missing(mask)) {
+    mask.idx <- 1:prod(dim(vol))
+  } else {
+    mask.idx <- which(mask!=0)
+  }
+
+  arr <- as.array(vol)
+  farr <- gaussian_blur_cpp(arr, as.integer(mask.idx), as.integer(window), sigma, spacing(vol))
+
+  out <- NeuroVol(farr, space(mask))
+  out
+}
+
+
 guided_filter <- function(vol, radius=4, epsilon=.7^2, ncores=parallel::detectCores()) {
   # pset <- patch_set(vol, c(3,3,3))
   #

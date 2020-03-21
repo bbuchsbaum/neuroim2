@@ -3,7 +3,6 @@
 \docType{package}
 \name{neuroim2}
 \alias{neuroim2}
-\alias{neuroim2-package}
 \title{neuroim2}
 \description{
 Data structures for neuroimaging data.

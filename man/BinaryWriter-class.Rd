@@ -6,8 +6,13 @@
 \alias{BinaryWriter}
 \title{BinaryWriter}
 \usage{
-BinaryWriter(output, byte_offset, data_type, bytes_per_element,
-  endian = .Platform$endian)
+BinaryWriter(
+  output,
+  byte_offset,
+  data_type,
+  bytes_per_element,
+  endian = .Platform$endian
+)
 }
 \arguments{
 \item{output}{file name to write to or else a \code{connection} object}

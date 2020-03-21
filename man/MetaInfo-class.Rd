@@ -6,10 +6,15 @@
 \alias{MetaInfo}
 \title{MetaInfo}
 \usage{
-MetaInfo(Dim, spacing, origin = rep(0, length(spacing)),
-  data_type = "FLOAT", label = "",
+MetaInfo(
+  Dim,
+  spacing,
+  origin = rep(0, length(spacing)),
+  data_type = "FLOAT",
+  label = "",
   spatial_axes = OrientationList3D$AXIAL_LPI,
-  additional_axes = NullAxis)
+  additional_axes = NullAxis
+)
 }
 \arguments{
 \item{Dim}{image dimensions}

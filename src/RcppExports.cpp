@@ -48,6 +48,34 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// gaussian_weights
+NumericVector gaussian_weights(int window, double sigma, NumericVector spacing);
+RcppExport SEXP _neuroim2_gaussian_weights(SEXP windowSEXP, SEXP sigmaSEXP, SEXP spacingSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type window(windowSEXP);
+    Rcpp::traits::input_parameter< double >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type spacing(spacingSEXP);
+    rcpp_result_gen = Rcpp::wrap(gaussian_weights(window, sigma, spacing));
+    return rcpp_result_gen;
+END_RCPP
+}
+// gaussian_blur_cpp
+NumericVector gaussian_blur_cpp(NumericVector arr, IntegerVector mask_idx, int window, double sigma, NumericVector spacing);
+RcppExport SEXP _neuroim2_gaussian_blur_cpp(SEXP arrSEXP, SEXP mask_idxSEXP, SEXP windowSEXP, SEXP sigmaSEXP, SEXP spacingSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type arr(arrSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type mask_idx(mask_idxSEXP);
+    Rcpp::traits::input_parameter< int >::type window(windowSEXP);
+    Rcpp::traits::input_parameter< double >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type spacing(spacingSEXP);
+    rcpp_result_gen = Rcpp::wrap(gaussian_blur_cpp(arr, mask_idx, window, sigma, spacing));
+    return rcpp_result_gen;
+END_RCPP
+}
 // find_seqnum
 NumericVector find_seqnum(NumericVector clens, NumericVector idx);
 RcppExport SEXP _neuroim2_find_seqnum(SEXP clensSEXP, SEXP idxSEXP) {
@@ -142,6 +170,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_neuroim2_indexToGridCpp", (DL_FUNC) &_neuroim2_indexToGridCpp, 2},
     {"_neuroim2_box_nbhd", (DL_FUNC) &_neuroim2_box_nbhd, 8},
     {"_neuroim2_box_blur", (DL_FUNC) &_neuroim2_box_blur, 3},
+    {"_neuroim2_gaussian_weights", (DL_FUNC) &_neuroim2_gaussian_weights, 3},
+    {"_neuroim2_gaussian_blur_cpp", (DL_FUNC) &_neuroim2_gaussian_blur_cpp, 5},
     {"_neuroim2_find_seqnum", (DL_FUNC) &_neuroim2_find_seqnum, 2},
     {"_neuroim2_grid_to_intvec", (DL_FUNC) &_neuroim2_grid_to_intvec, 2},
     {"_neuroim2_exgridToIndex3DCpp", (DL_FUNC) &_neuroim2_exgridToIndex3DCpp, 4},
