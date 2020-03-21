@@ -7,13 +7,13 @@
 gaussian_blur(vol, mask, sigma = 2, window = 1)
 }
 \arguments{
+\item{vol}{the image volume as a \code{NeuroVol}}
+
+\item{mask}{an image mask as a \code{LogicalNeuroVol}}
+
 \item{sigma}{the standard deviation of the Gaussian}
 
 \item{window}{the number of voxels around the center voxel to include on each side (window=1 for a 3x3x3 kernel).}
-
-\item{the}{image volume as a \code{NeuroVol}}
-
-\item{an}{image mask as a \code{LogicalNeuroVol}}
 }
 \value{
 a smoothed image of class \code{NeuroVol}
