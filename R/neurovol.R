@@ -844,7 +844,9 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 #' @param zlevels the series of slice indices to display.
 #' @param irange the intensity range indicating the low and high values of the color scale.
 #' @param thresh a 2-element vector indicating the lower and upper transparency thresholds.
+#' @param alpha the level of alpha transparency
 #' @param bgvol a background volume that serves as an image underlay (currently ignored).
+#' @param bgcmap a color map for backround layer consisting of a vector of colors in hex format (e.g. \code{gray(n=255)})
 #' @export
 #' @importFrom graphics plot
 #' @examples

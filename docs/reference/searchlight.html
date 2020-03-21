@@ -8,10 +8,12 @@
 
 <title>bootstrap_searchlight — bootstrap_searchlight • neuroim2</title>
 
+
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/flatly/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
 
@@ -22,8 +24,9 @@
 <!-- clipboard.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
 
-<!-- sticky kit -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
+<!-- headroom.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -31,12 +34,13 @@
 
 
 
-<meta property="og:title" content="bootstrap_searchlight — bootstrap_searchlight" />
 
+<meta property="og:title" content="bootstrap_searchlight — bootstrap_searchlight" />
 <meta property="og:description" content="Create a spherical searchlight iterator that samples regions from within a mask.
-Create an exhaustive searchlight iterator that only returns voxel coordinates
+Create an exhaustive searchlight iterator that only returns voxel coordinates.
 Generates an ROIVol around each non-zero voxel in a 3D image mask" />
 <meta name="twitter:card" content="summary" />
+
 
 
 
@@ -48,6 +52,7 @@ Generates an ROIVol around each non-zero voxel in a 3D image mask" />
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
+
 
 
   </head>
@@ -106,7 +111,6 @@ Generates an ROIVol around each non-zero voxel in a 3D image mask" />
   </ul>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/bbuchsbaum/neuroim2">
@@ -121,6 +125,7 @@ Generates an ROIVol around each non-zero voxel in a 3D image mask" />
 </div><!--/.navbar -->
 
       
+
       </header>
 
 <div class="row">
@@ -132,11 +137,9 @@ Generates an ROIVol around each non-zero voxel in a 3D image mask" />
     </div>
 
     <div class="ref-description">
-    
     <p>Create a spherical searchlight iterator that samples regions from within a mask.</p>
-<p>Create an exhaustive searchlight iterator that only returns voxel coordinates</p>
+<p>Create an exhaustive searchlight iterator that only returns voxel coordinates.</p>
 <p>Generates an <code>ROIVol</code> around each non-zero voxel in a 3D image mask</p>
-    
     </div>
 
     <pre class="usage"><span class='fu'>bootstrap_searchlight</span>(<span class='no'>mask</span>, <span class='kw'>radius</span> <span class='kw'>=</span> <span class='fl'>8</span>, <span class='kw'>iter</span> <span class='kw'>=</span> <span class='fl'>100</span>)
@@ -146,17 +149,17 @@ Generates an ROIVol around each non-zero voxel in a 3D image mask" />
 <span class='fu'>searchlight</span>(<span class='no'>mask</span>, <span class='no'>radius</span>, <span class='kw'>eager</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>nonzero</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
 
 <span class='fu'>clustered_searchlight</span>(<span class='no'>mask</span>, <span class='kw'>cvol</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>csize</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
-    
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>mask</th>
-      <td><p>an image volume containing valid central voxels for roving searchlight</p></td>
+      <td><p>an image volume containing valid central voxels for roving searchlight.</p></td>
     </tr>
     <tr>
       <th>radius</th>
-      <td><p>in mm of spherical searchlight</p></td>
+      <td><p>in mm of spherical searchlight.</p></td>
     </tr>
     <tr>
       <th>iter</th>
@@ -164,7 +167,7 @@ Generates an ROIVol around each non-zero voxel in a 3D image mask" />
     </tr>
     <tr>
       <th>nonzero</th>
-      <td><p>only include nonzero coordinates</p></td>
+      <td><p>only include coordinates with nonzero values in the supplied mask.</p></td>
     </tr>
     <tr>
       <th>eager</th>
@@ -179,37 +182,33 @@ Generates an ROIVol around each non-zero voxel in a 3D image mask" />
       <td><p>the number of clusters (ignored if <code>cvol</code> is provided)</p></td>
     </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>a list ofmatrices containing of integer-valued voxel coordinates</p>
+    <p>a list ofmatrices containing of integer-valued voxel coordinates.</p>
 <p>a list of <code>ROIVolWindow</code> objects</p>
 <p>an <code>iter</code> class</p>
-    
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>searchlight centers are sampled without replacement, but the same surround voxel can belong to multiple searchlight samples.</p>
-    
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='no'>mask</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='read_vol.html'>read_vol</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/system.file'>system.file</a></span>(<span class='st'>"extdata"</span>, <span class='st'>"global_mask.nii"</span>, <span class='kw'>package</span><span class='kw'>=</span><span class='st'>"neuroim2"</span>))
+<span class='no'>mask</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='read_vol.html'>read_vol</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(<span class='st'>"extdata"</span>, <span class='st'>"global_mask.nii"</span>, <span class='kw'>package</span><span class='kw'>=</span><span class='st'>"neuroim2"</span>))
 <span class='no'>slight</span> <span class='kw'>&lt;-</span> <span class='fu'>bootstrap_searchlight</span>(<span class='no'>mask</span>, <span class='fl'>6</span>)</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-      
       <li><a href="#value">Value</a></li>
-
       <li><a href="#details">Details</a></li>
-      
       <li><a href="#examples">Examples</a></li>
     </ul>
 
   </div>
 </div>
+
 
       <footer>
       <div class="copyright">
@@ -217,13 +216,16 @@ Generates an ROIVol around each non-zero voxel in a 3D image mask" />
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
+
       </footer>
    </div>
 
   
 
+
   </body>
 </html>
+
 

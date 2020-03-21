@@ -83,6 +83,7 @@ setMethod(f="show", signature=signature("ClusteredNeuroVol"),
 )
 
 #' @export
+#' @param type the type of center of mass: one of "center_of_mass" or "medoid"
 #' @rdname centroids-methods
 #' @importFrom Gmedian Gmedian
 setMethod(f="centroids", signature=signature(x="ClusteredNeuroVol"),

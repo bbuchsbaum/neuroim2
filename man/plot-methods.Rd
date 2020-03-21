@@ -29,7 +29,11 @@
 
 \item{thresh}{a 2-element vector indicating the lower and upper transparency thresholds.}
 
+\item{alpha}{the level of alpha transparency}
+
 \item{bgvol}{a background volume that serves as an image underlay (currently ignored).}
+
+\item{bgcmap}{a color map for backround layer consisting of a vector of colors in hex format (e.g. \code{gray(n=255)})}
 }
 \description{
 plot an image

@@ -2,33 +2,26 @@
 % Please edit documentation in R/all_generic.R, R/neurospace.R, R/roi.R
 \name{centroid}
 \alias{centroid}
-\alias{centroids}
 \alias{centroid,NeuroSpace-method}
 \alias{centroid,ROICoords-method}
 \title{return the centroid of an object}
 \usage{
 centroid(x, ...)
 
-centroids(x, ...)
-
 \S4method{centroid}{NeuroSpace}(x)
 
 \S4method{centroid}{ROICoords}(x)
 }
 \arguments{
-\item{x}{an object with multiple centroids (e.g. a \code{ClusteredNeuroVol})}
+\item{x}{an object with a centroid}
 
-\item{extra}{args}
+\item{...}{extra args}
 }
 \description{
 return the centroid of an object
-
-return a matrix of centroids of an object
 }
 \examples{
 bspace <- NeuroSpace(c(10,10,10), c(2,2,2))
 centroid(bspace)
-
-
 
 }

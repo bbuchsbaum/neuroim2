@@ -22,17 +22,17 @@ to_nih5_vol <- function(vol, file_name=NULL, data_type="FLOAT") {
 
   h5obj <- hdf5r::H5File$new(file_name)
 
-  space_ds <- H5S$new(dims = dim(vol), maxdims = dim(vol))
-  dtype <- H5P_DATASET_CREATE$new()
+  space_ds <- hdf5r::H5S$new(dims = dim(vol), maxdims = dim(vol))
+  dtype <- hdf5r::H5P_DATASET_CREATE$new()
 
   h5dtype <- switch(data_type,
-                    "BINARY"=h5types$H5T_NATIVE_HBOOL,
-                    "SHORT"=h5types$H5T_NATIVE_SHORT,
-                    "INT"=h5types$H5T_NATIVE_INT,
-                    "INTEGER"=h5types$H5T_NATIVE_INT,
-                    "FLOAT"=h5types$H5T_NATIVE_FLOAT,
-                    "DOUBLE"=h5types$H5T_NATIVE_DOUBLE,
-                    "LONG"=h5types$H5T_NATIVE_LONG,
+                    "BINARY"=hdf5r::h5types$H5T_NATIVE_HBOOL,
+                    "SHORT"=hdf5r::h5types$H5T_NATIVE_SHORT,
+                    "INT"=hdf5r::h5types$H5T_NATIVE_INT,
+                    "INTEGER"=hdf5r::h5types$H5T_NATIVE_INT,
+                    "FLOAT"=hdf5r::h5types$H5T_NATIVE_FLOAT,
+                    "DOUBLE"=hdf5r::h5types$H5T_NATIVE_DOUBLE,
+                    "LONG"=hdf5r::h5types$H5T_NATIVE_LONG,
                     NULL)
   if (is.null(h5dtype)) {
     stop(paste("unsupported data_type:", data_type))

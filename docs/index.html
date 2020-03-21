@@ -9,7 +9,7 @@
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/flatly/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous">
-<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
+<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
 <script src="pkgdown.js"></script><meta property="og:title" content="Data Structures and Handling for Neuroimaging Data">
 <meta property="og:description" content="A collection of data structures that represent
     volumetric brain imaging data. The focus is on basic data handling for 3D
@@ -22,7 +22,7 @@
 <![endif]-->
 </head>
 <body>
-    <div class="container template-article">
+    <div class="container template-home">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
@@ -90,46 +90,45 @@
 <!--/.navbar -->
 
       
-      </header><div class="row">
-  <div class="col-md-9 contents">
-    
 
-    
-    
+      </header><div class="row">
+  <div class="contents col-md-9">
+
 
 <p>The <code>neuroim2</code> package is currently in development. The goal of the project is to to provide basic functionality for working with neuroimaging data in R. <code>neuroim2</code> It is an effort to modify and upgrade the <code>neuroim</code> package (<a href="https://github.com/bbuchsbaum/neuroim" class="uri">https://github.com/bbuchsbaum/neuroim</a>).</p>
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
 <p>You can install the development version of <code>neuroim2</code> (v. <code>0.1.0</code>) from Github with:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># install.packages("devtools")</span>
-devtools<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/devtools/topics/install_github">install_github</a></span>(<span class="st">"bbuchsbaum/neuroim2"</span>)</code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co"># install.packages("devtools")</span></a>
+<a class="sourceLine" id="cb1-2" data-line-number="2">devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/devtools/man/remote-reexports.html">install_github</a></span>(<span class="st">"bbuchsbaum/neuroim2"</span>)</a></code></pre></div>
 </div>
 <div id="usage" class="section level2">
 <h2 class="hasAnchor">
 <a href="#usage" class="anchor"></a>Usage</h2>
 <p>To read in a volumetric NIFTI formatted image, use the <code>read_vol</code> function:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(neuroim2)</code></pre></div>
-<pre><code>## Loading required package: Matrix</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fname &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/system.file">system.file</a></span>(<span class="st">"extdata"</span>, <span class="st">"global_mask.nii"</span>, <span class="dt">package=</span><span class="st">"neuroim2"</span>)
-vol &lt;-<span class="st"> </span><span class="kw"><a href="reference/read_vol.html">read_vol</a></span>(fname)</code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(neuroim2)</a></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co">## Loading required package: Matrix</span></a></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">fname &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span>(<span class="st">"extdata"</span>, <span class="st">"global_mask.nii"</span>, <span class="dt">package=</span><span class="st">"neuroim2"</span>)</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">vol &lt;-<span class="st"> </span><span class="kw"><a href="reference/read_vol.html">read_vol</a></span>(fname)</a></code></pre></div>
 <p>Now, <code>vol</code> can be treated as a three-dimensional array:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">v1 &lt;-<span class="st"> </span>vol[<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>]
-vol2 &lt;-<span class="st"> </span>vol <span class="op">+</span><span class="st"> </span>vol
-vol3 &lt;-<span class="st"> </span>vol2 <span class="op">-</span><span class="st"> </span>vol
-<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/all">all</a></span>(vol <span class="op">==</span><span class="st"> </span>vol3)</code></pre></div>
-<pre><code>## [1] TRUE</code></pre>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">v1 &lt;-<span class="st"> </span>vol[<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>]</a>
+<a class="sourceLine" id="cb5-2" data-line-number="2">vol2 &lt;-<span class="st"> </span>vol <span class="op">+</span><span class="st"> </span>vol</a>
+<a class="sourceLine" id="cb5-3" data-line-number="3">vol3 &lt;-<span class="st"> </span>vol2 <span class="op">-</span><span class="st"> </span>vol</a>
+<a class="sourceLine" id="cb5-4" data-line-number="4"><span class="kw"><a href="https://rdrr.io/r/base/all.html">all</a></span>(vol <span class="op">==</span><span class="st"> </span>vol3)</a></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode R"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co">## [1] TRUE</span></a></code></pre></div>
 <p>We can create a 4D image, by concatenating several 3D volumes:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">vec &lt;-<span class="st"> </span><span class="kw"><a href="reference/concat-methods.html">concat</a></span>(vol, vol, vol2)
-series1 &lt;-<span class="st"> </span>vec[<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,]
-<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/length">length</a></span>(series1)</code></pre></div>
-<pre><code>## [1] 3</code></pre>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">vec &lt;-<span class="st"> </span><span class="kw"><a href="reference/concat-methods.html">concat</a></span>(vol, vol, vol2)</a>
+<a class="sourceLine" id="cb7-2" data-line-number="2">series1 &lt;-<span class="st"> </span>vec[<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,]</a>
+<a class="sourceLine" id="cb7-3" data-line-number="3"><span class="kw"><a href="https://rdrr.io/r/base/length.html">length</a></span>(series1)</a></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode R"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="co">## [1] 3</span></a></code></pre></div>
 </div>
 <div id="vignettes" class="section level2">
 <h2 class="hasAnchor">
 <a href="#vignettes" class="anchor"></a>Vignettes</h2>
 <p>See examples of use of <code>neuroim2</code> in the <a href="https://bbuchsbaum.github.io/neuroim2/articles/index.html">vignettes</a>.</p>
 </div>
+
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -155,7 +154,7 @@ series1 &lt;-<span class="st"> </span>vec[<span class="dv">1</span>,<span class=
 </ul>
 </div>
 
-      <div class="dev-status">
+  <div class="dev-status">
 <h2>Dev status</h2>
 <ul class="list-unstyled">
 <li><a href="https://travis-ci.org/bbuchsbaum/neuroim2"><img src="https://img.shields.io/travis/bbuchsbaum/neuroim2/master.svg" alt="Build Status"></a></li>
@@ -163,7 +162,6 @@ series1 &lt;-<span class="st"> </span>vec[<span class="dv">1</span>,<span class=
 </ul>
 </div>
 </div>
-
 </div>
 
 
@@ -172,12 +170,14 @@ series1 &lt;-<span class="st"> </span>vec[<span class="dv">1</span>,<span class=
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
+
       </footer>
 </div>
 
   
+
 
   </body>
 </html>

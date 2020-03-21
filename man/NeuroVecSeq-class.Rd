@@ -11,5 +11,7 @@ A concatenated sequence of \code{\linkS4class{NeuroVec}} instances.
 
 \describe{
 \item{\code{vecs}}{the sequences of \code{NeuroVec} instances}
+
+\item{\code{lens}}{the number of volumes in each \code{NeuroVec} sequence}
 }}
 

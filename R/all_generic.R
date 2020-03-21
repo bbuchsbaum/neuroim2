@@ -360,7 +360,7 @@ setGeneric(name="origin", def=function(x) standardGeneric("origin"))
 #' return the centroid of an object
 #'
 #' @param x an object with a centroid
-#' @param extra args
+#' @param ... extra args
 #' @export
 #' @examples
 #' bspace <- NeuroSpace(c(10,10,10), c(2,2,2))
@@ -372,12 +372,9 @@ setGeneric(name="centroid", def=function(x, ...) standardGeneric("centroid"))
 #' return a matrix of centroids of an object
 #'
 #' @param x an object with multiple centroids (e.g. a \code{ClusteredNeuroVol})
-#' @param extra args
+#' @param ... extra args
 #' @export
-#' @examples
-#'
-#'
-#' @rdname centroid-methods
+#' @rdname centroids-methods
 setGeneric(name="centroids", def=function(x, ...) standardGeneric("centroids"))
 
 

@@ -11,6 +11,11 @@ setMethod("series", signature(x="NeuroVecSeq", i="integer"),
 \usage{
 \S4method{[[}{NeuroVecSeq,numeric}(x, i)
 }
+\arguments{
+\item{x}{the object}
+
+\item{i}{the indices}
+}
 \description{
 #' @rdname series-methods
 #' @export
