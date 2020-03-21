@@ -2,8 +2,8 @@
 
 #' Blur a volumetric image with an isotropic discrete Gaussian kernel
 #'
-#' @param the image volume as a \code{NeuroVol}
-#' @param an image mask as a \code{LogicalNeuroVol}
+#' @param vol the image volume as a \code{NeuroVol}
+#' @param mask an image mask as a \code{LogicalNeuroVol}
 #' @param sigma the standard deviation of the Gaussian
 #' @param window the number of voxels around the center voxel to include on each side (window=1 for a 3x3x3 kernel).
 #'
@@ -26,8 +26,14 @@ gaussian_blur <- function(vol, mask, sigma=2, window=1) {
   out
 }
 
-
-guided_filter <- function(vol, radius=4, epsilon=.7^2, ncores=parallel::detectCores()) {
+#' Filter a volumetric image with a "guided" filter
+#'
+#' @param vol the image volume as a \code{NeuroVol}
+#' @param radius the spatial radius of the filter
+#' @param epsilon
+#' @return a filtered image of class \code{NeuroVol}
+#' @export
+guided_filter <- function(vol, radius=4, epsilon=.7^2) {
   # pset <- patch_set(vol, c(3,3,3))
   #
   # ab <- do.call(rbind, parallel::mclapply(pset, function(v) {
@@ -62,6 +68,4 @@ guided_filter <- function(vol, radius=4, epsilon=.7^2, ncores=parallel::detectCo
   mean_b = box_blur(b, mask_idx, radius)
   out = mean_a * vol + mean_b
   ovol = NeuroVol(out, space(vol))
-  plot(ovol, zlevel=seq(12,80,by=8))
-
 }
