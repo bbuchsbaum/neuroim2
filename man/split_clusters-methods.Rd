@@ -5,6 +5,7 @@
 \alias{split_clusters,NeuroVol,ClusteredNeuroVol-method}
 \alias{split_clusters,NeuroVol,integer-method}
 \alias{split_clusters,NeuroVol,numeric-method}
+\alias{split_clusters,ClusteredNeuroVol,missing-method}
 \alias{split_clusters,NeuroVec,integer-method}
 \alias{split_clusters,NeuroVec,numeric-method}
 \alias{split_clusters,NeuroVec,ClusteredNeuroVol-method}
@@ -17,6 +18,8 @@ split_clusters(x, clusters, ...)
 \S4method{split_clusters}{NeuroVol,integer}(x, clusters)
 
 \S4method{split_clusters}{NeuroVol,numeric}(x, clusters)
+
+\S4method{split_clusters}{ClusteredNeuroVol,missing}(x, clusters)
 
 \S4method{split_clusters}{NeuroVec,integer}(x, clusters, ...)
 
