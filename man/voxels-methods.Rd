@@ -7,14 +7,14 @@
 \usage{
 voxels(x, ...)
 
-\S4method{voxels}{Kernel}(x, centerVoxel = NULL)
+\S4method{voxels}{Kernel}(x, center_voxel = NULL)
 }
 \arguments{
 \item{x}{the object to extract voxels from}
 
 \item{...}{additional arguments to function}
 
-\item{centerVoxel}{the absolute location of the center of the voxel, default is (0,0,0)}
+\item{center_voxel}{the absolute location of the center of the voxel, default is (0,0,0)}
 }
 \description{
 extract voxel coordinates

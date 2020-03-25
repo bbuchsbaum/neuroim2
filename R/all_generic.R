@@ -843,9 +843,17 @@ setGeneric(name="strip_extension", def=function(x, file_name) standardGeneric("s
 #' Generic function to read image meta info given a file and a \code{\linkS4class{FileFormat}} instance.
 #' @param x descriptor instance
 #' @param file_name file name contianing meta information
-#' @export read_meta_info
+#' @export
 #' @rdname read_meta_info-methods
 setGeneric(name="read_meta_info", def=function(x, file_name) standardGeneric("read_meta_info"))
 
+
+#' Generic function to position kernel in a postion in image space
+#' @param x the kernel object
+#' @param sp the space to embed the kernel
+#' @param center_voxel the voxel marking the center of the kernel in the embedded space
+#' @export
+#' @rdname embed_kernel-methods
+setGeneric("embed_kernel", def=function(x, sp, center_voxel, ...) standardGeneric("embed_kernel"))
 
 

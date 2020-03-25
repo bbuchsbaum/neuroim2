@@ -310,6 +310,17 @@ spherical_roi <- function (bvol, centroid, radius, fill=NULL, nonzero=FALSE) {
 
 }
 
+# spherical_basis <- function(bvol, coord, kernel, weight=1) {
+#   ## convert coordinate from MNI space to voxel space
+#   grid.loc <- coord_to_grid(bvol, coord)
+#
+#   ## shift kernel so that it is centered around 'grid.loc'
+#   voxmat <- floor(voxels(kernel, centerVoxel=grid.loc))
+#   indices <- gridToIndex(template, voxmat)
+#   neuroim:::SparseNeuroVol(kernel@weights * weight, template, indices=indices)
+# }
+
+
 .resample <- function(x, ...) x[sample.int(length(x), ...)]
 
 #' @keywords internal
@@ -567,17 +578,27 @@ Kernel <- function(kerndim, vdim, FUN=dnorm, ...) {
 
 }
 
+#' @export
+#' @rdname embed_kernel-methods
+#' @param weight multiply kernel weights by this value
+setMethod("embed_kernel", signature=signature(x="Kernel", sp="NeuroSpace", center_voxel="numeric"),
+          function(x,  sp, center_voxel, weight=1) {
+            vox <- floor(voxels(x, center_voxel))
+            indices <- grid_to_index(sp, vox)
+            SparseNeuroVol(x@weights * weight, sp, indices=indices)
+          })
 
 
-#' @param centerVoxel the absolute location of the center of the voxel, default is (0,0,0)
+
+#' @param center_voxel the absolute location of the center of the voxel, default is (0,0,0)
 #' @rdname voxels-methods
 #' @export
 setMethod(f="voxels", signature=signature(x="Kernel"),
-          function(x, centerVoxel=NULL) {
+          function(x, center_voxel=NULL) {
             if (is.null(centerVoxel)) {
               x@voxels
             } else {
-              sweep(x@voxels, 2, centerVoxel, "+")
+              sweep(x@voxels, 2, center_voxel, "+")
             }
           })
 
