@@ -162,6 +162,13 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVol", clusters="numeri
             callGeneric(x,as.integer(clusters))
           })
 
+#' @export
+#' @rdname split_clusters-methods
+setMethod(f="split_clusters", signature=signature(x="ClusteredNeuroVol", clusters="missing"),
+          def = function(x,clusters) {
+            callGeneric(x,as.vector(x@data))
+          })
+
 
 #' get number of clusters in a ClusteredNeuroVol
 #' @rdname num_clusters-methods
