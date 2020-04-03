@@ -409,6 +409,15 @@ setMethod("vectors", signature(x="ROIVec", subset="missing"),
             deferred_list2(f, length(ind))
           })
 
+
+setMethod("vectors", signature(x="matrix", subset="missing"),
+          function(x) {
+            ind <- 1:ncol(x)
+            f <- function(i) x[,i]
+            #lis <- map(ind, function(i) f)
+            deferred_list2(f, length(ind))
+          })
+
 #' @rdname vectors-methods
 #' @export
 setMethod("vectors", signature(x="ROIVec", subset="integer"),
@@ -417,6 +426,20 @@ setMethod("vectors", signature(x="ROIVec", subset="integer"),
             f <- function(i) x@.Data[,ind[i]]
             #lis <- map(ind, function(i) f)
             deferred_list2(f, length(ind))
+          })
+
+
+setMethod("vectors", signature(x="matrix", subset="integer"),
+          function(x, subset) {
+            ind <- (1:ncol(x))[subset]
+            f <- function(i) x[,ind[i]]
+            #lis <- map(ind, function(i) f)
+            deferred_list2(f, length(ind))
+          })
+
+setMethod("vectors", signature(x="matrix", subset="numeric"),
+          function(x, subset) {
+            callGeneric(x,subset)
           })
 
 #' @rdname vectors-methods
