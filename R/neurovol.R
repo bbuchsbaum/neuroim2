@@ -164,6 +164,14 @@ setAs(from="DenseNeuroVol", to="H5NeuroVol", def=function(from) {
   to_nih5_vol(from, file_name=NULL, data_type="FLOAT")
 })
 
+#' @name as
+#'
+#' @rdname as-methods
+setAs(from="DenseNeuroVec", to="H5NeuroVec", def=function(from) {
+  to_nih5_vec(from, file_name=NULL, data_type="FLOAT")
+})
+
+
 
 #' @name as
 #'
@@ -177,6 +185,7 @@ setAs(from="SparseNeuroVol", to="array", def=function(from) {
 
 
 #' conversion from SparseNeuroVol to numeric
+#'
 #' @rdname as-methods
 #' @name as
 setAs(from="SparseNeuroVol", to="numeric", def=function(from) {
@@ -556,7 +565,8 @@ setMethod(f="patch_set", signature=signature(x="NeuroVol",
               stop("all 'dims' must be odd numbers")
             }
 
-            template <- as.matrix(expand.grid(x=seq(seq(ceiling(-dims[1]/2),floor(dims[1]/2))),
+            template <- as.matrix(expand.grid
+                                    (x=seq(seq(ceiling(-dims[1]/2),floor(dims[1]/2))),
                                     y=seq(seq(ceiling(-dims[2]/2),floor(dims[2]/2))),
                                     z=seq(seq(ceiling(-dims[3]/2),floor(dims[3]/2)))))
 

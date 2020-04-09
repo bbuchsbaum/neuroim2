@@ -24,8 +24,8 @@ NeuroVec <- function(data, space=NULL, mask=NULL, label="") {
     space <- space(data[[1]])
     space <- add_dim(space, length(data))
     data <- do.call(cbind, lapply(data, function(x) as.vector(x)))
-
   }
+
 
 	if (is.null(mask)) {
 	  if (prod(dim(space)) != length(data)) {
@@ -67,8 +67,9 @@ DenseNeuroVec <- function(data, space, label="") {
     }
 
 		dim(data) <- dim(space)
+	} else if (is.vector(data) || length(dim(data) == 1)) {
+	  data <- array(data, dim(space))
 	}
-
 
 
 	new("DenseNeuroVec", .Data=data,  space=space)
@@ -79,6 +80,7 @@ DenseNeuroVec <- function(data, space, label="") {
 
 
 #' load_data
+#'
 #' @return an instance of class \code{\linkS4class{NeuroVec}}
 #' @importFrom RNifti readNifti
 #' @rdname load_data-methods
@@ -120,8 +122,12 @@ setMethod(f="load_data", signature=c("NeuroVecSource"),
       } else {
         stop("NeuroVecSource::load_data: array dimension must be equal to 3 or 4.")
       }
-		})
+})
 
+setMethod(f="load_data", signature=c("H5NeuroVecSource"),
+          def=function(x) {
+            H5NeuroVec(x@file_name)
+          })
 
 
 #' NeuroVecSource
@@ -137,7 +143,6 @@ setMethod(f="load_data", signature=c("NeuroVecSource"),
 #'
 #' @rdname NeuroVecSource
 #' @importFrom assertthat assert_that
-#' @export
 NeuroVecSource <- function(file_name, indices=NULL, mask=NULL) {
 	assert_that(is.character(file_name))
 	assert_that(file.exists(file_name))
@@ -162,7 +167,6 @@ NeuroVecSource <- function(file_name, indices=NULL, mask=NULL) {
 		indices=seq(1, meta_info@dims[4])
 	}
 
-
 	if (is.null(mask)) {
 		new("NeuroVecSource", meta_info=meta_info, indices=as.integer(indices))
 	} else {
@@ -170,6 +174,47 @@ NeuroVecSource <- function(file_name, indices=NULL, mask=NULL) {
 	  assert_that(!any(is.na(mask)))
 		SparseNeuroVecSource(meta_info, as.integer(indices), mask)
 	}
+
+}
+
+
+#' @keywords internal
+H5NeuroVecSource <- function(file_name) {
+  new("H5NeuroVecSource", file_name=file_name)
+}
+
+#' H5NeuroVec
+#'
+#' Construct a \code{\linkS4class{H5NeuroVec}} object
+#'
+#' @param file_name name of the 4-dimensional image in \code{neuroim2} hdf5 format
+#' @return an \code{\linkS4class{H5NeuroVec}} instance
+#'
+#'
+#' @rdname NeuroVec
+#' @importFrom assertthat assert_that
+#' @export
+H5NeuroVec <- function(file_name) {
+  assert_that(is.character(file_name))
+  assert_that(file.exists(file_name))
+
+
+  h5obj <- hdf5r::H5File$new(file_name)
+
+  rtype <- try(h5attr(h5obj, which="rtype"))
+  if (! (rtype == "DenseNeuroVec")) {
+    stop("invalid h5 file: ", file_name)
+  }
+
+  if (length(h5obj[["space/dim"]][]) != 4) {
+    stop(paste("cannot H5NeuroVec: must have 4 dimensions: ", paste(h5obj[["space/dim"]][], collapse=" ")))
+  }
+
+
+  sp <- NeuroSpace(dim=h5obj[["space/dim"]][], origin=h5obj[["space/origin"]][],
+                   trans=h5obj[["space/trans"]][,])
+
+  new("H5NeuroVec", space=sp, obj=h5obj)
 
 }
 
@@ -508,8 +553,25 @@ setMethod(f="[[", signature=signature(x="NeuroVec", i="numeric"),
 #' @note memory-mapping a gzipped file is not currently allowed.
 read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap", "bigvec", "filebacked")) {
   mode <- match.arg(mode)
+
+  get_source <- function(x, indices, mask) {
+    if (endsWith(x, ".nii")) {
+      NeuroVecSource(x, indices, mask)
+    } else if (endsWith(x, ".nii.gz")) {
+      NeuroVecSource(x, indices, mask)
+    } else if (endsWith(x, ".h5")) {
+      if (!is.null(indices)) {
+        warning("do not support indices argument for .h5 files.")
+      }
+      if (!is.null(indices)) {
+        warning("do not support mask argument for .h5 files.")
+      }
+      H5NeuroVecSource(file_name=x)
+    }
+  }
+
   vecs <- if (mode == "normal") {
-	  lapply(file_name, function(fn) load_data(NeuroVecSource(fn, indices, mask)))
+	  lapply(file_name, function(fn) load_data(get_source(fn, indices, mask)))
 	  #load_data(src)
   } else if (mode == "mmap") {
     if (!is.null(indices)) {
@@ -678,6 +740,9 @@ setMethod("series_roi", signature(x="NeuroVec", i="LogicalNeuroVol"),
             mat <- as.matrix(series(x, i))
             ROIVec(space(x), coords=index_to_grid(i, which(i == TRUE)), data=as.matrix(mat))
           })
+
+
+
 #' @export
 #' @param drop whether to drop dimension of length 1
 #' @rdname series-methods
@@ -691,6 +756,7 @@ setMethod(f="series", signature=signature(x="NeuroVec", i="integer"),
               ret <- matrix(vals, dim(x)[4], length(i))
               if (drop) drop(ret) else ret
             } else {
+              ## could be solved with expand.grid, no?
               assert_that(length(i) == 1 && length(j) == 1 && length(k) ==1)
               ret <- x[i,j,k,]
               if (drop) drop(ret) else ret
@@ -711,6 +777,23 @@ setMethod(f="series", signature=signature(x="NeuroVec", i="integer"),
 #'               x[i,j,k,]
 #'             }
 #'           })
+
+
+#' @export
+#' @param drop whether to drop dimension of length 1
+#' @rdname series-methods
+setMethod(f="series", signature=signature(x="H5NeuroVec", i="integer"),
+          def=function(x,i,j,k, drop=TRUE) {
+            if (missing(j) && missing(k)) {
+              grid <- indexToGridCpp(i, dim(x)[1:3])
+              callGeneric(x, grid)
+            } else {
+              ## could be solved with expand.grid, no?
+              assert_that(length(i) == 1 && length(j) == 1 && length(k) ==1)
+              ret <- x@obj[["data/elements"]][i,j,k,]
+              if (drop) drop(ret) else ret
+            }
+          })
 
 
 #' @rdname series-methods
@@ -735,14 +818,57 @@ setMethod("series_roi", signature(x="NeuroVec", i="numeric"),
               callGeneric(x, vox)
             } else if (missing(i) || missing(j) || missing(k)) {
               stop("series_roi: must provide either 1D 'i' or 3D ('i', 'j', 'k') vector indices")
-            }
-            else {
-              vox <- cbind(i,j,k)
-              callGeneric(x, as.matrix(vox))
+            } else {
+              assert_that(length(i) == 1 && length(j) == 1 && length(k) ==1)
+              ret <- x[i,j,k,]
+              if (drop) drop(ret) else ret
+
             }
 
 
           })
+
+
+#' @rdname series-methods
+#' @export
+setMethod("series", signature(x="H5NeuroVec", i="numeric"),
+          def=function(x, i, j, k) {
+            if (missing(j) && missing(k)) {
+              callGeneric(x,as.integer(i))
+            } else {
+              callGeneric(x,as.integer(i), as.integer(j), as.integer(k))
+            }
+          })
+
+
+
+#' @rdname series-methods
+#' @export
+setMethod("series", signature(x="H5NeuroVec", i="matrix"),
+          def=function(x,i) {
+            assertthat::assert_that(ncol(i) == 3)
+
+            d4 <- dim(x)[4]
+            ir <- lapply(1:ncol(i), function(j) seq(min(i[,j]), max(i[,j])))
+
+            ret <- x@obj[["data/elements"]][ir[[1]][1]:ir[[1]][[length(ir[[1]])]],
+                                            ir[[2]][1]:ir[[2]][[length(ir[[2]])]],
+                                            ir[[3]][1]:ir[[3]][[length(ir[[3]])]],,drop=FALSE]
+            #ret2 <- apply(ret, 3L, c)
+            ret2 <- t(array(ret, c(prod(dim(ret)[1:3]),dim(ret)[4])))
+            if (ncol(ret2) != nrow(i)) {
+              i2 <- apply(i, 2, function(ind) {
+                ind - min(ind) + 1
+              })
+
+              i3 <- gridToIndex3DCpp(dim(ret)[1:3], i2)
+              ret2[,i3,drop=FALSE]
+
+            } else {
+              ret2
+            }
+          })
+
 
 
 
@@ -856,11 +982,18 @@ setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character",
 #' @export
 #' @rdname write_vec-methods
 setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character", format="character", data_type="missing"),
-		def=function(x, file_name, format) {
+		def=function(x, file_name, format, nbit=FALSE, compression=5, chunk_dim=c(10,10,10,dim(x)[4])) {
 			if (toupper(format) == "NIFTI" || toupper(format) == "NIFTI1" || toupper(format) == "NIFTI-1") {
 				callGeneric(x, file_name)
+			} else if (toupper(format) == "H5") {
+			  if (!endsWith(file_name, ".h5")) {
+			    file_name <- paste0(file_name, ".h5")
+			  }
+
+				h5obj <- to_nih5_vec(x, file_name, nbit=nbit, compression=compression, chunk_dim=chunk_dim)
+				h5obj
 			} else {
-				stop(paste("sorry, cannot write format: ", format))
+			  stop(paste("format ", format, "not supported."))
 			}
 		})
 

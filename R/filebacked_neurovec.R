@@ -53,6 +53,17 @@ setMethod(f="linear_access", signature=signature(x = "FileBackedNeuroVec", i = "
             read_mapped_data(x@meta, i)
           })
 
+#' @export
+#' @rdname linear_access-methods
+setMethod(f="linear_access", signature=signature(x = "H5NeuroVec", i = "numeric"),
+          def=function (x, i) {
+            els <- x@obj[["data/elements"]]
+            g <- index_to_grid(space(x), i)
+            apply(g, 1, function(r) {
+              els[r[1], r[2], r[3], r[4]]
+            })
+          })
+
 
 
 #' @rdname as.matrix-methods

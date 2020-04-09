@@ -468,6 +468,7 @@ setGeneric(name="write_vol",  def=function(x, file_name, format, data_type) stan
 #' @param format file format string. Since "NIFTI" is the only currently supported format, this parameter can be safely ignored and omitted.
 #' @param data_type the numeric data type. If specified should be a \code{character} vector of: "BINARY", "UBYTE", "SHORT", "INT", "FLOAT", "DOUBLE".
 #' Otherwise output format will be inferred from R the datatype of the image.
+#' @param ... extra args
 #' @export
 #' @examples
 #'
@@ -479,7 +480,7 @@ setGeneric(name="write_vol",  def=function(x, file_name, format, data_type) stan
 #' writeVector(bvec, "out.nii.gz")
 #' }
 #' @rdname write_vec-methods
-setGeneric(name="write_vec",  def=function(x, file_name, format, data_type) standardGeneric("write_vec"))
+setGeneric(name="write_vec",  def=function(x, file_name, format, data_type, ...) standardGeneric("write_vec"))
 
 
 

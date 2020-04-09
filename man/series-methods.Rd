@@ -12,8 +12,11 @@
 \alias{series,NeuroVec,LogicalNeuroVol-method}
 \alias{series_roi,NeuroVec,LogicalNeuroVol-method}
 \alias{series,NeuroVec,integer-method}
+\alias{series,H5NeuroVec,integer-method}
 \alias{series,NeuroVec,numeric-method}
 \alias{series_roi,NeuroVec,numeric-method}
+\alias{series,H5NeuroVec,numeric-method}
+\alias{series,H5NeuroVec,matrix-method}
 \alias{series,AbstractSparseNeuroVec,ROICoords-method}
 \alias{series,AbstractSparseNeuroVec,matrix-method}
 \alias{series,AbstractSparseNeuroVec,numeric-method}
@@ -40,9 +43,15 @@ series(x, i, ...)
 
 \S4method{series}{NeuroVec,integer}(x, i, j, k, drop = TRUE)
 
+\S4method{series}{H5NeuroVec,integer}(x, i, j, k, drop = TRUE)
+
 \S4method{series}{NeuroVec,numeric}(x, i, j, k)
 
 \S4method{series_roi}{NeuroVec,numeric}(x, i, j, k)
+
+\S4method{series}{H5NeuroVec,numeric}(x, i, j, k)
+
+\S4method{series}{H5NeuroVec,matrix}(x, i)
 
 \S4method{series}{AbstractSparseNeuroVec,ROICoords}(x, i)
 

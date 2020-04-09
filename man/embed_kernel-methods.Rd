@@ -16,7 +16,7 @@ embed_kernel(x, sp, center_voxel, ...)
 
 \item{center_voxel}{the voxel marking the center of the kernel in the embedded space}
 
-\item{weight}{multiply all kernel weight by this value}
+\item{weight}{multiply kernel weights by this value}
 }
 \description{
 Generic function to position kernel in a postion in image space

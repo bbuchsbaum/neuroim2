@@ -112,6 +112,11 @@ setClass("NIFTIFormat", contains=c("FileFormat"))
 #' @export
 setClass("AFNIFormat", contains=c("FileFormat"))
 
+#' H5Format
+#'
+#' This class supports the AFNI file format
+#' @keyword internal
+setClass("H5Format", contains=c("FileFormat"))
 
 
 #' MetaInfo
@@ -218,6 +223,14 @@ setClass("NeuroVolSource", representation(index="integer"), contains="FileSource
 #' @export
 setClass("NeuroVecSource", representation(indices="integer"), contains="FileSource")
 
+
+#' H5NeuroVecSource
+#'
+#' A class that is used to produce a \code{\linkS4class{H5NeuroVecSource}} instance
+#'
+#' @rdname H5NeuroVecSource-class
+#' @slot file_name the name of the hdf5 file.
+setClass("H5NeuroVecSource", representation(file_name="character"))
 
 
 #' BinaryReader
@@ -482,6 +495,15 @@ setClass("H5NeuroVol",
          contains=c("NeuroVol", "ArrayLike3D"))
 
 
+setClass("H5NeuroVec",
+         representation(obj="H5File"),
+         contains=c("NeuroVec", "ArrayLike4D"),
+         validity = function(object) {
+            TRUE
+         })
+
+
+
 #' NeuroVecSeq
 #'
 #' A concatenated sequence of \code{\linkS4class{NeuroVec}} instances.
@@ -493,6 +515,7 @@ setClass("H5NeuroVol",
 setClass("NeuroVecSeq",
          representation(vecs="list", lens="numeric"),
          contains=c("NeuroVec", "ArrayLike4D"),
+
          validity = function(object) {
            assert_that(all(purrr::map_lgl(object@vecs, ~ inherits(., "NeuroVec"))))
            dimlist <- purrr::map(object@vecs, ~ dim(.)[1:3])

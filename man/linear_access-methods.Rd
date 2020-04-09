@@ -4,6 +4,7 @@
 \name{linear_access}
 \alias{linear_access}
 \alias{linear_access,FileBackedNeuroVec,numeric-method}
+\alias{linear_access,H5NeuroVec,numeric-method}
 \alias{linear_access,MappedNeuroVec,numeric-method}
 \alias{linear_access,NeuroVecSeq,numeric-method}
 \alias{linear_access,SparseNeuroVol,numeric-method}
@@ -13,6 +14,8 @@
 linear_access(x, i, ...)
 
 \S4method{linear_access}{FileBackedNeuroVec,numeric}(x, i)
+
+\S4method{linear_access}{H5NeuroVec,numeric}(x, i)
 
 \S4method{linear_access}{MappedNeuroVec,numeric}(x, i)
 

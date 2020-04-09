@@ -9,13 +9,20 @@
 \alias{write_vec,NeuroVec,character,missing,character,ANY-method}
 \title{write a 4d image vector to disk}
 \usage{
-write_vec(x, file_name, format, data_type)
+write_vec(x, file_name, format, data_type, ...)
 
 \S4method{write_vec}{ROIVec,character,missing,missing}(x, file_name)
 
 \S4method{write_vec}{NeuroVec,character,missing,missing}(x, file_name)
 
-\S4method{write_vec}{NeuroVec,character,character,missing}(x, file_name, format)
+\S4method{write_vec}{NeuroVec,character,character,missing}(
+  x,
+  file_name,
+  format,
+  nbit = FALSE,
+  compression = 5,
+  chunk_dim = c(10, 10, 10, dim(x)[4])
+)
 
 \S4method{write_vec}{NeuroVec,character,missing,character}(x, file_name, data_type)
 }
@@ -28,6 +35,8 @@ write_vec(x, file_name, format, data_type)
 
 \item{data_type}{the numeric data type. If specified should be a \code{character} vector of: "BINARY", "UBYTE", "SHORT", "INT", "FLOAT", "DOUBLE".
 Otherwise output format will be inferred from R the datatype of the image.}
+
+\item{...}{extra args}
 }
 \description{
 write a 4d image vector to disk

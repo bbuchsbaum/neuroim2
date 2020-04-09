@@ -423,11 +423,18 @@ setMethod(f="[[", signature=signature(x="SparseNeuroVec", i="numeric"),
 setAs(from="SparseNeuroVec", to="matrix",
 		  function(from) {
 		    ind <- indices(from)
-		    out <- matrix(0, dim(from)[4], length(ind))
+		    out <- matrix(0, dim(from)[4], prod(dim(from)[1:3]))
 		    out[, ind] <- from@data
-		    out
+		    t(out)
 			  #from@data
 		  })
+
+setAs(from="SparseNeuroVec", to="DenseNeuroVec",
+      function(from) {
+        mat <- as(from, "matrix")
+        DenseNeuroVec(mat, space(svec))
+      })
+
 
 #' as.matrix
 #'
@@ -455,12 +462,12 @@ setMethod(f="as.list", signature=signature(x = "SparseNeuroVec"), def=function(x
 setMethod("show",
           signature=signature(object="SparseNeuroVec"),
           def=function(object) {
-            cat("an instance of class",  class(object), "\n\n")
-            cat("   dimensions: ", dim(object), "\n")
-            cat("   voxel spacing: ", spacing(object), "\n")
-            cat("   cardinality: ", length(object@map@indices))
+            cat(class(object), "\n\n")
+            cat("   Dimension: ", dim(object), "\n")
+            cat("   Spacing: ", spacing(object), "\n")
+            cat("   Origin: ", origin(space(object)), "\n")
+            cat("   Cardinality: ", length(object@map@indices))
             cat("\n\n")
-
           })
 
 
