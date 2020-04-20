@@ -230,7 +230,9 @@ setMethod("series", signature(x="AbstractSparseNeuroVec", i="numeric"),
 					 matrix(0, dim(x)[4], length(i))
 				 } else {
 					 mat <- matrix(0, dim(x)[4], length(i))
-					 mat[, idx !=0] <- x@data[,idx.nz]
+					 #mat[, idx !=0] <- x@data[,idx.nz]
+					 #browser()
+					 mat[, idx !=0] <- matricized_access(x, idx.nz)
 					 mat
 				 }
 			 } else {
@@ -319,18 +321,42 @@ setMethod(f="lookup", signature=signature(x="AbstractSparseNeuroVec", i="numeric
             lookup(x@map, i)
           })
 
-#' @export
+#' @rdname matricized_access-methods
+setMethod(f="matricized_access", signature=signature(x = "SparseNeuroVec", i = "matrix"),
+          def=function (x, i) {
+            x@data[i]
+          })
+
+#' @rdname matricized_access-methods
+setMethod(f="matricized_access", signature=signature(x = "SparseNeuroVec", i = "integer"),
+          def=function (x, i) {
+            x@data[,i]
+          })
+
+#' @rdname matricized_access-methods
+setMethod(f="matricized_access", signature=signature(x = "SparseNeuroVec", i = "numeric"),
+          def=function (x, i) {
+            x@data[,i]
+          })
+
 #' @rdname linear_access-methods
 setMethod(f="linear_access", signature=signature(x = "AbstractSparseNeuroVec", i = "numeric"),
           def=function (x, i) {
             nels <- prod(dim(x)[1:3])
-            n <- as.integer(i / nels) + 1
+            n <- ceiling(i/nels)
             offset <- i %% nels
+            offset[offset == 0] <- nels
 
             ll <- lookup(x, offset)
             nz <- which(ll > 0)
+
+            #if (length(nz) == 0) {
+            #  return(numeric(length(i)))
+            #}
+
             idx2d <- cbind(n[nz], ll[nz])
-            vals <- x@data[idx2d]
+            matricized_access(x, idx2d)
+            ##vals <- x@data[idx2d]
 
             ovals <- numeric(length(i))
             ovals[nz] <- vals
@@ -376,7 +402,10 @@ setMethod(f="[", signature=signature(x = "AbstractSparseNeuroVec", i = "numeric"
             indmat <- cbind(egrid[,2], egrid[,1])
 
             oval <- numeric(prod(dimout))
-            oval[rep(keep, length(m))] <- x@data[indmat]
+
+            ## TODO assumes x has @data member ...
+            ##oval[rep(keep, length(m))] <- x@data[indmat]
+            oval[rep(keep, length(m))] <- matricized_access(x, indmat)
 
             dim(oval) <- c(length(i),length(j),length(k),length(m))
 

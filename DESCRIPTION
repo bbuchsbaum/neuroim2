@@ -34,6 +34,7 @@ Collate:
     'filebacked_neurovec.R'
     'h5_io.R'
     'index_vol.R'
+    'latent_neurovec.R'
     'mapped_neurovec.R'
     'meta_info.R'
     'neuro_obj.R'
@@ -51,7 +52,7 @@ Collate:
     'searchlight.R'
     'sparse_neurovec.R'
     'spat_filter.R'
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 Imports: 
   magrittr,
   purrr,

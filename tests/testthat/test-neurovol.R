@@ -206,7 +206,6 @@ test_that("can map values over a NeuroVol", {
 
 
 
-
 test_that("can compute mean of each slice with 'slices'", {
 	vol1 <- read_vol(gmask)
 	slices <- slices(vol1)

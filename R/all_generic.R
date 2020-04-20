@@ -41,6 +41,15 @@ setGeneric(name="values", def=function(x, ...) standardGeneric("values"))
 setGeneric(name="linear_access", def=function(x, i, ...) standardGeneric("linear_access"))
 
 
+#' extract values from a matricized (x,y,z) of a 4D tensor using a space-time coordinate matrix
+#'
+#' @param x a data source
+#' @param i an index matrix
+#' @param ... additional arguments
+#' @rdname matricized_access-methods
+setGeneric(name="matricized_access", def=function(x, i, ...) standardGeneric("matricized_access"))
+
+
 
 #' load data from a data source
 #'

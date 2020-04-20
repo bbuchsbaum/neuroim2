@@ -130,6 +130,29 @@ setMethod(f="load_data", signature=c("H5NeuroVecSource"),
           })
 
 
+setMethod(f="load_data", signature=c("LatentNeuroVecSource"),
+          def=function(x) {
+            h5obj <- hdf5r::H5File$new(file_name)
+            basis <- h5obj[["data/basis"]][,]
+            loadings <- h5obj[["data/loadings"]][,]
+            offset <- h5obj[["data/offset"]][]
+            indices <- h5obj[["data/indices"]][]
+            sp <- NeuroSpace(dim=h5obj[["space/dim"]][],
+                             spacing=h5obj[["space/spacing"]][],
+                             origin=h5obj[["space/origin"]][],
+                             trans=h5obj[["space/trans"]][,])
+
+            mask <- NeuroVol(array(0, dim(sp)[1:3]), drop_dim(sp))
+            mask[indices] <- 1
+            mask <- as.logical(mask)
+
+            h5obj$close_all()
+            LatentNeuroVec(basis, loadings, space=sp, mask=mask, offset=offset)
+
+          })
+
+
+
 #' NeuroVecSource
 #'
 #' Construct a \code{\linkS4class{NeuroVecSource}} object
@@ -176,6 +199,8 @@ NeuroVecSource <- function(file_name, indices=NULL, mask=NULL) {
 	}
 
 }
+
+
 
 
 #' @keywords internal
@@ -559,11 +584,20 @@ read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap
       NeuroVecSource(x, indices, mask)
     } else if (endsWith(x, ".nii.gz")) {
       NeuroVecSource(x, indices, mask)
+    } else if (endsWith(x, ".lv.h5")) {
+      if (!is.null(indices)) {
+        warning("do not support indices argument for .lv.h5 files.")
+      }
+      if (!is.null(mask)) {
+        warning("do not support mask argument for .lv.h5 files.")
+      }
+
+      LatentNeuroVecSource(file_name)
     } else if (endsWith(x, ".h5")) {
       if (!is.null(indices)) {
         warning("do not support indices argument for .h5 files.")
       }
-      if (!is.null(indices)) {
+      if (!is.null(mask)) {
         warning("do not support mask argument for .h5 files.")
       }
       H5NeuroVecSource(file_name=x)
@@ -577,7 +611,6 @@ read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap
     if (!is.null(indices)) {
       stop("read_vec: memory mapped mode does not currently support volume 'indices'")
     }
-# <<<<<<< HEAD
 #     if (stringr::str_match(file_name, ".*gz$")) {
 #       stop("cannot memory map a compressed file.")
 #     }

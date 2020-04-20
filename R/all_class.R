@@ -233,6 +233,16 @@ setClass("NeuroVecSource", representation(indices="integer"), contains="FileSour
 setClass("H5NeuroVecSource", representation(file_name="character"))
 
 
+#' LatentNeuroVecSource
+#'
+#' A class that is used to produce a \code{\linkS4class{LatentNeuroVecSource}} instance
+#'
+#' @rdname LatentNeuroVecSource-class
+#' @slot file_name the name of the hdf5 file.
+setClass("LatentNeuroVecSource", representation(file_name="character"))
+
+
+
 #' BinaryReader
 #'
 #' This class supports reading of bulk binary data from a connection
@@ -526,24 +536,22 @@ setClass("NeuroVecSeq",
          })
 
 
-#' BasisNeuroVec
+#' LatentNeuroVec
 #'
 #' a class that stores a represents a 4-dimensional array as a set of basis functions (dictionary) and
-#' corresponding set of coefficients.
+#' corresponding set of loadings (coefficients).
 #'
-#' @rdname BasisNeuroVec
+#' @rdname LatentNeuroVec-class
 #'
-#' @slot mask the mask defining the sparse domain
 #' @slot basis the matrix of bases, were each column is a basis vector.
-#' @slot coeffs the \code{sparseMatrix} of coefficients
-#' @slot map instance of class \code{\linkS4class{IndexLookupVol}} is used to map between spatial and index/row coordinates
+#' @slot loadings the \code{sparseMatrix} of loadings
+#' @slot offset an offset vector
 #' @export
-setClass("BasisNeuroVec",
-         representation(mask="LogicalNeuroVol",
-                                       basis="Matrix",
-                                       coeffs="Matrix",
-                                       map="IndexLookupVol"),
-         contains=c("NeuroVec"))
+setClass("LatentNeuroVec",
+         representation(basis="Matrix",
+                        loadings="Matrix",
+                        offset="numeric"),
+         contains=c("NeuroVec", "AbstractSparseNeuroVec"))
 
 
 
