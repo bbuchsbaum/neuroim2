@@ -28,22 +28,22 @@ constructs a LatentNeuroVec object
 \section{Slots}{
 
 \describe{
-\item{\code{mask}}{the mask defining the sparse domain}
-
 \item{\code{basis}}{the matrix of bases, were each column is a basis vector.}
 
 \item{\code{loadings}}{the \code{sparseMatrix} of loadings}
-
-\item{\code{map}}{instance of class \code{\linkS4class{IndexLookupVol}} is used to map between spatial and index/row coordinates}
 
 \item{\code{offset}}{an offset vector}
 }}
 
 \examples{
 
-bspace <- NeuroSpace(c(10,10,10,100), c(1,1,1))
-mask <- array(rnorm(10*10*10) > .5, c(10,10,10))
-mat <- matrix(rnorm(sum(mask)), 100, sum(mask))
-svec <- SparseNeuroVec(mat, bspace,mask)
+bspace <- NeuroSpace(c(2,2,2,10), c(1,1,1))
+mask <- array(rnorm(2*2*2) > -100, c(2,2,2))
+mat <- matrix(rnorm(sum(mask)), 10, sum(mask))
+pres <- prcomp(mat)
+svec <- LatentNeuroVec(pres$x, pres$rotation, bspace,mask, offset=colMeans(mat))
+svec2 <- SparseNeuroVec(mat, bspace, mask)
 length(indices(svec)) == sum(mask)
+
+all.equal(svec2[1:prod(dim(mask))] == svec[1:prod(dim(mask))])
 }

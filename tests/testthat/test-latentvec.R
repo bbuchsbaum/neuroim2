@@ -17,6 +17,19 @@ gen_dat <- function(d1 = 12,
   DenseNeuroVec(dat, spc)
 }
 
+gen_latent_vec <- function(d1,d2,d3,d4) {
+  bv <- gen_dat(12,12,12,4, rand=TRUE)
+  mat <- bv@.Data
+  dim(mat) <- c(12*12*12,4)
+  mat <- t(mat)
+  mask <- bv[[1]]
+  mask[] <- 1
+  mask <- as.logical(mask)
+  pres <- prcomp(mat)
+  svec <- LatentNeuroVec(pres$x, pres$rotation, space=space(bv), mask=mask, offset=colMeans(mat))
+
+}
+
 context("latentneurovec")
 
 test_that("can construct a LatentNeuroVec", {
@@ -53,4 +66,14 @@ test_that("can write a LatentNeuroVec to h5", {
   svec <- LatentNeuroVec(pres$x, pres$rotation, space=space(bv), mask=mask, offset=colMeans(mat))
   tmp <- paste0(tempfile())
   write_vec(svec, tmp)
+})
+
+test_that("can extract a single volume from a LatentNeuroVec", {
+  bv1 <- gen_latent_vec()
+  bv2 <- gen_latent_vec()
+
+  bv3 <- concat(bv1, bv2)
+
+  expect_equal(as.vector(series(bv1,1)), series(bv3,1)[1:4])
+  expect_equal(as.vector(series(bv2,1)), series(bv3,1)[5:8])
 })
