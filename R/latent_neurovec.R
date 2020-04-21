@@ -149,5 +149,10 @@ setMethod(f="write_vec",signature=signature(x="LatentNeuroVec", file_name="chara
           })
 
 
-
+#' @rdname concat-methods
+#' @export
+setMethod(f="concat", signature=signature(x="LatentNeuroVec", y="LatentNeuroVec"),
+          def=function(x,y,...) {
+            do.call(NeuroVecSeq, list(x,y,...))
+          })
 
