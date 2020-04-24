@@ -132,7 +132,7 @@ setMethod(f="load_data", signature=c("H5NeuroVecSource"),
 
 setMethod(f="load_data", signature=c("LatentNeuroVecSource"),
           def=function(x) {
-            h5obj <- hdf5r::H5File$new(file_name)
+            h5obj <- hdf5r::H5File$new(x@file_name)
             basis <- h5obj[["data/basis"]][,]
             loadings <- h5obj[["data/loadings"]][,]
             offset <- h5obj[["data/offset"]][]
