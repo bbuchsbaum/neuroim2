@@ -611,23 +611,26 @@ read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap
     if (!is.null(indices)) {
       stop("read_vec: memory mapped mode does not currently support volume 'indices'")
     }
-#     if (stringr::str_match(file_name, ".*gz$")) {
-#       stop("cannot memory map a compressed file.")
-#     }
-#     src <- MappedNeuroVecSource(file_name)
-#     load_data(src)
-#   } else if (mode == "filebacked") {
-#     if (!is.null(indices)) {
-#       stop("memory mapped mode does not currently support volume 'indices'")
-#     }
-#     if (stringr::str_match(file_name, ".*gz$")) {
-#       stop("cannot memory map a compressed file.")
-#     }
-#     FileBackedNeuroVec(file_name)
-# =======
-    out <- vector(length(file_name), mode="list")
-    lapply(file_name, function(fn) load_data(MappedNeuroVecSource(fn)))
 
+    out <- vector(length(file_name), mode="list")
+
+    for (i in seq_along(file_name)) {
+      fname <- file_name[i]
+      if (endsWith(fname, ".gz")) {
+        if (!requireNamespace("R.utils")) {
+          stop("must install 'R.utils' to enable temporary gzip decompression")
+        }
+        oname <- stringr::str_replace(fname, ".gz$", "")
+        tdir <- tempdir()
+        oname <- paste0(tdir, "/", basename(oname))
+        R.utils::gunzip(fname, destname=oname, remove=FALSE)
+        warning(paste("uncompressing gzipped file to temporary file", oname, "for mem-mapping"))
+        out[[i]] <- load_data(MappedNeuroVecSource(oname))
+      } else {
+        out[[i]] <- load_data(MappedNeuroVecSource(fname))
+      }
+    }
+    out
   } else if (mode == "bigvec") {
     if (is.null(mask)) {
       stop("read_vec: 'bigvec' mode requires a mask")
