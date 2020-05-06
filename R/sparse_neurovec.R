@@ -374,7 +374,7 @@ setMethod(f="linear_access", signature=signature(x = "AbstractSparseNeuroVec", i
             #}
 
             idx2d <- cbind(n[nz], ll[nz])
-            matricized_access(x, idx2d)
+            vals <- matricized_access(x, idx2d)
             ##vals <- x@data[idx2d]
 
             ovals <- numeric(length(i))

@@ -624,9 +624,10 @@ read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap
         tdir <- tempdir()
         oname <- paste0(tdir, "/", basename(oname))
         R.utils::gunzip(fname, destname=oname, remove=FALSE)
-        warning(paste("uncompressing gzipped file to temporary file", oname, "for mem-mapping"))
+        warning(paste("uncompressing gzipped file", fname, "to temporary file", oname, "for mem-mapping"))
         out[[i]] <- load_data(MappedNeuroVecSource(oname))
       } else {
+        message("loading ", fname, " as mmaped file ")
         out[[i]] <- load_data(MappedNeuroVecSource(fname))
       }
     }
@@ -639,6 +640,7 @@ read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap
     out <- vector(length(file_name), mode="list")
 
     for (i  in seq_along(file_name)) {
+      message("loading ", file_name[i], " as bigvec ")
       v <- load_data(NeuroVecSource(file_name[i], indices, mask))
       out[[i]] <- BigNeuroVec(v@data, space(v), mask)
     }
