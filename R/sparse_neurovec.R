@@ -339,6 +339,25 @@ setMethod(f="matricized_access", signature=signature(x = "SparseNeuroVec", i = "
             x@data[,i]
           })
 
+
+#' @rdname matricized_access-methods
+setMethod(f="matricized_access", signature=signature(x = "BigNeuroVec", i = "matrix"),
+          def=function (x, i) {
+            x@data[i]
+          })
+
+#' @rdname matricized_access-methods
+setMethod(f="matricized_access", signature=signature(x = "BigNeuroVec", i = "integer"),
+          def=function (x, i) {
+            x@data[,i]
+          })
+
+#' @rdname matricized_access-methods
+setMethod(f="matricized_access", signature=signature(x = "BigNeuroVec", i = "numeric"),
+          def=function (x, i) {
+            x@data[,i]
+          })
+
 #' @rdname linear_access-methods
 setMethod(f="linear_access", signature=signature(x = "AbstractSparseNeuroVec", i = "numeric"),
           def=function (x, i) {
