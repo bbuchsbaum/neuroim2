@@ -145,7 +145,7 @@ setMethod(f="load_data", signature=c("LatentNeuroVecSource"),
             mask <- NeuroVol(array(0, dim(sp)[1:3]), drop_dim(sp))
             mask[indices] <- 1
             mask <- as.logical(mask)
-
+            #h5obj$close()
             h5obj$close_all()
             LatentNeuroVec(basis, loadings, space=sp, mask=mask, offset=offset)
 
