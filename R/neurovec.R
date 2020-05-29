@@ -481,7 +481,8 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="intege
             clusters <- clusters[keep]
             assert_that(length(clusters) > 0)
 
-            isplit <- split(1:length(clusters), clusters)
+            isplit <- split(keep, clusters)
+            ##isplit <- split(1:length(clusters), clusters)
             out <- vector(mode="list", length(isplit))
 
             for (i in seq_along(isplit)) {
