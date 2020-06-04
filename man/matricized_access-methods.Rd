@@ -8,6 +8,9 @@
 \alias{matricized_access,SparseNeuroVec,matrix-method}
 \alias{matricized_access,SparseNeuroVec,integer-method}
 \alias{matricized_access,SparseNeuroVec,numeric-method}
+\alias{matricized_access,BigNeuroVec,matrix-method}
+\alias{matricized_access,BigNeuroVec,integer-method}
+\alias{matricized_access,BigNeuroVec,numeric-method}
 \title{extract values from a matricized (x,y,z) of a 4D tensor using a space-time coordinate matrix}
 \usage{
 matricized_access(x, i, ...)
@@ -21,6 +24,12 @@ matricized_access(x, i, ...)
 \S4method{matricized_access}{SparseNeuroVec,integer}(x, i)
 
 \S4method{matricized_access}{SparseNeuroVec,numeric}(x, i)
+
+\S4method{matricized_access}{BigNeuroVec,matrix}(x, i)
+
+\S4method{matricized_access}{BigNeuroVec,integer}(x, i)
+
+\S4method{matricized_access}{BigNeuroVec,numeric}(x, i)
 }
 \arguments{
 \item{x}{a data source}

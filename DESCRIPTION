@@ -48,6 +48,7 @@ Collate:
     'niml_io.R'
     'ops.R'
     'pipeline.R'
+    'resample.R'
     'roi.R'
     'searchlight.R'
     'sparse_neurovec.R'

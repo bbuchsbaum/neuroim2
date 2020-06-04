@@ -115,7 +115,7 @@ setClass("AFNIFormat", contains=c("FileFormat"))
 #' H5Format
 #'
 #' This class supports the AFNI file format
-#' @keyword internal
+#' @keywords internal
 setClass("H5Format", contains=c("FileFormat"))
 
 

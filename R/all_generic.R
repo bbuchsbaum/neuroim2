@@ -1,4 +1,9 @@
-
+#' resample an image to match the space of another image
+#'
+#' @export
+#' @param the source image
+#' @param the target image
+setGeneric("resample", function(source, target, ...) standardGeneric("resample"))
 
 
 #' @export
