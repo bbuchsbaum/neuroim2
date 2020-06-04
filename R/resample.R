@@ -15,7 +15,7 @@ convert_hd <- function(hd) {
 #' @export
 #' @import RNifti
 #' @importFrom RNiftyReg buildAffine applyTransform
-#' @param interpolation A single integer specifying the type of interpolation to be applied to the
+#' @param interpolation a single integer specifying the type of interpolation to be applied to the
 #' final resampled image. May be 0 (nearest neighbour), 1 (trilinear) or 3 (cubic spline).
 #' No other values are valid.
 setMethod(f="resample", signature=signature("NeuroVol", "NeuroVol"),
@@ -30,7 +30,7 @@ setMethod(f="resample", signature=signature("NeuroVol", "NeuroVol"),
             targ <- RNifti::asNifti(as.array(target), reference=hdt)
 
             trans <- RNiftyReg::buildAffine(source=src, target=targ)
-            out <- RNiftyReg::applyTransform(trans,vol, interpolation=interpolation, nearest=nearest)
+            out <- RNiftyReg::applyTransform(trans,src, interpolation=interpolation, nearest=nearest)
 
             NeuroVol(unclass(out), space(target))
 

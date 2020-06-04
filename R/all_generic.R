@@ -3,6 +3,7 @@
 #' @export
 #' @param the source image
 #' @param the target image
+#' @param ... extra args
 setGeneric("resample", function(source, target, ...) standardGeneric("resample"))
 
 
