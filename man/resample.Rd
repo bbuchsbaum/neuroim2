@@ -7,6 +7,8 @@
 resample(source, target, ...)
 }
 \arguments{
+\item{...}{extra args}
+
 \item{the}{target image}
 }
 \description{

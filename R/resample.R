@@ -15,6 +15,7 @@ convert_hd <- function(hd) {
 #' @export
 #' @import RNifti
 #' @importFrom RNiftyReg buildAffine applyTransform
+#' @rdname centroids-methods
 #' @param interpolation a single integer specifying the type of interpolation to be applied to the
 #' final resampled image. May be 0 (nearest neighbour), 1 (trilinear) or 3 (cubic spline).
 #' No other values are valid.

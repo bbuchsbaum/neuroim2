@@ -7,3 +7,4 @@
 \description{
 This class supports the AFNI file format
 }
+\keyword{internal}
