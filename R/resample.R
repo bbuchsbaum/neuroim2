@@ -15,9 +15,9 @@ convert_hd <- function(hd) {
 #' @export
 #' @import RNifti
 #' @importFrom RNiftyReg buildAffine applyTransform
-#' @rdname centroids-methods
+#' @rdname resample-methods
 #' @param interpolation a single integer specifying the type of interpolation to be applied to the
-#' final resampled image. May be 0 (nearest neighbour), 1 (trilinear) or 3 (cubic spline).
+#' final resampled image. May be 0 (nearest neighbor), 1 (trilinear) or 3 (cubic spline).
 #' No other values are valid.
 setMethod(f="resample", signature=signature("NeuroVol", "NeuroVol"),
           def=function(source, target, interpolation=3L) {
@@ -35,4 +35,15 @@ setMethod(f="resample", signature=signature("NeuroVol", "NeuroVol"),
 
             NeuroVol(unclass(out), space(target))
 
+          })
+
+
+#' @export
+#' @import RNifti
+#' @importFrom RNiftyReg buildAffine applyTransform
+#' @rdname resample-methods
+setMethod(f="resample", signature=signature("NeuroVol", "NeuroSpace"),
+          def=function(source, target, interpolation=3L) {
+            targ <- NeuroVol(array(0, dim(target)), space=target)
+            callGeneric(source, targ)
           })

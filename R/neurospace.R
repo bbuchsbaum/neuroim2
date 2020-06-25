@@ -495,6 +495,9 @@ setMethod(f="reorient", signature=signature(x = "NeuroSpace", orient="character"
 #' @rdname origin-methods
 setMethod(f="origin", signature=signature(x = "NeuroSpace"), def=function(x) x@origin)
 
+#' @export
+#' @rdname origin-methods
+setMethod(f="origin", signature=signature(x = "NeuroVol"), def=function(x) space(x)@origin)
 
 
 #' @export
