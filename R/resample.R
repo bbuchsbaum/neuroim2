@@ -1,7 +1,7 @@
 convert_hd <- function(hd) {
   hdr_targ <- RNifti::niftiHeader(list(
     pixdim=hd$pixdim,
-    dimensions=hd$dimensions,
+    dim=hd$dimensions,
     qform_code=hd$qform_code,
     quatern_b=hd$quaternion[1],
     quatern_c=hd$quaternion[2],
@@ -30,8 +30,9 @@ setMethod(f="resample", signature=signature("NeuroVol", "NeuroVol"),
             src <- RNifti::asNifti(as.array(source), reference=hds)
             targ <- RNifti::asNifti(as.array(target), reference=hdt)
 
+            #browser()
             trans <- RNiftyReg::buildAffine(source=src, target=targ)
-            out <- RNiftyReg::applyTransform(trans,src, interpolation=interpolation, nearest=nearest)
+            out <- RNiftyReg::applyTransform(trans,src, interpolation=interpolation)
 
             NeuroVol(unclass(out), space(target))
 
@@ -45,5 +46,5 @@ setMethod(f="resample", signature=signature("NeuroVol", "NeuroVol"),
 setMethod(f="resample", signature=signature("NeuroVol", "NeuroSpace"),
           def=function(source, target, interpolation=3L) {
             targ <- NeuroVol(array(0, dim(target)), space=target)
-            callGeneric(source, targ)
+            callGeneric(source, targ, interpolation)
           })

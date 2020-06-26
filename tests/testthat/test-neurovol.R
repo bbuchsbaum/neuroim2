@@ -204,6 +204,21 @@ test_that("can map values over a NeuroVol", {
 
 })
 
+test_that("can resample a NeuroVol", {
+  vol1 <- read_vol(gmask)
+
+  tr <- trans(vol1)
+  tr[1,1] <- tr[1,1]/2
+  tr[2,2] <- tr[2,2]/2
+  tr[3,3] <- tr[3,3]/2
+
+  sp2 <- NeuroSpace(dim=c(128,128,50), spacing=c(3.5/2,3.5/2, 3.7/2), trans=tr, origin=origin(vol1))
+  out <- resample(vol1, sp2, interpolation=0)
+  expect_true(max(out) == 1)
+
+})
+
+
 
 
 test_that("can compute mean of each slice with 'slices'", {
