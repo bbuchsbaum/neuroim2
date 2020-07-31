@@ -68,7 +68,7 @@ as_nifti_header <- function(vol, file_name, oneFile=TRUE, data_type="FLOAT") {
 		### only encodes pixdim for three dimensions
 		hd$pixdim <- c(0, spacing(vol), rep(0,4))
 
-		hd$qoffset <- origin(vol)
+		hd$qoffset <- origin(space(vol))
 		hd$scl_intercept <- 0
 		hd$scl_slope <- 1
 
