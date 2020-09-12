@@ -19,6 +19,7 @@ convert_hd <- function(hd) {
 #' @param interpolation a single integer specifying the type of interpolation to be applied to the
 #' final resampled image. May be 0 (nearest neighbor), 1 (trilinear) or 3 (cubic spline).
 #' No other values are valid.
+#'
 setMethod(f="resample", signature=signature("NeuroVol", "NeuroVol"),
           def=function(source, target, interpolation=3L) {
             hd_target <- as_nifti_header(target, file_name="target.nii")
