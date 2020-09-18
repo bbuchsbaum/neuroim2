@@ -30,7 +30,7 @@ gaussian_blur <- function(vol, mask, sigma=2, window=1) {
 #'
 #' @param vol the image volume as a \code{NeuroVol}
 #' @param radius the spatial radius of the filter
-#' @param epsilon
+#' @param epsilon variance constant
 #' @return a filtered image of class \code{NeuroVol}
 #' @export
 guided_filter <- function(vol, radius=4, epsilon=.7^2) {

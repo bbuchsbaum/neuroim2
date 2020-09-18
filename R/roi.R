@@ -410,6 +410,8 @@ setMethod("vectors", signature(x="ROIVec", subset="missing"),
           })
 
 
+#' @rdname vectors-methods
+#' @export
 setMethod("vectors", signature(x="matrix", subset="missing"),
           function(x) {
             ind <- 1:ncol(x)
@@ -428,7 +430,8 @@ setMethod("vectors", signature(x="ROIVec", subset="integer"),
             deferred_list2(f, length(ind))
           })
 
-
+#' @rdname vectors-methods
+#' @export
 setMethod("vectors", signature(x="matrix", subset="integer"),
           function(x, subset) {
             ind <- (1:ncol(x))[subset]
@@ -437,6 +440,8 @@ setMethod("vectors", signature(x="matrix", subset="integer"),
             deferred_list2(f, length(ind))
           })
 
+#' @rdname vectors-methods
+#' @export
 setMethod("vectors", signature(x="matrix", subset="numeric"),
           function(x, subset) {
             callGeneric(x,subset)
@@ -618,7 +623,7 @@ setMethod("embed_kernel", signature=signature(x="Kernel", sp="NeuroSpace", cente
 #' @export
 setMethod(f="voxels", signature=signature(x="Kernel"),
           function(x, center_voxel=NULL) {
-            if (is.null(centerVoxel)) {
+            if (is.null(center_voxel)) {
               x@voxels
             } else {
               sweep(x@voxels, 2, center_voxel, "+")

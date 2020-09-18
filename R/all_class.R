@@ -504,7 +504,12 @@ setClass("H5NeuroVol",
          representation(h5obj="H5File"),
          contains=c("NeuroVol", "ArrayLike3D"))
 
-
+#' H5NeuroVec
+#'
+#' A NeuroVec backed by an hdf5 file
+#'
+#' @rdname H5NeuroVec-class
+#' @slot obj an H5File object
 setClass("H5NeuroVec",
          representation(obj="H5File"),
          contains=c("NeuroVec", "ArrayLike4D"),

@@ -3,6 +3,7 @@
 %   R/sparse_neurovec.R
 \name{matricized_access}
 \alias{matricized_access}
+\alias{matricized_access,LatentNeuroVec,matrix-method}
 \alias{matricized_access,LatentNeuroVec,integer-method}
 \alias{matricized_access,LatentNeuroVec,numeric-method}
 \alias{matricized_access,SparseNeuroVec,matrix-method}
@@ -14,6 +15,8 @@
 \title{extract values from a matricized (x,y,z) of a 4D tensor using a space-time coordinate matrix}
 \usage{
 matricized_access(x, i, ...)
+
+\S4method{matricized_access}{LatentNeuroVec,matrix}(x, i)
 
 \S4method{matricized_access}{LatentNeuroVec,integer}(x, i)
 

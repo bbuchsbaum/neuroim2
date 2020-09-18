@@ -41,6 +41,12 @@ write_vec(x, file_name, format, data_type, ...)
 Otherwise output format will be inferred from R the datatype of the image.}
 
 \item{...}{extra args}
+
+\item{nbit}{set nbit compression}
+
+\item{compression}{compression level 1 to 9}
+
+\item{chunk_dim}{the dimensions of each chunk}
 }
 \description{
 write a 4d image vector to disk

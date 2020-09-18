@@ -16,6 +16,8 @@ embed_kernel(x, sp, center_voxel, ...)
 
 \item{center_voxel}{the voxel marking the center of the kernel in the embedded space}
 
+\item{...}{extra args}
+
 \item{weight}{multiply kernel weights by this value}
 }
 \description{

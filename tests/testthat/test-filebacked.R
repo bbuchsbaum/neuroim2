@@ -1,4 +1,3 @@
-library(magrittr)
 library(purrr)
 library(testthat)
 library(assertthat)

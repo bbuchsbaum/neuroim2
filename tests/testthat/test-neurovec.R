@@ -1,4 +1,4 @@
-library(magrittr)
+
 library(purrr)
 gmask <- system.file("extdata", "global_mask.nii", package="neuroim2")
 

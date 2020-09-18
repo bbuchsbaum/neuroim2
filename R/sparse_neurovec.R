@@ -480,7 +480,7 @@ setAs(from="SparseNeuroVec", to="matrix",
 setAs(from="SparseNeuroVec", to="DenseNeuroVec",
       function(from) {
         mat <- as(from, "matrix")
-        DenseNeuroVec(mat, space(svec))
+        DenseNeuroVec(mat, space(from))
       })
 
 

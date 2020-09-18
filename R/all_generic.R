@@ -1,9 +1,10 @@
 #' resample an image to match the space of another image
 #'
 #' @export
-#' @param the source image
-#' @param the target image
+#' @param source the source image
+#' @param target the target image
 #' @param ... extra args
+#' @rdname resample-methods
 setGeneric("resample", function(source, target, ...) standardGeneric("resample"))
 
 
@@ -868,6 +869,7 @@ setGeneric(name="read_meta_info", def=function(x, file_name) standardGeneric("re
 #' @param x the kernel object
 #' @param sp the space to embed the kernel
 #' @param center_voxel the voxel marking the center of the kernel in the embedded space
+#' @param ... extra args
 #' @export
 #' @rdname embed_kernel-methods
 setGeneric("embed_kernel", def=function(x, sp, center_voxel, ...) standardGeneric("embed_kernel"))

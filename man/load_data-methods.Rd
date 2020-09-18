@@ -5,6 +5,8 @@
 \alias{load_data}
 \alias{load_data,MappedNeuroVecSource-method}
 \alias{load_data,NeuroVecSource-method}
+\alias{load_data,H5NeuroVecSource-method}
+\alias{load_data,LatentNeuroVecSource-method}
 \alias{load_data,NeuroVolSource-method}
 \alias{load_data,SparseNeuroVecSource-method}
 \title{load data from a data source}
@@ -14,6 +16,10 @@ load_data(x, ...)
 \S4method{load_data}{MappedNeuroVecSource}(x)
 
 \S4method{load_data}{NeuroVecSource}(x)
+
+\S4method{load_data}{H5NeuroVecSource}(x)
+
+\S4method{load_data}{LatentNeuroVecSource}(x)
 
 \S4method{load_data}{NeuroVolSource}(x)
 

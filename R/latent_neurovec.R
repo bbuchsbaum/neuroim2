@@ -13,9 +13,9 @@ LatentNeuroVecSource <- function(file_name) {
 #'
 #' @param basis an n-by-k matrix containing the latent vectors forming the reduced space
 #' @param loadings a p-by-k matrix of p loadings
-#' @param centroid a 1-by-p offset vector
 #' @param space a NeuroSpace instance
 #' @param mask a 3D \code{array}, 1D \code{vector} of type \code{logical}, or an instance of type \code{LogicalNeuroVol}
+#' @param offset  a 1-by-p offset vector
 #' @export
 #' @examples
 #'
@@ -27,7 +27,7 @@ LatentNeuroVecSource <- function(file_name) {
 #' svec2 <- SparseNeuroVec(mat, bspace, mask)
 #' length(indices(svec)) == sum(mask)
 #'
-#' all.equal(svec2[1:prod(dim(mask))] == svec[1:prod(dim(mask))])
+#' all.equal(svec2[1:prod(dim(mask))],svec[1:prod(dim(mask))])
 #' @rdname LatentNeuroVec-class
 #'
 LatentNeuroVec <- function(basis, loadings, space, mask, offset=NULL) {
@@ -65,7 +65,7 @@ LatentNeuroVec <- function(basis, loadings, space, mask, offset=NULL) {
 }
 
 
-#'  @rdname matricized_access-methods
+#' @rdname matricized_access-methods
 setMethod(f="matricized_access", signature=signature(x = "LatentNeuroVec", i = "matrix"),
           def=function (x, i) {
             b1 <- x@basis[as.numeric(i[,1]),,drop=FALSE]
@@ -73,7 +73,7 @@ setMethod(f="matricized_access", signature=signature(x = "LatentNeuroVec", i = "
             rowSums(b1*b2) + x@offset[i[,2]]
           })
 
-#'@rdname matricized_access-methods
+#' @rdname matricized_access-methods
 setMethod(f="matricized_access", signature=signature(x = "LatentNeuroVec", i = "integer"),
           def=function (x, i) {
             b1 <- x@basis

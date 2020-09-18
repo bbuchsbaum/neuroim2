@@ -10,6 +10,8 @@ guided_filter(vol, radius = 4, epsilon = 0.7^2)
 \item{vol}{the image volume as a \code{NeuroVol}}
 
 \item{radius}{the spatial radius of the filter}
+
+\item{epsilon}{variance constant}
 }
 \value{
 a filtered image of class \code{NeuroVol}

@@ -124,12 +124,16 @@ setMethod(f="load_data", signature=c("NeuroVecSource"),
       }
 })
 
+#' @export
+#' @rdname load_data-methods
 setMethod(f="load_data", signature=c("H5NeuroVecSource"),
           def=function(x) {
             H5NeuroVec(x@file_name)
           })
 
 
+#' @rdname load_data-methods
+#' @export
 setMethod(f="load_data", signature=c("LatentNeuroVecSource"),
           def=function(x) {
             h5obj <- hdf5r::H5File$new(x@file_name)
@@ -226,7 +230,7 @@ H5NeuroVec <- function(file_name) {
 
   h5obj <- hdf5r::H5File$new(file_name)
 
-  rtype <- try(h5attr(h5obj, which="rtype"))
+  rtype <- try(hdf5r::h5attr(h5obj, which="rtype"))
   if (! (rtype == "DenseNeuroVec")) {
     stop("invalid h5 file: ", file_name)
   }
@@ -1020,6 +1024,9 @@ setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character",
 
 #' @export
 #' @rdname write_vec-methods
+#' @param nbit set nbit compression
+#' @param compression compression level 1 to 9
+#' @param chunk_dim the dimensions of each chunk
 setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character", format="character", data_type="missing"),
 		def=function(x, file_name, format, nbit=FALSE, compression=5, chunk_dim=c(10,10,10,dim(x)[4])) {
 			if (toupper(format) == "NIFTI" || toupper(format) == "NIFTI1" || toupper(format) == "NIFTI-1") {

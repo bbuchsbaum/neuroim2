@@ -7,7 +7,10 @@
 \alias{vectors,NeuroVec,numeric-method}
 \alias{vectors,NeuroVec,logical-method}
 \alias{vectors,ROIVec,missing-method}
+\alias{vectors,matrix,missing-method}
 \alias{vectors,ROIVec,integer-method}
+\alias{vectors,matrix,integer-method}
+\alias{vectors,matrix,numeric-method}
 \alias{vectors,ROIVec,numeric-method}
 \alias{vectors,ROIVec,logical-method}
 \alias{vectors,SparseNeuroVec,missing-method}
@@ -23,7 +26,13 @@ vectors(x, subset, ...)
 
 \S4method{vectors}{ROIVec,missing}(x)
 
+\S4method{vectors}{matrix,missing}(x)
+
 \S4method{vectors}{ROIVec,integer}(x, subset)
+
+\S4method{vectors}{matrix,integer}(x, subset)
+
+\S4method{vectors}{matrix,numeric}(x, subset)
 
 \S4method{vectors}{ROIVec,numeric}(x, subset)
 

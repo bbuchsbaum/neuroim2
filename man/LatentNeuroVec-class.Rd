@@ -17,7 +17,7 @@ LatentNeuroVec(basis, loadings, space, mask, offset = NULL)
 
 \item{mask}{a 3D \code{array}, 1D \code{vector} of type \code{logical}, or an instance of type \code{LogicalNeuroVol}}
 
-\item{centroid}{a 1-by-p offset vector}
+\item{offset}{a 1-by-p offset vector}
 }
 \description{
 a class that stores a represents a 4-dimensional array as a set of basis functions (dictionary) and
@@ -45,5 +45,5 @@ svec <- LatentNeuroVec(pres$x, pres$rotation, bspace,mask, offset=colMeans(mat))
 svec2 <- SparseNeuroVec(mat, bspace, mask)
 length(indices(svec)) == sum(mask)
 
-all.equal(svec2[1:prod(dim(mask))] == svec[1:prod(dim(mask))])
+all.equal(svec2[1:prod(dim(mask))],svec[1:prod(dim(mask))])
 }

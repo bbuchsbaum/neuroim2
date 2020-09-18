@@ -55,7 +55,6 @@ Collate:
     'spat_filter.R'
 RoxygenNote: 7.1.0
 Imports: 
-  magrittr,
   purrr,
   assertthat,
   mmap,
@@ -67,7 +66,7 @@ Imports:
   colorplane,
   Gmedian,
   bigstatsr,
-  prettydoc
+  RNiftyReg
 Suggests: 
   testthat,
   covr,
@@ -75,7 +74,8 @@ Suggests:
   ggplot2,
   roxygen2,
   rmarkdown,
-  hdf5r
+  hdf5r,
+  R.utils
 Remotes: 
   YeeJeremy/rflann,
   bbuchsbaum/colorplane
