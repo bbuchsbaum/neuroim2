@@ -75,7 +75,8 @@ Suggests:
   roxygen2,
   rmarkdown,
   hdf5r,
-  R.utils
+  R.utils,
+  prettydoc
 Remotes: 
   YeeJeremy/rflann,
   bbuchsbaum/colorplane
