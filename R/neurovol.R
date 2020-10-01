@@ -6,7 +6,7 @@
 NULL
 
 
-#' Construct a NeuroSlice object
+#' Construct a NeuroVol object
 #'
 #' Construct a \code{\linkS4class{NeuroVol}} instance, using default (dense) implementation
 #' @param data a three-dimensional \code{array}
@@ -25,7 +25,7 @@ NeuroVol <- function(data, space,  label="", indices=NULL) {
 	DenseNeuroVol(data,space, label=label, indices=indices)
 }
 
-#' DenseNeuroVol
+#' Construct a DenseNeuroVol object
 #'
 #' Construct a \code{\linkS4class{DenseNeuroVol}} instance
 #' @param data a three-dimensional \code{array}
