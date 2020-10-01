@@ -6,7 +6,7 @@
 NULL
 
 
-#' NeuroVol
+#' Construct a NeuroSlice object
 #'
 #' Construct a \code{\linkS4class{NeuroVol}} instance, using default (dense) implementation
 #' @param data a three-dimensional \code{array}

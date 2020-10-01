@@ -7,9 +7,9 @@ LatentNeuroVecSource <- function(file_name) {
 
 
 
-#' LatentNeuroVec
+#' Construct a LatentNeuroVec object
 #'
-#' constructs a LatentNeuroVec object
+#' Construct a LatentNeuroVec object from a basis and associated loadings
 #'
 #' @param basis an n-by-k matrix containing the latent vectors forming the reduced space
 #' @param loadings a p-by-k matrix of p loadings

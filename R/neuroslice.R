@@ -4,7 +4,7 @@
 {}
 
 
-#' NeuroSlice constructor
+#' Construct a NeuroSlice object
 #'
 #' @param data data vector or matrix
 #' @param space an instance of class NeuroSpace

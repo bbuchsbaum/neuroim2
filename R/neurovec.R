@@ -778,6 +778,14 @@ setMethod("series", signature(x="NeuroVec", i="LogicalNeuroVol"),
 
 #' @rdname series-methods
 #' @export
+setMethod("series", signature(x="NeuroVec", i="NeuroVol"),
+          def=function(x,i) {
+            callGeneric(x, as.logical(i))
+
+          })
+
+#' @rdname series-methods
+#' @export
 setMethod("series_roi", signature(x="NeuroVec", i="LogicalNeuroVol"),
           def=function(x,i) {
             mat <- as.matrix(series(x, i))
