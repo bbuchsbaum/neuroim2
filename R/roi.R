@@ -203,7 +203,7 @@ cuboid_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE) {
 
 #' @importFrom rflann RadiusSearch
 #' @keywords internal
-make_spherical_grid <- function(bvol, centroid, radius, use_cpp=FALSE) {
+make_spherical_grid <- function(bvol, centroid, radius, use_cpp=TRUE) {
 
   vspacing <- spacing(bvol)
 
