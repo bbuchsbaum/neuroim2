@@ -17,6 +17,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// local_sphere
+NumericMatrix local_sphere(int vx, int vy, int vz, double radius, NumericVector spacing, IntegerVector dim);
+RcppExport SEXP _neuroim2_local_sphere(SEXP vxSEXP, SEXP vySEXP, SEXP vzSEXP, SEXP radiusSEXP, SEXP spacingSEXP, SEXP dimSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type vx(vxSEXP);
+    Rcpp::traits::input_parameter< int >::type vy(vySEXP);
+    Rcpp::traits::input_parameter< int >::type vz(vzSEXP);
+    Rcpp::traits::input_parameter< double >::type radius(radiusSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type spacing(spacingSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type dim(dimSEXP);
+    rcpp_result_gen = Rcpp::wrap(local_sphere(vx, vy, vz, radius, spacing, dim));
+    return rcpp_result_gen;
+END_RCPP
+}
 // box_nbhd
 NumericVector box_nbhd(NumericVector arr, IntegerVector dims, int x, int y, int z, int window, NumericVector out, int slicedim);
 RcppExport SEXP _neuroim2_box_nbhd(SEXP arrSEXP, SEXP dimsSEXP, SEXP xSEXP, SEXP ySEXP, SEXP zSEXP, SEXP windowSEXP, SEXP outSEXP, SEXP slicedimSEXP) {
@@ -168,6 +184,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_neuroim2_indexToGridCpp", (DL_FUNC) &_neuroim2_indexToGridCpp, 2},
+    {"_neuroim2_local_sphere", (DL_FUNC) &_neuroim2_local_sphere, 6},
     {"_neuroim2_box_nbhd", (DL_FUNC) &_neuroim2_box_nbhd, 8},
     {"_neuroim2_box_blur", (DL_FUNC) &_neuroim2_box_blur, 3},
     {"_neuroim2_gaussian_weights", (DL_FUNC) &_neuroim2_gaussian_weights, 3},

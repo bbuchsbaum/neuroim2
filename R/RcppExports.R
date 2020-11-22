@@ -5,6 +5,10 @@ indexToGridCpp <- function(idx, array_dim) {
     .Call('_neuroim2_indexToGridCpp', PACKAGE = 'neuroim2', idx, array_dim)
 }
 
+local_sphere <- function(vx, vy, vz, radius, spacing, dim) {
+    .Call('_neuroim2_local_sphere', PACKAGE = 'neuroim2', vx, vy, vz, radius, spacing, dim)
+}
+
 box_nbhd <- function(arr, dims, x, y, z, window, out, slicedim) {
     .Call('_neuroim2_box_nbhd', PACKAGE = 'neuroim2', arr, dims, x, y, z, window, out, slicedim)
 }

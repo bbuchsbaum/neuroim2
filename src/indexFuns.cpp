@@ -55,6 +55,58 @@ NumericMatrix indexToGridCpp(IntegerVector idx, IntegerVector array_dim) {
 //
 // }
 
+// [[Rcpp::export]]
+NumericMatrix local_sphere(int vx, int vy, int vz, double radius, NumericVector spacing, IntegerVector dim) {
+  int i_rad = round(radius/spacing[0]);
+  int j_rad = round(radius/spacing[1]);
+  int k_rad = round(radius/spacing[2]);
+
+  //std::list<std::vector<double>> cds;
+  //List cds((i_rad*2)*(j_rad*2)*(k_rad*2));
+
+  NumericMatrix cds((i_rad*2)*(j_rad*2)*(k_rad*2), 3);
+
+  int count = 0;
+  for (int i = vx - i_rad; i <= (vx + i_rad); i++) {
+      if (i < 1 || i > dim[0]) {
+        continue;
+      }
+      //Rcout << "i: " << i << std::endl;
+      for (int j = vy - j_rad; j <= (vy + j_rad); j++) {
+        if (j < 1 || j > dim[1]) {
+          continue;
+        }
+        //Rcout << "j: " << j << std::endl;
+        for (int k = vz -k_rad; k <= (vz + k_rad); k++) {
+          if (k < 1 || k > dim[2]) {
+            continue;
+          }
+          //Rcout << "k: " << k << std::endl;
+
+          double xd = (i-vx)*spacing[0];
+          double yd = (j-vy)*spacing[1];
+          double zd = (k-vz)*spacing[2];
+
+          double d = sqrt(pow(xd,2) + pow(yd,2) + pow(zd,2));
+          //Rcout << "d: " << d << std::endl;
+          if (d < radius) {
+            //cds[count] = IntegerVector::create(i,j,k);
+            //count++;
+            cds(count,0) = i;
+            cds(count,1) = j;
+            cds(count,2) = k;
+            count++;
+          }
+
+        }
+      }
+  }
+
+  return cds(Rcpp::Range(0, count-1), _);
+}
+
+
+
 int coord3d_to_index(int x, int y, int z, int dx, int dy, int dz, int slicedim) {
   return (slicedim * z) + (y * dx) + x;
 }

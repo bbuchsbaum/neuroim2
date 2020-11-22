@@ -434,6 +434,15 @@ setClass("NeuroHyperVec", contains="NeuroObj",
 #' @export
 setClass("DenseNeuroVec",  contains=c("NeuroVec", "array"))
 
+setValidity("DenseNeuroVec", function(object) {
+  if (length(dim(object) != 4)) {
+    "data must be four-dimensional array"
+  } else {
+    TRUE
+  }
+})
+
+
 
 
 #' MappedNeuroVec

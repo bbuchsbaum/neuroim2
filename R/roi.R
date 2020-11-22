@@ -203,7 +203,7 @@ cuboid_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE) {
 
 #' @importFrom rflann RadiusSearch
 #' @keywords internal
-make_spherical_grid <- function(bvol, centroid, radius) {
+make_spherical_grid <- function(bvol, centroid, radius, use_cpp=FALSE) {
 
   vspacing <- spacing(bvol)
 
@@ -212,26 +212,29 @@ make_spherical_grid <- function(bvol, centroid, radius) {
   }
 
   vdim <- dim(bvol)
-
   centroid <- as.integer(centroid)
 
-  deltas <- map_dbl(vspacing, function(x) round(radius/x))
+  out <- if (use_cpp) {
+    local_sphere(centroid[1], centroid[2], centroid[3], radius, vspacing, vdim)
+  } else {
+    deltas <- map_dbl(vspacing, function(x) round(radius/x))
 
-  cube <- as.matrix(expand.grid(
-    seq(centroid[1] - round(radius/vspacing[1]), centroid[1] + round(radius/vspacing[1])),
-    seq(centroid[2] - round(radius/vspacing[2]), centroid[2] + round(radius/vspacing[2])),
-    seq(centroid[3] - round(radius/vspacing[3]), centroid[3] + round(radius/vspacing[3]))))
+    cube <- as.matrix(expand.grid(
+      seq(centroid[1] - round(radius/vspacing[1]), centroid[1] + round(radius/vspacing[1])),
+      seq(centroid[2] - round(radius/vspacing[2]), centroid[2] + round(radius/vspacing[2])),
+      seq(centroid[3] - round(radius/vspacing[3]), centroid[3] + round(radius/vspacing[3]))))
 
-  rs <- rowSums(sapply(1:ncol(cube), function(i) cube[,i] > 0 & cube[,i] <= vdim[i]))
-  keep <- which(rs == 3)
-  cube <- cube[keep,]
+    rs <- rowSums(sapply(1:ncol(cube), function(i) cube[,i] > 0 & cube[,i] <= vdim[i]))
+    keep <- which(rs == 3)
+    cube <- cube[keep,]
 
-  coords <- t(t(cube) * vspacing)
+    coords <- t(t(cube) * vspacing)
 
-  res <- rflann::RadiusSearch(matrix(centroid * vspacing, ncol=3), coords, radius=radius^2,
+    res <- rflann::RadiusSearch(matrix(centroid * vspacing, ncol=3), coords, radius=radius^2,
                               max_neighbour=nrow(cube), build="kdtree", cores=0, checks=1)
 
-  cube[res$indices[[1]],,drop=FALSE]
+    cube[res$indices[[1]],,drop=FALSE]
+  }
 
 }
 
@@ -288,7 +291,7 @@ spherical_roi <- function (bvol, centroid, radius, fill=NULL, nonzero=FALSE) {
   vspacing <- spacing(bvol)
 
   centroid <- as.integer(centroid)
-  grid <- make_spherical_grid(bvol, centroid, radius)
+  grid <- make_spherical_grid(bvol, centroid, radius, use_cpp=TRUE)
 
   vals <- if (!is.null(fill)) {
     rep(fill, nrow(grid))

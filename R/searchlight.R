@@ -1,4 +1,9 @@
 
+#searchlight_table <- function(x, mask, radius, type=c("standard", "random")) {
+#
+#}
+
+
 #' random_searchlight
 #'
 #' Create an spherical random searchlight iterator
@@ -124,7 +129,7 @@ searchlight_coords <- function(mask, radius, nonzero=FALSE) {
 #'
 #' @inheritParams searchlight_coords
 #' @param eager if TRUE, then all searchlight coordinates set are generated up front. This is faster but requires more memory to store all coordinates.
-#' @return a list of \code{ROIVolWindow} objects
+#' @return a lazy list of \code{ROIVolWindow} objects
 #' @rdname searchlight
 #' @importFrom rflann RadiusSearch
 #' @export
