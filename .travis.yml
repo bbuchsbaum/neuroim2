@@ -14,10 +14,13 @@ Remotes:
   - YeeJeremy/rflann
   - bbuchsbaum/colorplane
 after_success:
-  - Rscript -e 'covr::codecov()'
+  - Rscript -e 'covr::codecov(type="all")'
 
 r_packages:
   - covr
   - devtools
 
+r_check_args: "--as-cran --install-args=--build"
+before_deploy:
+  - if [[ ${#TRAVIS_TAG} -gt 0 ]]; then R CMD INSTALL --build .; fi;
 
