@@ -436,7 +436,6 @@ setClass("DenseNeuroVec",  contains=c("NeuroVec", "array"))
 
 setValidity("DenseNeuroVec", function(object) {
   if (length(dim(object)) != 4) {
-    browser()
     "data must be four-dimensional array"
   } else {
     TRUE
