@@ -400,8 +400,8 @@ setMethod(f="sub_vector", signature=signature(x="NeuroVecSeq", i="numeric"),
             lens <- sapply(x@vecs, function(v) dim(v)[4])
             offset <- c(0, cumsum(lens)) + 1
 
-            vmap <- do.call(rbind, lapply(1:length(lens), function(i) {
-              data.frame(i=i, offset=seq(offset[i], offset[i] + lens[i]-1), lind=1:lens[i])
+            vmap <- do.call(rbind, lapply(1:length(lens), function(j) {
+              data.frame(i=j, offset=seq(offset[j], offset[j] + lens[j]-1), lind=1:lens[j])
             }))
 
             probe <- vmap[i,]
@@ -410,10 +410,18 @@ setMethod(f="sub_vector", signature=signature(x="NeuroVecSeq", i="numeric"),
             assertthat::assert_that(length(runs) > 0)
 
             svecs <- lapply(runs, function(rnum) {
-              neuroim2::sub_vector(x@vecs[[rnum]], smap[[rnum]])
+              neuroim2::sub_vector(x@vecs[[rnum]], smap[[as.character(rnum)]])
             })
 
-            do.call(NeuroVecSeq, svecs)
+            out <- do.call(NeuroVecSeq, svecs)
+
+            if (dim(out)[4] == 1) {
+              ## simplify and return NeuroVec. Could further simplify by return NeuroVec if length(vecs) == 1
+              out@vecs[[1]]
+            } else {
+              out
+            }
+
           })
 
 
