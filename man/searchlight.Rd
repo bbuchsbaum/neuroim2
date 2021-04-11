@@ -33,7 +33,7 @@ clustered_searchlight(mask, cvol = NULL, csize = NULL)
 \value{
 a list ofmatrices containing of integer-valued voxel coordinates.
 
-a list of \code{ROIVolWindow} objects
+a lazy list of \code{ROIVolWindow} objects
 
 an \code{iter} class
 }

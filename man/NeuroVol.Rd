@@ -2,7 +2,7 @@
 % Please edit documentation in R/neurovol.R
 \name{NeuroVol}
 \alias{NeuroVol}
-\title{NeuroVol}
+\title{Construct a NeuroVol object}
 \usage{
 NeuroVol(data, space, label = "", indices = NULL)
 }

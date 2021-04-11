@@ -10,6 +10,7 @@
 \alias{series,NeuroVec,ROICoords-method}
 \alias{series_roi,NeuroVec,ROICoords-method}
 \alias{series,NeuroVec,LogicalNeuroVol-method}
+\alias{series,NeuroVec,NeuroVol-method}
 \alias{series_roi,NeuroVec,LogicalNeuroVol-method}
 \alias{series,NeuroVec,integer-method}
 \alias{series,H5NeuroVec,integer-method}
@@ -38,6 +39,8 @@ series(x, i, ...)
 \S4method{series_roi}{NeuroVec,ROICoords}(x, i)
 
 \S4method{series}{NeuroVec,LogicalNeuroVol}(x, i)
+
+\S4method{series}{NeuroVec,NeuroVol}(x, i)
 
 \S4method{series_roi}{NeuroVec,LogicalNeuroVol}(x, i)
 

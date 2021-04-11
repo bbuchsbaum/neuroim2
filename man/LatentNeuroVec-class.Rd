@@ -23,7 +23,7 @@ LatentNeuroVec(basis, loadings, space, mask, offset = NULL)
 a class that stores a represents a 4-dimensional array as a set of basis functions (dictionary) and
 corresponding set of loadings (coefficients).
 
-constructs a LatentNeuroVec object
+Construct a LatentNeuroVec object from a basis and associated loadings
 }
 \section{Slots}{
 
