@@ -15,7 +15,7 @@
 # }
 
 to_h5_latentvec <- function(vec, file_name=NULL, data_type="FLOAT",
-                        nbit=FALSE, compression=6) {
+                            chunk_dim=c(4,4,4,dim(vec)[4]), nbit=FALSE, compression=6) {
 
   assert_that(inherits(vec, "LatentNeuroVec"))
 
@@ -52,7 +52,7 @@ to_h5_latentvec <- function(vec, file_name=NULL, data_type="FLOAT",
                     "LONG"=hdf5r::h5types$H5T_NATIVE_LONG,
                     NULL)
 
-  dtype <- dtype$set_fill_value(h5dtype, 0)$set_deflate(compression)
+  dtype <- dtype$set_chunk(chunk_dim)$set_fill_value(h5dtype, 0)$set_deflate(compression)
 
   basis_ds <- hdf5r::H5S$new(dims = dim(vec@basis), maxdims = dim(vec@basis))
   loadings_ds <- hdf5r::H5S$new(dims = dim(vec@loadings), maxdims = dim(vec@loadings))
