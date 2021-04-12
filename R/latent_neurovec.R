@@ -147,7 +147,7 @@ setMethod(f="[[", signature=signature(x="LatentNeuroVec", i="numeric"),
 #' @param chunk_dim the dimensions of each chunk
 setMethod(f="write_vec",signature=signature(x="LatentNeuroVec", file_name="character", format="missing", data_type="missing"),
           def=function(x, file_name, nbit=FALSE, compression=5, chunk_dim=c(4,4,4,dim(vec)[4])) {
-            obj <- to_h5_latentvec(x, file_name, nbit=nbit, compression=compression, chunk_dim=chunk_dim)
+            obj <- to_h5_latentvec(x, file_name, chunk_dim=chunk_dim, nbit=nbit, compression=compression)
             obj$close()
           })
 
