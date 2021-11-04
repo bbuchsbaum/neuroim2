@@ -183,7 +183,7 @@ setMethod(f="num_clusters", signature=signature(x="ClusteredNeuroVol"),
 #' @export
 setMethod("as.dense", signature(x="ClusteredNeuroVol"),
           function(x) {
-
+            NeuroVol(as.vector(x@data), space(x@mask))
           })
 
 
