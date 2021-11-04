@@ -92,17 +92,20 @@ bootstrap_searchlight <- function(mask, radius=8, iter=100) {
 #' @param mask an image volume containing valid central voxels for roving searchlight.
 #' @param radius in mm of spherical searchlight.
 #' @param nonzero only include coordinates with nonzero values in the supplied mask.
-#' @return a list ofmatrices containing of integer-valued voxel coordinates.
+#' @param cores number of cores to use
+#' @return a list of matrices containing of integer-valued voxel coordinates.
 #' @rdname searchlight
 #' @importFrom rflann RadiusSearch
 #' @export
-searchlight_coords <- function(mask, radius, nonzero=FALSE) {
+searchlight_coords <- function(mask, radius, nonzero=FALSE, cores=0) {
   mask.idx <- which(mask != 0)
 
   grid <- index_to_grid(mask, mask.idx)
   cds <- index_to_coord(mask, mask.idx)
 
-  rad <- rflann::RadiusSearch(cds, cds, radius=radius^2, max_neighbour=as.integer((radius+1))^3, build="kdtree", cores=0, checks=1)
+  rad <- rflann::RadiusSearch(cds, cds, radius=radius^2,
+                              max_neighbour=as.integer((radius+1))^3,
+                              build="kdtree", cores=cores, checks=1)
 
   spmask <- space(mask)
 
@@ -133,7 +136,7 @@ searchlight_coords <- function(mask, radius, nonzero=FALSE) {
 #' @rdname searchlight
 #' @importFrom rflann RadiusSearch
 #' @export
-searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE) {
+searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
   mask.idx <- which(mask != 0)
 
   grid <- index_to_grid(mask, mask.idx)
@@ -145,7 +148,8 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE) {
     deferred_list2(f, nrow(grid))
   } else {
     cds <- index_to_coord(mask, mask.idx)
-    rad <- rflann::RadiusSearch(cds, cds, radius=radius^2, max_neighbour=as.integer((radius+1))^3, build="kdtree", cores=0, checks=1)
+    rad <- rflann::RadiusSearch(cds, cds, radius=radius^2, max_neighbour=as.integer((radius+1))^3,
+                                build="kdtree", cores=cores, checks=1)
 
     spmask <- space(mask)
     purrr::map(seq_along(rad$indices), function(i) {

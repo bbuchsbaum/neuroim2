@@ -179,7 +179,12 @@ setMethod(f="num_clusters", signature=signature(x="ClusteredNeuroVol"),
           })
 
 
+#' @rdname as.dense-methods
+#' @export
+setMethod("as.dense", signature(x="ClusteredNeuroVol"),
+          function(x) {
 
+          })
 
 
 
