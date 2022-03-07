@@ -307,6 +307,15 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
   }
 }
 
+.isSigned <- function(data_type) {
+  if (data_type == "UBYTE") {
+    FALSE
+  } else {
+    TRUE
+  }
+}
+
+
 #' @rdname internal-methods
 #' @keywords internal
 #' @importFrom mmap int8 uint8 int16 int32 real32 real64
@@ -384,7 +393,7 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 .getDataSize <- function(data_type) {
   if (data_type == "BINARY") {
     return(1)
-  } else if (data_type == "UBYTE") {
+  } else if (data_type == "BYTE") {
 	  return(1)
   } else if (data_type == "UBYTE") {
     return(1)

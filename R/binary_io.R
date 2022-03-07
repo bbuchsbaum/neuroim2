@@ -108,13 +108,14 @@ series_reader <- function(file_name) {
 #' @param endian endianness of binary input connection
 #' @rdname BinaryReader
 #' @export
-BinaryReader <- function(input, byte_offset, data_type, bytes_per_element, endian=.Platform$endian) {
+BinaryReader <- function(input, byte_offset, data_type, bytes_per_element, endian=.Platform$endian, signed=TRUE) {
 	if (is.character(input)) {
 		new("BinaryReader", input=file(input, open="rb"), byte_offset=as.integer(byte_offset),
-		    data_type=data_type, bytes_per_element=as.integer(bytes_per_element), endian=endian)
+		    data_type=data_type, bytes_per_element=as.integer(bytes_per_element), endian=endian, signed=signed)
 	} else {
 		stopifnot(inherits(input, "connection"))
-		new("BinaryReader", input=input, byte_offset=as.integer(byte_offset), data_type=data_type, bytes_per_element=as.integer(bytes_per_element), endian=endian)
+		new("BinaryReader", input=input, byte_offset=as.integer(byte_offset), data_type=data_type,
+		    bytes_per_element=as.integer(bytes_per_element), endian=endian, signed=signed)
 	}
 
 }
@@ -142,12 +143,13 @@ BinaryWriter <- function(output, byte_offset, data_type, bytes_per_element, endi
 
 ## code duplication, fix me. introduce "BinaryConnection superclass
 setMethod(f="initialize", signature=signature("BinaryReader"),
-		def=function(.Object, input, byte_offset, data_type, bytes_per_element, endian) {
+		def=function(.Object, input, byte_offset, data_type, bytes_per_element, endian, signed) {
 			.Object@input <- input
 			.Object@byte_offset <- byte_offset
 			.Object@data_type <- data_type
 			.Object@bytes_per_element <- bytes_per_element
 			.Object@endian <- endian
+			.Object@signed <- signed
 
 			## must be seekable connection, should enforce this
 			##
@@ -184,7 +186,7 @@ setMethod(f="initialize", signature=signature("BinaryWriter"),
 #' @rdname read_elements-methods
 setMethod(f="read_elements", signature=signature(x= "BinaryReader", num_elements="numeric"),
 		def=function(x, num_elements) {
-			readBin(x@input, what=x@data_type, size=x@bytes_per_element, n=num_elements, endian=x@endian)
+			readBin(x@input, what=x@data_type, size=x@bytes_per_element, n=num_elements, endian=x@endian, signed=x@signed)
 		})
 
 #' write_elements

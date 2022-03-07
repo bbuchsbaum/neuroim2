@@ -252,13 +252,15 @@ setClass("LatentNeuroVecSource", representation(file_name="character"))
 #' @slot data_type the dataType of the binary Elements
 #' @slot bytes_per_element number of bytes in each data element (e.g. 4 or 8 for floating point numbers)
 #' @slot endian endianness of binary input connection
+#' @slot endian logical indicating whether data tyoe is signed
 #' @export
 setClass("BinaryReader",
            representation(input="connection",
                           byte_offset="numeric",
                           data_type="character",
                           bytes_per_element="integer",
-                          endian="character"))
+                          endian="character",
+                          signed="logical"))
 
 
 

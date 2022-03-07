@@ -28,9 +28,9 @@ setMethod(f="dim", signature=signature("FileMetaInfo"),
 setMethod(f="data_reader", signature=signature("NIFTIMetaInfo"),
 		def=function(x, offset=0) {
 			if (x@descriptor@data_encoding == "gzip") {
-				BinaryReader(gzfile(x@data_file, "rb"), x@data_offset+offset, .getRStorage(x@data_type), x@bytes_per_element, x@endian)
+				BinaryReader(gzfile(x@data_file, "rb"), x@data_offset+offset, .getRStorage(x@data_type), x@bytes_per_element, x@endian, .isSigned(x@data_type))
 			} else {
-				BinaryReader(x@data_file, x@data_offset+offset, .getRStorage(x@data_type), x@bytes_per_element, x@endian)
+				BinaryReader(x@data_file, x@data_offset+offset, .getRStorage(x@data_type), x@bytes_per_element, x@endian, .isSigned(x@data_type))
 			}
 		})
 
@@ -38,9 +38,9 @@ setMethod(f="data_reader", signature=signature("NIFTIMetaInfo"),
 setMethod(f="data_reader", signature=signature("AFNIMetaInfo"),
 		def=function(x, offset=0) {
 			if (x@descriptor@data_encoding == "gzip") {
-				BinaryReader(gzfile(x@data_file, "rb"), x@data_offset+offset, .getRStorage(x@data_type), x@bytes_per_element, x@endian)
+				BinaryReader(gzfile(x@data_file, "rb"), x@data_offset+offset, .getRStorage(x@data_type), x@bytes_per_element, x@endian,.isSigned(x@data_type))
 			} else {
-				BinaryReader(x@data_file, x@data_offset+offset, .getRStorage(x@data_type), x@bytes_per_element, x@endian)
+				BinaryReader(x@data_file, x@data_offset+offset, .getRStorage(x@data_type), x@bytes_per_element, x@endian,.isSigned(x@data_type))
 			}
 		})
 
