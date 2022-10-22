@@ -56,7 +56,7 @@ SparseNeuroVecSource <- function(meta_info, indices=NULL, mask) {
 }
 
 
-
+#' @keywords internal
 prep_sparsenvec <- function(data, space, mask) {
   if (!inherits(mask, "LogicalNeuroVol")) {
     mspace <- NeuroSpace(dim(space)[1:3],

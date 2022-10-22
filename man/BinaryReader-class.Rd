@@ -19,5 +19,7 @@ This class supports reading of bulk binary data from a connection
 \item{\code{bytes_per_element}}{number of bytes in each data element (e.g. 4 or 8 for floating point numbers)}
 
 \item{\code{endian}}{endianness of binary input connection}
+
+\item{\code{endian}}{logical indicating whether data tyoe is signed}
 }}
 

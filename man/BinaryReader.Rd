@@ -9,7 +9,8 @@ BinaryReader(
   byte_offset,
   data_type,
   bytes_per_element,
-  endian = .Platform$endian
+  endian = .Platform$endian,
+  signed = TRUE
 )
 }
 \arguments{

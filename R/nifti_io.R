@@ -253,7 +253,7 @@ read_nifti_header <- function(fname) {
 	sform  <- readBin(conn, double(), n=12, size=4, endian=endian)
 	header$sform <- rbind(matrix(sform,3,4, byrow=T), c(0,0,0,1))
 	header$intent_name <- readBin(conn, character(), n=16, size=1, endian=endian)
-	header$magic <- readChar(conn, nchars=4)
+	header$magic <- suppressWarnings(readChar(conn, nchars=4))
 
 	header$onefile <- F
 	if (substr(header$magic,2,2) == "+") {

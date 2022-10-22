@@ -9,9 +9,9 @@
 \usage{
 bootstrap_searchlight(mask, radius = 8, iter = 100)
 
-searchlight_coords(mask, radius, nonzero = FALSE)
+searchlight_coords(mask, radius, nonzero = FALSE, cores = 0)
 
-searchlight(mask, radius, eager = FALSE, nonzero = FALSE)
+searchlight(mask, radius, eager = FALSE, nonzero = FALSE, cores = 0)
 
 clustered_searchlight(mask, cvol = NULL, csize = NULL)
 }
@@ -24,6 +24,8 @@ clustered_searchlight(mask, cvol = NULL, csize = NULL)
 
 \item{nonzero}{only include coordinates with nonzero values in the supplied mask.}
 
+\item{cores}{number of cores to use}
+
 \item{eager}{if TRUE, then all searchlight coordinates set are generated up front. This is faster but requires more memory to store all coordinates.}
 
 \item{cvol}{a \code{ClusteredNeuroVol} instance}
@@ -31,7 +33,7 @@ clustered_searchlight(mask, cvol = NULL, csize = NULL)
 \item{csize}{the number of clusters (ignored if \code{cvol} is provided)}
 }
 \value{
-a list ofmatrices containing of integer-valued voxel coordinates.
+a list of matrices containing of integer-valued voxel coordinates.
 
 a lazy list of \code{ROIVolWindow} objects
 

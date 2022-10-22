@@ -61,7 +61,7 @@ parse_niml_header <- function(fconn) {
   STATE <- "BEGIN"
   while(TRUE ) {
 
-    ch <- readChar(fconn,1)
+    ch <- suppressWarnings(readChar(fconn,1))
     #print(ch)
     if (length(ch) == 0) {
       break
@@ -100,7 +100,7 @@ parse_niml_next <- function(fconn) {
   STATE <- "BEGIN"
   lastch <- ""
   while(TRUE ) {
-    ch <- readChar(fconn,1)
+    ch <- suppressWarnings(readChar(fconn,1))
 
     if (length(ch) == 0) {
       break

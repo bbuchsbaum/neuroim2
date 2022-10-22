@@ -13,13 +13,7 @@
 \usage{
 write_vec(x, file_name, format, data_type, ...)
 
-\S4method{write_vec}{LatentNeuroVec,character,missing,missing}(
-  x,
-  file_name,
-  nbit = FALSE,
-  compression = 5,
-  chunk_dim = c(4, 4, 4, dim(vec)[4])
-)
+\S4method{write_vec}{LatentNeuroVec,character,missing,missing}(x, file_name, nbit = FALSE, compression = 9, chunk_dim = NULL)
 
 \S4method{write_vec}{ROIVec,character,missing,missing}(x, file_name)
 
