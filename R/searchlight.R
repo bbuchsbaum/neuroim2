@@ -95,7 +95,7 @@ bootstrap_searchlight <- function(mask, radius=8, iter=100) {
 #' @param cores number of cores to use
 #' @return a list of matrices containing of integer-valued voxel coordinates.
 #' @rdname searchlight
-#' @importFrom rflann RadiusSearch
+#' @importFrom dbscan frNN
 #' @export
 searchlight_coords <- function(mask, radius, nonzero=FALSE, cores=0) {
   mask.idx <- which(mask != 0)
@@ -103,14 +103,17 @@ searchlight_coords <- function(mask, radius, nonzero=FALSE, cores=0) {
   grid <- index_to_grid(mask, mask.idx)
   cds <- index_to_coord(mask, mask.idx)
 
-  rad <- rflann::RadiusSearch(cds, cds, radius=radius^2,
-                              max_neighbour=as.integer((radius+1))^3,
-                              build="kdtree", cores=cores, checks=1)
+  #rad <- rflann::RadiusSearch(cds, cds, radius=radius^2,
+  #                            max_neighbour=as.integer((radius+1))^3,
+  #                            build="kdtree", cores=cores, checks=1)
+
+  rad <- dbscan::frNN(cds, eps=radius, cds)
 
   spmask <- space(mask)
 
   f <- function(i) {
-    ind <- rad$indices[[i]]
+    #ind <- rad$indices[[i]]
+    ind <- rad$id[[i]]
     grid[ind,,drop=FALSE]
   }
 
@@ -134,7 +137,7 @@ searchlight_coords <- function(mask, radius, nonzero=FALSE, cores=0) {
 #' @param eager if TRUE, then all searchlight coordinates set are generated up front. This is faster but requires more memory to store all coordinates.
 #' @return a lazy list of \code{ROIVolWindow} objects
 #' @rdname searchlight
-#' @importFrom rflann RadiusSearch
+#' @importFrom dbscan frNN
 #' @export
 searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
   mask.idx <- which(mask != 0)
@@ -148,12 +151,15 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
     deferred_list2(f, nrow(grid))
   } else {
     cds <- index_to_coord(mask, mask.idx)
-    rad <- rflann::RadiusSearch(cds, cds, radius=radius^2, max_neighbour=as.integer((radius+1))^3,
-                                build="kdtree", cores=cores, checks=1)
+    #rad <- rflann::RadiusSearch(cds, cds, radius=radius^2, max_neighbour=as.integer((radius+1))^3,
+    #                            build="kdtree", cores=cores, checks=1)
+
+    rad <- dbscan::frNN(cds, eps=radius, cds)
 
     spmask <- space(mask)
-    purrr::map(seq_along(rad$indices), function(i) {
-      ind <- rad$indices[[i]]
+    purrr::map(seq_along(rad$id), function(i) {
+      #ind <- rad$indices[[i]]
+      ind <- rad$id[[i]]
       search <- new("ROIVolWindow", mask[mask.idx[ind]], space=spmask, coords=grid[ind,,drop=FALSE],
                     center_index=as.integer(1), parent_index=as.integer(mask.idx[ind[1]]))
       search

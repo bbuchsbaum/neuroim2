@@ -16,6 +16,7 @@ knitr::opts_chunk$set(collapse = T, comment = "#>")
 library(purrr)
 library(assertthat)
 library(neuroim2)
+options(mc.cores=1)
 ```
 
 Pipelining operations using a functional approach
@@ -42,44 +43,35 @@ First we load in an example volume, assign it random values, and find its connec
 Now we want to find the average value in each of the connected components using the `split_clusters` function. Since `conn_comp` returns a `ClusteredNeuroVol` containing the cluster indices, we use that to split the original volume into a list of `ROIVol`s and compute the mean over each one.
 
 ```{r}
-
 mvals <- vol %>% split_clusters(comp$index) %>% map_dbl( ~ mean(.))
-
 ```
     
 Suppose we want to compute the local standard deviation within a 4mm radius of each voxel. We can use the `searchlight` function to construct a list of spherical ROIs centered on every voxel in the input set.
 
 ```{r}
-
 sdvol <- vol %>% searchlight(radius=5, eager=TRUE) %>% map_dbl( ~ sd(.)) %>% NeuroVol(space=space(vol), indices=which(vol!=0))
 plot(sdvol, cmap=rainbow(255))
-
 ```
 
 Another thing we might to is compute the k nearest neighbors in each searchlight and replace the center voxel with the average intensity of its neighbors:
 
 ```{r}
-
 k <- 12
 knnfvol <- vol %>% searchlight(radius=12, eager=TRUE) %>% map_dbl(function(x) {
   ind <- order((x[x@center_index] - x)^2)[1:k]
   mean(x[ind])
 }) %>% NeuroVol(space=space(vol), indices=which(vol!=0))
-
 plot(knnfvol, cmap=rainbow(255), zlevels=seq(1,25,by=3))
-
 ```
+
 If we only need access to the searchlight coordinates (in voxel space), we can use the `searchlight_coords` function. Here, we simply replace the center voxel with the average of its neighbors in searchlight space:
 
 ```{r}
-
 avgvol <- vol %>% searchlight_coords(radius=12) %>% map_dbl(function(x) {
   vals <- vol[x]
   mean(vals[vals!=0])
 }) %>% NeuroVol(space=space(vol), indices=which(vol!=0))
-
 plot(avgvol, cmap=rainbow(255), zlevels=seq(1,25,by=3))
-
 ```
 
 ## Mapping a function over every slice of a `NeuroVol`
@@ -87,32 +79,24 @@ plot(avgvol, cmap=rainbow(255), zlevels=seq(1,25,by=3))
 Suppose we want to split up an image volume by slice and apply a function to each slice. We can use the `slices` function to achieve this as follows:
 
 ```{r}
-
 slice_means <- vol %>% slices %>% map_dbl(~ mean(.))
 plot(slice_means, type='l', ylab="mean intensity", xlab="slice number")
-
 ```
 
-
-```{r}
 ## Mapping a function over each volume of a `NeuroVec` object
 
 ```{r}
-
 vec <- concat(vol,vol,vol,vol,vol)
 mean_vec <- vec %>% vols %>% map_dbl(~ mean(.))
 sd_vec <- vec %>% vols %>% map_dbl(~ sd(.))
 assert_that(length(mean_vec) == dim(vec)[4])
 assert_that(length(sd_vec) == dim(vec)[4])
-
 ```
 
 ## Mapping a function over each vector of a `NeuroVec` object
 
 ```{r}
 vec <- concat(vol,vol,vol,vol,vol)
-mean_vol <- vec %>% vectors %>% map_dbl(~ mean(.)) %>% NeuroVec(., space=space(vol))
+mean_vol <- vec %>% vectors() %>% map_dbl(~ mean(.)) %>% NeuroVol(., space=space(vol))
 assert_that(all(dim(mean_vol) == dim(vol)))
 ```
-
-

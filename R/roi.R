@@ -201,7 +201,7 @@ cuboid_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE) {
 
 }
 
-#' @importFrom rflann RadiusSearch
+#' @importFrom dbscan frNN
 #' @keywords internal
 make_spherical_grid <- function(bvol, centroid, radius, use_cpp=TRUE) {
 
@@ -230,10 +230,13 @@ make_spherical_grid <- function(bvol, centroid, radius, use_cpp=TRUE) {
 
     coords <- t(t(cube) * vspacing)
 
-    res <- rflann::RadiusSearch(matrix(centroid * vspacing, ncol=3), coords, radius=radius^2,
-                              max_neighbour=nrow(cube), build="kdtree", cores=0, checks=1)
 
-    cube[res$indices[[1]],,drop=FALSE]
+    #res <- rflann::RadiusSearch(matrix(centroid * vspacing, ncol=3), coords, radius=radius^2,
+    #                          max_neighbour=nrow(cube), build="kdtree", cores=0, checks=1)
+
+    res <- dbscan::frNN(coords, eps=radius, query=matrix(centroid * vspacing, ncol=3))
+
+    cube[res$id[[1]],,drop=FALSE]
   }
 
 }

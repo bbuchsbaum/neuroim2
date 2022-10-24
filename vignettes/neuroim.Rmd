@@ -14,6 +14,7 @@ vignette: >
 ```{r, echo = FALSE, message = FALSE}
 knitr::opts_chunk$set(collapse = T, comment = "#>")
 library(neuroim2)
+options(mc.cores=1)
 ```
 
 The **neuroim2** package

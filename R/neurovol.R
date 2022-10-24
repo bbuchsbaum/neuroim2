@@ -1,6 +1,5 @@
 #' @importFrom assertthat assert_that
 #' @importFrom Matrix sparseVector
-#' @importFrom rflann Neighbour
 #' @include all_class.R
 #' @include all_generic.R
 NULL
@@ -506,7 +505,7 @@ setMethod(f="coord_to_grid", signature=signature(x="NeuroVol", coords="numeric")
           })
 
 
-#' @importFrom rflann Neighbour
+#' @importFrom dbscan kNN
 #' @keywords internal
 .pruneCoords <- function(coord.set,  vals,  mindist=10) {
 
@@ -515,12 +514,18 @@ setMethod(f="coord_to_grid", signature=signature(x="NeuroVol", coords="numeric")
 	}
 
 	.prune <- function(keepIndices) {
-		if (length(keepIndices) == 1) {
+		if (length(keepIndices) <= 2) {
 			keepIndices
 		} else {
-			ret <- rflann::Neighbour(coord.set[keepIndices,], coord.set[keepIndices,], k=2, build="kdtree", cores=0, checks=1)
-			ind <- ret$indices[, 2]
-			ds <- sqrt(ret$distances[, 2])
+		  ret <- try(dbscan::kNN(coord.set[keepIndices,], coord.set[keepIndices,], k=2))
+
+			#ret <- rflann::Neighbour(coord.set[keepIndices,], coord.set[keepIndices,], k=2, build="kdtree", cores=0, checks=1)
+			#ind <- ret$indices[, 2]
+			#ds <- sqrt(ret$distances[, 2])
+
+		  ind <- ret$id[,2]
+		  ds <- ret$distances[,2]
+
 			v <- vals[keepIndices]
 			ovals <- v[ind]
 			pruneSet <- ifelse(ds < mindist & ovals > v,  TRUE, FALSE)

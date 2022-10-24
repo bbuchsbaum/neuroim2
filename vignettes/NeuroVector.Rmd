@@ -16,6 +16,7 @@ knitr::opts_chunk$set(collapse = T, comment = "#>")
 library(purrr)
 library(assertthat)
 library(neuroim2)
+options(mc.cores=1)
 ```
 
 ## Working with neuroimaging time-series data

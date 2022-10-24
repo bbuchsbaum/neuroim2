@@ -53,14 +53,14 @@ Collate:
     'searchlight.R'
     'sparse_neurovec.R'
     'spat_filter.R'
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1
 Imports: 
   purrr,
   assertthat,
   mmap,
   Rcpp,
   RNifti,
-  rflann,
+  dbscan,
   stringr,
   methods,
   colorplane,
@@ -78,7 +78,6 @@ Suggests:
   R.utils,
   prettydoc
 Remotes: 
-  YeeJeremy/rflann,
   bbuchsbaum/colorplane
 URL: https://github.com/bbuchsbaum/neuroim2
 BugReports: https://github.com/bbuchsbaum/neuroim2/issues

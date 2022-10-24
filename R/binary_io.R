@@ -106,6 +106,7 @@ series_reader <- function(file_name) {
 #' @param data_type R data type of binary elements
 #' @param bytes_per_element number of bytes in each data element (e.g. 4 or 8 for floating point numbers)
 #' @param endian endianness of binary input connection
+#' @param signed whether the element is signed (TRUE) or unsigned (FALSE)
 #' @rdname BinaryReader
 #' @export
 BinaryReader <- function(input, byte_offset, data_type, bytes_per_element, endian=.Platform$endian, signed=TRUE) {

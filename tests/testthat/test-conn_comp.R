@@ -7,7 +7,7 @@ context("connected components")
 test_that("can compute connected components for random masks", {
 
   D <- 20
-  for (i in 1:10) {
+  for (i in 1:100) {
     mat <- array(sample(c(0, 1), size = D^3, replace = TRUE), dim = rep(D, 3))
     nspace <- NeuroSpace(c(D,D,D))
     vol <- NeuroVol(mat, nspace)

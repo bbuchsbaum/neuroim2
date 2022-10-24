@@ -16,6 +16,7 @@ knitr::opts_chunk$set(collapse = T, comment = "#>")
 library(assertthat)
 library(purrr)
 library(neuroim2)
+options(mc.cores=1)
 ```
 
 
@@ -103,31 +104,31 @@ Here, we compute the mean value in an exhaustive set of spherical searchlights i
 library(purrr)
 
 ## generate a list of searchlight ROIs
-slist <- searchlight(vol, eager=TRUE, radius=8)
+#slist <- searchlight(vol, eager=TRUE, radius=8)
 
 ## compute the mean value in each searchlight ROI.
-ret <- slist %>% purrr::map(~ mean(vol[coords(.)]))
+#ret <- slist %>% purrr::map(~ mean(vol[coords(.)]))
 ```
 
 We can also use a "randomized searchlight", which samples voxels without replacement until all voxels have been included in at least one searchlight. 
 
 ```{r}
-ret <- vol %>% random_searchlight(radius=8) %>% purrr::map(~ mean(vol[coords(.)]))
+#ret <- vol %>% random_searchlight(radius=8) %>% purrr::map(~ mean(vol[coords(.)]))
 ```
 
 Another related method involves using a "parcellation" or clustering to define successive regions of interest for an analysis. Here we show how to do this in a similar way as above. First we must define a 'clustering' over the voxel space:
 
 ```{r}
 
-grid <- index_to_coord(vol, which(vol > 0))
-kres <- kmeans(grid, centers=50, iter.max=500)
+#grid <- index_to_coord(vol, which(vol > 0))
+#kres <- kmeans(grid, centers=50, iter.max=500)
 ```
 
 Now we create a `ClusteredNeuroVol` and map the `mean` function over all clusters:
 
 ```{r}
-kvol <- ClusteredNeuroVol(vol, kres$cluster)
-ret <- vol %>% clustered_searchlight(cvol=kvol) %>% purrr::map(~ mean(vol[coords(.)]))
+#kvol <- ClusteredNeuroVol(vol, kres$cluster)
+#ret <- vol %>% clustered_searchlight(cvol=kvol) %>% purrr::map(~ mean(vol[coords(.)]))
 
 ```
 
@@ -151,7 +152,7 @@ Now we limit patches so that the set of patch centers are within a mask.
 
 pset <- patch_set(vol, dims=c(3,3,1), mask=as.logical(vol))
 length(pset)
-ret <- pset %>% purrr::map(~ mean(.))
+#ret <- pset %>% purrr::map(~ mean(.))
 
 ```
     

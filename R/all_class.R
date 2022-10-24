@@ -245,14 +245,15 @@ setClass("LatentNeuroVecSource", representation(file_name="character"))
 
 #' BinaryReader
 #'
-#' This class supports reading of bulk binary data from a connection
+#' Class supporting reading of bulk binary data from a connection
+#'
 #' @rdname BinaryReader-class
 #' @slot input the binary input connection
 #' @slot byte_offset the number of bytes to skip at the start of input
 #' @slot data_type the dataType of the binary Elements
 #' @slot bytes_per_element number of bytes in each data element (e.g. 4 or 8 for floating point numbers)
 #' @slot endian endianness of binary input connection
-#' @slot endian logical indicating whether data tyoe is signed
+#' @slot signed logical indicating whether data type is signed
 #' @export
 setClass("BinaryReader",
            representation(input="connection",

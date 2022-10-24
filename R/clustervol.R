@@ -134,7 +134,9 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVol", clusters="Cluste
               ROIVol(space(x), index_to_grid(x,as.numeric(idx)), x[idx])
             }
 
-            dlis <- deferred_list(lapply(1:num_clusters(clusters), function(i) f))
+            #dlis <- deferred_list(lapply(1:num_clusters(clusters), function(i) f))
+            dlis <- deferred_list2(f, num_clusters(clusters))
+
           })
 
 
@@ -152,7 +154,8 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVol", clusters="intege
               ROIVol(space(x), index_to_grid(x,as.numeric(idx)), x[idx])
             }
 
-            dlis <- deferred_list(lapply(1:length(clist), function(i) f))
+            #dlis <- deferred_list(lapply(1:length(clist), function(i) f))
+            dlis <- deferred_list(f, length(clist))
           })
 
 #' @export

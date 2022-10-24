@@ -23,6 +23,8 @@ BinaryReader(
 \item{bytes_per_element}{number of bytes in each data element (e.g. 4 or 8 for floating point numbers)}
 
 \item{endian}{endianness of binary input connection}
+
+\item{signed}{whether the element is signed (TRUE) or unsigned (FALSE)}
 }
 \description{
 Constructor for  \code{\linkS4class{BinaryReader}} class

@@ -5,7 +5,7 @@
 \alias{BinaryReader-class}
 \title{BinaryReader}
 \description{
-This class supports reading of bulk binary data from a connection
+Class supporting reading of bulk binary data from a connection
 }
 \section{Slots}{
 
@@ -20,6 +20,6 @@ This class supports reading of bulk binary data from a connection
 
 \item{\code{endian}}{endianness of binary input connection}
 
-\item{\code{endian}}{logical indicating whether data tyoe is signed}
+\item{\code{signed}}{logical indicating whether data type is signed}
 }}
 

@@ -40,8 +40,10 @@ setMethod(f="as.list", signature=signature(x = "FileBackedNeuroVec"), def=functi
     drop(sub_vector(x, i))
   }
 
-  deferred_list(lapply(seq(1, D4),
-         function(i) { f } ))
+  #deferred_list(lapply(seq(1, D4),
+  #       function(i) { f } ))
+
+  deferred_list2(f, D4)
 
 })
 
