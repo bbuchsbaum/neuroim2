@@ -46,7 +46,7 @@
   <a href="reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -91,43 +91,37 @@
   <div class="contents col-md-9">
 
 
-<p>The <code>neuroim2</code> package is currently in development. The
-goal of the project is to to provide basic functionality for working
-with neuroimaging data in R. <code>neuroim2</code> It is an effort to
-modify and upgrade the <code>neuroim</code> package (<a href="https://github.com/bbuchsbaum/neuroim" class="external-link uri">https://github.com/bbuchsbaum/neuroim</a>).</p>
+<p>The <code>neuroim2</code> package is currently in development. The goal of the project is to to provide basic functionality for working with neuroimaging data in R. <code>neuroim2</code> It is an effort to modify and upgrade the <code>neuroim</code> package (<a href="https://github.com/bbuchsbaum/neuroim" class="external-link uri">https://github.com/bbuchsbaum/neuroim</a>).</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of <code>neuroim2</code> (v.
-<code>0.1.0</code>) from Github with:</p>
+<p>You can install the development version of <code>neuroim2</code> (v. <code>0.1.0</code>) from Github with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># install.packages("devtools")</span>
-<span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/remote-reexports.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"bbuchsbaum/neuroim2"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"bbuchsbaum/neuroim2"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
 </h2>
-<p>To read in a volumetric NIFTI formatted image, use the
-<code>read_vol</code> function:</p>
+<p>To read in a volumetric NIFTI formatted image, use the <code>read_vol</code> function:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bbuchsbaum/neuroim2" class="external-link">neuroim2</a></span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bbuchsbaum/neuroim2" class="external-link">neuroim2</a></span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Loading required package: Matrix</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">fname</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask.nii"</span>, package<span class="op">=</span><span class="st">"neuroim2"</span><span class="op">)</span>
-<span class="va">vol</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">fname</span><span class="op">)</span></code></pre></div>
-<p>Now, <code>vol</code> can be treated as a three-dimensional
-array:</p>
+<code class="sourceCode R"><span><span class="va">fname</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask.nii"</span>, package<span class="op">=</span><span class="st">"neuroim2"</span><span class="op">)</span></span>
+<span><span class="va">vol</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">fname</span><span class="op">)</span></span></code></pre></div>
+<p>Now, <code>vol</code> can be treated as a three-dimensional array:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">v1</span> <span class="op">&lt;-</span> <span class="va">vol</span><span class="op">[</span><span class="fl">1</span>,<span class="fl">1</span>,<span class="fl">1</span><span class="op">]</span>
-<span class="va">vol2</span> <span class="op">&lt;-</span> <span class="va">vol</span> <span class="op">+</span> <span class="va">vol</span>
-<span class="va">vol3</span> <span class="op">&lt;-</span> <span class="va">vol2</span> <span class="op">-</span> <span class="va">vol</span>
-<span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="va">vol</span> <span class="op">==</span> <span class="va">vol3</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">v1</span> <span class="op">&lt;-</span> <span class="va">vol</span><span class="op">[</span><span class="fl">1</span>,<span class="fl">1</span>,<span class="fl">1</span><span class="op">]</span></span>
+<span><span class="va">vol2</span> <span class="op">&lt;-</span> <span class="va">vol</span> <span class="op">+</span> <span class="va">vol</span></span>
+<span><span class="va">vol3</span> <span class="op">&lt;-</span> <span class="va">vol2</span> <span class="op">-</span> <span class="va">vol</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="va">vol</span> <span class="op">==</span> <span class="va">vol3</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb6"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] TRUE</span></span></code></pre></div>
 <p>We can create a 4D image, by concatenating several 3D volumes:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">vec</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/concat-methods.html">concat</a></span><span class="op">(</span><span class="va">vol</span>, <span class="va">vol</span>, <span class="va">vol2</span><span class="op">)</span>
-<span class="va">series1</span> <span class="op">&lt;-</span> <span class="va">vec</span><span class="op">[</span><span class="fl">1</span>,<span class="fl">1</span>,<span class="fl">1</span>,<span class="op">]</span>
-<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">series1</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">vec</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/concat-methods.html">concat</a></span><span class="op">(</span><span class="va">vol</span>, <span class="va">vol</span>, <span class="va">vol2</span><span class="op">)</span></span>
+<span><span class="va">series1</span> <span class="op">&lt;-</span> <span class="va">vec</span><span class="op">[</span><span class="fl">1</span>,<span class="fl">1</span>,<span class="fl">1</span>,<span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">series1</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb8"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 3</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -188,8 +182,7 @@ array:</p>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer>

@@ -864,6 +864,7 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 #' @param bgcmap a color map for backround layer consisting of a vector of colors in hex format (e.g. \code{gray(n=255)})
 #' @export
 #' @importFrom graphics plot
+#' @import colorplane
 #' @examples
 #'
 #' dat <- matrix(rnorm(100*100), 100, 100)

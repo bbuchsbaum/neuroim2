@@ -155,7 +155,7 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVol", clusters="intege
             }
 
             #dlis <- deferred_list(lapply(1:length(clist), function(i) f))
-            dlis <- deferred_list(f, length(clist))
+            dlis <- deferred_list2(f, length(clist))
           })
 
 #' @export

@@ -457,7 +457,7 @@ setMethod(f="vectors", signature=signature(x="NeuroVec", subset="missing"),
             f <- function(i) series(x, vox[i,1], vox[i,2], vox[i,3])
             #lis <- map(ind, function(i) f)
             #deferred_list(lis)
-            deferred_list2(f, lengt(ind))
+            deferred_list2(f, length(ind))
           })
 
 #' @export
@@ -484,7 +484,7 @@ setMethod(f="vectors", signature=signature(x="NeuroVec", subset="logical"),
             f <- function(i) series(x, vox[i,1], vox[i,2], vox[i,3])
             #lis <- lapply(seq_along(ind), function(i) f)
             #deferred_list(lis)
-            deferred_list2(f, lengt(ind))
+            deferred_list2(f, length(ind))
           })
 
 

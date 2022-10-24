@@ -1,20 +1,14 @@
 ---
 title: "Pipelines"
-date: "`r Sys.Date()`"
+date: "2022-10-24"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Pipelines}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{knitr::knitr}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, echo = FALSE, message = FALSE}
-knitr::opts_chunk$set(collapse = T, comment = "#>")
-library(purrr)
-library(assertthat)
-library(neuroim2)
-options(mc.cores=1)
-```
+
 
 Pipelining operations using a functional approach
 ===================
@@ -25,7 +19,8 @@ The `neuroim2` packages provides a set of functions that allows one to split ima
 
 First we load in an example volume, assign it random values, and find its connected components with a threshold of .9
 
-```{r}
+
+```r
       library(purrr)
       library(ggplot2)
       file_name <- system.file("extdata", "global_mask.nii", package="neuroim2")
@@ -37,22 +32,29 @@ First we load in an example volume, assign it random values, and find its connec
       plot(comp$index, zlevels=seq(1,25,by=3), cmap=rainbow(255))
 ```
 
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2-1.png)
+
 Now we want to find the average value in each of the connected components using the `split_clusters` function. Since `conn_comp` returns a `ClusteredNeuroVol` containing the cluster indices, we use that to split the original volume into a list of `ROIVol`s and compute the mean over each one.
 
-```{r}
+
+```r
 mvals <- vol %>% split_clusters(comp$index) %>% map_dbl( ~ mean(.))
 ```
     
 Suppose we want to compute the local standard deviation within a 4mm radius of each voxel. We can use the `searchlight` function to construct a list of spherical ROIs centered on every voxel in the input set.
 
-```{r}
+
+```r
 sdvol <- vol %>% searchlight(radius=5, eager=TRUE) %>% map_dbl( ~ sd(.)) %>% NeuroVol(space=space(vol), indices=which(vol!=0))
 plot(sdvol, cmap=rainbow(255))
 ```
 
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png)
+
 Another thing we might to is compute the k nearest neighbors in each searchlight and replace the center voxel with the average intensity of its neighbors:
 
-```{r}
+
+```r
 k <- 12
 knnfvol <- vol %>% searchlight(radius=12, eager=TRUE) %>% map_dbl(function(x) {
   ind <- order((x[x@center_index] - x)^2)[1:k]
@@ -61,9 +63,12 @@ knnfvol <- vol %>% searchlight(radius=12, eager=TRUE) %>% map_dbl(function(x) {
 plot(knnfvol, cmap=rainbow(255), zlevels=seq(1,25,by=3))
 ```
 
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png)
+
 If we only need access to the searchlight coordinates (in voxel space), we can use the `searchlight_coords` function. Here, we simply replace the center voxel with the average of its neighbors in searchlight space:
 
-```{r}
+
+```r
 avgvol <- vol %>% searchlight_coords(radius=12) %>% map_dbl(function(x) {
   vals <- vol[x]
   mean(vals[vals!=0])
@@ -71,29 +76,39 @@ avgvol <- vol %>% searchlight_coords(radius=12) %>% map_dbl(function(x) {
 plot(avgvol, cmap=rainbow(255), zlevels=seq(1,25,by=3))
 ```
 
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png)
+
 ## Mapping a function over every slice of a `NeuroVol`
 
 Suppose we want to split up an image volume by slice and apply a function to each slice. We can use the `slices` function to achieve this as follows:
 
-```{r}
+
+```r
 slice_means <- vol %>% slices %>% map_dbl(~ mean(.))
 plot(slice_means, type='l', ylab="mean intensity", xlab="slice number")
 ```
 
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7-1.png)
+
 ## Mapping a function over each volume of a `NeuroVec` object
 
-```{r}
+
+```r
 vec <- concat(vol,vol,vol,vol,vol)
 mean_vec <- vec %>% vols %>% map_dbl(~ mean(.))
 sd_vec <- vec %>% vols %>% map_dbl(~ sd(.))
 assert_that(length(mean_vec) == dim(vec)[4])
+#> [1] TRUE
 assert_that(length(sd_vec) == dim(vec)[4])
+#> [1] TRUE
 ```
 
 ## Mapping a function over each vector of a `NeuroVec` object
 
-```{r}
+
+```r
 vec <- concat(vol,vol,vol,vol,vol)
 mean_vol <- vec %>% vectors() %>% map_dbl(~ mean(.)) %>% NeuroVol(., space=space(vol))
 assert_that(all(dim(mean_vol) == dim(vol)))
+#> [1] TRUE
 ```

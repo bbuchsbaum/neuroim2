@@ -1,14 +1,11 @@
 ---
 title: "Regions of Interest"
 date: "`r Sys.Date()`"
-output: 
-  prettydoc::html_pretty:
-    theme: cayman
-    highlight: github
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Regions of Interest}
   %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8]{inputenc}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, echo = FALSE, message = FALSE}
@@ -60,99 +57,99 @@ Suppose our real-world coordinate is at -50, -28, 10 in coordinate space.
     
 Because the function `spherical_roi` takes a coordinate in *voxel units*, we need to convert the real-world coordinate (i.e. in millimeter units) to voxel coordinates.
 
-```{r}
-    
-    vox <- coord_to_grid(vol, rpoint)
-    sphere <- spherical_roi(vol, vox, radius=10, fill=1)
-    dim(coords(sphere))
-```
-    
-Now we convert back to real-world coordinates
+<!-- ```{r} -->
 
-```{r}
-    coords <- index_to_coord(vol, indices(sphere))
-    center_of_mass <- colMeans(coords)
-    center_of_mass
-```
+<!--     vox <- coord_to_grid(vol, rpoint) -->
+<!--     sphere <- spherical_roi(vol, vox, radius=10, fill=1) -->
+<!--     dim(coords(sphere)) -->
+<!-- ``` -->
 
-    
-## Converting an ROI to a SparseNeuroVol
+<!-- Now we convert back to real-world coordinates -->
 
-We may want to convert a region of interest to a NeuroVol instance. But we don't want to store every value in a dense array. Here we can make use of the `SparseNeuroVol` class which only stores non-zero values my using a `Matrix::sparseVector` under the hood.
+<!-- ```{r} -->
+<!--     coords <- index_to_coord(vol, indices(sphere)) -->
+<!--     center_of_mass <- colMeans(coords) -->
+<!--     center_of_mass -->
+<!-- ``` -->
 
-```{r}
-    
-    sphere <- spherical_roi(vol, c(50,10,10), radius=10, fill=1)
-    sphere
-```
-    
-Now we construct a `SparseNeuroVol` and fill it with the values stored in the ROI:
 
-```{r}
-    sparsevol <- SparseNeuroVol(sphere, space(vol),indices=indices(sphere))
-    sum(sparsevol) == sum(sphere)
-    all(dim(sparsevol) == dim(vol))
-```
+<!-- ## Converting an ROI to a SparseNeuroVol -->
 
-## Carrying out simple "searchlight" ROI analyses
+<!-- We may want to convert a region of interest to a NeuroVol instance. But we don't want to store every value in a dense array. Here we can make use of the `SparseNeuroVol` class which only stores non-zero values my using a `Matrix::sparseVector` under the hood. -->
 
-The so-called roving "searchlight" is often used to perform multivariate statistical analyses in a local neighborhood of each voxel of an image. Several functions in `neuroim2` can be used to carry out searchlight analyses. These functions produces `list`s of the `ROIVol` instances that encapsulate the local neighborhood around each voxel.
+<!-- ```{r} -->
 
-Here, we compute the mean value in an exhaustive set of spherical searchlights in an image volume.
+<!--     sphere <- spherical_roi(vol, c(50,10,10), radius=10, fill=1) -->
+<!--     sphere -->
+<!-- ``` -->
 
-```{r}
-library(purrr)
+<!-- Now we construct a `SparseNeuroVol` and fill it with the values stored in the ROI: -->
 
-## generate a list of searchlight ROIs
-#slist <- searchlight(vol, eager=TRUE, radius=8)
+<!-- ```{r} -->
+<!--     sparsevol <- SparseNeuroVol(sphere, space(vol),indices=indices(sphere)) -->
+<!--     sum(sparsevol) == sum(sphere) -->
+<!--     all(dim(sparsevol) == dim(vol)) -->
+<!-- ``` -->
 
-## compute the mean value in each searchlight ROI.
-#ret <- slist %>% purrr::map(~ mean(vol[coords(.)]))
-```
+<!-- ## Carrying out simple "searchlight" ROI analyses -->
 
-We can also use a "randomized searchlight", which samples voxels without replacement until all voxels have been included in at least one searchlight. 
+<!-- The so-called roving "searchlight" is often used to perform multivariate statistical analyses in a local neighborhood of each voxel of an image. Several functions in `neuroim2` can be used to carry out searchlight analyses. These functions produces `list`s of the `ROIVol` instances that encapsulate the local neighborhood around each voxel. -->
 
-```{r}
-#ret <- vol %>% random_searchlight(radius=8) %>% purrr::map(~ mean(vol[coords(.)]))
-```
+<!-- Here, we compute the mean value in an exhaustive set of spherical searchlights in an image volume. -->
 
-Another related method involves using a "parcellation" or clustering to define successive regions of interest for an analysis. Here we show how to do this in a similar way as above. First we must define a 'clustering' over the voxel space:
+<!-- ```{r} -->
+<!-- library(purrr) -->
 
-```{r}
+<!-- ## generate a list of searchlight ROIs -->
+<!-- slist <- searchlight(vol, eager=TRUE, radius=8) -->
 
-#grid <- index_to_coord(vol, which(vol > 0))
-#kres <- kmeans(grid, centers=50, iter.max=500)
-```
+<!-- ## compute the mean value in each searchlight ROI. -->
+<!-- ret <- slist %>% purrr::map(~ mean(vol[coords(.)])) -->
+<!-- ``` -->
 
-Now we create a `ClusteredNeuroVol` and map the `mean` function over all clusters:
+<!-- We can also use a "randomized searchlight", which samples voxels without replacement until all voxels have been included in at least one searchlight.  -->
 
-```{r}
-#kvol <- ClusteredNeuroVol(vol, kres$cluster)
-#ret <- vol %>% clustered_searchlight(cvol=kvol) %>% purrr::map(~ mean(vol[coords(.)]))
+<!-- ```{r} -->
+<!-- ret <- vol %>% random_searchlight(radius=8) %>% purrr::map(~ mean(vol[coords(.)])) -->
+<!-- ``` -->
 
-```
+<!-- Another related method involves using a "parcellation" or clustering to define successive regions of interest for an analysis. Here we show how to do this in a similar way as above. First we must define a 'clustering' over the voxel space: -->
 
-## Working with image patches
+<!-- ```{r} -->
 
-Another type of ROI analysis, similar to the 'searchlight', involves working with sets of square or cuboid image "patches". The `patch_set` function can be used to generate a set of equally-sized patches that span the image space (or some mask covering the space). The patches are guaranteed to be of equal size. This means that at edges, 'patches' will be padded out with the value at the image extremes.
+<!-- grid <- index_to_coord(vol, which(vol > 0)) -->
+<!-- kres <- kmeans(grid, centers=50, iter.max=500) -->
+<!-- ``` -->
 
-Here we create a patch set consistting of 3 by 3 by 1 square patches that span the image.
+<!-- Now we create a `ClusteredNeuroVol` and map the `mean` function over all clusters: -->
 
-```{r}
+<!-- ```{r} -->
+<!-- kvol <- ClusteredNeuroVol(vol, kres$cluster) -->
+<!-- ret <- vol %>% clustered_searchlight(cvol=kvol) %>% purrr::map(~ mean(vol[coords(.)])) -->
 
-pset <- patch_set(vol, dims=c(3,3,1))
-length(pset)
-ret <- pset %>% purrr::map(~ mean(.))
+<!-- ``` -->
 
-```
+<!-- ## Working with image patches -->
 
-Now we limit patches so that the set of patch centers are within a mask.
+<!-- Another type of ROI analysis, similar to the 'searchlight', involves working with sets of square or cuboid image "patches". The `patch_set` function can be used to generate a set of equally-sized patches that span the image space (or some mask covering the space). The patches are guaranteed to be of equal size. This means that at edges, 'patches' will be padded out with the value at the image extremes. -->
 
-```{r}
+<!-- Here we create a patch set consistting of 3 by 3 by 1 square patches that span the image. -->
 
-pset <- patch_set(vol, dims=c(3,3,1), mask=as.logical(vol))
-length(pset)
-#ret <- pset %>% purrr::map(~ mean(.))
+<!-- ```{r} -->
 
-```
+<!-- pset <- patch_set(vol, dims=c(3,3,1)) -->
+<!-- length(pset) -->
+<!-- ret <- pset %>% purrr::map(~ mean(.)) -->
+
+<!-- ``` -->
+
+<!-- Now we limit patches so that the set of patch centers are within a mask. -->
+
+<!-- ```{r} -->
+
+<!-- pset <- patch_set(vol, dims=c(3,3,1), mask=as.logical(vol)) -->
+<!-- length(pset) -->
+<!-- ret <- pset %>% purrr::map(~ mean(.)) -->
+
+<!-- ``` -->
     

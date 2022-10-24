@@ -1,18 +1,14 @@
 ---
 title: "The neuroim2 package"
-date: "`r Sys.Date()`"
+date: "2022-10-24"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{The neuroim2 package}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{knitr::knitr}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, echo = FALSE, message = FALSE}
-knitr::opts_chunk$set(collapse = T, comment = "#>")
-library(neuroim2)
-options(mc.cores=1)
-```
+
 
 The **neuroim2** package
 ========================================================
