@@ -1,21 +1,28 @@
-[![Build Status](https://img.shields.io/travis/bbuchsbaum/neuroim2/master.svg)](https://travis-ci.org/bbuchsbaum/neuroim2) [![codecov](https://codecov.io/github/bbuchsbaum/neuroim2/branch/master/graphs/badge.svg)](https://codecov.io/github/bbuchsbaum/neuroim2)
+<!-- badges: start -->
 
-The `neuroim2` package is currently in development. The goal of the project is to to provide basic functionality for working with neuroimaging data in R. `neuroim2` It is an effort to modify and upgrade the `neuroim` package (<https://github.com/bbuchsbaum/neuroim>).
+[![codecov](https://codecov.io/github/bbuchsbaum/neuroim2/branch/master/graphs/badge.svg)](https://codecov.io/github/bbuchsbaum/neuroim2)
+[![R-CMD-check](https://github.com/bbuchsbaum/neuroim2/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/bbuchsbaum/neuroim2/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
 
-Installation
-------------
+The `neuroim2` package is currently in development. The goal of the
+project is to to provide basic functionality for working with
+neuroimaging data in R. `neuroim2` It is an effort to modify and upgrade
+the `neuroim` package (<https://github.com/bbuchsbaum/neuroim>).
 
-You can install the development version of `neuroim2` (v. `0.1.0`) from Github with:
+## Installation
+
+You can install the development version of `neuroim2` (v. `0.1.0`) from
+Github with:
 
 ``` r
 # install.packages("devtools")
 devtools::install_github("bbuchsbaum/neuroim2")
 ```
 
-Usage
------
+## Usage
 
-To read in a volumetric NIFTI formatted image, use the `read_vol` function:
+To read in a volumetric NIFTI formatted image, use the `read_vol`
+function:
 
 ``` r
 library(neuroim2)
@@ -49,7 +56,7 @@ length(series1)
 
     ## [1] 3
 
-Vignettes
----------
+## Vignettes
 
-See examples of use of `neuroim2` in the [vignettes](https://bbuchsbaum.github.io/neuroim2/articles/index.html).
+See examples of use of `neuroim2` in the
+[vignettes](https://bbuchsbaum.github.io/neuroim2/articles/index.html).
