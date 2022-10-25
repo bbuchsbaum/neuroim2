@@ -36,7 +36,7 @@ Next, we create a spherical ROI centered around voxel coordinates [20,20,20] wit
 filling all values in the ROI with 100.
 
 ```{r}
-      sphere <- spherical_roi(vol, c(20,20,20), radius=5, fill=100)
+      sphere <- spherical_roi(vol, c(20,20,20), radius=5, fill=100, use_cpp=FALSE)
 ```
 
 

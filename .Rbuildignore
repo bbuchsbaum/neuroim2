@@ -11,3 +11,5 @@ test_data
 ^doc$
 ^Meta$
 benchmark
+^\.travis\.yml$
+^\.github$

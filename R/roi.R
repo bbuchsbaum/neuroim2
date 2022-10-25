@@ -259,6 +259,7 @@ make_spherical_grid <- function(bvol, centroid, radius, use_cpp=TRUE) {
 #' @param radius the radius in real units (e.g. millimeters) of the spherical ROI
 #' @param fill optional value(s) to store as data
 #' @param nonzero if \code{TRUE}, keep only nonzero elements from \code{bvol}
+#' @param use_cpp whether to use compiled c++ code
 #' @return an instance of class \code{ROIVol}
 #' @examples
 #'  sp1 <- NeuroSpace(c(10,10,10), c(1,2,3))
@@ -274,7 +275,7 @@ make_spherical_grid <- function(bvol, centroid, radius, use_cpp=TRUE) {
 #'  vox <- coord_to_grid(sp1, c(5, 5, 5))
 #'  cube <- spherical_roi(sp1, vox, 3.5)
 #' @export
-spherical_roi <- function (bvol, centroid, radius, fill=NULL, nonzero=FALSE) {
+spherical_roi <- function (bvol, centroid, radius, fill=NULL, nonzero=FALSE, use_cpp=TRUE) {
   if (is.matrix(centroid)) {
     assertthat::assert_that(ncol(centroid == 3) & nrow(centroid) == 1)
     centroid <- drop(centroid)
@@ -294,7 +295,7 @@ spherical_roi <- function (bvol, centroid, radius, fill=NULL, nonzero=FALSE) {
   vspacing <- spacing(bvol)
 
   centroid <- as.integer(centroid)
-  grid <- make_spherical_grid(bvol, centroid, radius, use_cpp=TRUE)
+  grid <- make_spherical_grid(bvol, centroid, radius, use_cpp=use_cpp)
 
   vals <- if (!is.null(fill)) {
     rep(fill, nrow(grid))

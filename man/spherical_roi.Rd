@@ -4,7 +4,14 @@
 \alias{spherical_roi}
 \title{Create a Spherical Region of Interest}
 \usage{
-spherical_roi(bvol, centroid, radius, fill = NULL, nonzero = FALSE)
+spherical_roi(
+  bvol,
+  centroid,
+  radius,
+  fill = NULL,
+  nonzero = FALSE,
+  use_cpp = TRUE
+)
 }
 \arguments{
 \item{bvol}{an \code{NeuroVol} or \code{NeuroSpace} instance}
@@ -16,6 +23,8 @@ spherical_roi(bvol, centroid, radius, fill = NULL, nonzero = FALSE)
 \item{fill}{optional value(s) to store as data}
 
 \item{nonzero}{if \code{TRUE}, keep only nonzero elements from \code{bvol}}
+
+\item{use_cpp}{whether to use compiled c++ code}
 }
 \value{
 an instance of class \code{ROIVol}

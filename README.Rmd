@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 <!-- badges: start -->
 [![Build Status](https://img.shields.io/travis/bbuchsbaum/neuroim2/master.svg)](https://travis-ci.org/bbuchsbaum/neuroim2) [![codecov](https://codecov.io/github/bbuchsbaum/neuroim2/branch/master/graphs/badge.svg)](https://codecov.io/github/bbuchsbaum/neuroim2)
  [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/bbuchsbaum/neuroim2?branch=master&svg=true)](https://ci.appveyor.com/project/bbuchsbaum/neuroim2)
+[![R-CMD-check](https://github.com/bbuchsbaum/neuroim2/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/bbuchsbaum/neuroim2/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The `neuroim2` package is currently in development. The goal of the project is to to provide basic functionality for working with neuroimaging data in R. `neuroim2` It is an effort to modify and upgrade the `neuroim` package (https://github.com/bbuchsbaum/neuroim). 
