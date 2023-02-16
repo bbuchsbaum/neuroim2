@@ -345,6 +345,36 @@ test_that("can write and read back an image vector", {
 
 })
 
+test_that("can write and read back an image vector as a bigneurovec", {
+  mask <- read_vol(gmask)
+  maskvec <- concat(mask,mask)
+  fname <- paste(tempfile(), ".nii", sep="")
+  write_vec(maskvec, fname)
+
+  vec2 <- read_vec(fname, mask=mask, mode="bigvec")
+
+  v1 <- series(maskvec, which(mask > 0))
+  v2 <- series(vec2, which(mask > 0))
+  expect_true(identical(space(maskvec), space(vec2)))
+  expect_true(all(v1==v2))
+
+})
+
+test_that("can write and read back an image vector as a filebacked neurovec", {
+  mask <- read_vol(gmask)
+  maskvec <- concat(mask,mask)
+  fname <- paste(tempfile(), ".nii", sep="")
+  write_vec(maskvec, fname)
+
+  vec2 <- read_vec(fname, mask=mask, mode="filebacked")
+
+  v1 <- series(maskvec, which(mask > 0))
+  v2 <- series(vec2, which(mask > 0))
+  expect_true(identical(space(maskvec), space(vec2)))
+  expect_true(all(v1==v2))
+
+})
+
 test_that("can extract ROI from NeuroVec", {
   mask <- read_vol(gmask)
   maskvec <- concat(mask,mask,mask,mask)

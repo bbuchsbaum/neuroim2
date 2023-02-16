@@ -141,8 +141,8 @@ searchlight_coords <- function(mask, radius, nonzero=FALSE, cores=0) {
 #' @export
 searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
   mask.idx <- which(mask != 0)
-
   grid <- index_to_grid(mask, mask.idx)
+
   if (!eager) {
     force(mask)
     force(radius)
@@ -151,12 +151,22 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
     deferred_list2(f, nrow(grid))
   } else {
     cds <- index_to_coord(mask, mask.idx)
+
+    ocds <- if (nonzero) {
+      grid <- index_to_grid(mask, mask.idx)
+      cds
+    } else {
+      tmp <- index_to_coord(mask, 1:prod(dim(mask)))
+      grid <- index_to_grid(mask, 1:prod(dim(mask)))
+      tmp
+    }
+
     #rad <- rflann::RadiusSearch(cds, cds, radius=radius^2, max_neighbour=as.integer((radius+1))^3,
     #                            build="kdtree", cores=cores, checks=1)
 
-    rad <- dbscan::frNN(cds, eps=radius, cds)
-
+    rad <- dbscan::frNN(ocds, eps=radius, cds )
     spmask <- space(mask)
+
     purrr::map(seq_along(rad$id), function(i) {
       #ind <- rad$indices[[i]]
       ind <- rad$id[[i]]
@@ -170,6 +180,8 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
 
 
 #' Create a clustered searchlight iterator
+#'
+#' A searchlight that iterates over successive spatial clusters in an image volume
 #'
 #' @inheritParams searchlight_coords
 #' @param cvol a \code{ClusteredNeuroVol} instance
@@ -185,7 +197,6 @@ clustered_searchlight <- function(mask, cvol=NULL, csize=NULL) {
 
   mask.idx <- which(mask != 0)
   grid <- index_to_coord(mask, mask.idx)
-
 
   if (is.null(cvol)) {
     kres <- kmeans(grid, centers=csize, iter.max=500)

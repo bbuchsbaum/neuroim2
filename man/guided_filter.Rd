@@ -2,7 +2,7 @@
 % Please edit documentation in R/spat_filter.R
 \name{guided_filter}
 \alias{guided_filter}
-\title{Filter a volumetric image with a "guided" filter}
+\title{Filter a volumetric image with an edge-preserving "guided" filter}
 \usage{
 guided_filter(vol, radius = 4, epsilon = 0.7^2)
 }
@@ -17,5 +17,8 @@ guided_filter(vol, radius = 4, epsilon = 0.7^2)
 a filtered image of class \code{NeuroVol}
 }
 \description{
-Filter a volumetric image with a "guided" filter
+Filter a volumetric image with an edge-preserving "guided" filter
+}
+\references{
+https://en.wikipedia.org/wiki/Guided_filter
 }

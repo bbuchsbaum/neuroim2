@@ -26,13 +26,15 @@ gaussian_blur <- function(vol, mask, sigma=2, window=1) {
   out
 }
 
-#' Filter a volumetric image with a "guided" filter
+#' Filter a volumetric image with an edge-preserving "guided" filter
 #'
 #' @param vol the image volume as a \code{NeuroVol}
 #' @param radius the spatial radius of the filter
 #' @param epsilon variance constant
 #' @return a filtered image of class \code{NeuroVol}
 #' @export
+#' @references
+#' https://en.wikipedia.org/wiki/Guided_filter
 guided_filter <- function(vol, radius=4, epsilon=.7^2) {
   # pset <- patch_set(vol, c(3,3,3))
   #

@@ -61,7 +61,7 @@ setMethod(f="Arith", signature=signature(e1="DenseNeuroVol", e2="DenseNeuroVol")
             checkDim(e1,e2)
             ret <- callGeneric(e1@.Data,e2@.Data)
             bv <- DenseNeuroVol(ret, space(e1))
-
+            bv
           })
 
 
@@ -81,6 +81,14 @@ setMethod(f="Arith", signature=signature(e1="DenseNeuroVec", e2="DenseNeuroVec")
 			      ret <- callGeneric(e1@.Data,e2@.Data)
             DenseNeuroVec(ret, space(e1))
           })
+
+
+# setMethod(f="Compare", signature=signature(e1="NeuroVec", e2="NeuroVec"),
+#           def=function(e1, e2) {
+#             checkDim(e1,e2)
+#
+#           })
+
 
 setMethod(f="Arith", signature=signature(e1="SparseNeuroVol", e2="NeuroVol"),
           def=function(e1, e2) {
