@@ -26,8 +26,6 @@ setGeneric("scale")
 #'
 #' @param x the object to print
 #' @param ... additional arguments
-## @export
-#' @rdname print-methods
 setGeneric(name="print", def=function(x, ...) standardGeneric("print"))
 
 #' extract data values of object
