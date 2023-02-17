@@ -22,11 +22,11 @@ setGeneric("scale")
 
 
 
-#' print an object
-#'
-#' @param x the object to print
-#' @param ... additional arguments
-setGeneric(name="print", def=function(x, ...) standardGeneric("print"))
+# print an object
+#
+# @param x the object to print
+# @param ... additional arguments
+#setGeneric(name="print", def=function(x, ...) standardGeneric("print"))
 
 #' extract data values of object
 #'

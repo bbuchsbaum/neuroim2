@@ -17,7 +17,7 @@ NULL
 #' bspace <- NeuroSpace(c(64,64,64), spacing=c(1,1,1))
 #' dat <- array(rnorm(64*64*64), c(64,64,64))
 #' bvol <- NeuroVol(dat,bspace, label="test")
-#' print(bvol)
+#' show(bvol)
 #' @export NeuroVol
 #' @rdname NeuroVol
 NeuroVol <- function(data, space,  label="", indices=NULL) {

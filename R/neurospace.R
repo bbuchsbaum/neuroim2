@@ -19,7 +19,7 @@
 #' @rdname neuro_space
 #' @examples
 #' bspace <- NeuroSpace(c(64,64,64), origin=c(0,0,0), spacing=c(2,2,2))
-#' print(bspace)
+#' bspace
 #' origin(bspace)
 #' axes(bspace)
 #' trans(bspace)

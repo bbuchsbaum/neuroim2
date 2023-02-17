@@ -14,7 +14,7 @@
 #' bspace <- NeuroSpace(c(64,64), spacing=c(1,1))
 #' dat <- array(rnorm(64*64), c(64,64))
 #' bslice <- NeuroSlice(dat,bspace)
-#' print(bslice)
+#' bslice
 NeuroSlice <- function(data, space, indices=NULL) {
 	if (ndim(space) != 2) {
 		stop("incorrect dimension for neuro_slice")

@@ -139,13 +139,13 @@ setMethod(f="ndim",signature(x= "AxisSet"), function(x, ...) { x@ndim })
 #' show an \code{NamedAxis}
 #' @param object the object
 #' @export
-setMethod(f="show", signature("NamedAxis"), function(object) { cat(print(object@axis)) })
+setMethod(f="show", signature("NamedAxis"), function(object) { cat(print_(object@axis)) })
 
 #' print a \code{NamedAxis}
 #' @param x the object
 #' @param ... extra arguments
 #' @export
-setMethod(f="print", signature=signature("NamedAxis"),
+setMethod(f="print_", signature=signature("NamedAxis"),
 		def=function(x, ...) {
 			x@axis
 		})
@@ -156,14 +156,14 @@ setMethod(f="print", signature=signature("NamedAxis"),
 setMethod(f="show", signature=signature("AxisSet1D"),
 		def=function(object) {
 			cat("instance of class:", class(object), "\n\n")
-			cat("Axis 1:", print(object@i@axis), "\n")
+			cat("Axis 1:", print_(object@i@axis), "\n")
 		})
 
 #' print a \code{AxisSet2D} instance
 #' @param x the object
 #' @param ... extra args
 #' @export
-setMethod(f="print", signature=signature("AxisSet2D"),
+setMethod(f="print_", signature=signature("AxisSet2D"),
 		def=function(x, ...) {
 			paste(x@i@axis, "-", x@j@axis)
 		})
@@ -182,7 +182,7 @@ setMethod(f="show", signature=signature("AxisSet2D"),
 #' @param x the object
 #' @param ... extra args
 #' @export
-setMethod(f="print", signature=signature("AxisSet3D"),
+setMethod(f="print_", signature=signature("AxisSet3D"),
 		def=function(x, ...) {
 			paste(x@i@axis, " -- ", x@j@axis, " -- ", x@k@axis)
 		})
@@ -205,10 +205,10 @@ setMethod(f="show", signature=signature("AxisSet3D"),
 setMethod(f="show", signature=signature("AxisSet4D"),
 		def=function(object) {
 			cat("instance of class:", class(object), "\n\n")
-			cat("Axis 1:", print(object@i), "\n")
-			cat("Axis 2:", print(object@j), "\n")
-			cat("Axis 3:", print(object@k), "\n")
-			cat("Axis 4:", print(object@l), "\n")
+			cat("Axis 1:", print_(object@i), "\n")
+			cat("Axis 2:", print_(object@j), "\n")
+			cat("Axis 3:", print_(object@k), "\n")
+			cat("Axis 4:", print_(object@l), "\n")
 
 		})
 

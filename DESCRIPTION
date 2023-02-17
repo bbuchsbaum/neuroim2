@@ -53,7 +53,7 @@ Collate:
     'searchlight.R'
     'sparse_neurovec.R'
     'spat_filter.R'
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Imports: 
   purrr,
   assertthat,
