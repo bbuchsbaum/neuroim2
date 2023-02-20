@@ -1,6 +1,6 @@
 Package: neuroim2
 Type: Package
-Title: Data Structures and Handling for Neuroimaging Data
+Title: Data Structures and Handling for Neuroimaging Data with an emphasis on fMRI
 Version: 0.7.0
 LinkingTo: Rcpp
 Authors@R: c(
@@ -10,12 +10,12 @@ Description: A collection of data structures that represent
     volumetric brain imaging data. The focus is on basic data handling for 3D
     and 4D neuroimaging data. In addition, there are function to read and write
     NIFTI files and limited support for reading AFNI files.
-License: GPL (>= 2)
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 VignetteBuilder: knitr, rmarkdown
 Depends:
-    R (>= 3.0.0),
+    R (>= 4.0.0),
     Matrix
 Collate:
     'RcppExports.R'
@@ -76,6 +76,6 @@ Suggests:
   rmarkdown,
   hdf5r,
   R.utils
-Additional_repositories:  https://bbuchsbaum.github.io/drat
+Additional_repositories: https://bbuchsbaum.github.io/drat
 URL: https://github.com/bbuchsbaum/neuroim2
 BugReports: https://github.com/bbuchsbaum/neuroim2/issues

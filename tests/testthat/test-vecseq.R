@@ -2,7 +2,7 @@ library(purrr)
 library(testthat)
 library(assertthat)
 
-gmask5 <- system.file("extdata", "global_mask_v5.nii.gz", package="neuroim2")
+gmask5 <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
 mask <- system.file("extdata", "global_mask.nii", package="neuroim2")
 
 context("neurovecseq")
@@ -88,7 +88,7 @@ test_that("can map over vols from NeuroVecSeq", {
 
 test_that("can subset a NeuroVecSeq", {
   vec <- read_vec(c(gmask5, gmask5, gmask5))
-  vec5 <- sub_vector(vec, 1:5)
+  vec5 <- sub_vector(vec, 1:4)
   vec2 <- read_vec(gmask5)
   expect_true(all(vec5[] == vec2[]))
 })
@@ -96,7 +96,7 @@ test_that("can subset a NeuroVecSeq", {
 test_that("can read a sparse NeuroVecSeq", {
   m <- read_vol(mask)
   vec <- read_vec(c(gmask5, gmask5, gmask5), mask=as.logical(m))
-  vec5 <- sub_vector(vec, 1:5)
+  vec5 <- sub_vector(vec, 1:4)
   vec2 <- read_vec(gmask5, mask=as.logical(m))
 
   ## TODO check that values are same
