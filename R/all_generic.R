@@ -82,7 +82,7 @@ setGeneric(name="mapf", def=function(x, m, ...) standardGeneric("mapf"))
 #' @rdname vols-methods
 #' @examples
 #'
-#' vec <- read_vec(system.file("extdata", "global_mask_v5.nii", package="neuroim2"))
+#' vec <- read_vec(system.file("extdata", "global_mask_v5.nii.gz", package="neuroim2"))
 #' vs <- vols(vec)
 #' length(vs) == dim(vec)[4]
 #'

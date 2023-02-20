@@ -46,7 +46,8 @@ mvals <- vol %>% split_clusters(comp$index) %>% map_dbl( ~ mean(.))
 Suppose we want to compute the local standard deviation within a 4mm radius of each voxel. We can use the `searchlight` function to construct a list of spherical ROIs centered on every voxel in the input set.
 
 ```{r}
-sdvol <- vol %>% searchlight(radius=5, eager=TRUE) %>% map_dbl( ~ sd(.)) %>% NeuroVol(space=space(vol), indices=which(vol!=0))
+sdvol <- vol %>% searchlight(radius=5, eager=TRUE) %>% map_dbl( ~ sd(.)) 
+sdvol <- NeuroVol(sdvol, space=space(vol), indices=which(vol!=0))
 plot(sdvol, cmap=rainbow(255))
 ```
 

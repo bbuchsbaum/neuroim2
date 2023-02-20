@@ -1,7 +1,7 @@
 Package: neuroim2
 Type: Package
 Title: Data Structures and Handling for Neuroimaging Data
-Version: 0.1.0
+Version: 0.7.0
 LinkingTo: Rcpp
 Authors@R: c(
     person(c("Bradley", "R"), "Buchsbaum", role = c("aut", "cre"), email = "brad.buchsbaum@gmail.com"))

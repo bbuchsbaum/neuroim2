@@ -72,7 +72,7 @@ setMethod(f="index_to_grid", signature=signature(x = "NeuroSlice", idx="numeric"
 #' slice <- NeuroSlice(dat, NeuroSpace(c(100,100)))
 #' #plot(slice)
 setMethod("plot", signature=signature(x="NeuroSlice"),
-          def=function(x,cmap=gray(seq(0,1,length.out=255)), irange=range(x)) {
+          def=function(x,cmap=gray(seq(0,1,length.out=255)), irange=range(x, na.rm=TRUE)) {
             if (!requireNamespace("ggplot2", quietly = TRUE)) {
               stop("Package \"ggplot2\" needed for this function to work. Please install it.",
                    call. = FALSE)
@@ -133,6 +133,25 @@ mapToColors <- function (imslice, col = heat.colors(128, alpha = 1), zero_col = 
     imcols
   }
 }
+
+
+#' show a \code{NeuroSlice}
+#' @param object the object
+#' @export
+setMethod(f="show", signature=signature("NeuroSlice"),
+          def=function(object) {
+            sp <- space(object)
+            cat("NeuroSlice\n")
+            cat("  Type           :", class(object), "\n")
+            cat("  Dimension      :", dim(object), "\n")
+            cat("  Spacing        :", paste(paste(signif(sp@spacing[1:(length(sp@spacing)-1)],2), " X ", collapse=" "),
+                                            sp@spacing[length(sp@spacing)], "\n"))
+            cat("  Origin         :", paste(paste(signif(sp@origin[1:(length(sp@origin)-1)],2), " X ", collapse=" "),
+                                            sp@origin[length(sp@origin)], "\n"))
+            cat("  Axes           :", paste(sp@axes@i@axis, sp@axes@j@axis), "\n")
+
+          }
+)
 
 
 

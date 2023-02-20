@@ -27,7 +27,7 @@ Here we read in a 4D image consisting of 5 time points,
 ```{r}
       library(purrr)
       library(ggplot2)
-      file_name <- system.file("extdata", "global_mask_v5.nii", package="neuroim2")
+      file_name <- system.file("extdata", "global_mask_v5.nii.gz", package="neuroim2")
       vec <- read_vec(file_name)
       dim(vec)
 ```
@@ -37,7 +37,7 @@ Now imagine we have a set of 4d images. We can read them in with `read_vec`. (He
 
 ```{r}
     
-      file_name <- system.file("extdata", "global_mask_v5.nii", package="neuroim2")
+      file_name <- system.file("extdata", "global_mask_v5.nii.gz", package="neuroim2")
       vec <- read_vec(c(file_name, file_name, file_name))
       dim(vec)
       

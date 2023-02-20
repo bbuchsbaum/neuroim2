@@ -5,13 +5,17 @@
 \alias{plot,NeuroVol-method}
 \title{plot an image}
 \usage{
-\S4method{plot}{NeuroSlice}(x, cmap = gray(seq(0, 1, length.out = 255)), irange = range(x))
+\S4method{plot}{NeuroSlice}(
+  x,
+  cmap = gray(seq(0, 1, length.out = 255)),
+  irange = range(x, na.rm = TRUE)
+)
 
 \S4method{plot}{NeuroVol}(
   x,
   cmap = gray(seq(0, 1, length.out = 255)),
   zlevels = unique(round(seq(1, dim(x)[3], length.out = 6))),
-  irange = range(x),
+  irange = range(x, na.rm = TRUE),
   thresh = c(0, 0),
   alpha = 1,
   bgvol = NULL,

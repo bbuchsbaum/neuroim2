@@ -25,7 +25,7 @@ test_that("can extract clustered searchlight object from a 3d volume", {
   kres <- kmeans(grid, centers=200, iter.max=500)
   cvol <- ClusteredNeuroVol(vol, clusters=kres$cluster)
   s2 <- clustered_searchlight(vol, cvol=cvol)
-  expect_equal(length(s1), 200)
+  expect_equal(length(s2), 200)
 })
 
 

@@ -4,7 +4,7 @@ library(assertthat)
 
 context("filebacked neurovec")
 
-gmask5 <- system.file("extdata", "global_mask_v5.nii", package="neuroim2")
+gmask5 <- system.file("extdata", "global_mask_v5.nii.gz", package="neuroim2")
 gmask <- system.file("extdata", "global_mask.nii", package="neuroim2")
 
 gvec <- FileBackedNeuroVec(gmask5)

@@ -2,7 +2,7 @@ library(purrr)
 library(testthat)
 library(assertthat)
 
-gmask5 <- system.file("extdata", "global_mask_v5.nii", package="neuroim2")
+gmask5 <- system.file("extdata", "global_mask_v5.nii.gz", package="neuroim2")
 mask <- system.file("extdata", "global_mask.nii", package="neuroim2")
 
 context("neurovecseq")
@@ -81,7 +81,7 @@ test_that("can map over vols from NeuroVecSeq", {
   cvec <- concat(vec,vec,vec)
 
   vs <- NeuroVecSeq(vec,vec,vec)
-  out <- vs2 <- vs %>% vols() %>% purrr::map( ~ .) %>% purrr::invoke(concat,.)
+  out <- do.call(concat, vs %>% vols() %>% purrr::map( ~ .))
   #out <- do.call(concat, vlist)
   expect_true(all(as.vector(cvec) == as.vector(out)))
 })
