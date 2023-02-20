@@ -873,7 +873,7 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 setMethod("plot", signature=signature(x="NeuroVol"),
           def=function(x,cmap=gray(seq(0,1,length.out=255)),
                                    zlevels=unique(round(seq(1, dim(x)[3], length.out=6))),
-                                   irange=range(x),
+                                   irange=range(x, na.rm=TRUE),
                                    thresh=c(0,0),
                                    alpha=1,
                                    bgvol=NULL,
@@ -888,6 +888,8 @@ setMethod("plot", signature=signature(x="NeuroVol"),
               assert_that(all(dim(x) == dim(bgvol)))
               assert_that(all(spacing(x) == spacing(bgvol)))
             }
+
+
 
 
             df1 <- do.call(rbind, purrr::map(zlevels, function(i) {

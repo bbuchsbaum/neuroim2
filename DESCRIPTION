@@ -76,7 +76,6 @@ Suggests:
   rmarkdown,
   hdf5r,
   R.utils
-Remotes: 
-  bbuchsbaum/colorplane
+Additional_repositories:  https://bbuchsbaum.github.io/drat
 URL: https://github.com/bbuchsbaum/neuroim2
 BugReports: https://github.com/bbuchsbaum/neuroim2/issues
