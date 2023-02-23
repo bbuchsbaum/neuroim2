@@ -85,14 +85,17 @@ setMethod(f="show", signature=signature("ClusteredNeuroVol"),
 #' @export
 #' @param type the type of center of mass: one of "center_of_mass" or "medoid"
 #' @rdname centroids-methods
-#' @importFrom Gmedian Gmedian
 setMethod(f="centroids", signature=signature(x="ClusteredNeuroVol"),
           def = function(x, type=c("center_of_mass", "medoid")) {
             type <- match.arg(type)
             if (type == "center_of_mass") {
               do.call(rbind, split_clusters(x@mask, x) %>% map(~ centroid(.)) )
             } else {
-              do.call(rbind, split_clusters(x@mask, x) %>% map(~ Gmedian(coords(., real=TRUE)) ))
+              if (!requireNamespace("Gmedian", quietly = TRUE)) {
+                stop("Package \"Gmedian\" needed for this function to work. Please install it.",
+                     call. = FALSE)
+              }
+              do.call(rbind, split_clusters(x@mask, x) %>% map(~ Gmedian::Gmedian(coords(., real=TRUE)) ))
             }
           })
 

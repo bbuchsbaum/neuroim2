@@ -29,7 +29,6 @@ LatentNeuroVecSource <- function(file_name) {
 #'
 #' all.equal(svec2[1:prod(dim(mask))],svec[1:prod(dim(mask))])
 #' @rdname LatentNeuroVec-class
-#'
 LatentNeuroVec <- function(basis, loadings, space, mask, offset=NULL) {
   stopifnot(inherits(space, "NeuroSpace"))
 

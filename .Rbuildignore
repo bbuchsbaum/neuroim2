@@ -13,3 +13,5 @@ test_data
 benchmark
 ^\.travis\.yml$
 ^\.github$
+^LICENSE\.md$
+cran-comments.md

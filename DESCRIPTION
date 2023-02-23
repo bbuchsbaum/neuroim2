@@ -64,18 +64,20 @@ Imports:
   stringr,
   methods,
   colorplane,
-  Gmedian,
   bigstatsr,
   RNiftyReg
 Suggests: 
-  testthat,
-  covr,
-  knitr,
-  ggplot2,
-  roxygen2,
-  rmarkdown,
-  hdf5r,
-  R.utils
+    testthat,
+    covr,
+    knitr,
+    ggplot2,
+    roxygen2,
+    rmarkdown,
+    hdf5r,
+    Gmedian,
+    R.utils,
+    spelling
 Additional_repositories: https://bbuchsbaum.github.io/drat
 URL: https://github.com/bbuchsbaum/neuroim2
 BugReports: https://github.com/bbuchsbaum/neuroim2/issues
+Language: en-US
