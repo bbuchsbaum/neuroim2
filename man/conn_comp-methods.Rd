@@ -3,7 +3,7 @@
 \name{conn_comp}
 \alias{conn_comp}
 \alias{conn_comp,NeuroVol-method}
-\title{Find connected components}
+\title{Connected components}
 \usage{
 conn_comp(x, ...)
 
@@ -19,7 +19,7 @@ conn_comp(x, ...)
 \arguments{
 \item{x}{the image object}
 
-\item{...}{additonal arguments}
+\item{...}{additional arguments}
 
 \item{threshold}{threshold defining lower intensity bound for image mask}
 
@@ -30,7 +30,5 @@ conn_comp(x, ...)
 \item{local_maxima_dist}{the distance used to define minum distance between local maxima}
 }
 \description{
-Find connected components
-
-find connected components in NeuroVol
+Find connected components in an image
 }

@@ -1,6 +1,7 @@
 
 
 #' Extract connected components from a 3D mask
+#'
 #' @export
 #' @import purrr
 #' @param mask a 3D binary array

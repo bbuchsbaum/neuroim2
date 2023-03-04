@@ -710,7 +710,7 @@ setGeneric(name="series_roi", def=function(x, i, ...) standardGeneric("series_ro
 #' @rdname series-methods
 setGeneric(name="series", def=function(x, i, ...) standardGeneric("series"))
 
-#' slice
+#' Extract image slice
 #'
 #' Extract a 2D slice from an image volume
 #'
@@ -724,6 +724,9 @@ setGeneric(name="series", def=function(x, i, ...) standardGeneric("series"))
 setGeneric(name="slice", def=function(x, zlevel, along, orientation, ...) standardGeneric("slice"))
 
 #' Render an image to create a drawable image.
+#'
+#' Map an image intensities to an image with color values.
+#'
 #' @param x the object, e.g. an instance of type \code{NeuroSlice}
 #' @param width width of the rendered image
 #' @param height height of the rendered image
@@ -734,6 +737,7 @@ setGeneric(name="render", def=function(x, width, height, colmap,...) standardGen
 
 
 #' Render a slice at z coordinate
+#'
 #' @param x the object, e.g. an instance of type \code{Layer} or \code{Overlay}
 #' @param zpos the z coordinate to slice through.
 #' @param width width of the rendered image
@@ -779,6 +783,8 @@ setGeneric(name="perm_mat", def=function(x, ...) standardGeneric("perm_mat"))
 #' @details The \code{x} and \code{y} images must have compatible dimensions. a \code{NeuroVol} can be concatenated to \code{NeuroVec}, and vice versa. See examples.
 #' @param ... additional objects
 #'
+#' @return a temporally concatenated object.
+#'
 #' @examples
 #' bv1 <- NeuroVol(rep(1,1000), NeuroSpace(c(10,10,10), c(1,1,1)))
 #' bv2 <- NeuroVol(rep(2,1000), NeuroSpace(c(10,10,10), c(1,1,1)))
@@ -798,10 +804,13 @@ setGeneric(name="perm_mat", def=function(x, ...) standardGeneric("perm_mat"))
 setGeneric(name="concat", def=function(x,y, ...) standardGeneric("concat"))
 
 
-#' Find connected components
+#' Connected components
+#'
+#' Find connected components in an image
+#'
 #' @name conn_comp
 #' @param x the image object
-#' @param ... additonal arguments
+#' @param ... additional arguments
 #' @export
 #' @rdname conn_comp-methods
 setGeneric(name="conn_comp", def=function(x, ...) standardGeneric("conn_comp"))

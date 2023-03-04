@@ -765,12 +765,12 @@ setMethod(f="write_vol",signature=signature(x="NeuroVol", file_name="character",
 
 #' as.logical
 #'
-#' Convert NeuroVol to \code{linkS4class{LogicalNeuroVol}}
+#' Convert NeuroVol to \code{\linkS4class{LogicalNeuroVol}}
 #'
 #' the image values will be converted to using R base function \code{as.logical} and wrapped in \code{LogicalNeuroVol}
 #'
 #' @param x the object
-#' @return an instance of \code{linkS4class{LogicalNeuroVol}}
+#' @return an instance of \code{\linkS4class{LogicalNeuroVol}}
 #' @rdname as.logical-methods
 #' @export
 setMethod(f="as.logical", signature=signature(x = "NeuroVol"), def=function(x) {
@@ -809,8 +809,8 @@ setMethod("partition", signature=signature(x="LogicalNeuroVol", k="numeric"),
 setMethod(f="as.sparse", signature=signature(x="DenseNeuroVol", mask="numeric"),
           def=function(x, mask) {
             m <- as.integer(mask)
-            bvec <- SparseNeuroVol(x[m], space(x), indices=m)
-
+            bvol <- SparseNeuroVol(x[m], space(x), indices=m)
+            bvol
           })
 
 
@@ -851,7 +851,7 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 
 
 
-#' plot an image
+#' plot an NeuroVol as a series of 2D slices
 #'
 #' @rdname plot-methods
 #' @param x the object to display

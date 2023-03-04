@@ -41,6 +41,9 @@ concat(x, y, ...)
 
 \item{...}{additional objects}
 }
+\value{
+a temporally concatenated object.
+}
 \description{
 Concatenate two objects in the time dimension
 }
