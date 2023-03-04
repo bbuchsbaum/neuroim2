@@ -2,7 +2,7 @@
 % Please edit documentation in R/roi.R
 \name{square_roi}
 \alias{square_roi}
-\title{Create a square region of interest where the z-dimension is fixed at one voxel coordinate.}
+\title{Create a square region of interest}
 \usage{
 square_roi(bvol, centroid, surround, fill = NULL, nonzero = FALSE, fixdim = 3)
 }

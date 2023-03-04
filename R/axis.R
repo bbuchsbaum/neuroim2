@@ -17,6 +17,7 @@ INF_SUP    <- new("NamedAxis", axis="Inferior-to-Superior", direction=c(0,0,1))
 SUP_INF    <- new("NamedAxis", axis="Superior-to-Inferior", direction=c(0,0,-1))
 
 
+#' @keywords internal
 matchAxis <- function(firstAxis) {
   switch(toupper(firstAxis),
          "LEFT"=LEFT_RIGHT,
@@ -38,21 +39,23 @@ TIME <- new("NamedAxis", axis="Time")
 
 TimeAxis <- new("AxisSet1D", ndim=as.integer(1), i=TIME)
 
+#' @keywords internal
 AxisSet1D <- function(i) {
   new("AxisSet1D", ndim=as.integer(1), i=i)
 }
 
+#' @keywords internal
 AxisSet2D <- function(i, j) {
 	new("AxisSet2D", ndim=as.integer(2), i=i, j=j)
 }
 
-
+#' @keywords internal
 AxisSet3D <- function(i, j, k) {
 	new("AxisSet3D", ndim=as.integer(3), i=i, j=j, k=k)
 }
 
 
-#' perm_mat
+
 #' @export
 #' @rdname perm_mat-methods
 setMethod(f="perm_mat", signature=signature(x = "AxisSet2D"),
@@ -60,7 +63,6 @@ setMethod(f="perm_mat", signature=signature(x = "AxisSet2D"),
             cbind(x@i@direction, x@j@direction)
           })
 
-#' perm_mat
 #' @export
 #' @rdname perm_mat-methods
 setMethod(f="perm_mat", signature=signature(x = "AxisSet3D"),
@@ -69,16 +71,13 @@ setMethod(f="perm_mat", signature=signature(x = "AxisSet3D"),
           })
 
 
-#' perm_mat
+
 #' @export
 #' @rdname perm_mat-methods
 setMethod(f="perm_mat", signature=signature(x = "NeuroSpace"),
           def=function(x, ...) {
             callGeneric(x@axes)
           })
-
-
-
 
 
 

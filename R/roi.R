@@ -37,6 +37,7 @@ setMethod(f="as.matrix", signature=signature(x = "ROIVec"), def=function(x) {
 })
 
 
+#' @keywords internal
 .makeSquareGrid <- function(bvol, centroid, surround, fixdim=3) {
   vspacing <- spacing(bvol)
   vdim <- dim(bvol)
@@ -88,6 +89,8 @@ setMethod(f="as.matrix", signature=signature(x = "ROIVec"), def=function(x) {
 
 
 
+#' Create a square region of interest
+#'
 #' Create a square region of interest where the z-dimension is fixed at one voxel coordinate.
 #'
 #' @param bvol an \code{NeuroVol} or \code{NeuroSpace} instance.

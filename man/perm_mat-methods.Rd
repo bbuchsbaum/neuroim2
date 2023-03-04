@@ -5,7 +5,7 @@
 \alias{perm_mat,AxisSet2D-method}
 \alias{perm_mat,AxisSet3D-method}
 \alias{perm_mat,NeuroSpace-method}
-\title{Extract permutation matrix}
+\title{Extract permutation matrix associated with an image}
 \usage{
 perm_mat(x, ...)
 
@@ -20,12 +20,25 @@ perm_mat(x, ...)
 
 \item{...}{additional arguments}
 }
+\value{
+an N x N permutation matrix, where N is the dimensionality of the image.
+}
 \description{
-Extract permutation matrix
+A permutation matrix defines how the native voxel coordinates can be transformed to standard (LPI) orientation.
+}
+\details{
+a permutation matrix can be used to convert between cardinal image orientations.
+For example, if an image is stored in RPI (Right-Posterior-Inferior) format, a coordinate in this space
+can be converted to LPI (Left-Posterior-Inferior) by multiplying a coordinate vector by the permutation matrix.
+}
+\examples{
 
-perm_mat
+fname <- system.file("extdata", "global_mask.nii", package="neuroim2")
+vol <- read_vol(fname)
+pmat <- perm_mat(space(vol))
 
-perm_mat
-
-perm_mat
+vox <- c(12,12,8)
+pvox <- vox \%*\% perm_mat(space(vol))
+## pvox is flipped along the x-axis to move to RPI to LPI space
+stopifnot(all(pvox == c(-12,12,8))
 }

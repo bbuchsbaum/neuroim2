@@ -746,11 +746,30 @@ setGeneric(name="render_slice", def=function(x, zpos, width, height, colmap,...)
 
 
 
-#' Extract permutation matrix
+#' Extract permutation matrix associated with an image
+#'
+#' A permutation matrix defines how the native voxel coordinates can be transformed to standard (LPI) orientation.
+#'
 #' @param x the object
 #' @param ... additional arguments
 #' @export
 #' @rdname perm_mat-methods
+#' @return an N x N permutation matrix, where N is the dimensionality of the image.
+#'
+#' @details a permutation matrix can be used to convert between cardinal image orientations.
+#' For example, if an image is stored in RPI (Right-Posterior-Inferior) format, a coordinate in this space
+#' can be converted to LPI (Left-Posterior-Inferior) by multiplying a coordinate vector by the permutation matrix.
+#'
+#' @examples
+#'
+#' fname <- system.file("extdata", "global_mask.nii", package="neuroim2")
+#' vol <- read_vol(fname)
+#' pmat <- perm_mat(space(vol))
+#'
+#' vox <- c(12,12,8)
+#' pvox <- vox %*% perm_mat(space(vol))
+#' ## pvox is flipped along the x-axis to move to RPI to LPI space
+#' stopifnot(all(pvox == c(-12,12,8))
 setGeneric(name="perm_mat", def=function(x, ...) standardGeneric("perm_mat"))
 
 #' Concatenate two objects in the time dimension
