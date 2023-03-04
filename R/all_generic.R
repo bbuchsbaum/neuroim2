@@ -365,7 +365,7 @@ setGeneric(name="axes",  def=function(x) standardGeneric("axes"))
 #' @export
 #' @examples
 #' bspace <- NeuroSpace(c(10,10,10), c(2,2,2))
-#' origin(bspace)
+#' stopifnot(origin(bspace) == c(0,0,0))
 #'
 #' @rdname origin-methods
 setGeneric(name="origin", def=function(x) standardGeneric("origin"))
@@ -377,6 +377,7 @@ setGeneric(name="origin", def=function(x) standardGeneric("origin"))
 #' @param ... extra args
 #' @export
 #' @examples
+#'
 #' bspace <- NeuroSpace(c(10,10,10), c(2,2,2))
 #' centroid(bspace)
 #'
@@ -761,7 +762,7 @@ setGeneric(name="render_slice", def=function(x, zpos, width, height, colmap,...)
 #' @return an N x N permutation matrix, where N is the dimensionality of the image.
 #'
 #' @details a permutation matrix can be used to convert between cardinal image orientations.
-#' For example, if an image is stored in RPI (Right-Posterior-Inferior) format, a coordinate in this space
+#' For example, if an image is stored in "RPI" (Right-Posterior-Inferior) format, a coordinate in this space
 #' can be converted to LPI (Left-Posterior-Inferior) by multiplying a coordinate vector by the permutation matrix.
 #'
 #' @examples
@@ -772,8 +773,8 @@ setGeneric(name="render_slice", def=function(x, zpos, width, height, colmap,...)
 #'
 #' vox <- c(12,12,8)
 #' pvox <- vox %*% perm_mat(space(vol))
-#' ## pvox is flipped along the x-axis to move to RPI to LPI space
-#' stopifnot(all(pvox == c(-12,12,8))
+#'
+#' stopifnot(all(pvox == c(-12,12,8)))
 setGeneric(name="perm_mat", def=function(x, ...) standardGeneric("perm_mat"))
 
 #' Concatenate two objects in the time dimension

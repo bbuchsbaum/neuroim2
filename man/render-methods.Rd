@@ -18,5 +18,5 @@ render(x, width, height, colmap, ...)
 \item{...}{additional arguments}
 }
 \description{
-Render an image to create a drawable image.
+Map an image intensities to an image with color values.
 }

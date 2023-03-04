@@ -4,7 +4,7 @@
 \alias{slice}
 \alias{slice,NeuroVol,numeric,numeric,missing-method}
 \alias{slice,NeuroVol,numeric,NeuroSpace,AxisSet3D-method}
-\title{slice}
+\title{Extract image slice}
 \usage{
 slice(x, zlevel, along, orientation, ...)
 

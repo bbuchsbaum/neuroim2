@@ -3,7 +3,7 @@
 \name{plot,NeuroSlice-method}
 \alias{plot,NeuroSlice-method}
 \alias{plot,NeuroVol-method}
-\title{plot an image}
+\title{plot an NeuroVol as a series of 2D slices}
 \usage{
 \S4method{plot}{NeuroSlice}(
   x,
@@ -40,7 +40,7 @@
 \item{bgcmap}{a color map for backround layer consisting of a vector of colors in hex format (e.g. \code{gray(n=255)})}
 }
 \description{
-plot an image
+plot an NeuroVol as a series of 2D slices
 }
 \examples{
 

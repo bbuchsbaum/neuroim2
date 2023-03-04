@@ -10,10 +10,10 @@
 \item{x}{the object}
 }
 \value{
-an instance of \code{linkS4class{LogicalNeuroVol}}
+an instance of \code{\linkS4class{LogicalNeuroVol}}
 }
 \description{
-Convert NeuroVol to \code{linkS4class{LogicalNeuroVol}}
+Convert NeuroVol to \code{\linkS4class{LogicalNeuroVol}}
 }
 \details{
 the image values will be converted to using R base function \code{as.logical} and wrapped in \code{LogicalNeuroVol}

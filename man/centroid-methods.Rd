@@ -21,6 +21,7 @@ centroid(x, ...)
 return the centroid of an object
 }
 \examples{
+
 bspace <- NeuroSpace(c(10,10,10), c(2,2,2))
 centroid(bspace)
 

@@ -20,6 +20,6 @@ extract image origin
 }
 \examples{
 bspace <- NeuroSpace(c(10,10,10), c(2,2,2))
-origin(bspace)
+stopifnot(origin(bspace) == c(0,0,0))
 
 }

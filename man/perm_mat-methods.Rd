@@ -28,7 +28,7 @@ A permutation matrix defines how the native voxel coordinates can be transformed
 }
 \details{
 a permutation matrix can be used to convert between cardinal image orientations.
-For example, if an image is stored in RPI (Right-Posterior-Inferior) format, a coordinate in this space
+For example, if an image is stored in "RPI" (Right-Posterior-Inferior) format, a coordinate in this space
 can be converted to LPI (Left-Posterior-Inferior) by multiplying a coordinate vector by the permutation matrix.
 }
 \examples{
@@ -39,6 +39,6 @@ pmat <- perm_mat(space(vol))
 
 vox <- c(12,12,8)
 pvox <- vox \%*\% perm_mat(space(vol))
-## pvox is flipped along the x-axis to move to RPI to LPI space
-stopifnot(all(pvox == c(-12,12,8))
+
+stopifnot(all(pvox == c(-12,12,8)))
 }
