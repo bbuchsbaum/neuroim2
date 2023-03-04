@@ -25,6 +25,10 @@ Three-dimensional brain image that is divided into N disjoint partitions
 
 Construct a \code{\linkS4class{ClusteredNeuroVol}} instance
 }
+\details{
+The use case of \code{ClusteredNeuroVol} is to store volumetric data that has been clustered into discrete sets of voxels,
+each of which has an associated id. For example, this class can be used to represent parcellated neuroimaging volumes.
+}
 \section{Slots}{
 
 \describe{

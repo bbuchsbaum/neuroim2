@@ -1,11 +1,18 @@
 #' ClusteredNeuroVol
 #'
 #' Construct a \code{\linkS4class{ClusteredNeuroVol}} instance
+#'
 #' @param mask an instance of class \code{\linkS4class{LogicalNeuroVol}}
 #' @param clusters a vector of clusters ids with length equal to number of nonzero voxels in mask \code{mask}
 #' @param label_map an optional \code{list} that maps from cluster id to a cluster label, e.g. (1 -> "FFA", 2 -> "PPA")
 #' @param label an optional \code{character} string used to label of the volume
 #' @return \code{\linkS4class{ClusteredNeuroVol}} instance
+#'
+#' @details
+#'
+#' The use case of \code{ClusteredNeuroVol} is to store volumetric data that has been clustered into discrete sets of voxels,
+#' each of which has an associated id. For example, this class can be used to represent parcellated neuroimaging volumes.
+#'
 #' @export ClusteredNeuroVol
 #' @examples
 #'
@@ -56,6 +63,7 @@ ClusteredNeuroVol <- function(mask, clusters, label_map=NULL, label="") {
 #' @name
 #'
 #' conversion from ClusteredNeuroVol to LogicalNeuroVol
+#'
 #' @rdname as-methods
 setAs(from="ClusteredNeuroVol", to="DenseNeuroVol", def=function(from) {
   data = from@clusters
