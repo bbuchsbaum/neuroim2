@@ -90,6 +90,7 @@ setMethod(f="read_meta_info",signature=signature(x= "AFNIFormat"),
 		})
 
 
+#' @keywords internal
 find_descriptor <- function(file_name) {
 	if (file_matches(NIFTI, file_name)) NIFTI
 	else if (file_matches(NIFTI_GZ, file_name)) NIFTI_GZ

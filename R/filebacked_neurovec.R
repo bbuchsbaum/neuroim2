@@ -1,6 +1,7 @@
 
-
-#' Constuct a \code{FileBackedNeuroVec} instance
+#' FileBackedNeuroVec
+#'
+#' Construct a \code{FileBackedNeuroVec} instance
 #'
 #' @param file_name the name of the image file
 #' @export
@@ -30,7 +31,7 @@ setMethod(f="sub_vector", signature=signature(x="FileBackedNeuroVec", i="numeric
 
 #' as.list
 #'
-#' convert FileBackedNeuroVec to list of \code{\linkS4class{DenseNeuroVol}}
+#' convert FileBackedNeuroVec to list of \code{\linkS4class{DenseNeuroVol}} objects.
 #' @rdname as.list-methods
 #' @export
 setMethod(f="as.list", signature=signature(x = "FileBackedNeuroVec"), def=function(x) {

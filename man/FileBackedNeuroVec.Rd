@@ -2,7 +2,7 @@
 % Please edit documentation in R/filebacked_neurovec.R
 \name{FileBackedNeuroVec}
 \alias{FileBackedNeuroVec}
-\title{Constuct a \code{FileBackedNeuroVec} instance}
+\title{FileBackedNeuroVec}
 \usage{
 FileBackedNeuroVec(file_name)
 }
@@ -10,5 +10,5 @@ FileBackedNeuroVec(file_name)
 \item{file_name}{the name of the image file}
 }
 \description{
-Constuct a \code{FileBackedNeuroVec} instance
+Construct a \code{FileBackedNeuroVec} instance
 }

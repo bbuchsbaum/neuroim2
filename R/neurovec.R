@@ -453,8 +453,9 @@ setMethod(f="vols", signature=signature(x="NeuroVec", indices="missing"),
 setMethod(f="vectors", signature=signature(x="NeuroVec", subset="missing"),
           def = function(x) {
             ind <- 1:prod(dim(x)[1:3])
-            vox <- index_to_grid(x, ind)
-            f <- function(i) series(x, vox[i,1], vox[i,2], vox[i,3])
+            ##vox <- index_to_grid(x, ind)
+            ##f <- function(i) series(x, vox[i,1], vox[i,2], vox[i,3])
+            f <- function(i) series(x, ind[i])
             #lis <- map(ind, function(i) f)
             #deferred_list(lis)
             deferred_list2(f, length(ind))
@@ -466,8 +467,14 @@ setMethod(f="vectors", signature=signature(x="NeuroVec", subset="numeric"),
           def = function(x, subset) {
             ind <- subset
             assert_that(max(ind) <= prod(dim(x)[1:3]))
-            vox <- index_to_grid(x, ind)
-            f <- function(i) series(x, vox[i,1], vox[i,2], vox[i,3])
+
+            ## 03-04-2023 index_to_grid is not necessary here
+            ## vox <- index_to_grid(x, ind)
+            ###############################################
+
+            #f <- function(i) series(x, vox[i,1], vox[i,2], vox[i,3])
+            f <- function(i) series(x, ind[i])
+
             #lis <- lapply(seq_along(ind), function(i) f)
             #deferred_list(lis)
             deferred_list2(f, length(ind))
@@ -480,8 +487,9 @@ setMethod(f="vectors", signature=signature(x="NeuroVec", subset="logical"),
             assert_that(length(subset) == prod(dim(x)[1:3]))
             ind <- which(subset)
             assert_that(length(ind) > 0)
-            vox <- index_to_grid(x, ind)
-            f <- function(i) series(x, vox[i,1], vox[i,2], vox[i,3])
+            #vox <- index_to_grid(x, ind)
+            #f <- function(i) series(x, vox[i,1], vox[i,2], vox[i,3])
+            f <- function(i) series(x, ind[i])
             #lis <- lapply(seq_along(ind), function(i) f)
             #deferred_list(lis)
             deferred_list2(f, length(ind))

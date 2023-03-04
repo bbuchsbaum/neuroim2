@@ -17,7 +17,7 @@
 \item{x}{the object}
 }
 \description{
-convert FileBackedNeuroVec to list of \code{\linkS4class{DenseNeuroVol}}
+convert FileBackedNeuroVec to list of \code{\linkS4class{DenseNeuroVol}} objects.
 
 convert SparseNeuroVec to list of \code{\linkS4class{DenseNeuroVol}}
 }

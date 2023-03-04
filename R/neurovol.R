@@ -201,18 +201,22 @@ setMethod(f="as.numeric", signature=signature(x = "SparseNeuroVol"), def=functio
   as(x, "numeric")
 })
 
+
+
+#' conversion from \code{\linkS4class{NeuroVol}} to \code{\linkS4class{LogicalNeuroVol}}
+#'
 #' @name as
-#' conversion from NeuroVol to LogicalNeuroVol
-#' @rdname as-methods
+#' @export
 setAs(from="NeuroVol", to="LogicalNeuroVol", def=function(from) {
 	LogicalNeuroVol(as.array(from), space(from))
 })
 
 
-#' @name as
+
+#' conversion from \code{\linkS4class{NeuroVol}} to \code{array}
 #'
-#' conversion from NeuroVol to array
-#' @rdname as-methods
+#' @name as
+#' @export
 setAs(from="NeuroVol", to="array", def=function(from) from[,,])
 
 #' show a \code{NeuroVol}

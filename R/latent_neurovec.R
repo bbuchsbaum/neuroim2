@@ -16,6 +16,8 @@ LatentNeuroVecSource <- function(file_name) {
 #' @param space a NeuroSpace instance
 #' @param mask a 3D \code{array}, 1D \code{vector} of type \code{logical}, or an instance of type \code{LogicalNeuroVol}
 #' @param offset  a 1-by-p offset vector
+#'
+#' @return a new \code{\linkS4Class{LatentNeuroVec}} instance
 #' @export
 #' @examples
 #'
