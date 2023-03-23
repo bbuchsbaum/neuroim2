@@ -43,7 +43,6 @@ setMethod(f="[", signature=signature(x = "ArrayLike4D", i = "numeric", j = "nume
               m = 1:(dim(x)[4])
             }
 
-
             ind <- exgridToIndex4DCpp(dim(x), i,j,k,m)
 
             #grid <- as.matrix(expand.grid(i=i,j=j,k=k,m=m))

@@ -38,6 +38,7 @@ setMethod(f="split_reduce", signature=signature(x = "matrix", fac="factor", FUN=
 
 #' @export
 #' @rdname split_reduce-methods
+#' @importFrom future.apply future_apply
 setMethod(f="split_reduce", signature=signature(x = "matrix", fac="factor", FUN="function"),
           def=function(x, fac, FUN) {
             if (length(fac) != nrow(x)) {
@@ -46,7 +47,7 @@ setMethod(f="split_reduce", signature=signature(x = "matrix", fac="factor", FUN=
 
             ind <- split(seq_along(fac), fac)
             out <- do.call(rbind, lapply(names(ind), function(lev) {
-              apply(x[ind[[lev]],], 2, FUN)
+              future_apply(x[ind[[lev]],], 2, FUN)
             }))
 
             row.names(out) <- levels(fac)
