@@ -29,7 +29,7 @@ setMethod(f="split_reduce", signature=signature(x = "matrix", fac="factor", FUN=
 
             ind <- split(seq_along(fac), fac)
             out <- do.call(rbind, lapply(levels(fac), function(lev) {
-              colMeans(x[ind[[lev]],])
+              colMeans(x[ind[[lev]],,drop=FALSE])
             }))
 
             row.names(out) <- levels(fac)
@@ -47,7 +47,7 @@ setMethod(f="split_reduce", signature=signature(x = "matrix", fac="factor", FUN=
 
             ind <- split(seq_along(fac), fac)
             out <- do.call(rbind, lapply(names(ind), function(lev) {
-              future_apply(x[ind[[lev]],], 2, FUN)
+              future_apply(x[ind[[lev]],,drop=FALSE], 2, FUN)
             }))
 
             row.names(out) <- levels(fac)
