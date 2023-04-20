@@ -20,7 +20,7 @@ LatentNeuroVec(basis, loadings, space, mask, offset = NULL)
 \item{offset}{a 1-by-p offset vector}
 }
 \value{
-a new \code{\linkS4Class{LatentNeuroVec}} instance
+a new \code{\linkS4class{LatentNeuroVec}} instance
 }
 \description{
 a class that stores a represents a 4-dimensional array as a set of basis functions (dictionary) and

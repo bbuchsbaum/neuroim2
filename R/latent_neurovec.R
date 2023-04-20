@@ -17,7 +17,7 @@ LatentNeuroVecSource <- function(file_name) {
 #' @param mask a 3D \code{array}, 1D \code{vector} of type \code{logical}, or an instance of type \code{LogicalNeuroVol}
 #' @param offset  a 1-by-p offset vector
 #'
-#' @return a new \code{\linkS4Class{LatentNeuroVec}} instance
+#' @return a new \code{\linkS4class{LatentNeuroVec}} instance
 #' @export
 #' @examples
 #'
