@@ -79,6 +79,7 @@ Suggests:
     Gmedian,
     R.utils,
     spelling
-URL: https://github.com/bbuchsbaum/neuroim2
+URL: https://github.com/bbuchsbaum/neuroim2,
+    https://bbuchsbaum.github.io/neuroim2/
 BugReports: https://github.com/bbuchsbaum/neuroim2/issues
 Language: en-US
