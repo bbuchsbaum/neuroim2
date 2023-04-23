@@ -22,3 +22,4 @@ A class is used to produce a \code{\linkS4class{NeuroVol}} instance
 \item{\code{index}}{the index of the volume to be read -- must be of length 1.}
 }}
 
+\keyword{internal}

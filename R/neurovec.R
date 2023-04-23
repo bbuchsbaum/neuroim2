@@ -7,16 +7,21 @@ NULL
 
 #' NeuroVec
 #'
-#' constructor function for virtual class \code{\linkS4class{NeuroVec}}
+#' Constructor function for the \code{\linkS4class{NeuroVec}} class. This function is used to create an instance of a NeuroVec object, which represents a four-dimensional brain image.
 #'
-#' @param data the image data which can be a \code{matrix}, a 4d \code{array}, or a list of \code{NeuroVols}.
-#'        If the latter, the geometric space of the data \code{NeuroSpace} will be inferred from the constituent volumes,
-#'        which must all be identical.
-#' @param space a \code{\linkS4class{NeuroSpace}} object. Does not ned to be included if \code{data} argument is a list of \code{NeuroVols}
-#' @param mask an optional \code{array} of type \code{logical}
-#' @param label a label of type \code{character}
-#' @return a concrete instance of \code{\linkS4class{NeuroVec}} class.
-#' If \code{mask} is provided then \code{\linkS4class{SparseNeuroVec}}, otherwise \code{\linkS4class{DenseNeuroVec}}
+#' @param data The image data, which can be a matrix, a 4D array, or a list of \code{NeuroVol} objects. If the latter, the geometric space of the data (\code{NeuroSpace}) will be inferred from the constituent volumes, which must all be identical.
+#' @param space An optional \code{\linkS4class{NeuroSpace}} object. Does not need to be included if the \code{data} argument is a list of \code{NeuroVol} objects.
+#' @param mask An optional \code{array} of type \code{logical}.
+#' @param label A label of type \code{character}.
+#' @return A concrete instance of the \code{\linkS4class{NeuroVec}} class. If a \code{mask} is provided, the function returns a \code{\linkS4class{SparseNeuroVec}} object; otherwise, it returns a \code{\linkS4class{DenseNeuroVec}} object.
+#'
+#' @examples
+#' # Load an example 4D brain image
+#' example_4d_image <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
+#'
+#' # Create a NeuroVec object
+#' neuro_vec <- NeuroVec(data=example_4d_image, space=space(example_4d_image))
+#'
 #' @export NeuroVec
 #' @rdname NeuroVec-class
 NeuroVec <- function(data, space=NULL, mask=NULL, label="") {

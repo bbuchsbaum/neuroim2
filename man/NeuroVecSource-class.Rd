@@ -13,3 +13,4 @@ A class that is used to produce a \code{\linkS4class{NeuroVec}} instance
 \item{\code{indices}}{the index vector of the volumes to be loaded}
 }}
 
+\keyword{internal}

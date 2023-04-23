@@ -13,3 +13,4 @@ A class that is used to produce a \code{\linkS4class{H5NeuroVecSource}} instance
 \item{\code{file_name}}{the name of the hdf5 file.}
 }}
 
+\keyword{internal}

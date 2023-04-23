@@ -10,6 +10,7 @@ A class that is used to produce a \code{\linkS4class{LatentNeuroVecSource}} inst
 \section{Slots}{
 
 \describe{
-\item{\code{file_name}}{the name of the hdf5 file.}
+\item{\code{file_name}}{the name of the file.}
 }}
 
+\keyword{internal}

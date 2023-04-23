@@ -31,7 +31,9 @@ First we load in an example volume, assign it random values, and find its connec
       file_name <- system.file("extdata", "global_mask.nii", package="neuroim2")
       vol <- read_vol(file_name)
       mask.idx <- which(vol>0)
-      vol[mask.idx] <- runif(length(mask.idx))
+      
+      vol2 <- vol
+      vol2[mask.idx] <- runif(length(mask.idx))
       comp <- conn_comp(vol, threshold=.9)
       
       plot(comp$index, zlevels=seq(1,25,by=3), cmap=rainbow(255))
@@ -40,7 +42,7 @@ First we load in an example volume, assign it random values, and find its connec
 Now we want to find the average value in each of the connected components using the `split_clusters` function. Since `conn_comp` returns a `ClusteredNeuroVol` containing the cluster indices, we use that to split the original volume into a list of `ROIVol`s and compute the mean over each one.
 
 ```{r}
-mvals <- vol %>% split_clusters(comp$index) %>% map_dbl( ~ mean(.))
+mvals <- vol2 %>% split_clusters(comp$index) %>% map_dbl( ~ mean(.))
 ```
     
 Suppose we want to compute the local standard deviation within a 4mm radius of each voxel. We can use the `searchlight` function to construct a list of spherical ROIs centered on every voxel in the input set.

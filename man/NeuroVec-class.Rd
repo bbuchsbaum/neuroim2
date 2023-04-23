@@ -9,22 +9,38 @@
 NeuroVec(data, space = NULL, mask = NULL, label = "")
 }
 \arguments{
-\item{data}{the image data which can be a \code{matrix}, a 4d \code{array}, or a list of \code{NeuroVols}.
-If the latter, the geometric space of the data \code{NeuroSpace} will be inferred from the constituent volumes,
-which must all be identical.}
+\item{data}{The image data, which can be a matrix, a 4D array, or a list of \code{NeuroVol} objects. If the latter, the geometric space of the data (\code{NeuroSpace}) will be inferred from the constituent volumes, which must all be identical.}
 
-\item{space}{a \code{\linkS4class{NeuroSpace}} object. Does not ned to be included if \code{data} argument is a list of \code{NeuroVols}}
+\item{space}{An optional \code{\linkS4class{NeuroSpace}} object. Does not need to be included if the \code{data} argument is a list of \code{NeuroVol} objects.}
 
-\item{mask}{an optional \code{array} of type \code{logical}}
+\item{mask}{An optional \code{array} of type \code{logical}.}
 
-\item{label}{a label of type \code{character}}
+\item{label}{A label of type \code{character}.}
 }
 \value{
-a concrete instance of \code{\linkS4class{NeuroVec}} class.
-If \code{mask} is provided then \code{\linkS4class{SparseNeuroVec}}, otherwise \code{\linkS4class{DenseNeuroVec}}
+A concrete instance of the \code{\linkS4class{NeuroVec}} class. If a \code{mask} is provided, the function returns a \code{\linkS4class{SparseNeuroVec}} object; otherwise, it returns a \code{\linkS4class{DenseNeuroVec}} object.
 }
 \description{
-Four-dimensional brain image
+This S4 class represents a four-dimensional brain image, which can be used to store and process time series data such as fMRI or 4D functional connectivity maps. The class extends the basic functionality of \code{NeuroObj}.
 
-constructor function for virtual class \code{\linkS4class{NeuroVec}}
+Constructor function for the \code{\linkS4class{NeuroVec}} class. This function is used to create an instance of a NeuroVec object, which represents a four-dimensional brain image.
+}
+\section{Usage}{
+
+To create a NeuroVec object, use the constructor function \code{NeuroVec()}.
+}
+
+\examples{
+# Load an example 4D brain image
+example_4d_image <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
+
+# Create a NeuroVec object
+neuro_vec <- NeuroVec(data=example_4d_image, space=space(example_4d_image))
+
+# Load an example 4D brain image
+example_4d_image <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
+
+# Create a NeuroVec object
+neuro_vec <- NeuroVec(data=example_4d_image, space=space(example_4d_image))
+
 }

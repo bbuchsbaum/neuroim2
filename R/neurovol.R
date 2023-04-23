@@ -113,12 +113,22 @@ SparseNeuroVol <- function(data, space, indices=NULL, label="") {
 
 #' LogicalNeuroVol
 #'
-#' Construct a \code{\linkS4class{LogicalNeuroVol}} instance
-#' @param data a three-dimensional \code{array}, a 1D vector with length equal to \code{prod(dim(space))}, or a set of \code{indices} where elements are \code{TRUE}
-#' @param space an instance of class \code{\linkS4class{NeuroSpace}}
-#' @param label a \code{character} string
-#' @param indices an optional 1-d index vector
-#' @return \code{\linkS4class{LogicalNeuroVol}} instance
+#' This function constructs a \code{\linkS4class{LogicalNeuroVol}} instance.
+#'
+#' @param data A three-dimensional \code{array}, a 1D vector with length equal to \code{prod(dim(space))}, or a set of \code{indices} where elements are \code{TRUE}.
+#' @param space An instance of class \code{\linkS4class{NeuroSpace}}.
+#' @param label A \code{character} string.
+#' @param indices An optional 1-d index vector.
+#'
+#' @return A \code{\linkS4class{LogicalNeuroVol}} instance.
+#'
+#' @examples
+#' # Load an example brain mask
+#' brain_mask <- read_vol(system.file("extdata", "example_mask.nii", package="neuroim2"))
+#'
+#' # Convert the brain mask to a LogicalNeuroVol
+#' logical_vol <- LogicalNeuroVol(brain_mask, space(brain_mask))
+#'
 #' @export LogicalNeuroVol
 #' @rdname LogicalNeuroVol-class
 LogicalNeuroVol <- function(data, space, label="", indices=NULL) {

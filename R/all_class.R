@@ -380,10 +380,13 @@ setClass("SparseNeuroVol",
 
 #' LogicalNeuroVol
 #'
-#' Three-dimensional brain image where all values are either TRUE or FALSE
+#' This S4 class represents a three-dimensional brain image, where all values are either TRUE or FALSE. It is particularly useful for creating and managing binary masks for brain images.
+#'
 #' @rdname LogicalNeuroVol-class
 #' @export
 setClass("LogicalNeuroVol", contains=c("DenseNeuroVol"))
+
+
 
 #' ClusteredNeuroVol Class
 #'
@@ -467,7 +470,17 @@ setClass("IndexLookupVol",
 
 #' NeuroVec
 #'
-#' Four-dimensional brain image
+#' This S4 class represents a four-dimensional brain image, which can be used to store and process time series data such as fMRI or 4D functional connectivity maps. The class extends the basic functionality of \code{NeuroObj}.
+#'
+#' @section Usage:
+#' To create a NeuroVec object, use the constructor function \code{NeuroVec()}.
+#'
+#' @examples
+#' # Load an example 4D brain image
+#' example_4d_image <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
+#'
+#' # Create a NeuroVec object
+#' neuro_vec <- NeuroVec(data=example_4d_image, space=space(example_4d_image))
 #'
 #' @rdname NeuroVec-class
 #' @export

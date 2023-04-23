@@ -9,19 +9,27 @@
 LogicalNeuroVol(data, space, label = "", indices = NULL)
 }
 \arguments{
-\item{data}{a three-dimensional \code{array}, a 1D vector with length equal to \code{prod(dim(space))}, or a set of \code{indices} where elements are \code{TRUE}}
+\item{data}{A three-dimensional \code{array}, a 1D vector with length equal to \code{prod(dim(space))}, or a set of \code{indices} where elements are \code{TRUE}.}
 
-\item{space}{an instance of class \code{\linkS4class{NeuroSpace}}}
+\item{space}{An instance of class \code{\linkS4class{NeuroSpace}}.}
 
-\item{label}{a \code{character} string}
+\item{label}{A \code{character} string.}
 
-\item{indices}{an optional 1-d index vector}
+\item{indices}{An optional 1-d index vector.}
 }
 \value{
-\code{\linkS4class{LogicalNeuroVol}} instance
+A \code{\linkS4class{LogicalNeuroVol}} instance.
 }
 \description{
-Three-dimensional brain image where all values are either TRUE or FALSE
+This S4 class represents a three-dimensional brain image, where all values are either TRUE or FALSE. It is particularly useful for creating and managing binary masks for brain images.
 
-Construct a \code{\linkS4class{LogicalNeuroVol}} instance
+This function constructs a \code{\linkS4class{LogicalNeuroVol}} instance.
+}
+\examples{
+# Load an example brain mask
+brain_mask <- read_vol(system.file("extdata", "example_mask.nii", package="neuroim2"))
+
+# Convert the brain mask to a LogicalNeuroVol
+logical_vol <- LogicalNeuroVol(brain_mask, space(brain_mask))
+
 }
