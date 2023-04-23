@@ -3,23 +3,41 @@
 \docType{class}
 \name{NeuroSpace-class}
 \alias{NeuroSpace-class}
-\title{NeuroSpace}
+\title{NeuroSpace Class}
 \description{
-This class represents the geometry of a brain image
+Represents the geometry of a brain image.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{dim}}{the grid dimensions of the image}
+\item{\code{dim}}{An integer vector representing the grid dimensions of the image.}
 
-\item{\code{origin}}{the coordinates of the spatial origin}
+\item{\code{origin}}{A numeric vector representing the coordinates of the spatial origin.}
 
-\item{\code{spacing}}{the dimensions (in mm) of the grid units (voxels)}
+\item{\code{spacing}}{A numeric vector representing the dimensions (in mm) of the grid units (voxels).}
 
-\item{\code{axes}}{the set of named spatial axes in the untransformed native grid space.}
+\item{\code{axes}}{A named \code{\linkS4class{AxisSet}} object representing the set of spatial axes in the untransformed native grid space.}
 
-\item{\code{trans}}{an affine transformation matrix that moves from grid -> real world coordinates}
+\item{\code{trans}}{A matrix representing an affine transformation that converts grid coordinates to real-world coordinates.}
 
-\item{\code{inverse}}{an inverse matrix that moves from real world -> grid coordinates}
+\item{\code{inverse}}{A matrix representing an inverse transformation that converts real-world coordinates to grid coordinates.}
 }}
 
+\section{Validity}{
+
+  The \code{\linkS4class{NeuroSpace}} object is considered valid if:
+  - The length of the @dim slot is equal to the lengths of the @spacing, @origin, and number of axes in the @axes slots.
+  - The @dim slot contains non-negative values.
+}
+
+\section{Usage}{
+
+  The \code{\linkS4class{NeuroSpace}} class is used to store and manipulate the geometric properties of a brain image.
+}
+
+\examples{
+# Create a NeuroSpace object
+space <- new("NeuroSpace", dim=c(64, 64, 64), origin=c(0, 0, 0), spacing=c(1, 1, 1),
+             axes=AxisSet(c('x', 'y', 'z')), trans=diag(4), inverse=diag(4))
+
+}

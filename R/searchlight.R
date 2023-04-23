@@ -4,12 +4,26 @@
 #}
 
 
-#' random_searchlight
+#' Create a spherical random searchlight iterator
 #'
-#' Create an spherical random searchlight iterator
+#' This function generates a spherical random searchlight iterator, which can be used to
+#' analyze the local neighborhood of voxels within a given radius in a brain mask.
 #'
-#' @inheritParams searchlight_coords
+#' @param mask A \code{\linkS4class{NeuroVol}} object representing the brain mask.
+#' @param radius A numeric value specifying the radius of the searchlight sphere in voxel units.
+#'
+#' @return A list of \code{\linkS4class{ROIVolWindow}} objects, each representing a spherical searchlight region.
+#'
+#' @examples
+#' # Create a simple brain mask
+#' mask <- array(TRUE, c(10, 10, 10))
+#' mask[1, 1, 1] <- FALSE
+#'
+#' # Generate random searchlight iterator with a radius of 2 voxels
+#' searchlights <- random_searchlight(mask, radius = 2)
+#'
 #' @export
+#' @rdname random_searchlight
 random_searchlight <- function(mask, radius) {
   assert_that(inherits(mask, "NeuroVol"))
 
@@ -58,20 +72,30 @@ random_searchlight <- function(mask, radius) {
 }
 
 
-#' bootstrap_searchlight
+#' Create a spherical searchlight iterator that samples regions from within a mask
 #'
-#' Create a spherical searchlight iterator that samples regions from within a mask.
+#' This function generates a spherical searchlight iterator by sampling regions from within a brain mask.
+#' It creates searchlight spheres around random center voxels, allowing the same surround voxel to belong
+#' to multiple searchlight samples.
 #'
-#' @inheritParams searchlight_coords
-#' @param iter the total number of searchlights to sample (default is 100).
-#' @export
-#' @rdname searchlight
-#' @details searchlight centers are sampled without replacement, but the same surround voxel can belong to multiple searchlight samples.
+#' @param mask A \code{\linkS4class{NeuroVol}} object representing the brain mask.
+#' @param radius A numeric value specifying the radius of the searchlight sphere in voxel units (default is 8).
+#' @param iter An integer specifying the total number of searchlights to sample (default is 100).
+#'
+#' @return A \code{\linkS4class{deferred_list}} object containing \code{\linkS4class{ROIVolWindow}} objects,
+#'         each representing a spherical searchlight region sampled from within the mask.
+#'
+#' @details Searchlight centers are sampled without replacement, but the same surround voxel can belong to multiple searchlight samples.
+#'
 #' @examples
-#'
+#' # Load an example brain mask
 #' mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
-#' slight <- bootstrap_searchlight(mask, 6)
 #'
+#' # Generate a bootstrap searchlight iterator with a radius of 6 voxels
+#' searchlights <- bootstrap_searchlight(mask, radius = 6)
+#'
+#' @export
+#' @rdname bootstrap_searchlight
 bootstrap_searchlight <- function(mask, radius=8, iter=100) {
   mask.idx <- which(mask != 0)
   grid <- index_to_grid(mask, mask.idx)
@@ -85,18 +109,28 @@ bootstrap_searchlight <- function(mask, radius=8, iter=100) {
   deferred_list2(f, iter)
 }
 
-#' searchlight_coords
+#' Create an exhaustive searchlight iterator that only returns voxel coordinates
 #'
-#' Create an exhaustive searchlight iterator that only returns voxel coordinates.
+#' This function generates an exhaustive searchlight iterator that returns voxel coordinates for each searchlight
+#' sphere within the provided mask. The searchlight iterator visits every non-zero voxel in the mask as a potential center voxel.
 #'
-#' @param mask an image volume containing valid central voxels for roving searchlight.
-#' @param radius in mm of spherical searchlight.
-#' @param nonzero only include coordinates with nonzero values in the supplied mask.
-#' @param cores number of cores to use
-#' @return a list of matrices containing of integer-valued voxel coordinates.
-#' @rdname searchlight
-#' @importFrom dbscan frNN
+#' @param mask A \code{\linkS4class{NeuroVol}} object representing the brain mask, containing valid central voxels for the roving searchlight.
+#' @param radius A numeric value specifying the radius (in mm) of the spherical searchlight.
+#' @param nonzero A logical value indicating whether to include only coordinates with nonzero values in the supplied mask (default is FALSE).
+#' @param cores An integer specifying the number of cores to use for parallel computation (default is 0, which uses a single core).
+#'
+#' @return A \code{\linkS4class{deferred_list}} object containing matrices of integer-valued voxel coordinates, each representing a searchlight region.
+#'
+#' @examples
+#' # Load an example brain mask
+#' mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
+#'
+#' # Generate an exhaustive searchlight iterator with a radius of 6 mm
+#' searchlights <- searchlight_coords(mask, radius = 6)
+#'
 #' @export
+#' @rdname searchlight_coords
+#' @importFrom dbscan frNN
 searchlight_coords <- function(mask, radius, nonzero=FALSE, cores=0) {
   mask.idx <- which(mask != 0)
 
@@ -129,16 +163,29 @@ searchlight_coords <- function(mask, radius, nonzero=FALSE, cores=0) {
 
 
 
-#' Create an exhaustive searchlight iterator
+#' Create an exhaustive searchlight iterator that only returns voxel coordinates
 #'
-#' Generates an \code{ROIVol} around each non-zero voxel in a 3D image mask
+#' This function generates an exhaustive searchlight iterator that returns voxel coordinates for each searchlight
+#' sphere within the provided mask. The searchlight iterator visits every non-zero voxel in the mask as a potential center voxel.
 #'
-#' @inheritParams searchlight_coords
-#' @param eager if TRUE, then all searchlight coordinates set are generated up front. This is faster but requires more memory to store all coordinates.
-#' @return a lazy list of \code{ROIVolWindow} objects
-#' @rdname searchlight
-#' @importFrom dbscan frNN
+#' @param mask A \code{\linkS4class{NeuroVol}} object representing the brain mask, containing valid central voxels for the roving searchlight.
+#' @param radius A numeric value specifying the radius (in mm) of the spherical searchlight.
+#' @param eager A logical value specifying whether to eagerly compute the searchlight ROIs (default is FALSE, which uses lazy evaluation).
+#' @param nonzero A logical value indicating whether to include only coordinates with nonzero values in the supplied mask (default is FALSE).
+#' @param cores An integer specifying the number of cores to use for parallel computation (default is 0, which uses a single core).
+#'
+#' @return A \code{\linkS4class{deferred_list}} object containing matrices of integer-valued voxel coordinates, each representing a searchlight region.
+#'
+#' @examples
+#' # Load an example brain mask
+#' mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
+#'
+#' # Generate an exhaustive searchlight iterator with a radius of 6 mm
+#' searchlights <- searchlight(mask, radius = 6, eager = TRUE)
+#'
 #' @export
+#' @rdname searchlight_coords
+#' @importFrom dbscan frNN
 searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
   mask.idx <- which(mask != 0)
   grid <- index_to_grid(mask, mask.idx)
@@ -181,13 +228,24 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
 
 #' Create a clustered searchlight iterator
 #'
-#' A searchlight that iterates over successive spatial clusters in an image volume
+#' This function generates a searchlight iterator that iterates over successive spatial clusters in an image volume.
+#' It allows for the exploration of spatially clustered regions within the provided mask by using either a pre-defined
+#' clustered volume or performing k-means clustering to generate the clusters.
 #'
-#' @inheritParams searchlight_coords
-#' @param cvol a \code{ClusteredNeuroVol} instance
-#' @param csize the number of clusters (ignored if \code{cvol} is provided)
-#' @return an \code{iter} class
+#' @param mask A \code{\linkS4class{NeuroVol}} object representing the brain mask, containing valid central voxels for the roving searchlight.
+#' @param cvol An optional \code{ClusteredNeuroVol} instance representing pre-defined clusters within the mask. If provided, the 'csize' parameter is ignored.
+#' @param csize An optional integer specifying the number of clusters to be generated using k-means clustering (ignored if \code{cvol} is provided).
+#'
+#' @return A \code{\linkS4class{deferred_list}} object containing \code{ROIVol} objects, each representing a clustered region within the image volume.
+#'
 #' @importFrom stats kmeans
+#' @examples
+#' # Load an example brain mask
+#' mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
+#'
+#' # Generate a clustered searchlight iterator with 5 clusters
+#' clust_searchlight <- clustered_searchlight(mask, csize = 5)
+#'
 #' @rdname searchlight
 #' @export
 clustered_searchlight <- function(mask, cvol=NULL, csize=NULL) {

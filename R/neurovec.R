@@ -453,9 +453,30 @@ setMethod(f="vols", signature=signature(x="NeuroVec", indices="missing"),
 setMethod(f="vectors", signature=signature(x="NeuroVec", subset="missing"),
           def = function(x) {
             ind <- 1:prod(dim(x)[1:3])
+            time <- seq(1, dim(x)[4])
+            lent = length(time)
+            grid <- indexToGridCpp(ind, dim(x)[1:3])
             ##vox <- index_to_grid(x, ind)
             ##f <- function(i) series(x, vox[i,1], vox[i,2], vox[i,3])
             f <- function(i) series(x, ind[i])
+
+            deferred_list2(f, length(ind))
+          })
+
+#' @export
+#' @rdname vectors-methods
+setMethod(f="vectors", signature=signature(x="DenseNeuroVec", subset="missing"),
+          def = function(x) {
+            ind <- 1:prod(dim(x)[1:3])
+            time <- seq(1, dim(x)[4])
+            lent <- length(time)
+            grid <- indexToGridCpp(ind, dim(x)[1:3])
+
+            #f <- function(i) series(x, ind[i])
+            f <- function(i) {
+              imat <- cbind(do.call("rbind", rep(list(grid[i,]),lent)), time)
+              x@.Data[imat]
+            }
             #lis <- map(ind, function(i) f)
             #deferred_list(lis)
             deferred_list2(f, length(ind))
@@ -828,6 +849,23 @@ setMethod(f="series", signature=signature(x="NeuroVec", i="integer"),
               if (drop) drop(ret) else ret
             } else {
               ## could be solved with expand.grid, no?
+              assert_that(length(i) == 1 && length(j) == 1 && length(k) ==1)
+              ret <- x[i,j,k,]
+              if (drop) drop(ret) else ret
+            }
+          })
+
+
+#' @export
+#' @param drop whether to drop dimension of length 1
+#' @rdname series-methods
+setMethod(f="series", signature=signature(x="DenseNeuroVec", i="integer"),
+          def=function(x,i,j,k,drop=TRUE) {
+            if (missing(j) && missing(k)) {
+              g <- indexToGridCpp(i, dim(x)[1:3])
+              ret <- callGeneric(x,g)
+              if (drop) drop(ret) else ret
+            } else {
               assert_that(length(i) == 1 && length(j) == 1 && length(k) ==1)
               ret <- x[i,j,k,]
               if (drop) drop(ret) else ret

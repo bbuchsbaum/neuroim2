@@ -21,7 +21,7 @@ SparseNeuroVol(data, space, indices = NULL, label = "")
 \code{\linkS4class{SparseNeuroVol}} instance
 }
 \description{
-Three-dimensional brain image, backed by a \code{sparseVector} for \code{Matrix} package
+This S4 class represents a three-dimensional brain image, which is stored using a sparse data representation, backed by a \code{sparseVector} from the Matrix package. Sparse representations are beneficial for storing and processing large brain images with a high proportion of zero or missing values.
 
 Construct a \code{\linkS4class{SparseNeuroVol}} instance
 }
@@ -31,7 +31,7 @@ Image data is backed by \code{Matrix::sparseVector}.
 \section{Slots}{
 
 \describe{
-\item{\code{data}}{a \code{sparseVector} instance}
+\item{\code{data}}{A \code{\linkS4class{sparseVector}} instance from the Matrix package, which stores the image volume data in a sparse format.}
 }}
 
 \examples{
@@ -44,4 +44,7 @@ sum(sparsevol) == sum(densevol)
 
 
 
+}
+\seealso{
+\code{\linkS4class{NeuroVol}} and \code{\linkS4class{ArrayLike3D}}
 }

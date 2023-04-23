@@ -2,12 +2,25 @@
 
 #' Blur a volumetric image with an isotropic discrete Gaussian kernel
 #'
-#' @param vol the image volume as a \code{NeuroVol}
-#' @param mask an image mask as a \code{LogicalNeuroVol}
-#' @param sigma the standard deviation of the Gaussian
-#' @param window the number of voxels around the center voxel to include on each side (window=1 for a 3x3x3 kernel).
+#' This function smooths a volumetric image (3D brain MRI data) by applying an isotropic discrete Gaussian kernel.
+#' The blurring is performed within the specified image mask, and the kernel's standard deviation and window size can be customized.
 #'
-#' @return a smoothed image of class \code{NeuroVol}
+#' @param vol A \code{\linkS4class{NeuroVol}} object representing the image volume to be smoothed.
+#' @param mask An optional \code{\linkS4class{LogicalNeuroVol}} object representing the image mask that defines the region where the blurring is applied. If not provided, the entire volume is considered.
+#' @param sigma A numeric value specifying the standard deviation of the Gaussian kernel (default is 2).
+#' @param window An integer specifying the number of voxels around the center voxel to include on each side. For example, window=1 for a 3x3x3 kernel (default is 1).
+#'
+#' @return A smoothed image of class \code{\linkS4class{NeuroVol}}.
+#'
+#' @examples
+#' # Load an example brain volume
+#' brain_vol <- read_vol(system.file("extdata", "example_volume.nii", package="neuroim2"))
+#' # Load an example brain mask
+#' brain_mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
+#'
+#' # Apply Gaussian blurring to the brain volume
+#' blurred_vol <- gaussian_blur(brain_vol, brain_mask, sigma = 2, window = 1)
+#'
 #' @export
 gaussian_blur <- function(vol, mask, sigma=2, window=1) {
   assert_that(window >= 1)
@@ -28,13 +41,27 @@ gaussian_blur <- function(vol, mask, sigma=2, window=1) {
 
 #' Filter a volumetric image with an edge-preserving "guided" filter
 #'
-#' @param vol the image volume as a \code{NeuroVol}
-#' @param radius the spatial radius of the filter
-#' @param epsilon variance constant
-#' @return a filtered image of class \code{NeuroVol}
-#' @export
+#' This function applies a guided filter to a volumetric image (3D brain MRI data) to perform edge-preserving smoothing.
+#' The guided filter is an edge-preserving filter that smooths the image while preserving the edges, providing a balance between noise reduction and edge preservation.
+#'
+#' @param vol A \code{\linkS4class{NeuroVol}} object representing the image volume to be filtered.
+#' @param radius An integer specifying the spatial radius of the filter (default is 4).
+#' @param epsilon A numeric value specifying the variance constant, which controls the degree of smoothing (default is .7^2).
+#'
+#' @return A filtered image of class \code{\linkS4class{NeuroVol}}.
+#'
+#' @examples
+#' # Load an example brain volume
+#' brain_vol <- read_vol(system.file("extdata", "example_volume.nii", package="neuroim2"))
+#'
+#' # Apply guided filtering to the brain volume
+#' filtered_vol <- guided_filter(brain_vol, radius = 4, epsilon = .7^2)
+#'
 #' @references
+#' Guided Image Filtering: Kaiming He, Jian Sun, and Xiaoou Tang, "Guided Image Filtering," IEEE Transactions on Pattern Analysis and Machine Intelligence, Vol. 35, No. 6, pp. 1397-1409, June, 2013.
 #' https://en.wikipedia.org/wiki/Guided_filter
+#'
+#' @export
 guided_filter <- function(vol, radius=4, epsilon=.7^2) {
   # pset <- patch_set(vol, c(3,3,3))
   #

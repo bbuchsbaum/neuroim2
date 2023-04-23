@@ -400,6 +400,32 @@ test_that("can extract ROI from SparseNeuroVec", {
 
 })
 
+library(testthat)
+
+test_that("NeuroVec constructor works correctly", {
+  # Create a simple 4D array
+  data <- array(1:24, dim = c(2, 2, 3, 2))
+
+  # Create a NeuroSpace object
+  space <- NeuroSpace(c(2, 2, 3, 2), c(1,1,1),
+                      c(0, 0, 0))
+
+  # Test NeuroVec constructor with a 4D array
+  nv <- NeuroVec(data, space)
+  expect_s4_class(nv, "DenseNeuroVec")
+  expect_equal(nv@.Data, data)
+
+  space2 <- NeuroSpace(c(2, 2, 3), c(1,1,1),
+                      c(0, 0, 0))
+  # Test NeuroVec constructor with a list of NeuroVols
+  nv_list <- list(NeuroVol(array(1:12, c(2, 2, 3)), space2),
+                  NeuroVol(array(13:24, c(2, 2, 3)), space2))
+  nv2 <- NeuroVec(nv_list)
+  expect_s4_class(nv2, "DenseNeuroVec")
+  expect_equal(nv2@.Data, c(data))
+})
+
+
 
 # test.NeuroVec.roundtrip.io <- function() {
 #   bvec <- loadVector("data/qrscan01.nii.gz", indices=1:4)

@@ -3,17 +3,21 @@
 \name{dim_of}
 \alias{dim_of}
 \alias{dim_of,NeuroSpace,NamedAxis-method}
-\title{get dimensions of an axis}
+\title{Get the length of a given dimension of an object}
 \usage{
 dim_of(x, axis)
 
 \S4method{dim_of}{NeuroSpace,NamedAxis}(x, axis)
 }
 \arguments{
-\item{x}{the object}
+\item{x}{the object whose axis to query}
 
-\item{axis}{the axis to return the dimension of}
+\item{axis}{an integer or character string indicating which axis to query}
+}
+\value{
+An integer representing the length of the specified axis.
 }
 \description{
-get dimensions of an axis
+This function returns the length of a given axis (dimension) of an object. The
+axis can be specified using its position or name.
 }

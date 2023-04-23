@@ -2,15 +2,28 @@
 % Please edit documentation in R/searchlight.R
 \name{random_searchlight}
 \alias{random_searchlight}
-\title{random_searchlight}
+\title{Create a spherical random searchlight iterator}
 \usage{
 random_searchlight(mask, radius)
 }
 \arguments{
-\item{mask}{an image volume containing valid central voxels for roving searchlight.}
+\item{mask}{A \code{\linkS4class{NeuroVol}} object representing the brain mask.}
 
-\item{radius}{in mm of spherical searchlight.}
+\item{radius}{A numeric value specifying the radius of the searchlight sphere in voxel units.}
+}
+\value{
+A list of \code{\linkS4class{ROIVolWindow}} objects, each representing a spherical searchlight region.
 }
 \description{
-Create an spherical random searchlight iterator
+This function generates a spherical random searchlight iterator, which can be used to
+analyze the local neighborhood of voxels within a given radius in a brain mask.
+}
+\examples{
+# Create a simple brain mask
+mask <- array(TRUE, c(10, 10, 10))
+mask[1, 1, 1] <- FALSE
+
+# Generate random searchlight iterator with a radius of 2 voxels
+searchlights <- random_searchlight(mask, radius = 2)
+
 }

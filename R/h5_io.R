@@ -14,6 +14,8 @@
 #
 # }
 
+
+#' @keywords internal
 to_h5_latentvec <- function(vec, file_name=NULL, data_type="FLOAT",
                             chunk_dim=NULL, nbit=FALSE, compression=6) {
 

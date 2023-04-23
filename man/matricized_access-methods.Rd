@@ -12,7 +12,7 @@
 \alias{matricized_access,BigNeuroVec,matrix-method}
 \alias{matricized_access,BigNeuroVec,integer-method}
 \alias{matricized_access,BigNeuroVec,numeric-method}
-\title{extract values from a matricized (x,y,z) of a 4D tensor using a space-time coordinate matrix}
+\title{Extract values from a matricized (x,y,z) of a 4D tensor using a space-time coordinate matrix.}
 \usage{
 matricized_access(x, i, ...)
 
@@ -35,12 +35,16 @@ matricized_access(x, i, ...)
 \S4method{matricized_access}{BigNeuroVec,numeric}(x, i)
 }
 \arguments{
-\item{x}{a data source}
+\item{x}{a data source.}
 
-\item{i}{an index matrix}
+\item{i}{an index matrix specifying the space-time coordinates.}
 
-\item{...}{additional arguments}
+\item{...}{additional arguments to be passed to methods.}
 }
 \description{
-extract values from a matricized (x,y,z) of a 4D tensor using a space-time coordinate matrix
+This function extracts the values of the elements in a 4D tensor, where the first three dimensions
+(x,y,z) have been matricized into a single dimension, using a space-time coordinate matrix.
+The input \code{i} is an index matrix, where each row specifies a (x,y,z,t) coordinate.
+The output is a vector containing the values of the elements in \code{x} at the specified
+space-time coordinates.
 }

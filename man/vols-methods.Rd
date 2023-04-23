@@ -4,7 +4,7 @@
 \alias{vols}
 \alias{vols,NeuroVec,numeric-method}
 \alias{vols,NeuroVec,missing-method}
-\title{extract an ordered series of 3d volumes}
+\title{Extract an ordered series of 3D volumes.}
 \usage{
 vols(x, indices, ...)
 
@@ -13,17 +13,19 @@ vols(x, indices, ...)
 \S4method{vols}{NeuroVec,missing}(x)
 }
 \arguments{
-\item{x}{the object that supplies the volume data}
+\item{x}{the object that supplies the volume data.}
 
-\item{indices}{the subset of volumes to extract}
+\item{indices}{the subset of volumes to extract.}
 
-\item{...}{additional arguments}
+\item{...}{additional arguments to be passed to methods.}
 }
 \description{
-extract an ordered series of 3d volumes
+This function extracts an ordered series of 3D volumes from an object that supplies volume data.
+The \code{indices} argument specifies the subset of volumes to extract, and can be a vector
+of indices or a logical vector. The return value is a list containing the extracted volumes
+in the same order as the specified indices.
 }
 \examples{
-
 vec <- read_vec(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 vs <- vols(vec)
 length(vs) == dim(vec)[4]

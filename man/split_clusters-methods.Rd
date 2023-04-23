@@ -9,7 +9,7 @@
 \alias{split_clusters,NeuroVec,integer-method}
 \alias{split_clusters,NeuroVec,numeric-method}
 \alias{split_clusters,NeuroVec,ClusteredNeuroVol-method}
-\title{cut an object into a list of spatial or spatiotemporal clusters}
+\title{Cut an object into a list of spatial or spatiotemporal clusters}
 \usage{
 split_clusters(x, clusters, ...)
 
@@ -28,16 +28,15 @@ split_clusters(x, clusters, ...)
 \S4method{split_clusters}{NeuroVec,ClusteredNeuroVol}(x, clusters, ...)
 }
 \arguments{
-\item{x}{the object to split}
+\item{x}{The object to split. The input object must be a 4D tensor, where the first three dimensions correspond to the spatial dimensions of the data and the fourth dimension corresponds to time.}
 
-\item{clusters}{a vector of cluster indices to split by}
+\item{clusters}{A vector of cluster indices to split by.}
 
-\item{...}{additional arguments}
+\item{...}{Additional arguments to be passed to methods.}
 }
 \description{
-cut an object into a list of spatial or spatiotemporal clusters
-
-split_clusters
+This function cuts an object into a list of sub-objects based on a vector of cluster indices.
+The resulting list contains each of the clusters as separate objects.
 }
 \examples{
 

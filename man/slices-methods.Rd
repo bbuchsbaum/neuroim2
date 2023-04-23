@@ -3,17 +3,20 @@
 \name{slices}
 \alias{slices}
 \alias{slices,NeuroVol-method}
-\title{extract an ordered series of 2d slices}
+\title{Extract an ordered series of 2D slices from a 3D or 4D object}
 \usage{
 slices(x, ...)
 
 \S4method{slices}{NeuroVol}(x)
 }
 \arguments{
-\item{x}{the object that supplies the slices}
+\item{x}{The 3D or 4D object to extract slices from}
 
-\item{...}{additional arguments}
+\item{...}{Additional arguments to be passed to the underlying methods}
+}
+\value{
+A list of 2D matrices, each containing a slice from the input object
 }
 \description{
-extract an ordered series of 2d slices
+This function extracts an ordered series of 2D slices from a 3D or 4D object. The returned slices are in the order they appear in the original object.
 }

@@ -9,24 +9,24 @@
 LatentNeuroVec(basis, loadings, space, mask, offset = NULL)
 }
 \arguments{
-\item{basis}{an n-by-k matrix containing the latent vectors forming the reduced space}
+\item{basis}{A numeric n-by-k matrix containing the latent vectors forming the reduced space.}
 
-\item{loadings}{a p-by-k matrix of p loadings}
+\item{loadings}{A numeric p-by-k matrix of p loadings.}
 
-\item{space}{a NeuroSpace instance}
+\item{space}{A NeuroSpace instance defining the dimensions, spacing, origin, axes, and transformation of the neuroimaging space.}
 
-\item{mask}{a 3D \code{array}, 1D \code{vector} of type \code{logical}, or an instance of type \code{LogicalNeuroVol}}
+\item{mask}{A 3D logical array, 1D logical vector, or an instance of LogicalNeuroVol class representing the brain mask.}
 
-\item{offset}{a 1-by-p offset vector}
+\item{offset}{An optional numeric 1-by-p offset vector. If not provided, it defaults to a zero vector.}
 }
 \value{
-a new \code{\linkS4class{LatentNeuroVec}} instance
+A new \code{\linkS4class{LatentNeuroVec}} instance representing the latent neuroimaging vectors.
 }
 \description{
 a class that stores a represents a 4-dimensional array as a set of basis functions (dictionary) and
 corresponding set of loadings (coefficients).
 
-Construct a LatentNeuroVec object from a basis and associated loadings
+This function constructs a LatentNeuroVec object from a basis, associated loadings, a NeuroSpace instance, a mask, and an optional offset.
 }
 \section{Slots}{
 
@@ -38,15 +38,25 @@ Construct a LatentNeuroVec object from a basis and associated loadings
 \item{\code{offset}}{an offset vector}
 }}
 
-\examples{
+\section{Usage}{
 
+\preformatted{
+LatentNeuroVec(basis, loadings, space, mask, offset = NULL)
+}
+}
+
+\section{Examples}{
+
+\preformatted{
 bspace <- NeuroSpace(c(2,2,2,10), c(1,1,1))
 mask <- array(rnorm(2*2*2) > -100, c(2,2,2))
 mat <- matrix(rnorm(sum(mask)), 10, sum(mask))
 pres <- prcomp(mat)
-svec <- LatentNeuroVec(pres$x, pres$rotation, bspace,mask, offset=colMeans(mat))
+svec <- LatentNeuroVec(pres$x, pres$rotation, bspace, mask, offset=colMeans(mat))
 svec2 <- SparseNeuroVec(mat, bspace, mask)
 length(indices(svec)) == sum(mask)
 
-all.equal(svec2[1:prod(dim(mask))],svec[1:prod(dim(mask))])
+all.equal(svec2[1:prod(dim(mask))], svec[1:prod(dim(mask))])
 }
+}
+

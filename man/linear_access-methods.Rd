@@ -11,7 +11,7 @@
 \alias{linear_access,NeuroVecSeq,numeric-method}
 \alias{linear_access,SparseNeuroVol,numeric-method}
 \alias{linear_access,AbstractSparseNeuroVec,numeric-method}
-\title{extract values from an array-like object using linear indexing}
+\title{Extract values from an array-like object using linear indexing.}
 \usage{
 linear_access(x, i, ...)
 
@@ -30,12 +30,14 @@ linear_access(x, i, ...)
 \S4method{linear_access}{AbstractSparseNeuroVec,numeric}(x, i)
 }
 \arguments{
-\item{x}{a data source}
+\item{x}{a data source.}
 
-\item{i}{a vector of indices}
+\item{i}{a vector of indices.}
 
-\item{...}{additional arguments}
+\item{...}{additional arguments to be passed to methods.}
 }
 \description{
-extract values from an array-like object using linear indexing
+This function extracts the values of the elements in an array-like object using
+linear indexing. Linear indexing is a way of indexing an array by a single index
+that is computed from multiple indices using a formula.
 }

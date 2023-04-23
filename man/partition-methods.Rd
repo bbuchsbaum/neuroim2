@@ -4,7 +4,7 @@
 \alias{partition}
 \alias{partition,LogicalNeuroVol,integer-method}
 \alias{partition,LogicalNeuroVol,numeric-method}
-\title{partition an image into a set of disjoint clusters}
+\title{Partition an image into a set of disjoint clusters}
 \usage{
 partition(x, k, ...)
 
@@ -13,12 +13,34 @@ partition(x, k, ...)
 \S4method{partition}{LogicalNeuroVol,numeric}(x, k)
 }
 \arguments{
-\item{x}{the object to partition}
+\item{x}{the image to partition, represented as a 3D array.}
 
-\item{k}{the number of clusters}
+\item{k}{the number of clusters to form.}
 
-\item{...}{additional arguments}
+\item{...}{additional arguments passed to the kmeans function.}
+}
+\value{
+a 3D array where each voxel is assigned to a cluster.
 }
 \description{
-partition an image into a set of disjoint clusters
+This function partitions an image into a set of disjoint clusters using k-means clustering.
+}
+\examples{
+# Load an example 3D image
+library(neuroim2)
+img <- read_vol(system.file("extdata", "global_mask_v5.nii", package = "neuroim2"))
+
+# Partition the image into 5 clusters using default options
+clusters <- partition(img, 5)
+
+# View the resulting clusters as a 4D array
+library(magrittr)
+split_blocks(clusters) \%>\%
+  vols() \%>\%
+  do.call(abind::abind, c(along = 4, .)) \%>\%
+  image3D::image3D(col = jet.colors(5))
+
+}
+\seealso{
+\code{\link{kmeans}}
 }

@@ -29,3 +29,31 @@ test_that("can extract clustered searchlight object from a 3d volume", {
 })
 
 
+test_that("random_searchlight works as expected", {
+  mask <- read_vol(gmask)
+  random_sl <- random_searchlight(mask, radius = 5)
+  expect_true(!is.null(random_sl), info = "random_searchlight failed to create an iterator")
+})
+
+test_that("bootstrap_searchlight works as expected", {
+  bootstrap_sl <- bootstrap_searchlight(sample_vol, radius = 8, iter = 100)
+  expect_true(!is.null(bootstrap_sl), info = "bootstrap_searchlight failed to create an iterator")
+})
+
+test_that("searchlight_coords works as expected", {
+  coords_list <- searchlight_coords(sample_vol, radius = 4, nonzero = FALSE, cores = 0)
+  expect_true(!is.null(coords_list), info = "searchlight_coords failed to create an iterator")
+})
+
+test_that("searchlight works as expected", {
+  searchlight_list <- searchlight(sample_vol, radius = 4, eager = FALSE, nonzero = FALSE, cores = 0)
+  expect_true(!is.null(searchlight_list), info = "searchlight failed to create an iterator")
+})
+
+test_that("clustered_searchlight works as expected", {
+  clustered_sl <- clustered_searchlight(sample_vol, csize = 5)
+  expect_true(!is.null(clustered_sl), info = "clustered_searchlight failed to create an iterator")
+})
+
+
+

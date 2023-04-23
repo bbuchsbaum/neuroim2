@@ -4,11 +4,17 @@
 {}
 
 
-#' IndexLookupVol
 #'
-#' @param space a NeuroSpace object
-#' @param indices the set of 1-d indices defining the lookup map
-#' @export IndexLookupVol
+#' Create an IndexLookupVol object.
+#'
+#' @param space A \code{\linkS4class{NeuroSpace}} object representing the 3D space of the brain image.
+#' @param indices An integer vector containing the 1D indices of the voxels in the grid.
+#'
+#' @return An object of class \code{\linkS4class{IndexLookupVol}} representing the index lookup volume.
+#'
+#' @seealso \code{\linkS4class{IndexLookupVol}}
+#'
+#' @export
 #' @rdname IndexLookupVol-class
 IndexLookupVol <- function(space, indices) {
   new("IndexLookupVol", space=space, indices=indices)

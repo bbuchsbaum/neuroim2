@@ -86,7 +86,7 @@ setClass("AxisSet5D", representation(m="NamedAxis"), contains=c("AxisSet4D"))
 #' @slot header_extension the file extension for the header file (e.g. 'nii' for NIfTI single files)
 #' @slot data_encoding the file encoding for the data file
 #' @slot data_extension the file extension for the data file (e.g. 'nii' for NIfTI single files)
-#' @exportClass FileFormat
+#' @export
 setClass("FileFormat",
          representation=
            representation(file_format="character",
@@ -99,17 +99,14 @@ setClass("FileFormat",
 #' NIFTIFormat
 #'
 #' This class supports the NIFTI file format
-#'
-#' @rdname NIFTIFileDescriptor-class
-#' @export
+#' @keywords internal
 setClass("NIFTIFormat", contains=c("FileFormat"))
 
 
 #' AFNIFormat
 #'
 #' This class supports the AFNI file format
-#' @rdname AFNIDescriptor-class
-#' @export
+#' @keywords internal
 setClass("AFNIFormat", contains=c("FileFormat"))
 
 #' H5Format
@@ -200,7 +197,7 @@ setClass("AFNIMetaInfo",
 #'
 #' @rdname FileSource-class
 #' @slot meta_info meta information for the data source
-#' @exportClass FileSource
+#' @export
 setClass("FileSource", representation(meta_info="FileMetaInfo"))
 
 
@@ -210,7 +207,7 @@ setClass("FileSource", representation(meta_info="FileMetaInfo"))
 #' A class is used to produce a \code{\linkS4class{NeuroVol}} instance
 #' @rdname NeuroVolSource-class
 #' @slot index the index of the volume to be read -- must be of length 1.
-#' @exportClass NeuroVolSource
+#' @keywords internal
 setClass("NeuroVolSource", representation(index="integer"), contains="FileSource")
 
 
@@ -220,7 +217,7 @@ setClass("NeuroVolSource", representation(index="integer"), contains="FileSource
 #' A class that is used to produce a \code{\linkS4class{NeuroVec}} instance
 #' @rdname NeuroVecSource-class
 #' @slot indices the index vector of the volumes to be loaded
-#' @export
+#' @keywords internal
 setClass("NeuroVecSource", representation(indices="integer"), contains="FileSource")
 
 
@@ -230,6 +227,7 @@ setClass("NeuroVecSource", representation(indices="integer"), contains="FileSour
 #'
 #' @rdname H5NeuroVecSource-class
 #' @slot file_name the name of the hdf5 file.
+#' @keywords internal
 setClass("H5NeuroVecSource", representation(file_name="character"))
 
 
@@ -238,7 +236,8 @@ setClass("H5NeuroVecSource", representation(file_name="character"))
 #' A class that is used to produce a \code{\linkS4class{LatentNeuroVecSource}} instance
 #'
 #' @rdname LatentNeuroVecSource-class
-#' @slot file_name the name of the hdf5 file.
+#' @slot file_name the name of the file.
+#' @keywords internal
 setClass("LatentNeuroVecSource", representation(file_name="character"))
 
 
@@ -282,19 +281,32 @@ setClass("BinaryWriter",
                           bytes_per_element="integer",
                           endian="character"))
 
-#' NeuroSpace
+#' NeuroSpace Class
 #'
-#' This class represents the geometry of a brain image
-#' @rdname NeuroSpace-class
-#' @slot dim the grid dimensions of the image
-#' @slot origin the coordinates of the spatial origin
-#' @slot spacing the dimensions (in mm) of the grid units (voxels)
-#' @slot axes the set of named spatial axes in the untransformed native grid space.
-#' @slot trans an affine transformation matrix that moves from grid -> real world coordinates
-#' @slot inverse an inverse matrix that moves from real world -> grid coordinates
+#' Represents the geometry of a brain image.
+#'
+#' @slot dim An integer vector representing the grid dimensions of the image.
+#' @slot origin A numeric vector representing the coordinates of the spatial origin.
+#' @slot spacing A numeric vector representing the dimensions (in mm) of the grid units (voxels).
+#' @slot axes A named \code{\linkS4class{AxisSet}} object representing the set of spatial axes in the untransformed native grid space.
+#' @slot trans A matrix representing an affine transformation that converts grid coordinates to real-world coordinates.
+#' @slot inverse A matrix representing an inverse transformation that converts real-world coordinates to grid coordinates.
+#'
+#' @section Validity:
+#'   The \code{\linkS4class{NeuroSpace}} object is considered valid if:
+#'   - The length of the @dim slot is equal to the lengths of the @spacing, @origin, and number of axes in the @axes slots.
+#'   - The @dim slot contains non-negative values.
+#'
+#' @section Usage:
+#'   The \code{\linkS4class{NeuroSpace}} class is used to store and manipulate the geometric properties of a brain image.
+#'
+#' @examples
+#' # Create a NeuroSpace object
+#' space <- new("NeuroSpace", dim=c(64, 64, 64), origin=c(0, 0, 0), spacing=c(1, 1, 1),
+#'              axes=AxisSet(c('x', 'y', 'z')), trans=diag(4), inverse=diag(4))
+#'
 #' @export
-#'
-# TODO add 'ref_space' e.g. the name of the coordinate reference space (e.g. LPI)?
+#' @rdname NeuroSpace-class
 setClass("NeuroSpace",
         representation(dim = "integer", origin = "numeric", spacing = "numeric",
                        axes="AxisSet", trans="matrix", inverse="matrix"),
@@ -315,6 +327,8 @@ setClass("NeuroSpace",
              return("@dim slot must contain non-negative values")
            }
          })
+
+
 
 #' NeuroObj
 #' Base class for all data objects with a cartesion spatial represenetation
@@ -350,10 +364,14 @@ setClass("DenseNeuroVol", contains=c("NeuroVol", "array"))
 
 #' SparseNeuroVol
 #'
-#' Three-dimensional brain image, backed by a \code{sparseVector} for \code{Matrix} package
-#' @slot data a \code{sparseVector} instance
-#' @importFrom Matrix sparseVector
+#' This S4 class represents a three-dimensional brain image, which is stored using a sparse data representation, backed by a \code{sparseVector} from the Matrix package. Sparse representations are beneficial for storing and processing large brain images with a high proportion of zero or missing values.
+#'
+#' @slot data A \code{\linkS4class{sparseVector}} instance from the Matrix package, which stores the image volume data in a sparse format.
+#'
+#' @seealso \code{\linkS4class{NeuroVol}} and \code{\linkS4class{ArrayLike3D}}
+#'
 #' @rdname SparseNeuroVol-class
+#' @importFrom Matrix sparseVector
 #' @export
 setClass("SparseNeuroVol",
          representation=representation(data="sparseVector"),
@@ -367,16 +385,30 @@ setClass("SparseNeuroVol",
 #' @export
 setClass("LogicalNeuroVol", contains=c("DenseNeuroVol"))
 
-#' ClusteredNeuroVol
+#' ClusteredNeuroVol Class
 #'
-#' Three-dimensional brain image that is divided into N disjoint partitions
+#' A three-dimensional brain image divided into N disjoint partitions or clusters.
 #'
-#' @slot mask the \code{logical} mask indicating the spatial domain of the set of clusters
-#' @slot clusters an integer index indicating the cluster number for each voxel in the mask
-#' @slot label_map a list mapping from name to cluster id
-#' @slot cluster_map an \code{environment} mapping from cluster id to the set of 1D spatial indices
-#' @rdname ClusteredNeuroVol-class
+#' @slot mask A \code{\linkS4class{LogicalNeuroVol}} object representing the logical mask indicating the spatial domain of the set of clusters.
+#' @slot clusters An integer vector representing the cluster number for each voxel in the mask.
+#' @slot label_map A named list where each element represents a cluster and its name.
+#' @slot cluster_map An \code{environment} object that maps from cluster id to the set of 1D spatial indices belonging to that cluster.
+#'
+#' @section Methods:
+#'   The \code{\linkS4class{ClusteredNeuroVol}} class inherits methods from the \code{\linkS4class{SparseNeuroVol}} class.
+#'
+#' @section Usage:
+#'   The \code{\linkS4class{ClusteredNeuroVol}} class is useful for representing a brain image with clustered regions, where each region is a disjoint partition.
+#'
+#' @seealso \code{\linkS4class{SparseNeuroVol}}, \code{\linkS4class{LogicalNeuroVol}}
+#'
+#' @examples
+#' # Create a ClusteredNeuroVol object
+#' # (Assuming you have the necessary data such as mask, clusters, label_map, and cluster_map)
+#' clustered_vol <- new("ClusteredNeuroVol", mask=mask, clusters=clusters, label_map=label_map, cluster_map=cluster_map)
+#'
 #' @export
+#' @rdname ClusteredNeuroVol-class
 setClass("ClusteredNeuroVol",
          representation=representation(
                                        mask="LogicalNeuroVol",
@@ -386,11 +418,44 @@ setClass("ClusteredNeuroVol",
          contains=c("SparseNeuroVol"))
 
 
-#' IndexLookupVol
+#' IndexLookupVol Class
 #'
-#' Three-dimensional brain image that can be used as a map between 1D grid indices and a table of values
-#' Currently used in the \code{\linkS4class{SparseNeuroVec}} class.
+#' A three-dimensional brain image class that serves as a map between 1D grid indices and a table of values.
+#' It is primarily used in the \code{\linkS4class{SparseNeuroVec}} class.
 #'
+#' @section Constructor:
+#' \preformatted{
+#' IndexLookupVol(space, indices, map)
+#' }
+#'
+#' @param space A \code{\linkS4class{NeuroSpace}} object representing the 3D space of the brain image.
+#' @param indices An integer vector containing the 1D indices of the voxels in the grid.
+#' @param map An integer vector containing the mapping between the 1D indices and the table of values.
+#'
+#' @return An object of class \code{\linkS4class{IndexLookupVol}} representing the index lookup volume.
+#'
+#' @section Slots:
+#' \describe{
+#'   \item{\code{space}:}{A \code{\linkS4class{NeuroSpace}} object representing the 3D space of the brain image.}
+#'   \item{\code{indices}:}{An integer vector containing the 1D indices of the voxels in the grid.}
+#'   \item{\code{map}:}{An integer vector containing the mapping between the 1D indices and the table of values.}
+#' }
+#'
+#' @seealso \code{\linkS4class{SparseNeuroVec}}
+#'
+#' @examples
+#' # Create a NeuroSpace object
+#' space <- NeuroSpace(c(2, 2, 2, 10), c(1, 1, 1))
+#'
+#' # Create a 3D mask
+#' mask <- array(rnorm(2 * 2 * 2) > -100, c(2, 2, 2))
+#'
+#' # Create indices and map for the IndexLookupVol
+#' indices <- which(mask)
+#' map <- seq_along(indices)
+#'
+#' # Create an IndexLookupVol object
+#' ilv <- IndexLookupVol(space, indices, map)
 #' @rdname IndexLookupVol-class
 #' @export
 setClass("IndexLookupVol",
@@ -437,6 +502,8 @@ setClass("NeuroHyperVec", contains="NeuroObj",
 #' @export
 setClass("DenseNeuroVec",  contains=c("NeuroVec", "array"))
 
+
+#' @keywords internal
 setValidity("DenseNeuroVec", function(object) {
   if (length(dim(object)) != 4) {
     "data must be four-dimensional array"

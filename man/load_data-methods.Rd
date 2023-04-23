@@ -9,7 +9,7 @@
 \alias{load_data,LatentNeuroVecSource-method}
 \alias{load_data,NeuroVolSource-method}
 \alias{load_data,SparseNeuroVecSource-method}
-\title{load data from a data source}
+\title{Load data from a data source.}
 \usage{
 load_data(x, ...)
 
@@ -26,17 +26,15 @@ load_data(x, ...)
 \S4method{load_data}{SparseNeuroVecSource}(x)
 }
 \arguments{
-\item{x}{a data source}
+\item{x}{a data source.}
 
-\item{...}{additional arguments}
+\item{...}{additional arguments to be passed to methods.}
 }
 \value{
 an instance of class \code{\linkS4class{NeuroVec}}
 }
 \description{
-load data from a data source
-
-load_data
-
-load a NeuroVol
+This function loads data from a data source and returns it in a format that is compatible with
+other functions in the neuroim2 package. The format of the returned data depends on the type
+of data source used.
 }

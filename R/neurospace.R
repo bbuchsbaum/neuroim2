@@ -6,23 +6,25 @@
 
 #' Constructor function for \code{\linkS4class{NeuroSpace}} class
 #'
-#' @param dim a vector describing the dimensions of the image grid
-#' @param origin the coordinate origin of the image space
-#' @param spacing the real-valued voxel dimensions (e.g. in millimeters)
-#' @param axes the image axes ordering (default is based on the NIFTI standard, Left-Posterior-Inferior)
-#' @param trans a matrix representing the coordinate transformation associated with the image space
-#'              (default is based on the NIFTI standard, "Neurological" orientation)
-#' @return an instance of class \code{\linkS4class{NeuroSpace}}
-#' @note one should rarely need to create a new \code{NeuroSpace} instance, as it will almost always be created automatically using information stored in an image header.
-#' Also, If one already has an existing image object, its \code{NeuroSpace} instance can be easily extracted with the \code{space} method.
-#' @export
-#' @rdname neuro_space
+#' @param dim An integer vector describing the dimensions of the image grid.
+#' @param origin A numeric vector representing the coordinate origin of the image space. If not provided, the default is set to a vector of zeroes with the same length as the dimensions.
+#' @param spacing A numeric vector representing the real-valued voxel dimensions (e.g., in millimeters). If not provided, the default is set to a vector of ones with the same length as the dimensions.
+#' @param axes An \code{\linkS4class{AxisSet}} object representing the image axes ordering. If not provided, the default axes are determined based on the NIFTI standard (Left-Posterior-Inferior).
+#' @param trans A matrix representing the coordinate transformation associated with the image space. If not provided, the default is based on the NIFTI standard ("Neurological" orientation).
+#'
+#' @return An instance of the \code{\linkS4class{NeuroSpace}} class.
+#'
+#' @note Users rarely need to create a new \code{NeuroSpace} instance, as it will almost always be created automatically using information stored in an image header. If an existing image object is available, its \code{NeuroSpace} instance can be easily extracted with the \code{space} method.
+#'
 #' @examples
-#' bspace <- NeuroSpace(c(64,64,64), origin=c(0,0,0), spacing=c(2,2,2))
+#' bspace <- NeuroSpace(c(64, 64, 64), origin = c(0, 0, 0), spacing = c(2, 2, 2))
 #' bspace
 #' origin(bspace)
 #' axes(bspace)
 #' trans(bspace)
+#'
+#' @export
+#' @rdname neuro_space
 NeuroSpace <- function(dim, spacing=NULL, origin=NULL, axes=NULL, trans=NULL) {
 
 	if (is.null(spacing)) {
@@ -36,6 +38,9 @@ NeuroSpace <- function(dim, spacing=NULL, origin=NULL, axes=NULL, trans=NULL) {
   if (length(origin) != length(spacing)) {
     stop("length of 'origin' must equal length of 'spacing'")
   }
+
+  assertthat::assert_that(all(spacing > 0), msg="all dimensions must have sppacing > 0")
+  assertthat::assert_that(all(dim > 0), msg="all dimensions must be > 0")
 
 	if (is.null(trans)) {
 		D <- min(length(dim), 3)
@@ -376,13 +381,9 @@ setMethod(f="grid_to_index", signature=signature(x="NeuroSpace", coords="matrix"
 		def=function(x, coords) {
 			dx <- dim(x)
 
-			if (length(dx) == 2) {
-			  assert_that(length(coords) == 2)
-			  dx <- dim(x)
-			  nsize <- prod(dx)
-			  apply(coords, 1, function(vox) {
-			    (vox[2]-1)*dx[1] + vox[1]
-			  })
+			if (ncol(coords) == 2) {
+			  .gridToIndex(dim(x), coords)
+			  #assert_that(ncol(coords) == 2)
 			} else if (ncol(coords) == 3) {
 			  assert_that(length(dx) >= 3)
 			  .gridToIndex3D(dx[1:3], coords)

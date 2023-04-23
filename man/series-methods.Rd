@@ -12,6 +12,7 @@
 \alias{series,NeuroVec,NeuroVol-method}
 \alias{series_roi,NeuroVec,LogicalNeuroVol-method}
 \alias{series,NeuroVec,integer-method}
+\alias{series,DenseNeuroVec,integer-method}
 \alias{series,H5NeuroVec,integer-method}
 \alias{series,NeuroVec,numeric-method}
 \alias{series_roi,NeuroVec,numeric-method}
@@ -42,6 +43,8 @@ series(x, i, ...)
 \S4method{series_roi}{NeuroVec,LogicalNeuroVol}(x, i)
 
 \S4method{series}{NeuroVec,integer}(x, i, j, k, drop = TRUE)
+
+\S4method{series}{DenseNeuroVec,integer}(x, i, j, k, drop = TRUE)
 
 \S4method{series}{H5NeuroVec,integer}(x, i, j, k, drop = TRUE)
 

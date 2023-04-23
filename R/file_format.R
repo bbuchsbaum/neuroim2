@@ -66,6 +66,8 @@ setMethod(f="strip_extension",signature=signature(x= "FileFormat", file_name="ch
 		})
 
 
+
+#' @keywords internal
 .read_meta_info <- function(desc, file_name, read_func, constructor) {
 
 	hfile <- header_file(desc, file_name)
@@ -75,14 +77,12 @@ setMethod(f="strip_extension",signature=signature(x= "FileFormat", file_name="ch
 }
 
 #' @rdname read_meta_info-methods
-#' @export
 setMethod(f="read_meta_info",signature=signature(x= "NIFTIFormat"),
 		def=function(x, file_name) {
 			.read_meta_info(x, file_name, read_nifti_header, NIFTIMetaInfo)
 		})
 
 #' @rdname read_meta_info-methods
-#' @export
 setMethod(f="read_meta_info",signature=signature(x= "AFNIFormat"),
 		def=function(x, file_name) {
 			.read_meta_info(x, file_name, read_afni_header, AFNIMetaInfo)
@@ -101,6 +101,8 @@ find_descriptor <- function(file_name) {
 	else NULL
 }
 
+
+#' @keywords internal
 AFNI <- new("AFNIFormat",
 		file_format="AFNI",
 		header_encoding="raw",
@@ -108,6 +110,8 @@ AFNI <- new("AFNIFormat",
 		data_encoding="raw",
 		data_extension="BRIK")
 
+
+#' @keywords internal
 AFNI_GZ <- new("AFNIFormat",
 		file_format="AFNI",
 		header_encoding="gzip",
@@ -115,6 +119,8 @@ AFNI_GZ <- new("AFNIFormat",
 		data_encoding="gzip",
 		data_extension="BRIK.gz")
 
+
+#' @keywords internal
 NIFTI <- new("NIFTIFormat",
 		file_format="NIFTI",
 		header_encoding="raw",
@@ -122,6 +128,8 @@ NIFTI <- new("NIFTIFormat",
 		data_encoding="raw",
 		data_extension="nii")
 
+
+#' @keywords internal
 NIFTI_GZ <- new("NIFTIFormat",
 		file_format="NIFTI",
 		header_encoding="gzip",
@@ -129,6 +137,8 @@ NIFTI_GZ <- new("NIFTIFormat",
 		data_encoding="gzip",
 		data_extension="nii.gz")
 
+
+#' @keywords internal
 NIFTI_PAIR <- new("NIFTIFormat",
 		file_format="NIFTI",
 		header_encoding="raw",
@@ -136,6 +146,8 @@ NIFTI_PAIR <- new("NIFTIFormat",
 		data_encoding="raw",
 		data_extension="img")
 
+
+#' @keywords internal
 NIFTI_PAIR_GZ <- new("NIFTIFormat",
 		file_format="NIFTI",
 		header_encoding="gzip",

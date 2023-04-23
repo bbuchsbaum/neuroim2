@@ -7,18 +7,28 @@
 guided_filter(vol, radius = 4, epsilon = 0.7^2)
 }
 \arguments{
-\item{vol}{the image volume as a \code{NeuroVol}}
+\item{vol}{A \code{\linkS4class{NeuroVol}} object representing the image volume to be filtered.}
 
-\item{radius}{the spatial radius of the filter}
+\item{radius}{An integer specifying the spatial radius of the filter (default is 4).}
 
-\item{epsilon}{variance constant}
+\item{epsilon}{A numeric value specifying the variance constant, which controls the degree of smoothing (default is .7^2).}
 }
 \value{
-a filtered image of class \code{NeuroVol}
+A filtered image of class \code{\linkS4class{NeuroVol}}.
 }
 \description{
-Filter a volumetric image with an edge-preserving "guided" filter
+This function applies a guided filter to a volumetric image (3D brain MRI data) to perform edge-preserving smoothing.
+The guided filter is an edge-preserving filter that smooths the image while preserving the edges, providing a balance between noise reduction and edge preservation.
+}
+\examples{
+# Load an example brain volume
+brain_vol <- read_vol(system.file("extdata", "example_volume.nii", package="neuroim2"))
+
+# Apply guided filtering to the brain volume
+filtered_vol <- guided_filter(brain_vol, radius = 4, epsilon = .7^2)
+
 }
 \references{
+Guided Image Filtering: Kaiming He, Jian Sun, and Xiaoou Tang, "Guided Image Filtering," IEEE Transactions on Pattern Analysis and Machine Intelligence, Vol. 35, No. 6, pp. 1397-1409, June, 2013.
 https://en.wikipedia.org/wiki/Guided_filter
 }

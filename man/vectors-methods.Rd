@@ -4,6 +4,7 @@
 \name{vectors}
 \alias{vectors}
 \alias{vectors,NeuroVec,missing-method}
+\alias{vectors,DenseNeuroVec,missing-method}
 \alias{vectors,NeuroVec,numeric-method}
 \alias{vectors,NeuroVec,logical-method}
 \alias{vectors,ROIVec,missing-method}
@@ -14,11 +15,13 @@
 \alias{vectors,ROIVec,numeric-method}
 \alias{vectors,ROIVec,logical-method}
 \alias{vectors,SparseNeuroVec,missing-method}
-\title{extract an ordered list of 1d vectors}
+\title{Extract an ordered list of 1D vectors.}
 \usage{
 vectors(x, subset, ...)
 
 \S4method{vectors}{NeuroVec,missing}(x)
+
+\S4method{vectors}{DenseNeuroVec,missing}(x)
 
 \S4method{vectors}{NeuroVec,numeric}(x, subset)
 
@@ -41,14 +44,17 @@ vectors(x, subset, ...)
 \S4method{vectors}{SparseNeuroVec,missing}(x, nonzero = FALSE)
 }
 \arguments{
-\item{x}{the object that supplies the vector data}
+\item{x}{the object that supplies the vector data.}
 
-\item{subset}{the subset of vectors to extract}
+\item{subset}{the subset of vectors to extract.}
 
-\item{...}{additional arguments}
+\item{...}{additional arguments to be passed to methods.}
 
 \item{nonzero}{only include nonzero vectors in output list}
 }
 \description{
-extract an ordered list of 1d vectors
+This function extracts an ordered list of 1D vectors from an object that supplies vector data.
+The \code{subset} argument specifies the subset of vectors to extract, and can be a vector
+of indices or a logical vector. The return value is a list containing the extracted vectors
+in the same order as the specified indices.
 }

@@ -4,7 +4,7 @@
 \name{ClusteredNeuroVol-class}
 \alias{ClusteredNeuroVol-class}
 \alias{ClusteredNeuroVol}
-\title{ClusteredNeuroVol}
+\title{ClusteredNeuroVol Class}
 \usage{
 ClusteredNeuroVol(mask, clusters, label_map = NULL, label = "")
 }
@@ -21,7 +21,7 @@ ClusteredNeuroVol(mask, clusters, label_map = NULL, label = "")
 \code{\linkS4class{ClusteredNeuroVol}} instance
 }
 \description{
-Three-dimensional brain image that is divided into N disjoint partitions
+A three-dimensional brain image divided into N disjoint partitions or clusters.
 
 Construct a \code{\linkS4class{ClusteredNeuroVol}} instance
 }
@@ -32,20 +32,37 @@ each of which has an associated id. For example, this class can be used to repre
 \section{Slots}{
 
 \describe{
-\item{\code{mask}}{the \code{logical} mask indicating the spatial domain of the set of clusters}
+\item{\code{mask}}{A \code{\linkS4class{LogicalNeuroVol}} object representing the logical mask indicating the spatial domain of the set of clusters.}
 
-\item{\code{clusters}}{an integer index indicating the cluster number for each voxel in the mask}
+\item{\code{clusters}}{An integer vector representing the cluster number for each voxel in the mask.}
 
-\item{\code{label_map}}{a list mapping from name to cluster id}
+\item{\code{label_map}}{A named list where each element represents a cluster and its name.}
 
-\item{\code{cluster_map}}{an \code{environment} mapping from cluster id to the set of 1D spatial indices}
+\item{\code{cluster_map}}{An \code{environment} object that maps from cluster id to the set of 1D spatial indices belonging to that cluster.}
 }}
 
+\section{Methods}{
+
+  The \code{\linkS4class{ClusteredNeuroVol}} class inherits methods from the \code{\linkS4class{SparseNeuroVol}} class.
+}
+
+\section{Usage}{
+
+  The \code{\linkS4class{ClusteredNeuroVol}} class is useful for representing a brain image with clustered regions, where each region is a disjoint partition.
+}
+
 \examples{
+# Create a ClusteredNeuroVol object
+# (Assuming you have the necessary data such as mask, clusters, label_map, and cluster_map)
+clustered_vol <- new("ClusteredNeuroVol", mask=mask, clusters=clusters, label_map=label_map, cluster_map=cluster_map)
+
 
 bspace <- NeuroSpace(c(16,16,16), spacing=c(1,1,1))
 grid <- index_to_grid(bspace, 1:(16*16*16))
 kres <- kmeans(grid, centers=10)
 mask <- NeuroVol(rep(1, 16^3),bspace)
 clusvol <- ClusteredNeuroVol(mask, kres$cluster)
+}
+\seealso{
+\code{\linkS4class{SparseNeuroVol}}, \code{\linkS4class{LogicalNeuroVol}}
 }

@@ -348,6 +348,11 @@ matchAnatomy2D <- function(axis1, axis2) {
   jcol <- mat33[,2]
   kcol <- mat33[,3]
 
+  # if (!sum(mat33 == 1) == 3) {
+  #   mat33 = apply(mat33, 2, function(x) (x+runif(3)*.1))
+  #   apply(mat33, 2, function(x) x/sum(x))
+  # }
+
   ## normalize icol
   icol <- icol / sqrt(sum(icol^2))
 
@@ -356,7 +361,8 @@ matchAnatomy2D <- function(axis1, axis2) {
 
   orthogonalize <- function(col1, col2) {
     dotp <- sum(col1*col2)
-    if (abs(dotp > 1.e-4)) {
+    #print(dotp)
+    if (abs(dotp) > 1.e-4) {
       col2 <- col2 - (dotp * col1)
       norm <- sqrt(sum(col2^2))
       col2 <- col2 / norm
@@ -385,6 +391,7 @@ matchAnatomy2D <- function(axis1, axis2) {
   if (detQ == 0.0) {
     stop("invalid matrix input, determinant is 0")
   }
+
 
   vbest = -666
   ibest = 1

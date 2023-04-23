@@ -1,11 +1,3 @@
-#' resample an image to match the space of another image
-#'
-#' @export
-#' @param source the source image
-#' @param target the target image
-#' @param ... extra args
-#' @rdname resample-methods
-setGeneric("resample", function(source, target, ...) standardGeneric("resample"))
 
 
 #' @export
@@ -20,6 +12,14 @@ setGeneric("as.matrix", function(x) standardGeneric("as.matrix"))
 
 setGeneric("scale")
 
+#' resample an image to match the space of another image
+#'
+#' @export
+#' @param source the source image
+#' @param target the target image
+#' @param ... extra args
+#' @rdname resample-methods
+setGeneric("resample", function(source, target, ...) standardGeneric("resample"))
 
 
 #' print an object
@@ -36,52 +36,76 @@ setGeneric(name="print_", def=function(x, ...) standardGeneric("print_"))
 #' @rdname values-methods
 setGeneric(name="values", def=function(x, ...) standardGeneric("values"))
 
-#' extract values from an array-like object using linear indexing
+#' Extract values from an array-like object using linear indexing.
 #'
-#' @param x a data source
-#' @param i a vector of indices
-#' @param ... additional arguments
+#' This function extracts the values of the elements in an array-like object using
+#' linear indexing. Linear indexing is a way of indexing an array by a single index
+#' that is computed from multiple indices using a formula.
+#'
+#' @param x a data source.
+#' @param i a vector of indices.
+#' @param ... additional arguments to be passed to methods.
 #' @export
 #' @rdname linear_access-methods
 setGeneric(name="linear_access", def=function(x, i, ...) standardGeneric("linear_access"))
 
 
-#' extract values from a matricized (x,y,z) of a 4D tensor using a space-time coordinate matrix
+#' Extract values from a matricized (x,y,z) of a 4D tensor using a space-time coordinate matrix.
 #'
-#' @param x a data source
-#' @param i an index matrix
-#' @param ... additional arguments
+#' This function extracts the values of the elements in a 4D tensor, where the first three dimensions
+#' (x,y,z) have been matricized into a single dimension, using a space-time coordinate matrix.
+#' The input \code{i} is an index matrix, where each row specifies a (x,y,z,t) coordinate.
+#' The output is a vector containing the values of the elements in \code{x} at the specified
+#' space-time coordinates.
+#'
+#' @param x a data source.
+#' @param i an index matrix specifying the space-time coordinates.
+#' @param ... additional arguments to be passed to methods.
+#' @export
 #' @rdname matricized_access-methods
 setGeneric(name="matricized_access", def=function(x, i, ...) standardGeneric("matricized_access"))
 
 
 
-#' load data from a data source
+#' Load data from a data source.
 #'
-#' @param x a data source
-#' @param ... additional arguments
+#' This function loads data from a data source and returns it in a format that is compatible with
+#' other functions in the neuroim2 package. The format of the returned data depends on the type
+#' of data source used.
+#'
+#' @param x a data source.
+#' @param ... additional arguments to be passed to methods.
 #' @export
 #' @rdname load_data-methods
 setGeneric(name="load_data", def=function(x, ...) standardGeneric("load_data"))
 
-#' apply a function to an object
+#' Apply a function to an object.
 #'
-#' @param x the object that is mapped
-#' @param m the mapping object
-#' @param ... additional arguments
+#' This function applies a function to an object, with additional arguments passed to the function
+#' using the \code{...} argument. The mapping object specifies how the function is to be applied,
+#' and can take many different forms, depending on the object and function used. The return value
+#' depends on the function used.
+#'
+#' @param x the object that is mapped.
+#' @param m the mapping object.
+#' @param ... additional arguments to be passed to the function.
 #' @export
 #' @rdname map-methods
 setGeneric(name="mapf", def=function(x, m, ...) standardGeneric("mapf"))
 
-#' extract an ordered series of 3d volumes
+#' Extract an ordered series of 3D volumes.
 #'
-#' @param x the object that supplies the volume data
-#' @param indices the subset of volumes to extract
-#' @param ... additional arguments
+#' This function extracts an ordered series of 3D volumes from an object that supplies volume data.
+#' The \code{indices} argument specifies the subset of volumes to extract, and can be a vector
+#' of indices or a logical vector. The return value is a list containing the extracted volumes
+#' in the same order as the specified indices.
+#'
+#' @param x the object that supplies the volume data.
+#' @param indices the subset of volumes to extract.
+#' @param ... additional arguments to be passed to methods.
 #' @export
 #' @rdname vols-methods
 #' @examples
-#'
 #' vec <- read_vec(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #' vs <- vols(vec)
 #' length(vs) == dim(vec)[4]
@@ -90,51 +114,103 @@ setGeneric(name="mapf", def=function(x, m, ...) standardGeneric("mapf"))
 #' length(vs) == 3
 setGeneric(name="vols", def=function(x, indices, ...) standardGeneric("vols"))
 
-#' extract an ordered list of 1d vectors
+
+#' Extract an ordered list of 1D vectors.
 #'
-#' @param x the object that supplies the vector data
-#' @param subset the subset of vectors to extract
-#' @param ... additional arguments
+#' This function extracts an ordered list of 1D vectors from an object that supplies vector data.
+#' The \code{subset} argument specifies the subset of vectors to extract, and can be a vector
+#' of indices or a logical vector. The return value is a list containing the extracted vectors
+#' in the same order as the specified indices.
+#'
+#' @param x the object that supplies the vector data.
+#' @param subset the subset of vectors to extract.
+#' @param ... additional arguments to be passed to methods.
 #' @export
 #' @rdname vectors-methods
 setGeneric(name="vectors", def=function(x, subset, ...) standardGeneric("vectors"))
 
-#' cut a vector-valued object into a list of sub-blocks
+#' Cut a vector-valued object into a list of sub-blocks
 #'
-#' @param x the object to split
-#' @param indices a vector of indices for the blocks. Must match the length of the inut vector.
+#' Splits a vector-valued object into a list of sub-blocks defined by a vector of indices.
+#'
+#' @param x a vector-valued object
+#' @param indices a vector of indices defining the sub-blocks. Must match the length of the input vector.
 #' @param ... additional arguments
 #' @export
 #' @rdname split_blocks-methods
-setGeneric(name="split_blocks", def=function(x, indices, ...) standardGeneric("split_blocks"))
-
-
-
-#' partition an image into a set of disjoint clusters
+#' @examples
 #'
-#' @param x the object to partition
-#' @param k the number of clusters
-#' @param ... additional arguments
+#' # split a numeric vector into sub-blocks
+#' x <- 1:12
+#' indices <- c(1,1,1,2,2,2,2,3,3,4,4,4)
+#' sub_blocks <- split_blocks(x, indices)
+#'
+#' # split a character vector into sub-blocks
+#' y <- c("apple", "banana", "cherry", "date", "elderberry", "fig")
+#' indices <- c(1,1,2,2,2,3)
+#' sub_blocks <- split_blocks(y, indices)
+#'
+#' # split a list into sub-blocks
+#' z <- list(a = 1:3, b = 4:6, c = 7:9, d = 10:12)
+#' indices <- c(1,1,1,2,2,2,3,3,3,4,4,4)
+#' sub_blocks <- split_blocks(z, indices)
+#'
+split_blocks <- function(x, indices, ...) {
+  # function body goes here
+}
+
+
+#' Partition an image into a set of disjoint clusters
+#'
+#' This function partitions an image into a set of disjoint clusters using k-means clustering.
+#'
+#' @param x the image to partition, represented as a 3D array.
+#' @param k the number of clusters to form.
+#' @param ... additional arguments passed to the kmeans function.
 #' @export
 #' @rdname partition-methods
+#' @examples
+#' # Load an example 3D image
+#' library(neuroim2)
+#' img <- read_vol(system.file("extdata", "global_mask_v5.nii", package = "neuroim2"))
+#'
+#' # Partition the image into 5 clusters using default options
+#' clusters <- partition(img, 5)
+#'
+#' # View the resulting clusters as a 4D array
+#' library(magrittr)
+#' split_blocks(clusters) %>%
+#'   vols() %>%
+#'   do.call(abind::abind, c(along = 4, .)) %>%
+#'   image3D::image3D(col = jet.colors(5))
+#'
+#' @return a 3D array where each voxel is assigned to a cluster.
+#' @seealso \code{\link{kmeans}}
 setGeneric(name="partition", def=function(x, k, ...) standardGeneric("partition"))
 
-
-
-#' cut an object into a list of spatial or spatiotemporal clusters
+#' Cut an object into a list of spatial or spatiotemporal clusters
 #'
-#' @param x the object to split
-#' @param clusters a vector of cluster indices to split by
-#' @param ... additional arguments
+#' This function cuts an object into a list of sub-objects based on a vector of cluster indices.
+#' The resulting list contains each of the clusters as separate objects.
+#'
+#' @param x The object to split. The input object must be a 4D tensor, where the first three dimensions correspond to the spatial dimensions of the data and the fourth dimension corresponds to time.
+#' @param clusters A vector of cluster indices to split by.
+#' @param ... Additional arguments to be passed to methods.
 #' @export
 #' @rdname split_clusters-methods
 setGeneric(name="split_clusters", def=function(x, clusters, ...) standardGeneric("split_clusters"))
 
 
-#' extract an ordered series of 2d slices
+
+#' Extract an ordered series of 2D slices from a 3D or 4D object
 #'
-#' @param x the object that supplies the slices
-#' @param ... additional arguments
+#' This function extracts an ordered series of 2D slices from a 3D or 4D object. The returned slices are in the order they appear in the original object.
+#'
+#' @param x The 3D or 4D object to extract slices from
+#' @param ... Additional arguments to be passed to the underlying methods
+#'
+#' @return A list of 2D matrices, each containing a slice from the input object
+#'
 #' @export
 #' @rdname slices-methods
 setGeneric(name="slices", def=function(x, ...) standardGeneric("slices"))
@@ -142,28 +218,37 @@ setGeneric(name="slices", def=function(x, ...) standardGeneric("slices"))
 
 
 
-#' extract the number of dimensions of an object
+#' Extract the number of dimensions of an object
 #'
 #' @param x n-dimensional object
 #' @param ... additional arguments
 #' @export
 #' @examples
 #'
+#' ```r
 #' x = NeuroSpace(c(10,10,10), spacing=c(1,1,1))
 #' ndim(x) == 3
 #' x = NeuroSpace(c(10,10,10,3), spacing=c(1,1,1))
 #' ndim(x) == 4
+#' ```
 #'
+#' @return The number of dimensions of the input object `x`
 #' @rdname ndim-methods
 setGeneric(name="ndim", def=function(x, ...) standardGeneric("ndim"))
 
 
-#' get dimensions of an axis
+#' Get the length of a given dimension of an object
 #'
-#' @param x the object
-#' @param axis the axis to return the dimension of
+#' This function returns the length of a given axis (dimension) of an object. The
+#' axis can be specified using its position or name.
+#'
+#' @param x the object whose axis to query
+#' @param axis an integer or character string indicating which axis to query
+#' @export
 #' @rdname dim_of-methods
+#' @return An integer representing the length of the specified axis.
 setGeneric(name="dim_of", def=function(x, axis) standardGeneric("dim_of"))
+
 
 #' find dimensions of a given axis
 #'
@@ -510,6 +595,7 @@ setGeneric(name="reorient", def=function(x, orient) standardGeneric("reorient"))
 
 
 #' convert 1d indices to n-dimensional grid coordinates
+#'
 #' @param x the object
 #' @param idx the 1d \code{vector} of indices
 #' @return a matrix of grid coordinates

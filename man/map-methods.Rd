@@ -3,23 +3,24 @@
 \name{mapf}
 \alias{mapf}
 \alias{mapf,NeuroVol,Kernel-method}
-\title{apply a function to an object}
+\title{Apply a function to an object.}
 \usage{
 mapf(x, m, ...)
 
 \S4method{mapf}{NeuroVol,Kernel}(x, m, mask = NULL)
 }
 \arguments{
-\item{x}{the object that is mapped}
+\item{x}{the object that is mapped.}
 
-\item{m}{the mapping object}
+\item{m}{the mapping object.}
 
-\item{...}{additional arguments}
+\item{...}{additional arguments to be passed to the function.}
 
 \item{mask}{restrict application of kernel to masked area}
 }
 \description{
-apply a function to an object
-
-apply a kernel function to a \code{\linkS4class{NeuroVol}}
+This function applies a function to an object, with additional arguments passed to the function
+using the \code{...} argument. The mapping object specifies how the function is to be applied,
+and can take many different forms, depending on the object and function used. The return value
+depends on the function used.
 }

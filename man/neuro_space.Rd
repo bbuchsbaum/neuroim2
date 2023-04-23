@@ -7,31 +7,30 @@
 NeuroSpace(dim, spacing = NULL, origin = NULL, axes = NULL, trans = NULL)
 }
 \arguments{
-\item{dim}{a vector describing the dimensions of the image grid}
+\item{dim}{An integer vector describing the dimensions of the image grid.}
 
-\item{spacing}{the real-valued voxel dimensions (e.g. in millimeters)}
+\item{spacing}{A numeric vector representing the real-valued voxel dimensions (e.g., in millimeters). If not provided, the default is set to a vector of ones with the same length as the dimensions.}
 
-\item{origin}{the coordinate origin of the image space}
+\item{origin}{A numeric vector representing the coordinate origin of the image space. If not provided, the default is set to a vector of zeroes with the same length as the dimensions.}
 
-\item{axes}{the image axes ordering (default is based on the NIFTI standard, Left-Posterior-Inferior)}
+\item{axes}{An \code{\linkS4class{AxisSet}} object representing the image axes ordering. If not provided, the default axes are determined based on the NIFTI standard (Left-Posterior-Inferior).}
 
-\item{trans}{a matrix representing the coordinate transformation associated with the image space
-(default is based on the NIFTI standard, "Neurological" orientation)}
+\item{trans}{A matrix representing the coordinate transformation associated with the image space. If not provided, the default is based on the NIFTI standard ("Neurological" orientation).}
 }
 \value{
-an instance of class \code{\linkS4class{NeuroSpace}}
+An instance of the \code{\linkS4class{NeuroSpace}} class.
 }
 \description{
 Constructor function for \code{\linkS4class{NeuroSpace}} class
 }
 \note{
-one should rarely need to create a new \code{NeuroSpace} instance, as it will almost always be created automatically using information stored in an image header.
-Also, If one already has an existing image object, its \code{NeuroSpace} instance can be easily extracted with the \code{space} method.
+Users rarely need to create a new \code{NeuroSpace} instance, as it will almost always be created automatically using information stored in an image header. If an existing image object is available, its \code{NeuroSpace} instance can be easily extracted with the \code{space} method.
 }
 \examples{
-bspace <- NeuroSpace(c(64,64,64), origin=c(0,0,0), spacing=c(2,2,2))
+bspace <- NeuroSpace(c(64, 64, 64), origin = c(0, 0, 0), spacing = c(2, 2, 2))
 bspace
 origin(bspace)
 axes(bspace)
 trans(bspace)
+
 }

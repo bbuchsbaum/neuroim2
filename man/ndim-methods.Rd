@@ -6,7 +6,7 @@
 \alias{ndim,AxisSet-method}
 \alias{ndim,NeuroObj-method}
 \alias{ndim,NeuroSpace-method}
-\title{extract the number of dimensions of an object}
+\title{Extract the number of dimensions of an object}
 \usage{
 ndim(x, ...)
 
@@ -21,14 +21,19 @@ ndim(x, ...)
 
 \item{...}{additional arguments}
 }
+\value{
+The number of dimensions of the input object `x`
+}
 \description{
-extract the number of dimensions of an object
+Extract the number of dimensions of an object
 }
 \examples{
 
+```r
 x = NeuroSpace(c(10,10,10), spacing=c(1,1,1))
 ndim(x) == 3
 x = NeuroSpace(c(10,10,10,3), spacing=c(1,1,1))
 ndim(x) == 4
+```
 
 }
