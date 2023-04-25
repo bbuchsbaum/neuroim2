@@ -52,7 +52,9 @@ gaussian_blur <- function(vol, mask, sigma=2, window=1) {
 #' brain_vol <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
 #'
 #' # Apply guided filtering to the brain volume
+#' \dontrun{
 #' filtered_vol <- guided_filter(brain_vol, radius = 4, epsilon = .7^2)
+#' }
 #'
 #' @references
 #' Guided Image Filtering: Kaiming He, Jian Sun, and Xiaoou Tang, "Guided Image Filtering," IEEE Transactions on Pattern Analysis and Machine Intelligence, Vol. 35, No. 6, pp. 1397-1409, June, 2013.

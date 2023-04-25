@@ -57,6 +57,19 @@ NumericMatrix indexToGridCpp(IntegerVector idx, IntegerVector array_dim) {
 
 // [[Rcpp::export]]
 NumericMatrix local_sphere(int vx, int vy, int vz, double radius, NumericVector spacing, IntegerVector dim) {
+
+  if (radius <= 0) {
+    Rcpp::stop("radius must be greater than 0.");
+  }
+
+  if (spacing.size() != 3) {
+    Rcpp::stop("spacing must be a vector of length 3.");
+  }
+
+  if (dim.size() != 3) {
+    Rcpp::stop("dim must be an integer vector of length 3.");
+  }
+
   int i_rad = round(radius/spacing[0]);
   int j_rad = round(radius/spacing[1]);
   int k_rad = round(radius/spacing[2]);
@@ -64,7 +77,7 @@ NumericMatrix local_sphere(int vx, int vy, int vz, double radius, NumericVector 
   //std::list<std::vector<double>> cds;
   //List cds((i_rad*2)*(j_rad*2)*(k_rad*2));
 
-  NumericMatrix cds((i_rad*2)*(j_rad*2)*(k_rad*2), 3);
+  NumericMatrix cds((i_rad*2+1)*(j_rad*2+1)*(k_rad*2+1), 3);
 
   int count = 0;
   for (int i = vx - i_rad; i <= (vx + i_rad); i++) {
@@ -101,8 +114,8 @@ NumericMatrix local_sphere(int vx, int vy, int vz, double radius, NumericVector 
         }
       }
   }
+  return cds(Rcpp::Range(0, count-1), Rcpp::_);
 
-  return cds(Rcpp::Range(0, count-1), _);
 }
 
 

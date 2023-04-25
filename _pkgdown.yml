@@ -156,7 +156,7 @@ reference:
     - map_values
     - matchAnatomy2D
     - matchAnatomy3D
-
+    - resample
   - title: "Data Access and Indexing"
     desc: >
       Methods for accessing and indexing neuroimaging data
@@ -215,7 +215,9 @@ reference:
       - starts_with("as")
       - starts_with("close")
       - starts_with("plot")
-
+      - starts_with("Arith")
+      - starts_with("Compare")
+      - ends_with("-method")
 
 
 

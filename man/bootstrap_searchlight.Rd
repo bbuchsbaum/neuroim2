@@ -30,6 +30,8 @@ Searchlight centers are sampled without replacement, but the same surround voxel
 mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
 
 # Generate a bootstrap searchlight iterator with a radius of 6 voxels
+\dontrun{
 searchlights <- bootstrap_searchlight(mask, radius = 6)
+}
 
 }

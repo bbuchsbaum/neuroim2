@@ -20,7 +20,9 @@
 #' mask[1, 1, 1] <- FALSE
 #' mask <- LogicalNeuroVol(mask, NeuroSpace(c(10,10,10)))
 #' # Generate random searchlight iterator with a radius of 2 voxels
-#' searchlights <- random_searchlight(mask, radius = 2)
+#'
+#' \dontrun{searchlights <- random_searchlight(mask, radius = 2)
+#' }
 #'
 #' @export
 #' @rdname random_searchlight
@@ -92,7 +94,9 @@ random_searchlight <- function(mask, radius) {
 #' mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
 #'
 #' # Generate a bootstrap searchlight iterator with a radius of 6 voxels
+#' \dontrun{
 #' searchlights <- bootstrap_searchlight(mask, radius = 6)
+#' }
 #'
 #' @export
 #' @rdname bootstrap_searchlight
@@ -126,7 +130,8 @@ bootstrap_searchlight <- function(mask, radius=8, iter=100) {
 #' mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
 #'
 #' # Generate an exhaustive searchlight iterator with a radius of 6 mm
-#' searchlights <- searchlight_coords(mask, radius = 6)
+#' \dontrun{ searchlights <- searchlight_coords(mask, radius = 6)
+#' }
 #'
 #' @export
 #' @rdname searchlight_coords
@@ -181,7 +186,9 @@ searchlight_coords <- function(mask, radius, nonzero=FALSE, cores=0) {
 #' mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
 #'
 #' # Generate an exhaustive searchlight iterator with a radius of 6 mm
+#' \dontrun{
 #' searchlights <- searchlight(mask, radius = 6, eager = TRUE)
+#' }
 #'
 #' @export
 #' @rdname searchlight_coords
@@ -244,7 +251,9 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
 #' mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
 #'
 #' # Generate a clustered searchlight iterator with 5 clusters
+#' \dontrun{
 #' clust_searchlight <- clustered_searchlight(mask, csize = 5)
+#' }
 #'
 #' @rdname searchlight
 #' @export

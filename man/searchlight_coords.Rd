@@ -37,12 +37,15 @@ sphere within the provided mask. The searchlight iterator visits every non-zero 
 mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
 
 # Generate an exhaustive searchlight iterator with a radius of 6 mm
-searchlights <- searchlight_coords(mask, radius = 6)
+\dontrun{ searchlights <- searchlight_coords(mask, radius = 6)
+}
 
 # Load an example brain mask
 mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
 
 # Generate an exhaustive searchlight iterator with a radius of 6 mm
+\dontrun{
 searchlights <- searchlight(mask, radius = 6, eager = TRUE)
+}
 
 }

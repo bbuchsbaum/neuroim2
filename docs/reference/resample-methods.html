@@ -48,7 +48,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Resample an Image to Match the Space of Another Image</h1>
-      <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/neuroim2/blob/HEAD/R/all_generic.R" class="external-link"><code>R/all_generic.R</code></a>, <a href="https://github.com/bbuchsbaum/neuroim2/blob/HEAD/R/resample.R" class="external-link"><code>R/resample.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/neuroim2/blob/HEAD/R/all_generic.R" class="external-link"><code>R/all_generic.R</code></a></small>
       <div class="d-none name"><code>resample-methods.Rd</code></div>
     </div>
 
@@ -58,13 +58,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">resample</span><span class="op">(</span><span class="va">source</span>, <span class="va">target</span>, <span class="va">...</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S4 method for NeuroVol,NeuroVol</span></span>
-<span><span class="fu">resample</span><span class="op">(</span><span class="va">source</span>, <span class="va">target</span>, interpolation <span class="op">=</span> <span class="fl">3L</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S4 method for NeuroVol,NeuroSpace</span></span>
-<span><span class="fu">resample</span><span class="op">(</span><span class="va">source</span>, <span class="va">target</span>, interpolation <span class="op">=</span> <span class="fl">3L</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">resample</span><span class="op">(</span><span class="va">source</span>, <span class="va">target</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -79,12 +73,6 @@
 
 <dt>...</dt>
 <dd><p>Additional arguments passed to the resampling function, such as interpolation method, boundary handling, or other resampling options.</p></dd>
-
-
-<dt>interpolation</dt>
-<dd><p>a single integer specifying the type of interpolation to be applied to the
-final resampled image. May be 0 (nearest neighbor), 1 (trilinear) or 3 (cubic spline).
-No other values are valid.</p></dd>
 
 </dl></div>
     <div class="section level2">
