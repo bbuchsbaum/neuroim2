@@ -38,3 +38,4 @@ This function loads data from a data source and returns it in a format that is c
 other functions in the neuroim2 package. The format of the returned data depends on the type
 of data source used.
 }
+\keyword{internal}

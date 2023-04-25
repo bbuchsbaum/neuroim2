@@ -60,10 +60,13 @@ setMethod(f="space", signature=signature(x="IndexLookupVol"),
             x@space
           })
 
-#' coords
-#'
-#' @export coords
-#' @param i the index in to the lookup volume
+
+#' @title Extract coordinates from an IndexLookupVol object
+#' @description This method extracts the coordinates from an IndexLookupVol object based on a given index.
+#' @param x An IndexLookupVol object to extract coordinates from.
+#' @param i The index into the lookup volume.
+#' @return The extracted coordinates corresponding to the provided index. If the index is not found, it returns NA.
+#' @export
 #' @rdname coords-methods
 setMethod(f="coords", signature(x="IndexLookupVol"),
           def=function(x,i) {

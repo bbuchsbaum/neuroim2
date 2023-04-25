@@ -4,7 +4,7 @@
 \alias{values}
 \alias{values,ROIVol-method}
 \alias{values,ROIVec-method}
-\title{extract data values of object}
+\title{Extract Data Values of an Object}
 \usage{
 values(x, ...)
 
@@ -18,5 +18,5 @@ values(x, ...)
 \item{...}{additional arguments}
 }
 \description{
-extract data values of object
+Extract Data Values of an Object
 }

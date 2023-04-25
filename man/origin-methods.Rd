@@ -4,7 +4,7 @@
 \alias{origin}
 \alias{origin,NeuroSpace-method}
 \alias{origin,NeuroVol-method}
-\title{extract image origin}
+\title{Extract Image Origin}
 \usage{
 origin(x)
 
@@ -16,7 +16,7 @@ origin(x)
 \item{x}{an object with an origin}
 }
 \description{
-extract image origin
+Extract Image Origin
 }
 \examples{
 bspace <- NeuroSpace(c(10,10,10), c(2,2,2))

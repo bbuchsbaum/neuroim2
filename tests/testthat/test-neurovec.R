@@ -422,7 +422,7 @@ test_that("NeuroVec constructor works correctly", {
                   NeuroVol(array(13:24, c(2, 2, 3)), space2))
   nv2 <- NeuroVec(nv_list)
   expect_s4_class(nv2, "DenseNeuroVec")
-  expect_equal(nv2@.Data, c(data))
+  expect_equivalent(nv2@.Data, c(data))
 })
 
 

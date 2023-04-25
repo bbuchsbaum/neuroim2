@@ -41,3 +41,4 @@ This function extracts the values of the elements in an array-like object using
 linear indexing. Linear indexing is a way of indexing an array by a single index
 that is computed from multiple indices using a formula.
 }
+\keyword{internal}

@@ -3,28 +3,25 @@
 \name{bounds}
 \alias{bounds}
 \alias{bounds,NeuroSpace-method}
-\title{extract the spatial bounds (origin + dim * spacing) of an image
-param x the object}
+\title{Extract Spatial Bounds of an Image}
 \usage{
 bounds(x)
 
 \S4method{bounds}{NeuroSpace}(x)
 }
 \arguments{
-\item{x}{the object with \code{bounds} property}
+\item{x}{The object with the `bounds` property, typically an image.}
 }
 \value{
-a \code{matrix} where each row contains the min (column 1) and max (column 2) bounds of the image dimension from 1 to \code{ndim(image)}.
+A matrix where each row contains the min (column 1) and max (column 2) bounds of the image dimension from 1 to `ndim(image)`.
 }
 \description{
-extract the spatial bounds (origin + dim * spacing) of an image
-param x the object
-
-bounds
+This function extracts the spatial bounds (origin + dim * spacing) of an image represented by the input object.
 }
 \examples{
-bspace <- NeuroSpace(c(10,10,10), c(2,2,2))
+bspace <- NeuroSpace(c(10, 10, 10), c(2, 2, 2))
 b <- bounds(bspace)
 nrow(b) == ndim(bspace)
 ncol(b) == 2
+
 }

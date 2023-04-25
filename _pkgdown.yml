@@ -1,7 +1,221 @@
 url: https://bbuchsbaum.github.io/neuroim2/
 template:
   bootstrap: 5
-  bslib:
-    bg: "#202123"
-    fg: "#B8BCC2"
-    primary: "#306cc9"
+
+reference:
+  - title: "Constructors"
+    desc: >
+      Constructors for creating and initializing various
+      neuroimaging objects
+    contents:
+    - AbstractSparseNeuroVec-class
+    - AFNIMetaInfo
+    - AxisSet-class
+    - AxisSet1D-class
+    - AxisSet2D-class
+    - AxisSet3D-class
+    - AxisSet4D-class
+    - AxisSet5D-class
+    - BigNeuroVec-class
+    - BinaryReader
+    - BinaryWriter
+    - ClusteredNeuroVol
+    - DenseNeuroVec
+    - DenseNeuroVol
+    - FileBackedNeuroVec
+    - H5NeuroVec
+    - IndexLookupVol
+    - LatentNeuroVec
+    - LogicalNeuroVol
+    - MappedNeuroVec
+    - MetaInfo-class
+    - NeuroBucket-class
+    - NeuroHyperVec-class
+    - NeuroObj-class
+    - NeuroSlice
+    - NeuroSpace
+    - NeuroVec
+    - NeuroVecSeq
+    - NeuroVecSource
+    - NeuroVol
+    - NIFTIMetaInfo
+    - ROICoords-class
+    - ROIVec
+    - ROIVol
+    - SparseNeuroVec
+    - SparseNeuroVol
+
+  - title: "S4 Classes"
+    desc: >
+      S4 classes for various neuroimaging objects
+    contents:
+    - BinaryReader-class
+    - ColumnReader-class
+    - FileBackedNeuroVec-class
+    - FileFormat-class
+    - FileMetaInfo-class
+    - FileSource-class
+    - H5NeuroVec-class
+    - H5NeuroVol-class
+    - MappedNeuroVecSource-class
+    - NamedAxis-class
+    - NeuroSlice-class
+    - NeuroSpace-class
+    - NeuroVecSeq-class
+    - NeuroVol-class
+    - ROI-class
+    - ROIVec-class
+    - ROIVecWindow-class
+    - ROIVol-class
+    - ROIVolWindow-class
+    - SparseNeuroVecSource-class
+  - title: "Data Loading and Manipulation"
+    desc: >
+      Methods for loading and manipulating neuroimaging data
+    contents:
+    - load_data
+    - concat
+    - mapf
+    - vols
+    - neuroim2
+    - data_file
+    - data_file_matches
+    - data_reader
+    - file_matches
+    - read_elements
+  - title: "Coordinate and Dimension Operations"
+    desc: >
+      Methods for operating on coordinates and dimensions
+    contents:
+    - space
+    - axes
+    - spacing
+    - bounds
+    - centroid
+    - coord_to_grid
+    - coord_to_index
+    - grid_to_coord
+    - grid_to_index
+    - grid_to_grid
+    - index_to_coord
+    - index_to_grid
+    - dim_of
+    - drop_dim
+    - add_dim
+    - ndim
+    - voxels
+    - which_dim
+    - trans
+    - inverse_trans
+    - origin
+    - perm_mat
+    - strip_extension
+  - title: "ROI and Clustering"
+    desc: >
+      Methods for working with regions of interest and clustering
+    contents:
+    - partition
+    - patch_set
+    - split_clusters
+    - centroids
+    - conn_comp
+    - conn_comp_3D
+    - coords
+    - cuboid_roi
+    - num_clusters
+    - slices
+    - slice
+    - vectors
+    - values
+  - title: "Kernel and Extraction"
+    desc: >
+      Methods for kernel operations and feature extraction
+    contents:
+    - Kernel
+    - Kernel-class
+    - embed_kernel
+    - extractor3d
+    - extractor4d
+    - spherical_roi
+    - square_roi
+    - searchlight
+    - searchlight_coords
+    - random_searchlight
+    - bootstrap_searchlight
+    - series_roi
+    - gaussian_blur
+    - guided_filter
+    - reorient
+    - clustered_searchlight
+
+  - title: "Lookup and Mapping"
+    desc: >
+      Methods for looking up and mapping neuroimaging data
+    contents:
+    - lookup
+    - map_values
+    - matchAnatomy2D
+    - matchAnatomy3D
+
+  - title: "Data Access and Indexing"
+    desc: >
+      Methods for accessing and indexing neuroimaging data
+    contents:
+    - linear_access
+    - matricized_access
+    - sub_vector
+    - indices
+    - length,NeuroVec-method
+
+  - title: "Scaling and Resampling"
+    desc: >
+      Methods for splitting, scaling, processing, and resampling neuroimaging data
+    contents:
+    - scale_series
+    - resample
+    - split_fill
+    - split_reduce
+    - split_blocks
+    - split_scale
+
+  - title: "Visualization and Rendering"
+    desc: >
+      Methods for visualizing and rendering neuroimaging data
+    contents:
+    - render
+    - render_slice
+  - title: "IO"
+    desc: >
+      Methods for input-output operations
+    contents:
+    - read_vec
+    - read_vol
+    - write_elements
+    - write_vec
+    - write_vol
+    - close,BinaryReader-method
+    - ColumnReader
+    - header_file
+    - header_file_matches
+    - read_columns
+    - read_header
+    - read_meta_info
+    - read_vol_list
+  - title: "Miscellaneous"
+    desc: >
+      Miscellaneous methods and functions
+    contents:
+      - starts_with("\\[")
+      - starts_with("dim")
+      - starts_with("drop")
+      - starts_with("length")
+      - starts_with("show")
+      - starts_with("print")
+      - starts_with("_print")
+      - starts_with("as")
+      - starts_with("close")
+      - starts_with("plot")
+
+
+
+

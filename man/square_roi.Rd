@@ -7,28 +7,30 @@
 square_roi(bvol, centroid, surround, fill = NULL, nonzero = FALSE, fixdim = 3)
 }
 \arguments{
-\item{bvol}{an \code{NeuroVol} or \code{NeuroSpace} instance.}
+\item{bvol}{A \code{NeuroVol} or \code{NeuroSpace} instance representing the 3D volume or space.}
 
-\item{centroid}{the center of the cube in \emph{voxel} coordinates.}
+\item{centroid}{A numeric vector of length 3, representing the center of the square ROI in voxel coordinates.}
 
-\item{surround}{the number of voxels on either side of the central voxel.}
+\item{surround}{A non-negative integer specifying the number of voxels on either side of the central voxel.}
 
-\item{fill}{optional value(s) to assign to data slot.}
+\item{fill}{An optional value or values to assign to the data slot of the resulting ROI. If not provided, no data will be assigned.}
 
-\item{nonzero}{keep only nonzero elements from \code{bvol}. If \code{bvol} is A \code{NeuroSpace} then this argument is ignored.}
+\item{nonzero}{A logical value indicating whether to keep only nonzero elements from \code{bvol}.
+If \code{bvol} is a \code{NeuroSpace} instance, this argument is ignored.}
 
-\item{fixdim}{the fixed dimension is the third, or z, dimension.}
+\item{fixdim}{A logical value indicating whether the fixed dimension is the third, or z, dimension. Default is TRUE.}
 }
 \value{
-an instance of class \code{ROIVol}.
+An instance of class \code{ROIVol} representing the square ROI.
 }
 \description{
-Create a square region of interest where the z-dimension is fixed at one voxel coordinate.
+This function creates a square region of interest (ROI) in a 3D volume, where the z-dimension is fixed
+at one voxel coordinate. The ROI is defined within a given NeuroVol or NeuroSpace instance.
 }
 \examples{
- sp1 <- NeuroSpace(c(10,10,10), c(1,1,1))
- square <- square_roi(sp1, c(5,5,5), 1)
- vox <- coords(square)
- ## a 3 X 3 X 1 grid
- nrow(vox) == 9
+sp1 <- NeuroSpace(c(10, 10, 10), c(1, 1, 1))
+square <- square_roi(sp1, c(5, 5, 5), 1)
+vox <- coords(square)
+## a 3 X 3 X 1 grid
+nrow(vox) == 9
 }

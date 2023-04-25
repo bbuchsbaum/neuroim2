@@ -22,7 +22,7 @@ analyze the local neighborhood of voxels within a given radius in a brain mask.
 # Create a simple brain mask
 mask <- array(TRUE, c(10, 10, 10))
 mask[1, 1, 1] <- FALSE
-
+mask <- LogicalNeuroVol(mask, NeuroSpace(c(10,10,10)))
 # Generate random searchlight iterator with a radius of 2 voxels
 searchlights <- random_searchlight(mask, radius = 2)
 

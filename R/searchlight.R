@@ -18,7 +18,7 @@
 #' # Create a simple brain mask
 #' mask <- array(TRUE, c(10, 10, 10))
 #' mask[1, 1, 1] <- FALSE
-#'
+#' mask <- LogicalNeuroVol(mask, NeuroSpace(c(10,10,10)))
 #' # Generate random searchlight iterator with a radius of 2 voxels
 #' searchlights <- random_searchlight(mask, radius = 2)
 #'
@@ -82,7 +82,7 @@ random_searchlight <- function(mask, radius) {
 #' @param radius A numeric value specifying the radius of the searchlight sphere in voxel units (default is 8).
 #' @param iter An integer specifying the total number of searchlights to sample (default is 100).
 #'
-#' @return A \code{\linkS4class{deferred_list}} object containing \code{\linkS4class{ROIVolWindow}} objects,
+#' @return A \code{deferred_list} object containing \code{\linkS4class{ROIVolWindow}} objects,
 #'         each representing a spherical searchlight region sampled from within the mask.
 #'
 #' @details Searchlight centers are sampled without replacement, but the same surround voxel can belong to multiple searchlight samples.
@@ -119,7 +119,7 @@ bootstrap_searchlight <- function(mask, radius=8, iter=100) {
 #' @param nonzero A logical value indicating whether to include only coordinates with nonzero values in the supplied mask (default is FALSE).
 #' @param cores An integer specifying the number of cores to use for parallel computation (default is 0, which uses a single core).
 #'
-#' @return A \code{\linkS4class{deferred_list}} object containing matrices of integer-valued voxel coordinates, each representing a searchlight region.
+#' @return A \code{deferred_list} object containing matrices of integer-valued voxel coordinates, each representing a searchlight region.
 #'
 #' @examples
 #' # Load an example brain mask
@@ -174,7 +174,7 @@ searchlight_coords <- function(mask, radius, nonzero=FALSE, cores=0) {
 #' @param nonzero A logical value indicating whether to include only coordinates with nonzero values in the supplied mask (default is FALSE).
 #' @param cores An integer specifying the number of cores to use for parallel computation (default is 0, which uses a single core).
 #'
-#' @return A \code{\linkS4class{deferred_list}} object containing matrices of integer-valued voxel coordinates, each representing a searchlight region.
+#' @return A \code{deferred_list} object containing matrices of integer-valued voxel coordinates, each representing a searchlight region.
 #'
 #' @examples
 #' # Load an example brain mask
@@ -236,7 +236,7 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
 #' @param cvol An optional \code{ClusteredNeuroVol} instance representing pre-defined clusters within the mask. If provided, the 'csize' parameter is ignored.
 #' @param csize An optional integer specifying the number of clusters to be generated using k-means clustering (ignored if \code{cvol} is provided).
 #'
-#' @return A \code{\linkS4class{deferred_list}} object containing \code{ROIVol} objects, each representing a clustered region within the image volume.
+#' @return A \code{deferred_list} object containing \code{ROIVol} objects, each representing a clustered region within the image volume.
 #'
 #' @importFrom stats kmeans
 #' @examples

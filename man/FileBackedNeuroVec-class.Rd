@@ -5,11 +5,11 @@
 \alias{FileBackedNeuroVec-class}
 \title{FileBackedNeuroVec}
 \description{
-a four-dimensional brain image that is read in to memory "on demand" using memory-mapped file access.
+A class representing a four-dimensional brain image that is read into memory "on demand" using memory-mapped file access. FileBackedNeuroVec objects enable efficient handling of large-scale brain imaging data by loading only the required portions of the data into memory when needed.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{meta}}{the file meta information of type \code{\linkS4class{FileMetaInfo}}}
+\item{\code{meta}}{An instance of class \code{\linkS4class{FileMetaInfo}} containing the file meta information, such as the file path, format, and other associated metadata.}
 }}
 

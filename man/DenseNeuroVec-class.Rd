@@ -19,7 +19,7 @@ DenseNeuroVec(data, space, label = "")
 \code{\linkS4class{DenseNeuroVec}} instance
 }
 \description{
-Four-dimensional brain image, backed by an array
+A class representing a four-dimensional brain image, backed by an array. DenseNeuroVec objects store their data in a dense array format, which is useful for cases where most elements in the brain image contain non-zero values. This class inherits from both the \code{\linkS4class{NeuroVec}} and the \code{array} classes.
 
 constructor function for class \code{\linkS4class{DenseNeuroVec}}
 }

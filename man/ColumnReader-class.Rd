@@ -5,15 +5,15 @@
 \alias{ColumnReader-class}
 \title{ColumnReader}
 \description{
-This class supports reading of data froma matrix-like storage format
+A class that supports reading of data from a matrix-like storage format, such as a file or a database, in a column-wise manner.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{nrow}}{the number of rows}
+\item{\code{nrow}}{An \code{integer} representing the number of rows in the matrix-like storage.}
 
-\item{\code{ncol}}{the number of columns}
+\item{\code{ncol}}{An \code{integer} representing the number of columns in the matrix-like storage.}
 
-\item{\code{reader}}{a function that takes a set of column indices and returns a \code{matrix}}
+\item{\code{reader}}{A \code{function} that takes a set of column indices as input and returns a \code{matrix} containing the requested columns from the storage.}
 }}
 

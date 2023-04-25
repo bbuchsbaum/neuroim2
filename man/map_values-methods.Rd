@@ -4,7 +4,7 @@
 \alias{map_values}
 \alias{map_values,NeuroVol,list-method}
 \alias{map_values,NeuroVol,matrix-method}
-\title{map values from one set of values to another set using a user-supplied lookup table}
+\title{Map Values from One Set to Another Using a User-supplied Lookup Table}
 \usage{
 map_values(x, lookup)
 
@@ -13,26 +13,26 @@ map_values(x, lookup)
 \S4method{map_values}{NeuroVol,matrix}(x, lookup)
 }
 \arguments{
-\item{x}{the object to map values from}
+\item{x}{The object from which values will be mapped.}
 
-\item{lookup}{the lookup table. The first column is the "key" the second column is the "value".}
+\item{lookup}{The lookup table. The first column is the "key" and the second column is the "value".}
 }
 \value{
-a new object where the original values have been filled in with the values in the lookup table
+A new object in which the original values have been replaced with the values from the lookup table.
 }
 \description{
-map values from one set of values to another set using a user-supplied lookup table
+This function maps values from one set to another using a lookup table provided by the user.
 }
 \examples{
-x <- NeuroSpace(c(10,10,10), c(1,1,1))
-vol <- NeuroVol(sample(1:10, 10*10*10, replace=TRUE), x)
+x <- NeuroSpace(c(10, 10, 10), c(1, 1, 1))
+vol <- NeuroVol(sample(1:10, 10 * 10 * 10, replace = TRUE), x)
 
-## lookup table is list
-lookup <- lapply(1:10, function(i) i*10)
+## Lookup table is a list
+lookup <- lapply(1:10, function(i) i * 10)
 names(lookup) <- 1:10
 ovol <- map_values(vol, lookup)
 
-## lookup table is matrix. First column is key, second column is value
+## Lookup table is a matrix. The first column is the key, and the second column is the value
 names(lookup) <- 1:length(lookup)
 lookup.mat <- cbind(as.numeric(names(lookup)), unlist(lookup))
 ovol2 <- map_values(vol, lookup.mat)

@@ -6,29 +6,66 @@
 
 #' Create an instance of class \code{\linkS4class{ROIVol}}
 #'
-#' @param vspace an instance of class \code{NeuroSpace} with three dimensions
-#' @param coords a 3-column matrix of voxel coordinates
-#' @param data the data values, numeric vector
-#' @return an instance of class \code{ROIVol}
-#' @rdname ROIVol
+#' This function constructs an instance of the ROIVol class, which represents
+#' a region of interest (ROI) in a 3D volume. The class stores the
+#' NeuroSpace object, voxel coordinates, and data values for the ROI.
+#'
+#' @param vspace An instance of class \code{NeuroSpace} with three dimensions,
+#'   which represents the dimensions and voxel spacing of the 3D volume.
+#' @param coords A 3-column matrix of voxel coordinates for the region of interest.
+#' @param data The data values associated with the region of interest,
+#'   provided as a numeric vector. By default, it is a vector of ones with a length equal
+#'   to the number of rows in the `coords` matrix.
+#' @return An instance of class \code{ROIVol}, containing the NeuroSpace object,
+#'   voxel coordinates, and data values for the region of interest.
+#' @examples
+#' # Create a NeuroSpace object
+#' vspace <- NeuroSpace(dim = c(5, 5, 5), spacing = c(1, 1, 1))
+#'
+#' # Define voxel coordinates for the ROI
+#' coords <- matrix(c(1, 2, 3, 2, 2, 2, 3, 3, 3), ncol = 3)
+#'
+#' # Create a ROIVol object
+#' roi_vol <- ROIVol(vspace, coords)
 #' @export
-ROIVol <- function(vspace, coords, data=rep(nrow(coords),1)) {
+ROIVol <- function(vspace, coords, data=rep(1, nrow(coords))) {
   new("ROIVol", space=vspace, coords=coords, as.vector(data))
 }
 
 #' Create an instance of class \code{\linkS4class{ROIVec}}
 #'
-#' @param vspace an instance of class \code{NeuroSpace} with four dimenisons
-#' @param coords a 3 column matrix of voxel coordinates
-#' @param data the \code{matrix} of data values
-#' @return an instance of class \code{ROIVec}
+#' This function constructs an instance of the ROIVec class, which represents
+#' a region of interest (ROI) in a 4D volume. The class stores the
+#' NeuroSpace object, voxel coordinates, and data values for the ROI.
+#'
+#' @param vspace An instance of class \code{NeuroSpace} with four dimensions,
+#'   which represents the dimensions, voxel spacing, and time points of the 4D volume.
+#' @param coords A 3-column matrix of voxel coordinates for the region of interest.
+#' @param data The matrix of data values associated with the region of interest,
+#'   with each row representing a voxel and each column representing a time point.
+#'   By default, it is a matrix with a number of rows equal to the number of rows
+#'   in the `coords` matrix and a single column filled with ones.
+#' @return An instance of class \code{ROIVec}, containing the NeuroSpace object,
+#'   voxel coordinates, and data values for the region of interest.
+#' @examples
+#' # Create a NeuroSpace object
+#' vspace <- NeuroSpace(dim = c(5, 5, 5, 10), spacing = c(1, 1, 1))
+#'
+#' # Define voxel coordinates for the ROI
+#' coords <- matrix(c(1, 2, 3, 2, 2, 2, 3, 3, 3), ncol = 3)
+#'
+#' # Create a data matrix for the ROI
+#' data <- matrix(rnorm(30), nrow = 10, ncol = 3)
+#'
+#' # Create a ROIVec object
+#' roi_vec <- ROIVec(vspace, coords, data)
 #' @rdname ROIVec
 #' @export
 ROIVec <- function(vspace, coords, data=rep(nrow(coords),1)) {
   new("ROIVec", space=vspace, coords=coords, data)
 }
 
-#' convert a \code{ROIVec} to a matrix
+#' convert a \code{\linkS4class{ROIVec}} to a matrix
 #'
 #' @rdname as.matrix-methods
 #' @export
@@ -91,21 +128,23 @@ setMethod(f="as.matrix", signature=signature(x = "ROIVec"), def=function(x) {
 
 #' Create a square region of interest
 #'
-#' Create a square region of interest where the z-dimension is fixed at one voxel coordinate.
+#' This function creates a square region of interest (ROI) in a 3D volume, where the z-dimension is fixed
+#' at one voxel coordinate. The ROI is defined within a given NeuroVol or NeuroSpace instance.
 #'
-#' @param bvol an \code{NeuroVol} or \code{NeuroSpace} instance.
-#' @param centroid the center of the cube in \emph{voxel} coordinates.
-#' @param surround the number of voxels on either side of the central voxel.
-#' @param fill optional value(s) to assign to data slot.
-#' @param nonzero keep only nonzero elements from \code{bvol}. If \code{bvol} is A \code{NeuroSpace} then this argument is ignored.
-#' @param fixdim the fixed dimension is the third, or z, dimension.
-#' @return an instance of class \code{ROIVol}.
+#' @param bvol A \code{NeuroVol} or \code{NeuroSpace} instance representing the 3D volume or space.
+#' @param centroid A numeric vector of length 3, representing the center of the square ROI in voxel coordinates.
+#' @param surround A non-negative integer specifying the number of voxels on either side of the central voxel.
+#' @param fill An optional value or values to assign to the data slot of the resulting ROI. If not provided, no data will be assigned.
+#' @param nonzero A logical value indicating whether to keep only nonzero elements from \code{bvol}.
+#'   If \code{bvol} is a \code{NeuroSpace} instance, this argument is ignored.
+#' @param fixdim A logical value indicating whether the fixed dimension is the third, or z, dimension. Default is TRUE.
+#' @return An instance of class \code{ROIVol} representing the square ROI.
 #' @examples
-#'  sp1 <- NeuroSpace(c(10,10,10), c(1,1,1))
-#'  square <- square_roi(sp1, c(5,5,5), 1)
-#'  vox <- coords(square)
-#'  ## a 3 X 3 X 1 grid
-#'  nrow(vox) == 9
+#' sp1 <- NeuroSpace(c(10, 10, 10), c(1, 1, 1))
+#' square <- square_roi(sp1, c(5, 5, 5), 1)
+#' vox <- coords(square)
+#' ## a 3 X 3 X 1 grid
+#' nrow(vox) == 9
 #' @export
 square_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE, fixdim=3) {
   if (is.matrix(centroid)) {
@@ -156,7 +195,6 @@ square_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE, fixdi
 #' @param fill optional value(s) to assign to data slot.
 #' @param nonzero keep only nonzero elements from \code{bvol}. If \code{bvol} is A \code{NeuroSpace} then this argument is ignored.
 #' @return an instance of class \code{ROIVol}
-#' @rdname cuboid_roi
 #' @examples
 #'  sp1 <- NeuroSpace(c(10,10,10), c(1,1,1))
 #'  cube <- cuboid_roi(sp1, c(5,5,5), 3)
@@ -254,7 +292,7 @@ make_spherical_grid <- function(bvol, centroid, radius, use_cpp=TRUE) {
 #   ROIVol(space(mask), out)
 # }
 
-#' @title Create a Spherical Region of Interest
+#' Create a Spherical Region of Interest
 #'
 #' @description Creates a Spherical ROI based on a centroid.
 #' @param bvol an \code{NeuroVol} or \code{NeuroSpace} instance
@@ -330,7 +368,7 @@ spherical_roi <- function (bvol, centroid, radius, fill=NULL, nonzero=FALSE, use
 #   neuroim:::SparseNeuroVol(kernel@weights * weight, template, indices=indices)
 # }
 
-
+#' @keywords internal
 .resample <- function(x, ...) x[sample.int(length(x), ...)]
 
 #' @keywords internal
@@ -355,9 +393,13 @@ roi_surface_matrix <- function(mat, refspace, indices, coords) {
 
 
 
-#' @name as
+#' Coerce ROIVec to matrix
 #'
-#' @rdname as-methods
+#' This function provides a method to coerce an object of class \code{ROIVec} to a \code{matrix}.
+#'
+#' @name as
+#' @param from An object of class \code{ROIVec} to be coerced to a \code{matrix}.
+#' @return A \code{matrix} obtained by coercing the \code{ROIVec} object.
 #' @export
 setAs(from="ROIVec", to="matrix", function(from) {
   ind <- indices(from)
@@ -367,9 +409,13 @@ setAs(from="ROIVec", to="matrix", function(from) {
 
 })
 
-#' @name as
+#' Coerce ROIVol to DenseNeuroVol
 #'
-#' @rdname as-methods
+#' This function provides a method to coerce an object of class \code{ROIVol} to a \code{DenseNeuroVol}.
+#'
+#' @name as
+#' @param from An object of class \code{ROIVol} to be coerced to a \code{DenseNeuroVol}.
+#' @return A \code{DenseNeuroVol} object obtained by coercing the \code{ROIVol} object.
 setAs(from="ROIVol", to="DenseNeuroVol", function(from) {
   NeuroVol(values(from), space(from), indices=indices(from))
   #dat <- array(0, dim(from@space))
@@ -377,8 +423,14 @@ setAs(from="ROIVol", to="DenseNeuroVol", function(from) {
   #ovol <- DenseNeuroVol(dat, from@space, from@source)
 })
 
+
+#' Coerce ROIVol to DenseNeuroVol using as.dense method
+#'
+#' This function provides a method to coerce an object of class \code{ROIVol} to a \code{DenseNeuroVol} using the \code{as.dense} method.
+#'
 #' @rdname as.dense-methods
-#' @export
+#' @param x An object of class \code{ROIVol} to be coerced to a \code{DenseNeuroVol}.
+#' @return A \code{DenseNeuroVol} object obtained by coercing the \code{ROIVol} object.
 setMethod("as.dense", signature(x="ROIVol"),
           function(x) {
             as(x, "DenseNeuroVol")
@@ -513,8 +565,6 @@ setMethod(f="length", signature=signature(x="ROIVol"),
 
 
 
-
-
 #' subset an \code{ROIVol}
 #' @export
 #' @param x the object
@@ -563,18 +613,20 @@ setMethod("show", signature=signature(object = "ROIVec"),
 
 
 
-
-
-
-
-
 #' Create a Kernel object from a function of distance from kernel center
 #'
-#' @param kerndim the dimensions in voxels of the kernel
-#' @param vdim the dimensions of the voxels in real units
-#' @param FUN the kernel function taking as its first argument representing the distance from the center of the kernel
-#' @param ... additional parameters to the kernel FUN
+#' This function creates a Kernel object using a kernel function (\code{FUN}) that takes the distance from the center of the kernel as its first argument.
+#'
+#' @param kerndim A numeric vector representing the dimensions in voxels of the kernel.
+#' @param vdim A numeric vector representing the dimensions of the voxels in real units.
+#' @param FUN The kernel function taking its first argument representing the distance from the center of the kernel (default: \code{dnorm}).
+#' @param ... Additional parameters to the kernel function, \code{FUN}.
 #' @importFrom stats dnorm
+#' @return A Kernel object with the specified dimensions, voxel dimensions, and kernel function.
+#' @examples
+#' kdim <- c(3, 3, 3)
+#' vdim <- c(1, 1, 1)
+#' k <- Kernel(kerndim = kdim, vdim = vdim, FUN = dnorm, sd = 1)
 #' @export
 Kernel <- function(kerndim, vdim, FUN=dnorm, ...) {
   if (length(kerndim) < 2) {

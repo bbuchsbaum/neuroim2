@@ -26,10 +26,4 @@ constructs a SparseNeuroVecSource object
 \item{\code{mask}}{the subset of voxels that will be stored in memory}
 }}
 
-\examples{
- mask_name <- system.file("extdata", "global_mask.nii", package="neuroim2")
- vec_name <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
- mask <- as.logical(read_vol(mask_name))
-
- src <- SparseNeuroVecSource(read_header(vec_name), mask=mask)
-}
+\keyword{internal}

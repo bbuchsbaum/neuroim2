@@ -48,3 +48,4 @@ The input \code{i} is an index matrix, where each row specifies a (x,y,z,t) coor
 The output is a vector containing the values of the elements in \code{x} at the specified
 space-time coordinates.
 }
+\keyword{internal}

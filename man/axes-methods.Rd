@@ -3,7 +3,7 @@
 \name{axes}
 \alias{axes}
 \alias{axes,NeuroSpace-method}
-\title{extract image axes}
+\title{Extract Image Axes}
 \usage{
 axes(x)
 
@@ -13,5 +13,5 @@ axes(x)
 \item{x}{an object with a set of axes}
 }
 \description{
-extract image axes
+Extract Image Axes
 }

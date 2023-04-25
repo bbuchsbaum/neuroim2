@@ -5,17 +5,17 @@
 \alias{Kernel-class}
 \title{Kernel}
 \description{
-A class representing an image kernel
+A class representing an image kernel for image processing, such as convolution or filtering operations in brain images.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{width}}{the width in voxels of the kernel}
+\item{\code{width}}{A \code{numeric} value representing the width of the kernel in voxels. The width is typically an odd number to maintain symmetry.}
 
-\item{\code{weights}}{the kernel weights}
+\item{\code{weights}}{A \code{numeric} vector containing the weights associated with each voxel in the kernel.}
 
-\item{\code{voxels}}{the relative voxel coordinates of the kernel}
+\item{\code{voxels}}{A \code{matrix} containing the relative voxel coordinates of the kernel. Each row represents a voxel coordinate as (x, y, z).}
 
-\item{\code{coords}}{the relative real coordinates of the kernel}
+\item{\code{coords}}{A \code{matrix} containing the relative real-world coordinates of the kernel, corresponding to the voxel coordinates.}
 }}
 

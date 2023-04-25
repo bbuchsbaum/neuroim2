@@ -12,7 +12,15 @@ MappedNeuroVec(file_name)
 \item{file_name}{the name of the 4D image file that containing the memory-mapped data source.}
 }
 \description{
-Four-dimensional brain image, backed by an memory-mapped file.
+A class representing a four-dimensional brain image, backed by a memory-mapped file. MappedNeuroVec objects store their data in a memory-mapped file, providing efficient access to large brain images without loading the entire dataset into memory. This class inherits from the \code{\linkS4class{NeuroVec}} and implements the \code{ArrayLike4D} interface.
 
 constructs a MappedNeuroVec object
 }
+\section{Slots}{
+
+\describe{
+\item{\code{filemap}}{An instance of the \code{mmap} class representing the memory-mapped file containing the brain image data.}
+
+\item{\code{offset}}{An integer representing the offset (in bytes) within the memory-mapped file where the brain image data starts.}
+}}
+

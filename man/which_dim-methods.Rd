@@ -3,17 +3,20 @@
 \name{which_dim}
 \alias{which_dim}
 \alias{which_dim,NeuroSpace,NamedAxis-method}
-\title{find dimensions of a given axis}
+\title{Find Dimensions of a Given Axis}
 \usage{
 which_dim(x, axis)
 
 \S4method{which_dim}{NeuroSpace,NamedAxis}(x, axis)
 }
 \arguments{
-\item{x}{the object}
+\item{x}{An object representing the input data, such as a matrix or an array.}
 
-\item{axis}{the axis to return dimension of}
+\item{axis}{An integer representing the axis for which the dimension is requested. For example, 1 for rows, 2 for columns, or 3 for the depth in a 3D array.}
+}
+\value{
+An integer representing the dimension of the specified axis for the given object.
 }
 \description{
-find dimensions of a given axis
+This function returns the dimension of the specified axis for a given object, such as a matrix or an array.
 }

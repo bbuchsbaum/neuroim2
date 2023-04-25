@@ -17,7 +17,6 @@ NULL
 #' bspace <- NeuroSpace(c(64,64,64), spacing=c(1,1,1))
 #' dat <- array(rnorm(64*64*64), c(64,64,64))
 #' bvol <- NeuroVol(dat,bspace, label="test")
-#' show(bvol)
 #' @export NeuroVol
 #' @rdname NeuroVol
 NeuroVol <- function(data, space,  label="", indices=NULL) {
@@ -124,7 +123,7 @@ SparseNeuroVol <- function(data, space, indices=NULL, label="") {
 #'
 #' @examples
 #' # Load an example brain mask
-#' brain_mask <- read_vol(system.file("extdata", "example_mask.nii", package="neuroim2"))
+#' brain_mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
 #'
 #' # Convert the brain mask to a LogicalNeuroVol
 #' logical_vol <- LogicalNeuroVol(brain_mask, space(brain_mask))
@@ -161,42 +160,75 @@ LogicalNeuroVol <- function(data, space, label="", indices=NULL) {
 
 
 
-#' @name as
+#' Convert DenseNeuroVol to array
 #'
-#' @rdname as-methods
+#' This function converts a DenseNeuroVol object to an array.
+#'
+#' @param from A DenseNeuroVol object.
+#'
+#' @return An array resulting from the conversion.
+#'
+#' @keywords internal
+#' @name as,DenseNeuroVol,array
 setAs(from="DenseNeuroVol", to="array", def=function(from) from@.Data)
 
-#' @name as
+
+#' Convert DenseNeuroVol to H5NeuroVol
 #'
-#' @rdname as-methods
+#' This function converts a DenseNeuroVol object to an H5NeuroVol object.
+#'
+#' @param from A DenseNeuroVol object.
+#'
+#' @return An H5NeuroVol object resulting from the conversion.
+#'
+#' @keywords internal
+#' @name DenseNeuroVol,H5NeuroVol
 setAs(from="DenseNeuroVol", to="H5NeuroVol", def=function(from) {
   to_nih5_vol(from, file_name=NULL, data_type="FLOAT")
 })
 
-#' @name as
+#' Convert DenseNeuroVec to H5NeuroVec
 #'
-#' @rdname as-methods
+#' This function converts a DenseNeuroVec object to an H5NeuroVec object.
+#'
+#' @param from A DenseNeuroVec object.
+#'
+#' @return An H5NeuroVec object resulting from the conversion.
+#'
+#' @keywords internal
+#' @name DenseNeuroVec,H5NeuroVec
 setAs(from="DenseNeuroVec", to="H5NeuroVec", def=function(from) {
   to_nih5_vec(from, file_name=NULL, data_type="FLOAT")
 })
 
 
 
-#' @name as
+
+#' Convert SparseNeuroVol to array
 #'
-#' conversion from \code{SparseNeuroVol} to \code{array}
+#' This function converts a SparseNeuroVol object to an array object.
 #'
-#' @rdname as-methods
+#' @param from A SparseNeuroVol object.
+#'
+#' @return An array object resulting from the conversion.
+#'
+#' @keywords internal
+#' @name SparseNeuroVol,array
 setAs(from="SparseNeuroVol", to="array", def=function(from) {
   vals <- as.numeric(from@data)
   array(vals, dim(from))
 })
 
 
-#' conversion from SparseNeuroVol to numeric
+#' Convert SparseNeuroVol to numeric
 #'
-#' @rdname as-methods
-#' @name as
+#' This function converts a SparseNeuroVol object to a numeric object.
+#'
+#' @param from A SparseNeuroVol object.
+#'
+#' @return A numeric object resulting from the conversion.
+#' @keywords internal
+#' @name SparseNeuroVol,numeric
 setAs(from="SparseNeuroVol", to="numeric", def=function(from) {
   as.numeric(from@data)
 })
@@ -486,6 +518,11 @@ setMethod(f="slice", signature=signature(x="NeuroVol", zlevel="numeric", along="
           })
 
 
+#' @title Convert NeuroVol to a mask
+#' @description This method converts a NeuroVol object to a mask by setting all positive values to TRUE and all non-positive values to FALSE.
+#' @param x A NeuroVol object to convert to a mask.
+#' @param indices A missing argument; not used in this method.
+#' @return A LogicalNeuroVol object representing the mask created from the input NeuroVol.
 #' @export
 #' @rdname as.mask-methods
 setMethod(f="as.mask", signature=signature(x="NeuroVol", indices="missing"),
@@ -493,6 +530,11 @@ setMethod(f="as.mask", signature=signature(x="NeuroVol", indices="missing"),
             LogicalNeuroVol(x > 0, space(x))
           })
 
+#' @title Convert NeuroVol to a mask with specified indices
+#' @description This method converts a NeuroVol object to a mask by setting the specified indices to TRUE and the remaining elements to FALSE.
+#' @param x A NeuroVol object to convert to a mask.
+#' @param indices A numeric vector containing the indices of the input NeuroVol that should be set to TRUE in the resulting mask.
+#' @return A LogicalNeuroVol object representing the mask created from the input NeuroVol with specified indices.
 #' @export
 #' @rdname as.mask-methods
 setMethod(f="as.mask", signature=signature(x="NeuroVol", indices="numeric"),
@@ -560,8 +602,15 @@ setMethod(f="coord_to_grid", signature=signature(x="NeuroVol", coords="numeric")
 
 }
 
-#' @rdname patch_set-methods
+
+#' @title Create a patch set from a NeuroVol object
+#' @description This function creates a patch set from a NeuroVol object given specified dimensions
+#' @return A deferred list of patches.
+#' @param x a NeuroVol object
+#' @param dims the dimensions of the patch
+#' @param ... additional args
 #' @export
+#' @rdname patch_set-methods
 setMethod(f="patch_set", signature=signature(x="NeuroVol",
                                              dims="numeric",
                                              mask="missing"),
@@ -571,6 +620,14 @@ setMethod(f="patch_set", signature=signature(x="NeuroVol",
           })
 
 
+#' @title Create a patch set from a NeuroVol object
+#' @description This function creates a patch set from a NeuroVol object given specified dimensions and a mask.
+#' @return A deferred list of patches.
+#' @param x a NeuroVol object
+#' @param dims the dimensions of the patch
+#' @param mask the mask defining the valid patch centers
+#' @param ... additional args
+#' @export
 #' @rdname patch_set-methods
 setMethod(f="patch_set", signature=signature(x="NeuroVol",
                                             dims="numeric",
@@ -817,6 +874,12 @@ setMethod("partition", signature=signature(x="LogicalNeuroVol", k="integer"),
 setMethod("partition", signature=signature(x="LogicalNeuroVol", k="numeric"),
           def=function(x,k) {
             callGeneric(x, as.integer(k))
+          })
+
+#' @rdname partition-methods
+setMethod("partition", signature=signature(x="DenseNeuroVol", k="numeric"),
+          def=function(x,k) {
+            callGeneric(as.logical(x), as.integer(k))
           })
 
 #' @rdname as.sparse-methods

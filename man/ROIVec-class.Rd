@@ -5,5 +5,21 @@
 \alias{ROIVec-class}
 \title{ROIVec}
 \description{
-A class that represents a vector-valued volumetric region of interest
+A class representing a vector-valued volumetric region of interest (ROI) in a brain image.
 }
+\section{Slots}{
+
+\describe{
+\item{\code{coords}}{A \code{matrix} containing the 3D coordinates of the voxels within the ROI. Each row represents a voxel coordinate as (x, y, z).}
+
+\item{\code{.Data}}{A \code{matrix} containing the data values associated with each voxel in the ROI. Each row corresponds to a unique vector value, and the number of rows should match the number of rows in the \code{coords} matrix.}
+}}
+
+\section{Validity}{
+
+An object of class \code{ROIVec} is considered valid if:
+- The \code{coords} slot is a matrix with 3 columns.
+- The \code{.Data} slot is a matrix.
+- The number of rows in the \code{.Data} matrix is equal to the number of rows in the \code{coords} matrix.
+}
+

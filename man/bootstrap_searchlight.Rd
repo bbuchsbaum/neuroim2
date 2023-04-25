@@ -14,7 +14,7 @@ bootstrap_searchlight(mask, radius = 8, iter = 100)
 \item{iter}{An integer specifying the total number of searchlights to sample (default is 100).}
 }
 \value{
-A \code{\linkS4class{deferred_list}} object containing \code{\linkS4class{ROIVolWindow}} objects,
+A \code{deferred_list} object containing \code{\linkS4class{ROIVolWindow}} objects,
         each representing a spherical searchlight region sampled from within the mask.
 }
 \description{

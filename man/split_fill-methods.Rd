@@ -3,38 +3,40 @@
 \name{split_fill}
 \alias{split_fill}
 \alias{split_fill,NeuroVol,factor,function-method}
-\title{fill disjoint sets of values with the output of a function}
+\title{Fill Disjoint Sets of Values with the Output of a Function}
 \usage{
 split_fill(x, fac, FUN)
 
 \S4method{split_fill}{NeuroVol,factor,`function`}(x, fac, FUN)
 }
 \arguments{
-\item{x}{the object to split}
+\item{x}{The object to split.}
 
-\item{fac}{the \code{factor} to split by}
+\item{fac}{The \code{factor} to split by.}
 
-\item{FUN}{the function to summarize the the sets}
+\item{FUN}{The function used to summarize the sets.}
 }
 \value{
-a new object where the original values have been replaced by the function output
+A new object in which the original values have been replaced by the output of the function.
 }
 \description{
-fill disjoint sets of values with the output of a function
+This function splits an object into disjoint sets of values based on a factor, applies a specified function to each set,
+and returns a new object with the original values replaced by the function's output.
 }
 \details{
-\code{FUN} can either return a scalar for each input vector or a vector equal to the length of the input vector.
-If it returns a scalar then every voxel in the set will be filled with that value in the output vector.
+The \code{FUN} function can either return a scalar for each input vector or a vector equal to the length of the input vector.
+If it returns a scalar, every voxel in the set will be filled with that value in the output vector.
 }
 \examples{
-
-## summarize with mean -- FUN returns a scalar
-x = NeuroSpace(c(10,10,10), c(1,1,1))
-vol <- NeuroVol(rnorm(10*10*10), x)
+## Summarize with mean -- FUN returns a scalar
+x <- NeuroSpace(c(10, 10, 10), c(1, 1, 1))
+vol <- NeuroVol(rnorm(10 * 10 * 10), x)
 fac <- factor(rep(1:10, length.out=1000))
 ovol.mean <- split_fill(vol, fac, mean)
 identical(dim(ovol.mean), dim(vol))
 length(unique(as.vector(ovol.mean))) == 10
-## transform by reversing vector -- FUN returns a vector.
+
+## Transform by reversing vector -- FUN returns a vector
 ovol2 <- split_fill(vol, fac, rev)
+
 }

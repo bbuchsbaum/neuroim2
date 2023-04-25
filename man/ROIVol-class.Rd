@@ -5,5 +5,21 @@
 \alias{ROIVol-class}
 \title{ROIVol}
 \description{
-A class that represents a volumetric region of interest
+A class representing a volumetric region of interest (ROI) in a brain image, defined by a set of coordinates and associated data values.
 }
+\section{Slots}{
+
+\describe{
+\item{\code{coords}}{A \code{matrix} containing the 3D coordinates of the voxels within the ROI. Each row represents a voxel coordinate as (x, y, z).}
+
+\item{\code{.Data}}{A \code{numeric} vector containing the data values associated with each voxel in the ROI. The length of this vector should match the number of rows in the \code{coords} matrix.}
+}}
+
+\section{Validity}{
+
+An object of class \code{ROIVol} is considered valid if:
+- The \code{coords} slot is a matrix with 3 columns.
+- The \code{.Data} slot is a numeric vector.
+- The length of the \code{.Data} vector is equal to the number of rows in the \code{coords} matrix.
+}
+

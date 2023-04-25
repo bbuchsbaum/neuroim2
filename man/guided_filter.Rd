@@ -22,7 +22,7 @@ The guided filter is an edge-preserving filter that smooths the image while pres
 }
 \examples{
 # Load an example brain volume
-brain_vol <- read_vol(system.file("extdata", "example_volume.nii", package="neuroim2"))
+brain_vol <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
 
 # Apply guided filtering to the brain volume
 filtered_vol <- guided_filter(brain_vol, radius = 4, epsilon = .7^2)

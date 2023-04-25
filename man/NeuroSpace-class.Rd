@@ -37,7 +37,6 @@ Represents the geometry of a brain image.
 
 \examples{
 # Create a NeuroSpace object
-space <- new("NeuroSpace", dim=c(64, 64, 64), origin=c(0, 0, 0), spacing=c(1, 1, 1),
-             axes=AxisSet(c('x', 'y', 'z')), trans=diag(4), inverse=diag(4))
+space <- NeuroSpace(dim=as.integer(c(64, 64, 64)), origin=c(0, 0, 0), spacing=c(1, 1, 1))
 
 }

@@ -5,11 +5,11 @@
 \alias{H5NeuroVec-class}
 \title{H5NeuroVec}
 \description{
-A NeuroVec backed by an hdf5 file
+A class representing a four-dimensional brain image (NeuroVec) backed by an HDF5 file. H5NeuroVec objects facilitate efficient handling of large-scale brain imaging data by storing and accessing the data using the HDF5 file format.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{obj}}{an H5File object}
+\item{\code{obj}}{An instance of class \code{H5File} from the \code{hdf5r} package, representing the underlying HDF5 file.}
 }}
 

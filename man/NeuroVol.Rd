@@ -25,5 +25,4 @@ Construct a \code{\linkS4class{NeuroVol}} instance, using default (dense) implem
 bspace <- NeuroSpace(c(64,64,64), spacing=c(1,1,1))
 dat <- array(rnorm(64*64*64), c(64,64,64))
 bvol <- NeuroVol(dat,bspace, label="test")
-show(bvol)
 }

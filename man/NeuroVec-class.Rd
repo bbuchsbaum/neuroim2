@@ -32,15 +32,15 @@ To create a NeuroVec object, use the constructor function \code{NeuroVec()}.
 
 \examples{
 # Load an example 4D brain image
-example_4d_image <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
+example_4d_image <- read_vec(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 
-# Create a NeuroVec object
-neuro_vec <- NeuroVec(data=example_4d_image, space=space(example_4d_image))
+# Create a NeuroVec object by copying the @.Data field (not advised in practice)
+neuro_vec <- NeuroVec(data=example_4d_image@.Data, space=space(example_4d_image))
 
 # Load an example 4D brain image
-example_4d_image <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
+example_4d_image <- read_vec(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 
 # Create a NeuroVec object
-neuro_vec <- NeuroVec(data=example_4d_image, space=space(example_4d_image))
+neuro_vec <- NeuroVec(data=example_4d_image@.Data, space=space(example_4d_image))
 
 }

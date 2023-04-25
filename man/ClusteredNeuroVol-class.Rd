@@ -52,10 +52,6 @@ each of which has an associated id. For example, this class can be used to repre
 }
 
 \examples{
-# Create a ClusteredNeuroVol object
-# (Assuming you have the necessary data such as mask, clusters, label_map, and cluster_map)
-clustered_vol <- new("ClusteredNeuroVol", mask=mask, clusters=clusters, label_map=label_map, cluster_map=cluster_map)
-
 
 bspace <- NeuroSpace(c(16,16,16), spacing=c(1,1,1))
 grid <- index_to_grid(bspace, 1:(16*16*16))

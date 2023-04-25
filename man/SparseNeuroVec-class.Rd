@@ -9,29 +9,31 @@
 SparseNeuroVec(data, space, mask)
 }
 \arguments{
-\item{data}{an array which can be a \code{matrix} or 4-D \code{array}}
+\item{data}{A matrix or a 4-D array containing the neuroimaging data. The dimensions of the data should be consistent with the dimensions of the provided NeuroSpace object and mask.}
 
-\item{space}{a NeuroSpace instance}
+\item{space}{A \link{NeuroSpace} object representing the dimensions and voxel spacing of the neuroimaging data.}
 
-\item{mask}{a 3D \code{array}, 1D \code{vector} of type \code{logical}, or an instance of type \code{LogicalNeuroVol}}
+\item{mask}{A 3D array, 1D vector of type logical, or an instance of type \link{LogicalNeuroVol}, which specifies the locations of the non-zero values in the data.}
+}
+\value{
+A SparseNeuroVec object, containing the sparse neuroimaging data, mask, and associated NeuroSpace information.
 }
 \description{
-a sparse four-dimensional brain image, backed by a \code{matrix}, where each column represents
-a non-zero vector spanning the fourth dimension (e.g. time), and defined by a volumetric mask.
+A class representing a sparse four-dimensional brain image, backed by a \code{matrix}, where each column represents a non-zero vector spanning the fourth dimension (e.g., time) and defined by a volumetric mask. SparseNeuroVec objects store their data in a compressed format, providing efficient storage and access to sparse brain images. This class inherits from the \code{\linkS4class{NeuroVec}}, \code{\linkS4class{AbstractSparseNeuroVec}}, and implements the \code{ArrayLike4D} interface.
 
-constructs a SparseNeuroVec object
+Constructs a SparseNeuroVec object for efficient representation and manipulation
+of sparse neuroimaging data with many zero or missing values.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{data}}{the matrix of series, where rows span across voxel space and columns span the fourth dimensions}
+\item{\code{data}}{A \code{matrix} of series, where rows span across voxel space and columns span the fourth dimension. Each column represents a non-zero vector in the 4D space, and the matrix stores only non-zero values to save memory.}
 }}
 
 \examples{
-
 bspace <- NeuroSpace(c(10,10,10,100), c(1,1,1))
 mask <- array(rnorm(10*10*10) > .5, c(10,10,10))
 mat <- matrix(rnorm(sum(mask)), 100, sum(mask))
-svec <- SparseNeuroVec(mat, bspace,mask)
+svec <- SparseNeuroVec(mat, bspace, mask)
 length(indices(svec)) == sum(mask)
 }

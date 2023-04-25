@@ -8,7 +8,7 @@
 \alias{drop_dim,AxisSet3D,missing-method}
 \alias{drop_dim,NeuroSpace,numeric-method}
 \alias{drop_dim,NeuroSpace,missing-method}
-\title{drop a dimension from an object}
+\title{Drop a Dimension from an Object}
 \usage{
 drop_dim(x, dimnum)
 
@@ -25,16 +25,25 @@ drop_dim(x, dimnum)
 \S4method{drop_dim}{NeuroSpace,missing}(x)
 }
 \arguments{
-\item{x}{a dimensioned object}
+\item{x}{A dimensioned object, such as a NeuroSpace object.}
 
-\item{dimnum}{the index of the dimension to drop}
+\item{dimnum}{An integer representing the index of the dimension to drop.}
+}
+\value{
+An updated dimensioned object with the specified dimension removed.
 }
 \description{
-drop a dimension from an object
+This function removes a specified dimension from a given object, such as a matrix or an array.
 }
 \examples{
-x = NeuroSpace(c(10,10,10), c(1,1,1))
-x1 <- drop_dim(x)
+# Create a NeuroSpace object with dimensions (10, 10, 10)
+x <- NeuroSpace(c(10, 10, 10), c(1, 1, 1))
+
+# Drop the first dimension
+x1 <- drop_dim(x, 1)
+
+# Check the new dimensions
 ndim(x1) == 2
-dim(x1)[2] == 10
+dim(x1)[1] == 10
+
 }

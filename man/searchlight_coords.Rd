@@ -21,9 +21,9 @@ searchlight(mask, radius, eager = FALSE, nonzero = FALSE, cores = 0)
 \item{eager}{A logical value specifying whether to eagerly compute the searchlight ROIs (default is FALSE, which uses lazy evaluation).}
 }
 \value{
-A \code{\linkS4class{deferred_list}} object containing matrices of integer-valued voxel coordinates, each representing a searchlight region.
+A \code{deferred_list} object containing matrices of integer-valued voxel coordinates, each representing a searchlight region.
 
-A \code{\linkS4class{deferred_list}} object containing matrices of integer-valued voxel coordinates, each representing a searchlight region.
+A \code{deferred_list} object containing matrices of integer-valued voxel coordinates, each representing a searchlight region.
 }
 \description{
 This function generates an exhaustive searchlight iterator that returns voxel coordinates for each searchlight

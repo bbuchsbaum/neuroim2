@@ -58,3 +58,10 @@ The \code{subset} argument specifies the subset of vectors to extract, and can b
 of indices or a logical vector. The return value is a list containing the extracted vectors
 in the same order as the specified indices.
 }
+\examples{
+
+file_name <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
+vec <- read_vec(file_name)
+v <- vectors(vec)
+mean(v[[1]])
+}

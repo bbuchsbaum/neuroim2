@@ -13,13 +13,10 @@
 #' @return A smoothed image of class \code{\linkS4class{NeuroVol}}.
 #'
 #' @examples
-#' # Load an example brain volume
-#' brain_vol <- read_vol(system.file("extdata", "example_volume.nii", package="neuroim2"))
-#' # Load an example brain mask
 #' brain_mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
 #'
 #' # Apply Gaussian blurring to the brain volume
-#' blurred_vol <- gaussian_blur(brain_vol, brain_mask, sigma = 2, window = 1)
+#' blurred_vol <- gaussian_blur(brain_mask, brain_mask, sigma = 2, window = 1)
 #'
 #' @export
 gaussian_blur <- function(vol, mask, sigma=2, window=1) {
@@ -52,7 +49,7 @@ gaussian_blur <- function(vol, mask, sigma=2, window=1) {
 #'
 #' @examples
 #' # Load an example brain volume
-#' brain_vol <- read_vol(system.file("extdata", "example_volume.nii", package="neuroim2"))
+#' brain_vol <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
 #'
 #' # Apply guided filtering to the brain volume
 #' filtered_vol <- guided_filter(brain_vol, radius = 4, epsilon = .7^2)

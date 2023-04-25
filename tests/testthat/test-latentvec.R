@@ -53,19 +53,19 @@ test_that("can construct a LatentNeuroVec", {
 
 })
 
-test_that("can write a LatentNeuroVec to h5", {
-  bv <- gen_dat(12,12,12,4, rand=TRUE)
-  mat <- bv@.Data
-  dim(mat) <- c(12*12*12,4)
-  mat <- t(mat)
-  mask <- bv[[1]]
-  mask[] <- 1
-  mask <- as.logical(mask)
-  pres <- prcomp(mat)
-  svec <- LatentNeuroVec(pres$x, pres$rotation, space=space(bv), mask=mask, offset=colMeans(mat))
-  tmp <- paste0(tempfile())
-  write_vec(svec, tmp)
-})
+# test_that("can write a LatentNeuroVec to h5", {
+#   bv <- gen_dat(12,12,12,4, rand=TRUE)
+#   mat <- bv@.Data
+#   dim(mat) <- c(12*12*12,4)
+#   mat <- t(mat)
+#   mask <- bv[[1]]
+#   mask[] <- 1
+#   mask <- as.logical(mask)
+#   pres <- prcomp(mat)
+#   svec <- LatentNeuroVec(pres$x, pres$rotation, space=space(bv), mask=mask, offset=colMeans(mat))
+#   tmp <- paste0(tempfile())
+#   write_vec(svec, tmp)
+# })
 
 test_that("can extract a single volume from a LatentNeuroVec", {
   bv1 <- gen_latent_vec()

@@ -12,8 +12,6 @@ IndexLookupVol(space, indices)
 \item{space}{A \code{\linkS4class{NeuroSpace}} object representing the 3D space of the brain image.}
 
 \item{indices}{An integer vector containing the 1D indices of the voxels in the grid.}
-
-\item{map}{An integer vector containing the mapping between the 1D indices and the table of values.}
 }
 \value{
 An object of class \code{\linkS4class{IndexLookupVol}} representing the index lookup volume.
@@ -24,13 +22,6 @@ An object of class \code{\linkS4class{IndexLookupVol}} representing the index lo
 A three-dimensional brain image class that serves as a map between 1D grid indices and a table of values.
 It is primarily used in the \code{\linkS4class{SparseNeuroVec}} class.
 }
-\section{Constructor}{
-
-\preformatted{
-IndexLookupVol(space, indices, map)
-}
-}
-
 \section{Slots}{
 
 \describe{
@@ -52,7 +43,7 @@ indices <- which(mask)
 map <- seq_along(indices)
 
 # Create an IndexLookupVol object
-ilv <- IndexLookupVol(space, indices, map)
+ilv <- new("IndexLookupVol", space=space, indices=as.integer(indices))
 }
 \seealso{
 \code{\linkS4class{SparseNeuroVec}}

@@ -12,14 +12,8 @@
 #' @param meta_info an object of class \code{\linkS4class{MetaInfo}}
 #' @param indices an optional vector of 1D indices the subset of volumes to load
 #' @param mask a logical 3D \code{array},  a logical 1D \code{vector} or a \code{LogicalNeuroVol}
-#' @export
 #' @rdname SparseNeuroVecSource-class
-#' @examples
-#'  mask_name <- system.file("extdata", "global_mask.nii", package="neuroim2")
-#'  vec_name <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
-#'  mask <- as.logical(read_vol(mask_name))
-#'
-#'  src <- SparseNeuroVecSource(read_header(vec_name), mask=mask)
+#' @keywords internal
 SparseNeuroVecSource <- function(meta_info, indices=NULL, mask) {
 
   if (is.null(indices)) {
@@ -105,20 +99,22 @@ prep_sparsenvec <- function(data, space, mask) {
 }
 
 
-#' SparseNeuroVec
+#' Construct a SparseNeuroVec Object
 #'
-#' constructs a SparseNeuroVec object
+#' Constructs a SparseNeuroVec object for efficient representation and manipulation
+#' of sparse neuroimaging data with many zero or missing values.
 #'
-#' @param data an array which can be a \code{matrix} or 4-D \code{array}
-#' @param space a NeuroSpace instance
-#' @param mask a 3D \code{array}, 1D \code{vector} of type \code{logical}, or an instance of type \code{LogicalNeuroVol}
+#' @param data A matrix or a 4-D array containing the neuroimaging data. The dimensions of the data should be consistent with the dimensions of the provided NeuroSpace object and mask.
+#' @param space A \link{NeuroSpace} object representing the dimensions and voxel spacing of the neuroimaging data.
+#' @param mask A 3D array, 1D vector of type logical, or an instance of type \link{LogicalNeuroVol}, which specifies the locations of the non-zero values in the data.
+#' @return A SparseNeuroVec object, containing the sparse neuroimaging data, mask, and associated NeuroSpace information.
 #' @export
-#' @examples
 #'
+#' @examples
 #' bspace <- NeuroSpace(c(10,10,10,100), c(1,1,1))
 #' mask <- array(rnorm(10*10*10) > .5, c(10,10,10))
 #' mat <- matrix(rnorm(sum(mask)), 100, sum(mask))
-#' svec <- SparseNeuroVec(mat, bspace,mask)
+#' svec <- SparseNeuroVec(mat, bspace, mask)
 #' length(indices(svec)) == sum(mask)
 #' @rdname SparseNeuroVec-class
 SparseNeuroVec <- function(data, space, mask) {
@@ -133,8 +129,9 @@ SparseNeuroVec <- function(data, space, mask) {
 
 
 
-#' @export
+
 #' @rdname load_data-methods
+#' @keywords internal
 setMethod(f="load_data", signature=c("SparseNeuroVecSource"),
 		def=function(x) {
 
@@ -168,8 +165,9 @@ setMethod(f="load_data", signature=c("SparseNeuroVecSource"),
 
 		})
 
-#' @export
+
 #' @rdname indices-methods
+#' @keywords internal
 setMethod(f="indices", signature=signature(x="AbstractSparseNeuroVec"),
           def=function(x) {
             indices(x@map)
@@ -249,6 +247,12 @@ setMethod("series", signature(x="AbstractSparseNeuroVec", i="numeric"),
 #' @param nonzero only include nonzero vectors in output list
 #' @export
 #' @rdname vectors-methods
+#' @examples
+#'
+#' file_name <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
+#' vec <- read_vec(file_name)
+#' v <- vectors(vec)
+#' mean(v[[1]])
 setMethod(f="vectors", signature=signature(x="SparseNeuroVec", subset="missing"),
           def = function(x, nonzero=FALSE) {
             if (nonzero) {
@@ -314,26 +318,30 @@ setMethod(f="concat", signature=signature(x="SparseNeuroVec", y="SparseNeuroVec"
           })
 
 
-#' @export
+
 #' @rdname lookup-methods
+#' @keywords internal
 setMethod(f="lookup", signature=signature(x="AbstractSparseNeuroVec", i="numeric"),
          def=function(x,i) {
             lookup(x@map, i)
           })
 
 #' @rdname matricized_access-methods
+#' @keywords internal
 setMethod(f="matricized_access", signature=signature(x = "SparseNeuroVec", i = "matrix"),
           def=function (x, i) {
             x@data[i]
           })
 
 #' @rdname matricized_access-methods
+#' @keywords internal
 setMethod(f="matricized_access", signature=signature(x = "SparseNeuroVec", i = "integer"),
           def=function (x, i) {
             x@data[,i]
           })
 
 #' @rdname matricized_access-methods
+#' @keywords internal
 setMethod(f="matricized_access", signature=signature(x = "SparseNeuroVec", i = "numeric"),
           def=function (x, i) {
             x@data[,i]
@@ -341,24 +349,28 @@ setMethod(f="matricized_access", signature=signature(x = "SparseNeuroVec", i = "
 
 
 #' @rdname matricized_access-methods
+#' @keywords internal
 setMethod(f="matricized_access", signature=signature(x = "BigNeuroVec", i = "matrix"),
           def=function (x, i) {
             x@data[i]
           })
 
 #' @rdname matricized_access-methods
+#' @keywords internal
 setMethod(f="matricized_access", signature=signature(x = "BigNeuroVec", i = "integer"),
           def=function (x, i) {
             x@data[,i]
           })
 
 #' @rdname matricized_access-methods
+#' @keywords internal
 setMethod(f="matricized_access", signature=signature(x = "BigNeuroVec", i = "numeric"),
           def=function (x, i) {
             x@data[,i]
           })
 
 #' @rdname linear_access-methods
+#' @keywords internal
 setMethod(f="linear_access", signature=signature(x = "AbstractSparseNeuroVec", i = "numeric"),
           def=function (x, i) {
             nels <- prod(dim(x)[1:3])
@@ -467,7 +479,6 @@ setMethod(f="[[", signature=signature(x="SparseNeuroVec", i="numeric"),
 
 #' @name as
 #' @export
-#' @rdname as-methods
 setAs(from="SparseNeuroVec", to="matrix",
 		  function(from) {
 		    ind <- indices(from)
@@ -477,6 +488,8 @@ setAs(from="SparseNeuroVec", to="matrix",
 			  #from@data
 		  })
 
+
+#' @export
 setAs(from="SparseNeuroVec", to="DenseNeuroVec",
       function(from) {
         mat <- as(from, "matrix")
@@ -496,6 +509,7 @@ setMethod(f="as.matrix", signature=signature(x = "SparseNeuroVec"), def=function
 #' as.list
 #'
 #' convert SparseNeuroVec to list of \code{\linkS4class{DenseNeuroVol}}
+#'
 #' @rdname as.list-methods
 #' @export
 setMethod(f="as.list", signature=signature(x = "SparseNeuroVec"), def=function(x) {

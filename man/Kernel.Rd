@@ -7,14 +7,22 @@
 Kernel(kerndim, vdim, FUN = dnorm, ...)
 }
 \arguments{
-\item{kerndim}{the dimensions in voxels of the kernel}
+\item{kerndim}{A numeric vector representing the dimensions in voxels of the kernel.}
 
-\item{vdim}{the dimensions of the voxels in real units}
+\item{vdim}{A numeric vector representing the dimensions of the voxels in real units.}
 
-\item{FUN}{the kernel function taking as its first argument representing the distance from the center of the kernel}
+\item{FUN}{The kernel function taking its first argument representing the distance from the center of the kernel (default: \code{dnorm}).}
 
-\item{...}{additional parameters to the kernel FUN}
+\item{...}{Additional parameters to the kernel function, \code{FUN}.}
+}
+\value{
+A Kernel object with the specified dimensions, voxel dimensions, and kernel function.
 }
 \description{
-Create a Kernel object from a function of distance from kernel center
+This function creates a Kernel object using a kernel function (\code{FUN}) that takes the distance from the center of the kernel as its first argument.
+}
+\examples{
+kdim <- c(3, 3, 3)
+vdim <- c(1, 1, 1)
+k <- Kernel(kerndim = kdim, vdim = vdim, FUN = dnorm, sd = 1)
 }

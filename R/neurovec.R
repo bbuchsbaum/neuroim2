@@ -17,10 +17,10 @@ NULL
 #'
 #' @examples
 #' # Load an example 4D brain image
-#' example_4d_image <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
+#' example_4d_image <- read_vec(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #'
 #' # Create a NeuroVec object
-#' neuro_vec <- NeuroVec(data=example_4d_image, space=space(example_4d_image))
+#' neuro_vec <- NeuroVec(data=example_4d_image@.Data, space=space(example_4d_image))
 #'
 #' @export NeuroVec
 #' @rdname NeuroVec-class
@@ -1044,8 +1044,14 @@ setAs(from="ROIVec", to="SparseNeuroVec",
         SparseNeuroVec(dat, from@space, mask=mask)
       })
 
-#' @rdname as.sparse-methods
+
+#' @title Convert DenseNeuroVec to sparse representation using mask
+#' @description This method converts a DenseNeuroVec object to a sparse representation using a given LogicalNeuroVol mask.
+#' @param x A DenseNeuroVec object to convert to a sparse representation.
+#' @param mask A LogicalNeuroVol object representing the mask to apply during conversion.
+#' @return A SparseNeuroVec object resulting from the conversion.
 #' @export
+#' @rdname as.sparse-methods
 setMethod(f="as.sparse", signature=signature(x="DenseNeuroVec", mask="LogicalNeuroVol"),
           def=function(x, mask) {
             assert_that(all(dim(x)[1:3] == dim(mask)))
@@ -1058,8 +1064,13 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVec", mask="LogicalNeu
           })
 
 
-#' @rdname as.sparse-methods
+#' @title Convert DenseNeuroVec to sparse representation using a numeric mask
+#' @description This method converts a DenseNeuroVec object to a sparse representation using a given numeric mask.
+#' @param x A DenseNeuroVec object to convert to a sparse representation.
+#' @param mask A numeric vector representing the mask to apply during conversion.
+#' @return A SparseNeuroVec object resulting from the conversion.
 #' @export
+#' @rdname as.sparse-methods
 setMethod(f="as.sparse", signature=signature(x="DenseNeuroVec", mask="numeric"),
 		def=function(x, mask) {
 			vdim <- dim(x)[1:3]
@@ -1127,19 +1138,21 @@ setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character",
 
 ## NeuroVecSeq methods
 
-#' Create an \code{NeuroVecSeq} instance for a variable length list of \code{NeuroVec} objects.
+#' Create a NeuroVecSeq Instance
 #'
-#' @param ... one or more instance of type \code{NeuroVec}
+#' Constructs a NeuroVecSeq object to represent a variable-length list of NeuroVec objects.
+#'
+#' @param ... One or more instances of type \link{NeuroVec}.
+#' @return A NeuroVecSeq object containing the provided NeuroVec objects, along with the associated space and length information.
 #' @export
 #'
 #' @examples
-#'
-#' v1 <- NeuroVec(array(0,c(5,5,5,2)), space=NeuroSpace(dim=c(5,5,5,2)))
-#' v2 <- NeuroVec(array(0,c(5,5,5,4)), space=NeuroSpace(dim=c(5,5,5,4)))
-#' v3 <- NeuroVec(array(0,c(5,5,5,6)), space=NeuroSpace(dim=c(5,5,5,6)))
-#' vs <- NeuroVecSeq(v1,v2,v3)
-#' blks <- split_blocks(vs, rep(1:3, each=4))
-#' #res <- blks %>% purrr::map( ~ dim(.))
+#' v1 <- NeuroVec(array(0, c(5, 5, 5, 2)), space = NeuroSpace(dim = c(5, 5, 5, 2)))
+#' v2 <- NeuroVec(array(0, c(5, 5, 5, 4)), space = NeuroSpace(dim = c(5, 5, 5, 4)))
+#' v3 <- NeuroVec(array(0, c(5, 5, 5, 6)), space = NeuroSpace(dim = c(5, 5, 5, 6)))
+#' vs <- NeuroVecSeq(v1, v2, v3)
+#' blks <- split_blocks(vs, rep(1:3, each = 4))
+#' # res <- blks %>% purrr::map(~ dim(.))
 NeuroVecSeq <- function(...) {
   vecs <- list(...)
   assert_that(all(map_lgl(vecs, ~ inherits(., "NeuroVec"))))

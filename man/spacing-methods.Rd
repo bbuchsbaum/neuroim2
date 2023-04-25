@@ -5,7 +5,7 @@
 \alias{spacing,ROICoords-method}
 \alias{spacing,NeuroObj-method}
 \alias{spacing,NeuroSpace-method}
-\title{extract the voxel dimensions of an image}
+\title{Extract Voxel Dimensions of an Image}
 \usage{
 spacing(x)
 
@@ -16,17 +16,16 @@ spacing(x)
 \S4method{spacing}{NeuroSpace}(x)
 }
 \arguments{
-\item{x}{the object}
+\item{x}{The object representing the image.}
 }
 \value{
-a numeric vector
+A numeric vector containing the voxel dimensions of the image.
 }
 \description{
-extract the voxel dimensions of an image
-
-spacing
+This function extracts the voxel dimensions of an image represented by the input object.
 }
 \examples{
-bspace <- NeuroSpace(c(10,10,10), c(2,2,2))
-all.equal(spacing(bspace), c(2,2,2))
+bspace <- NeuroSpace(c(10, 10, 10), c(2, 2, 2))
+all.equal(spacing(bspace), c(2, 2, 2))
+
 }

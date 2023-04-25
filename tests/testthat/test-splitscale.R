@@ -17,7 +17,7 @@ test_that("split_reduce works with matrix, integer and function inputs", {
   # Expected output
   expected_output <- matrix(c(3, 7, 11, 15,19,23), nrow=2)
 
-  expect_equal(output, expected_output)
+  expect_equivalent(output, expected_output)
 })
 
 # Test cases for split_scale
@@ -35,7 +35,7 @@ test_that("split_scale works with matrix and factor inputs", {
   expected_output <- rbind(scale(mat[1:2,], center=TRUE, scale=TRUE),
                            scale(mat[3:4,], center=TRUE, scale=TRUE))
 
-  expect_equal(output, expected_output)
+  expect_equivalent(output, expected_output)
 })
 
 

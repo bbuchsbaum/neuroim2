@@ -23,12 +23,9 @@ This function smooths a volumetric image (3D brain MRI data) by applying an isot
 The blurring is performed within the specified image mask, and the kernel's standard deviation and window size can be customized.
 }
 \examples{
-# Load an example brain volume
-brain_vol <- read_vol(system.file("extdata", "example_volume.nii", package="neuroim2"))
-# Load an example brain mask
 brain_mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
 
 # Apply Gaussian blurring to the brain volume
-blurred_vol <- gaussian_blur(brain_vol, brain_mask, sigma = 2, window = 1)
+blurred_vol <- gaussian_blur(brain_mask, brain_mask, sigma = 2, window = 1)
 
 }

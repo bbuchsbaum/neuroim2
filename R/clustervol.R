@@ -60,11 +60,11 @@ ClusteredNeuroVol <- function(mask, clusters, label_map=NULL, label="") {
       label_map=label_map, cluster_map=cluster_map, space=space)
 }
 
-#' @name
+#' Conversion from ClusteredNeuroVol to LogicalNeuroVol
 #'
-#' conversion from ClusteredNeuroVol to LogicalNeuroVol
-#'
-#' @rdname as-methods
+#' @keywords internal
+#' @rdname ClusteredNeuroVol-methods
+#' @name as,ClusteredNeuroVol,DenseNeuroVol
 setAs(from="ClusteredNeuroVol", to="DenseNeuroVol", def=function(from) {
   data = from@clusters
   indices <- which(from@mask == TRUE)
@@ -184,9 +184,17 @@ setMethod(f="split_clusters", signature=signature(x="ClusteredNeuroVol", cluster
           })
 
 
-#' get number of clusters in a ClusteredNeuroVol
-#' @rdname num_clusters-methods
+
+#' Number of Clusters
+#'
+#' This function returns the number of clusters in a ClusteredNeuroVol object.
+#'
+#' @param x A ClusteredNeuroVol object.
+#'
+#' @return An integer representing the number of clusters in the input object.
+#'
 #' @export
+#' @rdname num_clusters-methods
 setMethod(f="num_clusters", signature=signature(x="ClusteredNeuroVol"),
           def=function(x) {
             length(x@cluster_map)

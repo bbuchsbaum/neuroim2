@@ -12,12 +12,17 @@ setGeneric("as.matrix", function(x) standardGeneric("as.matrix"))
 
 setGeneric("scale")
 
-#' resample an image to match the space of another image
+#' Resample an Image to Match the Space of Another Image
+#'
+#' This function resamples a source image to match the spatial properties (dimensions, resolution, and orientation) of a target image.
+#'
+#' @param source An object representing the source image to be resampled. This could be a 3D or 4D image object, depending on the use case.
+#' @param target An object representing the target image, whose spatial properties will be used as the reference for resampling the source image.
+#' @param ... Additional arguments passed to the resampling function, such as interpolation method, boundary handling, or other resampling options.
+#'
+#' @return An object representing the resampled source image, with the same spatial properties as the target image.
 #'
 #' @export
-#' @param source the source image
-#' @param target the target image
-#' @param ... extra args
 #' @rdname resample-methods
 setGeneric("resample", function(source, target, ...) standardGeneric("resample"))
 
@@ -28,7 +33,7 @@ setGeneric("resample", function(source, target, ...) standardGeneric("resample")
 #' @param ... additional arguments
 setGeneric(name="print_", def=function(x, ...) standardGeneric("print_"))
 
-#' extract data values of object
+#' Extract Data Values of an Object
 #'
 #' @param x the object to get values from
 #' @param ... additional arguments
@@ -172,17 +177,11 @@ split_blocks <- function(x, indices, ...) {
 #' @examples
 #' # Load an example 3D image
 #' library(neuroim2)
-#' img <- read_vol(system.file("extdata", "global_mask_v5.nii", package = "neuroim2"))
+#' img <- read_vol(system.file("extdata", "global_mask.nii", package = "neuroim2"))
 #'
 #' # Partition the image into 5 clusters using default options
 #' clusters <- partition(img, 5)
 #'
-#' # View the resulting clusters as a 4D array
-#' library(magrittr)
-#' split_blocks(clusters) %>%
-#'   vols() %>%
-#'   do.call(abind::abind, c(along = 4, .)) %>%
-#'   image3D::image3D(col = jet.colors(5))
 #'
 #' @return a 3D array where each voxel is assigned to a cluster.
 #' @seealso \code{\link{kmeans}}
@@ -225,12 +224,10 @@ setGeneric(name="slices", def=function(x, ...) standardGeneric("slices"))
 #' @export
 #' @examples
 #'
-#' ```r
 #' x = NeuroSpace(c(10,10,10), spacing=c(1,1,1))
 #' ndim(x) == 3
 #' x = NeuroSpace(c(10,10,10,3), spacing=c(1,1,1))
 #' ndim(x) == 4
-#' ```
 #'
 #' @return The number of dimensions of the input object `x`
 #' @rdname ndim-methods
@@ -250,93 +247,141 @@ setGeneric(name="ndim", def=function(x, ...) standardGeneric("ndim"))
 setGeneric(name="dim_of", def=function(x, axis) standardGeneric("dim_of"))
 
 
-#' find dimensions of a given axis
+#' Find Dimensions of a Given Axis
 #'
-#' @param x the object
-#' @param axis the axis to return dimension of
+#' This function returns the dimension of the specified axis for a given object, such as a matrix or an array.
+#'
+#' @param x An object representing the input data, such as a matrix or an array.
+#' @param axis An integer representing the axis for which the dimension is requested. For example, 1 for rows, 2 for columns, or 3 for the depth in a 3D array.
+#'
+#' @return An integer representing the dimension of the specified axis for the given object.
+#'
+#' @export
 #' @rdname which_dim-methods
 setGeneric(name="which_dim", def=function(x, axis) standardGeneric("which_dim"))
 
 
-#' add a dimension to an object
+#' Add a Dimension to an Object
 #'
-#' @param x a dimensioned object
-#' @param n the size of the dimension to add
-#' @export
-#' @rdname add_dim-methods
+#' This function adds a new dimension to a given object, such as a matrix or an array.
+#'
+#' @param x A dimensioned object, such as a matrix, an array, or a NeuroSpace object.
+#' @param n An integer representing the size of the dimension to add.
+#'
+#' @return An updated dimensioned object with the new dimension added.
+#'
 #' @examples
-#' x = NeuroSpace(c(10,10,10), c(1,1,1))
+#' # Create a NeuroSpace object
+#' x <- NeuroSpace(c(10, 10, 10), c(1, 1, 1))
+#'
+#' # Add a new dimension with size 10
 #' x1 <- add_dim(x, 10)
+#'
+#' # Check the new dimension
 #' ndim(x1) == 4
 #' dim(x1)[4] == 10
+#'
+#' @export
+#' @rdname add_dim-methods
 setGeneric(name="add_dim", def=function(x, n) standardGeneric("add_dim"))
 
-#' drop a dimension from an object
+#' Drop a Dimension from an Object
 #'
-#' @param x a dimensioned object
-#' @param dimnum the index of the dimension to drop
+#' This function removes a specified dimension from a given object, such as a matrix or an array.
+#'
+#' @param x A dimensioned object, such as a NeuroSpace object.
+#' @param dimnum An integer representing the index of the dimension to drop.
+#'
+#' @return An updated dimensioned object with the specified dimension removed.
+#'
+#' @examples
+#' # Create a NeuroSpace object with dimensions (10, 10, 10)
+#' x <- NeuroSpace(c(10, 10, 10), c(1, 1, 1))
+#'
+#' # Drop the first dimension
+#' x1 <- drop_dim(x, 1)
+#'
+#' # Check the new dimensions
+#' ndim(x1) == 2
+#' dim(x1)[1] == 10
+#'
 #' @export
 #' @rdname drop_dim-methods
-#' @examples
-#' x = NeuroSpace(c(10,10,10), c(1,1,1))
-#' x1 <- drop_dim(x)
-#' ndim(x1) == 2
-#' dim(x1)[2] == 10
 setGeneric(name="drop_dim", def=function(x, dimnum) standardGeneric("drop_dim"))
 
-#' extract geometric properties of an image.
+#' Extract Geometric Properties of an Image
 #'
-#' @param x the object to query, e.g. an instance of \code{\linkS4class{NeuroVol}} or \code{\linkS4class{NeuroVec}}
-#' @param ... additional arguments
-#' @return an object representing the geometric space of the image of type \code{\linkS4class{NeuroSpace}}
-#' @export space
+#' This function retrieves the geometric properties of a given image, such as dimensions and voxel size.
+#'
+#' @param x The object to query, which can be an instance of \code{\linkS4class{NeuroVol}} or \code{\linkS4class{NeuroVec}}.
+#' @param ... Additional arguments, if needed.
+#'
+#' @return An object representing the geometric space of the image, of type \code{\linkS4class{NeuroSpace}}.
+#'
 #' @examples
-#' x = NeuroSpace(c(10,10,10), c(1,1,1))
-#' vol <- NeuroVol(rnorm(10*10*10), x)
-#' identical(x,space(vol))
+#' # Create a NeuroSpace object with dimensions (10, 10, 10) and voxel size (1, 1, 1)
+#' x <- NeuroSpace(c(10, 10, 10), c(1, 1, 1))
 #'
+#' # Create a NeuroVol object with random data and the specified NeuroSpace
+#' vol <- NeuroVol(rnorm(10 * 10 * 10), x)
+#'
+#' # Retrieve the geometric properties of the NeuroVol object
+#' identical(x, space(vol))
+#'
+#' @export
 #' @rdname space-methods
 setGeneric(name="space", def=function(x, ...) standardGeneric("space"))
-
-#' fill disjoint sets of values with the output of a function
+#' Fill Disjoint Sets of Values with the Output of a Function
 #'
-#' @param x the object to split
-#' @param fac the \code{factor} to split by
-#' @param FUN the function to summarize the the sets
-#' @return a new object where the original values have been replaced by the function output
+#' This function splits an object into disjoint sets of values based on a factor, applies a specified function to each set,
+#' and returns a new object with the original values replaced by the function's output.
+#'
+#' @param x The object to split.
+#' @param fac The \code{factor} to split by.
+#' @param FUN The function used to summarize the sets.
+#'
+#' @return A new object in which the original values have been replaced by the output of the function.
+#'
 #' @export
-#' @rdname split_fill-methods
-#' @details \code{FUN} can either return a scalar for each input vector or a vector equal to the length of the input vector.
-#' If it returns a scalar then every voxel in the set will be filled with that value in the output vector.
-#' @examples
 #'
-#' ## summarize with mean -- FUN returns a scalar
-#' x = NeuroSpace(c(10,10,10), c(1,1,1))
-#' vol <- NeuroVol(rnorm(10*10*10), x)
+#' @details The \code{FUN} function can either return a scalar for each input vector or a vector equal to the length of the input vector.
+#' If it returns a scalar, every voxel in the set will be filled with that value in the output vector.
+#'
+#' @examples
+#' ## Summarize with mean -- FUN returns a scalar
+#' x <- NeuroSpace(c(10, 10, 10), c(1, 1, 1))
+#' vol <- NeuroVol(rnorm(10 * 10 * 10), x)
 #' fac <- factor(rep(1:10, length.out=1000))
 #' ovol.mean <- split_fill(vol, fac, mean)
 #' identical(dim(ovol.mean), dim(vol))
 #' length(unique(as.vector(ovol.mean))) == 10
-#' ## transform by reversing vector -- FUN returns a vector.
+#'
+#' ## Transform by reversing vector -- FUN returns a vector
 #' ovol2 <- split_fill(vol, fac, rev)
+#'
+#' @rdname split_fill-methods
 setGeneric(name="split_fill", def=function(x, fac, FUN) standardGeneric("split_fill"))
 
-#' map values from one set of values to another set using a user-supplied lookup table
+#' Map Values from One Set to Another Using a User-supplied Lookup Table
 #'
-#' @param x the object to map values from
-#' @param lookup the lookup table. The first column is the "key" the second column is the "value".
-#' @return a new object where the original values have been filled in with the values in the lookup table
+#' This function maps values from one set to another using a lookup table provided by the user.
+#'
+#' @param x The object from which values will be mapped.
+#' @param lookup The lookup table. The first column is the "key" and the second column is the "value".
+#'
+#' @return A new object in which the original values have been replaced with the values from the lookup table.
+#'
 #' @export
 #' @examples
-#' x <- NeuroSpace(c(10,10,10), c(1,1,1))
-#' vol <- NeuroVol(sample(1:10, 10*10*10, replace=TRUE), x)
+#' x <- NeuroSpace(c(10, 10, 10), c(1, 1, 1))
+#' vol <- NeuroVol(sample(1:10, 10 * 10 * 10, replace = TRUE), x)
 #'
-#' ## lookup table is list
-#' lookup <- lapply(1:10, function(i) i*10)
+#' ## Lookup table is a list
+#' lookup <- lapply(1:10, function(i) i * 10)
 #' names(lookup) <- 1:10
 #' ovol <- map_values(vol, lookup)
 #'
-#' ## lookup table is matrix. First column is key, second column is value
+#' ## Lookup table is a matrix. The first column is the key, and the second column is the value
 #' names(lookup) <- 1:length(lookup)
 #' lookup.mat <- cbind(as.numeric(names(lookup)), unlist(lookup))
 #' ovol2 <- map_values(vol, lookup.mat)
@@ -347,14 +392,17 @@ setGeneric(name="map_values", def=function(x, lookup) standardGeneric("map_value
 
 
 
-#' center/scale row-subsets of a matrix or matrix-like object
+#' Center and/or Scale Row-subsets of a Matrix or Matrix-like Object
 #'
-#' @param x a numeric matrix or matrix-like object
-#' @param f the splitting object, typically a \code{factor} or set of \code{integer} indices. must be equal to number of rows of matrix.
-#' @param center should values within each submatrix be centered? (mean removed from each column of submatrix)
-#' @param scale should values be scaled? (divide vector by standard deviation from each column of submatrix)
-#' @return a new matrix or matrix-like object where the original rows have been grouped by \code{f} and then centered and/or scaled for each grouping
-#' @docType methods
+#' This function centers and/or scales the row-subsets of a numeric matrix or matrix-like object.
+#'
+#' @param x A numeric matrix or matrix-like object.
+#' @param f The splitting object, typically a factor or a set of integer indices. Must be equal to the number of rows in the matrix.
+#' @param center Should values within each submatrix be centered? If TRUE, the mean is removed from each column of the submatrix.
+#' @param scale Should values be scaled? If TRUE, the vector is divided by the standard deviation for each column of the submatrix.
+#'
+#' @return A new matrix or matrix-like object in which the original rows have been grouped by 'f' and then centered and/or scaled for each grouping.
+#'
 #' @export
 #' @examples
 #'
@@ -362,89 +410,98 @@ setGeneric(name="map_values", def=function(x, lookup) standardGeneric("map_value
 #' fac <- factor(rep(1:2, each=5))
 #' Ms <- split_scale(M, fac)
 #'
-#' ## correctly centered
+#' ## Correctly centered
 #' all(abs(apply(Ms[fac == 1,], 2, mean)) < .000001)
 #' all(abs(apply(Ms[fac == 2,], 2, mean)) < .000001)
 #'
-#' # correctly scaled
+#' ## Correctly scaled
 #' all.equal(apply(Ms[fac == 1,], 2, sd), rep(1, ncol(Ms)))
 #' all.equal(apply(Ms[fac == 2,], 2, sd), rep(1, ncol(Ms)))
 #' @rdname split_scale-methods
 setGeneric(name="split_scale", def=function(x, f, center, scale) standardGeneric("split_scale"))
 
-#' summarize subsets of an object by first splitting by row and then "reducing" by a summary \code{function}
+#' Summarize Subsets of an Object by Splitting by Row and Applying a Summary Function
 #'
-#' @param x a numeric matrix(like) object
-#' @param fac the factor to define subsets of the object
-#' @param FUN the function to apply to each subset. if \code{FUN} is missing, than the mean of each sub-matrix column is computed.
-#' @return a new \code{matrix} where the original values have been "reduced" by the supplied function.
-#' @docType methods
-#' @details if \code{FUN} is supplied it must take a vector and return a single scalar value. If it returns more than one value, an error will occur.
+#' This function summarizes subsets of a numeric matrix or matrix-like object by first splitting the object by row and then applying a summary function.
 #'
-#' if \code{x} is a \code{\linkS4class{NeuroVec}} instance then voxels (dims 1:3) are treated as columns and time-series (dim 4) as rows.
-#' The summary function then is applied to groups of voxels. However, if the goal is to apply a function to groups of time-points,
-#' then this can be achieved as follows:
+#' @param x A numeric matrix or matrix-like object.
+#' @param fac A factor to define subsets of the object.
+#' @param FUN The summary function to apply to each subset. If not provided, the mean of each sub-matrix column is computed.
+#'
+#' @return A new matrix where the original values have been "reduced" by the supplied function.
+#'
+#' @details If 'FUN' is supplied, it must take a vector and return a single scalar value. If it returns more than one value, an error will occur.
+#'
+#' If 'x' is a NeuroVec instance, voxels (dimensions 1:3) are treated as columns and time-series (dimension 4) as rows. The summary function is then applied to groups of voxels. However, if the goal is to apply a function to groups of time-points, this can be achieved as follows:
 #'
 #' \code{ split_reduce(t(as.matrix(bvec)), fac) }
-#'
 #'
 #' @export
 #' @examples
 #' mat = matrix(rnorm(100*100), 100, 100)
 #' fac = factor(sample(1:3, nrow(mat), replace=TRUE))
-#' ## compute column means of each sub-matrix
+#' ## Compute column means of each sub-matrix
 #' ms <- split_reduce(mat, fac)
 #' all.equal(row.names(ms), levels(fac))
 #'
-#' ## compute column medians of each sub-matrix
+#' ## Compute column medians of each sub-matrix
 #' ms <- split_reduce(mat, fac, median)
 #'
-#' ## compute time-series means grouped over voxels.
-#' ## Here, \code{length(fac)} must equal the number of voxels: \code{prod(dim(bvec)[1:3]}
+#' ## Compute time-series means grouped over voxels.
+#' ## Here, 'length(fac)' must equal the number of voxels: 'prod(dim(bvec)[1:3])'
 #' bvec <- NeuroVec(array(rnorm(24*24*24*24), c(24,24,24,24)), NeuroSpace(c(24,24,24,24), c(1,1,1)))
 #' fac <- factor(sample(1:3, prod(dim(bvec)[1:3]), replace=TRUE))
 #' ms <- split_reduce(bvec, fac)
 #' ms2 <- split_reduce(bvec, fac, mean)
 #' all.equal(row.names(ms), levels(fac))
-#' all.equal(ms,ms2)
+#' all.equal(ms, ms2)
 #'
 #' @rdname split_reduce-methods
 setGeneric(name="split_reduce", def=function(x, fac, FUN) standardGeneric("split_reduce"))
 
 
-#' extract the voxel dimensions of an image
+#' Extract Voxel Dimensions of an Image
 #'
-#' @param x the object
-#' @return a numeric vector
+#' This function extracts the voxel dimensions of an image represented by the input object.
+#'
+#' @param x The object representing the image.
+#'
+#' @return A numeric vector containing the voxel dimensions of the image.
+#'
 #' @export
 #' @examples
-#' bspace <- NeuroSpace(c(10,10,10), c(2,2,2))
-#' all.equal(spacing(bspace), c(2,2,2))
+#' bspace <- NeuroSpace(c(10, 10, 10), c(2, 2, 2))
+#' all.equal(spacing(bspace), c(2, 2, 2))
+#'
 #' @rdname spacing-methods
 setGeneric(name="spacing", def=function(x) standardGeneric("spacing"))
 
-#' extract the spatial bounds (origin + dim * spacing) of an image
-#' param x the object
-
-#' @param x the object with \code{bounds} property
-#' @return a \code{matrix} where each row contains the min (column 1) and max (column 2) bounds of the image dimension from 1 to \code{ndim(image)}.
+#' Extract Spatial Bounds of an Image
+#'
+#' This function extracts the spatial bounds (origin + dim * spacing) of an image represented by the input object.
+#'
+#' @param x The object with the `bounds` property, typically an image.
+#'
+#' @return A matrix where each row contains the min (column 1) and max (column 2) bounds of the image dimension from 1 to `ndim(image)`.
+#'
 #' @examples
-#' bspace <- NeuroSpace(c(10,10,10), c(2,2,2))
+#' bspace <- NeuroSpace(c(10, 10, 10), c(2, 2, 2))
 #' b <- bounds(bspace)
 #' nrow(b) == ndim(bspace)
 #' ncol(b) == 2
+#'
 #' @rdname bounds-methods
 setGeneric(name="bounds",     def=function(x) standardGeneric("bounds"))
 
 
-#' extract image axes
+#' Extract Image Axes
 #'
 #' @param x an object with a set of axes
 #' @export
 #' @rdname axes-methods
 setGeneric(name="axes",  def=function(x) standardGeneric("axes"))
 
-#' extract image origin
+#' Extract Image Origin
 #'
 #' @param x an object with an origin
 #' @export
@@ -724,54 +781,53 @@ setGeneric(name="scale_series", def=function(x, center, scale) standardGeneric("
 #'
 #' mask <- LogicalNeuroVol(runif(length(indmask)), space=space(bvol), indices=indmask)
 #' sum(mask) == 100
-#' @rdname as.sparse-methods
+#' @export
 setGeneric(name="as.sparse", def=function(x, mask, ...) standardGeneric("as.sparse"))
 
 #' Convert to dense representation
 #'
 #' @param x the object to densify
-#' @rdname as.dense-methods
+#' @export
 setGeneric(name="as.dense", def=function(x) standardGeneric("as.dense"))
 
 #' Convert to a LogicalNeuroVol
+#'
 #' @param x the object to binarize
 #' @param indices the indices to set to TRUE
 #' @export
-#' @rdname as.mask-methods
 setGeneric(name="as.mask", def=function(x, indices) standardGeneric("as.mask"))
 
 
-#' Extract set of patches
-#'
-#' generate a set of coordinate "patches" of fixed size from an image object.
+
+#' Generate a set of coordinate "patches" of fixed size from an image object.
 #'
 #' @param x the object to extract patches from
 #' @param dims a vector indicating the dimensions of the patches
 #' @param mask mask indicating the valid patch area
 #' @param ... additional args
-#' @rdname patch_set-methods
+#' @export
 setGeneric(name="patch_set", def=function(x, dims, mask, ...) standardGeneric("patch_set"))
 
-#' num_clusters
+#' Number of Clusters
 #'
 #' @param x the object to extract number of clusters
 #' @export
-#' @rdname num_clusters-methods
 setGeneric(name="num_clusters", def=function(x) standardGeneric("num_clusters"))
 
 
-#' Extract coordinates
-#'
-#' @param x the object to extract coordinates from
-#' @param ... additional arguments
+#' @title Extract coordinates from an object
+#' @description This function extracts the coordinates from an input object.
+#' @param x The object to extract coordinates from.
+#' @param ... Additional arguments (not used in the generic function).
+#' @return The extracted coordinates.
 #' @export
-#' @rdname coords-methods
+#' @name coords
 setGeneric(name="coords", def=function(x, ...) standardGeneric("coords"))
 
 #' Extract indices
+#'
 #' @param x the object to extract indices
 #' @export
-#' @rdname indices-methods
 setGeneric(name="indices", def=function(x) standardGeneric("indices"))
 
 #' Index Lookup operation
@@ -779,13 +835,11 @@ setGeneric(name="indices", def=function(x) standardGeneric("indices"))
 #' @param i the index to lookup
 #' @param ... additional arguments
 #' @export
-#' @rdname lookup-methods
 setGeneric(name="lookup", def=function(x, i, ...) standardGeneric("lookup"))
 
 
 #' Extract one or more series from object and return as ROI object
 #'
-#' @inheritParams series
 #' @rdname series-methods
 setGeneric(name="series_roi", def=function(x, i, ...) standardGeneric("series_roi"))
 

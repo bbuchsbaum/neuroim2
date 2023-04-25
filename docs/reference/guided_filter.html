@@ -94,7 +94,7 @@ https://en.wikipedia.org/wiki/Guided_filter</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Load an example brain volume</span></span></span>
 <span class="r-in"><span><span class="va">brain_vol</span> <span class="op">&lt;-</span> <span class="fu"><a href="read_vol.html">read_vol</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"example_volume.nii"</span>, package<span class="op">=</span><span class="st">"neuroim2"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in read_header(input):</span> could not find reader for file:  AFNIDescriptor-class.html</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in read_header(input):</span> could not find reader for file:  AFNIFormat-class.html</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Apply guided filtering to the brain volume</span></span></span>
 <span class="r-in"><span><span class="va">filtered_vol</span> <span class="op">&lt;-</span> <span class="fu">guided_filter</span><span class="op">(</span><span class="va">brain_vol</span>, radius <span class="op">=</span> <span class="fl">4</span>, epsilon <span class="op">=</span> <span class="fl">.7</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span></span>

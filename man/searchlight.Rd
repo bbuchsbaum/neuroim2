@@ -14,7 +14,7 @@ clustered_searchlight(mask, cvol = NULL, csize = NULL)
 \item{csize}{An optional integer specifying the number of clusters to be generated using k-means clustering (ignored if \code{cvol} is provided).}
 }
 \value{
-A \code{\linkS4class{deferred_list}} object containing \code{ROIVol} objects, each representing a clustered region within the image volume.
+A \code{deferred_list} object containing \code{ROIVol} objects, each representing a clustered region within the image volume.
 }
 \description{
 This function generates a searchlight iterator that iterates over successive spatial clusters in an image volume.

@@ -27,7 +27,7 @@ This function constructs a \code{\linkS4class{LogicalNeuroVol}} instance.
 }
 \examples{
 # Load an example brain mask
-brain_mask <- read_vol(system.file("extdata", "example_mask.nii", package="neuroim2"))
+brain_mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
 
 # Convert the brain mask to a LogicalNeuroVol
 logical_vol <- LogicalNeuroVol(brain_mask, space(brain_mask))

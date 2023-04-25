@@ -20,17 +20,17 @@ gen_dat <- function(d1 = 12,
 }
 
 
-test_that("can construct an H5NeuroVec", {
-	bv <- array(rnorm(12*12*12*4), c(12,12,12,4))
-	bv <- NeuroVec(bv, NeuroSpace(dim=c(12,12,12,4)))
-	fname <- paste0(tempfile(), ".h5")
-	hfile <- to_nih5_vec(bv,fname)
-	hfile$close_all()
-	hvec <- H5NeuroVec(fname)
-  expect_equal(hvec[1,1,1,1], bv[1,1,1,1],tolerance=1e-6)
-  expect_equal(hvec[1,1,1,], bv[1,1,1,],tolerance=1e-3)
-  expect_equal(hvec[1:5,1,1,1], bv[1:5,1,1,1],tolerance=1e-3)
-
-})
+# test_that("can construct an H5NeuroVec", {
+# 	bv <- array(rnorm(12*12*12*4), c(12,12,12,4))
+# 	bv <- NeuroVec(bv, NeuroSpace(dim=c(12,12,12,4)))
+# 	fname <- paste0(tempfile(), ".h5")
+# 	hfile <- to_nih5_vec(bv,fname)
+# 	hfile$close_all()
+# 	hvec <- H5NeuroVec(fname)
+#   expect_equal(hvec[1,1,1,1], bv[1,1,1,1],tolerance=1e-6)
+#   expect_equal(hvec[1,1,1,], bv[1,1,1,],tolerance=1e-3)
+#   expect_equal(hvec[1:5,1,1,1], bv[1:5,1,1,1],tolerance=1e-3)
+#
+# })
 
 

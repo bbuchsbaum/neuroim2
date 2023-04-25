@@ -5,11 +5,11 @@
 \alias{BigNeuroVec-class}
 \title{BigNeuroVec}
 \description{
-a sparse four-dimensional brain image that is backed by a disk-based big-matrix
+A class representing a sparse four-dimensional brain image that is backed by a disk-based big-matrix. BigNeuroVec objects are designed for efficient handling of large-scale brain imaging data that do not fit into memory. This class inherits from the \code{\linkS4class{NeuroVec}}, \code{\linkS4class{AbstractSparseNeuroVec}}, and implements the \code{ArrayLike4D} interface.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{data}}{an instance of class \code{FBM} from \code{bigstatsr} package which contains time-series data.}
+\item{\code{data}}{An instance of class \code{FBM} from the \code{bigstatsr} package, which contains time-series data. The FBM (Filebacked Big Matrix) is a matrix-like structure stored on disk, allowing for the efficient handling of large-scale data.}
 }}
 

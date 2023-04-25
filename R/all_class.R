@@ -302,8 +302,7 @@ setClass("BinaryWriter",
 #'
 #' @examples
 #' # Create a NeuroSpace object
-#' space <- new("NeuroSpace", dim=c(64, 64, 64), origin=c(0, 0, 0), spacing=c(1, 1, 1),
-#'              axes=AxisSet(c('x', 'y', 'z')), trans=diag(4), inverse=diag(4))
+#' space <- NeuroSpace(dim=as.integer(c(64, 64, 64)), origin=c(0, 0, 0), spacing=c(1, 1, 1))
 #'
 #' @export
 #' @rdname NeuroSpace-class
@@ -368,7 +367,7 @@ setClass("DenseNeuroVol", contains=c("NeuroVol", "array"))
 #'
 #' @slot data A \code{\linkS4class{sparseVector}} instance from the Matrix package, which stores the image volume data in a sparse format.
 #'
-#' @seealso \code{\linkS4class{NeuroVol}} and \code{\linkS4class{ArrayLike3D}}
+#' @seealso \code{\linkS4class{NeuroVol}}
 #'
 #' @rdname SparseNeuroVol-class
 #' @importFrom Matrix sparseVector
@@ -405,11 +404,6 @@ setClass("LogicalNeuroVol", contains=c("DenseNeuroVol"))
 #'
 #' @seealso \code{\linkS4class{SparseNeuroVol}}, \code{\linkS4class{LogicalNeuroVol}}
 #'
-#' @examples
-#' # Create a ClusteredNeuroVol object
-#' # (Assuming you have the necessary data such as mask, clusters, label_map, and cluster_map)
-#' clustered_vol <- new("ClusteredNeuroVol", mask=mask, clusters=clusters, label_map=label_map, cluster_map=cluster_map)
-#'
 #' @export
 #' @rdname ClusteredNeuroVol-class
 setClass("ClusteredNeuroVol",
@@ -425,15 +419,6 @@ setClass("ClusteredNeuroVol",
 #'
 #' A three-dimensional brain image class that serves as a map between 1D grid indices and a table of values.
 #' It is primarily used in the \code{\linkS4class{SparseNeuroVec}} class.
-#'
-#' @section Constructor:
-#' \preformatted{
-#' IndexLookupVol(space, indices, map)
-#' }
-#'
-#' @param space A \code{\linkS4class{NeuroSpace}} object representing the 3D space of the brain image.
-#' @param indices An integer vector containing the 1D indices of the voxels in the grid.
-#' @param map An integer vector containing the mapping between the 1D indices and the table of values.
 #'
 #' @return An object of class \code{\linkS4class{IndexLookupVol}} representing the index lookup volume.
 #'
@@ -458,7 +443,7 @@ setClass("ClusteredNeuroVol",
 #' map <- seq_along(indices)
 #'
 #' # Create an IndexLookupVol object
-#' ilv <- IndexLookupVol(space, indices, map)
+#' ilv <- new("IndexLookupVol", space=space, indices=as.integer(indices))
 #' @rdname IndexLookupVol-class
 #' @export
 setClass("IndexLookupVol",
@@ -477,10 +462,10 @@ setClass("IndexLookupVol",
 #'
 #' @examples
 #' # Load an example 4D brain image
-#' example_4d_image <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
+#' example_4d_image <- read_vec(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #'
-#' # Create a NeuroVec object
-#' neuro_vec <- NeuroVec(data=example_4d_image, space=space(example_4d_image))
+#' # Create a NeuroVec object by copying the @.Data field (not advised in practice)
+#' neuro_vec <- NeuroVec(data=example_4d_image@.Data, space=space(example_4d_image))
 #'
 #' @rdname NeuroVec-class
 #' @export
@@ -510,7 +495,9 @@ setClass("NeuroHyperVec", contains="NeuroObj",
 
 #' DenseNeuroVec
 #'
-#' Four-dimensional brain image, backed by an array
+#' A class representing a four-dimensional brain image, backed by an array. DenseNeuroVec objects store their data in a dense array format, which is useful for cases where most elements in the brain image contain non-zero values. This class inherits from both the \code{\linkS4class{NeuroVec}} and the \code{array} classes.
+#'
+#'
 #' @name DenseNeuroVec-class
 #' @export
 setClass("DenseNeuroVec",  contains=c("NeuroVec", "array"))
@@ -530,11 +517,15 @@ setValidity("DenseNeuroVec", function(object) {
 
 #' MappedNeuroVec
 #'
-#' Four-dimensional brain image, backed by an memory-mapped file.
+#' A class representing a four-dimensional brain image, backed by a memory-mapped file. MappedNeuroVec objects store their data in a memory-mapped file, providing efficient access to large brain images without loading the entire dataset into memory. This class inherits from the \code{\linkS4class{NeuroVec}} and implements the \code{ArrayLike4D} interface.
+#'
+#' @slot filemap An instance of the \code{mmap} class representing the memory-mapped file containing the brain image data.
+#' @slot offset An integer representing the offset (in bytes) within the memory-mapped file where the brain image data starts.
 #'
 #' @name MappedNeuroVec-class
 #' @export
-setClass("MappedNeuroVec",  representation(filemap="mmap", offset="integer"), contains=c("NeuroVec", "ArrayLike4D"))
+setClass("MappedNeuroVec",  representation(filemap="mmap", offset="integer"),
+         contains=c("NeuroVec", "ArrayLike4D"))
 
 
 #' AbstractSparseNeuroVec
@@ -548,24 +539,26 @@ setClass("AbstractSparseNeuroVec",
 
 #' SparseNeuroVec
 #'
-#' a sparse four-dimensional brain image, backed by a \code{matrix}, where each column represents
-#' a non-zero vector spanning the fourth dimension (e.g. time), and defined by a volumetric mask.
+#' A class representing a sparse four-dimensional brain image, backed by a \code{matrix}, where each column represents a non-zero vector spanning the fourth dimension (e.g., time) and defined by a volumetric mask. SparseNeuroVec objects store their data in a compressed format, providing efficient storage and access to sparse brain images. This class inherits from the \code{\linkS4class{NeuroVec}}, \code{\linkS4class{AbstractSparseNeuroVec}}, and implements the \code{ArrayLike4D} interface.
 #'
-#' @slot data the matrix of series, where rows span across voxel space and columns span the fourth dimensions
+#' @slot data A \code{matrix} of series, where rows span across voxel space and columns span the fourth dimension. Each column represents a non-zero vector in the 4D space, and the matrix stores only non-zero values to save memory.
 #'
-#' @rdname SparseNeuroVec-class
+#'
+#' @name SparseNeuroVec-class
+#' @export
 setClass("SparseNeuroVec",
          representation(data="matrix"),
          contains=c("NeuroVec", "AbstractSparseNeuroVec", "ArrayLike4D"))
 
 #' BigNeuroVec
 #'
-#' a sparse four-dimensional brain image that is backed by a disk-based big-matrix
+#' A class representing a sparse four-dimensional brain image that is backed by a disk-based big-matrix. BigNeuroVec objects are designed for efficient handling of large-scale brain imaging data that do not fit into memory. This class inherits from the \code{\linkS4class{NeuroVec}}, \code{\linkS4class{AbstractSparseNeuroVec}}, and implements the \code{ArrayLike4D} interface.
 #'
-#' @rdname BigNeuroVec-class
+#' @slot data An instance of class \code{FBM} from the \code{bigstatsr} package, which contains time-series data. The FBM (Filebacked Big Matrix) is a matrix-like structure stored on disk, allowing for the efficient handling of large-scale data.
 #'
-#' @slot data an instance of class \code{FBM} from \code{bigstatsr} package which contains time-series data.
+#' @name BigNeuroVec-class
 #' @importFrom bigstatsr FBM
+#' @export
 setClass("BigNeuroVec",
          representation(data="FBM"),
          contains=c("NeuroVec", "AbstractSparseNeuroVec", "ArrayLike4D"))
@@ -573,13 +566,14 @@ setClass("BigNeuroVec",
 
 
 
-
 #' FileBackedNeuroVec
 #'
-#' a four-dimensional brain image that is read in to memory "on demand" using memory-mapped file access.
+#' A class representing a four-dimensional brain image that is read into memory "on demand" using memory-mapped file access. FileBackedNeuroVec objects enable efficient handling of large-scale brain imaging data by loading only the required portions of the data into memory when needed.
 #'
-#' @rdname FileBackedNeuroVec-class
-#' @slot meta the file meta information of type \code{\linkS4class{FileMetaInfo}}
+#' @slot meta An instance of class \code{\linkS4class{FileMetaInfo}} containing the file meta information, such as the file path, format, and other associated metadata.
+#'
+#' @name FileBackedNeuroVec-class
+#' @export
 setClass("FileBackedNeuroVec",
          representation(meta="FileMetaInfo"),
          contains=c("NeuroVec", "ArrayLike4D"))
@@ -588,26 +582,32 @@ setClass("FileBackedNeuroVec",
 
 #' H5NeuroVol
 #'
-#' a three-dimensional brain image backed by an HDF5 dataset
+#' A class representing a three-dimensional brain image backed by an HDF5 dataset. H5NeuroVol objects facilitate efficient handling of large-scale brain imaging data by storing and accessing the data using the HDF5 file format.
 #'
-#' @rdname H5NeuroVol-class
-# @importClassesFrom hdf5r H5File
+#' @slot h5obj An instance of class \code{H5File} from the \code{hdf5r} package, representing the underlying HDF5 dataset.
+#'
+#'
+#' @name H5NeuroVol-class
+## @importClassesFrom hdf5r H5File
+#' @export
 setClass("H5NeuroVol",
          representation(h5obj="H5File"),
          contains=c("NeuroVol", "ArrayLike3D"))
 
+
 #' H5NeuroVec
 #'
-#' A NeuroVec backed by an hdf5 file
+#' A class representing a four-dimensional brain image (NeuroVec) backed by an HDF5 file. H5NeuroVec objects facilitate efficient handling of large-scale brain imaging data by storing and accessing the data using the HDF5 file format.
 #'
-#' @rdname H5NeuroVec-class
-#' @slot obj an H5File object
+#' @slot obj An instance of class \code{H5File} from the \code{hdf5r} package, representing the underlying HDF5 file.
+#'
+#'
+#' @name H5NeuroVec-class
+# @importClassesFrom hdf5r H5File
+#' @export
 setClass("H5NeuroVec",
          representation(obj="H5File"),
-         contains=c("NeuroVec", "ArrayLike4D"),
-         validity = function(object) {
-            TRUE
-         })
+         contains=c("NeuroVec", "ArrayLike4D"))
 
 
 
@@ -682,16 +682,38 @@ setClassUnion("numericOrMatrix", c("numeric", "matrix"))
 #' @export
 setClass("ROI", contains="VIRTUAL")
 
+
+#' ROICoords
+#'
+#' A class representing a region of interest (ROI) in a brain image, defined by a set of coordinates. This class stores the geometric space of the image and the coordinates of the voxels within the ROI.
+#'
+#' @slot space An instance of class \code{\linkS4class{NeuroSpace}} representing the geometric space of the image data.
+#' @slot coords A \code{matrix} containing the coordinates of the voxels within the ROI.
+#' Each row represents a coordinate as, e.g. (i,   j,  k).
+#'
+#'
+#' @name ROICoords-class
+#' @export
 setClass("ROICoords",
          representation=representation(space="NeuroSpace", coords="matrix"),
          contains=c("ROI"))
 
 #' ROIVol
 #'
-#' A class that represents a volumetric region of interest
+#' A class representing a volumetric region of interest (ROI) in a brain image, defined by a set of coordinates and associated data values.
 #'
-#' @rdname ROIVol-class
-#' @exportClass ROIVol
+#' @slot coords A \code{matrix} containing the 3D coordinates of the voxels within the ROI. Each row represents a voxel coordinate as (x, y, z).
+#' @slot .Data A \code{numeric} vector containing the data values associated with each voxel in the ROI. The length of this vector should match the number of rows in the \code{coords} matrix.
+#'
+#'
+#' @section Validity:
+#' An object of class \code{ROIVol} is considered valid if:
+#' - The \code{coords} slot is a matrix with 3 columns.
+#' - The \code{.Data} slot is a numeric vector.
+#' - The length of the \code{.Data} vector is equal to the number of rows in the \code{coords} matrix.
+#'
+#' @name ROIVol-class
+#' @export
 setClass("ROIVol",
          contains=c("ROICoords", "numeric"),
          validity = function(object) {
@@ -702,6 +724,7 @@ setClass("ROIVol",
              stop("'data' must be a vector")
            }
            if (length(object@.Data) != nrow(object@coords)) {
+
              stop("length of data vector must equal 'nrow(coords)'")
            }
          })
@@ -709,11 +732,21 @@ setClass("ROIVol",
 
 #' ROIVolWindow
 #'
-#' A class that represents a spatially windowed volumetric region of interest
+#' A class representing a spatially windowed volumetric region of interest (ROI) in a brain image, derived from a larger parent ROI.
 #'
-#' @rdname ROIVolWindow-class
-#' @slot parent_index the 1D index of the center voxel in the parent space.
-#' @slot center_index the location in the coordinate matrix of the center voxel in the window
+#' @slot parent_index An \code{integer} representing the 1D index of the center voxel in the parent space.
+#' @slot center_index An \code{integer} representing the location in the coordinate matrix of the center voxel in the window.
+#' @slot coords A \code{matrix} containing the 3D coordinates of the voxels within the ROI. Each row represents a voxel coordinate as (x, y, z).
+#' @slot .Data A \code{numeric} vector containing the data values associated with each voxel in the ROI. The length of this vector should match the number of rows in the \code{coords} matrix.
+#'
+#'
+#' @section Validity:
+#' An object of class \code{ROIVolWindow} is considered valid if:
+#' - The \code{coords} slot is a matrix with 3 columns.
+#' - The \code{.Data} slot is a numeric vector.
+#' - The length of the \code{.Data} vector is equal to the number of rows in the \code{coords} matrix.
+#'
+#' @name ROIVolWindow-class
 #' @export
 setClass("ROIVolWindow",
          contains=c("ROIVol"),
@@ -735,10 +768,20 @@ setClass("ROIVolWindow",
 
 #' ROIVec
 #'
-#' A class that represents a vector-valued volumetric region of interest
+#' A class representing a vector-valued volumetric region of interest (ROI) in a brain image.
 #'
-#' @rdname ROIVec-class
-#' @exportClass ROIVec
+#' @slot coords A \code{matrix} containing the 3D coordinates of the voxels within the ROI. Each row represents a voxel coordinate as (x, y, z).
+#' @slot .Data A \code{matrix} containing the data values associated with each voxel in the ROI. Each row corresponds to a unique vector value, and the number of rows should match the number of rows in the \code{coords} matrix.
+#'
+#'
+#' @section Validity:
+#' An object of class \code{ROIVec} is considered valid if:
+#' - The \code{coords} slot is a matrix with 3 columns.
+#' - The \code{.Data} slot is a matrix.
+#' - The number of rows in the \code{.Data} matrix is equal to the number of rows in the \code{coords} matrix.
+#'
+#' @name ROIVec-class
+#' @export
 setClass("ROIVec",
          contains=c("ROICoords", "matrix"),
          validity = function(object) {
@@ -754,11 +797,22 @@ setClass("ROIVec",
 
 #' ROIVecWindow
 #'
-#' A class that represents a vector-valued volumetric region of interest
+#' A class representing a spatially windowed, vector-valued volumetric region of interest (ROI) in a brain image.
 #'
-#' @slot parent_index the 1D index of the center voxel in the parent space.
-#' @slot center_index the location in the coordinate matrix of the center voxel in the window
-#' @rdname ROIVecWindow-class
+#' @slot coords A \code{matrix} containing the 3D coordinates of the voxels within the ROI. Each row represents a voxel coordinate as (x, y, z).
+#' @slot .Data A \code{matrix} containing the data values associated with each voxel in the ROI. Each row corresponds to a unique vector value, and the number of rows should match the number of rows in the \code{coords} matrix.
+#' @slot parent_index An \code{integer} representing the 1D index of the center voxel in the parent space.
+#' @slot center_index An \code{integer} representing the location in the coordinate matrix of the center voxel in the window.
+#'
+#'
+#' @section Validity:
+#' An object of class \code{ROIVecWindow} is considered valid if:
+#' - The \code{coords} slot is a matrix with 3 columns.
+#' - The \code{.Data} slot is a matrix.
+#' - The number of rows in the \code{.Data} matrix is equal to the number of rows in the \code{coords} matrix.
+#'
+#' @name ROIVecWindow-class
+#' @export
 setClass("ROIVecWindow",
          representation=representation(parent_index="integer", center_index="integer"),
          contains=c("ROIVec"),
@@ -775,13 +829,15 @@ setClass("ROIVecWindow",
 
 #' Kernel
 #'
-#' A class representing an image kernel
+#' A class representing an image kernel for image processing, such as convolution or filtering operations in brain images.
 #'
-#' @rdname Kernel-class
-#' @slot width the width in voxels of the kernel
-#' @slot weights the kernel weights
-#' @slot voxels the relative voxel coordinates of the kernel
-#' @slot coords the relative real coordinates of the kernel
+#' @slot width A \code{numeric} value representing the width of the kernel in voxels. The width is typically an odd number to maintain symmetry.
+#' @slot weights A \code{numeric} vector containing the weights associated with each voxel in the kernel.
+#' @slot voxels A \code{matrix} containing the relative voxel coordinates of the kernel. Each row represents a voxel coordinate as (x, y, z).
+#' @slot coords A \code{matrix} containing the relative real-world coordinates of the kernel, corresponding to the voxel coordinates.
+#'
+#'
+#' @name Kernel-class
 #' @export
 setClass("Kernel", representation(width="numeric", weights="numeric", voxels="matrix", coords="matrix"))
 
@@ -810,11 +866,13 @@ setClass("NeuroBucket",
 
 #' ColumnReader
 #'
-#' This class supports reading of data froma matrix-like storage format
-#' @rdname ColumnReader-class
-#' @slot nrow the number of rows
-#' @slot ncol the number of columns
-#' @slot reader a function that takes a set of column indices and returns a \code{matrix}
+#' A class that supports reading of data from a matrix-like storage format, such as a file or a database, in a column-wise manner.
+#'
+#' @slot nrow An \code{integer} representing the number of rows in the matrix-like storage.
+#' @slot ncol An \code{integer} representing the number of columns in the matrix-like storage.
+#' @slot reader A \code{function} that takes a set of column indices as input and returns a \code{matrix} containing the requested columns from the storage.
+#'
+#' @name ColumnReader-class
 #' @export
 setClass("ColumnReader", representation=
           representation(nrow="integer", ncol="integer", reader="function"))

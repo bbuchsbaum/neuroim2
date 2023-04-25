@@ -5,13 +5,25 @@
 \alias{ROIVecWindow-class}
 \title{ROIVecWindow}
 \description{
-A class that represents a vector-valued volumetric region of interest
+A class representing a spatially windowed, vector-valued volumetric region of interest (ROI) in a brain image.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{parent_index}}{the 1D index of the center voxel in the parent space.}
+\item{\code{coords}}{A \code{matrix} containing the 3D coordinates of the voxels within the ROI. Each row represents a voxel coordinate as (x, y, z).}
 
-\item{\code{center_index}}{the location in the coordinate matrix of the center voxel in the window}
+\item{\code{.Data}}{A \code{matrix} containing the data values associated with each voxel in the ROI. Each row corresponds to a unique vector value, and the number of rows should match the number of rows in the \code{coords} matrix.}
+
+\item{\code{parent_index}}{An \code{integer} representing the 1D index of the center voxel in the parent space.}
+
+\item{\code{center_index}}{An \code{integer} representing the location in the coordinate matrix of the center voxel in the window.}
 }}
+
+\section{Validity}{
+
+An object of class \code{ROIVecWindow} is considered valid if:
+- The \code{coords} slot is a matrix with 3 columns.
+- The \code{.Data} slot is a matrix.
+- The number of rows in the \code{.Data} matrix is equal to the number of rows in the \code{coords} matrix.
+}
 

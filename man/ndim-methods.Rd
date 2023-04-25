@@ -29,11 +29,9 @@ Extract the number of dimensions of an object
 }
 \examples{
 
-```r
 x = NeuroSpace(c(10,10,10), spacing=c(1,1,1))
 ndim(x) == 3
 x = NeuroSpace(c(10,10,10,3), spacing=c(1,1,1))
 ndim(x) == 4
-```
 
 }

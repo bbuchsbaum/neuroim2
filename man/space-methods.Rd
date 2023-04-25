@@ -7,7 +7,7 @@
 \alias{space,ROICoords-method}
 \alias{space,NeuroObj-method}
 \alias{space,NeuroSpace-method}
-\title{extract geometric properties of an image.}
+\title{Extract Geometric Properties of an Image}
 \usage{
 space(x, ...)
 
@@ -20,19 +20,24 @@ space(x, ...)
 \S4method{space}{NeuroSpace}(x)
 }
 \arguments{
-\item{x}{the object to query, e.g. an instance of \code{\linkS4class{NeuroVol}} or \code{\linkS4class{NeuroVec}}}
+\item{x}{The object to query, which can be an instance of \code{\linkS4class{NeuroVol}} or \code{\linkS4class{NeuroVec}}.}
 
-\item{...}{additional arguments}
+\item{...}{Additional arguments, if needed.}
 }
 \value{
-an object representing the geometric space of the image of type \code{\linkS4class{NeuroSpace}}
+An object representing the geometric space of the image, of type \code{\linkS4class{NeuroSpace}}.
 }
 \description{
-extract geometric properties of an image.
+This function retrieves the geometric properties of a given image, such as dimensions and voxel size.
 }
 \examples{
-x = NeuroSpace(c(10,10,10), c(1,1,1))
-vol <- NeuroVol(rnorm(10*10*10), x)
-identical(x,space(vol))
+# Create a NeuroSpace object with dimensions (10, 10, 10) and voxel size (1, 1, 1)
+x <- NeuroSpace(c(10, 10, 10), c(1, 1, 1))
+
+# Create a NeuroVol object with random data and the specified NeuroSpace
+vol <- NeuroVol(rnorm(10 * 10 * 10), x)
+
+# Retrieve the geometric properties of the NeuroVol object
+identical(x, space(vol))
 
 }

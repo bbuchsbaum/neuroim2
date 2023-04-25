@@ -46,5 +46,5 @@ sum(sparsevol) == sum(densevol)
 
 }
 \seealso{
-\code{\linkS4class{NeuroVol}} and \code{\linkS4class{ArrayLike3D}}
+\code{\linkS4class{NeuroVol}}
 }

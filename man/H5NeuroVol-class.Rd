@@ -5,5 +5,11 @@
 \alias{H5NeuroVol-class}
 \title{H5NeuroVol}
 \description{
-a three-dimensional brain image backed by an HDF5 dataset
+A class representing a three-dimensional brain image backed by an HDF5 dataset. H5NeuroVol objects facilitate efficient handling of large-scale brain imaging data by storing and accessing the data using the HDF5 file format.
 }
+\section{Slots}{
+
+\describe{
+\item{\code{h5obj}}{An instance of class \code{H5File} from the \code{hdf5r} package, representing the underlying HDF5 dataset.}
+}}
+
