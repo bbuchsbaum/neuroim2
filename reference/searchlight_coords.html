@@ -110,13 +110,16 @@ sphere within the provided mask. The searchlight iterator visits every non-zero 
 <span class="r-in"><span><span class="va">mask</span> <span class="op">&lt;-</span> <span class="fu"><a href="read_vol.html">read_vol</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask.nii"</span>, package<span class="op">=</span><span class="st">"neuroim2"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Generate an exhaustive searchlight iterator with a radius of 6 mm</span></span></span>
-<span class="r-in"><span><span class="va">searchlights</span> <span class="op">&lt;-</span> <span class="fu">searchlight_coords</span><span class="op">(</span><span class="va">mask</span>, radius <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span>  <span class="va">searchlights</span> <span class="op">&lt;-</span> <span class="fu">searchlight_coords</span><span class="op">(</span><span class="va">mask</span>, radius <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Load an example brain mask</span></span></span>
 <span class="r-in"><span><span class="va">mask</span> <span class="op">&lt;-</span> <span class="fu"><a href="read_vol.html">read_vol</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask.nii"</span>, package<span class="op">=</span><span class="st">"neuroim2"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Generate an exhaustive searchlight iterator with a radius of 6 mm</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span><span class="va">searchlights</span> <span class="op">&lt;-</span> <span class="fu">searchlight</span><span class="op">(</span><span class="va">mask</span>, radius <span class="op">=</span> <span class="fl">6</span>, eager <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

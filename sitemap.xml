@@ -43,6 +43,15 @@
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/AbstractSparseNeuroVec-class.html</loc>
   </url>
   <url>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/Arith-NeuroVec-NeuroVol-method.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/Arith-ROIVol-ROIVol-method.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/Arith-methods.html</loc>
+  </url>
+  <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/AxisSet-class.html</loc>
   </url>
   <url>
@@ -76,13 +85,25 @@
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/ClusteredNeuroVol-class.html</loc>
   </url>
   <url>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/ClusteredNeuroVol-methods.html</loc>
+  </url>
+  <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/ColumnReader-class.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/ColumnReader.html</loc>
   </url>
   <url>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/Compare-methods.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/DenseNeuroVec-H5NeuroVec.html</loc>
+  </url>
+  <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/DenseNeuroVec-class.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/DenseNeuroVol-H5NeuroVol.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/DenseNeuroVol-class.html</loc>
@@ -205,6 +226,9 @@
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/ROI-class.html</loc>
   </url>
   <url>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/ROICoords-class.html</loc>
+  </url>
+  <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/ROIVec-class.html</loc>
   </url>
   <url>
@@ -232,16 +256,31 @@
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/SparseNeuroVecSource-class.html</loc>
   </url>
   <url>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/SparseNeuroVol-array.html</loc>
+  </url>
+  <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/SparseNeuroVol-class.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/SparseNeuroVol-numeric.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/Summary-SparseNeuroVec-method.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/Summary-SparseNeuroVol-method.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/add_dim-methods.html</loc>
   </url>
   <url>
-    <loc>https://bbuchsbaum.github.io/neuroim2/reference/as-methods.html</loc>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/as-DenseNeuroVol-array.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/as.dense-methods.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/as.dense.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/as.html</loc>
@@ -256,6 +295,9 @@
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/as.mask-methods.html</loc>
   </url>
   <url>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/as.mask.html</loc>
+  </url>
+  <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/as.matrix-methods.html</loc>
   </url>
   <url>
@@ -263,6 +305,9 @@
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/as.sparse-methods.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/as.sparse.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/axes-methods.html</loc>
@@ -299,6 +344,9 @@
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/coords-methods.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/coords.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/cuboid_roi.html</loc>
@@ -382,6 +430,9 @@
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/indices-methods.html</loc>
   </url>
   <url>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/indices.html</loc>
+  </url>
+  <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/internal-methods.html</loc>
   </url>
   <url>
@@ -398,6 +449,9 @@
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/lookup-methods.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/lookup.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/map-methods.html</loc>
@@ -427,6 +481,9 @@
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/num_clusters-methods.html</loc>
   </url>
   <url>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/num_clusters.html</loc>
+  </url>
+  <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/origin-methods.html</loc>
   </url>
   <url>
@@ -434,6 +491,9 @@
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/patch_set-methods.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/patch_set.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/perm_mat-methods.html</loc>
@@ -488,6 +548,12 @@
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/reorient-methods.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/resample-NeuroVol-NeuroSpace-method.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/resample-NeuroVol-NeuroVol-method.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/resample-methods.html</loc>
