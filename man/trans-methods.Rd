@@ -7,7 +7,7 @@
 \alias{trans,NIFTIMetaInfo-method}
 \alias{trans,NeuroObj-method}
 \alias{trans,NeuroSpace-method}
-\title{extract image coordinate transformation}
+\title{Extract image coordinate transformation}
 \usage{
 trans(x)
 
@@ -23,7 +23,7 @@ trans(x)
 \item{x}{an object with a transformation}
 }
 \description{
-extract image coordinate transformation
+Extract image coordinate transformation
 }
 \details{
 This function returns a transformation that can be used to go from "grid coordinates" to "real world coordinates" in millimeters.

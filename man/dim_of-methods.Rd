@@ -21,3 +21,8 @@ An integer representing the length of the specified axis.
 This function returns the length of a given axis (dimension) of an object. The
 axis can be specified using its position or name.
 }
+\examples{
+
+x <- NeuroSpace(c(10,10,10), spacing=c(1,1,1))
+stopifnot(dim_of(x, x@axes@i) == 10)
+}

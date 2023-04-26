@@ -44,6 +44,7 @@ parseElement <- function(inputLines) {
 #' read_afni_header
 #
 #' @param file_name the name of the AFNI header file (ending in .HEAD)
+#' @return a \code{list} representation of an AFNI header
 #' @keywords internal
 read_afni_header <- function(file_name) {
 	inputLines <- scan(file_name, what=character(), sep="\n", blank.lines.skip=FALSE)

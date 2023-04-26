@@ -3,7 +3,7 @@
 \name{inverse_trans}
 \alias{inverse_trans}
 \alias{inverse_trans,NeuroSpace-method}
-\title{extract inverse image coordinate transformation}
+\title{Extract inverse image coordinate transformation}
 \usage{
 inverse_trans(x)
 
@@ -13,7 +13,7 @@ inverse_trans(x)
 \item{x}{an object}
 }
 \description{
-extract inverse image coordinate transformation
+Extract inverse image coordinate transformation
 }
 \examples{
 bspace <- NeuroSpace(c(10,10,10), c(2,2,2))

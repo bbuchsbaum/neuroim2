@@ -38,5 +38,4 @@ sub_blocks <- split_blocks(y, indices)
 z <- list(a = 1:3, b = 4:6, c = 7:9, d = 10:12)
 indices <- c(1,1,1,2,2,2,3,3,3,4,4,4)
 sub_blocks <- split_blocks(z, indices)
-
 }

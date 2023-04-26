@@ -9,7 +9,7 @@
 \alias{write_vec,NeuroVec,character,character,missing-method}
 \alias{write_vec,NeuroVec,character,missing,character-method}
 \alias{write_vec,NeuroVec,character,missing,character,ANY-method}
-\title{write a 4d image vector to disk}
+\title{Write a 4d image vector to disk}
 \usage{
 write_vec(x, file_name, format, data_type, ...)
 
@@ -49,15 +49,15 @@ Otherwise output format will be inferred from R the datatype of the image.}
 \item{chunk_dim}{the dimensions of each chunk}
 }
 \description{
-write a 4d image vector to disk
+Write a 4d image vector to disk
 }
 \examples{
 
 bvec <- NeuroVec(array(0, c(10,10,10,10)), NeuroSpace(c(10,10,10,10), c(1,1,1)))
 \dontrun{
-writeVector(bvol, "out.nii")
-writeVector(bvol, "out.nii.gz")
-writeVector(bvec, "out.nii")
-writeVector(bvec, "out.nii.gz")
+write_vec(bvol, "out.nii")
+write_vec(bvol, "out.nii.gz")
+write_vec(bvec, "out.nii")
+write_vec(bvec, "out.nii.gz")
 }
 }

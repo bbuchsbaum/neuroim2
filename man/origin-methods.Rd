@@ -15,6 +15,9 @@ origin(x)
 \arguments{
 \item{x}{an object with an origin}
 }
+\value{
+the origin of the image
+}
 \description{
 Extract Image Origin
 }

@@ -9,6 +9,9 @@ read_afni_header(file_name)
 \arguments{
 \item{file_name}{the name of the AFNI header file (ending in .HEAD)}
 }
+\value{
+a \code{list} representation of an AFNI header
+}
 \description{
 read_afni_header
 }

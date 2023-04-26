@@ -17,6 +17,9 @@ centroid(x, ...)
 
 \item{...}{extra args}
 }
+\value{
+the centroid of the object
+}
 \description{
 return the centroid of an object
 }

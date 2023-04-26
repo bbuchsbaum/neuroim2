@@ -3,7 +3,7 @@
 \name{centroids}
 \alias{centroids}
 \alias{centroids,ClusteredNeuroVol-method}
-\title{return a matrix of centroids of an object}
+\title{Return a matrix of centroids of an object}
 \usage{
 centroids(x, ...)
 
@@ -17,5 +17,5 @@ centroids(x, ...)
 \item{type}{the type of center of mass: one of "center_of_mass" or "medoid"}
 }
 \description{
-return a matrix of centroids of an object
+Return a matrix of centroids of an object
 }

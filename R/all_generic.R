@@ -22,6 +22,22 @@ setGeneric("scale")
 #'
 #' @return An object representing the resampled source image, with the same spatial properties as the target image.
 #'
+#' @examples
+#'
+#' img <- read_vol(system.file("extdata", "global_mask.nii", package = "neuroim2"))
+#' rspace <- space(img)
+#'
+#' ### normally, one would resample from two existing soource and target spaces.
+#' ### But here we manually create the target space, which is a bit ugly.
+#'
+#' newtrans4X3 <- trans(img)[1:4, 1:3]
+#' newtrans4X3 <- newtrans4X3 * c(.5,.5,.5,1)
+#' newtrans <- cbind(newtrans4X3, c(space(img)@origin,1))
+#'
+#' rspace <- NeuroSpace(rspace@dim*2, rspace@spacing/2, origin=rspace@origin, trans=trans(img))
+#' rvol <- resample(img, rspace)
+#'
+#'
 #' @export
 #' @rdname resample-methods
 setGeneric("resample", function(source, target, ...) standardGeneric("resample"))
@@ -31,6 +47,7 @@ setGeneric("resample", function(source, target, ...) standardGeneric("resample")
 #'
 #' @param x the object to print
 #' @param ... additional arguments
+#' @keywords internal
 setGeneric(name="print_", def=function(x, ...) standardGeneric("print_"))
 
 #' Extract Data Values of an Object
@@ -50,8 +67,8 @@ setGeneric(name="values", def=function(x, ...) standardGeneric("values"))
 #' @param x a data source.
 #' @param i a vector of indices.
 #' @param ... additional arguments to be passed to methods.
-#' @export
 #' @rdname linear_access-methods
+#' @keywords internal
 setGeneric(name="linear_access", def=function(x, i, ...) standardGeneric("linear_access"))
 
 
@@ -66,8 +83,8 @@ setGeneric(name="linear_access", def=function(x, i, ...) standardGeneric("linear
 #' @param x a data source.
 #' @param i an index matrix specifying the space-time coordinates.
 #' @param ... additional arguments to be passed to methods.
-#' @export
 #' @rdname matricized_access-methods
+#' @keywords internal
 setGeneric(name="matricized_access", def=function(x, i, ...) standardGeneric("matricized_access"))
 
 
@@ -159,10 +176,7 @@ setGeneric(name="vectors", def=function(x, subset, ...) standardGeneric("vectors
 #' z <- list(a = 1:3, b = 4:6, c = 7:9, d = 10:12)
 #' indices <- c(1,1,1,2,2,2,3,3,3,4,4,4)
 #' sub_blocks <- split_blocks(z, indices)
-#'
-split_blocks <- function(x, indices, ...) {
-  # function body goes here
-}
+split_blocks <- function(x, indices, ...) standardGeneric("split_blocks")
 
 
 #' Partition an image into a set of disjoint clusters
@@ -244,6 +258,10 @@ setGeneric(name="ndim", def=function(x, ...) standardGeneric("ndim"))
 #' @export
 #' @rdname dim_of-methods
 #' @return An integer representing the length of the specified axis.
+#' @examples
+#'
+#' x <- NeuroSpace(c(10,10,10), spacing=c(1,1,1))
+#' stopifnot(dim_of(x, x@axes@i) == 10)
 setGeneric(name="dim_of", def=function(x, axis) standardGeneric("dim_of"))
 
 
@@ -258,6 +276,12 @@ setGeneric(name="dim_of", def=function(x, axis) standardGeneric("dim_of"))
 #'
 #' @export
 #' @rdname which_dim-methods
+#'
+#' @examples
+#'
+#' x <- NeuroSpace(c(10,10,10), spacing=c(1,1,1))
+#' which_dim(x, x@axes@j) == 2
+#'
 setGeneric(name="which_dim", def=function(x, axis) standardGeneric("which_dim"))
 
 
@@ -331,6 +355,8 @@ setGeneric(name="drop_dim", def=function(x, dimnum) standardGeneric("drop_dim"))
 #' @export
 #' @rdname space-methods
 setGeneric(name="space", def=function(x, ...) standardGeneric("space"))
+
+
 #' Fill Disjoint Sets of Values with the Output of a Function
 #'
 #' This function splits an object into disjoint sets of values based on a factor, applies a specified function to each set,
@@ -497,7 +523,14 @@ setGeneric(name="bounds",     def=function(x) standardGeneric("bounds"))
 #' Extract Image Axes
 #'
 #' @param x an object with a set of axes
+#'
+#' @return the `axes` associated with the object.
+#'
 #' @export
+#' @examples
+#' x <- NeuroSpace(c(10,10,10), spacing=c(1,1,1))
+#' class(axes(x)) == "AxisSet3D"
+#'
 #' @rdname axes-methods
 setGeneric(name="axes",  def=function(x) standardGeneric("axes"))
 
@@ -505,6 +538,9 @@ setGeneric(name="axes",  def=function(x) standardGeneric("axes"))
 #'
 #' @param x an object with an origin
 #' @export
+#'
+#' @return the origin of the image
+#'
 #' @examples
 #' bspace <- NeuroSpace(c(10,10,10), c(2,2,2))
 #' stopifnot(origin(bspace) == c(0,0,0))
@@ -518,6 +554,7 @@ setGeneric(name="origin", def=function(x) standardGeneric("origin"))
 #' @param x an object with a centroid
 #' @param ... extra args
 #' @export
+#' @return the centroid of the object
 #' @examples
 #'
 #' bspace <- NeuroSpace(c(10,10,10), c(2,2,2))
@@ -526,17 +563,18 @@ setGeneric(name="origin", def=function(x) standardGeneric("origin"))
 #' @rdname centroid-methods
 setGeneric(name="centroid", def=function(x, ...) standardGeneric("centroid"))
 
-#' return a matrix of centroids of an object
+#' Return a matrix of centroids of an object
 #'
 #' @param x an object with multiple centroids (e.g. a \code{ClusteredNeuroVol})
 #' @param ... extra args
+#'
 #' @export
 #' @rdname centroids-methods
 setGeneric(name="centroids", def=function(x, ...) standardGeneric("centroids"))
 
 
 
-#' extract image coordinate transformation
+#' Extract image coordinate transformation
 #'
 #' @param x an object with a transformation
 #' @export
@@ -551,7 +589,7 @@ setGeneric(name="centroids", def=function(x, ...) standardGeneric("centroids"))
 #' @rdname trans-methods
 setGeneric(name="trans",  def=function(x) standardGeneric("trans"))
 
-#' extract inverse image coordinate transformation
+#' Extract inverse image coordinate transformation
 #'
 #' @param x an object
 #' @export
@@ -562,7 +600,7 @@ setGeneric(name="trans",  def=function(x) standardGeneric("trans"))
 #' @rdname inverse_trans-methods
 setGeneric(name="inverse_trans", def=function(x) standardGeneric("inverse_trans"))
 
-#' read a sequence of elements from an input source
+#' Read a sequence of elements from an input source
 #'
 #' @param x the input channel
 #' @param num_elements the number of elements to read
@@ -571,7 +609,7 @@ setGeneric(name="inverse_trans", def=function(x) standardGeneric("inverse_trans"
 #' @rdname read_elements-methods
 setGeneric(name="read_elements", def=function(x, num_elements) standardGeneric("read_elements"))
 
-#' read a set of column vector from an input source (e.g. \code{ColumnReader})
+#' Read a set of column vector from an input source (e.g. \code{ColumnReader})
 #' @param x the input channel
 #' @param column_indices the column indices
 #' @return a \code{matrix} consisting of the requested column vectors
@@ -580,7 +618,7 @@ setGeneric(name="read_elements", def=function(x, num_elements) standardGeneric("
 setGeneric(name="read_columns", def=function(x, column_indices) standardGeneric("read_columns"))
 
 
-#' write a sequence of elements from an input source
+#' Write a sequence of elements from an input source
 #'
 #' @param x the output channel
 #' @param els the elements to write
@@ -589,7 +627,7 @@ setGeneric(name="read_columns", def=function(x, column_indices) standardGeneric(
 setGeneric(name="write_elements", def=function(x, els) standardGeneric("write_elements"))
 
 
-#' write a 3d image volume to disk
+#' Write a 3d image volume to disk
 #'
 #' @param x an image object, typically a \code{\linkS4class{NeuroVol}} instance.
 #' @param file_name output file name
@@ -618,7 +656,7 @@ setGeneric(name="write_elements", def=function(x, els) standardGeneric("write_el
 setGeneric(name="write_vol",  def=function(x, file_name, format, data_type) standardGeneric("write_vol"))
 
 
-#' write a 4d image vector to disk
+#' Write a 4d image vector to disk
 #'
 #' @param x an image object, typically a \code{NeuroVec} instance.
 #' @param file_name output file name.
@@ -631,27 +669,27 @@ setGeneric(name="write_vol",  def=function(x, file_name, format, data_type) stan
 #'
 #' bvec <- NeuroVec(array(0, c(10,10,10,10)), NeuroSpace(c(10,10,10,10), c(1,1,1)))
 #' \dontrun{
-#' writeVector(bvol, "out.nii")
-#' writeVector(bvol, "out.nii.gz")
-#' writeVector(bvec, "out.nii")
-#' writeVector(bvec, "out.nii.gz")
+#' write_vec(bvol, "out.nii")
+#' write_vec(bvol, "out.nii.gz")
+#' write_vec(bvec, "out.nii")
+#' write_vec(bvec, "out.nii.gz")
 #' }
 #' @rdname write_vec-methods
 setGeneric(name="write_vec",  def=function(x, file_name, format, data_type, ...) standardGeneric("write_vec"))
 
 
 
-#' remap the grid-to-world coordinates mapping of an image.
+#' Remap the grid-to-world coordinates mapping of an image.
 #'
 #' @param x the object
-#' @param orient the orientation code indcating the "remapped" axes.
-#' @return a reoriented space
+#' @param orient the orientation code indicating the "remapped" axes.
+#' @return a reoriented image space
 #' @rdname reorient-methods
 #' @export
 setGeneric(name="reorient", def=function(x, orient) standardGeneric("reorient"))
 
 
-#' convert 1d indices to n-dimensional grid coordinates
+#' Convert 1d indices to n-dimensional grid coordinates
 #'
 #' @param x the object
 #' @param idx the 1d \code{vector} of indices

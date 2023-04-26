@@ -3,7 +3,7 @@
 \name{reorient}
 \alias{reorient}
 \alias{reorient,NeuroSpace,character-method}
-\title{remap the grid-to-world coordinates mapping of an image.}
+\title{Remap the grid-to-world coordinates mapping of an image.}
 \usage{
 reorient(x, orient)
 
@@ -12,11 +12,11 @@ reorient(x, orient)
 \arguments{
 \item{x}{the object}
 
-\item{orient}{the orientation code indcating the "remapped" axes.}
+\item{orient}{the orientation code indicating the "remapped" axes.}
 }
 \value{
-a reoriented space
+a reoriented image space
 }
 \description{
-remap the grid-to-world coordinates mapping of an image.
+Remap the grid-to-world coordinates mapping of an image.
 }

@@ -3,7 +3,7 @@
 \name{write_elements}
 \alias{write_elements}
 \alias{write_elements,BinaryWriter,numeric-method}
-\title{write a sequence of elements from an input source}
+\title{Write a sequence of elements from an input source}
 \usage{
 write_elements(x, els)
 
@@ -15,7 +15,7 @@ write_elements(x, els)
 \item{els}{the elements to write}
 }
 \description{
-write a sequence of elements from an input source
+Write a sequence of elements from an input source
 
 write_elements
 }

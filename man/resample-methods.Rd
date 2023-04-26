@@ -19,3 +19,20 @@ An object representing the resampled source image, with the same spatial propert
 \description{
 This function resamples a source image to match the spatial properties (dimensions, resolution, and orientation) of a target image.
 }
+\examples{
+
+img <- read_vol(system.file("extdata", "global_mask.nii", package = "neuroim2"))
+rspace <- space(img)
+
+### normally, one would resample from two existing soource and target spaces.
+### But here we manually create the target space, which is a bit ugly.
+
+newtrans4X3 <- trans(img)[1:4, 1:3]
+newtrans4X3 <- newtrans4X3 * c(.5,.5,.5,1)
+newtrans <- cbind(newtrans4X3, c(space(img)@origin,1))
+
+rspace <- NeuroSpace(rspace@dim*2, rspace@spacing/2, origin=rspace@origin, trans=trans(img))
+rvol <- resample(img, rspace)
+
+
+}

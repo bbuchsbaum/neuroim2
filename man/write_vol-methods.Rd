@@ -7,7 +7,7 @@
 \alias{write_vol,NeuroVol,character,character,missing-method}
 \alias{write_vol,ROIVol,character,character,missing-method}
 \alias{write_vol,NeuroVol,character,missing,character-method}
-\title{write a 3d image volume to disk}
+\title{Write a 3d image volume to disk}
 \usage{
 write_vol(x, file_name, format, data_type)
 
@@ -32,7 +32,7 @@ write_vol(x, file_name, format, data_type)
 Otherwise output format will be inferred from R the datatype of the image.}
 }
 \description{
-write a 3d image volume to disk
+Write a 3d image volume to disk
 }
 \details{
 The output format will be inferred from file extension.

@@ -12,6 +12,14 @@ axes(x)
 \arguments{
 \item{x}{an object with a set of axes}
 }
+\value{
+the `axes` associated with the object.
+}
 \description{
 Extract Image Axes
+}
+\examples{
+x <- NeuroSpace(c(10,10,10), spacing=c(1,1,1))
+class(axes(x)) == "AxisSet3D"
+
 }

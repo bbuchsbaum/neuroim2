@@ -3,7 +3,7 @@
 \name{read_columns}
 \alias{read_columns}
 \alias{read_columns,ColumnReader,integer-method}
-\title{read a set of column vector from an input source (e.g. \code{ColumnReader})}
+\title{Read a set of column vector from an input source (e.g. \code{ColumnReader})}
 \usage{
 read_columns(x, column_indices)
 
@@ -18,5 +18,5 @@ read_columns(x, column_indices)
 a \code{matrix} consisting of the requested column vectors
 }
 \description{
-read a set of column vector from an input source (e.g. \code{ColumnReader})
+Read a set of column vector from an input source (e.g. \code{ColumnReader})
 }

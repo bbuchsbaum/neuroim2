@@ -20,3 +20,9 @@ An integer representing the dimension of the specified axis for the given object
 \description{
 This function returns the dimension of the specified axis for a given object, such as a matrix or an array.
 }
+\examples{
+
+x <- NeuroSpace(c(10,10,10), spacing=c(1,1,1))
+which_dim(x, x@axes@j) == 2
+
+}

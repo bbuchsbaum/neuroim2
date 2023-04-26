@@ -3,7 +3,7 @@
 \name{read_elements}
 \alias{read_elements}
 \alias{read_elements,BinaryReader,numeric-method}
-\title{read a sequence of elements from an input source}
+\title{Read a sequence of elements from an input source}
 \usage{
 read_elements(x, num_elements)
 
@@ -18,7 +18,7 @@ read_elements(x, num_elements)
 the elements as a vector
 }
 \description{
-read a sequence of elements from an input source
+Read a sequence of elements from an input source
 
 read_elements
 }
