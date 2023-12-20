@@ -22,20 +22,3 @@ split_blocks(x, indices, ...)
 \description{
 Splits a vector-valued object into a list of sub-blocks defined by a vector of indices.
 }
-\examples{
-
-# split a numeric vector into sub-blocks
-x <- 1:12
-indices <- c(1,1,1,2,2,2,2,3,3,4,4,4)
-sub_blocks <- split_blocks(x, indices)
-
-# split a character vector into sub-blocks
-y <- c("apple", "banana", "cherry", "date", "elderberry", "fig")
-indices <- c(1,1,2,2,2,3)
-sub_blocks <- split_blocks(y, indices)
-
-# split a list into sub-blocks
-z <- list(a = 1:3, b = 4:6, c = 7:9, d = 10:12)
-indices <- c(1,1,1,2,2,2,3,3,3,4,4,4)
-sub_blocks <- split_blocks(z, indices)
-}

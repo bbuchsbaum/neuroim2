@@ -124,6 +124,12 @@ int coord3d_to_index(int x, int y, int z, int dx, int dy, int dz, int slicedim) 
   return (slicedim * z) + (y * dx) + x;
 }
 
+int coord4d_to_index(int x, int y, int z, int t, int dim_x, int dim_y, int dim_z, int dim_t) {
+  if (x < 0 || x >= dim_x || y < 0 || y >= dim_y || z < 0 || z >= dim_z || t < 0 || t >= dim_t) {
+    return -1;
+  }
+  return x + dim_x * (y + dim_y * (z + dim_z * t));
+}
 
 // [[Rcpp::export]]
 NumericVector box_nbhd(NumericVector arr, IntegerVector dims, int x, int y, int z, int window, NumericVector out, int slicedim) {
@@ -147,6 +153,28 @@ NumericVector box_nbhd(NumericVector arr, IntegerVector dims, int x, int y, int 
 
 }
 
+NumericVector box_nbhd_4d(NumericVector arr, IntegerVector dims, int x, int y, int z, int t, int spatial_window, int temporal_window, NumericVector out) {
+  int count = 0;
+
+  for (int i = x - spatial_window; i <= x + spatial_window; i++) {
+    for (int j = y - spatial_window; j <= y + spatial_window; j++) {
+      for (int k = z - spatial_window; k <= z + spatial_window; k++) {
+        for (int l = t - temporal_window; l <= t + temporal_window; l++) {
+          int ind = coord4d_to_index(i, j, k, l, dims[0], dims[1], dims[2], dims[3]);
+          if (ind < 0 || ind >= arr.length()) {
+            out[count] = 0;
+          } else {
+            out[count] = arr[ind];
+          }
+          count = count + 1;
+        }
+      }
+    }
+  }
+
+  return out;
+}
+
 // [[Rcpp::export]]
 NumericVector box_blur(NumericVector arr, IntegerVector mask_idx, int window) {
   IntegerVector dims = arr.attr("dim");
@@ -164,6 +192,7 @@ NumericVector box_blur(NumericVector arr, IntegerVector mask_idx, int window) {
   out.attr("dim") = dims;
   return out;
 }
+
 // H(x) = exp(-x2/ (2s2)) / sqrt(2* pi*s2)
 // I(y) = exp(-y2/ (2t2)) / sqrt(2* pi*t2)
 
@@ -213,6 +242,239 @@ NumericVector gaussian_blur_cpp(NumericVector arr, IntegerVector mask_idx, int w
   out.attr("dim") = dims;
   return out;
 }
+
+// Compute standard deviation of intensity values within the mask
+double masked_sd(NumericVector arr, IntegerVector mask_idx) {
+  int n = mask_idx.size();
+  double sum = 0.0;
+  double sum_squared = 0.0;
+
+  for (int i = 0; i < n; i++) {
+    double val = arr[mask_idx[i] - 1];
+    sum += val;
+    sum_squared += val * val;
+  }
+
+  double mean = sum / n;
+  double variance = (sum_squared - (n * mean * mean)) / (n - 1);
+  return sqrt(variance);
+}
+
+
+// Calculate bilateral filter weights
+NumericMatrix bilateral_weights(int window, double spatial_sigma, double intensity_sigma, NumericVector spacing, double intensity_sd) {
+  NumericMatrix out = NumericMatrix(pow((window*2)+1, 3), 2);
+  double spatial_denom = 2 * pow(spatial_sigma, 2);
+  double intensity_denom = 2 * pow(intensity_sigma * intensity_sd, 2);
+
+  int ind = 0;
+  for (int i = -window; i <= window; i++) {
+    for (int j = -window; j <= window; j++) {
+      for (int k = -window; k <= window; k++) {
+        out(ind, 0) = std::exp(-std::pow(i * spacing[0],2)/spatial_denom) * std::exp(-std::pow(j * spacing[1],2)/spatial_denom) * std::exp(-std::pow(k * spacing[2],2)/spatial_denom);
+        out(ind, 1) = intensity_denom;
+        ind = ind + 1;
+      }
+    }
+  }
+
+  return out;
+}
+
+
+// [[Rcpp::export]]
+NumericVector bilateral_filter_cpp(NumericVector arr, IntegerVector mask_idx, int window, double spatial_sigma, double intensity_sigma,
+                                   NumericVector spacing) {
+  IntegerVector dims = arr.attr("dim");
+  NumericVector out = NumericVector(arr.length());
+  NumericVector local = NumericVector( pow((window*2)+1, 3));
+
+  // Find the standard deviation of the intensity values within the mask
+  double intensity_sd = masked_sd(arr, mask_idx);
+
+  // Calculate bilateral weights
+  NumericMatrix wts = bilateral_weights(window, spatial_sigma, intensity_sigma, spacing, intensity_sd);
+
+  NumericMatrix cds = indexToGridCpp(mask_idx, dims);
+  int slicedim = dims[0]*dims[1];
+
+  for (int i = 0; i < mask_idx.length(); i++) {
+    NumericVector ret = box_nbhd(arr, dims, cds(i,0)-1, cds(i,1)-1, cds(i,2)-1, window, local, slicedim);
+    NumericVector bilateral_wts = wts(_, 0) * exp(-pow(ret - arr[mask_idx[i]-1], 2) / wts(_, 1));
+    double total_weight = sum(bilateral_wts);
+    out[mask_idx[i]-1] = sum(ret * bilateral_wts) / total_weight;
+  }
+
+  out.attr("dim") = dims;
+  return out;
+}
+
+NumericMatrix bilateral_weights_4d(int spatial_window, int temporal_window, double spatial_sigma,
+                                   double intensity_sigma, double temporal_sigma, NumericVector spacing) {
+  int total_elements = pow((spatial_window * 2) + 1, 3) * ((temporal_window * 2) + 1);
+  NumericMatrix out(total_elements, 2);
+
+  double spatial_denom = 2 * pow(spatial_sigma, 2);
+  double intensity_denom = 2 * pow(intensity_sigma, 2);
+  double temporal_denom = 2 * pow(temporal_sigma, 2);
+
+  int ind = 0;
+  for (int t = -temporal_window; t <= temporal_window; t++) {
+    for (int i = -spatial_window; i <= spatial_window; i++) {
+      for (int j = -spatial_window; j <= spatial_window; j++) {
+        for (int k = -spatial_window; k <= spatial_window; k++) {
+          out(ind, 0) = std::exp(-std::pow(i * spacing[0], 2) / spatial_denom) * std::exp(-std::pow(j * spacing[1], 2) / spatial_denom) * std::exp(-std::pow(k * spacing[2], 2) / spatial_denom) * std::exp(-std::pow(t * spacing[3], 2) / temporal_denom);
+          out(ind, 1) = intensity_denom;
+          ind = ind + 1;
+        }
+      }
+    }
+  }
+
+  return out;
+}
+
+
+// [[Rcpp::export]]
+int gridToIndexSingleCpp(IntegerVector coords, IntegerVector array_dim) {
+  int rank = array_dim.size();
+  int index = coords[0] - 1;
+
+  for (int i = 1; i < rank; ++i) {
+    index += (coords[i] - 1) * array_dim[i - 1];
+  }
+
+  return index;
+}
+
+// Helper function to convert 1D index to 4D index
+inline IntegerVector get_4d_idx(int idx, IntegerVector& dims) {
+  IntegerVector idx_4d(4);
+  idx_4d[0] = idx % dims[0];
+  idx_4d[1] = (idx / dims[0]) % dims[1];
+  idx_4d[2] = (idx / (dims[0] * dims[1])) % dims[2];
+  idx_4d[3] = idx / (dims[0] * dims[1] * dims[2]);
+  return idx_4d;
+}
+
+// Helper function to convert 4D index to 1D index
+inline int get_1d_idx(IntegerVector& idx_4d, IntegerVector& dims) {
+  return idx_4d[0] + idx_4d[1] * dims[0] + idx_4d[2] * dims[0] * dims[1] + idx_4d[3] * dims[0] * dims[1] * dims[2];
+}
+
+inline IntegerVector get_3d_idx(int idx, IntegerVector& dims) {
+  IntegerVector idx_3d(3);
+  idx_3d[0] = idx % dims[0];
+  idx_3d[1] = (idx / dims[0]) % dims[1];
+  idx_3d[2] = idx / (dims[0] * dims[1]);
+  return idx_3d;
+}
+
+
+// [[Rcpp::export]]
+NumericVector bilateral_filter_4d_cpp(NumericVector arr, IntegerVector mask_idx, int spatial_window, int temporal_window,
+                                      double spatial_sigma, double intensity_sigma, double temporal_sigma, double intensity_sd, NumericVector spacing) {
+  // Extract dimensions of the input 4D array
+  IntegerVector dims = arr.attr("dim");
+
+  // Initialize the output array
+  NumericVector output(arr.size());
+  std::copy(arr.begin(), arr.end(), output.begin());
+
+  // Iterate through each voxel in the mask_idx
+  for (int m = 0; m < mask_idx.size(); ++m) {
+    int spatial_idx = mask_idx[m];
+    IntegerVector spatial_idx_3d = get_3d_idx(spatial_idx, dims);
+
+    for (int t = 0; t < dims[3]; ++t) {
+      IntegerVector idx_4d = spatial_idx_3d;
+      idx_4d.push_back(t);  // Adding the time dimension to the spatial_idx_3d
+
+      int idx = get_1d_idx(idx_4d, dims);
+
+      double weight_sum = 0.0;
+      double weighted_value_sum = 0.0;
+
+      // Iterate through spatial and temporal neighbors
+      for (int t_offset = -temporal_window; t_offset <= temporal_window; ++t_offset) {
+        for (int z_offset = -spatial_window; z_offset <= spatial_window; ++z_offset) {
+          for (int y_offset = -spatial_window; y_offset <= spatial_window; ++y_offset) {
+            for (int x_offset = -spatial_window; x_offset <= spatial_window; ++x_offset) {
+              IntegerVector neighbor_idx_4d = idx_4d + IntegerVector::create(x_offset, y_offset, z_offset, t_offset);
+
+              // Check if the neighbor is within the bounds of the array
+              if (neighbor_idx_4d[0] >= 0 && neighbor_idx_4d[0] < dims[0] &&
+                  neighbor_idx_4d[1] >= 0 && neighbor_idx_4d[1] < dims[1] &&
+                  neighbor_idx_4d[2] >= 0 && neighbor_idx_4d[2] < dims[2] &&
+                  neighbor_idx_4d[3] >= 0 && neighbor_idx_4d[3] < dims[3]) {
+
+                int neighbor_idx = get_1d_idx(neighbor_idx_4d, dims);
+                double intensity_diff = (arr[idx] - arr[neighbor_idx]) / intensity_sd;
+                double spatial_diff = std::sqrt(
+                  std::pow((idx_4d[0] - neighbor_idx_4d[0]) * spacing[0], 2) +
+                    std::pow((idx_4d[1] - neighbor_idx_4d[1]) * spacing[1], 2) +
+                    std::pow((idx_4d[2] - neighbor_idx_4d[2]) * spacing[2], 2));
+                double temporal_diff = std::abs(idx_4d[3] - neighbor_idx_4d[3]) * spacing[3];
+
+                // Calculate the weights
+                double spatial_weight = std::exp(-0.5 * std::pow(spatial_diff / spatial_sigma, 2));
+                double intensity_weight = std::exp(-0.5 * std::pow(intensity_diff / intensity_sigma, 2));
+                double temporal_weight = std::exp(-0.5 * std::pow(temporal_diff / temporal_sigma, 2));
+
+                // Calculate the final weight
+                double final_weight = spatial_weight * intensity_weight * temporal_weight;
+
+                weight_sum += final_weight;
+                weighted_value_sum += final_weight * arr[neighbor_idx];
+              }
+            }
+          }
+        }
+      }
+
+      // Calculate and set the bilateral filter value for the current voxel
+      if (weight_sum > 0) {
+        output[idx] = weighted_value_sum / weight_sum;
+      }
+    }
+  }
+
+  output.attr("dim") = dims;
+  return output;
+}
+
+
+
+
+
+
+// NumericVector extract_patch(NumericVector arr, IntegerVector dims, int x, int y, int z, int patch_radius) {
+//   int patch_size = 2 * patch_radius + 1;
+//   NumericVector patch = NumericVector(patch_size * patch_size * patch_size);
+//   int index = 0;
+//
+//   for (int i = -patch_radius; i <= patch_radius; i++) {
+//     for (int j = -patch_radius; j <= patch_radius; j++) {
+//       for (int k = -patch_radius; k <= patch_radius; k++) {
+//         int xi = x + i;
+//         int yi = y + j;
+//         int zi = z + k;
+//
+//         if (xi < 0 || yi < 0 || zi < 0 || xi >= dims[0] || yi >= dims[1] || zi >= dims[2]) {
+//           patch[index] = 0;
+//         } else {
+//           patch[index] = arr[xi + yi * dims[0] + zi * dims[0] * dims[1]];
+//         }
+//         index++;
+//       }
+//     }
+//   }
+//
+//   return patch;
+// }
+
+
+
 
 
 // [[Rcpp::export]]
@@ -316,6 +578,8 @@ NumericVector exgridToIndex4DCpp(IntegerVector array_dim, IntegerVector iind, In
 
   return out;
 }
+
+
 
 // [[Rcpp::export]]
 IntegerVector gridToIndexCpp(IntegerVector array_dim, IntegerMatrix voxmat) {
