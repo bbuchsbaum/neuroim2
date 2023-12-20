@@ -29,6 +29,14 @@ bilateral_filter_cpp <- function(arr, mask_idx, window, spatial_sigma, intensity
     .Call('_neuroim2_bilateral_filter_cpp', PACKAGE = 'neuroim2', arr, mask_idx, window, spatial_sigma, intensity_sigma, spacing)
 }
 
+gridToIndexSingleCpp <- function(coords, array_dim) {
+    .Call('_neuroim2_gridToIndexSingleCpp', PACKAGE = 'neuroim2', coords, array_dim)
+}
+
+bilateral_filter_4d_cpp <- function(arr, mask_idx, spatial_window, temporal_window, spatial_sigma, intensity_sigma, temporal_sigma, intensity_sd, spacing) {
+    .Call('_neuroim2_bilateral_filter_4d_cpp', PACKAGE = 'neuroim2', arr, mask_idx, spatial_window, temporal_window, spatial_sigma, intensity_sigma, temporal_sigma, intensity_sd, spacing)
+}
+
 find_seqnum <- function(clens, idx) {
     .Call('_neuroim2_find_seqnum', PACKAGE = 'neuroim2', clens, idx)
 }

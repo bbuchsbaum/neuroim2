@@ -158,13 +158,13 @@ bilateral_filter_vec <- function(vec, mask, spatial_sigma=2, intensity_sigma=1, 
   assert_that(intensity_sigma > 0)
 
   if (missing(mask)) {
-    mask.idx <- 1:prod(dim(vol))
+    mask.idx <- 1:prod(dim(mask))
   } else {
     mask.idx <- which(mask!=0)
   }
 
   res<- lapply(1:dim(vec)[4], function(i) {
-    print(i)
+    #print(i)
     arr <- as.array(vec[[i]])
     farr <- bilateral_filter_cpp(arr, as.integer(mask.idx), as.integer(window), spatial_sigma, intensity_sigma, spacing(vec)[1:3])
     NeuroVol(farr, space(mask))

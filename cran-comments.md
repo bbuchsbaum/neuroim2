@@ -1,5 +1,6 @@
-## R CMD check results
+── R CMD check results ──────────────────────────── neuroim2 0.7.0 ────
+Duration: 5m 34.3s
 
-0 errors | 0 warnings | 1 note
+0 errors ✔ | 0 warnings ✔ | 0 notes ✔
 
-* This is a new release.
+R CMD check succeeded

@@ -113,6 +113,37 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// gridToIndexSingleCpp
+int gridToIndexSingleCpp(IntegerVector coords, IntegerVector array_dim);
+RcppExport SEXP _neuroim2_gridToIndexSingleCpp(SEXP coordsSEXP, SEXP array_dimSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type coords(coordsSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type array_dim(array_dimSEXP);
+    rcpp_result_gen = Rcpp::wrap(gridToIndexSingleCpp(coords, array_dim));
+    return rcpp_result_gen;
+END_RCPP
+}
+// bilateral_filter_4d_cpp
+NumericVector bilateral_filter_4d_cpp(NumericVector arr, IntegerVector mask_idx, int spatial_window, int temporal_window, double spatial_sigma, double intensity_sigma, double temporal_sigma, double intensity_sd, NumericVector spacing);
+RcppExport SEXP _neuroim2_bilateral_filter_4d_cpp(SEXP arrSEXP, SEXP mask_idxSEXP, SEXP spatial_windowSEXP, SEXP temporal_windowSEXP, SEXP spatial_sigmaSEXP, SEXP intensity_sigmaSEXP, SEXP temporal_sigmaSEXP, SEXP intensity_sdSEXP, SEXP spacingSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type arr(arrSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type mask_idx(mask_idxSEXP);
+    Rcpp::traits::input_parameter< int >::type spatial_window(spatial_windowSEXP);
+    Rcpp::traits::input_parameter< int >::type temporal_window(temporal_windowSEXP);
+    Rcpp::traits::input_parameter< double >::type spatial_sigma(spatial_sigmaSEXP);
+    Rcpp::traits::input_parameter< double >::type intensity_sigma(intensity_sigmaSEXP);
+    Rcpp::traits::input_parameter< double >::type temporal_sigma(temporal_sigmaSEXP);
+    Rcpp::traits::input_parameter< double >::type intensity_sd(intensity_sdSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type spacing(spacingSEXP);
+    rcpp_result_gen = Rcpp::wrap(bilateral_filter_4d_cpp(arr, mask_idx, spatial_window, temporal_window, spatial_sigma, intensity_sigma, temporal_sigma, intensity_sd, spacing));
+    return rcpp_result_gen;
+END_RCPP
+}
 // find_seqnum
 NumericVector find_seqnum(NumericVector clens, NumericVector idx);
 RcppExport SEXP _neuroim2_find_seqnum(SEXP clensSEXP, SEXP idxSEXP) {
@@ -211,6 +242,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_neuroim2_gaussian_weights", (DL_FUNC) &_neuroim2_gaussian_weights, 3},
     {"_neuroim2_gaussian_blur_cpp", (DL_FUNC) &_neuroim2_gaussian_blur_cpp, 5},
     {"_neuroim2_bilateral_filter_cpp", (DL_FUNC) &_neuroim2_bilateral_filter_cpp, 6},
+    {"_neuroim2_gridToIndexSingleCpp", (DL_FUNC) &_neuroim2_gridToIndexSingleCpp, 2},
+    {"_neuroim2_bilateral_filter_4d_cpp", (DL_FUNC) &_neuroim2_bilateral_filter_4d_cpp, 9},
     {"_neuroim2_find_seqnum", (DL_FUNC) &_neuroim2_find_seqnum, 2},
     {"_neuroim2_grid_to_intvec", (DL_FUNC) &_neuroim2_grid_to_intvec, 2},
     {"_neuroim2_exgridToIndex3DCpp", (DL_FUNC) &_neuroim2_exgridToIndex3DCpp, 4},
