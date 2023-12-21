@@ -170,10 +170,7 @@ reference:
     contents:
     - scale_series
     - resample
-    - split_fill
-    - split_reduce
-    - split_blocks
-    - split_scale
+    - starts_with("split_")
   - title: "Visualization and Rendering"
     desc: >
       Methods for visualizing and rendering neuroimaging data
