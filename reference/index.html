@@ -924,12 +924,7 @@ Will test for match to header file only</dd>
           
           <code><a href="NeuroVecSeq-methods.html">`[[`(<i>&lt;NeuroVecSeq&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> 
         </dt>
-        <dd>#' @rdname series-methods
-#' @export
-setMethod("series", signature(x="NeuroVecSeq", i="integer"),
-          def=function(x, i, j, k) 
-            map(x@vecs, ~ series(., i,j,k)) <!-- %&gt;% flatten_dbl() -->
-          )</dd>
+        <dd>[[</dd>
       </dl><dl><dt>
           
           <code><a href="SparseNeuroVec-methods.html">`[[`(<i>&lt;LatentNeuroVec&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="SparseNeuroVec-methods.html">`[[`(<i>&lt;SparseNeuroVec&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> 
