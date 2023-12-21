@@ -1,7 +1,7 @@
 Package: neuroim2
 Type: Package
 Title: Data Structures and IO for Neuroimaging Data with an Emphasis on Functional Magnetic Resonance Imaging (FMRI)
-Version: 0.7.0
+Version: 0.8.0
 LinkingTo: Rcpp
 Authors@R: c(
     person(c("Bradley", "R"), "Buchsbaum", role = c("aut", "cre", "cph"), email = "brad.buchsbaum@gmail.com"))
