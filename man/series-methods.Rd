@@ -82,8 +82,6 @@ Extract one or more series from object and return as ROI object
 
 Extract one or more series from object
 
-#' @rdname series-methods
-#' @export
 setMethod("series", signature(x="NeuroVec", i="integer"),
           def=function(x, i, j, k) {
             if (missing(j) && missing(k)) {
