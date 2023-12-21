@@ -25,6 +25,9 @@ BinaryWriter(
 
 \item{endian}{endianness of binary output connection}
 }
+\value{
+a new instance of type \code{BinaryWriter}
+}
 \description{
 This class supports writing of bulk binary data to a connection
 

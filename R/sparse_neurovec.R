@@ -14,6 +14,7 @@
 #' @param mask a logical 3D \code{array},  a logical 1D \code{vector} or a \code{LogicalNeuroVol}
 #' @rdname SparseNeuroVecSource-class
 #' @keywords internal
+#' @noRd
 SparseNeuroVecSource <- function(meta_info, indices=NULL, mask) {
 
   if (is.null(indices)) {
@@ -51,6 +52,7 @@ SparseNeuroVecSource <- function(meta_info, indices=NULL, mask) {
 
 
 #' @keywords internal
+#' @noRd
 prep_sparsenvec <- function(data, space, mask) {
   if (!inherits(mask, "LogicalNeuroVol")) {
     mspace <- NeuroSpace(dim(space)[1:3],
@@ -130,8 +132,8 @@ SparseNeuroVec <- function(data, space, mask) {
 
 
 
-#' @rdname load_data-methods
 #' @keywords internal
+#' @noRd
 setMethod(f="load_data", signature=c("SparseNeuroVecSource"),
 		def=function(x) {
 
@@ -326,21 +328,21 @@ setMethod(f="lookup", signature=signature(x="AbstractSparseNeuroVec", i="numeric
             lookup(x@map, i)
           })
 
-#' @rdname matricized_access-methods
+#' @noRd
 #' @keywords internal
 setMethod(f="matricized_access", signature=signature(x = "SparseNeuroVec", i = "matrix"),
           def=function (x, i) {
             x@data[i]
           })
 
-#' @rdname matricized_access-methods
+#' @noRd
 #' @keywords internal
 setMethod(f="matricized_access", signature=signature(x = "SparseNeuroVec", i = "integer"),
           def=function (x, i) {
             x@data[,i]
           })
 
-#' @rdname matricized_access-methods
+#' @noRd
 #' @keywords internal
 setMethod(f="matricized_access", signature=signature(x = "SparseNeuroVec", i = "numeric"),
           def=function (x, i) {
@@ -348,28 +350,28 @@ setMethod(f="matricized_access", signature=signature(x = "SparseNeuroVec", i = "
           })
 
 
-#' @rdname matricized_access-methods
+#' @noRd
 #' @keywords internal
 setMethod(f="matricized_access", signature=signature(x = "BigNeuroVec", i = "matrix"),
           def=function (x, i) {
             x@data[i]
           })
 
-#' @rdname matricized_access-methods
+#' @noRd
 #' @keywords internal
 setMethod(f="matricized_access", signature=signature(x = "BigNeuroVec", i = "integer"),
           def=function (x, i) {
             x@data[,i]
           })
 
-#' @rdname matricized_access-methods
+#' @noRd
 #' @keywords internal
 setMethod(f="matricized_access", signature=signature(x = "BigNeuroVec", i = "numeric"),
           def=function (x, i) {
             x@data[,i]
           })
 
-#' @rdname linear_access-methods
+#' @noRd
 #' @keywords internal
 setMethod(f="linear_access", signature=signature(x = "AbstractSparseNeuroVec", i = "numeric"),
           def=function (x, i) {

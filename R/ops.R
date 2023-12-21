@@ -5,6 +5,7 @@ NULL
 
 #' @importFrom assertthat assert_that
 #' @keywords internal
+#' @noRd
 checkDim <- function(e1,e2) {
   assert_that(all(dim(e1) == dim(e2)))
   assert_that(all(spacing(e1) == spacing(e2)))

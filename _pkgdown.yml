@@ -161,8 +161,6 @@ reference:
     desc: >
       Methods for accessing and indexing neuroimaging data
     contents:
-    - linear_access
-    - matricized_access
     - sub_vector
     - indices
     - length,NeuroVec-method

@@ -1,5 +1,6 @@
 
 #' @keywords internal
+#' @noRd
 LatentNeuroVecSource <- function(file_name) {
   ### could put logic in here inspect h5 object.
   new("LatentNeuroVecSource", file_name=file_name)
@@ -73,7 +74,7 @@ LatentNeuroVec <- function(basis, loadings, space, mask, offset=NULL) {
 }
 
 
-#' @rdname matricized_access-methods
+#' @noRd
 setMethod(f="matricized_access", signature=signature(x = "LatentNeuroVec", i = "matrix"),
           def=function (x, i) {
             b1 <- x@basis[as.numeric(i[,1]),,drop=FALSE]
@@ -81,7 +82,7 @@ setMethod(f="matricized_access", signature=signature(x = "LatentNeuroVec", i = "
             rowSums(b1*b2) + x@offset[i[,2]]
           })
 
-#' @rdname matricized_access-methods
+#' @noRd
 setMethod(f="matricized_access", signature=signature(x = "LatentNeuroVec", i = "integer"),
           def=function (x, i) {
             b1 <- x@basis
@@ -91,15 +92,15 @@ setMethod(f="matricized_access", signature=signature(x = "LatentNeuroVec", i = "
           })
 
 
-#' @rdname matricized_access-methods
+#' @noRd
 setMethod(f="matricized_access", signature=signature(x = "LatentNeuroVec", i = "numeric"),
           def=function (x, i) {
             callGeneric(x, as.integer(i))
           })
 
 
-#'
-#' @rdname linear_access-methods
+
+#' @noRd
 setMethod(f="linear_access", signature=signature(x = "LatentNeuroVec", i = "numeric"),
           def=function (x, i) {
             nels <- prod(dim(x)[1:3])

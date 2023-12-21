@@ -47,7 +47,6 @@ Collate:
     'nifti_io.R'
     'niml_io.R'
     'ops.R'
-    'pipeline.R'
     'resample.R'
     'roi.R'
     'searchlight.R'

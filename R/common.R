@@ -199,16 +199,16 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 
 
 #' .isExtension
-#' @rdname internal-methods
 #' @keywords internal
+#' @noRd
 .isExtension <- function(fname, extension) {
   last <- substr(fname, nchar(fname)+1 - nchar(extension), nchar(fname))
   return(last==extension)
 }
 
 #' .concat4D
-#' @rdname internal-methods
 #' @keywords internal
+#' @noRd
 .concat4D <- function(x, y, ...) {
   rest <- list(...)
 
@@ -249,9 +249,9 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 
 
 #' .gridToIndex3D
-#' @rdname internal-methods
 #' @importFrom assertthat assert_that
 #' @keywords internal
+#' @noRd
 .gridToIndex3D <- function(dimensions, voxmat) {
 	assert_that(length(dimensions) == 3)
   if (is.vector(voxmat)) {
@@ -265,9 +265,9 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 }
 
 #' .gridToIndex
-#' @rdname internal-methods
 #' @keywords internal
 #' @importFrom purrr map_dbl
+#' @noRd
 .gridToIndex <- function(dimensions, vmat) {
   vmat <- as.matrix(vmat)
   assert_that(length(dimensions) == ncol(vmat), msg=paste("length(dimensions) not equal to ncol(vmat): ", length(dimensions), "!=", ncol(vmat)))
@@ -284,8 +284,8 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 }
 
 #' .indexToGrid
-#' @rdname internal-methods
 #' @keywords internal
+#' @noRd
 .indexToGrid <- function(idx, array.dim) {
   assert_that(all(idx > 0 & idx <= prod(array.dim)))
   assert_that(length(array.dim) <= 5)
@@ -296,8 +296,8 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 
 
 #' .getRStorage
-#' @rdname internal-methods
 #' @keywords internal
+#' @noRd
 .getRStorage <- function(data_type) {
   if (any(toupper(data_type) == c("BINARY", "BYTE", "UBYTE", "SHORT", "INTEGER", "INT", "LONG"))) {
     "integer"
@@ -308,6 +308,8 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
   }
 }
 
+
+#' @noRd
 .isSigned <- function(data_type) {
   if (data_type == "UBYTE") {
     FALSE
@@ -317,10 +319,11 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 }
 
 
-#' @rdname internal-methods
+
 #' @keywords internal
 #' @importFrom mmap int8 uint8 int16 int32 real32 real64
 #' @importFrom mmap mmap char mmapFlags munmap
+#' @noRd
 .getMMapMode <- function(code) {
 	if (code == "UNKNOWN") {
 		stop(paste(".getMMapMode: no memory map mode for UNKNOWN data type: ", code))
@@ -343,8 +346,8 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 
 
 #' .getDataStorage
-#' @rdname internal-methods
 #' @keywords internal
+#' @noRd
 .getDataStorage <- function(code) {
   if (code == 0) {
     return("UNKNOWN")
@@ -366,8 +369,8 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 }
 
 #' .getDataCode
-#' @rdname internal-methods
 #' @keywords internal
+#' @noRd
 .getDataCode <- function(data_type) {
   if (data_type == "UNKNOWN") {
     return(0)
@@ -389,8 +392,8 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 }
 
 #' .getDataSize
-#' @rdname internal-methods
 #' @keywords internal
+#' @noRd
 .getDataSize <- function(data_type) {
   if (data_type == "BINARY") {
     return(1)
@@ -416,8 +419,8 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 }
 
 #' .getEndian
-#' @rdname internal-methods
 #' @keywords internal
+#' @noRd
 .getEndian <- function(conn) {
   #try little endian
   endian <- "little"
@@ -436,9 +439,10 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
   return(endian)
 }
 
-#' @rdname internal-methods
-#' @name .niftiExt
+
+
 #' @keywords internal
+#' @noRd
 .niftiExt <- function(filetype) {
 
   extensions <- list()
@@ -461,8 +465,8 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
   return(extensions)
 }
 
-#' @rdname internal-methods
 #' @keywords internal
+#' @noRd
 .matrixToQuatern <- function(mat) {
   xd <- sqrt(drop(crossprod(mat[1:3,1])))
   yd <- sqrt(drop(crossprod(mat[1:3,2])))
@@ -527,8 +531,9 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 
 }
 
-#' @rdname internal-methods
+
 #' @keywords internal
+#' @noRd
 .quaternToMatrix <- function(quat, origin, stepSize, qfac) {
   mat <- matrix(0, 4,4)
   mat[4,] <- c(0,0,0,1)

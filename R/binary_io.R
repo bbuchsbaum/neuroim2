@@ -108,6 +108,7 @@ series_reader <- function(file_name) {
 #' @param endian endianness of binary input connection
 #' @param signed whether the element is signed (TRUE) or unsigned (FALSE)
 #' @rdname BinaryReader
+#' @return a new instance of type \code{BinaryReader}
 #' @export
 BinaryReader <- function(input, byte_offset, data_type, bytes_per_element, endian=.Platform$endian, signed=TRUE) {
 	if (is.character(input)) {
@@ -131,6 +132,7 @@ BinaryReader <- function(input, byte_offset, data_type, bytes_per_element, endia
 #' @param bytes_per_element number of bytes in each data element (e.g. 4 or 8 for floating point numbers)
 #' @param endian endianness of binary output connection
 #' @rdname BinaryWriter-class
+#' @return a new instance of type \code{BinaryWriter}
 #' @export
 BinaryWriter <- function(output, byte_offset, data_type, bytes_per_element, endian=.Platform$endian) {
 	if (is.character(output)) {
@@ -232,6 +234,7 @@ setMethod(f="close", signature=signature(con= "BinaryWriter"),
 #' @param reader a function that takes a set of column indices and returns a \code{matrix}
 #' @rdname ColumnReader
 #' @export
+#' @return a new instance of type \code{ColumnReader}
 ColumnReader <- function(nrow, ncol, reader) {
   stopifnot(is.function(reader))
   new("ColumnReader", nrow=as.integer(nrow), ncol=as.integer(ncol), reader=reader)

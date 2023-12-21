@@ -1,4 +1,5 @@
 #' @keywords internal
+#' @noRd
 parse_niml_element <- function(el) {
   items <- strsplit(el, " ")[[1]]
   if (length(items) > 1) {
@@ -18,6 +19,7 @@ parse_niml_element <- function(el) {
 }
 
 #' @keywords internal
+#' @noRd
 read_niml_data <- function(fconn, meta) {
 
   dtype <- meta$ni_type
@@ -56,6 +58,7 @@ read_niml_data <- function(fconn, meta) {
   }
 }
 #' @keywords internal
+#' @noRd
 parse_niml_header <- function(fconn) {
   out <- c()
   STATE <- "BEGIN"
@@ -89,6 +92,7 @@ parse_niml_header <- function(fconn) {
 
 #' @keywords internal
 #' @importFrom utils str
+#' @noRd
 parse_niml_next <- function(fconn) {
   header <- parse_niml_header(fconn)
   if (!is.null(header$attr) && (header$label == "SPARSE_DATA" || header$label == "INDEX_LIST")) {
@@ -118,6 +122,7 @@ parse_niml_next <- function(fconn) {
 }
 
 #' @keywords internal
+#' @noRd
 parse_niml_file <- function(fname, maxels=10000) {
   fconn <- file(fname, open="rb")
   #open(fconn, open="rb")

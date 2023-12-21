@@ -18,6 +18,7 @@ SUP_INF    <- new("NamedAxis", axis="Superior-to-Inferior", direction=c(0,0,-1))
 
 
 #' @keywords internal
+#' @noRd
 matchAxis <- function(firstAxis) {
   switch(toupper(firstAxis),
          "LEFT"=LEFT_RIGHT,
@@ -35,21 +36,26 @@ matchAxis <- function(firstAxis) {
 
 }
 
+#' @noRd
 TIME <- new("NamedAxis", axis="Time")
 
+#' @noRd
 TimeAxis <- new("AxisSet1D", ndim=as.integer(1), i=TIME)
 
 #' @keywords internal
+#' @noRd
 AxisSet1D <- function(i) {
   new("AxisSet1D", ndim=as.integer(1), i=i)
 }
 
 #' @keywords internal
+#' @noRd
 AxisSet2D <- function(i, j) {
 	new("AxisSet2D", ndim=as.integer(2), i=i, j=j)
 }
 
 #' @keywords internal
+#' @noRd
 AxisSet3D <- function(i, j, k) {
 	new("AxisSet3D", ndim=as.integer(3), i=i, j=j, k=k)
 }
@@ -313,6 +319,7 @@ findAnatomy3D <- function(axis1="L", axis2="P", axis3="I") {
 #' @param axis1 the first axis
 #' @param axis2 the second axis
 #' @param axis3 the third axis
+#' @noRd
 matchAnatomy3D <- function(axis1, axis2, axis3) {
 	for (orient in OrientationList3D) {
 		if (identical(orient@i,axis1) && identical(orient@j,axis2) && identical(orient@k, axis3)) {
@@ -328,6 +335,7 @@ matchAnatomy3D <- function(axis1, axis2, axis3) {
 #' given two named axes return AxisSet2D singleton
 #' @param axis1 the first axis
 #' @param axis2 the second axis
+#' @noRd
 matchAnatomy2D <- function(axis1, axis2) {
 	for (orient in OrientationList2D) {
 		if (identical(orient@i,axis1) && identical(orient@j,axis2)) {
@@ -340,7 +348,7 @@ matchAnatomy2D <- function(axis1, axis2) {
 
 }
 
-
+#' @noRd
 .nearestAnatomy <- function(mat44) {
   mat33 <- mat44[1:3, 1:3]
   #mat33 <- sweep(mat33, 2, sqrt(apply(mat33 * mat33, 2, sum)), "/")

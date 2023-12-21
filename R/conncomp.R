@@ -17,10 +17,6 @@
 #' res2 <- conn_comp_3D(dat, connect="18-connect")
 #' res3 <- conn_comp_3D(dat, connect="26-connect")
 #'
-#' @return a two-element list of the connected components (cluster \code{index} and cluster \code{size})
-#' The first element \code{index} is a 3D array containing the cluster index of the connected component for each voxel.
-#' The second element \code{size} is a 3D array consisting of the size of the connected component inhabited by each voxel.
-#'
 conn_comp_3D <- function(mask,connect=c("26-connect", "18-connect", "6-connect")) {
 	stopifnot(length(dim(mask)) == 3 && is.logical(mask[1]))
 

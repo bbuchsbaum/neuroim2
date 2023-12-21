@@ -1,4 +1,5 @@
 #' @keywords internal
+#' @noRd
 BigNeuroVec <- function(data, space, mask,type = c("double", "float", "integer"), backingfile=tempfile()) {
   type <- match.arg(type)
   stopifnot(inherits(space, "NeuroSpace"))

@@ -13,6 +13,9 @@ ColumnReader(nrow, ncol, reader)
 
 \item{reader}{a function that takes a set of column indices and returns a \code{matrix}}
 }
+\value{
+a new instance of type \code{ColumnReader}
+}
 \description{
 Constructor for  \code{\linkS4class{ColumnReader}} class
 }

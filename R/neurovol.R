@@ -337,6 +337,7 @@ setMethod(f="load_data", signature=c(x="NeuroVolSource"),
 #' @param index the image subvolume index
 #' @export
 #' @rdname NeuroVolSource-class
+#' @return a new instance of type \code{NeuroVolSource}
 NeuroVolSource <- function(input, index=1) {
 	stopifnot(index >= 1)
 	stopifnot(is.character(input))
@@ -385,8 +386,9 @@ setMethod(f="slices", signature=signature(x="NeuroVol"),
           def = function(x) {
             nslices <- dim(x)[3]
             f <- function(i) slice(x, i, 3)
-            lis <- lapply(1:nslices, function(i) f)
-            deferred_list(lis)
+            #lis <- lapply(1:nslices, function(i) f)
+            #deferred_list(lis)
+            deflist::deflist(f, nslices)
           })
 
 
@@ -467,6 +469,7 @@ setMethod(f="split_fill", signature=signature(x="NeuroVol", fac="factor", FUN="f
 		})
 
 #' @keywords internal
+#' @noRd
 fast.expand.grid <- function(seq1,seq2, constant) {
   cbind(Var1 = rep.int(seq1, length(seq2)),
         Var2 = rep.int(seq2, rep.int(length(seq1),length(seq2))),
@@ -563,6 +566,7 @@ setMethod(f="coord_to_grid", signature=signature(x="NeuroVol", coords="numeric")
 
 #' @importFrom dbscan kNN
 #' @keywords internal
+#' @noRd
 .pruneCoords <- function(coord.set,  vals,  mindist=10) {
 
 	if (NROW(coord.set) == 1) {
@@ -661,7 +665,9 @@ setMethod(f="patch_set", signature=signature(x="NeuroVol",
 
             }
 
-            patches <- deferred_list(lapply(1:nrow(grid), function(i) f))
+            patches <- deflist::deflist(f, nrow(grid))
+            patches
+            #patches <- deferred_list(lapply(1:nrow(grid), function(i) f))
 
           })
 
@@ -893,7 +899,7 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVol", mask="numeric"),
 
 
 #' @export
-#' @rdname linear_access-methods
+#' @noRd
 setMethod(f="linear_access", signature=signature(x = "SparseNeuroVol", i = "numeric"),
           def=function (x, i) {
             x@data[as.numeric(i)]

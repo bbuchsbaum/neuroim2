@@ -65,6 +65,7 @@ ClusteredNeuroVol <- function(mask, clusters, label_map=NULL, label="") {
 #' @keywords internal
 #' @rdname ClusteredNeuroVol-methods
 #' @name as,ClusteredNeuroVol,DenseNeuroVol
+#' @noRd
 setAs(from="ClusteredNeuroVol", to="DenseNeuroVol", def=function(from) {
   data = from@clusters
   indices <- which(from@mask == TRUE)
@@ -146,7 +147,7 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVol", clusters="Cluste
             }
 
             #dlis <- deferred_list(lapply(1:num_clusters(clusters), function(i) f))
-            dlis <- deferred_list2(f, num_clusters(clusters))
+            dlis <- deflist::deflist(f, num_clusters(clusters))
 
           })
 
@@ -166,7 +167,7 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVol", clusters="intege
             }
 
             #dlis <- deferred_list(lapply(1:length(clist), function(i) f))
-            dlis <- deferred_list2(f, length(clist))
+            dlis <- deflist::deflist(f, length(clist))
           })
 
 #' @export

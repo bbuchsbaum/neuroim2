@@ -5,6 +5,7 @@
 #'
 #' @param file_name the name of the image file
 #' @export
+#' @return a new instance of type \code{FileBackedNeuroVec}
 FileBackedNeuroVec <- function(file_name) {
   meta <- read_header(file_name)
   assert_that(length(meta@dims) == 4)
@@ -44,20 +45,20 @@ setMethod(f="as.list", signature=signature(x = "FileBackedNeuroVec"), def=functi
   #deferred_list(lapply(seq(1, D4),
   #       function(i) { f } ))
 
-  deferred_list2(f, D4)
+  deflist::deflist(f, D4)
 
 })
 
 
 #' @export
-#' @rdname linear_access-methods
+#' @noRd
 setMethod(f="linear_access", signature=signature(x = "FileBackedNeuroVec", i = "numeric"),
           def=function (x, i) {
             read_mapped_data(x@meta, i)
           })
 
-#' @export
-#' @rdname linear_access-methods
+
+#' @noRd
 setMethod(f="linear_access", signature=signature(x = "H5NeuroVec", i = "numeric"),
           def=function (x, i) {
             els <- x@obj[["data/elements"]]

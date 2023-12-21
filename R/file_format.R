@@ -68,6 +68,7 @@ setMethod(f="strip_extension",signature=signature(x= "FileFormat", file_name="ch
 
 
 #' @keywords internal
+#' @noRd
 .read_meta_info <- function(desc, file_name, read_func, constructor) {
 
 	hfile <- header_file(desc, file_name)
@@ -91,6 +92,7 @@ setMethod(f="read_meta_info",signature=signature(x= "AFNIFormat"),
 
 
 #' @keywords internal
+#' @noRd
 find_descriptor <- function(file_name) {
 	if (file_matches(NIFTI, file_name)) NIFTI
 	else if (file_matches(NIFTI_GZ, file_name)) NIFTI_GZ
@@ -103,6 +105,7 @@ find_descriptor <- function(file_name) {
 
 
 #' @keywords internal
+#' @noRd
 AFNI <- new("AFNIFormat",
 		file_format="AFNI",
 		header_encoding="raw",
@@ -112,6 +115,7 @@ AFNI <- new("AFNIFormat",
 
 
 #' @keywords internal
+#' @noRd
 AFNI_GZ <- new("AFNIFormat",
 		file_format="AFNI",
 		header_encoding="gzip",
@@ -121,6 +125,7 @@ AFNI_GZ <- new("AFNIFormat",
 
 
 #' @keywords internal
+#' @noRd
 NIFTI <- new("NIFTIFormat",
 		file_format="NIFTI",
 		header_encoding="raw",
@@ -130,6 +135,7 @@ NIFTI <- new("NIFTIFormat",
 
 
 #' @keywords internal
+#' @noRd
 NIFTI_GZ <- new("NIFTIFormat",
 		file_format="NIFTI",
 		header_encoding="gzip",
@@ -139,6 +145,7 @@ NIFTI_GZ <- new("NIFTIFormat",
 
 
 #' @keywords internal
+#' @noRd
 NIFTI_PAIR <- new("NIFTIFormat",
 		file_format="NIFTI",
 		header_encoding="raw",

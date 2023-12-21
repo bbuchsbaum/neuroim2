@@ -75,6 +75,7 @@ setMethod(f="as.matrix", signature=signature(x = "ROIVec"), def=function(x) {
 
 
 #' @keywords internal
+#' @noRd
 .makeSquareGrid <- function(bvol, centroid, surround, fixdim=3) {
   vspacing <- spacing(bvol)
   vdim <- dim(bvol)
@@ -106,6 +107,7 @@ setMethod(f="as.matrix", signature=signature(x = "ROIVec"), def=function(x) {
 
 
 #' @keywords internal
+#' @noRd
 .makeCubicGrid <- function(bvol, centroid, surround) {
   vspacing <- spacing(bvol)
   vdim <- dim(bvol)
@@ -244,6 +246,7 @@ cuboid_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE) {
 
 #' @importFrom dbscan frNN
 #' @keywords internal
+#' @noRd
 make_spherical_grid <- function(bvol, centroid, radius, use_cpp=TRUE) {
 
   vspacing <- spacing(bvol)
@@ -369,9 +372,11 @@ spherical_roi <- function (bvol, centroid, radius, fill=NULL, nonzero=FALSE, use
 # }
 
 #' @keywords internal
+#' @noRd
 .resample <- function(x, ...) x[sample.int(length(x), ...)]
 
 #' @keywords internal
+#' @noRd
 roi_vector_matrix <- function(mat, refspace, indices, coords) {
   structure(mat,
             refspace=refspace,
@@ -382,6 +387,7 @@ roi_vector_matrix <- function(mat, refspace, indices, coords) {
 }
 
 #' @keywords internal
+#' @noRd
 roi_surface_matrix <- function(mat, refspace, indices, coords) {
   structure(mat,
             refspace=refspace,

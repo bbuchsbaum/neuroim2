@@ -213,6 +213,7 @@ NeuroVecSource <- function(file_name, indices=NULL, mask=NULL) {
 
 
 #' @keywords internal
+#' @noRd
 H5NeuroVecSource <- function(file_name) {
   new("H5NeuroVecSource", file_name=file_name)
 }
@@ -440,7 +441,7 @@ setMethod(f="vols", signature=signature(x="NeuroVec", indices="numeric"),
             f <- function(i) x[[indices[i]]]
             #lis <- lapply(indices, function(i) function(i) x[[i]])
             #deferred_list(lis)
-            deferred_list2(f, length(indices))
+            deflist::deflist(f, length(indices))
           })
 
 #' @export
@@ -450,7 +451,7 @@ setMethod(f="vols", signature=signature(x="NeuroVec", indices="missing"),
             f <- function(i) x[[i]]
             #lis <- lapply(1:(dim(x)[4]), function(i) f)
             #deferred_list(lis)
-            deferred_list2(f, dim(x)[4])
+            deflist::deflist(f, dim(x)[4])
           })
 
 #' @export
@@ -465,7 +466,7 @@ setMethod(f="vectors", signature=signature(x="NeuroVec", subset="missing"),
             ##f <- function(i) series(x, vox[i,1], vox[i,2], vox[i,3])
             f <- function(i) series(x, ind[i])
 
-            deferred_list2(f, length(ind))
+            deflist::deflist(f, length(ind))
           })
 
 #' @export
@@ -484,7 +485,7 @@ setMethod(f="vectors", signature=signature(x="DenseNeuroVec", subset="missing"),
             }
             #lis <- map(ind, function(i) f)
             #deferred_list(lis)
-            deferred_list2(f, length(ind))
+            deflist::deflist(f, length(ind))
           })
 
 #' @export
@@ -503,7 +504,7 @@ setMethod(f="vectors", signature=signature(x="NeuroVec", subset="numeric"),
 
             #lis <- lapply(seq_along(ind), function(i) f)
             #deferred_list(lis)
-            deferred_list2(f, length(ind))
+            deflist::deflist(f, length(ind))
           })
 
 #' @export
@@ -518,7 +519,7 @@ setMethod(f="vectors", signature=signature(x="NeuroVec", subset="logical"),
             f <- function(i) series(x, ind[i])
             #lis <- lapply(seq_along(ind), function(i) f)
             #deferred_list(lis)
-            deferred_list2(f, length(ind))
+            deflist::deflist(f, length(ind))
           })
 
 
@@ -533,16 +534,23 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="intege
 
             isplit <- split(keep, clusters)
             ##isplit <- split(1:length(clusters), clusters)
-            out <- vector(mode="list", length(isplit))
 
-            for (i in seq_along(isplit)) {
-              out[[i]] <- function(i) {
-                series_roi(x, isplit[[i]])
-              }
+
+            #out <- vector(mode="list", length(isplit))
+
+            #for (i in seq_along(isplit)) {
+            #  out[[i]] <- function(i) {
+            #    series_roi(x, isplit[[i]])
+            #  }
+            #}
+
+            f <- function(i) {
+              series_roi(x, isplit[[i]])
             }
 
-            ret <- deferred_list(out)
-            names(ret) <- names(isplit)
+            ret <- deflist::deflist(f, length(isplit), names=names(isplit))
+            #ret <- deferred_list(out)
+            #names(ret) <- names(isplit)
             ret
           })
 
@@ -571,16 +579,23 @@ setMethod(f="split_blocks", signature=signature(x="NeuroVec", indices="integer")
           def = function(x, indices,...) {
             assert_that(length(indices) == dim(x)[4])
             isplit <- split(1:length(indices), indices)
-            out <- vector(mode="list", length(isplit))
 
-            for (i in seq_along(isplit)) {
-              out[[i]] <- function(i) {
-                sub_vector(x, isplit[[i]])
-              }
+
+            #out <- vector(mode="list", length(isplit))
+
+            #for (i in seq_along(isplit)) {
+            #  out[[i]] <- function(i) {
+            #    sub_vector(x, isplit[[i]])
+            #  }
+            #}
+
+            f <- function(i) {
+              sub_vector(x, isplit[[i]])
             }
 
-            ret <- deferred_list(out)
-            names(ret) <- names(isplit)
+            #ret <- deferred_list(out)
+            ret <- deflist::deflist(f, length(isplit), names=names(isplit))
+            #names(ret) <- names(isplit)
             ret
           })
 
@@ -1233,7 +1248,7 @@ setMethod(f="[[", signature=signature(x="NeuroVecSeq", i="numeric"),
           })
 
 #' @export
-#' @rdname linear_access-methods
+#' @noRd
 setMethod(f="linear_access", signature=signature(x = "NeuroVecSeq", i = "numeric"),
           def = function (x, i) {
             ## inprog

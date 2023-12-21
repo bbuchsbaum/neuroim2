@@ -151,6 +151,7 @@ bilateral_filter <- function(vol, mask, spatial_sigma=2, intensity_sigma=1, wind
 #' brain_mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
 #' vec <- read_vec(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #' out <- bilateral_filter_vec(vec,brain_mask)
+#' @noRd
 bilateral_filter_vec <- function(vec, mask, spatial_sigma=2, intensity_sigma=1, window=1) {
   assert_that(inherits(vec, "NeuroVec"))
   assert_that(window >= 1)

@@ -13,6 +13,9 @@ NeuroSlice(data, space, indices = NULL)
 
 \item{indices}{linear indices corresponding used if \code{data} is a 1D vector.}
 }
+\value{
+a new instance of type \code{NeuroSlice}
+}
 \description{
 Construct a NeuroSlice object
 }

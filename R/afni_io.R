@@ -1,16 +1,19 @@
 
 #' @keywords internal
 #' @importFrom stringr str_split str_trim str_sub
+#' @noRd
 parseIntAttribute <- function(line){
 	as.integer(str_split(str_trim(paste(line, collapse=" ")), "\\s+")[[1]])
 }
 
 #' @keywords internal
+#' @noRd
 parseFloatAttribute <- function(line){
 	as.numeric(str_split(str_trim(paste(line, collapse=" ")), "\\s+")[[1]])
 }
 
 #' @keywords internal
+#' @noRd
 parseStringAttribute <- function(line) {
 
 	res <- str_split(line, "~")[[1]]
@@ -23,6 +26,7 @@ parseStringAttribute <- function(line) {
 }
 
 #' @keywords internal
+#' @noRd
 parseElement <- function(inputLines) {
 	atype <- str_trim(str_split(inputLines[[1]], "=")[[1]])[2]
 	name <- str_trim(str_split(inputLines[[2]], "=")[[1]])[2]
@@ -46,6 +50,7 @@ parseElement <- function(inputLines) {
 #' @param file_name the name of the AFNI header file (ending in .HEAD)
 #' @return a \code{list} representation of an AFNI header
 #' @keywords internal
+#' @noRd
 read_afni_header <- function(file_name) {
 	inputLines <- scan(file_name, what=character(), sep="\n", blank.lines.skip=FALSE)
 	idx <- which(unlist(lapply(inputLines, function(lin) lin == ""))) + 1

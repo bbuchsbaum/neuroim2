@@ -16,6 +16,7 @@
 
 
 #' @keywords internal
+#' @noRd
 to_h5_latentvec <- function(vec, file_name=NULL, data_type="FLOAT",
                             chunk_dim=NULL, nbit=FALSE, compression=6) {
 
@@ -88,6 +89,7 @@ to_h5_latentvec <- function(vec, file_name=NULL, data_type="FLOAT",
 
 
 #' @keywords internal
+#' @noRd
 to_nih5_vec <- function(vec, file_name=NULL, data_type="FLOAT", chunk_dim=c(4,4,4,dim(vec)[4]),
                         nbit=FALSE, compression=6) {
 
@@ -144,6 +146,7 @@ to_nih5_vec <- function(vec, file_name=NULL, data_type="FLOAT", chunk_dim=c(4,4,
 }
 
 #' @keywords internal
+#' @noRd
 to_nih5_vol <- function(vol, file_name=NULL, data_type="FLOAT") {
   if (is.null(file_name)) {
     file_name <- paste0(tempfile(), ".h5")

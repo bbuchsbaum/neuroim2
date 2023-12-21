@@ -48,6 +48,7 @@ setGeneric("resample", function(source, target, ...) standardGeneric("resample")
 #' @param x the object to print
 #' @param ... additional arguments
 #' @keywords internal
+#' @noRd
 setGeneric(name="print_", def=function(x, ...) standardGeneric("print_"))
 
 #' Extract Data Values of an Object
@@ -67,8 +68,8 @@ setGeneric(name="values", def=function(x, ...) standardGeneric("values"))
 #' @param x a data source.
 #' @param i a vector of indices.
 #' @param ... additional arguments to be passed to methods.
-#' @rdname linear_access-methods
 #' @keywords internal
+#' @noRd
 setGeneric(name="linear_access", def=function(x, i, ...) standardGeneric("linear_access"))
 
 
@@ -85,6 +86,7 @@ setGeneric(name="linear_access", def=function(x, i, ...) standardGeneric("linear
 #' @param ... additional arguments to be passed to methods.
 #' @rdname matricized_access-methods
 #' @keywords internal
+#' @noRd
 setGeneric(name="matricized_access", def=function(x, i, ...) standardGeneric("matricized_access"))
 
 

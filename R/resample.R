@@ -1,5 +1,6 @@
 
 #' @keywords internal
+#' @noRd
 convert_hd <- function(hd) {
   hdr_targ <- RNifti::niftiHeader(list(
     pixdim=hd$pixdim,

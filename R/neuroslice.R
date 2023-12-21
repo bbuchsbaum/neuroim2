@@ -15,6 +15,7 @@
 #' dat <- array(rnorm(64*64), c(64,64))
 #' bslice <- NeuroSlice(dat,bspace)
 #' bslice
+#' @return a new instance of type \code{NeuroSlice}
 NeuroSlice <- function(data, space, indices=NULL) {
 	if (ndim(space) != 2) {
 		stop("incorrect dimension for neuro_slice")
@@ -98,6 +99,7 @@ setMethod("plot", signature=signature(x="NeuroSlice"),
 #' @import assertthat
 #' @keywords internal
 #' @importFrom grDevices col2rgb gray heat.colors
+#' @noRd
 mapToColors <- function (imslice, col = heat.colors(128, alpha = 1), zero_col = "#00000000",
                          alpha = 1, irange = range(imslice), threshold = c(0, 0)) {
 

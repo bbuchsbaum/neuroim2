@@ -100,6 +100,7 @@ setClass("FileFormat",
 #'
 #' This class supports the NIFTI file format
 #' @keywords internal
+#' @noRd
 setClass("NIFTIFormat", contains=c("FileFormat"))
 
 
@@ -107,12 +108,14 @@ setClass("NIFTIFormat", contains=c("FileFormat"))
 #'
 #' This class supports the AFNI file format
 #' @keywords internal
+#' @noRd
 setClass("AFNIFormat", contains=c("FileFormat"))
 
 #' H5Format
 #'
 #' This class supports the AFNI file format
 #' @keywords internal
+#' @noRd
 setClass("H5Format", contains=c("FileFormat"))
 
 
@@ -208,6 +211,7 @@ setClass("FileSource", representation(meta_info="FileMetaInfo"))
 #' @rdname NeuroVolSource-class
 #' @slot index the index of the volume to be read -- must be of length 1.
 #' @keywords internal
+#' @noRd
 setClass("NeuroVolSource", representation(index="integer"), contains="FileSource")
 
 
@@ -215,9 +219,10 @@ setClass("NeuroVolSource", representation(index="integer"), contains="FileSource
 #' NeuroVecSource
 #'
 #' A class that is used to produce a \code{\linkS4class{NeuroVec}} instance
-#' @rdname NeuroVecSource-class
+#'
 #' @slot indices the index vector of the volumes to be loaded
 #' @keywords internal
+#' @noRd
 setClass("NeuroVecSource", representation(indices="integer"), contains="FileSource")
 
 
@@ -225,9 +230,9 @@ setClass("NeuroVecSource", representation(indices="integer"), contains="FileSour
 #'
 #' A class that is used to produce a \code{\linkS4class{H5NeuroVecSource}} instance
 #'
-#' @rdname H5NeuroVecSource-class
 #' @slot file_name the name of the hdf5 file.
 #' @keywords internal
+#' @noRd
 setClass("H5NeuroVecSource", representation(file_name="character"))
 
 
@@ -238,6 +243,7 @@ setClass("H5NeuroVecSource", representation(file_name="character"))
 #' @rdname LatentNeuroVecSource-class
 #' @slot file_name the name of the file.
 #' @keywords internal
+#' @noRd
 setClass("LatentNeuroVecSource", representation(file_name="character"))
 
 
@@ -504,6 +510,7 @@ setClass("DenseNeuroVec",  contains=c("NeuroVec", "array"))
 
 
 #' @keywords internal
+#' @noRd
 setValidity("DenseNeuroVec", function(object) {
   if (length(dim(object)) != 4) {
     "data must be four-dimensional array"

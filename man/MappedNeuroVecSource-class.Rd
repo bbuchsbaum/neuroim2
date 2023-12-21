@@ -11,6 +11,9 @@ MappedNeuroVecSource(file_name)
 \arguments{
 \item{file_name}{the name of the image file to be memory mapped}
 }
+\value{
+a new instance of type \code{MappedNeuroVecSource}
+}
 \description{
 A class that is used to produce a \code{\linkS4class{MappedNeuroVec}} instance
 

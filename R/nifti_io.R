@@ -4,6 +4,7 @@
 {}
 
 #' @keywords internal
+#' @noRd
 .checkDimensions <- function(dimvec) {
 	if (any(dimvec < 0)) {
 		stop(paste("nifti(checkDimensons): illegal dimension vector in header: ", dimvec))
@@ -12,6 +13,7 @@
 
 
 #' @keywords internal
+#' @noRd
 write_nifti_vector <- function(vec, file_name, data_type="FLOAT") {
 	assertthat::assert_that(length(dim(vec)) == 4)
 	hdr <- as_nifti_header(vec, file_name=file_name, data_type=data_type)
@@ -34,6 +36,7 @@ write_nifti_vector <- function(vec, file_name, data_type="FLOAT") {
 }
 
 #' @keywords internal
+#' @noRd
 write_nifti_volume <- function(vol, file_name, data_type="FLOAT") {
 	stopifnot(length(dim(vol)) == 3)
 	hdr <- as_nifti_header(vol, file_name=file_name, data_type=data_type)
@@ -52,6 +55,7 @@ write_nifti_volume <- function(vol, file_name, data_type="FLOAT") {
 
 
 #' @keywords internal
+#' @noRd
 as_nifti_header <- function(vol, file_name, oneFile=TRUE, data_type="FLOAT") {
 		hd <- createNIfTIHeader(oneFile=oneFile, file_name=file_name)
 		hd$file_name <- file_name
@@ -87,6 +91,7 @@ as_nifti_header <- function(vol, file_name, oneFile=TRUE, data_type="FLOAT") {
 
 
 #' @keywords internal
+#' @noRd
 createNIfTIHeader <- function(oneFile=TRUE, file_name=NULL) {
 	header <- list()
 	header$file_type <- "NIfTI"
@@ -161,6 +166,7 @@ createNIfTIHeader <- function(oneFile=TRUE, file_name=NULL) {
 
 
 #' @keywords internal
+#' @noRd
 read_nifti_header <- function(fname) {
 	header <- list()
 	header$file_type <- "NIfTI"
@@ -270,6 +276,7 @@ read_nifti_header <- function(fname) {
 
 
 #' @keywords internal
+#' @noRd
 write_nifti_header <- function(niftiInfo, conn, close=TRUE) {
 	endian <- niftiInfo$endian
 

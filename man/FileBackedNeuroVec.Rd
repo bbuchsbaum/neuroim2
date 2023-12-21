@@ -9,6 +9,9 @@ FileBackedNeuroVec(file_name)
 \arguments{
 \item{file_name}{the name of the image file}
 }
+\value{
+a new instance of type \code{FileBackedNeuroVec}
+}
 \description{
 Construct a \code{FileBackedNeuroVec} instance
 }

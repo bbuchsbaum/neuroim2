@@ -26,6 +26,9 @@ BinaryReader(
 
 \item{signed}{whether the element is signed (TRUE) or unsigned (FALSE)}
 }
+\value{
+a new instance of type \code{BinaryReader}
+}
 \description{
 Constructor for  \code{\linkS4class{BinaryReader}} class
 }
