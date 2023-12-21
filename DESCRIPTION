@@ -65,7 +65,8 @@ Imports:
   colorplane,
   bigstatsr,
   RNiftyReg,
-  future.apply
+  future.apply,
+  deflist
 Suggests: 
     testthat,
     covr,
