@@ -34,12 +34,6 @@
     <loc>https://bbuchsbaum.github.io/neuroim2/index.html</loc>
   </url>
   <url>
-    <loc>https://bbuchsbaum.github.io/neuroim2/reference/AFNIFormat-class.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/neuroim2/reference/AFNIMetaInfo-class.html</loc>
-  </url>
-  <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/AbstractSparseNeuroVec-class.html</loc>
   </url>
   <url>
@@ -85,9 +79,6 @@
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/ClusteredNeuroVol-class.html</loc>
   </url>
   <url>
-    <loc>https://bbuchsbaum.github.io/neuroim2/reference/ClusteredNeuroVol-methods.html</loc>
-  </url>
-  <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/ColumnReader-class.html</loc>
   </url>
   <url>
@@ -124,13 +115,7 @@
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/FileSource-class.html</loc>
   </url>
   <url>
-    <loc>https://bbuchsbaum.github.io/neuroim2/reference/H5Format-class.html</loc>
-  </url>
-  <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/H5NeuroVec-class.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/neuroim2/reference/H5NeuroVecSource-class.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/H5NeuroVol-class.html</loc>
@@ -148,9 +133,6 @@
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/LatentNeuroVec-class.html</loc>
   </url>
   <url>
-    <loc>https://bbuchsbaum.github.io/neuroim2/reference/LatentNeuroVecSource-class.html</loc>
-  </url>
-  <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/LogicalNeuroVol-class.html</loc>
   </url>
   <url>
@@ -161,12 +143,6 @@
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/MetaInfo-class.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/neuroim2/reference/NIFTIFormat-class.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/neuroim2/reference/NIFTIMetaInfo-class.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/NamedAxis-class.html</loc>
@@ -206,9 +182,6 @@
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/NeuroVecSeq.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/neuroim2/reference/NeuroVecSource-class.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/NeuroVecSource.html</loc>
@@ -313,6 +286,9 @@
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/axes-methods.html</loc>
   </url>
   <url>
+    <loc>https://bbuchsbaum.github.io/neuroim2/reference/bilateral_filter.html</loc>
+  </url>
+  <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/bootstrap_searchlight.html</loc>
   </url>
   <url>
@@ -359,12 +335,6 @@
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/data_reader-methods.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/neuroim2/reference/deferred_list.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/neuroim2/reference/deferred_list2.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/dim-FileMetaInfo-method.html</loc>
@@ -433,19 +403,10 @@
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/indices.html</loc>
   </url>
   <url>
-    <loc>https://bbuchsbaum.github.io/neuroim2/reference/internal-methods.html</loc>
-  </url>
-  <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/inverse_trans-methods.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/length-methods.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/neuroim2/reference/linear_access-methods.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/neuroim2/reference/load_data-methods.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/lookup-methods.html</loc>
@@ -458,15 +419,6 @@
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/map_values-methods.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/neuroim2/reference/matchAnatomy2D.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/neuroim2/reference/matchAnatomy3D.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/neuroim2/reference/matricized_access-methods.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/ndim-methods.html</loc>
@@ -502,22 +454,7 @@
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/plot-methods.html</loc>
   </url>
   <url>
-    <loc>https://bbuchsbaum.github.io/neuroim2/reference/print_-AxisSet2D-method.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/neuroim2/reference/print_-AxisSet3D-method.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/neuroim2/reference/print_-NamedAxis-method.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/neuroim2/reference/print_.html</loc>
-  </url>
-  <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/random_searchlight.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/neuroim2/reference/read_afni_header.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/neuroim2/reference/read_columns-methods.html</loc>
