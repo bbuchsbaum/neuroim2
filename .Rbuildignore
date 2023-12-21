@@ -21,3 +21,4 @@ cran-comments.md
 ^cran-comments\.md$
 Classes.yml
 Generics.yml
+^CRAN-SUBMISSION$
