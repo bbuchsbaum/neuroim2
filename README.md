@@ -1,6 +1,5 @@
 <!-- badges: start -->
 
-[![codecov](https://codecov.io/github/bbuchsbaum/neuroim2/branch/master/graphs/badge.svg)](https://codecov.io/github/bbuchsbaum/neuroim2)
 [![R-CMD-check](https://github.com/bbuchsbaum/neuroim2/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/bbuchsbaum/neuroim2/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
