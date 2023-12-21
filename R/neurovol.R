@@ -410,7 +410,7 @@ setMethod(f="concat", signature=signature(x="DenseNeuroVol", y="missing"),
 
 
 #' @note dimensions of x and y must be equal
-#' @export concat
+#' @export
 #' @rdname concat-methods
 setMethod(f="concat", signature=signature(x="DenseNeuroVol", y="DenseNeuroVol"),
 		def=function(x,y,...) {
@@ -446,7 +446,7 @@ setMethod(f="map_values", signature=signature(x="NeuroVol", lookup="matrix"),
           })
 
 
-#' @export split_fill
+#' @export
 #' @rdname split_fill-methods
 setMethod(f="split_fill", signature=signature(x="NeuroVol", fac="factor", FUN="function"),
 		def=function(x,fac,FUN) {

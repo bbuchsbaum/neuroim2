@@ -37,6 +37,7 @@ reference:
     - NeuroVec
     - NeuroVecSeq
     - NeuroVecSource
+    - NeuroVolSource
     - NeuroVol
     - NIFTIMetaInfo
     - ROICoords-class
@@ -73,7 +74,6 @@ reference:
     desc: >
       Methods for loading and manipulating neuroimaging data
     contents:
-    - load_data
     - concat
     - mapf
     - vols
@@ -145,6 +145,7 @@ reference:
     - series_roi
     - gaussian_blur
     - guided_filter
+    - bilateral_filter
     - reorient
     - clustered_searchlight
 
@@ -154,8 +155,6 @@ reference:
     contents:
     - lookup
     - map_values
-    - matchAnatomy2D
-    - matchAnatomy3D
     - resample
   - title: "Data Access and Indexing"
     desc: >
@@ -175,7 +174,6 @@ reference:
     - split_reduce
     - split_blocks
     - split_scale
-
   - title: "Visualization and Rendering"
     desc: >
       Methods for visualizing and rendering neuroimaging data

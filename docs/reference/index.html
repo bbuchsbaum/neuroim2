@@ -68,9 +68,9 @@
         <dd>AbstractSparseNeuroVec</dd>
       </dl><dl><dt>
           
-          <code><a href="AFNIMetaInfo-class.html">AFNIMetaInfo()</a></code> 
+          <code><a href="FileMetaInfo-class.html">NIFTIMetaInfo()</a></code> <code><a href="FileMetaInfo-class.html">AFNIMetaInfo()</a></code> 
         </dt>
-        <dd>AFNIMetaInfo</dd>
+        <dd>FileMetaInfo</dd>
       </dl><dl><dt>
           
           <code><a href="AxisSet-class.html">AxisSet-class</a></code> 
@@ -209,14 +209,14 @@ Base class for all data objects with a cartesion spatial represenetation</dd>
         <dd>NeuroVecSource</dd>
       </dl><dl><dt>
           
+          <code><a href="NeuroVolSource-class.html">NeuroVolSource()</a></code> 
+        </dt>
+        <dd>Constructor for NeuroVolSource</dd>
+      </dl><dl><dt>
+          
           <code><a href="NeuroVol.html">NeuroVol()</a></code> 
         </dt>
         <dd>Construct a NeuroVol object</dd>
-      </dl><dl><dt>
-          
-          <code><a href="NIFTIMetaInfo-class.html">NIFTIMetaInfo()</a></code> 
-        </dt>
-        <dd>Constructor for <code>NIFTIMetaInfo</code> class</dd>
       </dl><dl><dt>
           
           <code><a href="ROICoords-class.html">ROICoords-class</a></code> 
@@ -275,7 +275,7 @@ Base class for all data objects with a cartesion spatial represenetation</dd>
         <dd>FileFormatDescriptor</dd>
       </dl><dl><dt>
           
-          <code><a href="FileMetaInfo-class.html">FileMetaInfo-class</a></code> <code><a href="FileMetaInfo-class.html">NIFTIMetaInfo-class</a></code> <code><a href="FileMetaInfo-class.html">AFNIMetaInfo-class</a></code> 
+          <code><a href="FileMetaInfo-class.html">NIFTIMetaInfo()</a></code> <code><a href="FileMetaInfo-class.html">AFNIMetaInfo()</a></code> 
         </dt>
         <dd>FileMetaInfo</dd>
       </dl><dl><dt>
@@ -350,7 +350,7 @@ Base class for all data objects with a cartesion spatial represenetation</dd>
         <dd>ROIVolWindow</dd>
       </dl><dl><dt>
           
-          <code><a href="SparseNeuroVecSource-class.html">SparseNeuroVecSource()</a></code> 
+          <code><a href="SparseNeuroVecSource-class.html">SparseNeuroVecSource-class</a></code> 
         </dt>
         <dd>SparseNeuroVecSource</dd>
       </dl></div><div class="section level2">
@@ -365,11 +365,6 @@ Base class for all data objects with a cartesion spatial represenetation</dd>
       
 
       <dl><dt>
-          
-          <code><a href="load_data-methods.html">load_data()</a></code> 
-        </dt>
-        <dd>Load data from a data source.</dd>
-      </dl><dl><dt>
           
           <code><a href="concat-methods.html">concat()</a></code> 
         </dt>
@@ -415,7 +410,7 @@ Will test for match to either header file or data file</dd>
           
           <code><a href="read_elements-methods.html">read_elements()</a></code> 
         </dt>
-        <dd>read a sequence of elements from an input source</dd>
+        <dd>Read a sequence of elements from an input source</dd>
       </dl></div><div class="section level2">
       <h2 id="coordinate-and-dimension-operations">Coordinate and Dimension Operations<a class="anchor" aria-label="anchor" href="#coordinate-and-dimension-operations"></a></h2>
       
@@ -486,7 +481,7 @@ Will test for match to either header file or data file</dd>
           
           <code><a href="index_to_grid-methods.html">index_to_grid()</a></code> 
         </dt>
-        <dd>convert 1d indices to n-dimensional grid coordinates</dd>
+        <dd>Convert 1d indices to n-dimensional grid coordinates</dd>
       </dl><dl><dt>
           
           <code><a href="dim_of-methods.html">dim_of()</a></code> 
@@ -521,12 +516,12 @@ Will test for match to either header file or data file</dd>
           
           <code><a href="trans-methods.html">trans()</a></code> 
         </dt>
-        <dd>extract image coordinate transformation</dd>
+        <dd>Extract image coordinate transformation</dd>
       </dl><dl><dt>
           
           <code><a href="inverse_trans-methods.html">inverse_trans()</a></code> 
         </dt>
-        <dd>extract inverse image coordinate transformation</dd>
+        <dd>Extract inverse image coordinate transformation</dd>
       </dl><dl><dt>
           
           <code><a href="origin-methods.html">origin()</a></code> 
@@ -572,7 +567,7 @@ Will test for match to either header file or data file</dd>
           
           <code><a href="centroids-methods.html">centroids()</a></code> 
         </dt>
-        <dd>return a matrix of centroids of an object</dd>
+        <dd>Return a matrix of centroids of an object</dd>
       </dl><dl><dt>
           
           <code><a href="conn_comp-methods.html">conn_comp()</a></code> 
@@ -696,9 +691,14 @@ Will test for match to either header file or data file</dd>
         <dd>Filter a volumetric image with an edge-preserving "guided" filter</dd>
       </dl><dl><dt>
           
+          <code><a href="bilateral_filter.html">bilateral_filter()</a></code> 
+        </dt>
+        <dd>Apply a bilateral filter to a volumetric image</dd>
+      </dl><dl><dt>
+          
           <code><a href="reorient-methods.html">reorient()</a></code> 
         </dt>
-        <dd>remap the grid-to-world coordinates mapping of an image.</dd>
+        <dd>Remap the grid-to-world coordinates mapping of an image.</dd>
       </dl><dl><dt>
           
           <code><a href="searchlight.html">clustered_searchlight()</a></code> 
@@ -727,16 +727,6 @@ Will test for match to either header file or data file</dd>
         <dd>Map Values from One Set to Another Using a User-supplied Lookup Table</dd>
       </dl><dl><dt>
           
-          <code><a href="matchAnatomy2D.html">matchAnatomy2D()</a></code> 
-        </dt>
-        <dd>given two named axes return AxisSet2D singleton</dd>
-      </dl><dl><dt>
-          
-          <code><a href="matchAnatomy3D.html">matchAnatomy3D()</a></code> 
-        </dt>
-        <dd>given three named axes return AxisSet3D singleton</dd>
-      </dl><dl><dt>
-          
           <code><a href="resample-methods.html">resample()</a></code> 
         </dt>
         <dd>Resample an Image to Match the Space of Another Image</dd>
@@ -752,16 +742,6 @@ Will test for match to either header file or data file</dd>
       
 
       <dl><dt>
-          
-          <code><a href="linear_access-methods.html">linear_access()</a></code> 
-        </dt>
-        <dd>Extract values from an array-like object using linear indexing.</dd>
-      </dl><dl><dt>
-          
-          <code><a href="matricized_access-methods.html">matricized_access()</a></code> 
-        </dt>
-        <dd>Extract values from a matricized (x,y,z) of a 4D tensor using a space-time coordinate matrix.</dd>
-      </dl><dl><dt>
           
           <code><a href="sub_vector-methods.html">sub_vector()</a></code> 
         </dt>
@@ -864,17 +844,17 @@ That is, if the 4th dimension is 'time' each series is a 1D time series.</dd>
           
           <code><a href="write_elements-methods.html">write_elements()</a></code> 
         </dt>
-        <dd>write a sequence of elements from an input source</dd>
+        <dd>Write a sequence of elements from an input source</dd>
       </dl><dl><dt>
           
           <code><a href="write_vec-methods.html">write_vec()</a></code> 
         </dt>
-        <dd>write a 4d image vector to disk</dd>
+        <dd>Write a 4d image vector to disk</dd>
       </dl><dl><dt>
           
           <code><a href="write_vol-methods.html">write_vol()</a></code> 
         </dt>
-        <dd>write a 3d image volume to disk</dd>
+        <dd>Write a 3d image volume to disk</dd>
       </dl><dl><dt>
           
           <code><a href="close-methods.html">close(<i>&lt;BinaryReader&gt;</i>)</a></code> <code><a href="close-methods.html">close(<i>&lt;BinaryWriter&gt;</i>)</a></code> 
@@ -900,7 +880,7 @@ Will test for match to header file only</dd>
           
           <code><a href="read_columns-methods.html">read_columns()</a></code> 
         </dt>
-        <dd>read a set of column vector from an input source (e.g. <code>ColumnReader</code>)</dd>
+        <dd>Read a set of column vector from an input source (e.g. <code>ColumnReader</code>)</dd>
       </dl><dl><dt>
           
           <code><a href="read_header.html">read_header()</a></code> 
@@ -1089,26 +1069,6 @@ setMethod("series", signature(x="NeuroVecSeq", i="integer"),
         <dd>show a <code>SparseNeuroVol</code></dd>
       </dl><dl><dt>
           
-          <code><a href="print_-AxisSet2D-method.html">print_(<i>&lt;AxisSet2D&gt;</i>)</a></code> 
-        </dt>
-        <dd>print a <code>AxisSet2D</code> instance</dd>
-      </dl><dl><dt>
-          
-          <code><a href="print_-AxisSet3D-method.html">print_(<i>&lt;AxisSet3D&gt;</i>)</a></code> 
-        </dt>
-        <dd>print a <code>AxisSet3D</code> instance</dd>
-      </dl><dl><dt>
-          
-          <code><a href="print_-NamedAxis-method.html">print_(<i>&lt;NamedAxis&gt;</i>)</a></code> 
-        </dt>
-        <dd>print a <code>NamedAxis</code></dd>
-      </dl><dl><dt>
-          
-          <code><a href="print_.html">print_()</a></code> 
-        </dt>
-        <dd>print an object</dd>
-      </dl><dl><dt>
-          
           <code><a href="as.html">as</a></code> 
         </dt>
         <dd>conversion from <code>NeuroVol</code> to <code>LogicalNeuroVol</code></dd>
@@ -1226,7 +1186,7 @@ setMethod("series", signature(x="NeuroVecSeq", i="integer"),
           
           <code><a href="centroids-methods.html">centroids()</a></code> 
         </dt>
-        <dd>return a matrix of centroids of an object</dd>
+        <dd>Return a matrix of centroids of an object</dd>
       </dl><dl><dt>
           
           <code><a href="concat-methods.html">concat()</a></code> 
@@ -1314,12 +1274,12 @@ Will test for match to header file only</dd>
           
           <code><a href="index_to_grid-methods.html">index_to_grid()</a></code> 
         </dt>
-        <dd>convert 1d indices to n-dimensional grid coordinates</dd>
+        <dd>Convert 1d indices to n-dimensional grid coordinates</dd>
       </dl><dl><dt>
           
           <code><a href="inverse_trans-methods.html">inverse_trans()</a></code> 
         </dt>
-        <dd>extract inverse image coordinate transformation</dd>
+        <dd>Extract inverse image coordinate transformation</dd>
       </dl><dl><dt>
           
           <code><a href="map-methods.html">mapf()</a></code> 
@@ -1364,12 +1324,12 @@ Will test for match to header file only</dd>
           
           <code><a href="read_columns-methods.html">read_columns()</a></code> 
         </dt>
-        <dd>read a set of column vector from an input source (e.g. <code>ColumnReader</code>)</dd>
+        <dd>Read a set of column vector from an input source (e.g. <code>ColumnReader</code>)</dd>
       </dl><dl><dt>
           
           <code><a href="read_elements-methods.html">read_elements()</a></code> 
         </dt>
-        <dd>read a sequence of elements from an input source</dd>
+        <dd>Read a sequence of elements from an input source</dd>
       </dl><dl><dt>
           
           <code><a href="read_meta_info-methods.html">read_meta_info()</a></code> 
@@ -1379,7 +1339,7 @@ Will test for match to header file only</dd>
           
           <code><a href="reorient-methods.html">reorient()</a></code> 
         </dt>
-        <dd>remap the grid-to-world coordinates mapping of an image.</dd>
+        <dd>Remap the grid-to-world coordinates mapping of an image.</dd>
       </dl><dl><dt>
           
           <code><a href="resample-NeuroVol-NeuroSpace-method.html">resample(<i>&lt;NeuroVol&gt;</i>,<i>&lt;NeuroSpace&gt;</i>)</a></code> 
@@ -1460,7 +1420,7 @@ That is, if the 4th dimension is 'time' each series is a 1D time series.</dd>
           
           <code><a href="trans-methods.html">trans()</a></code> 
         </dt>
-        <dd>extract image coordinate transformation</dd>
+        <dd>Extract image coordinate transformation</dd>
       </dl><dl><dt>
           
           <code><a href="values-methods.html">values()</a></code> 
@@ -1490,17 +1450,17 @@ That is, if the 4th dimension is 'time' each series is a 1D time series.</dd>
           
           <code><a href="write_elements-methods.html">write_elements()</a></code> 
         </dt>
-        <dd>write a sequence of elements from an input source</dd>
+        <dd>Write a sequence of elements from an input source</dd>
       </dl><dl><dt>
           
           <code><a href="write_vec-methods.html">write_vec()</a></code> 
         </dt>
-        <dd>write a 4d image vector to disk</dd>
+        <dd>Write a 4d image vector to disk</dd>
       </dl><dl><dt>
           
           <code><a href="write_vol-methods.html">write_vol()</a></code> 
         </dt>
-        <dd>write a 3d image volume to disk</dd>
+        <dd>Write a 3d image volume to disk</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>

@@ -40,9 +40,8 @@ This function summarizes subsets of a numeric matrix or matrix-like object by fi
 \details{
 If 'FUN' is supplied, it must take a vector and return a single scalar value. If it returns more than one value, an error will occur.
 
-If 'x' is a NeuroVec instance, voxels (dimensions 1:3) are treated as columns and time-series (dimension 4) as rows. The summary function is then applied to groups of voxels. However, if the goal is to apply a function to groups of time-points, this can be achieved as follows:
-
-\code{ split_reduce(t(as.matrix(bvec)), fac) }
+If 'x' is a NeuroVec instance, voxels (dimensions 1:3) are treated as columns and time-series (dimension 4) as rows.
+The summary function is then applied to groups of voxels. However, if the goal is to apply a function to groups of time-points.
 }
 \examples{
 mat = matrix(rnorm(100*100), 100, 100)
