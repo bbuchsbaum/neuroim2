@@ -149,7 +149,7 @@ setMethod(f="show", signature("NamedAxis"), function(object) { cat(print_(object
 #' print a \code{NamedAxis}
 #' @param x the object
 #' @param ... extra arguments
-#' @export
+#' @noRd
 setMethod(f="print_", signature=signature("NamedAxis"),
 		def=function(x, ...) {
 			x@axis
@@ -167,7 +167,7 @@ setMethod(f="show", signature=signature("AxisSet1D"),
 #' print a \code{AxisSet2D} instance
 #' @param x the object
 #' @param ... extra args
-#' @export
+#' @noRd
 setMethod(f="print_", signature=signature("AxisSet2D"),
 		def=function(x, ...) {
 			paste(x@i@axis, "-", x@j@axis)
@@ -186,7 +186,7 @@ setMethod(f="show", signature=signature("AxisSet2D"),
 #' print a \code{AxisSet3D} instance
 #' @param x the object
 #' @param ... extra args
-#' @export
+#' @noRd
 setMethod(f="print_", signature=signature("AxisSet3D"),
 		def=function(x, ...) {
 			paste(x@i@axis, " -- ", x@j@axis, " -- ", x@k@axis)

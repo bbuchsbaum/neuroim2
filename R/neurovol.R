@@ -300,8 +300,7 @@ setMethod(f="show", signature=signature("SparseNeuroVol"),
 
 
 #' load a NeuroVol
-#' @export load_data
-#' @rdname load_data-methods
+#' @noRd
 ## TODO reduce code duplication with load_data#NeuroVecSource
 setMethod(f="load_data", signature=c(x="NeuroVolSource"),
 		def=function(x) {
@@ -898,7 +897,7 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVol", mask="numeric"),
 
 
 
-#' @export
+
 #' @noRd
 setMethod(f="linear_access", signature=signature(x = "SparseNeuroVol", i = "numeric"),
           def=function (x, i) {

@@ -218,7 +218,7 @@ setClass("NeuroVolSource", representation(index="integer"), contains="FileSource
 
 #' NeuroVecSource
 #'
-#' A class that is used to produce a \code{\linkS4class{NeuroVec}} instance
+#' A class that is used to produce a \code{NeuroVec} instance
 #'
 #' @slot indices the index vector of the volumes to be loaded
 #' @keywords internal
@@ -228,7 +228,7 @@ setClass("NeuroVecSource", representation(indices="integer"), contains="FileSour
 
 #' H5NeuroVecSource
 #'
-#' A class that is used to produce a \code{\linkS4class{H5NeuroVecSource}} instance
+#' A class that is used to produce a \code{H5NeuroVecSource} instance
 #'
 #' @slot file_name the name of the hdf5 file.
 #' @keywords internal
@@ -238,7 +238,7 @@ setClass("H5NeuroVecSource", representation(file_name="character"))
 
 #' LatentNeuroVecSource
 #'
-#' A class that is used to produce a \code{\linkS4class{LatentNeuroVecSource}} instance
+#' A class that is used to produce a \code{LatentNeuroVecSource} instance
 #'
 #' @rdname LatentNeuroVecSource-class
 #' @slot file_name the name of the file.

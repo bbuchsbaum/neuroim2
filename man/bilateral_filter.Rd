@@ -28,6 +28,7 @@ The bilateral filter considers both spatial closeness and intensity similarity f
 brain_mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
 
 # Apply bilateral filtering to the brain volume
-filtered_vol <- bilateral_filter(brain_mask, brain_mask, spatial_sigma = 2, intensity_sigma = 25, window = 1)
+filtered_vol <- bilateral_filter(brain_mask, brain_mask, spatial_sigma = 2,
+intensity_sigma = 25, window = 1)
 
 }

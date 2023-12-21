@@ -11,13 +11,13 @@ NeuroVecSource(file_name, indices = NULL, mask = NULL)
 
 \item{indices}{the subset of integer volume indices to load -- if \code{NULL} then all volumes will be loaded}
 
-\item{mask}{image volume indicating the subset of voxels that will be loaded. If provided, function returns \code{\linkS4class{SparseNeuroVecSource}}}
+\item{mask}{image volume indicating the subset of voxels that will be loaded. If provided, function returns \code{SparseNeuroVecSource}}
 }
 \value{
-a instance deriving from \code{\linkS4class{NeuroVecSource}}
+a instance deriving from \code{NeuroVecSource}
 }
 \description{
-Construct a \code{\linkS4class{NeuroVecSource}} object
+Construct a \code{NeuroVecSource} object
 }
 \details{
 If a \code{mask} is supplied then it should be a \code{\linkS4class{LogicalNeuroVol}} or \code{\linkS4class{NeuroVol}} instance. If the latter, then the mask will be defined by nonzero elements of the volume.

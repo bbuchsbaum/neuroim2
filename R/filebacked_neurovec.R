@@ -49,8 +49,6 @@ setMethod(f="as.list", signature=signature(x = "FileBackedNeuroVec"), def=functi
 
 })
 
-
-#' @export
 #' @noRd
 setMethod(f="linear_access", signature=signature(x = "FileBackedNeuroVec", i = "numeric"),
           def=function (x, i) {

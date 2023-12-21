@@ -110,7 +110,7 @@ bootstrap_searchlight <- function(mask, radius=8, iter=100) {
   f <- function(i) spherical_roi(mask, grid[sample.idx[i],], radius, nonzero=TRUE)
 
   #dlis <- deferred_list(lapply(1:iter, function(i) f))
-  deferred_list2(f, iter)
+  deflist::deflist(f, iter)
 }
 
 #' Create an exhaustive searchlight iterator that only returns voxel coordinates
@@ -158,7 +158,7 @@ searchlight_coords <- function(mask, radius, nonzero=FALSE, cores=0) {
 
   #deferred_list(map(seq_along(rad$indices), ~ f))
   len <- nrow(cds)
-  deferred_list2(f, len)
+  deflist::deflist(f, len)
 
   #purrr::map(seq_along(rad$indices), function(i) {
   #    ind <- rad$indices[[i]]
@@ -202,7 +202,7 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
     force(radius)
     f <- function(i) { spherical_roi(mask, grid[i,], radius, nonzero=nonzero) }
     #deferred_list(lapply(1:nrow(grid), function(i) f))
-    deferred_list2(f, nrow(grid))
+    deflist::deflist(f, nrow(grid))
   } else {
     cds <- index_to_coord(mask, mask.idx)
 
@@ -282,6 +282,6 @@ clustered_searchlight <- function(mask, cvol=NULL, csize=NULL) {
   #dlis <- deferred_list(lapply(1:csize, function(i) f))
   #dlis
 
-  deferred_list2(f, csize)
+  deflist::deflist(f, csize)
 
 }

@@ -262,13 +262,13 @@ setMethod(f="vectors", signature=signature(x="SparseNeuroVec", subset="missing")
               ind <- indices(x)
               f <- function(i) series(x, ind[i])
               #lis <- lapply(seq_along(ind), function(i) f)
-              deferred_list2(f, length(ind))
+              deflist::deflist(f, length(ind))
             } else {
               ind <- 1:prod(dim(x)[1:3])
               vox <- index_to_grid(x, ind)
               f <- function(i) series(x, vox[i,1], vox[i,2], vox[i,3])
               #lis <- map(ind, function(i) f)
-              deferred_list2(f, length(ind))
+              deflist::deflist(f, length(ind))
             }
 
           })

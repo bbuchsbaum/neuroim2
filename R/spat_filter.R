@@ -115,7 +115,8 @@ guided_filter <- function(vol, radius=4, epsilon=.7^2) {
 #' brain_mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
 #'
 #' # Apply bilateral filtering to the brain volume
-#' filtered_vol <- bilateral_filter(brain_mask, brain_mask, spatial_sigma = 2, intensity_sigma = 25, window = 1)
+#' filtered_vol <- bilateral_filter(brain_mask, brain_mask, spatial_sigma = 2,
+#' intensity_sigma = 25, window = 1)
 #'
 #' @export
 bilateral_filter <- function(vol, mask, spatial_sigma=2, intensity_sigma=1, window=1) {

@@ -98,7 +98,7 @@ MetaInfo <- function(Dim, spacing, origin=rep(0, length(spacing)), data_type="FL
 #' @param nifti_header a \code{list} returned by \code{readNIftiHeader}
 #' @return an instance of class \code{\linkS4class{NIFTIMetaInfo}}
 #' @export NIFTIMetaInfo
-#' @rdname NIFTIMetaInfo-class
+#' @rdname FileMetaInfo-class
 NIFTIMetaInfo <- function(descriptor, nifti_header) {
 	stopifnot(!is.null(nifti_header$file_type) || (nifti_header$file_type == "NIFTI"))
 
@@ -148,12 +148,12 @@ setMethod(f="show", signature=signature("FileMetaInfo"),
 
 #' AFNIMetaInfo
 #'
-#' Constructor for \code{\linkS4class{AFNIMetaInfo}} class
-#' @param descriptor an instance of class \code{\linkS4class{AFNIFormat}}
+#' Constructor for \code{AFNIMetaInfo} class
+#' @param descriptor an instance of class \code{AFNIFormat}
 #' @param afni_header a \code{list} returned by \code{read_afni_header}
-#' @return an instance of class \code{\linkS4class{AFNIMetaInfo}}
+#' @return an instance of class \code{AFNIMetaInfo}
 #' @export AFNIMetaInfo
-#' @rdname AFNIMetaInfo-class
+#' @rdname FileMetaInfo-class
 AFNIMetaInfo <- function(descriptor, afni_header) {
 		.Dim <- afni_header$DATASET_DIMENSIONS$content[afni_header$DATASET_DIMENSIONS$content > 0]
 		if (afni_header$DATASET_RANK$content[2] > 1) {

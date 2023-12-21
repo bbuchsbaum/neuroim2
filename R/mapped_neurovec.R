@@ -27,8 +27,8 @@ MappedNeuroVec <- function(file_name) {
 }
 
 
-#' @export
-#' @rdname load_data-methods
+#' @keywords internal
+#' @noRd
 setMethod(f="load_data", signature=c(x="MappedNeuroVecSource"),
           def=function(x) {
             meta <- x@meta_info
@@ -43,7 +43,6 @@ setMethod(f="load_data", signature=c(x="MappedNeuroVecSource"),
           })
 
 
-#' @export
 #' @noRd
 setMethod(f="linear_access", signature=signature(x = "MappedNeuroVec", i = "numeric"),
           def=function (x, i) {

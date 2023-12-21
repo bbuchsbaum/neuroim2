@@ -474,7 +474,7 @@ setMethod("vectors", signature(x="ROIVec", subset="missing"),
             ind <- 1:nrow(x@coords)
             f <- function(i) x@.Data[,i]
             #lis <- map(ind, function(i) f)
-            deferred_list2(f, length(ind))
+            deflist::deflist(f, length(ind))
           })
 
 
@@ -485,7 +485,7 @@ setMethod("vectors", signature(x="matrix", subset="missing"),
             ind <- 1:ncol(x)
             f <- function(i) x[,i]
             #lis <- map(ind, function(i) f)
-            deferred_list2(f, length(ind))
+            deflist::deflist(f, length(ind))
           })
 
 #' @rdname vectors-methods
@@ -495,7 +495,7 @@ setMethod("vectors", signature(x="ROIVec", subset="integer"),
             ind <- (1:nrow(x@coords))[subset]
             f <- function(i) x@.Data[,ind[i]]
             #lis <- map(ind, function(i) f)
-            deferred_list2(f, length(ind))
+            deflist::deflist(f, length(ind))
           })
 
 #' @rdname vectors-methods
@@ -505,7 +505,7 @@ setMethod("vectors", signature(x="matrix", subset="integer"),
             ind <- (1:ncol(x))[subset]
             f <- function(i) x[,ind[i]]
             #lis <- map(ind, function(i) f)
-            deferred_list2(f, length(ind))
+            deflist::deflist(f, length(ind))
           })
 
 #' @rdname vectors-methods

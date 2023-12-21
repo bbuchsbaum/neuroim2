@@ -86,9 +86,9 @@ DenseNeuroVec <- function(data, space, label="") {
 
 #' load_data
 #'
-#' @return an instance of class \code{\linkS4class{NeuroVec}}
+#' @return an instance of class \code{NeuroVec}
 #' @importFrom RNifti readNifti
-#' @rdname load_data-methods
+#' @noRd
 setMethod(f="load_data", signature=c("NeuroVecSource"),
 		def=function(x) {
       #browser()
@@ -129,16 +129,15 @@ setMethod(f="load_data", signature=c("NeuroVecSource"),
       }
 })
 
-#' @export
-#' @rdname load_data-methods
+
+#' @noRd
 setMethod(f="load_data", signature=c("H5NeuroVecSource"),
           def=function(x) {
             H5NeuroVec(x@file_name)
           })
 
 
-#' @rdname load_data-methods
-#' @export
+#' @noRd
 setMethod(f="load_data", signature=c("LatentNeuroVecSource"),
           def=function(x) {
             h5obj <- hdf5r::H5File$new(x@file_name)
@@ -164,12 +163,12 @@ setMethod(f="load_data", signature=c("LatentNeuroVecSource"),
 
 #' NeuroVecSource
 #'
-#' Construct a \code{\linkS4class{NeuroVecSource}} object
+#' Construct a \code{NeuroVecSource} object
 #'
 #' @param file_name name of the 4-dimensional image file
 #' @param indices the subset of integer volume indices to load -- if \code{NULL} then all volumes will be loaded
-#' @param mask image volume indicating the subset of voxels that will be loaded. If provided, function returns \code{\linkS4class{SparseNeuroVecSource}}
-#' @return a instance deriving from \code{\linkS4class{NeuroVecSource}}
+#' @param mask image volume indicating the subset of voxels that will be loaded. If provided, function returns \code{SparseNeuroVecSource}
+#' @return a instance deriving from \code{NeuroVecSource}
 #'
 #' @details If a \code{mask} is supplied then it should be a \code{\linkS4class{LogicalNeuroVol}} or \code{\linkS4class{NeuroVol}} instance. If the latter, then the mask will be defined by nonzero elements of the volume.
 #'
@@ -1247,7 +1246,6 @@ setMethod(f="[[", signature=signature(x="NeuroVecSeq", i="numeric"),
             x@vecs[[bucket]][[bucket_elnum]]
           })
 
-#' @export
 #' @noRd
 setMethod(f="linear_access", signature=signature(x = "NeuroVecSeq", i = "numeric"),
           def = function (x, i) {
