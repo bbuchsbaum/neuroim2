@@ -27,8 +27,8 @@
 # }
 #
 #
-# #' @rdname series-methods
-# #' @export
+# # @rdname series-methods
+# # @export
 # setMethod("series", signature(x="NeuroHyperVec", i="matrix"),
 #           def=function(x,i) {
 #             out <- array(0, c(dim(x)[4], nrow(i), length(x@vecs)))

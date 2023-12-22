@@ -81,15 +81,4 @@ series(x, i, ...)
 Extract one or more series from object and return as ROI object
 
 Extract one or more series from object
-
-setMethod("series", signature(x="NeuroVec", i="integer"),
-          def=function(x, i, j, k) {
-            if (missing(j) && missing(k)) {
-              vdim <- dim(x)[1:3]
-              mat <- arrayInd(i, vdim)
-              apply(mat, 1, function(i) x[i[1], i[2], i[3],])
-            } else {
-              x[i,j,k,]
-            }
-          })
 }

@@ -895,16 +895,16 @@ setMethod(f="series", signature=signature(x="DenseNeuroVec", i="integer"),
 
 ## @rdname series-methods
 ## @export
-#' setMethod("series", signature(x="NeuroVec", i="integer"),
-#'           def=function(x, i, j, k) {
-#'             if (missing(j) && missing(k)) {
-#'               vdim <- dim(x)[1:3]
-#'               mat <- arrayInd(i, vdim)
-#'               apply(mat, 1, function(i) x[i[1], i[2], i[3],])
-#'             } else {
-#'               x[i,j,k,]
-#'             }
-#'           })
+# setMethod("series", signature(x="NeuroVec", i="integer"),
+#           def=function(x, i, j, k) {
+#             if (missing(j) && missing(k)) {
+#               vdim <- dim(x)[1:3]
+#               mat <- arrayInd(i, vdim)
+#             apply(mat, 1, function(i) x[i[1], i[2], i[3],])
+#             } else {
+#               x[i,j,k,]
+#             }
+#          })
 
 
 #' @export
@@ -1200,8 +1200,8 @@ setMethod("length", signature=c("NeuroVecSeq"),
 #           })
 #
 #
-# #' @rdname series-methods
-# #' @export
+## @rdname series-methods
+## @export
 # setMethod("series", signature(x="NeuroVecSeq", i="matrix"),
 #           def=function(x,i) {
 #             do.call(rbind, map(x@vecs, ~ series(., i)))
