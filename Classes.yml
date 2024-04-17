@@ -1,0 +1,283 @@
+NeuroSpace:
+  type: S4 class
+  description: Represents the geometry of a brain image
+  slots:
+    dim: integer vector (grid dimensions)
+    origin: numeric vector (spatial origin)
+    spacing: numeric vector (grid unit dimensions in mm)
+    axes: AxisSet (spatial axes in native grid space)
+    trans: matrix (affine transformation to real-world coordinates)
+    inverse: matrix (inverse transformation to grid coordinates)
+  validity: Checks length of dimensions, non-negative values in dim slot
+  usage: Store and manipulate geometric properties of a brain image
+NeuroObj:
+  type: S4 class
+  description: Base class for data objects with cartesian spatial representation
+  slots:
+    space: NeuroSpace (image geometry)
+
+NeuroSlice:
+  type: S4 class
+  description: A two-dimensional brain image
+  contains: ["array", "NeuroObj"]
+
+NeuroVol:
+  type: S4 class
+  description: Base class for 3D volumetric data representation
+  contains: "NeuroObj"
+
+DenseNeuroVol:
+  type: S4 class
+  description: Three-dimensional brain image backed by an array
+  contains: ["NeuroVol", "array"]
+
+SparseNeuroVol:
+  type: S4 class
+  description: 3D brain image with sparse data representation
+  slots:
+    data: sparseVector (Matrix package)
+  contains: ["NeuroVol", "ArrayLike3D"]
+
+LogicalNeuroVol:
+  type: S4 class
+  description: 3D brain image with boolean values
+  contains: ["DenseNeuroVol"]
+
+ClusteredNeuroVol:
+  type: S4 class
+  description: 3D brain image divided into disjoint partitions or clusters
+  slots:
+    mask: LogicalNeuroVol
+    clusters: integer vector
+    label_map: named list
+    cluster_map: environment
+  contains: ["SparseNeuroVol"]
+
+IndexLookupVol:
+  type: S4 class
+  description: 3D brain image mapping between 1D grid indices and a table of values
+  slots:
+    space: NeuroSpace
+    indices: integer vector
+    map: integer vector
+  contains: ["NeuroVol"]
+
+NeuroVec:
+  type: S4 class
+  description: Four-dimensional brain image for time series data
+  contains: "NeuroObj"
+
+NeuroHyperVec:
+  type: S4 class
+  description: Five-dimensional brain image
+  slots:
+    vecs: list
+  contains: "NeuroObj"
+  validity: Checks if all elements are of NeuroVec class and have matching dimensions
+
+DenseNeuroVec:
+  type: S4 class
+  description: Four-dimensional brain image backed by an array
+  contains: ["NeuroVec", "array"]
+  validity: Data must be a four-dimensional array
+SparseNeuroVec:
+  type: S4 class
+  description: Four-dimensional brain image with sparse data representation
+  contains: ["NeuroVec", "ArrayLike4D"]
+
+MappedNeuroVec:
+  type: class
+  description: Efficient 4D brain image backed by memory-mapped file
+  slots:
+    - filemap: mmap
+    - offset: integer
+
+AbstractSparseNeuroVec:
+  type: class
+  slots:
+    - mask: LogicalNeuroVol
+    - map: IndexLookupVol
+
+SparseNeuroVec:
+  type: class
+  description: Efficient sparse 4D brain image backed by matrix
+  slots:
+    - data: matrix
+
+BigNeuroVec:
+  type: class
+  description: Efficient sparse 4D brain image backed by disk-based big-matrix
+  slots:
+    - data: FBM
+
+FileBackedNeuroVec:
+  type: class
+  description: Efficient 4D brain image read into memory "on demand"
+  slots:
+    - meta: FileMetaInfo
+
+H5NeuroVol:
+  type: class
+  description: 3D brain image backed by HDF5 dataset
+  slots:
+    - h5obj: H5File
+
+H5NeuroVec:
+  type: class
+  description: 4D brain image backed by HDF5 file
+  slots:
+    - obj: H5File
+
+NeuroVecSeq:
+  type: class
+  description: Concatenated sequence of NeuroVec instances
+  slots:
+    - vecs: list
+    - lens: numeric
+
+LatentNeuroVec:
+  type: class
+  description: 4D array represented by basis functions and loadings
+  slots:
+    - basis: Matrix
+    - loadings: Matrix
+    - offset: numeric
+
+ROI:
+  type: class
+  contains: VIRTUAL
+ROICoords:
+  type: class
+  slots:
+    space: NeuroSpace
+    coords: matrix
+  contains: ROI
+ROIVol:
+  type: class
+  slots:
+    coords: matrix
+    .Data: numeric
+  contains: ROICoords, numeric
+ROIVolWindow:
+  type: class
+  slots:
+    parent_index: integer
+    center_index: integer
+    coords: matrix
+    .Data: numeric
+  contains: ROIVol
+ROIVec:
+  type: class
+  slots:
+    coords: matrix
+    .Data: matrix
+  contains: ROICoords, matrix
+ROIVecWindow:
+  type: class
+  slots:
+    parent_index: integer
+    center_index: integer
+    coords: matrix
+    .Data: matrix
+  contains: ROIVec
+Kernel:
+  type: class
+  slots:
+    width: numeric
+    weights: numeric
+    voxels: matrix
+    coords: matrix
+NeuroBucket:
+  type: class
+  slots:
+    labels: character
+    data: list
+  contains: NeuroVec
+ColumnReader:
+  type: class
+  slots:
+    nrow: integer
+    ncol: integer
+    reader: function
+
+
+NS: NeuroSpace
+NO: NeuroObj
+NOS: NeuroSlice
+NV: NeuroVol
+NVD: DenseNeuroVol
+S: SparseNeuroVol
+L: LogicalNeuroVol
+C: ClusteredNeuroVol
+ILV: IndexLookupVol
+NVs: NeuroVec
+NHV: NeuroHyperVec
+DenseVsSparse: DenseNeuroVec
+S: SparseNeuroVec
+MappedVsSparseVsBig: MappedNeuroVec
+S: SparseNeuroVec
+B: BigNeuroVec
+FileBackedVsH5: FileBackedNeuroVec
+FB: FileBackedNeuroVec
+H5NV: H5NeuroVec
+H5NV: H5NeuroVol
+NVS: NeuroVecSeq
+LN: LatentNeuroVec
+ROI: ROI
+ROIC: ROICoords
+R: ROIVol
+RV: ROIVec
+K: Kernel
+NB: NeuroBucket
+CR: ColumnReader
+
+Abbreviations:
+t: type
+d: description
+s: slots
+c: contains
+v: validity
+iv: integer vector
+nv: numeric vector
+AS: AxisSet
+m: matrix
+e: environment
+sV: sparseVector
+AL3D: ArrayLike3D
+AL4D: ArrayLike4D
+l: list
+nl: named list
+i: integer
+M: Matrix
+FBM: FBM
+FMI: FileMetaInfo
+H5F: H5File
+n: numeric
+c: character
+f: function
+
+
+NS: {t: S4, d: Geometry of a brain image, s: {dim: iv, origin: nv, spacing: nv, axes: AS, trans: m, inverse: m}, v: Checks dim slot}
+NO: {t: S4, d: Base class with cartesian spatial representation, s: {space: NS}}
+NOS: [NSl: {t: S4, d: 2D brain image, c: ["array", "NO"]}, NV: {t: S4, d: Base class for 3D volumetric data, c: "NO"}]
+NVD: [D: {t: S4, d: 3D brain image with dense data, c: ["NV", "array"]}, S: {t: S4, d: 3D brain image with sparse data, s: {data: sV}, c: ["NV", "AL3D"]}, L: {t: S4, d: 3D brain image with boolean values, c: ["D"]}]
+C: {t: S4, d: 3D brain image with clusters, s: {mask: L, clusters: iv, label_map: nl, cluster_map: e}, c: ["S"]}
+ILV: {t: S4, d: 3D brain image with index lookup, s: {space: NS, indices: iv, map: iv}, c: ["NV"]}
+NVs: [NV: {t: S4, d: 4D brain image for time series data, c: "NO"}, NHV: {t: S4, d: 5D brain image, s: {vecs: l}, c: "NO", v: Checks matching dimensions}]
+DenseVsSparse: [D: {t: S4, d: 4D brain image with dense data, c: ["NV", "array"], v: Data must be 4D array}, S: {t: S4, d: 4D brain image with sparse data, c: ["NV", "AL4D"]}]
+MappedVsSparseVsBig: [M: {t: class, d: Efficient 4D brain image with memory-mapped file, s: {filemap: mmap, offset: i}}, S: {t: class, d: Efficient sparse 4D brain image backed by matrix, s: {data: m}}, B: {t: class, d: Efficient sparse 4D brain image backed by big-matrix, s: {data: FBM}}]
+FileBackedVsH5: [FB: {t: class, d: Efficient 4D brain image on demand, s: {meta: FMI}}, H5NV: {t: class, d: 4D brain image backed by HDF5 file, s: {obj: H5F}}]
+H5NV: {t: class, d: 3D brain image backed by HDF5 dataset, s: {h5obj: H5F}}
+NVS: {t: class, d: Concatenated sequence of NeuroVec instances, s: {vecs: l, lens: n}}
+LN: {t: class, d: 4D array with basis functions and loadings, s: {basis: M, loadings: M, offset: n}}
+ROI: {t: class, c: VIRTUAL}
+ROIC: {t: class, s: {space: NS, coords: m}, c: ROI}
+R: [V: {t: class,R: [V: {t: class, s: {coords: m, .Data: n}, c: [ROIC, numeric]}, VW: {t: class, s: {parent_index: i, center_index: i, coords: m, .Data: n}, c: ROIV}]
+RV: [V: {t: class, s: {coords: m, .Data: m}, c: [ROIC, matrix]}, VW: {t: class, s: {parent_index: i, center_index: i, coords: m, .Data: m}, c: ROIV}]
+K: {t: class, s: {width: n, weights: n, voxels: m, coords: m}}
+NB: {t: class, s: {labels: c, data: l}, c: NeuroVec}
+CR: {t: class, s: {nrow: i, ncol: i, reader: f}}
+
+
+
+

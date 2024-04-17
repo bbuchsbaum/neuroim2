@@ -29,7 +29,6 @@ Collate:
     'clustervol.R'
     'common.R'
     'conncomp.R'
-    'datadoc.R'
     'file_format.R'
     'filebacked_neurovec.R'
     'h5_io.R'
@@ -52,7 +51,7 @@ Collate:
     'searchlight.R'
     'sparse_neurovec.R'
     'spat_filter.R'
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Imports: 
   purrr,
   assertthat,

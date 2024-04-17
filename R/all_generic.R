@@ -100,7 +100,7 @@ setGeneric(name="matricized_access", def=function(x, i, ...) standardGeneric("ma
 #' @param x a data source.
 #' @param ... additional arguments to be passed to methods.
 #' @keywords internal
-#' @noRd
+#' @export
 setGeneric(name="load_data", def=function(x, ...) standardGeneric("load_data"))
 
 #' Apply a function to an object.

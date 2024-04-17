@@ -12,15 +12,15 @@
 \usage{
 split_reduce(x, fac, FUN)
 
-\S4method{split_reduce}{matrix,integer,`function`}(x, fac, FUN)
+\S4method{split_reduce}{matrix,integer,function}(x, fac, FUN)
 
 \S4method{split_reduce}{matrix,integer,missing}(x, fac)
 
 \S4method{split_reduce}{matrix,factor,missing}(x, fac)
 
-\S4method{split_reduce}{matrix,factor,`function`}(x, fac, FUN)
+\S4method{split_reduce}{matrix,factor,function}(x, fac, FUN)
 
-\S4method{split_reduce}{NeuroVec,factor,`function`}(x, fac, FUN)
+\S4method{split_reduce}{NeuroVec,factor,function}(x, fac, FUN)
 
 \S4method{split_reduce}{NeuroVec,factor,missing}(x, fac, FUN)
 }

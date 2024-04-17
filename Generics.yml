@@ -1,0 +1,286 @@
+- resample:
+    desc: Resample an Image to Match the Space of Another Image
+    params: [source, target, ...]
+
+- slices:
+    desc: Extract an ordered series of 2D slices from a 3D or 4D object
+    params: [x, ...]
+    return: A list of 2D matrices, each containing a slice from the input object
+
+- ndim:
+    desc: Extract the number of dimensions of an object
+    params: [x, ...]
+    return: The number of dimensions of the input object `x`
+
+- dim_of:
+    desc: Get the length of a given dimension of an object
+    params: [x, axis]
+    return: An integer representing the length of the specified axis
+
+- which_dim:
+    desc: Find Dimensions of a Given Axis
+    params: [x, axis]
+    return: An integer representing the dimension of the specified axis for the given object
+
+- add_dim:
+    desc: Add a Dimension to an Object
+    params: [x, n]
+    return: An updated dimensioned object with the new dimension added
+
+- drop_dim:
+    desc: Drop a Dimension from an Object
+    params: [x, dimnum]
+    return: An updated dimensioned object with the specified dimension removed
+
+- space:
+    desc: Extract Geometric Properties of an Image
+    params: [x, ...]
+    return: An object representing the geometric space of the image, of type NeuroSpace
+
+- split_fill:
+    desc: Fill Disjoint Sets of Values with the Output of a Function
+    params: [x, fac, FUN]
+    return: A new object in which the original values have been replaced by the output of the function
+
+- map_values:
+    desc: Maps values from one set to another using a user-supplied lookup table
+    params: [x, lookup]
+
+- split_scale:
+    desc: Centers and/or scales the row-subsets of a numeric matrix or matrix-like object
+    params: [x, f, center, scale]
+
+- split_reduce:
+    desc: Summarizes subsets of a numeric matrix or matrix-like object by first splitting the object by row and then applying a summary function
+    params: [x, fac, FUN]
+
+- spacing:
+    desc: Extracts the voxel dimensions of an image
+    params: [x]
+
+- bounds:
+    desc: Extracts the spatial bounds (origin + dim * spacing) of an image represented by the input object
+    params: [x]
+
+- axes:
+    desc: Extracts image axes
+    params: [x]
+
+- origin:
+    desc: Extracts image origin
+    params: [x]
+
+- centroid:
+    desc: Returns the centroid of an object
+    params: [x, ...]
+
+- centroids:
+    desc: Returns a matrix of centroids of an object
+    params: [x, ...]
+
+- trans:
+    desc: Extracts image coordinate transformation
+    params: [x]
+
+- inverse_trans:
+    desc: Extracts inverse image coordinate transformation
+    params: [x]
+
+- read_elements:
+    desc: Read a sequence of elements from an input source
+    params: [x, num_elements]
+    return: Elements as a vector
+
+- read_columns:
+    desc: Read a set of column vector from an input source
+    params: [x, column_indices]
+    return: Matrix consisting of the requested column vectors
+
+- write_elements:
+    desc: Write a sequence of elements from an input source
+    params: [x, els]
+
+- write_vol:
+    desc: Write a 3D image volume to disk
+    params: [x, file_name, format, data_type]
+    details: Output format will be inferred from file extension
+
+- write_vec:
+    desc: Write a 4D image vector to disk
+    params: [x, file_name, format, data_type, extra_args]
+
+- reorient:
+    desc: Remap the grid-to-world coordinates mapping of an image
+    params: [x, orient]
+    return: Reoriented space
+
+- index_to_grid:
+    desc: Convert 1D indices to n-dimensional grid coordinates
+    params: [x, idx]
+    return: Matrix of grid coordinates
+
+- index_to_coord:
+    desc: Convert 1D indices to n-dimensional real world coordinates
+    params: [x, idx]
+    return: Matrix of real coordinates
+
+- coord_to_index:
+    desc: Convert n-dimensional real world coordinates to 1D indices
+    params: [x, coords]
+    return: Vector of indices
+
+- coord_to_grid:
+    desc: Convert n-dimensional real world coordinates to grid coordinates
+    params: [x, coords]
+    return: Matrix of grid coordinates
+
+- grid_to_coord:
+    desc: Convert N-dimensional grid coordinate coordinates to real world coordinates
+    params: [x, coords]
+    return: Matrix of real coordinates
+
+- grid_to_grid:
+    desc: Convert voxel coordinates in the reference space (LPI) to native array space
+    params: [x, vox]
+    return: Matrix of native voxel coordinates
+
+- grid_to_index:
+    desc: Convert N-dimensional grid coordinate to 1D indices
+    params: [x, coords]
+    return: Vector of indices
+
+- sub_vector:
+    desc: Extract a sub-vector from a NeuroVec object
+    params: [x, i, extra_args]
+    return: NeuroVec object that is a sub-sequence of the supplied object
+
+- scale_series:
+    desc: Scale (center and/or normalize by standard deviation) each series of a 4D image
+    params: [x, center, scale]
+
+- as.sparse:
+    desc: Convert to from dense to sparse representation
+    params:
+
+- slice:
+    desc: Extract a 2D slice from an image volume
+    params: [x, zlevel, along, orientation, ...]
+
+- render:
+    desc: Map an image intensities to an image with color values
+    params: [x, width, height, colmap, ...]
+
+- render_slice:
+    desc: Render a slice at z coordinate
+    params: [x, zpos, width, height, colmap, ...]
+
+- perm_mat:
+    desc: Extract permutation matrix associated with an image
+    return: an N x N permutation matrix, where N is the dimensionality of the image
+    params: [x, ...]
+
+- concat:
+    desc: Concatenate two objects in the time dimension
+    return: a temporally concatenated object
+    params: [x, y, ...]
+
+- conn_comp:
+    desc: Find connected components in an image
+    params: [x, ...]
+- voxels:
+    desc: Extract voxel coordinates
+    params: [x, ...]
+- file_matches:
+    desc: Test whether a file name conforms to the given FileFormat instance
+    return: TRUE for match, FALSE otherwise
+    params: [x, file_name]
+- header_file_matches:
+    desc: Test whether a file name conforms to the given FileFormat instance (header file only)
+
+- header_file_matches:
+    desc: Test whether a file name conforms to the given FileFormat instance (header file only)
+    return: TRUE for match, FALSE otherwise
+    params: [x, file_name]
+
+- data_file_matches:
+    desc: Test whether a file name conforms to the given FileFormat instance (data file only)
+    return: TRUE for match, FALSE otherwise
+    params: [x, file_name]
+
+- header_file:
+    desc: Get the name of the header file, given a file name and a FileFormat instance
+    return: the correct header name
+    params: [x, file_name]
+
+- data_file:
+    desc: Get the name of the data file, given a file name and a FileFormat instance
+    return: the correct header name
+    params: [x, file_name]
+
+- strip_extension:
+    desc: Strip extension from file name, given a FileFormat instance
+    return: file_name without extension
+    params: [x, file_name]
+
+- read_meta_info:
+    desc: Read image meta info given a file and a FileFormat instance
+    params: [x, file_name]
+
+- embed_kernel:
+    desc: Position kernel in a position in image space
+    params: [x, sp, center_voxel, ...]
+
+
+- resample: [source, target]
+- slices: [x]
+- ndim: [x]
+- dim_of: [x, axis]
+- which_dim: [x, axis]
+- add_dim: [x, n]
+- drop_dim: [x, dimnum]
+- space: [x]
+- split_fill: [x, fac, FUN]
+- map_values: [x, lookup]
+- split_scale: [x, f, center, scale]
+- split_reduce: [x, fac, FUN]
+- spacing: [x]
+- bounds: [x]
+- axes: [x]
+- origin: [x]
+- centroid: [x]
+- centroids: [x]
+- trans: [x]
+- inverse_trans: [x]
+- read_elements: [x, num_elements]
+- read_columns: [x, column_indices]
+- write_elements: [x, els]
+- write_vol: [x, file_name, format, data_type]
+- write_vec: [x, file_name, format, data_type, extra_args]
+- reorient: [x, orient]
+- index_to_grid: [x, idx]
+- index_to_coord: [x, idx]
+- coord_to_index: [x, coords]
+- coord_to_grid: [x, coords]
+- grid_to_coord: [x, coords]
+- grid_to_grid: [x, vox]
+- grid_to_index: [x, coords]
+- sub_vector: [x, i, extra_args]
+- scale_series: [x, center, scale]
+- as_sparse: []
+- slice: [x, zlevel, along, orientation]
+- render: [x, width, height, colmap]
+- render_slice: [x, zpos, width, height, colmap]
+- perm_mat: [x]
+- concat: [x, y]
+- conn_comp: [x]
+- voxels: [x]
+- file_matches: [x, file_name]
+- header_file_matches: [x, file_name]
+- data_file_matches: [x, file_name]
+- header_file: [x, file_name]
+- data_file: [x, file_name]
+- strip_extension: [x, file_name]
+- read_meta_info: [x, file_name]
+- embed_kernel: [x, sp, center_voxel]
+
+

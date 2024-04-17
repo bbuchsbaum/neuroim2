@@ -2,6 +2,7 @@
 % Please edit documentation in R/neuroim.R
 \docType{package}
 \name{neuroim2}
+\alias{neuroim2-package}
 \alias{neuroim2}
 \title{neuroim2}
 \description{
@@ -9,4 +10,17 @@ Data structures for neuroimaging data.
 }
 \details{
 none
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/bbuchsbaum/neuroim2}
+  \item \url{https://bbuchsbaum.github.io/neuroim2/}
+  \item Report bugs at \url{https://github.com/bbuchsbaum/neuroim2/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Bradley R Buchsbaum \email{brad.buchsbaum@gmail.com} [copyright holder]
+
 }

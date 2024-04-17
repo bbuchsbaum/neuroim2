@@ -7,7 +7,7 @@
 \usage{
 split_fill(x, fac, FUN)
 
-\S4method{split_fill}{NeuroVol,factor,`function`}(x, fac, FUN)
+\S4method{split_fill}{NeuroVol,factor,function}(x, fac, FUN)
 }
 \arguments{
 \item{x}{The object to split.}
