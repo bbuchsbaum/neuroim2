@@ -201,28 +201,34 @@ setMethod(f="Arith", signature=signature(e1="SparseNeuroVol", e2="NeuroVol"),
 #' The input SparseNeuroVec objects must have the same dimensions.
 #' The method performs the arithmetic operation on the non-zero values of the SparseNeuroVec objects.
 #' The result is returned as a new SparseNeuroVec object.
+#' @export
+#' @rdname Arith-methods
+#' @param e1 A SparseNeuroVec object.
+#' @param e2 A SparseNeuroVec object.
+#' @return A SparseNeuroVec object representing the result of the arithmetic operation.
+#' @description Perform an arithmetic operation between two SparseNeuroVec objects.
+#' The input SparseNeuroVec objects must have the same dimensions.
+#' The method performs the arithmetic operation on the non-zero values of the SparseNeuroVec objects.
+#' The result is returned as a new SparseNeuroVec object.
 setMethod(f="Arith", signature=signature(e1="SparseNeuroVec", e2="SparseNeuroVec"),
           def=function(e1, e2) {
-				    D4 <- dim(e1)[4]
-				    vols <- list()
-				    ind <- list()
+            checkDim(e1, e2)
+            D4 <- dim(e1)[4]
+            vols <- list()
+            ind <- list()
 
-				    for (i in 1:D4) {
-					    vols[[i]] <- callGeneric(e1[[i]], e2[[i]])
-					    ind[[i]] <- vols[[i]]@data@i
-				    }
+            for (i in 1:D4) {
+              vols[[i]] <- callGeneric(e1[[i]], e2[[i]])
+              ind[[i]] <- vols[[i]]@indices
+            }
 
-				    ind <- sort(unique(unlist(ind)))
-				    vret <- do.call(rbind, lapply(vols, function(vol) as.numeric(vol[ind])))
+            ind <- sort(unique(unlist(ind)))
+            vret <- do.call(rbind, lapply(vols, function(vol) as.numeric(vol[ind])))
 
-				    dspace <- add_dim(space(vols[[1]]), length(vols))
-				    m <- logical(prod(dim(space(vols[[1]]))))
-				    m[ind] <- TRUE
-				    mask <- LogicalNeuroVol(m, space(vols[[1]]))
-				    SparseNeuroVec(vret, dspace, mask=mask)
-
-          }
-)
+            dspace <- add_dim(space(vols[[1]]), length(vols))
+            mask <- which(vret != 0)
+            SparseNeuroVec(vret[mask], dspace, indices=ind[mask])
+          })
 
 #' @export
 #' @rdname Arith-methods
@@ -320,3 +326,48 @@ setMethod(f="Summary", signature=signature(x="SparseNeuroVol", na.rm="ANY"),
 
 #setMethod("sum", signature()
 
+#' Compare two NeuroVec objects
+#'
+#' This method compares two NeuroVec objects (\code{e1} and \code{e2}) using a generic comparison function.
+#' The dimensions of both objects are checked for compatibility before performing the comparison.
+#'
+#' @param e1 A NeuroVec object to be compared.
+#' @param e2 A NeuroVec object to be compared.
+#' @return The result of the comparison between \code{e1} and \code{e2}.
+#' @rdname Compare-methods
+#' @export
+setMethod(f="Compare", signature=signature(e1="NeuroVec", e2="NeuroVec"),
+          def=function(e1, e2) {
+            checkDim(e1,e2)
+            callGeneric(e1@.Data, e2@.Data)
+          })
+#' @export
+#' @rdname Arith-methods
+#' @param e1 A NeuroVol object.
+#' @param e2 A SparseNeuroVol object.
+#' @return A DenseNeuroVol object representing the result of the arithmetic operation.
+#' @description Perform an arithmetic operation between a NeuroVol object and a SparseNeuroVol object.
+#' The input NeuroVol and SparseNeuroVol objects must have the same dimensions.
+#' The method performs the arithmetic operation on the values of the NeuroVol and the non-zero values
+#' of the SparseNeuroVol. The result is returned as a new DenseNeuroVol object.
+setMethod(f="Arith", signature=signature(e1="NeuroVol", e2="SparseNeuroVol"),
+          def=function(e1, e2) {
+            checkDim(e1,e2)
+            ret <- callGeneric(as.vector(e1@.Data), as.vector(e2@data))
+            DenseNeuroVol(ret, space(e1))
+          })
+#' Summary of DenseNeuroVol
+#'
+#' This function computes a summary of a DenseNeuroVol object.
+#'
+#' @param x A DenseNeuroVol object.
+#' @param ... Additional arguments (currently ignored).
+#' @param na.rm A logical value indicating whether NA values should be removed before computation.
+#'
+#' @return A summary of the input DenseNeuroVol object.
+#'
+#' @export
+setMethod(f="Summary", signature=signature(x="DenseNeuroVol", na.rm="ANY"),
+    def=function(x, ..., na.rm) {
+      callGeneric(x@.Data, ..., na.rm=na.rm)
+    })
