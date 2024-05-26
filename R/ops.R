@@ -192,6 +192,25 @@ setMethod(f="Arith", signature=signature(e1="SparseNeuroVol", e2="NeuroVol"),
 
 
 
+
+#' @export
+#' @rdname Arith-methods
+#' @param e1 A NeuroVol object.
+#' @param e2 A SparseNeuroVol object.
+#' @return A DenseNeuroVol object representing the result of the arithmetic operation.
+#' @description Perform an arithmetic operation between a NeuroVol object and a SparseNeuroVol object.
+#' The input NeuroVol and SparseNeuroVol objects must have the same dimensions.
+#' The method performs the arithmetic operation on the values of the NeuroVol and the non-zero values
+#' of the SparseNeuroVol. The result is returned as a new DenseNeuroVol object.
+setMethod(f="Arith", signature=signature(e1="NeuroVol", e2="SparseNeuroVol"),
+            def=function(e1, e2) {
+              checkDim(e1,e2)
+              ret <- callGeneric(as.vector(e1@.Data), as.vector(e2@data))
+              DenseNeuroVol(ret, space(e1))
+      })
+
+
+
 #' @export
 #' @rdname Arith-methods
 #' @param e1 A SparseNeuroVec object.
