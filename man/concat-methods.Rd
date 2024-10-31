@@ -35,20 +35,25 @@ concat(x, y, ...)
 \S4method{concat}{SparseNeuroVec,SparseNeuroVec}(x, y, ...)
 }
 \arguments{
-\item{x}{the first object, typically \code{NeuroVol} or \code{NeuroVec}}
+\item{x}{A LatentNeuroVec object.}
 
-\item{y}{the second object, typically \code{NeuroVol} or \code{NeuroVec}}
+\item{y}{Another LatentNeuroVec object.}
 
-\item{...}{additional objects}
+\item{...}{Additional LatentNeuroVec objects to concatenate.}
 }
 \value{
 a temporally concatenated object.
+
+A \code{\linkS4class{NeuroVecSeq}} object representing the concatenated vectors.
 }
 \description{
-Concatenate two objects in the time dimension
+This method concatenates two or more LatentNeuroVec objects.
 }
 \details{
 The \code{x} and \code{y} images must have compatible dimensions. a \code{NeuroVol} can be concatenated to \code{NeuroVec}, and vice versa. See examples.
+
+This method creates a NeuroVecSeq object from the input LatentNeuroVec objects, 
+effectively concatenating them along the 4th dimension.
 }
 \note{
 dimensions of x and y must be equal
@@ -67,4 +72,12 @@ dim(bv4)[4] == 3
 bv6 <- concat(bv4,bv5)
 dim(bv6)[4] == 6
 
+\dontrun{
+# Assuming 'svec1' and 'svec2' are previously created LatentNeuroVec objects
+concatenated <- concat(svec1, svec2)
+}
+
+}
+\seealso{
+\code{\link{LatentNeuroVec-class}}, \code{\link{NeuroVecSeq-class}}
 }

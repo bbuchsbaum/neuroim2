@@ -22,19 +22,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// local_sphere
-NumericMatrix local_sphere(int vx, int vy, int vz, double radius, NumericVector spacing, IntegerVector dim);
-RcppExport SEXP _neuroim2_local_sphere(SEXP vxSEXP, SEXP vySEXP, SEXP vzSEXP, SEXP radiusSEXP, SEXP spacingSEXP, SEXP dimSEXP) {
+// local_spheres
+List local_spheres(NumericMatrix centers, double radius, NumericVector spacing, IntegerVector dim);
+RcppExport SEXP _neuroim2_local_spheres(SEXP centersSEXP, SEXP radiusSEXP, SEXP spacingSEXP, SEXP dimSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type vx(vxSEXP);
-    Rcpp::traits::input_parameter< int >::type vy(vySEXP);
-    Rcpp::traits::input_parameter< int >::type vz(vzSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type centers(centersSEXP);
     Rcpp::traits::input_parameter< double >::type radius(radiusSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type spacing(spacingSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type dim(dimSEXP);
-    rcpp_result_gen = Rcpp::wrap(local_sphere(vx, vy, vz, radius, spacing, dim));
+    rcpp_result_gen = Rcpp::wrap(local_spheres(centers, radius, spacing, dim));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -221,6 +219,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// local_sphere
+NumericMatrix local_sphere(int vx, int vy, int vz, double radius, NumericVector spacing, IntegerVector dim);
+RcppExport SEXP _neuroim2_local_sphere(SEXP vxSEXP, SEXP vySEXP, SEXP vzSEXP, SEXP radiusSEXP, SEXP spacingSEXP, SEXP dimSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type vx(vxSEXP);
+    Rcpp::traits::input_parameter< int >::type vy(vySEXP);
+    Rcpp::traits::input_parameter< int >::type vz(vzSEXP);
+    Rcpp::traits::input_parameter< double >::type radius(radiusSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type spacing(spacingSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type dim(dimSEXP);
+    rcpp_result_gen = Rcpp::wrap(local_sphere(vx, vy, vz, radius, spacing, dim));
+    return rcpp_result_gen;
+END_RCPP
+}
 // kernel_filt_3d_cpp
 NumericMatrix kernel_filt_3d_cpp(NumericMatrix data, NumericMatrix kernel);
 RcppExport SEXP _neuroim2_kernel_filt_3d_cpp(SEXP dataSEXP, SEXP kernelSEXP) {
@@ -236,7 +250,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_neuroim2_indexToGridCpp", (DL_FUNC) &_neuroim2_indexToGridCpp, 2},
-    {"_neuroim2_local_sphere", (DL_FUNC) &_neuroim2_local_sphere, 6},
+    {"_neuroim2_local_spheres", (DL_FUNC) &_neuroim2_local_spheres, 4},
     {"_neuroim2_box_nbhd", (DL_FUNC) &_neuroim2_box_nbhd, 8},
     {"_neuroim2_box_blur", (DL_FUNC) &_neuroim2_box_blur, 3},
     {"_neuroim2_gaussian_weights", (DL_FUNC) &_neuroim2_gaussian_weights, 3},
@@ -250,6 +264,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_neuroim2_exgridToIndex4DCpp", (DL_FUNC) &_neuroim2_exgridToIndex4DCpp, 5},
     {"_neuroim2_gridToIndexCpp", (DL_FUNC) &_neuroim2_gridToIndexCpp, 2},
     {"_neuroim2_gridToIndex3DCpp", (DL_FUNC) &_neuroim2_gridToIndex3DCpp, 2},
+    {"_neuroim2_local_sphere", (DL_FUNC) &_neuroim2_local_sphere, 6},
     {"_neuroim2_kernel_filt_3d_cpp", (DL_FUNC) &_neuroim2_kernel_filt_3d_cpp, 2},
     {NULL, NULL, 0}
 };

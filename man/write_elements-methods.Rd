@@ -10,12 +10,10 @@ write_elements(x, els)
 \S4method{write_elements}{BinaryWriter,numeric}(x, els)
 }
 \arguments{
-\item{x}{the output channel}
+\item{x}{A BinaryWriter object.}
 
-\item{els}{the elements to write}
+\item{els}{A numeric vector of elements to write.}
 }
 \description{
-Write a sequence of elements from an input source
-
-write_elements
+This method writes elements to a BinaryWriter object.
 }

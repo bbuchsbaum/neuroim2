@@ -15,38 +15,68 @@ IndexLookupVol(space, indices)
 }
 \value{
 An object of class \code{\linkS4class{IndexLookupVol}} representing the index lookup volume.
-
-An object of class \code{\linkS4class{IndexLookupVol}} representing the index lookup volume.
 }
 \description{
-A three-dimensional brain image class that serves as a map between 1D grid indices and a table of values.
-It is primarily used in the \code{\linkS4class{SparseNeuroVec}} class.
+A three-dimensional brain image class that serves as a map between 1D grid indices
+and a table of values. This class is primarily used in conjunction with the
+\code{\linkS4class{SparseNeuroVec}} class to efficiently represent and access
+sparse neuroimaging data.
+
+This function creates an IndexLookupVol object, which represents a lookup volume
+for efficient indexing of voxels in a 3D brain image space.
+}
+\details{
+The IndexLookupVol class extends \code{\linkS4class{NeuroVol}} and provides a
+mechanism for efficient lookup and mapping of sparse 3D neuroimaging data. It
+stores only the indices of non-zero voxels and their corresponding mappings,
+allowing for memory-efficient representation of large, sparse brain images.
 }
 \section{Slots}{
 
 \describe{
-  \item{\code{space}:}{A \code{\linkS4class{NeuroSpace}} object representing the 3D space of the brain image.}
-  \item{\code{indices}:}{An integer vector containing the 1D indices of the voxels in the grid.}
-  \item{\code{map}:}{An integer vector containing the mapping between the 1D indices and the table of values.}
-}
+\item{\code{space}}{A \code{\linkS4class{NeuroSpace}} object representing the 3D space of the brain image.}
+
+\item{\code{indices}}{An integer vector containing the 1D indices of the non-zero voxels in the grid.}
+
+\item{\code{map}}{An integer vector containing the mapping between the 1D indices and the table of values.}
+}}
+
+\section{Methods}{
+
+This class inherits methods from \code{\linkS4class{NeuroVol}}. Additional
+methods specific to index lookup and mapping operations may be available.
 }
 
 \examples{
 # Create a NeuroSpace object
-space <- NeuroSpace(c(2, 2, 2, 10), c(1, 1, 1))
+space <- NeuroSpace(dim = c(2L, 2L, 2L), origin = c(0, 0, 0), spacing = c(1, 1, 1))
 
 # Create a 3D mask
-mask <- array(rnorm(2 * 2 * 2) > -100, c(2, 2, 2))
+mask <- array(c(TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, FALSE, TRUE), dim = c(2, 2, 2))
 
 # Create indices and map for the IndexLookupVol
 indices <- which(mask)
 map <- seq_along(indices)
 
 # Create an IndexLookupVol object
-ilv <- new("IndexLookupVol", space=space, indices=as.integer(indices))
+ilv <- new("IndexLookupVol", space = space, indices = as.integer(indices), map = map)
+
+# Access the indices
+print(ilv@indices)
+
+# Access the map
+print(ilv@map)
+
+\dontrun{
+space <- NeuroSpace(c(64, 64, 64), c(1, 1, 1), c(0, 0, 0))
+indices <- sample(1:262144, 10000)  # Random selection of 10000 voxels
+ilv <- IndexLookupVol(space, indices)
+}
+
 }
 \seealso{
-\code{\linkS4class{SparseNeuroVec}}
+\code{\link{SparseNeuroVec-class}} for the primary class that utilizes IndexLookupVol.
+\code{\link{NeuroVol-class}} for the base volumetric image class.
 
-\code{\linkS4class{IndexLookupVol}}
+\code{\linkS4class{IndexLookupVol}}, \code{\linkS4class{NeuroSpace}}
 }

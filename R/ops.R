@@ -88,7 +88,8 @@ setMethod(f="Arith", signature=signature(e1="ROIVol", e2="ROIVol"),
             v2[indices %in% idx2] <- e2@.Data
             res <- callGeneric(v1,v2)
 
-            ROIVol(space(e1), data=res, coords = index_to_grid(space(e1), indices))
+            ROIVol(space(e1), data=res,
+                   coords = index_to_grid(space(e1), indices))
 
           })
 
@@ -211,43 +212,53 @@ setMethod(f="Arith", signature=signature(e1="NeuroVol", e2="SparseNeuroVol"),
 
 
 
-#' @export
-#' @rdname Arith-methods
-#' @param e1 A SparseNeuroVec object.
-#' @param e2 A SparseNeuroVec object.
-#' @return A SparseNeuroVec object representing the result of the arithmetic operation.
-#' @description Perform an arithmetic operation between two SparseNeuroVec objects.
-#' The input SparseNeuroVec objects must have the same dimensions.
-#' The method performs the arithmetic operation on the non-zero values of the SparseNeuroVec objects.
-#' The result is returned as a new SparseNeuroVec object.
-#' @export
-#' @rdname Arith-methods
-#' @param e1 A SparseNeuroVec object.
-#' @param e2 A SparseNeuroVec object.
-#' @return A SparseNeuroVec object representing the result of the arithmetic operation.
-#' @description Perform an arithmetic operation between two SparseNeuroVec objects.
-#' The input SparseNeuroVec objects must have the same dimensions.
-#' The method performs the arithmetic operation on the non-zero values of the SparseNeuroVec objects.
-#' The result is returned as a new SparseNeuroVec object.
+
 setMethod(f="Arith", signature=signature(e1="SparseNeuroVec", e2="SparseNeuroVec"),
           def=function(e1, e2) {
+            # Ensure dimensions match
             checkDim(e1, e2)
-            D4 <- dim(e1)[4]
-            vols <- list()
-            ind <- list()
 
-            for (i in 1:D4) {
-              vols[[i]] <- callGeneric(e1[[i]], e2[[i]])
-              ind[[i]] <- vols[[i]]@indices
+            # Extract the fourth dimension from the space slot
+            D4 <- space(e1)@dim[4]
+
+            # Initialize lists to store results
+            vols <- vector("list", D4)
+            ind <- vector("list", D4)
+
+            # Iterate over the fourth dimension
+            for (i in seq_len(D4)) {
+              # Perform the arithmetic operation on the i-th slice
+              # Access data directly from the @data slot
+              vols[[i]] <- callGeneric(e1@data[i, ], e2@data[i, ])
+
+              # Extract non-zero indices from the result
+              ind[[i]] <- which(vols[[i]] != 0)
             }
 
-            ind <- sort(unique(unlist(ind)))
-            vret <- do.call(rbind, lapply(vols, function(vol) as.numeric(vol[ind])))
+            # Combine all unique non-zero indices across all dimensions
+            combined_ind <- sort(unique(unlist(ind)))
 
-            dspace <- add_dim(space(vols[[1]]), length(vols))
-            mask <- which(vret != 0)
-            SparseNeuroVec(vret[mask], dspace, indices=ind[mask])
+            # Handle case where there are no non-zero elements
+            if (length(combined_ind) == 0) {
+              stop("Resulting SparseNeuroVec has no non-zero elements.")
+            }
+
+            # Extract the non-zero data for each volume based on combined indices
+            vret <- do.call(rbind, lapply(vols, function(vol) vol[combined_ind]))
+
+            # Update the NeuroSpace object by ensuring the fourth dimension remains consistent
+            dspace <- space(e1)  # Assuming space remains the same
+
+            # Construct the new mask based on non-zero elements
+            new_mask <- rep(FALSE, length(space(e1)@dim))
+            new_mask[combined_ind] <- TRUE
+
+            # Create the new SparseNeuroVec object
+            SparseNeuroVec(data = vret,
+                           space = dspace,
+                           mask = new_mask)
           })
+
 
 #' @export
 #' @rdname Arith-methods
@@ -280,7 +291,8 @@ setMethod(f="Arith", signature=signature(e1="NeuroVec", e2="NeuroVec"),
 
 #' Arithmetic Operations for NeuroVec and NeuroVol
 #'
-#' This function performs arithmetic operations on a NeuroVec object and a NeuroVol object.
+#' This function performs arithmetic operations on a NeuroVec object and a
+#' NeuroVol object.
 #'
 #' @param e1 A NeuroVec object.
 #' @param e2 A NeuroVol object.
@@ -291,7 +303,8 @@ setMethod(f="Arith", signature=signature(e1="NeuroVec", e2="NeuroVec"),
 setMethod(f="Arith", signature=signature(e1="NeuroVec", e2="NeuroVol"),
 		  def=function(e1, e2) {
 			  if (!all(dim(e1)[1:3] == dim(e2))) {
-				  stop("cannot perform arithmetic operation on arguments with different spatial dimensions")
+				  stop("cannot perform arithmetic operation on arguments with different
+               spatial dimensions")
 			  }
 
 			  D4 <- dim(e1)[4]
@@ -308,6 +321,36 @@ setMethod(f="Arith", signature=signature(e1="NeuroVec", e2="NeuroVol"),
 
 
 		  })
+
+#' Arithmetic Operations for NeuroVol and NeuroVec
+#'
+#' This function performs arithmetic operations on a NeuroVol object and a
+#' NeuroVec object.
+#'
+#' @param e1 A NeuroVol object.
+#' @param e2 A NeuroVec object.
+#'
+#' @return A DenseNeuroVec object resulting from the arithmetic operation.
+#'
+#' @export
+setMethod(f="Arith", signature=signature(e1="NeuroVol", e2="NeuroVec"),
+          def=function(e1, e2) {
+            if (!all(dim(e1) == dim(e2)[1:3])) {
+              stop("cannot perform arithmetic operation on arguments with
+                    different spatial dimensions")
+            }
+
+            D4 <- dim(e2)[4]
+            vols <- list()
+
+            for (i in 1:D4) {
+              vols[[i]] <- callGeneric(e1, e2[[i]])
+            }
+
+            mat <- do.call(cbind, vols)
+            dspace <- add_dim(space(e1), D4)
+            DenseNeuroVec(mat, dspace)
+          })
 
 
 #' Summary of SparseNeuroVec
@@ -390,3 +433,5 @@ setMethod(f="Summary", signature=signature(x="DenseNeuroVol", na.rm="ANY"),
     def=function(x, ..., na.rm) {
       callGeneric(x@.Data, ..., na.rm=na.rm)
     })
+
+

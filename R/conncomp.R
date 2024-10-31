@@ -1,23 +1,53 @@
-
-
-#' Extract connected components from a 3D mask
+#' Extract Connected Components from a 3D Mask
 #'
-#' @export
-#' @import purrr
-#' @param mask a 3D binary array
-#' @param connect the connectiivty constraint: "6-connect", "18-connect", or "26-connect"
-#' @return a two-element list of the connected components (cluster \code{index} and cluster \code{size})
-#' The first element \code{index} is a 3D array containing the cluster index of the connected component for each voxel.
-#' The second element \code{size} is a 3D array consisting of the size of the connected component inhabited by each voxel.
+#' @description
+#' This function identifies and labels connected components in a 3D binary mask using
+#' different connectivity constraints.
+#'
+#' @param mask A 3D binary array representing the mask. Must be a logical array.
+#' @param connect A character string specifying the connectivity constraint. 
+#'   Options are "6-connect", "18-connect", or "26-connect". Default is "26-connect".
+#'
+#' @return A list with two elements:
+#'   \item{index}{A 3D array containing the cluster index of the connected component for each voxel.}
+#'   \item{size}{A 3D array containing the size of the connected component for each voxel.}
+#'
+#' @details
+#' The function implements a two-pass algorithm to identify connected components:
+#' \itemize{
+#'   \item First pass: Assigns initial labels and establishes connectivity.
+#'   \item Second pass: Resolves label conflicts and assigns final labels.
+#' }
+#' 
+#' The connectivity options determine which voxels are considered neighbors:
+#' \itemize{
+#'   \item 6-connect: Only face-adjacent voxels
+#'   \item 18-connect: Face and edge-adjacent voxels
+#'   \item 26-connect: Face, edge, and vertex-adjacent voxels
+#' }
 #'
 #' @examples
+#' # Generate a random 3D binary mask
+#' set.seed(123)
+#' dat <- array(as.logical(runif(10*10*10) > 0.5), c(10, 10, 10))
+#' 
+#' # Extract connected components using different connectivity constraints
+#' res1 <- conn_comp_3D(dat, connect = "6-connect")
+#' res2 <- conn_comp_3D(dat, connect = "18-connect")
+#' res3 <- conn_comp_3D(dat, connect = "26-connect")
+#' 
+#' # Compare the number of connected components
+#' cat("Number of components (6-connect):", max(res1$index), "\n")
+#' cat("Number of components (18-connect):", max(res2$index), "\n")
+#' cat("Number of components (26-connect):", max(res3$index), "\n")
 #'
-#' dat <- array(as.logical(rnorm(10*10*10)>.5), c(10, 10, 10))
-#' res1 <- conn_comp_3D(dat, connect="6-connect")
-#' res2 <- conn_comp_3D(dat, connect="18-connect")
-#' res3 <- conn_comp_3D(dat, connect="26-connect")
+#' @seealso 
+#' \code{\link{array}} for creating 3D arrays
+#' 
+#' @importFrom purrr map flatten_dbl
 #'
-conn_comp_3D <- function(mask,connect=c("26-connect", "18-connect", "6-connect")) {
+#' @export
+conn_comp_3D <- function(mask, connect = c("26-connect", "18-connect", "6-connect")) {
 	stopifnot(length(dim(mask)) == 3 && is.logical(mask[1]))
 
   connect <- match.arg(connect)

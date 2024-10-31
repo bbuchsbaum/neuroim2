@@ -2,28 +2,31 @@
 % Please edit documentation in R/searchlight.R
 \name{bootstrap_searchlight}
 \alias{bootstrap_searchlight}
-\title{Create a spherical searchlight iterator that samples regions from within a mask}
+\title{Create a bootstrap spherical searchlight iterator}
 \usage{
 bootstrap_searchlight(mask, radius = 8, iter = 100)
 }
 \arguments{
 \item{mask}{A \code{\linkS4class{NeuroVol}} object representing the brain mask.}
 
-\item{radius}{A numeric value specifying the radius of the searchlight sphere in voxel units (default is 8).}
+\item{radius}{A numeric value specifying the radius of the searchlight sphere
+in voxel units. Default is 8.}
 
-\item{iter}{An integer specifying the total number of searchlights to sample (default is 100).}
+\item{iter}{An integer specifying the total number of searchlights to sample.
+Default is 100.}
 }
 \value{
-A \code{deferred_list} object containing \code{\linkS4class{ROIVolWindow}} objects,
-        each representing a spherical searchlight region sampled from within the mask.
+A \code{deferred_list} object containing \code{\linkS4class{ROIVolWindow}}
+  objects, each representing a spherical searchlight region sampled from within the mask.
 }
 \description{
-This function generates a spherical searchlight iterator by sampling regions from within a brain mask.
-It creates searchlight spheres around random center voxels, allowing the same surround voxel to belong
-to multiple searchlight samples.
+This function generates a spherical searchlight iterator by sampling regions
+from within a brain mask. It creates searchlight spheres around random center
+voxels, allowing the same surrounding voxel to belong to multiple searchlight samples.
 }
 \details{
-Searchlight centers are sampled without replacement, but the same surround voxel can belong to multiple searchlight samples.
+Searchlight centers are sampled without replacement, but the same surrounding
+voxel can belong to multiple searchlight samples.
 }
 \examples{
 # Load an example brain mask

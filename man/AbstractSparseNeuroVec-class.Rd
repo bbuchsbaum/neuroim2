@@ -3,15 +3,44 @@
 \docType{class}
 \name{AbstractSparseNeuroVec-class}
 \alias{AbstractSparseNeuroVec-class}
-\title{AbstractSparseNeuroVec}
+\title{AbstractSparseNeuroVec Class}
 \description{
-AbstractSparseNeuroVec
+An abstract base class for sparse four-dimensional brain image representations.
+This class provides the foundation for efficient storage and manipulation of
+large, sparse neuroimaging data.
+}
+\details{
+The AbstractSparseNeuroVec class serves as a template for implementing various
+sparse representations of 4D brain images. It combines the spatial properties of
+\code{\linkS4class{NeuroVec}} with the efficiency of sparse data structures.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{mask}}{the mask defining the sparse domain}
+\item{\code{mask}}{An object of class \code{\linkS4class{LogicalNeuroVol}} defining the
+sparse domain of the brain image. This mask indicates which voxels contain
+non-zero data.}
 
-\item{\code{map}}{instance of class \code{\linkS4class{IndexLookupVol}} is used to map between spatial and index/row coordinates}
+\item{\code{map}}{An object of class \code{\linkS4class{IndexLookupVol}} used to map
+between spatial coordinates and index/row coordinates in the sparse representation.}
 }}
 
+\section{Subclasses}{
+
+Concrete implementations of this abstract class should provide specific data
+storage mechanisms and methods for efficient access and manipulation of sparse
+4D brain image data.
+}
+
+\examples{
+\dontrun{
+# This is an abstract class and should not be instantiated directly.
+# Instead, use one of its concrete subclasses, such as SparseNeuroVec.
+}
+
+}
+\seealso{
+\code{\link{NeuroVec-class}} for the parent class.
+\code{\link{LogicalNeuroVol-class}} for the mask representation.
+\code{\link{IndexLookupVol-class}} for the spatial-to-index mapping.
+}

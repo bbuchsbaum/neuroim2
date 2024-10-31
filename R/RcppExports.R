@@ -2,66 +2,70 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 indexToGridCpp <- function(idx, array_dim) {
-    .Call('_neuroim2_indexToGridCpp', PACKAGE = 'neuroim2', idx, array_dim)
+    .Call(`_neuroim2_indexToGridCpp`, idx, array_dim)
 }
 
-local_sphere <- function(vx, vy, vz, radius, spacing, dim) {
-    .Call('_neuroim2_local_sphere', PACKAGE = 'neuroim2', vx, vy, vz, radius, spacing, dim)
+local_spheres <- function(centers, radius, spacing, dim) {
+    .Call(`_neuroim2_local_spheres`, centers, radius, spacing, dim)
 }
 
 box_nbhd <- function(arr, dims, x, y, z, window, out, slicedim) {
-    .Call('_neuroim2_box_nbhd', PACKAGE = 'neuroim2', arr, dims, x, y, z, window, out, slicedim)
+    .Call(`_neuroim2_box_nbhd`, arr, dims, x, y, z, window, out, slicedim)
 }
 
 box_blur <- function(arr, mask_idx, window) {
-    .Call('_neuroim2_box_blur', PACKAGE = 'neuroim2', arr, mask_idx, window)
+    .Call(`_neuroim2_box_blur`, arr, mask_idx, window)
 }
 
 gaussian_weights <- function(window, sigma, spacing) {
-    .Call('_neuroim2_gaussian_weights', PACKAGE = 'neuroim2', window, sigma, spacing)
+    .Call(`_neuroim2_gaussian_weights`, window, sigma, spacing)
 }
 
 gaussian_blur_cpp <- function(arr, mask_idx, window, sigma, spacing) {
-    .Call('_neuroim2_gaussian_blur_cpp', PACKAGE = 'neuroim2', arr, mask_idx, window, sigma, spacing)
+    .Call(`_neuroim2_gaussian_blur_cpp`, arr, mask_idx, window, sigma, spacing)
 }
 
 bilateral_filter_cpp <- function(arr, mask_idx, window, spatial_sigma, intensity_sigma, spacing) {
-    .Call('_neuroim2_bilateral_filter_cpp', PACKAGE = 'neuroim2', arr, mask_idx, window, spatial_sigma, intensity_sigma, spacing)
+    .Call(`_neuroim2_bilateral_filter_cpp`, arr, mask_idx, window, spatial_sigma, intensity_sigma, spacing)
 }
 
 gridToIndexSingleCpp <- function(coords, array_dim) {
-    .Call('_neuroim2_gridToIndexSingleCpp', PACKAGE = 'neuroim2', coords, array_dim)
+    .Call(`_neuroim2_gridToIndexSingleCpp`, coords, array_dim)
 }
 
 bilateral_filter_4d_cpp <- function(arr, mask_idx, spatial_window, temporal_window, spatial_sigma, intensity_sigma, temporal_sigma, intensity_sd, spacing) {
-    .Call('_neuroim2_bilateral_filter_4d_cpp', PACKAGE = 'neuroim2', arr, mask_idx, spatial_window, temporal_window, spatial_sigma, intensity_sigma, temporal_sigma, intensity_sd, spacing)
+    .Call(`_neuroim2_bilateral_filter_4d_cpp`, arr, mask_idx, spatial_window, temporal_window, spatial_sigma, intensity_sigma, temporal_sigma, intensity_sd, spacing)
 }
 
 find_seqnum <- function(clens, idx) {
-    .Call('_neuroim2_find_seqnum', PACKAGE = 'neuroim2', clens, idx)
+    .Call(`_neuroim2_find_seqnum`, clens, idx)
 }
 
 grid_to_intvec <- function(D, vox) {
-    .Call('_neuroim2_grid_to_intvec', PACKAGE = 'neuroim2', D, vox)
+    .Call(`_neuroim2_grid_to_intvec`, D, vox)
 }
 
 exgridToIndex3DCpp <- function(array_dim, iind, jind, kind) {
-    .Call('_neuroim2_exgridToIndex3DCpp', PACKAGE = 'neuroim2', array_dim, iind, jind, kind)
+    .Call(`_neuroim2_exgridToIndex3DCpp`, array_dim, iind, jind, kind)
 }
 
 exgridToIndex4DCpp <- function(array_dim, iind, jind, kind, mind) {
-    .Call('_neuroim2_exgridToIndex4DCpp', PACKAGE = 'neuroim2', array_dim, iind, jind, kind, mind)
+    .Call(`_neuroim2_exgridToIndex4DCpp`, array_dim, iind, jind, kind, mind)
 }
 
 gridToIndexCpp <- function(array_dim, voxmat) {
-    .Call('_neuroim2_gridToIndexCpp', PACKAGE = 'neuroim2', array_dim, voxmat)
+    .Call(`_neuroim2_gridToIndexCpp`, array_dim, voxmat)
 }
 
 gridToIndex3DCpp <- function(array_dim, voxmat) {
-    .Call('_neuroim2_gridToIndex3DCpp', PACKAGE = 'neuroim2', array_dim, voxmat)
+    .Call(`_neuroim2_gridToIndex3DCpp`, array_dim, voxmat)
+}
+
+local_sphere <- function(vx, vy, vz, radius, spacing, dim) {
+    .Call(`_neuroim2_local_sphere`, vx, vy, vz, radius, spacing, dim)
 }
 
 kernel_filt_3d_cpp <- function(data, kernel) {
-    .Call('_neuroim2_kernel_filt_3d_cpp', PACKAGE = 'neuroim2', data, kernel)
+    .Call(`_neuroim2_kernel_filt_3d_cpp`, data, kernel)
 }
 

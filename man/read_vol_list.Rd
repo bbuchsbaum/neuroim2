@@ -7,13 +7,13 @@
 read_vol_list(file_names, mask = NULL)
 }
 \arguments{
-\item{file_names}{a list of files to load}
+\item{file_names}{A list of file names to load.}
 
-\item{mask}{an optional mask indicating subset of voxels to load}
+\item{mask}{An optional mask defining the subset of voxels to load.}
 }
 \value{
-an instance of class \code{\linkS4class{NeuroVec}}
+An instance of the \code{\linkS4class{NeuroVec}} class.
 }
 \description{
-load a list of image volumes and return a \code{\linkS4class{NeuroVec}} instance
+This function loads a list of image volumes and returns a NeuroVec object.
 }

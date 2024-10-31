@@ -20,20 +20,24 @@
 \S4method{[}{ArrayLike4D,missing,numeric,ANY}(x, i, j, k, m, ..., drop = TRUE)
 }
 \arguments{
-\item{x}{the object}
+\item{x}{The 4-dimensional object to be accessed.}
 
-\item{i}{first index}
+\item{i}{First index or dimension.}
 
-\item{j}{second index}
+\item{j}{Second index or dimension.}
 
-\item{k}{third index}
+\item{k}{Third index or dimension.}
 
-\item{m}{the fourth index}
+\item{m}{Fourth index or dimension.}
 
-\item{...}{additional args}
+\item{...}{Additional arguments passed to methods.}
 
-\item{drop}{dimension}
+\item{drop}{Logical. If TRUE, the result is coerced to the lowest possible dimension.}
+}
+\value{
+A subset of the input object, with dimensions depending on the indexing and the `drop` parameter.
 }
 \description{
-Array-like access for 4-dimensional data structures
+This generic function provides array-like access for 4-dimensional data structures.
+It allows for flexible indexing and subsetting of 4D arrays or array-like objects.
 }

@@ -3,13 +3,29 @@
 \docType{class}
 \name{AxisSet4D-class}
 \alias{AxisSet4D-class}
-\title{AxisSet4D}
+\title{AxisSet4D Class}
 \description{
-A four-dimensional axis set
+A class representing a four-dimensional axis set, extending the AxisSet3D class
+with an additional fourth axis.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{l}}{the fourth axis}
+\item{\code{l}}{A \code{NamedAxis} object representing the fourth axis.}
 }}
 
+\examples{
+# Create NamedAxis objects for each dimension
+x_axis <- new("NamedAxis", axis = "x", direction = 1)
+y_axis <- new("NamedAxis", axis = "y", direction = 1)
+z_axis <- new("NamedAxis", axis = "z", direction = 1)
+t_axis <- new("NamedAxis", axis = "t", direction = 1)
+
+# Create an AxisSet4D object
+axis_set_4d <- new("AxisSet4D", i = x_axis, j = y_axis, k = z_axis,
+                   l = t_axis, ndim = 4L)
+
+}
+\seealso{
+\code{\link{AxisSet3D-class}}, \code{\link{NamedAxis-class}}
+}

@@ -3,13 +3,48 @@
 \docType{class}
 \name{FileBackedNeuroVec-class}
 \alias{FileBackedNeuroVec-class}
-\title{FileBackedNeuroVec}
+\title{FileBackedNeuroVec Class}
 \description{
-A class representing a four-dimensional brain image that is read into memory "on demand" using memory-mapped file access. FileBackedNeuroVec objects enable efficient handling of large-scale brain imaging data by loading only the required portions of the data into memory when needed.
+A class representing a four-dimensional brain image that uses on-demand loading
+through memory-mapped file access. This approach enables efficient handling of
+large-scale brain imaging data by loading only the required portions of the data
+into memory when needed.
+}
+\details{
+FileBackedNeuroVec objects provide a memory-efficient solution for working with
+large 4D neuroimaging datasets. By utilizing memory-mapped file access, this class
+allows users to work with datasets that exceed available RAM, only loading the
+necessary data segments into memory as they are accessed.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{meta}}{An instance of class \code{\linkS4class{FileMetaInfo}} containing the file meta information, such as the file path, format, and other associated metadata.}
+\item{\code{meta}}{An instance of class \code{\linkS4class{FileMetaInfo}} containing
+file metadata such as file path, format, and other associated information.}
 }}
 
+\section{Inheritance}{
+
+\code{FileBackedNeuroVec} inherits from:
+\itemize{
+  \item \code{\linkS4class{NeuroVec}}: Base class for 4D brain images
+  \item \code{ArrayLike4D}: Interface for 4D array-like operations
+}
+}
+
+\examples{
+\dontrun{
+# Create a FileBackedNeuroVec object
+file_path <- "/path/to/large/brain/image.nii.gz"
+file_meta <- FileMetaInfo(file_path, format = "NIFTI")
+file_backed_vec <- FileBackedNeuroVec(meta = file_meta)
+
+# Access a subset of the data (this will load only the required portion)
+subset <- file_backed_vec[,,, 1:10]
+}
+
+}
+\seealso{
+\code{\link{NeuroVec-class}} for the base 4D brain image class.
+\code{\link{FileMetaInfo-class}} for details on file metadata representation.
+}

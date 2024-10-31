@@ -28,13 +28,13 @@ First we load in an example volume, assign it random values, and find its connec
 ```{r}
       library(purrr)
       library(ggplot2)
-      file_name <- system.file("extdata", "global_mask.nii", package="neuroim2")
+      file_name <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
       vol <- read_vol(file_name)
       mask.idx <- which(vol>0)
       
       vol2 <- vol
       vol2[mask.idx] <- runif(length(mask.idx))
-      comp <- conn_comp(vol, threshold=.9)
+      comp <- conn_comp(vol2, threshold=.8)
       
       plot(comp$index, zlevels=seq(1,25,by=3), cmap=rainbow(255))
 ```
@@ -57,11 +57,13 @@ Another thing we might to is compute the k nearest neighbors in each searchlight
 
 ```{r}
 k <- 12
-knnfvol <- vol %>% searchlight(radius=12, eager=TRUE) %>% map_dbl(function(x) {
+knnfvol <- vol2 %>% searchlight(radius=12, eager=FALSE) %>% map_dbl(function(x) {
+  print(x@center_index)
   ind <- order((x[x@center_index] - x)^2)[1:k]
   mean(x[ind])
+  mean(x)
 }) %>% NeuroVol(space=space(vol), indices=which(vol!=0))
-plot(knnfvol, cmap=rainbow(255), zlevels=seq(1,25,by=3))
+plot(knnfvol, cmap=rainbow(255))
 ```
 
 If we only need access to the searchlight coordinates (in voxel space), we can use the `searchlight_coords` function. Here, we simply replace the center voxel with the average of its neighbors in searchlight space:

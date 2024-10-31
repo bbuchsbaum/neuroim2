@@ -2,16 +2,20 @@
 % Please edit documentation in R/all_generic.R, R/clustervol.R, R/neurovec.R
 \name{split_clusters}
 \alias{split_clusters}
+\alias{split_clusters,NeuroVec,ClusteredNeuroVol-method}
+\alias{split_clusters,NeuroVec,integer-method}
 \alias{split_clusters,NeuroVol,ClusteredNeuroVol-method}
 \alias{split_clusters,NeuroVol,integer-method}
 \alias{split_clusters,NeuroVol,numeric-method}
 \alias{split_clusters,ClusteredNeuroVol,missing-method}
-\alias{split_clusters,NeuroVec,integer-method}
 \alias{split_clusters,NeuroVec,numeric-method}
-\alias{split_clusters,NeuroVec,ClusteredNeuroVol-method}
 \title{Cut an object into a list of spatial or spatiotemporal clusters}
 \usage{
 split_clusters(x, clusters, ...)
+
+\S4method{split_clusters}{NeuroVec,ClusteredNeuroVol}(x, clusters, ...)
+
+\S4method{split_clusters}{NeuroVec,integer}(x, clusters, ...)
 
 \S4method{split_clusters}{NeuroVol,ClusteredNeuroVol}(x, clusters)
 
@@ -28,17 +32,42 @@ split_clusters(x, clusters, ...)
 \S4method{split_clusters}{NeuroVec,ClusteredNeuroVol}(x, clusters, ...)
 }
 \arguments{
-\item{x}{The object to split. The input object must be a 4D tensor, where the first three dimensions correspond to the spatial dimensions of the data and the fourth dimension corresponds to time.}
+\item{x}{A NeuroVec object to be split.}
 
-\item{clusters}{A vector of cluster indices to split by.}
+\item{clusters}{Either a ClusteredNeuroVol object or an integer vector of cluster assignments.}
 
 \item{...}{Additional arguments to be passed to methods.}
+}
+\value{
+A deflist object containing ROIVec instances for each cluster.
 }
 \description{
 This function cuts an object into a list of sub-objects based on a vector of cluster indices.
 The resulting list contains each of the clusters as separate objects.
+
+These methods split a NeuroVec object into multiple ROIVec objects based on cluster assignments.
+}
+\details{
+There are two methods for splitting clusters:
+\itemize{
+  \item Using a ClusteredNeuroVol object: This method uses the pre-defined clusters in the ClusteredNeuroVol object.
+  \item Using an integer vector: This method allows for custom cluster assignments.
+}
+
+Both methods return a deflist, which is a lazy-loading list of ROIVec objects.
 }
 \examples{
+\dontrun{
+# Using ClusteredNeuroVol
+neuro_vec <- # ... create a NeuroVec object
+clustered_vol <- # ... create a ClusteredNeuroVol object
+split_result <- split_clusters(neuro_vec, clustered_vol)
+
+# Using integer vector
+cluster_assignments <- # ... create an integer vector of cluster assignments
+split_result <- split_clusters(neuro_vec, cluster_assignments)
+}
+
 
 ## split 'NeuroVol' with a 'ClusteredNeuroVol'
 vol <- NeuroVol(array(runif(10*10*10),c(10,10,10)), NeuroSpace(c(10,10,10)))
@@ -60,7 +89,10 @@ indices <- numeric(prod(dim(mask)[1:3]))
 ## locations with a cluster value of 0 are ignored
 indices[mask.idx] <- kres$cluster
 
-ret2 <- vol \%>\% split_clusters(as.integer(indices)) \%>\% purrr::map_dbl(~ mean(values(.)))
+ret2 <- vol \%>\% split_clusters(as.integer(indices)) \%>\% 
+purrr::map_dbl(~ mean(values(.)))
 all(ret1 == ret1)
-
+}
+\seealso{
+\code{\link{NeuroVec-class}}, \code{\link{ClusteredNeuroVol-class}}, \code{\link{ROIVec-class}}
 }

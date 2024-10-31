@@ -3,13 +3,48 @@
 \docType{class}
 \name{SparseNeuroVecSource-class}
 \alias{SparseNeuroVecSource-class}
-\title{SparseNeuroVecSource}
+\title{SparseNeuroVecSource Class}
 \description{
-A class that is used to produce a \code{\linkS4class{SparseNeuroVec}} instance
+A class used to produce a \code{\linkS4class{SparseNeuroVec}} instance. It encapsulates
+the necessary information to create a sparse representation of a 4D neuroimaging dataset.
+}
+\details{
+SparseNeuroVecSource acts as a factory for SparseNeuroVec objects. It holds the
+spatial mask that determines which voxels will be included in the sparse representation.
+This class is typically used in data loading or preprocessing pipelines where the
+sparse structure of the data is known or determined before the full dataset is loaded.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{mask}}{the subset of voxels that will be stored in memory}
+\item{\code{mask}}{An object of class \code{\linkS4class{LogicalNeuroVol}} representing the subset
+of voxels that will be stored in memory. This mask defines the sparse structure of the
+resulting SparseNeuroVec.}
 }}
 
+\section{Inheritance}{
+
+\code{SparseNeuroVecSource} inherits from:
+\itemize{
+  \item \code{\linkS4class{NeuroVecSource}}: Base class for NeuroVec source objects
+}
+}
+
+\examples{
+\dontrun{
+# Create a simple mask
+mask_data <- array(runif(64*64*32) > 0.7, dim = c(64, 64, 32))
+mask <- LogicalNeuroVol(mask_data, space = NeuroSpace(dim = c(64, 64, 32)))
+
+# Create a SparseNeuroVecSource
+sparse_source <- new("SparseNeuroVecSource", mask = mask)
+
+# Use the source to create a SparseNeuroVec (pseudo-code)
+# sparse_vec <- create_sparse_neuro_vec(sparse_source, data)
+}
+
+}
+\seealso{
+\code{\link{SparseNeuroVec-class}} for the resulting sparse 4D neuroimaging data class.
+\code{\link{LogicalNeuroVol-class}} for the mask representation.
+}

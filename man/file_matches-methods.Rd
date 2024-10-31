@@ -11,14 +11,34 @@ file_matches(x, file_name)
 \S4method{file_matches}{FileFormat,character}(x, file_name)
 }
 \arguments{
-\item{x}{object for which the file name is to matched to}
+\item{x}{A FileFormat object.}
 
-\item{file_name}{file name to be matched}
+\item{file_name}{A character string representing the file name to be matched.}
 }
 \value{
 TRUE for match, FALSE otherwise
+
+A logical value: TRUE if the file matches the format and both header 
+  and data files exist, FALSE otherwise.
 }
 \description{
-Generic function to test whether a file name conforms to the given \code{\linkS4class{FileFormat}} instance.
-Will test for match to either header file or data file
+This method checks if a given file name matches the specified FileFormat,
+verifying the existence of both header and data files.
+}
+\details{
+The function performs the following checks:
+1. If the file name matches the header file format, it checks for the existence of the corresponding data file.
+2. If the file name matches the data file format, it checks for the existence of the corresponding header file.
+3. If neither condition is met, it returns FALSE.
+}
+\examples{
+\dontrun{
+file_format <- new("FileFormat", header_extension = "hdr", data_extension = "img")
+file_matches(file_format, "brain_scan.hdr")
+file_matches(file_format, "brain_scan.img")
+}
+
+}
+\seealso{
+\code{\link{FileFormat-class}}, \code{\link{header_file_matches}}, \code{\link{data_file_matches}}
 }

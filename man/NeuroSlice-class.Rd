@@ -3,7 +3,23 @@
 \docType{class}
 \name{NeuroSlice-class}
 \alias{NeuroSlice-class}
-\title{NeuroSlice}
+\title{NeuroSlice Class}
 \description{
-A two-dimensional brain image.
+Represents a two-dimensional brain image slice. This class extends both the \code{array}
+class for data storage and the \code{\linkS4class{NeuroObj}} class for spatial information.
+}
+\details{
+NeuroSlice objects are typically used to represent individual slices of 3D brain volumes
+or 2D projections of 3D data. They inherit the spatial properties from NeuroObj and
+the data storage capabilities from array.
+}
+\examples{
+# Create a simple 2D brain slice
+slice_data <- matrix(rnorm(64*64), 64, 64)
+slice_space <- NeuroSpace(dim=c(64L, 64L), origin=c(0, 0), spacing=c(1, 1))
+brain_slice <- new("NeuroSlice", .Data=slice_data, space=slice_space)
+
+}
+\seealso{
+\code{\link{NeuroObj-class}}, \code{\link{NeuroVol-class}}
 }

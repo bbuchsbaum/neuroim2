@@ -10,13 +10,33 @@ data_file(x, file_name)
 \S4method{data_file}{FileFormat,character}(x, file_name)
 }
 \arguments{
-\item{x}{descriptor instance}
+\item{x}{A FileFormat object.}
 
-\item{file_name}{file name to be stripped of its extension}
+\item{file_name}{A character string representing the file name to be processed.}
 }
 \value{
 the correct header name
+
+A character string representing the correct data file name.
 }
 \description{
-Generic function to get the name of the data file, given a file name and a \code{\linkS4class{FileFormat}} instance.
+This method derives the data file name from a given file name based on 
+the FileFormat specifications.
+}
+\details{
+The function performs the following steps:
+1. If the input file_name already matches the data file format, it returns the file_name as is.
+2. If the file_name matches the header file format, it constructs and returns the corresponding data file name.
+3. If the file_name doesn't match either format, it throws an error.
+}
+\examples{
+\dontrun{
+file_format <- new("FileFormat", header_extension = "hdr", data_extension = "img")
+data_file(file_format, "brain_scan.img")
+data_file(file_format, "brain_scan.hdr")
+}
+
+}
+\seealso{
+\code{\link{FileFormat-class}}, \code{\link{data_file_matches}}, \code{\link{header_file_matches}}, \code{\link{strip_extension}}
 }

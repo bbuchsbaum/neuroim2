@@ -3,21 +3,39 @@
 \docType{class}
 \name{FileFormat-class}
 \alias{FileFormat-class}
-\title{FileFormatDescriptor}
+\title{FileFormat Class}
 \description{
-This class represents a neuroimaging file format
+This class represents a neuroimaging file format descriptor, containing
+information about the file format, encoding, and extensions for both header
+and data components.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{file_format}}{the name of the file format (e.g. NIfTI)}
+\item{\code{file_format}}{A \code{character} string specifying the name of the file format (e.g., "NIfTI").}
 
-\item{\code{header_encoding}}{the file encoding of the header file (e.g. 'raw' for binary, 'gzip' for gz compressed')}
+\item{\code{header_encoding}}{A \code{character} string specifying the file encoding of the header file
+(e.g., "raw" for binary, "gzip" for gz compressed).}
 
-\item{\code{header_extension}}{the file extension for the header file (e.g. 'nii' for NIfTI single files)}
+\item{\code{header_extension}}{A \code{character} string specifying the file extension for the header file
+(e.g., "nii" for NIfTI single files).}
 
-\item{\code{data_encoding}}{the file encoding for the data file}
+\item{\code{data_encoding}}{A \code{character} string specifying the file encoding for the data file.}
 
-\item{\code{data_extension}}{the file extension for the data file (e.g. 'nii' for NIfTI single files)}
+\item{\code{data_extension}}{A \code{character} string specifying the file extension for the data file
+(e.g., "nii" for NIfTI single files).}
 }}
 
+\examples{
+# Create a FileFormat object for NIfTI format
+nifti_format <- new("FileFormat",
+                    file_format = "NIfTI",
+                    header_encoding = "raw",
+                    header_extension = "nii",
+                    data_encoding = "raw",
+                    data_extension = "nii")
+
+}
+\seealso{
+\code{\link{NIFTIFormat-class}}, \code{\link{AFNIFormat-class}}
+}

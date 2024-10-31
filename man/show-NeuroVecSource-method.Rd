@@ -2,13 +2,13 @@
 % Please edit documentation in R/neurovec.R
 \name{show,NeuroVecSource-method}
 \alias{show,NeuroVecSource-method}
-\title{show a \code{NeuroVecSource}}
+\title{show a NeuroVecSource object}
 \usage{
 \S4method{show}{NeuroVecSource}(object)
 }
 \arguments{
-\item{object}{the object}
+\item{object}{The NeuroVecSource object to display.}
 }
 \description{
-show a \code{NeuroVecSource}
+This function prints a summary of a NeuroVecSource object.
 }

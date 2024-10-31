@@ -4,22 +4,93 @@
 \name{DenseNeuroVec-class}
 \alias{DenseNeuroVec-class}
 \alias{DenseNeuroVec}
-\title{DenseNeuroVec}
+\title{DenseNeuroVec Class}
 \usage{
 DenseNeuroVec(data, space, label = "")
 }
 \arguments{
-\item{data}{a 4-dimensional \code{array} or a 2-dimension \code{matrix} that is either nvoxels by ntime-points or ntime-points by nvoxels}
+\item{data}{The image data. This can be:
+\itemize{
+  \item A 4-dimensional array
+  \item A 2-dimensional matrix (either nvoxels x ntime-points or 
+        ntime-points x nvoxels)
+  \item A vector (which will be reshaped to match the space dimensions)
+}}
 
-\item{space}{a \code{\linkS4class{NeuroSpace}} object}
+\item{space}{A \code{\linkS4class{NeuroSpace}} object defining the spatial properties of the image.}
 
-\item{label}{a label of type \code{character}}
+\item{label}{A character string providing a label for the DenseNeuroVec object. Default is an empty string.}
 }
 \value{
-\code{\linkS4class{DenseNeuroVec}} instance
+A concrete instance of the \code{\linkS4class{DenseNeuroVec}} class.
 }
 \description{
-A class representing a four-dimensional brain image, backed by an array. DenseNeuroVec objects store their data in a dense array format, which is useful for cases where most elements in the brain image contain non-zero values. This class inherits from both the \code{\linkS4class{NeuroVec}} and the \code{array} classes.
+A class representing a four-dimensional brain image, backed by a dense array.
+This class is designed for neuroimaging data where most voxels contain non-zero values.
 
-constructor function for class \code{\linkS4class{DenseNeuroVec}}
+This function constructs a DenseNeuroVec object, which represents a dense 
+four-dimensional brain image. It handles various input data formats and 
+ensures proper dimensionality.
+}
+\details{
+DenseNeuroVec objects store their data in a dense array format, which is efficient
+for operations that require frequent access to all voxels. This class inherits from
+both \code{\linkS4class{NeuroVec}} and \code{array} classes, combining spatial
+information with array-based data storage.
+
+The function performs several operations based on the input data type:
+\itemize{
+  \item For matrix input: It determines the correct orientation (voxels x time or time x voxels) 
+    and reshapes accordingly. If necessary, it adds a 4th dimension to the space object.
+  \item For vector input: It reshapes the data to match the dimensions specified in the space object.
+  \item For array input: It ensures the dimensions match those specified in the space object.
+}
+
+Note that the label parameter is currently not used in the object creation, 
+but is included for potential future use or consistency with other constructors.
+}
+\section{Validity}{
+
+A DenseNeuroVec object is considered valid if:
+\itemize{
+  \item The underlying data is a four-dimensional array.
+}
+}
+
+\examples{
+\dontrun{
+# Create a simple 4D brain image
+data <- array(rnorm(64*64*32*100), dim = c(64, 64, 32, 100))
+space <- NeuroSpace(dim = c(64, 64, 32), origin = c(0, 0, 0), spacing = c(3, 3, 4))
+dense_vec <- new("DenseNeuroVec", .Data = data, space = space)
+
+# Access dimensions
+dim(dense_vec)
+
+# Extract a single 3D volume
+first_volume <- dense_vec[,,,1]
+}
+
+# Create a simple 4D brain image
+dim <- c(64, 64, 32, 10)  # 64x64x32 volume with 10 time points
+data <- array(rnorm(prod(dim)), dim)
+space <- NeuroSpace(dim, spacing = c(3, 3, 4, 1))
+
+# Create a DenseNeuroVec object
+dense_vec <- DenseNeuroVec(data = data, space = space, label = "Example")
+print(dense_vec)
+
+# Create from a matrix (voxels x time)
+mat_data <- matrix(rnorm(prod(dim)), nrow = prod(dim[1:3]), ncol = dim[4])
+dense_vec_mat <- DenseNeuroVec(data = mat_data, space = space)
+print(dense_vec_mat)
+
+}
+\seealso{
+\code{\link{NeuroVec-class}} for the parent class.
+\code{\link{SparseNeuroVec-class}} for a sparse representation alternative.
+
+\code{\link{NeuroVec-class}} for the parent class.
+\code{\link{SparseNeuroVec-class}} for the sparse version of 4D brain images.
+\code{\link{NeuroSpace-class}} for details on spatial properties.
 }

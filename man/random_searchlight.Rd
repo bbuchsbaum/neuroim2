@@ -12,20 +12,22 @@ random_searchlight(mask, radius)
 \item{radius}{A numeric value specifying the radius of the searchlight sphere in voxel units.}
 }
 \value{
-A list of \code{\linkS4class{ROIVolWindow}} objects, each representing a spherical searchlight region.
+A list of \code{\linkS4class{ROIVolWindow}} objects, each representing
+  a spherical searchlight region.
 }
 \description{
-This function generates a spherical random searchlight iterator, which can be used to
-analyze the local neighborhood of voxels within a given radius in a brain mask.
+This function generates a spherical random searchlight iterator for analyzing
+local neighborhoods of voxels within a given radius in a brain mask.
 }
 \examples{
 # Create a simple brain mask
-mask <- array(TRUE, c(10, 10, 10))
-mask[1, 1, 1] <- FALSE
-mask <- LogicalNeuroVol(mask, NeuroSpace(c(10,10,10)))
-# Generate random searchlight iterator with a radius of 2 voxels
+mask_data <- array(TRUE, c(10, 10, 10))
+mask_data[1, 1, 1] <- FALSE
+mask <- LogicalNeuroVol(mask_data, NeuroSpace(c(10,10,10)))
 
-\dontrun{searchlights <- random_searchlight(mask, radius = 2)
+# Generate random searchlight iterator with a radius of 2 voxels
+\dontrun{
+searchlights <- random_searchlight(mask, radius = 2)
 }
 
 }

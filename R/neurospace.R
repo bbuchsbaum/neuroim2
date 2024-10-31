@@ -4,28 +4,67 @@
 {}
 
 
-#' Constructor function for \code{\linkS4class{NeuroSpace}} class
+#' Create a NeuroSpace Object
+#'
+#' @description
+#' This function constructs a NeuroSpace object, which defines the spatial properties
+#' of a neuroimaging volume, including its dimensions, origin, spacing, axes, and 
+#' coordinate transformation.
 #'
 #' @param dim An integer vector describing the dimensions of the image grid.
-#' @param origin A numeric vector representing the coordinate origin of the image space. If not provided, the default is set to a vector of zeroes with the same length as the dimensions.
-#' @param spacing A numeric vector representing the real-valued voxel dimensions (e.g., in millimeters). If not provided, the default is set to a vector of ones with the same length as the dimensions.
-#' @param axes An \code{\linkS4class{AxisSet}} object representing the image axes ordering. If not provided, the default axes are determined based on the NIFTI standard (Left-Posterior-Inferior).
-#' @param trans A matrix representing the coordinate transformation associated with the image space. If not provided, the default is based on the NIFTI standard ("Neurological" orientation).
+#' @param spacing A numeric vector representing the real-valued voxel dimensions 
+#'   (e.g., in millimeters). If not provided, defaults to a vector of ones with 
+#'   the same length as `dim`.
+#' @param origin A numeric vector representing the coordinate origin of the image space. 
+#'   If not provided, defaults to a vector of zeros with the same length as `dim`.
+#' @param axes An \code{\linkS4class{AxisSet}} object representing the image axes ordering. 
+#'   If not provided, the default axes are determined based on the NIFTI standard 
+#'   (Left-Posterior-Inferior for 3D, or LEFT_RIGHT and POST_ANT for 2D).
+#' @param trans A matrix representing the coordinate transformation associated with 
+#'   the image space. If not provided, a default transformation is constructed based 
+#'   on the spacing and origin.
 #'
 #' @return An instance of the \code{\linkS4class{NeuroSpace}} class.
 #'
-#' @note Users rarely need to create a new \code{NeuroSpace} instance, as it will almost always be created automatically using information stored in an image header. If an existing image object is available, its \code{NeuroSpace} instance can be easily extracted with the \code{space} method.
+#' @details
+#' The function performs several checks and computations:
+#' \itemize{
+#'   \item It ensures that `spacing` and `origin` have appropriate lengths and values.
+#'   \item If `trans` is not provided, it constructs a default transformation matrix.
+#'   \item It determines the appropriate axis set if not provided.
+#'   \item It creates a NeuroSpace object with the specified or computed properties.
+#' }
+#' 
+#' The resulting NeuroSpace object encapsulates all the spatial information necessary 
+#' to interpret and manipulate neuroimaging data.
+#'
+#' @note
+#' Users rarely need to create a new \code{NeuroSpace} instance directly, as it will 
+#' almost always be created automatically using information stored in an image header. 
+#' If an existing image object is available, its \code{NeuroSpace} instance can be 
+#' easily extracted with the \code{space} method.
 #'
 #' @examples
-#' bspace <- NeuroSpace(c(64, 64, 64), origin = c(0, 0, 0), spacing = c(2, 2, 2))
-#' bspace
-#' origin(bspace)
-#' axes(bspace)
-#' trans(bspace)
+#' # Create a 3D NeuroSpace object
+#' bspace_3d <- NeuroSpace(c(64, 64, 64), origin = c(0, 0, 0), spacing = c(2, 2, 2))
+#' print(bspace_3d)
+#' cat("Origin:", origin(bspace_3d), "\n")
+#' cat("Axes:", axes(bspace_3d), "\n")
+#' cat("Transformation matrix:\n")
+#' print(trans(bspace_3d))
+#'
+#' # Create a 2D NeuroSpace object
+#' bspace_2d <- NeuroSpace(c(128, 128), spacing = c(1.5, 1.5))
+#' print(bspace_2d)
+#'
+#' @seealso 
+#' \code{\link{AxisSet-class}} for details on axis specifications.
+#' \code{\link{NeuroVol-class}} for volumetric data using NeuroSpace.
+#' \code{\link{space}} for extracting NeuroSpace from existing objects.
 #'
 #' @export
-#' @rdname neuro_space
-NeuroSpace <- function(dim, spacing=NULL, origin=NULL, axes=NULL, trans=NULL) {
+#' @rdname NeuroSpace
+NeuroSpace <- function(dim, spacing = NULL, origin = NULL, axes = NULL, trans = NULL) {
 
 	if (is.null(spacing)) {
 		spacing <- rep(1, min(length(dim), 3))

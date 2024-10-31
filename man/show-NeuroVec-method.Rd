@@ -2,13 +2,13 @@
 % Please edit documentation in R/neurovec.R
 \name{show,NeuroVec-method}
 \alias{show,NeuroVec-method}
-\title{show a \code{NeuroVec}}
+\title{show a NeuroVec object}
 \usage{
 \S4method{show}{NeuroVec}(object)
 }
 \arguments{
-\item{object}{the object}
+\item{object}{The NeuroVec object to display.}
 }
 \description{
-show a \code{NeuroVec}
+This function prints a summary of a NeuroVec object.
 }

@@ -5,7 +5,7 @@
 \alias{Arith,DenseNeuroVol,DenseNeuroVol-method}
 \alias{Arith,DenseNeuroVec,DenseNeuroVec-method}
 \alias{Arith,SparseNeuroVol,NeuroVol-method}
-\alias{Arith,SparseNeuroVec,SparseNeuroVec-method}
+\alias{Arith,NeuroVol,SparseNeuroVol-method}
 \alias{Arith,NeuroVec,NeuroVec-method}
 \title{Perform arithmetic operations between two SparseNeuroVol objects}
 \usage{
@@ -17,14 +17,16 @@
 
 \S4method{Arith}{SparseNeuroVol,NeuroVol}(e1, e2)
 
-\S4method{Arith}{SparseNeuroVec,SparseNeuroVec}(e1, e2)
+\S4method{Arith}{NeuroVol,SparseNeuroVol}(e1, e2)
 
 \S4method{Arith}{NeuroVec,NeuroVec}(e1, e2)
+
+\S4method{Arith}{NeuroVol,SparseNeuroVol}(e1, e2)
 }
 \arguments{
-\item{e1}{A NeuroVec object.}
+\item{e1}{A NeuroVol object.}
 
-\item{e2}{A NeuroVec object.}
+\item{e2}{A SparseNeuroVol object.}
 }
 \value{
 A SparseNeuroVol object containing the result of the arithmetic operation between \code{e1} and \code{e2}.
@@ -35,9 +37,11 @@ A SparseNeuroVec object representing the result of the arithmetic operation.
 
 A DenseNeuroVol object representing the result of the arithmetic operation.
 
-A SparseNeuroVec object representing the result of the arithmetic operation.
+A DenseNeuroVol object representing the result of the arithmetic operation.
 
 A DenseNeuroVec object representing the result of the arithmetic operation.
+
+A DenseNeuroVol object representing the result of the arithmetic operation.
 }
 \description{
 This method performs arithmetic operations between two SparseNeuroVol objects (\code{e1} and \code{e2}) using a generic arithmetic function.
@@ -56,13 +60,18 @@ The input SparseNeuroVol and NeuroVol objects must have the same dimensions.
 The method performs the arithmetic operation on the non-zero values of the SparseNeuroVol
 and the corresponding values of the NeuroVol. The result is returned as a new DenseNeuroVol object.
 
-Perform an arithmetic operation between two SparseNeuroVec objects.
-The input SparseNeuroVec objects must have the same dimensions.
-The method performs the arithmetic operation on the non-zero values of the SparseNeuroVec objects.
-The result is returned as a new SparseNeuroVec object.
+Perform an arithmetic operation between a NeuroVol object and a SparseNeuroVol object.
+The input NeuroVol and SparseNeuroVol objects must have the same dimensions.
+The method performs the arithmetic operation on the values of the NeuroVol and the non-zero values
+of the SparseNeuroVol. The result is returned as a new DenseNeuroVol object.
 
 Perform an arithmetic operation between two NeuroVec objects.
 The input NeuroVec objects must have the same dimensions.
 The method performs the arithmetic operation on the elements of the NeuroVec objects.
 The result is returned as a new DenseNeuroVec object.
+
+Perform an arithmetic operation between a NeuroVol object and a SparseNeuroVol object.
+The input NeuroVol and SparseNeuroVol objects must have the same dimensions.
+The method performs the arithmetic operation on the values of the NeuroVol and the non-zero values
+of the SparseNeuroVol. The result is returned as a new DenseNeuroVol object.
 }

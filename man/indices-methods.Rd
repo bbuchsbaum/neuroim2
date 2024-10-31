@@ -5,7 +5,7 @@
 \alias{indices,ROIVol-method}
 \alias{indices,ROIVec-method}
 \alias{indices,AbstractSparseNeuroVec-method}
-\title{indices}
+\title{Get Indices from an IndexLookupVol Object}
 \usage{
 \S4method{indices}{IndexLookupVol}(x)
 
@@ -15,7 +15,13 @@
 
 \S4method{indices}{AbstractSparseNeuroVec}(x)
 }
+\arguments{
+\item{x}{An IndexLookupVol object.}
+}
+\value{
+An integer vector of indices.
+}
 \description{
-indices
+This method retrieves the indices stored in an IndexLookupVol object.
 }
 \keyword{internal}

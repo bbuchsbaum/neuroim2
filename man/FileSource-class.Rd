@@ -3,7 +3,7 @@
 \docType{class}
 \name{FileSource-class}
 \alias{FileSource-class}
-\title{FileSource}
+\title{FileSource Class}
 \description{
 Base class for representing a data source for images. The purpose of this class is to provide a layer in between
 low level IO and image loading functionality.
@@ -11,6 +11,9 @@ low level IO and image loading functionality.
 \section{Slots}{
 
 \describe{
-\item{\code{meta_info}}{meta information for the data source}
+\item{\code{meta_info}}{An object of class \code{\linkS4class{FileMetaInfo}} containing meta information for the data source.}
 }}
 
+\seealso{
+\code{\link{FileMetaInfo-class}}, \code{\link{NeuroVolSource-class}}, \code{\link{NeuroVecSource-class}}
+}

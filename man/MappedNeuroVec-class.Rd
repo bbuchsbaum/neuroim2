@@ -4,26 +4,73 @@
 \name{MappedNeuroVec-class}
 \alias{MappedNeuroVec-class}
 \alias{MappedNeuroVec}
-\title{MappedNeuroVec}
+\title{MappedNeuroVec Class}
 \usage{
 MappedNeuroVec(file_name)
 }
 \arguments{
-\item{file_name}{the name of the 4D image file that containing the memory-mapped data source.}
+\item{file_name}{A character string specifying the name of the 4D image file 
+containing the memory-mapped data source.}
 }
 \value{
-a new instance of type \code{MappedNeuroVec}
+A new instance of class \code{\linkS4class{MappedNeuroVec}}.
 }
 \description{
-A class representing a four-dimensional brain image, backed by a memory-mapped file. MappedNeuroVec objects store their data in a memory-mapped file, providing efficient access to large brain images without loading the entire dataset into memory. This class inherits from the \code{\linkS4class{NeuroVec}} and implements the \code{ArrayLike4D} interface.
+A class representing a four-dimensional brain image backed by a memory-mapped file.
+This class provides efficient access to large brain images without loading the
+entire dataset into memory.
 
-constructs a MappedNeuroVec object
+This function constructs a MappedNeuroVec object, which represents memory-mapped
+neuroimaging data as a vector.
+}
+\details{
+MappedNeuroVec objects use memory-mapped files to store and access large 4D brain
+images efficiently. This approach allows for rapid access to specific portions of
+the data without requiring the entire dataset to be loaded into memory at once.
+
+The function performs the following steps:
+1. Creates a MappedNeuroVecSource object from the input file.
+2. Loads the data from the source using the \code{load_data} method.
+
+This approach allows for efficient handling of large neuroimaging datasets
+by keeping the data on disk and only loading it into memory when needed.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{filemap}}{An instance of the \code{mmap} class representing the memory-mapped file containing the brain image data.}
+\item{\code{filemap}}{An object of class \code{mmap} representing the memory-mapped file
+containing the brain image data.}
 
-\item{\code{offset}}{An integer representing the offset (in bytes) within the memory-mapped file where the brain image data starts.}
+\item{\code{offset}}{An integer representing the byte offset within the memory-mapped file
+where the brain image data starts.}
 }}
 
+\section{Methods}{
+
+This class inherits methods from \code{\linkS4class{NeuroVec}} and implements
+the \code{ArrayLike4D} interface. Additional methods specific to memory-mapped
+operations may be available.
+}
+
+\examples{
+\dontrun{
+# Create a MappedNeuroVec object (pseudo-code)
+file_path <- "/path/to/large/brain/image.dat"
+mapped_vec <- MappedNeuroVec(file_path, dim = c(64, 64, 32, 100))
+
+# Access a subset of the data
+subset <- mapped_vec[,,, 1:10]
+}
+
+\dontrun{
+# Assuming you have a valid 4D neuroimaging file named "fmri.nii"
+mapped_vec <- MappedNeuroVec("fmri.nii")
+}
+
+}
+\seealso{
+\code{\link{NeuroVec-class}} for the parent class.
+\code{\link[mmap]{mmap}} for details on memory-mapped file objects.
+
+\code{\link{MappedNeuroVecSource}}, \code{\link{load_data}}
+}

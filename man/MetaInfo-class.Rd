@@ -4,7 +4,7 @@
 \name{MetaInfo-class}
 \alias{MetaInfo-class}
 \alias{MetaInfo}
-\title{MetaInfo}
+\title{MetaInfo Class}
 \usage{
 MetaInfo(
   Dim,
@@ -17,41 +17,79 @@ MetaInfo(
 )
 }
 \arguments{
-\item{Dim}{image dimensions}
+\item{Dim}{A numeric vector specifying the image dimensions.}
 
-\item{spacing}{voxel dimensions}
+\item{spacing}{A numeric vector specifying the voxel dimensions.}
 
-\item{origin}{coordinate origin}
+\item{origin}{A numeric vector specifying the coordinate origin. Default is a zero vector of length equal to `spacing`.}
 
-\item{data_type}{the type of the data (e.g. "FLOAT")}
+\item{data_type}{A character string specifying the type of the data (e.g., "FLOAT"). Default is "FLOAT".}
 
-\item{label}{name(s) of images}
+\item{label}{A character string specifying the name(s) of images. Default is an empty string.}
 
-\item{spatial_axes}{image axes for spatial dimensions (x,y,z)}
+\item{spatial_axes}{An object specifying the image axes for spatial dimensions (x,y,z). 
+Default is OrientationList3D$AXIAL_LPI.}
 
-\item{additional_axes}{axes for dimensions > 3 (e.g. time, color band, direction)}
+\item{additional_axes}{An object specifying axes for dimensions > 3 (e.g., time, color band, direction). 
+Default is NullAxis.}
 }
 \value{
-an instance of class \code{\linkS4class{MetaInfo}}
+An instance of class \code{\linkS4class{MetaInfo}}.
 }
 \description{
-This class contains meta information for an image data type
+This class encapsulates meta information for neuroimaging data types,
+including spatial and temporal characteristics, data type, and labeling.
+
+This function creates a MetaInfo object, which contains metadata information for a neuroimaging volume.
+}
+\details{
+The MetaInfo class provides a structured way to store and access essential
+metadata for neuroimaging data. This includes information about the data type,
+spatial and temporal dimensions, voxel spacing, and coordinate system origin.
+
+The MetaInfo object encapsulates essential metadata about a neuroimaging volume, 
+including its dimensions, voxel spacing, origin, data type, and axis orientations.
+This information is crucial for correctly interpreting and manipulating the image data.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{data_type}}{the data type code, e.g. FLOAT}
+\item{\code{data_type}}{A \code{character} string specifying the data type code (e.g., "FLOAT", "INT").}
 
-\item{\code{dims}}{image dimensions}
+\item{\code{dims}}{A \code{numeric} vector representing image dimensions.}
 
-\item{\code{spatial_axes}}{image axes for spatial dimensions (x,y,z)}
+\item{\code{spatial_axes}}{An \code{\linkS4class{AxisSet3D}} object representing image axes for spatial dimensions (x, y, z).}
 
-\item{\code{additional_axes}}{axes for dimensions > 3 (e.g. time, color band, direction)}
+\item{\code{additional_axes}}{An \code{\linkS4class{AxisSet}} object representing axes for dimensions beyond spatial (e.g., time, color band, direction).}
 
-\item{\code{spacing}}{voxel dimensions}
+\item{\code{spacing}}{A \code{numeric} vector representing voxel dimensions in real-world units.}
 
-\item{\code{origin}}{coordinate origin}
+\item{\code{origin}}{A \code{numeric} vector representing the coordinate origin.}
 
-\item{\code{label}}{name(s) of images}
+\item{\code{label}}{A \code{character} vector containing name(s) of images or data series.}
 }}
 
+\examples{
+# Create a MetaInfo object
+meta_info <- new("MetaInfo",
+                 data_type = "FLOAT",
+                 dims = c(64, 64, 32, 100),
+                 spatial_axes = new("AxisSet3D"),
+                 additional_axes = new("AxisSet"),
+                 spacing = c(3, 3, 4),
+                 origin = c(0, 0, 0),
+                 label = "fMRI_run1")
+
+# Create a MetaInfo object for a 3D image
+meta <- MetaInfo(Dim = c(64, 64, 32), 
+                 spacing = c(3, 3, 4), 
+                 origin = c(0, 0, 0),
+                 data_type = "FLOAT",
+                 label = "T1_weighted")
+
+}
+\seealso{
+\code{\link{FileMetaInfo-class}}, \code{\link{AxisSet3D-class}}, \code{\link{AxisSet-class}}
+
+\code{\link{NIFTIMetaInfo}}, \code{\link{OrientationList3D}}
+}

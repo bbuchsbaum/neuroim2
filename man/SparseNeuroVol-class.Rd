@@ -4,7 +4,7 @@
 \name{SparseNeuroVol-class}
 \alias{SparseNeuroVol-class}
 \alias{SparseNeuroVol}
-\title{SparseNeuroVol}
+\title{SparseNeuroVol Class}
 \usage{
 SparseNeuroVol(data, space, indices = NULL, label = "")
 }
@@ -21,20 +21,38 @@ SparseNeuroVol(data, space, indices = NULL, label = "")
 \code{\linkS4class{SparseNeuroVol}} instance
 }
 \description{
-This S4 class represents a three-dimensional brain image, which is stored using a sparse data representation, backed by a \code{sparseVector} from the Matrix package. Sparse representations are beneficial for storing and processing large brain images with a high proportion of zero or missing values.
+This class represents a three-dimensional brain image using a sparse data
+representation. It is particularly useful for large brain images with a high
+proportion of zero or missing values, offering efficient storage and processing.
 
 Construct a \code{\linkS4class{SparseNeuroVol}} instance
 }
 \details{
+The SparseNeuroVol class extends the \code{\linkS4class{NeuroVol}} class and
+implements the ArrayLike3D interface. It uses a \code{\linkS4class{sparseVector}}
+from the Matrix package to store the image data, which allows for memory-efficient
+representation of sparse 3D neuroimaging data.
+
 Image data is backed by \code{Matrix::sparseVector}.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{data}}{A \code{\linkS4class{sparseVector}} instance from the Matrix package, which stores the image volume data in a sparse format.}
+\item{\code{data}}{A \code{\linkS4class{sparseVector}} object from the Matrix package,
+storing the image volume data in a sparse format.}
 }}
 
 \examples{
+\dontrun{
+# Create a sparse 3D brain image
+dim <- c(64L, 64L, 64L)
+space <- NeuroSpace(dim = dim, origin = c(0, 0, 0), spacing = c(1, 1, 1))
+sparse_data <- Matrix::sparseVector(x = c(1, 2, 3),
+                                    i = c(100, 1000, 10000),
+                                    length = prod(dim))
+sparse_vol <- new("SparseNeuroVol", space = space, data = sparse_data)
+}
+
 data <- 1:10
 indices <- seq(1,1000, length.out=10)
 bspace <- NeuroSpace(c(64,64,64), spacing=c(1,1,1))
@@ -45,6 +63,13 @@ sum(sparsevol) == sum(densevol)
 
 
 }
+\references{
+Bates, D., & Maechler, M. (2019). Matrix: Sparse and Dense Matrix Classes
+and Methods. R package version 1.2-18.
+https://CRAN.R-project.org/package=Matrix
+}
 \seealso{
-\code{\linkS4class{NeuroVol}}
+\code{\link{NeuroVol-class}} for the base volumetric image class.
+\code{\link{DenseNeuroVol-class}} for a dense representation of 3D brain images.
+\code{\link[Matrix]{sparseVector-class}} for details on the underlying sparse data structure.
 }

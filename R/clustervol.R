@@ -3,8 +3,10 @@
 #' Construct a \code{\linkS4class{ClusteredNeuroVol}} instance
 #'
 #' @param mask an instance of class \code{\linkS4class{LogicalNeuroVol}}
-#' @param clusters a vector of clusters ids with length equal to number of nonzero voxels in mask \code{mask}
-#' @param label_map an optional \code{list} that maps from cluster id to a cluster label, e.g. (1 -> "FFA", 2 -> "PPA")
+#' @param clusters a vector of clusters ids with length equal to number of nonzero 
+#' voxels in mask \code{mask}
+#' @param label_map an optional \code{list} that maps from cluster id to a cluster 
+#' label, e.g. (1 -> "FFA", 2 -> "PPA")
 #' @param label an optional \code{character} string used to label of the volume
 #' @return \code{\linkS4class{ClusteredNeuroVol}} instance
 #'
@@ -108,7 +110,70 @@ setMethod(f="centroids", signature=signature(x="ClusteredNeuroVol"),
             }
           })
 
-## TODO add split_clusters for neurovec
+#' Split Clusters for NeuroVec Objects
+#'
+#' @description
+#' These methods split a NeuroVec object into multiple ROIVec objects based on cluster assignments.
+#'
+#' @param x A NeuroVec object to be split.
+#' @param clusters Either a ClusteredNeuroVol object or an integer vector of cluster assignments.
+#'
+#' @return A deflist object containing ROIVec instances for each cluster.
+#'
+#' @details
+#' There are two methods for splitting clusters:
+#' \itemize{
+#'   \item Using a ClusteredNeuroVol object: This method uses the pre-defined clusters in the ClusteredNeuroVol object.
+#'   \item Using an integer vector: This method allows for custom cluster assignments.
+#' }
+#' 
+#' Both methods return a deflist, which is a lazy-loading list of ROIVec objects.
+#'
+#' @seealso 
+#' \code{\link{NeuroVec-class}}, \code{\link{ClusteredNeuroVol-class}}, \code{\link{ROIVec-class}}
+#'
+#' @examples
+#' \dontrun{
+#' # Using ClusteredNeuroVol
+#' neuro_vec <- # ... create a NeuroVec object
+#' clustered_vol <- # ... create a ClusteredNeuroVol object
+#' split_result <- split_clusters(neuro_vec, clustered_vol)
+#' 
+#' # Using integer vector
+#' cluster_assignments <- # ... create an integer vector of cluster assignments
+#' split_result <- split_clusters(neuro_vec, cluster_assignments)
+#' }
+#'
+#' @export
+#' @rdname split_clusters-methods
+setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="ClusteredNeuroVol"),
+          def = function(x, clusters) {
+            f <- function(i) {
+              idx <- clusters@cluster_map[[as.character(i)]]
+              ROIVec(space(x), index_to_grid(x, as.numeric(idx)), x[idx])
+            }
+            
+            deflist::deflist(f, num_clusters(clusters))
+          })
+
+#' @export
+#' @rdname split_clusters-methods
+setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="integer"),
+          def = function(x, clusters) {
+            assert_that(length(clusters) == prod(dim(x)[1:3]))
+            
+            unique_clusters <- sort(unique(clusters))
+            unique_clusters <- unique_clusters[unique_clusters != 0]
+            
+            f <- function(i) {
+              idx <- which(clusters == i)
+              ROIVec(space(x), index_to_grid(x, idx), x[idx])
+            }
+            
+            deflist::deflist(f, length(unique_clusters))
+          })
+
+
 
 #' split_clusters
 #'
@@ -136,9 +201,9 @@ setMethod(f="centroids", signature=signature(x="ClusteredNeuroVol"),
 #' ## locations with a cluster value of 0 are ignored
 #' indices[mask.idx] <- kres$cluster
 #'
-#' ret2 <- vol %>% split_clusters(as.integer(indices)) %>% purrr::map_dbl(~ mean(values(.)))
+#' ret2 <- vol %>% split_clusters(as.integer(indices)) %>% 
+#' purrr::map_dbl(~ mean(values(.)))
 #' all(ret1 == ret1)
-#'
 setMethod(f="split_clusters", signature=signature(x="NeuroVol", clusters="ClusteredNeuroVol"),
           def = function(x,clusters) {
             f <- function(i) {

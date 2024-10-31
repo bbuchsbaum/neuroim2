@@ -31,9 +31,9 @@ write_vec(x, file_name, format, data_type, ...)
 \S4method{write_vec}{NeuroVec,character,missing,character}(x, file_name, data_type)
 }
 \arguments{
-\item{x}{an image object, typically a \code{NeuroVec} instance.}
+\item{x}{A LatentNeuroVec object to be written.}
 
-\item{file_name}{output file name.}
+\item{file_name}{A character string specifying the output file name.}
 
 \item{format}{file format string. Since "NIFTI" is the only currently supported format, this parameter can be safely ignored and omitted.}
 
@@ -48,8 +48,15 @@ Otherwise output format will be inferred from R the datatype of the image.}
 
 \item{chunk_dim}{the dimensions of each chunk}
 }
+\value{
+None (called for side effects).
+}
 \description{
-Write a 4d image vector to disk
+This method writes a LatentNeuroVec object to an HDF5 file.
+}
+\details{
+This method uses the internal \code{to_h5_latentvec} function to write the LatentNeuroVec 
+object to an HDF5 file. It allows for customization of compression settings and chunking.
 }
 \examples{
 
@@ -60,4 +67,12 @@ write_vec(bvol, "out.nii.gz")
 write_vec(bvec, "out.nii")
 write_vec(bvec, "out.nii.gz")
 }
+\dontrun{
+# Assuming 'svec' is a previously created LatentNeuroVec object
+write_vec(svec, "output.h5", compression = 6)
+}
+
+}
+\seealso{
+\code{\link{LatentNeuroVec-class}}, \code{\link{read_vec}}
 }

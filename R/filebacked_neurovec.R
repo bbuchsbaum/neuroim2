@@ -1,116 +1,96 @@
-
-#' FileBackedNeuroVec
+#' Create a FileBackedNeuroVec Object
 #'
-#' Construct a \code{FileBackedNeuroVec} instance
+#' @description
+#' Constructs a \code{FileBackedNeuroVec} instance, which represents a file-backed
+#' neuroimaging vector object.
 #'
-#' @param file_name the name of the image file
+#' @param file_name A character string specifying the name of the image file.
+#' @return A new instance of class \code{FileBackedNeuroVec}.
+#'
+#' @details
+#' This function reads the header of the specified file, creates a NeuroSpace object,
+#' and initializes a FileBackedNeuroVec with the appropriate metadata.
+#'
+#' @examples
+#' \dontrun{
+#' fbvec <- FileBackedNeuroVec("path/to/image.nii")
+#' }
+#'
+#' @seealso \code{\link{NeuroSpace}}, \code{\link{read_header}}
+#'
 #' @export
-#' @return a new instance of type \code{FileBackedNeuroVec}
 FileBackedNeuroVec <- function(file_name) {
   meta <- read_header(file_name)
   assert_that(length(meta@dims) == 4)
-  sp <- NeuroSpace(meta@dims,meta@spacing, meta@origin,
-                       meta@spatial_axes, trans(meta))
+  sp <- NeuroSpace(meta@dims, meta@spacing, meta@origin,
+                   meta@spatial_axes, trans(meta))
 
   new("FileBackedNeuroVec",
-      space=sp,
-      meta=meta)
-
+      space = sp,
+      meta = meta)
 }
 
-
-
+#' Extract Sub-vector from FileBackedNeuroVec
+#'
+#' @param x A FileBackedNeuroVec object.
+#' @param i A numeric vector specifying the indices to extract.
+#'
+#' @return A DenseNeuroVec object containing the extracted sub-vector.
+#'
+#' @details
+#' This method reads the specified volumes from the file-backed data and
+#' returns them as a DenseNeuroVec object.
+#'
 #' @export
 #' @rdname sub_vector-methods
-setMethod(f="sub_vector", signature=signature(x="FileBackedNeuroVec", i="numeric"),
-          def=function(x, i) {
+setMethod(f = "sub_vector", signature = signature(x = "FileBackedNeuroVec", i = "numeric"),
+          def = function(x, i) {
             mat <- read_mapped_vols(x@meta, i)
             sp <- add_dim(drop_dim(space(x)), length(i))
             DenseNeuroVec(mat, sp)
           })
 
-
-#' as.list
+#' Convert FileBackedNeuroVec to List
 #'
-#' convert FileBackedNeuroVec to list of \code{\linkS4class{DenseNeuroVol}} objects.
+#' @description
+#' Converts a FileBackedNeuroVec object to a list of DenseNeuroVol objects.
+#'
+#' @param x A FileBackedNeuroVec object.
+#'
+#' @return A deferred list of DenseNeuroVol objects.
+#'
+#' @details
+#' This method creates a deferred list, where each element is a DenseNeuroVol
+#' object representing a single volume from the FileBackedNeuroVec.
+#'
+#' @export
 #' @rdname as.list-methods
-#' @export
-setMethod(f="as.list", signature=signature(x = "FileBackedNeuroVec"), def=function(x) {
-  D4 <- dim(x)[4]
-
-  f <- function(i) {
-    drop(sub_vector(x, i))
-  }
-
-  #deferred_list(lapply(seq(1, D4),
-  #       function(i) { f } ))
-
-  deflist::deflist(f, D4)
-
-})
-
-#' @noRd
-setMethod(f="linear_access", signature=signature(x = "FileBackedNeuroVec", i = "numeric"),
-          def=function (x, i) {
-            read_mapped_data(x@meta, i)
+setMethod(f = "as.list", signature = signature(x = "FileBackedNeuroVec"),
+          def = function(x) {
+            D4 <- dim(x)[4]
+            f <- function(i) {
+              drop(sub_vector(x, i))
+            }
+            deflist::deflist(f, D4)
           })
 
 
+#' Convert FileBackedNeuroVec to Matrix
+#'
+#' @description
+#' This method converts a FileBackedNeuroVec object to a matrix.
+#'
+#' @param from A FileBackedNeuroVec object to be converted.
+#'
+#' @return A matrix representation of the FileBackedNeuroVec object.
+#'
+#' @details
+#' The resulting matrix will have rows representing time points (or the 4th dimension)
+#' and columns representing voxels. The voxels are arranged in a linear order.
+#'
 #' @noRd
-setMethod(f="linear_access", signature=signature(x = "H5NeuroVec", i = "numeric"),
-          def=function (x, i) {
-            els <- x@obj[["data/elements"]]
-            g <- index_to_grid(space(x), i)
-            apply(g, 1, function(r) {
-              els[r[1], r[2], r[3], r[4]]
-            })
-          })
-
-
-
-#' @rdname as.matrix-methods
-#' @export
-setMethod(f="as.matrix", signature=signature(x = "FileBackedNeuroVec"), def=function(x) {
-  as(x, "matrix")
-})
-
-#' @export
-setAs(from="FileBackedNeuroVec", to="matrix",
-      function(from) {
+setAs(from = "FileBackedNeuroVec", to = "matrix",
+      def = function(from) {
         len <- prod(from@meta@dims[1:3])
         t(series(from, seq(1, len)))
       })
-
-
-#' @export
-#' @rdname concat-methods
-# setMethod(f="concat", signature=signature(x="FileBackedNeuroVec", y="FileBackedNeuroVec"),
-#           def=function(x,y,...) {
-#             if (!all(dim(x)[1:3] == dim(y)[1:3])) {
-#               stop("cannot concatenate arguments with different spatial dimensions")
-#             }
-#             if (!all(spacing(x) == spacing(y))) {
-#               stop("cannot concatenate arguments with different voxel spacing")
-#             }
-#
-#             ndat <- rbind(x@data, y@data)
-#             d1 <- dim(x)
-#             d2 <- dim(y)
-#
-#             rest <- list(...)
-#
-#
-#             if (length(rest) >= 1) {
-#               mat <- do.call(rbind, map(rest, ~ .@data))
-#
-#               ndim <- c(d1[1:3], d1[4] + d2[4] + nrow(mat))
-#               ndat <- rbind(ndat, mat)
-#               nspace <- NeuroSpace(ndim, spacing(x@space),  origin(x@space), axes(x@space), trans(x@space))
-#               SparseNeuroVec(ndat, nspace, mask=x@mask)
-#             } else {
-#               ndim <- c(d1[1:3], d1[4] + d2[4])
-#               nspace <- NeuroSpace(ndim, spacing(x@space),  origin(x@space), axes(x@space), trans(x@space))
-#               SparseNeuroVec(ndat, nspace, mask=x@mask)
-#             }
-#
-#           })

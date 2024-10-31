@@ -3,7 +3,54 @@
 \docType{class}
 \name{NeuroHyperVec-class}
 \alias{NeuroHyperVec-class}
-\title{NeuroHyperVec}
+\title{NeuroHyperVec Class}
 \description{
-Five-dimensional brain image
+This class represents a five-dimensional brain image, extending the functionality
+of \code{\linkS4class{NeuroObj}} to handle higher-dimensional neuroimaging data.
+}
+\details{
+NeuroHyperVec is designed to store and manipulate five-dimensional neuroimaging
+data. This can be useful for representing multi-modal imaging data, multiple
+time series, or other complex neuroimaging datasets that require more than
+four dimensions.
+
+The class ensures that all contained NeuroVec objects have consistent spatial
+dimensions, spacing, and fourth-dimension length.
+}
+\section{Slots}{
+
+\describe{
+\item{\code{vecs}}{A list of \code{\linkS4class{NeuroVec}} objects, each representing a
+four-dimensional brain image.}
+}}
+
+\section{Validity}{
+
+A NeuroHyperVec object is considered valid if:
+\itemize{
+  \item All elements in the \code{vecs} slot are \code{NeuroVec} objects.
+  \item All NeuroVec objects have the same spatial dimensions (first three dimensions).
+  \item All NeuroVec objects have the same spacing.
+  \item All NeuroVec objects have the same length in the fourth dimension.
+}
+}
+
+\examples{
+\dontrun{
+# Create multiple NeuroVec objects
+space <- NeuroSpace(dim = c(64, 64, 32), origin = c(0, 0, 0), spacing = c(3, 3, 4))
+vec1 <- NeuroVec(data = array(rnorm(64*64*32*100), dim = c(64, 64, 32, 100)), space = space)
+vec2 <- NeuroVec(data = array(rnorm(64*64*32*100), dim = c(64, 64, 32, 100)), space = space)
+
+# Create a NeuroHyperVec object
+hyper_vec <- new("NeuroHyperVec", vecs = list(vec1, vec2))
+
+# Access the first NeuroVec
+first_vec <- hyper_vec@vecs[[1]]
+}
+
+}
+\seealso{
+\code{\link{NeuroObj-class}} for the parent class.
+\code{\link{NeuroVec-class}} for the four-dimensional brain image class.
 }

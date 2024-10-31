@@ -3,15 +3,15 @@
 \name{close,BinaryReader-method}
 \alias{close,BinaryReader-method}
 \alias{close,BinaryWriter-method}
-\title{close}
+\title{Close a BinaryReader or BinaryWriter}
 \usage{
 \S4method{close}{BinaryReader}(con)
 
 \S4method{close}{BinaryWriter}(con)
 }
 \arguments{
-\item{con}{the object to close}
+\item{con}{The BinaryReader or BinaryWriter object to close.}
 }
 \description{
-close
+This method closes the connection associated with a BinaryReader or BinaryWriter object.
 }

@@ -3,13 +3,27 @@
 \docType{class}
 \name{AxisSet3D-class}
 \alias{AxisSet3D-class}
-\title{AxisSet3D}
+\title{AxisSet3D Class}
 \description{
-A three-dimensional axis set
+A class representing a three-dimensional axis set, extending the AxisSet2D class
+with an additional third axis.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{k}}{the third axis}
+\item{\code{k}}{A \code{NamedAxis} object representing the third axis.}
 }}
 
+\examples{
+# Create NamedAxis objects for each dimension
+x_axis <- new("NamedAxis", axis = "x", direction = 1)
+y_axis <- new("NamedAxis", axis = "y", direction = 1)
+z_axis <- new("NamedAxis", axis = "z", direction = 1)
+
+# Create an AxisSet3D object
+axis_set_3d <- new("AxisSet3D", i = x_axis, j = y_axis, k = z_axis, ndim = 3L)
+
+}
+\seealso{
+\code{\link{AxisSet2D-class}}, \code{\link{NamedAxis-class}}
+}

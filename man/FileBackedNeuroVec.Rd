@@ -2,16 +2,30 @@
 % Please edit documentation in R/filebacked_neurovec.R
 \name{FileBackedNeuroVec}
 \alias{FileBackedNeuroVec}
-\title{FileBackedNeuroVec}
+\title{Create a FileBackedNeuroVec Object}
 \usage{
 FileBackedNeuroVec(file_name)
 }
 \arguments{
-\item{file_name}{the name of the image file}
+\item{file_name}{A character string specifying the name of the image file.}
 }
 \value{
-a new instance of type \code{FileBackedNeuroVec}
+A new instance of class \code{FileBackedNeuroVec}.
 }
 \description{
-Construct a \code{FileBackedNeuroVec} instance
+Constructs a \code{FileBackedNeuroVec} instance, which represents a file-backed
+neuroimaging vector object.
+}
+\details{
+This function reads the header of the specified file, creates a NeuroSpace object,
+and initializes a FileBackedNeuroVec with the appropriate metadata.
+}
+\examples{
+\dontrun{
+fbvec <- FileBackedNeuroVec("path/to/image.nii")
+}
+
+}
+\seealso{
+\code{\link{NeuroSpace}}, \code{\link{read_header}}
 }

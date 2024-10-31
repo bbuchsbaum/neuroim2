@@ -20,17 +20,25 @@ sub_vector(x, i, ...)
 \S4method{sub_vector}{SparseNeuroVec,numeric}(x, i)
 }
 \arguments{
-\item{x}{four-dimensional image}
+\item{x}{A FileBackedNeuroVec object.}
 
-\item{i}{the indices of the volume(s) to extract}
+\item{i}{A numeric vector specifying the indices to extract.}
 
 \item{...}{additional arguments}
 }
 \value{
 a  \code{NeuroVec} object that is a sub-sequence of the supplied object.
+
+A DenseNeuroVec object containing the extracted sub-vector.
 }
 \description{
 Generic function to extract a sub-vector from a \code{NeuroVec} object.
+
+Extract Sub-vector from FileBackedNeuroVec
+}
+\details{
+This method reads the specified volumes from the file-backed data and
+returns them as a DenseNeuroVec object.
 }
 \examples{
 bvec <- NeuroVec(array(rnorm(24*24*24*24), c(24,24,24,24)), NeuroSpace(c(24,24,24,24), c(1,1,1)))

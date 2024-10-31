@@ -4,18 +4,61 @@
 \name{MappedNeuroVecSource-class}
 \alias{MappedNeuroVecSource-class}
 \alias{MappedNeuroVecSource}
-\title{MappedNeuroVecSource}
+\title{MappedNeuroVecSource Class}
 \usage{
 MappedNeuroVecSource(file_name)
 }
 \arguments{
-\item{file_name}{the name of the image file to be memory mapped}
+\item{file_name}{A character string specifying the name of the image file to be memory mapped.}
 }
 \value{
-a new instance of type \code{MappedNeuroVecSource}
+A new instance of class \code{\linkS4class{MappedNeuroVecSource}}.
 }
 \description{
-A class that is used to produce a \code{\linkS4class{MappedNeuroVec}} instance
+A class used to produce a \code{\linkS4class{MappedNeuroVec}} instance. It encapsulates
+the necessary information to create a memory-mapped representation of a 4D neuroimaging dataset.
 
-constructs a MappedNeuroVecSource object
+This function constructs a MappedNeuroVecSource object, which represents a source
+for memory-mapped neuroimaging data.
+}
+\details{
+MappedNeuroVecSource acts as a factory for MappedNeuroVec objects. While it doesn't
+have any additional slots beyond its parent class, it specifies the intent to create
+a memory-mapped representation of the neuroimaging data. This class is typically used
+in data loading pipelines where large datasets need to be accessed efficiently without
+loading the entire dataset into memory.
+
+The function performs the following steps:
+1. Reads the header of the specified file using \code{\link{read_header}}.
+2. Checks that the dimensions of the meta information are at least 3D.
+3. Creates and returns a new MappedNeuroVecSource object with the meta information.
+}
+\section{Inheritance}{
+
+\code{MappedNeuroVecSource} inherits from:
+\itemize{
+  \item \code{\linkS4class{NeuroVecSource}}: Base class for NeuroVec source objects
+}
+}
+
+\examples{
+\dontrun{
+# Create a MappedNeuroVecSource
+mapped_source <- new("MappedNeuroVecSource")
+
+# Use the source to create a MappedNeuroVec (pseudo-code)
+# file_path <- "/path/to/large/brain/image.dat"
+# mapped_vec <- create_mapped_neuro_vec(mapped_source, file_path)
+}
+
+\dontrun{
+# Assuming you have a valid neuroimaging file named "brain.nii"
+source <- MappedNeuroVecSource("brain.nii")
+}
+
+}
+\seealso{
+\code{\link{MappedNeuroVec-class}} for the resulting memory-mapped 4D neuroimaging data class.
+
+\code{\link{MappedNeuroVec}}, \code{\link{read_header}}
 }

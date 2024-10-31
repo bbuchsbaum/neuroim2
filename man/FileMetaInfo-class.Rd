@@ -7,58 +7,113 @@
 \alias{AFNIMetaInfo-class}
 \alias{NIFTIMetaInfo}
 \alias{AFNIMetaInfo}
-\title{FileMetaInfo}
+\title{FileMetaInfo Class}
 \usage{
 NIFTIMetaInfo(descriptor, nifti_header)
 
 AFNIMetaInfo(descriptor, afni_header)
 }
 \arguments{
-\item{descriptor}{an instance of class \code{AFNIFormat}}
+\item{descriptor}{An instance of class \code{\linkS4class{AFNIFormat}}.}
 
-\item{nifti_header}{a \code{list} returned by \code{readNIftiHeader}}
+\item{nifti_header}{A list returned by \code{readNIftiHeader} containing NIFTI header information.}
 
-\item{afni_header}{a \code{list} returned by \code{read_afni_header}}
+\item{afni_header}{A list returned by \code{read_afni_header} containing AFNI header information.}
 }
 \value{
-an instance of class \code{\linkS4class{NIFTIMetaInfo}}
+An instance of class \code{\linkS4class{NIFTIMetaInfo}}.
 
-an instance of class \code{AFNIMetaInfo}
+An instance of class \code{\linkS4class{AFNIMetaInfo}}.
 }
 \description{
-This class contains meta information from an image data file
+This class extends MetaInfo to include file-specific metadata for neuroimaging data files.
 
-This class contains meta information for a NIfTI image file
+This class extends FileMetaInfo with NIfTI-specific metadata.
 
-This class contains meta information for a AFNI image file.
+This class extends FileMetaInfo with AFNI-specific metadata.
 
-Constructor for \code{AFNIMetaInfo} class
+This function creates a NIFTIMetaInfo object, which contains metadata information 
+specific to NIFTI format neuroimaging files.
+
+This function constructs an AFNIMetaInfo object, which contains metadata information 
+specific to AFNI format neuroimaging files.
+}
+\details{
+The NIFTIMetaInfo object extends the basic MetaInfo with additional fields specific to the NIFTI format.
+It includes information about file locations, endianness, data offsets, and NIFTI-specific 
+transformations and scaling factors.
+
+This function performs several steps:
+1. Checks that the input header is valid for a NIFTI file.
+2. Extracts relevant information from the NIFTI header.
+3. Computes derived information (e.g., bytes per element, dimensions).
+4. Creates and returns a new NIFTIMetaInfo object.
+
+The AFNIMetaInfo object extends the basic MetaInfo with additional fields specific to the AFNI format.
+It includes information about file locations, endianness, data types, dimensions, and AFNI-specific 
+transformations and scaling factors.
+
+This function performs several steps:
+1. Extracts and processes dimension information from the AFNI header.
+2. Generates labels for each sub-brick if not provided in the header.
+3. Computes the transformation matrix from AFNI's IJK space to NIFTI's LPI space.
+4. Determines various metadata fields such as endianness, data type, and scaling factors.
+5. Creates and returns a new AFNIMetaInfo object.
+
+Note: The 'additional_axes' field is currently set to NullAxis, which may be incorrect 
+for some AFNI datasets with more than 3 dimensions.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{header_file}}{name of the file containing meta information}
+\item{\code{header_file}}{A \code{character} string specifying the name of the file containing meta information.}
 
-\item{\code{data_file}}{name of the file containing data}
+\item{\code{data_file}}{A \code{character} string specifying the name of the file containing image data.}
 
-\item{\code{descriptor}}{descriptor of image file format}
+\item{\code{descriptor}}{A \code{\linkS4class{FileFormat}} object describing the image file format.}
 
-\item{\code{endian}}{byte order of data ('little' or 'big')}
+\item{\code{endian}}{A \code{character} string specifying the byte order of data ('little' or 'big').}
 
-\item{\code{data_offset}}{the number of bytes preceding the start of image data in data file}
+\item{\code{data_offset}}{A \code{numeric} value indicating the number of bytes preceding the start of image data in the data file.}
 
-\item{\code{bytes_per_element}}{number of bytes per element}
+\item{\code{bytes_per_element}}{An \code{integer} specifying the number of bytes per data element.}
 
-\item{\code{intercept}}{constant value added to image -- multiple values allowed (must equal numer of sub-images)}
+\item{\code{intercept}}{A \code{numeric} vector of constant values added to image data (one per sub-image).}
 
-\item{\code{slope}}{image multiplier -- multiple values allowed (must equal numer of sub-images)}
+\item{\code{slope}}{A \code{numeric} vector of multipliers for image data (one per sub-image).}
 
-\item{\code{header}}{a list of format specific attributes}
+\item{\code{header}}{A \code{list} of format-specific attributes.}
 
-\item{\code{nifti_header}}{a \code{list} of attributes specific to the NIfTI file format}
+\item{\code{nifti_header}}{A \code{list} of attributes specific to the NIfTI file format.}
 
-\item{\code{afni_header}}{a list of attributes specific to the AFNI file format}
-
-\item{\code{afni_header}}{a \code{list} of attributes specific to the AFNI file format}
+\item{\code{afni_header}}{A \code{list} of attributes specific to the AFNI file format.}
 }}
 
+\examples{
+\dontrun{
+# Assuming you have a NIFTIFormat object and a NIFTI header
+nifti_format <- NIFTIFormat()
+nifti_header <- readNIftiHeader("brain.nii")
+meta_info <- NIFTIMetaInfo(nifti_format, nifti_header)
+}
+
+\dontrun{
+# Assuming you have an AFNIFormat object and an AFNI header
+afni_format <- AFNIFormat()
+afni_header <- read_afni_header("brain.HEAD")
+meta_info <- AFNIMetaInfo(afni_format, afni_header)
+}
+
+}
+\seealso{
+\code{\link{MetaInfo-class}}, \code{\link{NIFTIMetaInfo-class}}, \code{\link{AFNIMetaInfo-class}}
+
+\code{\link{FileMetaInfo-class}}
+
+\code{\link{FileMetaInfo-class}}
+
+\code{\link{MetaInfo}}, \code{\link{NIFTIFormat-class}}, \code{\link{readNIftiHeader}}
+
+\code{\link{MetaInfo}}, \code{\link{AFNIFormat-class}}, \code{\link{read_afni_header}},
+\code{\link{NIFTIMetaInfo}}
+}

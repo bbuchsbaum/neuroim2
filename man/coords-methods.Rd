@@ -4,7 +4,7 @@
 \alias{coords,IndexLookupVol-method}
 \alias{coords,ROICoords-method}
 \alias{coords,AbstractSparseNeuroVec-method}
-\title{Extract coordinates from an IndexLookupVol object}
+\title{Extract Coordinates from an IndexLookupVol Object}
 \usage{
 \S4method{coords}{IndexLookupVol}(x, i)
 
@@ -20,8 +20,18 @@
 \item{real}{if \code{TRUE}, return coordinates in real world units}
 }
 \value{
-The extracted coordinates corresponding to the provided index. If the index is not found, it returns NA.
+The extracted coordinates corresponding to the provided index.
+        If the index is not found, it returns NA.
 }
 \description{
 This method extracts the coordinates from an IndexLookupVol object based on a given index.
+}
+\examples{
+\dontrun{
+space <- NeuroSpace(c(64, 64, 64), c(1, 1, 1), c(0, 0, 0))
+indices <- sample(1:262144, 10000)
+ilv <- IndexLookupVol(space, indices)
+coords(ilv, 1000)
+}
+
 }

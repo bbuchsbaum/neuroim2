@@ -5,11 +5,22 @@
 \alias{AxisSet2D-class}
 \title{AxisSet2D}
 \description{
-A two-dimensional axis set
+A two-dimensional axis set representing an ordered pair of named axes.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{j}}{the second axis}
+\item{\code{i}}{The first axis, inherited from AxisSet1D}
+
+\item{\code{j}}{The second axis, of class "NamedAxis"}
 }}
 
+\examples{
+# Create an AxisSet2D object
+axis1 <- new("NamedAxis", axis = "x", direction = 1)
+axis2 <- new("NamedAxis", axis = "y", direction = 1)
+axisSet2D <- new("AxisSet2D", i = axis1, j = axis2, ndim = 2L)
+}
+\seealso{
+\code{\link{AxisSet1D-class}}, \code{\link{AxisSet3D-class}}
+}

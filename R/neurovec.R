@@ -7,24 +7,67 @@ NULL
 
 #' NeuroVec
 #'
-#' Constructor function for the \code{\linkS4class{NeuroVec}} class. This function is used to create an instance of a NeuroVec object, which represents a four-dimensional brain image.
+#' @description
+#' This function constructs a NeuroVec object, which represents a four-dimensional 
+#' brain image. It can create either a DenseNeuroVec or SparseNeuroVec object 
+#' depending on the input parameters.
 #'
-#' @param data The image data, which can be a matrix, a 4D array, or a list of \code{NeuroVol} objects. If the latter, the geometric space of the data (\code{NeuroSpace}) will be inferred from the constituent volumes, which must all be identical.
-#' @param space An optional \code{\linkS4class{NeuroSpace}} object. Does not need to be included if the \code{data} argument is a list of \code{NeuroVol} objects.
-#' @param mask An optional \code{array} of type \code{logical}.
-#' @param label A label of type \code{character}.
-#' @return A concrete instance of the \code{\linkS4class{NeuroVec}} class. If a \code{mask} is provided, the function returns a \code{\linkS4class{SparseNeuroVec}} object; otherwise, it returns a \code{\linkS4class{DenseNeuroVec}} object.
+#' @param data The image data. This can be:
+#'   \itemize{
+#'     \item A matrix (voxels x time points)
+#'     \item A 4D array
+#'     \item A list of \code{\linkS4class{NeuroVol}} objects
+#'   }
+#'   If a list of NeuroVol objects is provided, the geometric space (\code{NeuroSpace}) 
+#'   will be inferred from the constituent volumes, which must all be identical.
+#' @param space An optional \code{\linkS4class{NeuroSpace}} object defining the spatial 
+#'   properties of the image. Not required if \code{data} is a list of NeuroVol objects.
+#' @param mask An optional logical array specifying which voxels to include. If provided, 
+#'   a SparseNeuroVec object will be created.
+#' @param label A character string providing a label for the NeuroVec object. Default is an empty string.
+#'
+#' @return A concrete instance of the \code{\linkS4class{NeuroVec}} class:
+#'   \itemize{
+#'     \item If \code{mask} is provided: a \code{\linkS4class{SparseNeuroVec}} object
+#'     \item Otherwise: a \code{\linkS4class{DenseNeuroVec}} object
+#'   }
+#'
+#' @details
+#' The function performs several operations:
+#' \itemize{
+#'   \item If \code{data} is a list of NeuroVol objects, it combines them into a single 4D array.
+#'   \item It checks that the dimensions of \code{data} match the provided \code{space}.
+#'   \item Depending on whether a \code{mask} is provided, it creates either a DenseNeuroVec 
+#'     or a SparseNeuroVec object.
+#' }
 #'
 #' @examples
 #' # Load an example 4D brain image
-#' example_4d_image <- read_vec(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
+#' example_file <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
+#' example_4d_image <- read_vec(example_file)
 #'
-#' # Create a NeuroVec object
-#' neuro_vec <- NeuroVec(data=example_4d_image@.Data, space=space(example_4d_image))
+#' # Create a DenseNeuroVec object
+#' dense_vec <- NeuroVec(data = example_4d_image@.Data, 
+#'                       space = space(example_4d_image))
+#' print(dense_vec)
 #'
-#' @export NeuroVec
+#' # Create a SparseNeuroVec object with a mask
+#' mask <- array(runif(prod(dim(example_4d_image)[1:3])) > 0.5, 
+#'               dim = dim(example_4d_image)[1:3])
+#' sparse_vec <- NeuroVec(data = example_4d_image@.Data, 
+#'                        space = space(example_4d_image),
+#'                        mask = mask)
+#' print(sparse_vec)
+#'
+#' @seealso 
+#' \code{\link{DenseNeuroVec-class}}, \code{\link{SparseNeuroVec-class}} for the 
+#' specific NeuroVec types.
+#' \code{\link{NeuroVol-class}} for 3D volumetric data.
+#' \code{\link{NeuroSpace-class}} for details on spatial properties.
+#'
+#' @export
 #' @rdname NeuroVec-class
-NeuroVec <- function(data, space=NULL, mask=NULL, label="") {
+NeuroVec <- function(data, space = NULL, mask = NULL, label = "") {
   if (is.list(data)) {
     space <- space(data[[1]])
     space <- add_dim(space, length(data))
@@ -48,13 +91,56 @@ NeuroVec <- function(data, space=NULL, mask=NULL, label="") {
 
 #' DenseNeuroVec
 #'
-#' constructor function for class \code{\linkS4class{DenseNeuroVec}}
+#' @description
+#' This function constructs a DenseNeuroVec object, which represents a dense 
+#' four-dimensional brain image. It handles various input data formats and 
+#' ensures proper dimensionality.
 #'
-#' @param data a 4-dimensional \code{array} or a 2-dimension \code{matrix} that is either nvoxels by ntime-points or ntime-points by nvoxels
-#' @param space a \code{\linkS4class{NeuroSpace}} object
-#' @param label a label of type \code{character}
-#' @return \code{\linkS4class{DenseNeuroVec}} instance
-#' @export DenseNeuroVec
+#' @param data The image data. This can be:
+#'   \itemize{
+#'     \item A 4-dimensional array
+#'     \item A 2-dimensional matrix (either nvoxels x ntime-points or 
+#'           ntime-points x nvoxels)
+#'     \item A vector (which will be reshaped to match the space dimensions)
+#'   }
+#' @param space A \code{\linkS4class{NeuroSpace}} object defining the spatial properties of the image.
+#' @param label A character string providing a label for the DenseNeuroVec object. Default is an empty string.
+#'
+#' @return A concrete instance of the \code{\linkS4class{DenseNeuroVec}} class.
+#'
+#' @details
+#' The function performs several operations based on the input data type:
+#' \itemize{
+#'   \item For matrix input: It determines the correct orientation (voxels x time or time x voxels) 
+#'     and reshapes accordingly. If necessary, it adds a 4th dimension to the space object.
+#'   \item For vector input: It reshapes the data to match the dimensions specified in the space object.
+#'   \item For array input: It ensures the dimensions match those specified in the space object.
+#' }
+#' 
+#' Note that the label parameter is currently not used in the object creation, 
+#' but is included for potential future use or consistency with other constructors.
+#'
+#' @examples
+#' # Create a simple 4D brain image
+#' dim <- c(64, 64, 32, 10)  # 64x64x32 volume with 10 time points
+#' data <- array(rnorm(prod(dim)), dim)
+#' space <- NeuroSpace(dim, spacing = c(3, 3, 4, 1))
+#' 
+#' # Create a DenseNeuroVec object
+#' dense_vec <- DenseNeuroVec(data = data, space = space, label = "Example")
+#' print(dense_vec)
+#'
+#' # Create from a matrix (voxels x time)
+#' mat_data <- matrix(rnorm(prod(dim)), nrow = prod(dim[1:3]), ncol = dim[4])
+#' dense_vec_mat <- DenseNeuroVec(data = mat_data, space = space)
+#' print(dense_vec_mat)
+#'
+#' @seealso 
+#' \code{\link{NeuroVec-class}} for the parent class.
+#' \code{\link{SparseNeuroVec-class}} for the sparse version of 4D brain images.
+#' \code{\link{NeuroSpace-class}} for details on spatial properties.
+#'
+#' @export
 #' @rdname DenseNeuroVec-class
 DenseNeuroVec <- function(data, space, label="") {
 
@@ -84,59 +170,134 @@ DenseNeuroVec <- function(data, space, label="") {
 
 
 
-#' load_data
+#' Load image data from a NeuroVecSource object
 #'
-#' @return an instance of class \code{NeuroVec}
-#' @importFrom RNifti readNifti
+#' @description
+#' This function loads the image data from a NeuroVecSource object, handling various
+#' dimensionalities and applying any necessary transformations.
+#'
+#' @param x The NeuroVecSource object containing the image metadata and file information.
+#'
+#' @return A DenseNeuroVec object containing the loaded image data and associated spatial information.
+#'
+#' @details
+#' This method performs the following steps:
+#' 1. Validates the dimensionality of the metadata.
+#' 2. Reads the image data using RNifti.
+#' 3. Handles 5D arrays by dropping the 4th dimension if it has length 1.
+#' 4. Applies slope scaling if present in the metadata.
+#' 5. Constructs a NeuroSpace object with appropriate dimensions and spatial information.
+#' 6. Creates and returns a DenseNeuroVec object, handling both 3D and 4D input arrays.
+#'
+#' @note This method currently only supports NIfTI file format through RNifti.
+#'
+#' @seealso \code{\link{NeuroVecSource}}, \code{\link{DenseNeuroVec}}, \code{\link{NeuroSpace}}
+#'
+#' @examples
+#' \dontrun{
+#' # Assuming 'source' is a valid NeuroVecSource object
+#' vec_data <- load_data(source)
+#' }
+#'
 #' @noRd
 setMethod(f="load_data", signature=c("NeuroVecSource"),
-		def=function(x) {
-      #browser()
-			meta <- x@meta_info
+          def=function(x) {
+            #browser()
+            meta <- x@meta_info
 
-			stopifnot(length(meta@dims) == 4)
+            stopifnot(length(meta@dims) == 4)
 
-			nels <- prod(meta@dims[1:4])
-			ind <- x@indices
+            nels <- prod(meta@dims[1:4])
+            ind <- x@indices
 
-			## use RNifti, fails to work with other formats, though...
-			arr <- RNifti::readNifti(meta@data_file)
+            ## use RNifti, fails to work with other formats, though...
+            arr <- RNifti::readNifti(meta@data_file)
 
-			if (length(dim(arr)) == 5 && dim(arr)[4] == 1) {
-			  ## if 4th dimension is of length 1, drop it
-			  arr <- drop(arr)
-			}
-
-
-			## bit of a hack to deal with scale factors
-			if (.hasSlot(meta, "slope")) {
-
-        if (meta@slope != 0) {
-			    arr <- arr * meta@slope
-        }
-			}
-
-      bspace <- NeuroSpace(c(meta@dims[1:3], length(ind)),meta@spacing, meta@origin,
-                           meta@spatial_axes, trans(meta))
-
-      if (length(dim(arr)) == 3) {
-        dim(arr) <- c(dim(arr),1)
-        DenseNeuroVec(unclass(arr), bspace, x)
-      } else if (length(dim(arr)) == 4) {
-        DenseNeuroVec(arr[,,,ind,drop=FALSE], bspace, x)
-      } else {
-        stop("NeuroVecSource::load_data: array dimension must be equal to 3 or 4.")
-      }
-})
+            if (length(dim(arr)) == 5 && dim(arr)[4] == 1) {
+              ## if 4th dimension is of length 1, drop it
+              arr <- drop(arr)
+            }
 
 
+            ## bit of a hack to deal with scale factors
+            if (.hasSlot(meta, "slope")) {
+
+              if (meta@slope != 0) {
+                arr <- arr * meta@slope
+              }
+            }
+
+            bspace <- NeuroSpace(c(meta@dims[1:3], length(ind)),meta@spacing, meta@origin,
+                                 meta@spatial_axes, trans(meta))
+
+            if (length(dim(arr)) == 3) {
+              dim(arr) <- c(dim(arr),1)
+              DenseNeuroVec(unclass(arr), bspace, x)
+            } else if (length(dim(arr)) == 4) {
+              DenseNeuroVec(arr[,,,ind,drop=FALSE], bspace, x)
+            } else {
+              stop("NeuroVecSource::load_data: array dimension must be equal to 3 or 4.")
+            }
+          })
+
+
+#' Load data from an H5NeuroVecSource object
+#'
+#' @description
+#' This function loads the image data from an H5NeuroVecSource object, which represents
+#' data stored in an HDF5 file format.
+#'
+#' @param x The H5NeuroVecSource object containing the file name of the HDF5 data.
+#'
+#' @return An H5NeuroVec object containing the loaded image data.
+#'
+#' @details
+#' This method simply calls the H5NeuroVec constructor with the file name stored in the source object.
+#'
+#' @seealso \code{\link{H5NeuroVecSource}}, \code{\link{H5NeuroVec}}
+#'
+#' @examples
+#' \dontrun{
+#' # Assuming 'source' is a valid H5NeuroVecSource object
+#' h5_data <- load_data(source)
+#' }
+#'
 #' @noRd
 setMethod(f="load_data", signature=c("H5NeuroVecSource"),
           def=function(x) {
             H5NeuroVec(x@file_name)
           })
 
-
+#' Load data from a LatentNeuroVecSource object
+#'
+#' @description
+#' This function loads and constructs a LatentNeuroVec object from a LatentNeuroVecSource,
+#' which represents latent space neuroimaging data stored in an HDF5 file.
+#'
+#' @param x The LatentNeuroVecSource object containing the file name of the HDF5 data.
+#'
+#' @return A LatentNeuroVec object containing the loaded latent space representation of the neuroimaging data.
+#'
+#' @details
+#' This method performs the following steps:
+#' 1. Opens the HDF5 file specified in the source object.
+#' 2. Reads the basis, loadings, offset, and indices data from the file.
+#' 3. Constructs a NeuroSpace object from the spatial information in the file.
+#' 4. Creates a mask from the indices data.
+#' 5. Closes the HDF5 file.
+#' 6. Constructs and returns a LatentNeuroVec object with the loaded data.
+#'
+#' @note This method requires the hdf5r package for reading HDF5 files.
+#'
+#' @seealso \code{\link{LatentNeuroVecSource}}, \code{\link{LatentNeuroVec}}, \code{\link{NeuroSpace}}
+#'
+#' @examples
+#' \dontrun{
+#' # Assuming 'source' is a valid LatentNeuroVecSource object
+#' latent_data <- load_data(source)
+#' }
+#'
+#' @importFrom hdf5r H5File
 #' @noRd
 setMethod(f="load_data", signature=c("LatentNeuroVecSource"),
           def=function(x) {
@@ -153,24 +314,30 @@ setMethod(f="load_data", signature=c("LatentNeuroVecSource"),
             mask <- NeuroVol(array(0, dim(sp)[1:3]), drop_dim(sp))
             mask[indices] <- 1
             mask <- as.logical(mask)
-            #h5obj$close()
             h5obj$close_all()
             LatentNeuroVec(basis, loadings, space=sp, mask=mask, offset=offset)
-
           })
 
 
 
 #' NeuroVecSource
 #'
-#' Construct a \code{NeuroVecSource} object
+#' @description
+#' This function constructs a NeuroVecSource object, which represents the source 
+#' of a four-dimensional brain image.
 #'
-#' @param file_name name of the 4-dimensional image file
-#' @param indices the subset of integer volume indices to load -- if \code{NULL} then all volumes will be loaded
-#' @param mask image volume indicating the subset of voxels that will be loaded. If provided, function returns \code{SparseNeuroVecSource}
-#' @return a instance deriving from \code{NeuroVecSource}
+#' @param file_name The name of the 4-dimensional image file.
+#' @param indices An optional integer vector specifying the subset of volume indices to load.
+#'   If not provided, all volumes will be loaded.
+#' @param mask An optional logical array or \code{\linkS4class{NeuroVol}} object defining 
+#'   the subset of voxels to load. If provided, a SparseNeuroVecSource object will be created.
 #'
-#' @details If a \code{mask} is supplied then it should be a \code{\linkS4class{LogicalNeuroVol}} or \code{\linkS4class{NeuroVol}} instance. If the latter, then the mask will be defined by nonzero elements of the volume.
+#' @return An instance of the \code{\linkS4class{NeuroVecSource}} class.
+#'
+#' @details
+#' If a \code{mask} is supplied, it should be a \code{\linkS4class{LogicalNeuroVol}} or 
+#' \code{\linkS4class{NeuroVol}} instance. If the latter, then the mask will be defined by 
+#' nonzero elements of the volume.
 #'
 #' @rdname NeuroVecSource
 #' @importFrom assertthat assert_that
@@ -219,11 +386,13 @@ H5NeuroVecSource <- function(file_name) {
 
 #' H5NeuroVec
 #'
-#' Construct a \code{\linkS4class{H5NeuroVec}} object
+#' @description
+#' This function constructs an H5NeuroVec object, which represents a four-dimensional 
+#' brain image stored in the neuroim2 HDF5 format.
 #'
-#' @param file_name name of the 4-dimensional image in \code{neuroim2} hdf5 format
-#' @return an \code{\linkS4class{H5NeuroVec}} instance
+#' @param file_name The name of the 4-dimensional image file in neuroim2 HDF5 format.
 #'
+#' @return An instance of the \code{\linkS4class{H5NeuroVec}} class.
 #'
 #' @rdname NeuroVec
 #' @importFrom assertthat assert_that
@@ -253,10 +422,16 @@ H5NeuroVec <- function(file_name) {
 }
 
 
-#' Get length of \code{NeuroVec}. This is the number of volumes in the volume vector (e.g. the 4th image dimension)
+#' Get the length of a NeuroVec object
+#'
+#' @description
+#' This function returns the number of volumes in a NeuroVec object.
+#'
+#' @param x The NeuroVec object.
+#'
+#' @return The number of volumes in the NeuroVec object.
 #'
 #' @export
-#' @param x the object
 #' @rdname length-methods
 setMethod("length", signature=c(x="NeuroVec"),
 		def=function(x) {
@@ -267,12 +442,15 @@ setMethod("length", signature=c(x="NeuroVec"),
 
 #' read_vol_list
 #'
-#' load a list of image volumes and return a \code{\linkS4class{NeuroVec}} instance
+#' @description
+#' This function loads a list of image volumes and returns a NeuroVec object.
 #'
-#' @param file_names a list of files to load
-#' @param mask an optional mask indicating subset of voxels to load
-#' @return an instance of class \code{\linkS4class{NeuroVec}}
-#' @export read_vol_list
+#' @param file_names A list of file names to load.
+#' @param mask An optional mask defining the subset of voxels to load.
+#'
+#' @return An instance of the \code{\linkS4class{NeuroVec}} class.
+#'
+#' @export
 #' @importFrom purrr map_lgl
 read_vol_list <- function(file_names, mask=NULL) {
 	stopifnot(all(map_lgl(file_names, file.exists)))
@@ -317,8 +495,15 @@ read_vol_list <- function(file_names, mask=NULL) {
 }
 
 #' drop
-#' @param x the object
-#' @rdname drop-methods
+#'
+#' @description
+#' This function drops the last dimension of a NeuroVec object if it is of length 1.
+#'
+#' @param x The NeuroVec object.
+#'
+#' @return If the last dimension of the NeuroVec object is of length 1, a DenseNeuroVol 
+#'   object is returned. Otherwise, the original NeuroVec object is returned.
+#'
 #' @export
 setMethod("drop", signature(x="NeuroVec"),
           def=function(x) {
@@ -341,8 +526,13 @@ setAs("NeuroVec", "array", function(from) {
   vals
 })
 
-#' show a \code{NeuroVecSource}
-#' @param object the object
+#' show a NeuroVecSource object
+#'
+#' @description
+#' This function prints a summary of a NeuroVecSource object.
+#'
+#' @param object The NeuroVecSource object to display.
+#'
 #' @export
 setMethod(f="show",
 		signature=signature(object="NeuroVecSource"),
@@ -358,8 +548,13 @@ setMethod(f="show",
 
 
 
-#' show a \code{NeuroVec}
-#' @param object the object
+#' show a NeuroVec object
+#'
+#' @description
+#' This function prints a summary of a NeuroVec object.
+#'
+#' @param object The NeuroVec object to display.
+#'
 #' @export
 setMethod(f="show", signature=signature("NeuroVec"),
           def=function(object) {
@@ -613,9 +808,15 @@ setMethod(f="split_blocks", signature=signature(x="NeuroVec", indices="factor"),
 
 
 #' [[
-#' @rdname NeuroVec-methods
-#' @param x the object
-#' @param i the volume index
+#'
+#' @description
+#' This function extracts a single volume from a NeuroVec object.
+#'
+#' @param x The NeuroVec object.
+#' @param i The volume index to extract.
+#'
+#' @return A DenseNeuroVol object representing the extracted volume.
+#'
 #' @export
 setMethod(f="[[", signature=signature(x="NeuroVec", i="numeric"),
           def = function(x, i) {
@@ -632,15 +833,19 @@ setMethod(f="[[", signature=signature(x="NeuroVec", i="numeric"),
 
 #' read_vec
 #'
-#' load an image volume from a file
+#' @description
+#' This function loads an image volume from a file.
 #'
-#' @param file_name the name(s) of the file(s) to load. If more than one file_name is specified, the files are loaded and concatenated.
-#' @param indices the indices of the sub-volumes to load (e.g. if the file is 4-dimensional)
-#' @param mask a mask defining the spatial elements to load
-#' @param mode the IO mode which is one of "normal", "mmap", "bigvec", or "filebacked".
-#' @return an \code{\linkS4class{NeuroVec}} object
+#' @param file_name The name(s) of the file(s) to load. If more than one file_name is specified, 
+#'   the files are loaded and concatenated.
+#' @param indices The indices of the sub-volumes to load (e.g. if the file is 4-dimensional).
+#' @param mask A mask defining the spatial elements to load.
+#' @param mode The IO mode which is one of "normal", "mmap", "bigvec", or "filebacked".
+#'
+#' @return An \code{\linkS4class{NeuroVec}} object.
+#'
 #' @export
-#' @note memory-mapping a gzipped file is not currently allowed.
+#' @note Memory-mapping a gzipped file is not currently allowed.
 read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap", "bigvec", "filebacked")) {
   mode <- match.arg(mode)
 

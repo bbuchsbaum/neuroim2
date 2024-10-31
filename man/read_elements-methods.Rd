@@ -10,15 +10,15 @@ read_elements(x, num_elements)
 \S4method{read_elements}{BinaryReader,numeric}(x, num_elements)
 }
 \arguments{
-\item{x}{the input channel}
+\item{x}{A BinaryReader object.}
 
-\item{num_elements}{the number of elements to read}
+\item{num_elements}{A numeric value specifying the number of elements to read.}
 }
 \value{
 the elements as a vector
+
+A vector of read elements.
 }
 \description{
-Read a sequence of elements from an input source
-
-read_elements
+This method reads a specified number of elements from a BinaryReader object.
 }

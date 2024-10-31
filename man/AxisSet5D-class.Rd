@@ -3,13 +3,30 @@
 \docType{class}
 \name{AxisSet5D-class}
 \alias{AxisSet5D-class}
-\title{AxisSet5D}
+\title{AxisSet5D Class}
 \description{
-A five-dimensional axis set
+A class representing a five-dimensional axis set, extending the AxisSet4D class
+with an additional fifth axis.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{m}}{the fifth axis}
+\item{\code{m}}{A \code{NamedAxis} object representing the fifth axis.}
 }}
 
+\examples{
+# Create NamedAxis objects for each dimension
+x_axis <- new("NamedAxis", axis = "x", direction = 1)
+y_axis <- new("NamedAxis", axis = "y", direction = 1)
+z_axis <- new("NamedAxis", axis = "z", direction = 1)
+t_axis <- new("NamedAxis", axis = "t", direction = 1)
+v_axis <- new("NamedAxis", axis = "v", direction = 1)
+
+# Create an AxisSet5D object
+axis_set_5d <- new("AxisSet5D", i = x_axis, j = y_axis, k = z_axis,
+                   l = t_axis, m = v_axis, ndim = 5L)
+
+}
+\seealso{
+\code{\link{AxisSet4D-class}}, \code{\link{NamedAxis-class}}
+}

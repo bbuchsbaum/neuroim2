@@ -56,8 +56,7 @@ NumericMatrix indexToGridCpp(IntegerVector idx, IntegerVector array_dim) {
 // }
 
 // [[Rcpp::export]]
-NumericMatrix local_sphere(int vx, int vy, int vz, double radius, NumericVector spacing, IntegerVector dim) {
-
+List local_spheres(NumericMatrix centers, double radius, NumericVector spacing, IntegerVector dim) {
   if (radius <= 0) {
     Rcpp::stop("radius must be greater than 0.");
   }
@@ -70,52 +69,59 @@ NumericMatrix local_sphere(int vx, int vy, int vz, double radius, NumericVector 
     Rcpp::stop("dim must be an integer vector of length 3.");
   }
 
+  // Calculate radius in voxel units for each dimension
   int i_rad = round(radius/spacing[0]);
   int j_rad = round(radius/spacing[1]);
   int k_rad = round(radius/spacing[2]);
-
-  //std::list<std::vector<double>> cds;
-  //List cds((i_rad*2)*(j_rad*2)*(k_rad*2));
-
-  NumericMatrix cds((i_rad*2+1)*(j_rad*2+1)*(k_rad*2+1), 3);
-
-  int count = 0;
-  for (int i = vx - i_rad; i <= (vx + i_rad); i++) {
-      if (i < 1 || i > dim[0]) {
-        continue;
-      }
-      //Rcout << "i: " << i << std::endl;
+  
+  // Pre-calculate max size of sphere for memory allocation
+  int max_sphere_size = (2*i_rad + 1) * (2*j_rad + 1) * (2*k_rad + 1);
+  int n_centers = centers.nrow();
+  
+  // Create output list
+  List result(n_centers);
+  
+  // Process each center point
+  for (int c = 0; c < n_centers; c++) {
+    int vx = centers(c, 0);
+    int vy = centers(c, 1);
+    int vz = centers(c, 2);
+    
+    // Pre-allocate matrix for this sphere's coordinates
+    NumericMatrix cds(max_sphere_size, 3);
+    int count = 0;
+    
+    // Find all points within radius
+    for (int i = vx - i_rad; i <= (vx + i_rad); i++) {
+      if (i < 1 || i > dim[0]) continue;
+      
       for (int j = vy - j_rad; j <= (vy + j_rad); j++) {
-        if (j < 1 || j > dim[1]) {
-          continue;
-        }
-        //Rcout << "j: " << j << std::endl;
-        for (int k = vz -k_rad; k <= (vz + k_rad); k++) {
-          if (k < 1 || k > dim[2]) {
-            continue;
-          }
-          //Rcout << "k: " << k << std::endl;
-
+        if (j < 1 || j > dim[1]) continue;
+        
+        for (int k = vz - k_rad; k <= (vz + k_rad); k++) {
+          if (k < 1 || k > dim[2]) continue;
+          
           double xd = (i-vx)*spacing[0];
           double yd = (j-vy)*spacing[1];
           double zd = (k-vz)*spacing[2];
-
+          
           double d = sqrt(pow(xd,2) + pow(yd,2) + pow(zd,2));
-          //Rcout << "d: " << d << std::endl;
+          
           if (d < radius) {
-            //cds[count] = IntegerVector::create(i,j,k);
-            //count++;
             cds(count,0) = i;
             cds(count,1) = j;
             cds(count,2) = k;
             count++;
           }
-
         }
       }
+    }
+    
+    // Trim matrix to actual size and store in result list
+    result[c] = cds(Range(0, count-1), _);
   }
-  return cds(Rcpp::Range(0, count-1), Rcpp::_);
-
+  
+  return result;
 }
 
 
@@ -621,5 +627,62 @@ IntegerVector gridToIndex3DCpp(IntegerVector array_dim, NumericMatrix voxmat) {
 
   return out;
 
+}
+
+
+// [[Rcpp::export]]
+NumericMatrix local_sphere(int vx, int vy, int vz, double radius, NumericVector spacing, IntegerVector dim) {
+  if (radius <= 0) {
+    Rcpp::stop("radius must be greater than 0.");
+  }
+
+  if (spacing.size() != 3) {
+    Rcpp::stop("spacing must be a vector of length 3.");
+  }
+
+  if (dim.size() != 3) {
+    Rcpp::stop("dim must be an integer vector of length 3.");
+  }
+
+  // Calculate radius in voxel units for each dimension
+  int i_rad = round(radius/spacing[0]);
+  int j_rad = round(radius/spacing[1]);
+  int k_rad = round(radius/spacing[2]);
+  
+  // Pre-calculate max size of sphere for memory allocation
+  int max_sphere_size = (2*i_rad + 1) * (2*j_rad + 1) * (2*k_rad + 1);
+  
+  // Pre-allocate matrix for coordinates
+  NumericMatrix cds(max_sphere_size, 3);
+  int count = 0;
+  
+  // Find all points within radius
+  for (int i = vx - i_rad; i <= (vx + i_rad); i++) {
+    if (i < 1 || i > dim[0]) continue;
+    
+    for (int j = vy - j_rad; j <= (vy + j_rad); j++) {
+      if (j < 1 || j > dim[1]) continue;
+      
+      for (int k = vz - k_rad; k <= (vz + k_rad); k++) {
+        if (k < 1 || k > dim[2]) continue;
+        
+        double xd = (i-vx)*spacing[0];
+        double yd = (j-vy)*spacing[1];
+        double zd = (k-vz)*spacing[2];
+        
+        double d = sqrt(pow(xd,2) + pow(yd,2) + pow(zd,2));
+        
+        if (d < radius) {
+          cds(count,0) = i;
+          cds(count,1) = j;
+          cds(count,2) = k;
+          count++;
+        }
+      }
+    }
+  }
+  
+  // Trim matrix to actual size
+  return cds(Range(0, count-1), _);
 }
 

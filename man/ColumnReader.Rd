@@ -2,20 +2,39 @@
 % Please edit documentation in R/binary_io.R
 \name{ColumnReader}
 \alias{ColumnReader}
-\title{ColumnReader}
+\title{Create a ColumnReader Object}
 \usage{
 ColumnReader(nrow, ncol, reader)
 }
 \arguments{
-\item{nrow}{the number of rows}
+\item{nrow}{An integer specifying the number of rows in the data.}
 
-\item{ncol}{the number of columns}
+\item{ncol}{An integer specifying the number of columns in the data.}
 
-\item{reader}{a function that takes a set of column indices and returns a \code{matrix}}
+\item{reader}{A function that takes a set of column indices and returns a matrix.}
 }
 \value{
-a new instance of type \code{ColumnReader}
+A new instance of the \code{\linkS4class{ColumnReader}} class.
 }
 \description{
-Constructor for  \code{\linkS4class{ColumnReader}} class
+This function creates a new instance of the \code{\linkS4class{ColumnReader}} class,
+which represents a reader for column-oriented data.
+}
+\details{
+The \code{ColumnReader} function creates an object for efficient reading of column-oriented data.
+The provided reader function should be capable of reading specified columns from the data source.
+}
+\examples{
+\dontrun{
+# Create a simple ColumnReader
+reader_func <- function(cols) {
+  # This is a placeholder function
+  matrix(rnorm(100 * length(cols)), nrow = 100, ncol = length(cols))
+}
+col_reader <- ColumnReader(nrow = 100, ncol = 10, reader = reader_func)
+}
+
+}
+\seealso{
+\code{\link{ColumnReader-class}} for the class definition and available methods.
 }

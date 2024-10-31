@@ -10,13 +10,33 @@ strip_extension(x, file_name)
 \S4method{strip_extension}{FileFormat,character}(x, file_name)
 }
 \arguments{
-\item{x}{descriptor instance}
+\item{x}{A FileFormat object.}
 
-\item{file_name}{file name to be stripped of its extension}
+\item{file_name}{A character string representing the file name to be processed.}
 }
 \value{
 file_name without extension
+
+A character string representing the file name without the extension.
 }
 \description{
-Generic function to strip extension from file name, given a \code{\linkS4class{FileFormat}} instance.
+This method removes the file extension from a given file name based on 
+the FileFormat specifications.
+}
+\details{
+The function performs the following steps:
+1. If the file_name matches the header file format, it removes the header extension.
+2. If the file_name matches the data file format, it removes the data extension.
+3. If the file_name doesn't match either format, it throws an error.
+}
+\examples{
+\dontrun{
+file_format <- new("FileFormat", header_extension = "hdr", data_extension = "img")
+strip_extension(file_format, "brain_scan.hdr")
+strip_extension(file_format, "brain_scan.img")
+}
+
+}
+\seealso{
+\code{\link{FileFormat-class}}, \code{\link{header_file_matches}}, \code{\link{data_file_matches}}
 }

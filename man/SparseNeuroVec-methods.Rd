@@ -3,7 +3,7 @@
 \name{[[,LatentNeuroVec,numeric-method}
 \alias{[[,LatentNeuroVec,numeric-method}
 \alias{[[,SparseNeuroVec,numeric-method}
-\title{[[}
+\title{Extract a Single Volume from LatentNeuroVec}
 \usage{
 \S4method{[[}{LatentNeuroVec,numeric}(x, i)
 
@@ -14,8 +14,27 @@
 
 \item{i}{the volume index}
 }
+\value{
+A \code{\linkS4class{SparseNeuroVol}} object representing the extracted volume.
+}
 \description{
-[[
+This method extracts a single volume from a LatentNeuroVec object and returns it as a SparseNeuroVol.
+}
+\details{
+The method performs the following steps:
+1. Checks that the input index is a single number.
+2. Computes the data for the specified volume using the basis and loadings.
+3. Adds the offset to the computed data.
+4. Creates a new NeuroSpace object for the extracted volume.
+5. Returns a SparseNeuroVol object with the computed data and new space.
+}
+\examples{
+# Assuming 'svec' is a previously created LatentNeuroVec object
+\dontrun{
+single_vol <- svec[[1]]  # Extract the first volume
+}
 
-[[
+}
+\seealso{
+\code{\link{LatentNeuroVec-class}}, \code{\link{SparseNeuroVol-class}}
 }

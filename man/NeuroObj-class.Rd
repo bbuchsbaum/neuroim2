@@ -3,15 +3,17 @@
 \docType{class}
 \name{NeuroObj-class}
 \alias{NeuroObj-class}
-\title{NeuroObj
-Base class for all data objects with a cartesion spatial represenetation}
+\title{NeuroObj Class}
 \description{
-NeuroObj
-Base class for all data objects with a cartesion spatial represenetation
+Base class for all neuroimaging data objects with a Cartesian spatial representation.
+This class provides a foundation for more specific neuroimaging data structures.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{space}}{the geometry of the image object}
+\item{\code{space}}{An object of class \code{\linkS4class{NeuroSpace}} representing the geometry of the image object.}
 }}
 
+\seealso{
+\code{\link{NeuroSpace-class}}, \code{\link{NeuroSlice-class}}, \code{\link{NeuroVol-class}}
+}

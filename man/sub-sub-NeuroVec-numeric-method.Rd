@@ -7,10 +7,13 @@
 \S4method{[[}{NeuroVec,numeric}(x, i)
 }
 \arguments{
-\item{x}{the object}
+\item{x}{The NeuroVec object.}
 
-\item{i}{the volume index}
+\item{i}{The volume index to extract.}
+}
+\value{
+A DenseNeuroVol object representing the extracted volume.
 }
 \description{
-[[
+This function extracts a single volume from a NeuroVec object.
 }

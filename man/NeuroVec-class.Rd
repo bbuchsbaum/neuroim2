@@ -4,43 +4,119 @@
 \name{NeuroVec-class}
 \alias{NeuroVec-class}
 \alias{NeuroVec}
-\title{NeuroVec}
+\title{NeuroVec Class}
 \usage{
 NeuroVec(data, space = NULL, mask = NULL, label = "")
 }
 \arguments{
-\item{data}{The image data, which can be a matrix, a 4D array, or a list of \code{NeuroVol} objects. If the latter, the geometric space of the data (\code{NeuroSpace}) will be inferred from the constituent volumes, which must all be identical.}
+\item{data}{The image data. This can be:
+\itemize{
+  \item A matrix (voxels x time points)
+  \item A 4D array
+  \item A list of \code{\linkS4class{NeuroVol}} objects
+}
+If a list of NeuroVol objects is provided, the geometric space (\code{NeuroSpace}) 
+will be inferred from the constituent volumes, which must all be identical.}
 
-\item{space}{An optional \code{\linkS4class{NeuroSpace}} object. Does not need to be included if the \code{data} argument is a list of \code{NeuroVol} objects.}
+\item{space}{An optional \code{\linkS4class{NeuroSpace}} object defining the spatial 
+properties of the image. Not required if \code{data} is a list of NeuroVol objects.}
 
-\item{mask}{An optional \code{array} of type \code{logical}.}
+\item{mask}{An optional logical array specifying which voxels to include. If provided, 
+a SparseNeuroVec object will be created.}
 
-\item{label}{A label of type \code{character}.}
+\item{label}{A character string providing a label for the NeuroVec object. Default is an empty string.}
 }
 \value{
-A concrete instance of the \code{\linkS4class{NeuroVec}} class. If a \code{mask} is provided, the function returns a \code{\linkS4class{SparseNeuroVec}} object; otherwise, it returns a \code{\linkS4class{DenseNeuroVec}} object.
+A concrete instance of the \code{\linkS4class{NeuroVec}} class:
+  \itemize{
+    \item If \code{mask} is provided: a \code{\linkS4class{SparseNeuroVec}} object
+    \item Otherwise: a \code{\linkS4class{DenseNeuroVec}} object
+  }
 }
 \description{
-This S4 class represents a four-dimensional brain image, which can be used to store and process time series data such as fMRI or 4D functional connectivity maps. The class extends the basic functionality of \code{NeuroObj}.
+This S4 class represents a four-dimensional brain image, which is used to store
+and process time series neuroimaging data such as fMRI or 4D functional
+connectivity maps. The class extends the basic functionality of \code{\linkS4class{NeuroObj}}.
 
-Constructor function for the \code{\linkS4class{NeuroVec}} class. This function is used to create an instance of a NeuroVec object, which represents a four-dimensional brain image.
+This function constructs a NeuroVec object, which represents a four-dimensional 
+brain image. It can create either a DenseNeuroVec or SparseNeuroVec object 
+depending on the input parameters.
 }
+\details{
+NeuroVec objects are designed to handle 4D neuroimaging data, where the first
+three dimensions represent spatial coordinates, and the fourth dimension typically
+represents time or another series dimension. This structure is particularly
+useful for storing and analyzing functional MRI data, time series of brain
+states, or multiple 3D volumes in a single object.
+
+The function performs several operations:
+\itemize{
+  \item If \code{data} is a list of NeuroVol objects, it combines them into a single 4D array.
+  \item It checks that the dimensions of \code{data} match the provided \code{space}.
+  \item Depending on whether a \code{mask} is provided, it creates either a DenseNeuroVec 
+    or a SparseNeuroVec object.
+}
+}
+\section{Slots}{
+
+This class inherits all slots from \code{\linkS4class{NeuroObj}}.
+}
+
+\section{Methods}{
+
+Methods specific to NeuroVec objects may include operations for time series
+analysis, 4D data manipulation, and extraction of 3D volumes or time courses.
+}
+
 \section{Usage}{
 
 To create a NeuroVec object, use the constructor function \code{NeuroVec()}.
+This function should handle the appropriate initialization of the 4D data
+structure and associated spatial information.
 }
 
 \examples{
+\dontrun{
 # Load an example 4D brain image
-example_4d_image <- read_vec(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
-
-# Create a NeuroVec object by copying the @.Data field (not advised in practice)
-neuro_vec <- NeuroVec(data=example_4d_image@.Data, space=space(example_4d_image))
-
-# Load an example 4D brain image
-example_4d_image <- read_vec(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
+example_4d_image <- read_vec(system.file("extdata", "example_4d.nii", package = "neuroim2"))
 
 # Create a NeuroVec object
-neuro_vec <- NeuroVec(data=example_4d_image@.Data, space=space(example_4d_image))
+neuro_vec <- NeuroVec(data = array(rnorm(64*64*32*100), dim = c(64, 64, 32, 100)),
+                      space = NeuroSpace(dim = c(64, 64, 32),
+                                        origin = c(0, 0, 0),
+                                        spacing = c(3, 3, 4)))
 
+# Access the dimensions of the 4D image
+dim(neuro_vec)
+
+# Extract a single 3D volume (e.g., the first time point)
+first_volume <- neuro_vec[,,,1]
+}
+
+# Load an example 4D brain image
+example_file <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
+example_4d_image <- read_vec(example_file)
+
+# Create a DenseNeuroVec object
+dense_vec <- NeuroVec(data = example_4d_image@.Data, 
+                      space = space(example_4d_image))
+print(dense_vec)
+
+# Create a SparseNeuroVec object with a mask
+mask <- array(runif(prod(dim(example_4d_image)[1:3])) > 0.5, 
+              dim = dim(example_4d_image)[1:3])
+sparse_vec <- NeuroVec(data = example_4d_image@.Data, 
+                       space = space(example_4d_image),
+                       mask = mask)
+print(sparse_vec)
+
+}
+\seealso{
+\code{\link{NeuroObj-class}} for the parent class.
+\code{\link{DenseNeuroVec-class}} and \code{\link{SparseNeuroVec-class}} for specific implementations.
+
+\code{\link{DenseNeuroVec-class}}, \code{\link{SparseNeuroVec-class}} for the 
+specific NeuroVec types.
+\code{\link{NeuroVol-class}} for 3D volumetric data.
+\code{\link{NeuroSpace-class}} for details on spatial properties.
 }

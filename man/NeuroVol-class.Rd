@@ -3,7 +3,15 @@
 \docType{class}
 \name{NeuroVol-class}
 \alias{NeuroVol-class}
-\title{NeuroVol}
+\title{NeuroVol Class}
 \description{
-Base class for image representing 3D volumetric data.
+Base class for representing 3D volumetric neuroimaging data. This class extends
+\code{\linkS4class{NeuroObj}} to provide a foundation for various types of 3D brain images.
+}
+\details{
+NeuroVol serves as an abstract base class for more specific 3D neuroimaging data structures.
+It inherits spatial properties from NeuroObj but does not specify a particular data storage method.
+}
+\seealso{
+\code{\link{NeuroObj-class}}, \code{\link{DenseNeuroVol-class}}
 }

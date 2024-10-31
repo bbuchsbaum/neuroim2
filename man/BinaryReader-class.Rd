@@ -3,23 +3,23 @@
 \docType{class}
 \name{BinaryReader-class}
 \alias{BinaryReader-class}
-\title{BinaryReader}
+\title{BinaryReader Class}
 \description{
 Class supporting reading of bulk binary data from a connection
 }
 \section{Slots}{
 
 \describe{
-\item{\code{input}}{the binary input connection}
+\item{\code{input}}{The binary input connection}
 
-\item{\code{byte_offset}}{the number of bytes to skip at the start of input}
+\item{\code{byte_offset}}{The number of bytes to skip at the start of input}
 
-\item{\code{data_type}}{the dataType of the binary Elements}
+\item{\code{data_type}}{The data type of the binary elements}
 
-\item{\code{bytes_per_element}}{number of bytes in each data element (e.g. 4 or 8 for floating point numbers)}
+\item{\code{bytes_per_element}}{The number of bytes in each data element (e.g. 4 or 8 for floating point numbers)}
 
-\item{\code{endian}}{endianness of binary input connection}
+\item{\code{endian}}{The endianness of the binary input connection}
 
-\item{\code{signed}}{logical indicating whether data type is signed}
+\item{\code{signed}}{Logical indicating whether the data type is signed}
 }}
 

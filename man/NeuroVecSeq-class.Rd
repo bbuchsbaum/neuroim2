@@ -3,15 +3,15 @@
 \docType{class}
 \name{NeuroVecSeq-class}
 \alias{NeuroVecSeq-class}
-\title{NeuroVecSeq}
+\title{NeuroVecSeq Class}
 \description{
 A concatenated sequence of \code{\linkS4class{NeuroVec}} instances.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{vecs}}{the sequences of \code{NeuroVec} instances}
+\item{\code{vecs}}{The sequences of \code{NeuroVec} instances}
 
-\item{\code{lens}}{the number of volumes in each \code{NeuroVec} sequence}
+\item{\code{lens}}{The number of volumes in each \code{NeuroVec} sequence}
 }}
 

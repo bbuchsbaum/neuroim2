@@ -3,13 +3,21 @@
 \name{lookup,IndexLookupVol,numeric-method}
 \alias{lookup,IndexLookupVol,numeric-method}
 \alias{lookup,AbstractSparseNeuroVec,numeric-method}
-\title{lookup}
+\title{Lookup Values in an IndexLookupVol Object}
 \usage{
 \S4method{lookup}{IndexLookupVol,numeric}(x, i)
 
 \S4method{lookup}{AbstractSparseNeuroVec,numeric}(x, i)
 }
+\arguments{
+\item{x}{An IndexLookupVol object.}
+
+\item{i}{A numeric vector of indices to look up.}
+}
+\value{
+A vector of lookup values corresponding to the input indices.
+}
 \description{
-lookup
+This method performs a lookup operation on an IndexLookupVol object.
 }
 \keyword{internal}

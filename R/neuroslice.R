@@ -4,19 +4,58 @@
 {}
 
 
-#' Construct a NeuroSlice object
+#' Construct a NeuroSlice Object
 #'
-#' @param data data vector or matrix
-#' @param space an instance of class NeuroSpace
-#' @param indices linear indices corresponding used if \code{data} is a 1D vector.
-#' @export
+#' @description
+#' This function creates a NeuroSlice object, which represents a 2D slice of neuroimaging data
+#' with associated spatial information.
+#'
+#' @param data A vector or matrix containing the slice data.
+#' @param space An instance of class \code{\linkS4class{NeuroSpace}} defining the spatial properties of the slice.
+#' @param indices Optional. A vector of linear indices used when \code{data} is a 1D vector.
+#'   If provided, it specifies where the data should be placed in the 2D slice.
+#'
+#' @return A new instance of class \code{\linkS4class{NeuroSlice}}.
+#'
+#' @details
+#' The function performs several checks and transformations:
+#' \itemize{
+#'   \item It ensures that the provided space is 2-dimensional.
+#'   \item If \code{indices} is not provided:
+#'     \itemize{
+#'       \item If \code{data} is not 2D, it reshapes it to match the dimensions of \code{space}.
+#'       \item It checks that the dimensions of \code{data} match those of \code{space}.
+#'     }
+#'   \item If \code{indices} is provided:
+#'     \itemize{
+#'       \item It creates a zero matrix matching the dimensions of \code{space}.
+#'       \item It places the \code{data} values at the specified \code{indices} in this matrix.
+#'     }
+#' }
+#'
 #' @examples
-#' bspace <- NeuroSpace(c(64,64), spacing=c(1,1))
-#' dat <- array(rnorm(64*64), c(64,64))
-#' bslice <- NeuroSlice(dat,bspace)
-#' bslice
-#' @return a new instance of type \code{NeuroSlice}
-NeuroSlice <- function(data, space, indices=NULL) {
+#' # Create a NeuroSpace object for a 64x64 slice
+#' bspace <- NeuroSpace(c(64, 64), spacing = c(1, 1))
+#'
+#' # Create random data for the slice
+#' dat <- array(rnorm(64*64), c(64, 64))
+#'
+#' # Construct a NeuroSlice object
+#' bslice <- NeuroSlice(dat, bspace)
+#' print(bslice)
+#'
+#' # Using indices to create a sparse slice
+#' sparse_data <- rnorm(100)  # 100 non-zero values
+#' sparse_indices <- sample(1:(64*64), 100)  # 100 random positions
+#' sparse_slice <- NeuroSlice(sparse_data, bspace, indices = sparse_indices)
+#' print(sparse_slice)
+#'
+#' @seealso 
+#' \code{\link{NeuroSpace-class}} for details on the spatial information.
+#' \code{\link{NeuroVol-class}} for 3D volumetric data.
+#'
+#' @export
+NeuroSlice <- function(data, space, indices = NULL) {
 	if (ndim(space) != 2) {
 		stop("incorrect dimension for neuro_slice")
 	}

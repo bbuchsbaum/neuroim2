@@ -5,7 +5,7 @@
 \alias{as.list,FileBackedNeuroVec-method}
 \alias{as.list,NeuroVec-method}
 \alias{as.list,SparseNeuroVec-method}
-\title{as.list}
+\title{Convert FileBackedNeuroVec to List}
 \usage{
 \S4method{as.list}{FileBackedNeuroVec}(x)
 
@@ -16,8 +16,15 @@
 \arguments{
 \item{x}{the object}
 }
+\value{
+A deferred list of DenseNeuroVol objects.
+}
 \description{
-convert FileBackedNeuroVec to list of \code{\linkS4class{DenseNeuroVol}} objects.
+Converts a FileBackedNeuroVec object to a list of DenseNeuroVol objects.
 
 convert SparseNeuroVec to list of \code{\linkS4class{DenseNeuroVol}}
+}
+\details{
+This method creates a deferred list, where each element is a DenseNeuroVol
+object representing a single volume from the FileBackedNeuroVec.
 }

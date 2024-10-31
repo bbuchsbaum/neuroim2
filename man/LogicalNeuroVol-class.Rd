@@ -4,7 +4,7 @@
 \name{LogicalNeuroVol-class}
 \alias{LogicalNeuroVol-class}
 \alias{LogicalNeuroVol}
-\title{LogicalNeuroVol}
+\title{LogicalNeuroVol Class}
 \usage{
 LogicalNeuroVol(data, space, label = "", indices = NULL)
 }
@@ -21,15 +21,52 @@ LogicalNeuroVol(data, space, label = "", indices = NULL)
 A \code{\linkS4class{LogicalNeuroVol}} instance.
 }
 \description{
-This S4 class represents a three-dimensional brain image, where all values are either TRUE or FALSE. It is particularly useful for creating and managing binary masks for brain images.
+This class represents a three-dimensional brain image where all values are
+either TRUE or FALSE. It is particularly useful for creating and managing
+binary masks for brain images.
 
 This function constructs a \code{\linkS4class{LogicalNeuroVol}} instance.
 }
+\details{
+The LogicalNeuroVol class extends the \code{\linkS4class{DenseNeuroVol}} class,
+inheriting its spatial properties and array-based storage. However, it
+constrains the values to be logical (TRUE or FALSE), making it ideal for
+representing binary masks, regions of interest (ROIs), or segmentation results
+in neuroimaging analyses.
+}
+\section{Slots}{
+
+\describe{
+\item{\code{.Data}}{A logical array containing the binary volume data.}
+
+\item{\code{space}}{A \code{\linkS4class{NeuroSpace}} object defining the spatial properties of the volume.}
+}}
+
+\section{Methods}{
+
+This class inherits methods from \code{\linkS4class{DenseNeuroVol}}. Additional
+methods specific to logical operations may be available.
+}
+
 \examples{
+# Create a simple logical brain volume (e.g., a mask)
+dim <- c(64L, 64L, 64L)
+mask_data <- array(sample(c(TRUE, FALSE), prod(dim), replace = TRUE), dim)
+mask_space <- NeuroSpace(dim = dim, origin = c(0, 0, 0), spacing = c(1, 1, 1))
+brain_mask <- new("LogicalNeuroVol", .Data = mask_data, space = mask_space)
+
+# Check the proportion of TRUE voxels
+true_proportion <- sum(brain_mask) / prod(dim(brain_mask))
+print(paste("Proportion of TRUE voxels:", true_proportion))
+
 # Load an example brain mask
 brain_mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
 
 # Convert the brain mask to a LogicalNeuroVol
 logical_vol <- LogicalNeuroVol(brain_mask, space(brain_mask))
 
+}
+\seealso{
+\code{\link{DenseNeuroVol-class}} for the parent class.
+\code{\link{NeuroVol-class}} for the base volumetric image class.
 }

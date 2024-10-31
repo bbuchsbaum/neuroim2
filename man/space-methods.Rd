@@ -20,15 +20,19 @@ space(x, ...)
 \S4method{space}{NeuroSpace}(x)
 }
 \arguments{
-\item{x}{The object to query, which can be an instance of \code{\linkS4class{NeuroVol}} or \code{\linkS4class{NeuroVec}}.}
+\item{x}{An IndexLookupVol object.}
 
 \item{...}{Additional arguments, if needed.}
 }
 \value{
 An object representing the geometric space of the image, of type \code{\linkS4class{NeuroSpace}}.
+
+A NeuroSpace object.
 }
 \description{
 This function retrieves the geometric properties of a given image, such as dimensions and voxel size.
+
+This method retrieves the NeuroSpace object associated with an IndexLookupVol object.
 }
 \examples{
 # Create a NeuroSpace object with dimensions (10, 10, 10) and voxel size (1, 1, 1)

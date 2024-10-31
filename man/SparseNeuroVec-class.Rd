@@ -4,7 +4,7 @@
 \name{SparseNeuroVec-class}
 \alias{SparseNeuroVec-class}
 \alias{SparseNeuroVec}
-\title{SparseNeuroVec}
+\title{SparseNeuroVec Class}
 \usage{
 SparseNeuroVec(data, space, mask)
 }
@@ -19,21 +19,55 @@ SparseNeuroVec(data, space, mask)
 A SparseNeuroVec object, containing the sparse neuroimaging data, mask, and associated NeuroSpace information.
 }
 \description{
-A class representing a sparse four-dimensional brain image, backed by a \code{matrix}, where each column represents a non-zero vector spanning the fourth dimension (e.g., time) and defined by a volumetric mask. SparseNeuroVec objects store their data in a compressed format, providing efficient storage and access to sparse brain images. This class inherits from the \code{\linkS4class{NeuroVec}}, \code{\linkS4class{AbstractSparseNeuroVec}}, and implements the \code{ArrayLike4D} interface.
+A class representing a sparse four-dimensional brain image, optimized for
+efficient storage and access of large, sparse neuroimaging data.
 
 Constructs a SparseNeuroVec object for efficient representation and manipulation
 of sparse neuroimaging data with many zero or missing values.
 }
+\details{
+SparseNeuroVec objects store data in a compressed format, where only non-zero
+values are retained. This approach significantly reduces memory usage for
+sparse brain images. The class leverages the mask and mapping from its parent
+class \code{\linkS4class{AbstractSparseNeuroVec}} to efficiently manage the
+spatial structure of the data.
+}
 \section{Slots}{
 
 \describe{
-\item{\code{data}}{A \code{matrix} of series, where rows span across voxel space and columns span the fourth dimension. Each column represents a non-zero vector in the 4D space, and the matrix stores only non-zero values to save memory.}
+\item{\code{data}}{A \code{matrix} where each column represents a non-zero vector
+spanning the fourth dimension (e.g., time series for each voxel). Rows
+correspond to voxels in the sparse domain defined by the mask.}
 }}
 
+\section{Inheritance}{
+
+\code{SparseNeuroVec} inherits from:
+\itemize{
+  \item \code{\linkS4class{NeuroVec}}: Base class for 4D brain images
+  \item \code{\linkS4class{AbstractSparseNeuroVec}}: Provides sparse representation framework
+  \item \code{ArrayLike4D}: Interface for 4D array-like operations
+}
+}
+
 \examples{
+\dontrun{
+# Create a sparse 4D brain image
+mask <- LogicalNeuroVol(array(runif(64*64*32) > 0.7, dim=c(64,64,32)))
+data <- matrix(rnorm(sum(mask) * 100), nrow=sum(mask), ncol=100)
+sparse_vec <- SparseNeuroVec(data=data, mask=mask, space=NeuroSpace(dim=c(64,64,32)))
+
+# Access a subset of the data
+subset <- sparse_vec[,,, 1:10]
+}
+
 bspace <- NeuroSpace(c(10,10,10,100), c(1,1,1))
 mask <- array(rnorm(10*10*10) > .5, c(10,10,10))
 mat <- matrix(rnorm(sum(mask)), 100, sum(mask))
 svec <- SparseNeuroVec(mat, bspace, mask)
 length(indices(svec)) == sum(mask)
+}
+\seealso{
+\code{\link{AbstractSparseNeuroVec-class}} for the parent sparse representation class.
+\code{\link{NeuroVec-class}} for the base 4D brain image class.
 }

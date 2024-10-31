@@ -4,12 +4,41 @@ NULL
 NULL
 
 
-#' Generic function to create data reader
-#' @param x an object specifying the infromation required to produce the reader
-#' @param offset the byte offset (number of bytes to skip before reading)
-#' @export data_reader
+#' Create a Data Reader
+#'
+#' @description
+#' This generic function creates a data reader for neuroimaging data. It is designed
+#' to be flexible and work with various types of neuroimaging data formats.
+#'
+#' @param x An object specifying the information required to produce the reader.
+#'   This could be a file path, a metadata object, or any other relevant information
+#'   depending on the specific method implementation.
+#' @param offset A numeric value specifying the byte offset (number of bytes to skip
+#'   before reading). This allows for flexibility in reading data from different
+#'   parts of a file or data stream.
+#'
+#' @return A data reader object. The exact type and structure of this object will
+#'   depend on the specific method implementation.
+#'
+#' @details
+#' The `data_reader` function is a generic that should be implemented for different
+#' types of neuroimaging data formats (e.g., NIFTI, AFNI). Each implementation should
+#' return an appropriate reader object that can be used to access the data.
+#'
+#' @seealso 
+#' \code{\link{read_vol}}, \code{\link{FileMetaInfo-class}}
+#'
+#' @examples
+#' \dontrun{
+#' # Example usage (specific implementation may vary):
+#' meta_info <- read_header("brain_scan.nii")
+#' reader <- data_reader(meta_info, offset = 0)
+#' }
+#'
+#' @export
 #' @rdname data_reader-methods
-setGeneric(name="data_reader", def=function(x, offset) standardGeneric("data_reader"))
+setGeneric(name = "data_reader", 
+           def = function(x, offset) standardGeneric("data_reader"))
 
 #' dim of \code{FileMetaInfo}
 #' @param x the object
@@ -60,6 +89,8 @@ setMethod(f="trans", signature=signature("NIFTIMetaInfo"),
 			x@header$qform
 		})
 
+#' @noRd 
+#' @keywords internal
 niftiDim <- function(nifti_header) {
 	dimarray <- nifti_header$dimensions
 	lastidx <- min(which(dimarray == 1)) - 1
@@ -68,91 +99,157 @@ niftiDim <- function(nifti_header) {
 
 
 
-#' This class contains meta information for an image
+#' Create a MetaInfo Object
 #'
-#' @param Dim image dimensions
-#' @param spacing voxel dimensions
-#' @param origin coordinate origin
-#' @param data_type the type of the data (e.g. "FLOAT")
-#' @param label name(s) of images
-#' @param spatial_axes image axes for spatial dimensions (x,y,z)
-#' @param additional_axes axes for dimensions > 3 (e.g. time, color band, direction)
-#' @return an instance of class \code{\linkS4class{MetaInfo}}
-#' @export MetaInfo
+#' @description
+#' This function creates a MetaInfo object, which contains metadata information for a neuroimaging volume.
+#'
+#' @param Dim A numeric vector specifying the image dimensions.
+#' @param spacing A numeric vector specifying the voxel dimensions.
+#' @param origin A numeric vector specifying the coordinate origin. Default is a zero vector of length equal to `spacing`.
+#' @param data_type A character string specifying the type of the data (e.g., "FLOAT"). Default is "FLOAT".
+#' @param label A character string specifying the name(s) of images. Default is an empty string.
+#' @param spatial_axes An object specifying the image axes for spatial dimensions (x,y,z). 
+#'   Default is OrientationList3D$AXIAL_LPI.
+#' @param additional_axes An object specifying axes for dimensions > 3 (e.g., time, color band, direction). 
+#'   Default is NullAxis.
+#'
+#' @return An instance of class \code{\linkS4class{MetaInfo}}.
+#'
+#' @details
+#' The MetaInfo object encapsulates essential metadata about a neuroimaging volume, 
+#' including its dimensions, voxel spacing, origin, data type, and axis orientations.
+#' This information is crucial for correctly interpreting and manipulating the image data.
+#'
+#' @examples
+#' # Create a MetaInfo object for a 3D image
+#' meta <- MetaInfo(Dim = c(64, 64, 32), 
+#'                  spacing = c(3, 3, 4), 
+#'                  origin = c(0, 0, 0),
+#'                  data_type = "FLOAT",
+#'                  label = "T1_weighted")
+#'
+#' @seealso 
+#' \code{\link{NIFTIMetaInfo}}, \code{\link{OrientationList3D}}
+#'
+#' @export
 #' @rdname MetaInfo-class
-MetaInfo <- function(Dim, spacing, origin=rep(0, length(spacing)), data_type="FLOAT", label="", spatial_axes=OrientationList3D$AXIAL_LPI, additional_axes=NullAxis) {
-	new("MetaInfo",
-			dims=Dim,
-			spacing=spacing,
-			origin=origin,
-			data_type=data_type,
-			label=label,
-			spatial_axes=spatial_axes,
-			additional_axes=additional_axes)
+MetaInfo <- function(Dim, spacing, origin = rep(0, length(spacing)), 
+                     data_type = "FLOAT", label = "", 
+                     spatial_axes = OrientationList3D$AXIAL_LPI, 
+                     additional_axes = NullAxis) {
+  new("MetaInfo",
+      dims = Dim,
+      spacing = spacing,
+      origin = origin,
+      data_type = data_type,
+      label = label,
+      spatial_axes = spatial_axes,
+      additional_axes = additional_axes)
 }
 
 
 
-#' Constructor for \code{\linkS4class{NIFTIMetaInfo}} class
-#' @param descriptor an instance of class \code{\linkS4class{NIFTIFormat}}
-#' @param nifti_header a \code{list} returned by \code{readNIftiHeader}
-#' @return an instance of class \code{\linkS4class{NIFTIMetaInfo}}
-#' @export NIFTIMetaInfo
+#' Create a NIFTIMetaInfo Object
+#'
+#' @description
+#' This function creates a NIFTIMetaInfo object, which contains metadata information 
+#' specific to NIFTI format neuroimaging files.
+#'
+#' @param descriptor An instance of class \code{\linkS4class{NIFTIFormat}}.
+#' @param nifti_header A list returned by \code{readNIftiHeader} containing NIFTI header information.
+#'
+#' @return An instance of class \code{\linkS4class{NIFTIMetaInfo}}.
+#'
+#' @details
+#' The NIFTIMetaInfo object extends the basic MetaInfo with additional fields specific to the NIFTI format.
+#' It includes information about file locations, endianness, data offsets, and NIFTI-specific 
+#' transformations and scaling factors.
+#'
+#' This function performs several steps:
+#' 1. Checks that the input header is valid for a NIFTI file.
+#' 2. Extracts relevant information from the NIFTI header.
+#' 3. Computes derived information (e.g., bytes per element, dimensions).
+#' 4. Creates and returns a new NIFTIMetaInfo object.
+#'
+#' @examples
+#' \dontrun{
+#' # Assuming you have a NIFTIFormat object and a NIFTI header
+#' nifti_format <- NIFTIFormat()
+#' nifti_header <- readNIftiHeader("brain.nii")
+#' meta_info <- NIFTIMetaInfo(nifti_format, nifti_header)
+#' }
+#'
+#' @seealso 
+#' \code{\link{MetaInfo}}, \code{\link{NIFTIFormat-class}}, \code{\link{readNIftiHeader}}
+#'
+#' @export
 #' @rdname FileMetaInfo-class
 NIFTIMetaInfo <- function(descriptor, nifti_header) {
-	stopifnot(!is.null(nifti_header$file_type) || (nifti_header$file_type == "NIFTI"))
-
-
-	new("NIFTIMetaInfo",
-			header_file=header_file(descriptor, nifti_header$file_name),
-			data_file=data_file(descriptor, nifti_header$file_name),
-			descriptor=descriptor,
-			endian=nifti_header$endian,
-			data_offset=nifti_header$vox_offset,
-			data_type=nifti_header$data_storage,
-			bytes_per_element=as.integer(.getDataSize(nifti_header$data_storage)),
-			dims=niftiDim(nifti_header),
-			spatial_axes=.nearestAnatomy(nifti_header$qform),
-			additional_axes=NullAxis,
-			spacing=nifti_header$pixdim[2:4],
-			origin=nifti_header$qoffset,
-			label=strip_extension(descriptor, basename(nifti_header$file_name)),
-			intercept=nifti_header$scl_intercept,
-			slope=nifti_header$scl_slope,
-			header=nifti_header)
+  stopifnot(!is.null(nifti_header$file_type) || (nifti_header$file_type == "NIFTI"))
+  
+  new("NIFTIMetaInfo",
+      header_file = header_file(descriptor, nifti_header$file_name),
+      data_file = data_file(descriptor, nifti_header$file_name),
+      descriptor = descriptor,
+      endian = nifti_header$endian,
+      data_offset = nifti_header$vox_offset,
+      data_type = nifti_header$data_storage,
+      bytes_per_element = as.integer(.getDataSize(nifti_header$data_storage)),
+      dims = niftiDim(nifti_header),
+      spatial_axes = .nearestAnatomy(nifti_header$qform),
+      additional_axes = NullAxis,
+      spacing = nifti_header$pixdim[2:4],
+      origin = nifti_header$qoffset,
+      label = strip_extension(descriptor, basename(nifti_header$file_name)),
+      intercept = nifti_header$scl_intercept,
+      slope = nifti_header$scl_slope,
+      header = nifti_header)
 }
 
 
 
-#' show a \code{FileMetaInfo}
-#' @param object the object
-#' @export
-setMethod(f="show", signature=signature("FileMetaInfo"),
-		def=function(object) {
-			cat("an instance of class",  class(object), "\n\n")
-			cat("header_file:", "\t", object@header_file, "\n")
-			cat("data_file:", "\t", object@data_file, "\n")
-			cat("endian:", "\t", object@endian, "\n")
-			cat("data_offset:", "\t", object@data_offset, "\n")
-			cat("data_type:", "\t", object@data_type, "\n")
-			cat("dimensions:", "\t", object@dims, "\n")
-			cat("voxel size:", "\t", object@spacing, "\n")
-			cat("origin:", "\t", object@origin, "\n")
-			cat("label(s):", "\t", object@label, "\n")
-			cat("intercept:", "\t", object@intercept, "\n")
-			cat("slope:", "\t\t", object@slope, "\n\n")
-
-			cat("additional format-specific info may be contained in @header slot", "\n")
-		})
 
 
-#' AFNIMetaInfo
+#' Create an AFNIMetaInfo Object
 #'
-#' Constructor for \code{AFNIMetaInfo} class
-#' @param descriptor an instance of class \code{AFNIFormat}
-#' @param afni_header a \code{list} returned by \code{read_afni_header}
-#' @return an instance of class \code{AFNIMetaInfo}
-#' @export AFNIMetaInfo
+#' @description
+#' This function constructs an AFNIMetaInfo object, which contains metadata information 
+#' specific to AFNI format neuroimaging files.
+#'
+#' @param descriptor An instance of class \code{\linkS4class{AFNIFormat}}.
+#' @param afni_header A list returned by \code{read_afni_header} containing AFNI header information.
+#'
+#' @return An instance of class \code{\linkS4class{AFNIMetaInfo}}.
+#'
+#' @details
+#' The AFNIMetaInfo object extends the basic MetaInfo with additional fields specific to the AFNI format.
+#' It includes information about file locations, endianness, data types, dimensions, and AFNI-specific 
+#' transformations and scaling factors.
+#'
+#' This function performs several steps:
+#' 1. Extracts and processes dimension information from the AFNI header.
+#' 2. Generates labels for each sub-brick if not provided in the header.
+#' 3. Computes the transformation matrix from AFNI's IJK space to NIFTI's LPI space.
+#' 4. Determines various metadata fields such as endianness, data type, and scaling factors.
+#' 5. Creates and returns a new AFNIMetaInfo object.
+#'
+#' Note: The 'additional_axes' field is currently set to NullAxis, which may be incorrect 
+#' for some AFNI datasets with more than 3 dimensions.
+#'
+#' @examples
+#' \dontrun{
+#' # Assuming you have an AFNIFormat object and an AFNI header
+#' afni_format <- AFNIFormat()
+#' afni_header <- read_afni_header("brain.HEAD")
+#' meta_info <- AFNIMetaInfo(afni_format, afni_header)
+#' }
+#'
+#' @seealso 
+#' \code{\link{MetaInfo}}, \code{\link{AFNIFormat-class}}, \code{\link{read_afni_header}},
+#' \code{\link{NIFTIMetaInfo}}
+#'
+#' @export
 #' @rdname FileMetaInfo-class
 AFNIMetaInfo <- function(descriptor, afni_header) {
 		.Dim <- afni_header$DATASET_DIMENSIONS$content[afni_header$DATASET_DIMENSIONS$content > 0]
@@ -172,7 +269,7 @@ AFNIMetaInfo <- function(descriptor, afni_header) {
     ## We want the transform to go from IJK to nifti (LPI) space
 		Tdicom <- matrix(afni_header$IJK_TO_DICOM$content, 3,4, byrow=TRUE)
 		TLPI <- perm_mat(OrientationList3D$AXIAL_RAI) %*% Tdicom[1:3,]
-    TLPI <- rbind(TLPI, c(0,0,0,1))
+    	TLPI <- rbind(TLPI, c(0,0,0,1))
 
 		new("AFNIMetaInfo",
 			header_file=header_file(descriptor, afni_header$file_name),
@@ -220,6 +317,29 @@ setAs(from="MetaInfo", to="NIFTIMetaInfo", def=function(from) {
 			}
 
 		})
+
+
+		#' show a \code{FileMetaInfo}
+#' @param object the object
+#' @export
+setMethod(f="show", signature=signature("FileMetaInfo"),
+		def=function(object) {
+			cat("an instance of class",  class(object), "\n\n")
+			cat("header_file:", "\t", object@header_file, "\n")
+			cat("data_file:", "\t", object@data_file, "\n")
+			cat("endian:", "\t", object@endian, "\n")
+			cat("data_offset:", "\t", object@data_offset, "\n")
+			cat("data_type:", "\t", object@data_type, "\n")
+			cat("dimensions:", "\t", object@dims, "\n")
+			cat("voxel size:", "\t", object@spacing, "\n")
+			cat("origin:", "\t", object@origin, "\n")
+			cat("label(s):", "\t", object@label, "\n")
+			cat("intercept:", "\t", object@intercept, "\n")
+			cat("slope:", "\t\t", object@slope, "\n\n")
+
+			cat("additional format-specific info may be contained in @header slot", "\n")
+		})
+
 
 
 

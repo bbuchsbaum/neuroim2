@@ -7,18 +7,23 @@
 NeuroVecSource(file_name, indices = NULL, mask = NULL)
 }
 \arguments{
-\item{file_name}{name of the 4-dimensional image file}
+\item{file_name}{The name of the 4-dimensional image file.}
 
-\item{indices}{the subset of integer volume indices to load -- if \code{NULL} then all volumes will be loaded}
+\item{indices}{An optional integer vector specifying the subset of volume indices to load.
+If not provided, all volumes will be loaded.}
 
-\item{mask}{image volume indicating the subset of voxels that will be loaded. If provided, function returns \code{SparseNeuroVecSource}}
+\item{mask}{An optional logical array or \code{\linkS4class{NeuroVol}} object defining 
+the subset of voxels to load. If provided, a SparseNeuroVecSource object will be created.}
 }
 \value{
-a instance deriving from \code{NeuroVecSource}
+An instance of the \code{\linkS4class{NeuroVecSource}} class.
 }
 \description{
-Construct a \code{NeuroVecSource} object
+This function constructs a NeuroVecSource object, which represents the source 
+of a four-dimensional brain image.
 }
 \details{
-If a \code{mask} is supplied then it should be a \code{\linkS4class{LogicalNeuroVol}} or \code{\linkS4class{NeuroVol}} instance. If the latter, then the mask will be defined by nonzero elements of the volume.
+If a \code{mask} is supplied, it should be a \code{\linkS4class{LogicalNeuroVol}} or 
+\code{\linkS4class{NeuroVol}} instance. If the latter, then the mask will be defined by 
+nonzero elements of the volume.
 }

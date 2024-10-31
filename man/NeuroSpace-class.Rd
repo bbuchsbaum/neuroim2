@@ -5,7 +5,10 @@
 \alias{NeuroSpace-class}
 \title{NeuroSpace Class}
 \description{
-Represents the geometry of a brain image.
+The NeuroSpace class represents the geometric properties of a brain image,
+including its dimensions, origin, spacing, axes, and coordinate transformations.
+It provides a comprehensive framework for handling spatial information in
+neuroimaging data analysis.
 }
 \section{Slots}{
 
@@ -25,18 +28,56 @@ Represents the geometry of a brain image.
 
 \section{Validity}{
 
-  The \code{\linkS4class{NeuroSpace}} object is considered valid if:
-  - The length of the @dim slot is equal to the lengths of the @spacing, @origin, and number of axes in the @axes slots.
-  - The @dim slot contains non-negative values.
+A \code{NeuroSpace} object is considered valid if:
+\itemize{
+  \item The length of the \code{dim} slot is equal to the lengths of the \code{spacing}, \code{origin}, and number of axes in the \code{axes} slots.
+  \item The \code{dim} slot contains only non-negative values.
+}
+}
+
+\section{Methods}{
+
+The following methods are available for \code{NeuroSpace} objects:
+\itemize{
+  \item \code{\link{dim}}: Get the dimensions of the space.
+  \item \code{\link{origin}}: Get or set the origin of the space.
+  \item \code{\link{spacing}}: Get or set the spacing of the space.
+  \item \code{\link{axes}}: Get the axes of the space.
+  \item \code{\link{transform}}: Apply the affine transformation to coordinates.
+  \item \code{\link{inverse_transform}}: Apply the inverse transformation to coordinates.
+}
 }
 
 \section{Usage}{
 
-  The \code{\linkS4class{NeuroSpace}} class is used to store and manipulate the geometric properties of a brain image.
+The \code{NeuroSpace} class is fundamental in representing and manipulating
+the spatial properties of neuroimaging data. It is used extensively throughout
+the package for operations that require spatial information, such as image
+registration, resampling, and coordinate transformations.
 }
 
 \examples{
 # Create a NeuroSpace object
-space <- NeuroSpace(dim=as.integer(c(64, 64, 64)), origin=c(0, 0, 0), spacing=c(1, 1, 1))
+space <- NeuroSpace(dim = c(64L, 64L, 64L),
+                    origin = c(0, 0, 0),
+                    spacing = c(1, 1, 1))
 
+# Get the dimensions
+dim(space)
+
+# Set a new origin
+origin(space) <- c(-32, -32, -32)
+
+# Apply a transformation to a set of coordinates
+coords <- matrix(c(10, 20, 30), ncol = 3)
+transformed_coords <- transform(space, coords)
+
+}
+\references{
+For more information on spatial transformations in neuroimaging:
+Brett, M., Johnsrude, I. S., & Owen, A. M. (2002). The problem of functional localization in the human brain. Nature Reviews Neuroscience, 3(3), 243-249.
+}
+\seealso{
+\code{\link{AxisSet-class}} for details on the axis set representation.
+\code{\link{NeuroVol-class}} and \code{\link{NeuroVec-class}} for classes that use NeuroSpace.
 }

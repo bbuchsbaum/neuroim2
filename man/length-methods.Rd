@@ -4,7 +4,7 @@
 \alias{length,NeuroVec-method}
 \alias{length,NeuroVecSeq-method}
 \alias{length,ROIVol-method}
-\title{Get length of \code{NeuroVec}. This is the number of volumes in the volume vector (e.g. the 4th image dimension)}
+\title{Get the length of a NeuroVec object}
 \usage{
 \S4method{length}{NeuroVec}(x)
 
@@ -13,8 +13,11 @@
 \S4method{length}{ROIVol}(x)
 }
 \arguments{
-\item{x}{the object}
+\item{x}{The NeuroVec object.}
+}
+\value{
+The number of volumes in the NeuroVec object.
 }
 \description{
-Get length of \code{NeuroVec}. This is the number of volumes in the volume vector (e.g. the 4th image dimension)
+This function returns the number of volumes in a NeuroVec object.
 }

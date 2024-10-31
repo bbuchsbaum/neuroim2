@@ -51,6 +51,7 @@ Collate:
     'searchlight.R'
     'sparse_neurovec.R'
     'spat_filter.R'
+    'zzz.R'
 RoxygenNote: 7.3.1
 Imports: 
   purrr,

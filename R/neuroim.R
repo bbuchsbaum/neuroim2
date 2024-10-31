@@ -1,13 +1,22 @@
 #'
-#' @title neuroim2
-#' @description Data structures for neuroimaging data.
+#' neuroim2: neuroimaging data structures for analysis
 #'
-#' @useDynLib neuroim2
-#' @importFrom Rcpp evalCpp
-#' @importFrom assertthat assert_that
+#' @description
+#' The neuroim2 package provides tools and functions for analyzing and 
+#' manipulating neuroimaging data. It supports various neuroimaging formats 
+#' and offers a range of analysis techniques.
+#'
+#' @section Main functions:
+#' \itemize{
+#'   \item \code{\link{read_vol}}: Read neuroimaging volumes
+#'   \item \code{\link{write_vol}}: Write neuroimaging volumes
+#'   \item \code{\link{NeuroVol}}: Create NeuroVol objects
+#'   \item \code{\link{NeuroVec}}: Create NeuroVec objects
+#' }
+#'
 #' @docType package
-#' @name neuroim2
-#' @details none
-NULL
+#' @name neuroim2-package
+#' @aliases neuroim2
+"_PACKAGE"
 
 if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))

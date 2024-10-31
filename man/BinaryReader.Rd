@@ -2,7 +2,7 @@
 % Please edit documentation in R/binary_io.R
 \name{BinaryReader}
 \alias{BinaryReader}
-\title{BinaryReader}
+\title{Create a BinaryReader Object}
 \usage{
 BinaryReader(
   input,
@@ -14,21 +14,47 @@ BinaryReader(
 )
 }
 \arguments{
-\item{input}{file name to read from or else a \code{connection} object}
+\item{input}{A file name (character string) to read from or a \code{connection} object.}
 
-\item{byte_offset}{the number of bytes to skip at the start of input}
+\item{byte_offset}{An integer specifying the number of bytes to skip at the start of input.}
 
-\item{data_type}{R data type of binary elements}
+\item{data_type}{A character string specifying the R data type of binary elements.}
 
-\item{bytes_per_element}{number of bytes in each data element (e.g. 4 or 8 for floating point numbers)}
+\item{bytes_per_element}{An integer specifying the number of bytes in each data element 
+(e.g., 4 or 8 for floating point numbers).}
 
-\item{endian}{endianness of binary input connection}
+\item{endian}{A character string specifying the endianness of the binary input connection. 
+Default is \code{.Platform$endian}.}
 
-\item{signed}{whether the element is signed (TRUE) or unsigned (FALSE)}
+\item{signed}{A logical value indicating whether the data type is signed (TRUE) or 
+unsigned (FALSE). Default is TRUE.}
 }
 \value{
-a new instance of type \code{BinaryReader}
+A new instance of the \code{\linkS4class{BinaryReader}} class.
 }
 \description{
-Constructor for  \code{\linkS4class{BinaryReader}} class
+This function creates a new instance of the \code{\linkS4class{BinaryReader}} class,
+which supports reading of bulk binary data from a connection or file.
+}
+\details{
+The \code{BinaryReader} function creates an object for efficient reading of binary data.
+It can work with both file names and existing connection objects. If a file name is provided,
+it opens a new connection in binary read mode.
+}
+\examples{
+\dontrun{
+# Create a BinaryReader for a file
+reader <- BinaryReader("data.bin", byte_offset = 0, data_type = "double", 
+                       bytes_per_element = 8)
+
+# Create a BinaryReader for an existing connection
+con <- file("data.bin", "rb")
+reader <- BinaryReader(con, byte_offset = 100, data_type = "integer", 
+                       bytes_per_element = 4, endian = "little")
+}
+
+}
+\seealso{
+\code{\link{BinaryReader-class}} for the class definition and available methods.
+\code{\link{BinaryWriter}} for writing binary data.
 }

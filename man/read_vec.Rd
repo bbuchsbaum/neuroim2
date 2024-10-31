@@ -12,20 +12,21 @@ read_vec(
 )
 }
 \arguments{
-\item{file_name}{the name(s) of the file(s) to load. If more than one file_name is specified, the files are loaded and concatenated.}
+\item{file_name}{The name(s) of the file(s) to load. If more than one file_name is specified, 
+the files are loaded and concatenated.}
 
-\item{indices}{the indices of the sub-volumes to load (e.g. if the file is 4-dimensional)}
+\item{indices}{The indices of the sub-volumes to load (e.g. if the file is 4-dimensional).}
 
-\item{mask}{a mask defining the spatial elements to load}
+\item{mask}{A mask defining the spatial elements to load.}
 
-\item{mode}{the IO mode which is one of "normal", "mmap", "bigvec", or "filebacked".}
+\item{mode}{The IO mode which is one of "normal", "mmap", "bigvec", or "filebacked".}
 }
 \value{
-an \code{\linkS4class{NeuroVec}} object
+An \code{\linkS4class{NeuroVec}} object.
 }
 \description{
-load an image volume from a file
+This function loads an image volume from a file.
 }
 \note{
-memory-mapping a gzipped file is not currently allowed.
+Memory-mapping a gzipped file is not currently allowed.
 }

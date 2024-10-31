@@ -15,5 +15,6 @@
 A DenseNeuroVec object resulting from the arithmetic operation.
 }
 \description{
-This function performs arithmetic operations on a NeuroVec object and a NeuroVol object.
+This function performs arithmetic operations on a NeuroVec object and a
+NeuroVol object.
 }

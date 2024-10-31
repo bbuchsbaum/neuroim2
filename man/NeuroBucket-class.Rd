@@ -5,7 +5,7 @@
 \alias{NeuroBucket-class}
 \title{NeuroBucket}
 \description{
-a four-dimensional image that conists of a sequence of labeled image volumes backed by a list
+a four-dimensional image that consists of a sequence of labeled image volumes backed by a list
 }
 \section{Slots}{
 

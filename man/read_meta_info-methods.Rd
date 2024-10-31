@@ -13,10 +13,34 @@ read_meta_info(x, file_name)
 \S4method{read_meta_info}{AFNIFormat}(x, file_name)
 }
 \arguments{
-\item{x}{descriptor instance}
+\item{x}{A FileFormat object (either NIFTIFormat or AFNIFormat).}
 
-\item{file_name}{file name contianing meta information}
+\item{file_name}{A character string representing the file name to read meta information from.}
+}
+\value{
+An object of class NIFTIMetaInfo or AFNIMetaInfo, depending on the input format.
 }
 \description{
-Generic function to read image meta info given a file and a \code{\linkS4class{FileFormat}} instance.
+These methods read meta information from image files based on their format (NIFTI or AFNI).
+}
+\details{
+These methods use format-specific functions to read the header information and 
+create the appropriate meta information object. The `.read_meta_info` helper function 
+is used internally to streamline the process for both formats.
+}
+\examples{
+\dontrun{
+# For NIFTI format
+nifti_format <- new("NIFTIFormat")
+nifti_meta <- read_meta_info(nifti_format, "brain_scan.nii")
+
+# For AFNI format
+afni_format <- new("AFNIFormat")
+afni_meta <- read_meta_info(afni_format, "brain_scan+orig.HEAD")
+}
+
+}
+\seealso{
+\code{\link{FileFormat-class}}, \code{\link{NIFTIFormat-class}}, \code{\link{AFNIFormat-class}},
+\code{\link{NIFTIMetaInfo-class}}, \code{\link{AFNIMetaInfo-class}}
 }
