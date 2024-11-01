@@ -57,8 +57,7 @@ Another thing we might to is compute the k nearest neighbors in each searchlight
 
 ```{r}
 k <- 12
-knnfvol <- vol2 %>% searchlight(radius=12, eager=FALSE) %>% map_dbl(function(x) {
-  print(x@center_index)
+knnfvol <- vol2 %>% searchlight(radius=8, eager=TRUE) %>% map_dbl(function(x) {
   ind <- order((x[x@center_index] - x)^2)[1:k]
   mean(x[ind])
   mean(x)
