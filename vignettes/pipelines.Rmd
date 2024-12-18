@@ -68,11 +68,11 @@ plot(knnfvol, cmap=rainbow(255))
 If we only need access to the searchlight coordinates (in voxel space), we can use the `searchlight_coords` function. Here, we simply replace the center voxel with the average of its neighbors in searchlight space:
 
 ```{r}
-avgvol <- vol %>% searchlight_coords(radius=12) %>% map_dbl(function(x) {
+avgvol <- vol %>% searchlight_coords(radius=12, nonzero=TRUE) %>% map_dbl(function(x) {
   vals <- vol[x]
   mean(vals[vals!=0])
 }) %>% NeuroVol(space=space(vol), indices=which(vol!=0))
-plot(avgvol, cmap=rainbow(255), zlevels=seq(1,25,by=3))
+plot(avgvol, cmap=rainbow(2), zlevels=seq(1,25,by=3))
 ```
 
 ## Mapping a function over every slice of a `NeuroVol`
@@ -88,6 +88,7 @@ plot(slice_means, type='l', ylab="mean intensity", xlab="slice number")
 
 ```{r}
 vec <- concat(vol,vol,vol,vol,vol)
+vec
 mean_vec <- vec %>% vols %>% map_dbl(~ mean(.))
 sd_vec <- vec %>% vols %>% map_dbl(~ sd(.))
 assert_that(length(mean_vec) == dim(vec)[4])
@@ -98,6 +99,7 @@ assert_that(length(sd_vec) == dim(vec)[4])
 
 ```{r}
 vec <- concat(vol,vol,vol,vol,vol)
+vec
 mean_vol <- vec %>% vectors() %>% map_dbl(~ mean(.)) %>% NeuroVol(., space=space(vol))
 assert_that(all(dim(mean_vol) == dim(vol)))
 ```

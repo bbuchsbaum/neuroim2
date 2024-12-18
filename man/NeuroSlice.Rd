@@ -2,60 +2,81 @@
 % Please edit documentation in R/neuroslice.R
 \name{NeuroSlice}
 \alias{NeuroSlice}
-\title{Construct a NeuroSlice Object}
+\title{NeuroSlice: 2D Neuroimaging Data Container}
 \usage{
 NeuroSlice(data, space, indices = NULL)
 }
 \arguments{
-\item{data}{A vector or matrix containing the slice data.}
+\item{data}{A vector or matrix containing the slice data values.}
 
-\item{space}{An instance of class \code{\linkS4class{NeuroSpace}} defining the spatial properties of the slice.}
+\item{space}{An object of class \code{\linkS4class{NeuroSpace}} defining the spatial 
+properties (dimensions, spacing, origin) of the slice.}
 
-\item{indices}{Optional. A vector of linear indices used when \code{data} is a 1D vector.
-If provided, it specifies where the data should be placed in the 2D slice.}
+\item{indices}{Optional integer vector. When \code{data} is provided as a 1D vector,
+\code{indices} specifies the linear indices where the data values should be placed
+in the 2D slice. Useful for creating sparse slices. Default is NULL.}
 }
 \value{
-A new instance of class \code{\linkS4class{NeuroSlice}}.
+A new object of class \code{\linkS4class{NeuroSlice}}.
 }
 \description{
-This function creates a NeuroSlice object, which represents a 2D slice of neuroimaging data
-with associated spatial information.
+Creates a \code{NeuroSlice} object representing a two-dimensional slice of neuroimaging data
+with associated spatial information. This class is particularly useful for working with
+individual slices from volumetric neuroimaging data or for visualizing 2D cross-sections.
 }
 \details{
-The function performs several checks and transformations:
+Two-Dimensional Neuroimaging Data Slice
+}
+\section{Input Validation}{
+
+The function performs several validation checks:
 \itemize{
-  \item It ensures that the provided space is 2-dimensional.
-  \item If \code{indices} is not provided:
+  \item Verifies that \code{space} is 2-dimensional
+  \item Ensures data dimensions are compatible with \code{space}
+  \item Validates \code{indices} when provided for sparse initialization
+}
+}
+
+\section{Data Handling}{
+
+The function supports two initialization modes:
+\itemize{
+  \item Dense mode (indices = NULL):
     \itemize{
-      \item If \code{data} is not 2D, it reshapes it to match the dimensions of \code{space}.
-      \item It checks that the dimensions of \code{data} match those of \code{space}.
+      \item Data is reshaped if necessary to match space dimensions
+      \item Dimensions must match exactly after reshaping
     }
-  \item If \code{indices} is provided:
+  \item Sparse mode (indices provided):
     \itemize{
-      \item It creates a zero matrix matching the dimensions of \code{space}.
-      \item It places the \code{data} values at the specified \code{indices} in this matrix.
+      \item Creates a zero-initialized matrix matching space dimensions
+      \item Places data values at specified indices
     }
 }
 }
+
 \examples{
-# Create a NeuroSpace object for a 64x64 slice
-bspace <- NeuroSpace(c(64, 64), spacing = c(1, 1))
+# Create a 64x64 slice space
+slice_space <- NeuroSpace(c(64, 64), spacing = c(2, 2))
 
-# Create random data for the slice
-dat <- array(rnorm(64*64), c(64, 64))
+# Example 1: Dense slice from matrix
+slice_data <- matrix(rnorm(64*64), 64, 64)
+dense_slice <- NeuroSlice(slice_data, slice_space)
 
-# Construct a NeuroSlice object
-bslice <- NeuroSlice(dat, bspace)
-print(bslice)
+# Example 2: Dense slice from vector
+vec_data <- rnorm(64*64)
+vec_slice <- NeuroSlice(vec_data, slice_space)
 
-# Using indices to create a sparse slice
-sparse_data <- rnorm(100)  # 100 non-zero values
-sparse_indices <- sample(1:(64*64), 100)  # 100 random positions
-sparse_slice <- NeuroSlice(sparse_data, bspace, indices = sparse_indices)
-print(sparse_slice)
+# Example 3: Sparse slice with specific values
+n_points <- 100
+sparse_data <- rnorm(n_points)
+sparse_indices <- sample(1:(64*64), n_points)
+sparse_slice <- NeuroSlice(sparse_data, slice_space, indices = sparse_indices)
 
 }
 \seealso{
-\code{\link{NeuroSpace-class}} for details on the spatial information.
-\code{\link{NeuroVol-class}} for 3D volumetric data.
+\itemize{
+  \item \code{\link{NeuroSpace}} for defining spatial properties
+  \item \code{\link{NeuroVol}} for 3D volumetric data
+  \item \code{\link{plot.NeuroSlice}} for visualization methods
+}
 }

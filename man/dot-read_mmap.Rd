@@ -2,19 +2,19 @@
 % Please edit documentation in R/binary_io.R
 \name{.read_mmap}
 \alias{.read_mmap}
-\title{Read data using memory mapping}
+\title{Read Data Using Memory Mapping}
 \usage{
 .read_mmap(meta, idx)
 }
 \arguments{
-\item{meta}{An object containing metadata about the file to be read.}
+\item{meta}{An object of class \linkS4class{ImageMetadata} containing file metadata}
 
-\item{idx}{A vector of indices specifying which elements to read.}
+\item{idx}{Integer vector of indices specifying elements to read}
 }
 \value{
-A vector of values read from the memory-mapped file.
+A numeric vector of values read from the memory-mapped file
 }
 \description{
-This internal function reads data from a memory-mapped file based on the provided metadata and indices.
+Read data from a memory-mapped file based on metadata and indices.
 }
 \keyword{internal}

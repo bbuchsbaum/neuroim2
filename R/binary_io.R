@@ -3,13 +3,13 @@
 #' @include all_generic.R
 {}
 
-#' Read data using memory mapping
+#' Read Data Using Memory Mapping
 #'
-#' This internal function reads data from a memory-mapped file based on the provided metadata and indices.
+#' Read data from a memory-mapped file based on metadata and indices.
 #'
-#' @param meta An object containing metadata about the file to be read.
-#' @param idx A vector of indices specifying which elements to read.
-#' @return A vector of values read from the memory-mapped file.
+#' @param meta An object of class \linkS4class{ImageMetadata} containing file metadata
+#' @param idx Integer vector of indices specifying elements to read
+#' @return A numeric vector of values read from the memory-mapped file
 #' @keywords internal
 .read_mmap <- function(meta, idx) {
   if (.Platform$endian != meta@endian) {
@@ -24,13 +24,13 @@
   vals
 }
 
-#' Read a mapped series from a 4D image file
+#' Read Mapped Series from 4D Image
 #'
-#' This function reads a series of data from a memory-mapped 4D image file.
+#' Read a time series of data from a memory-mapped 4D image file.
 #'
-#' @param meta An object containing metadata about the file to be read.
-#' @param idx A vector of indices specifying which elements to read.
-#' @return A matrix of values read from the memory-mapped file, transposed.
+#' @param meta An object of class \linkS4class{ImageMetadata} containing file metadata
+#' @param idx Integer vector of indices specifying elements to read
+#' @return A numeric matrix of values with dimensions [time, voxels]
 #' @keywords internal
 read_mapped_series <- function(meta, idx) {
   if (endsWith(meta@data_file, ".gz")) {
@@ -46,13 +46,13 @@ read_mapped_series <- function(meta, idx) {
   t(matrix(ret, length(idx), meta@dims[4]))
 }
 
-#' Read mapped data from a 4D image file
+#' Read Mapped Data from 4D Image
 #'
-#' This function reads data from a memory-mapped 4D image file.
+#' Read data from a memory-mapped 4D image file.
 #'
-#' @param meta An object containing metadata about the file to be read.
-#' @param idx A vector of indices specifying which elements to read.
-#' @return A vector of values read from the memory-mapped file.
+#' @param meta An object of class \linkS4class{ImageMetadata} containing file metadata
+#' @param idx Integer vector of indices specifying elements to read
+#' @return A numeric vector of values
 #' @keywords internal
 read_mapped_data <- function(meta, idx) {
   if (endsWith(meta@data_file, ".gz")) {
@@ -65,13 +65,13 @@ read_mapped_data <- function(meta, idx) {
   ret <- .read_mmap(meta, idx)
 }
 
-#' Read mapped volumes from a 4D image file
+#' Read Mapped Volumes from 4D Image
 #'
-#' This function reads volumes of data from a memory-mapped 4D image file.
+#' Read volume data from a memory-mapped 4D image file.
 #'
-#' @param meta An object containing metadata about the file to be read.
-#' @param idx A vector of indices specifying which volumes to read.
-#' @return A matrix of values read from the memory-mapped file.
+#' @param meta An object of class \linkS4class{ImageMetadata} containing file metadata
+#' @param idx Integer vector of indices specifying volumes to read
+#' @return A numeric matrix with dimensions [time, voxels]
 #' @keywords internal
 read_mapped_vols <- function(meta, idx) {
   if (endsWith(meta@data_file, ".gz")) {
@@ -87,14 +87,20 @@ read_mapped_vols <- function(meta, idx) {
   idx_set <- map(idx, ~ (.-1)*nels + seq(1,nels)) %>% flatten_dbl()
   ret <- .read_mmap(meta, idx_set)
   mat <- matrix(ret, nels, length(idx))
+  t(mat)  # Transpose to get [time, voxels]
 }
 
-#' Create a series reader function for a 4D image file
+#' Create Series Reader for 4D Image
 #'
-#' This function creates a closure that can read series of data from a 4D image file.
+#' Create a closure function that can read time series data from a 4D image file.
 #'
-#' @param file_name The name of the 4D image file to read from.
-#' @return A function that can read series of data from the specified file.
+#' @param file_name Character string specifying the path to the 4D image file
+#' @return A function that accepts parameters:
+#'   \itemize{
+#'     \item first: Integer index of first element to read
+#'     \item last: Integer index of last element to read
+#'     \item input: Optional connection object (if NULL, creates new connection)
+#'   }
 #' @keywords internal
 series_reader <- function(file_name) {
   if (endsWith(file_name, ".gz")) {
@@ -130,49 +136,32 @@ series_reader <- function(file_name) {
   f
 }
 
-#' Create a BinaryReader Object
+#' Create Binary Reader Object
 #'
-#' @description
-#' This function creates a new instance of the \code{\linkS4class{BinaryReader}} class,
-#' which supports reading of bulk binary data from a connection or file.
+#' Create a new instance of the \linkS4class{BinaryReader} class for reading bulk binary data.
 #'
-#' @param input A file name (character string) to read from or a \code{connection} object.
-#' @param byte_offset An integer specifying the number of bytes to skip at the start of input.
-#' @param data_type A character string specifying the R data type of binary elements.
-#' @param bytes_per_element An integer specifying the number of bytes in each data element 
-#'   (e.g., 4 or 8 for floating point numbers).
-#' @param endian A character string specifying the endianness of the binary input connection. 
-#'   Default is \code{.Platform$endian}.
-#' @param signed A logical value indicating whether the data type is signed (TRUE) or 
-#'   unsigned (FALSE). Default is TRUE.
-#'
-#' @return A new instance of the \code{\linkS4class{BinaryReader}} class.
-#'
-#' @details
-#' The \code{BinaryReader} function creates an object for efficient reading of binary data.
-#' It can work with both file names and existing connection objects. If a file name is provided,
-#' it opens a new connection in binary read mode.
-#'
-#' @seealso 
-#' \code{\link{BinaryReader-class}} for the class definition and available methods.
-#' \code{\link{BinaryWriter}} for writing binary data.
-#'
+#' @param input Character string (file name) or connection object to read from
+#' @param byte_offset Integer specifying bytes to skip at start of input
+#' @param data_type Character string specifying R data type ('integer', 'double', etc.)
+#' @param bytes_per_element Integer specifying bytes per data element (e.g., 4 or 8)
+#' @param endian Character string specifying endianness ('big' or 'little', default: platform-specific)
+#' @param signed Logical indicating if data type is signed (default: TRUE)
+#' @return An object of class \linkS4class{BinaryReader}
 #' @examples
 #' \dontrun{
-#' # Create a BinaryReader for a file
-#' reader <- BinaryReader("data.bin", byte_offset = 0, data_type = "double", 
-#'                        bytes_per_element = 8)
-#'
-#' # Create a BinaryReader for an existing connection
+#' # Create reader for double-precision data
+#' reader <- BinaryReader("data.bin", byte_offset = 0L,
+#'                       data_type = "double", bytes_per_element = 8L)
+#'                       
+#' # Read from existing connection with offset
 #' con <- file("data.bin", "rb")
-#' reader <- BinaryReader(con, byte_offset = 100, data_type = "integer", 
-#'                        bytes_per_element = 4, endian = "little")
+#' reader <- BinaryReader(con, byte_offset = 100L,
+#'                       data_type = "integer", bytes_per_element = 4L)
 #' }
-#'
+#' @seealso \code{\link{BinaryWriter}} for writing binary data
 #' @export
-#' @rdname BinaryReader
-BinaryReader <- function(input, byte_offset, data_type, bytes_per_element, 
-                         endian = .Platform$endian, signed = TRUE) {
+BinaryReader <- function(input, byte_offset, data_type, bytes_per_element,
+                        endian = .Platform$endian, signed = TRUE) {
   if (is.character(input)) {
     new("BinaryReader", input = file(input, open = "rb"), 
         byte_offset = as.integer(byte_offset),
@@ -189,46 +178,31 @@ BinaryReader <- function(input, byte_offset, data_type, bytes_per_element,
   }
 }
 
-#' Create a BinaryWriter Object
+#' Create Binary Writer Object
 #'
-#' @description
-#' This function creates a new instance of the \code{\linkS4class{BinaryWriter}} class,
-#' which supports writing of bulk binary data to a connection or file.
+#' Create a new instance of the \linkS4class{BinaryWriter} class for writing bulk binary data.
 #'
-#' @param output A file name (character string) to write to or a \code{connection} object.
-#' @param byte_offset An integer specifying the number of bytes to skip at the start of output.
-#' @param data_type A character string specifying the R data type of binary elements to be written.
-#' @param bytes_per_element An integer specifying the number of bytes in each data element 
-#'   (e.g., 4 or 8 for floating point numbers).
-#' @param endian A character string specifying the endianness of the binary output connection. 
-#'   Default is \code{.Platform$endian}.
-#'
-#' @return A new instance of the \code{\linkS4class{BinaryWriter}} class.
-#'
-#' @details
-#' The \code{BinaryWriter} function creates an object for efficient writing of binary data.
-#' It can work with both file names and existing connection objects. If a file name is provided,
-#' it opens a new connection in binary write mode.
-#'
-#' @seealso 
-#' \code{\link{BinaryWriter-class}} for the class definition and available methods.
-#' \code{\link{BinaryReader}} for reading binary data.
-#'
+#' @param output Character string (file name) or connection object to write to
+#' @param byte_offset Integer specifying bytes to skip at start of output
+#' @param data_type Character string specifying R data type ('integer', 'double', etc.)
+#' @param bytes_per_element Integer specifying bytes per data element (e.g., 4 or 8)
+#' @param endian Character string specifying endianness ('big' or 'little', default: platform-specific)
+#' @return An object of class \linkS4class{BinaryWriter}
 #' @examples
 #' \dontrun{
-#' # Create a BinaryWriter for a file
-#' writer <- BinaryWriter("output.bin", byte_offset = 0, data_type = "double", 
-#'                        bytes_per_element = 8)
-#'
-#' # Create a BinaryWriter for an existing connection
+#' # Create writer for double-precision data
+#' writer <- BinaryWriter("output.bin", byte_offset = 0L,
+#'                       data_type = "double", bytes_per_element = 8L)
+#'                       
+#' # Write to existing connection with offset
 #' con <- file("output.bin", "wb")
-#' writer <- BinaryWriter(con, byte_offset = 100, data_type = "integer", 
-#'                        bytes_per_element = 4, endian = "little")
+#' writer <- BinaryWriter(con, byte_offset = 100L,
+#'                       data_type = "integer", bytes_per_element = 4L)
 #' }
-#'
+#' @seealso \code{\link{BinaryReader}} for reading binary data
 #' @export
-#' @rdname BinaryWriter
-BinaryWriter <- function(output, byte_offset, data_type, bytes_per_element, endian = .Platform$endian) {
+BinaryWriter <- function(output, byte_offset, data_type, bytes_per_element,
+                        endian = .Platform$endian) {
   if (is.character(output)) {
     new("BinaryWriter", output = file(output, open = "wb"), 
         byte_offset = as.integer(byte_offset), 
@@ -246,7 +220,7 @@ BinaryWriter <- function(output, byte_offset, data_type, bytes_per_element, endi
 }
 
 ## some code duplication here.
-setMethod(f="initialize", signature=signature("BinaryReader"),
+setMethod(f="initialize", signature=signature(.Object="BinaryReader"),
 		def=function(.Object, input, byte_offset, data_type, bytes_per_element, endian, signed) {
 			.Object@input <- input
 			.Object@byte_offset <- byte_offset
@@ -270,7 +244,7 @@ setMethod(f="initialize", signature=signature("BinaryReader"),
 		})
 
 ## code duplication, fix me
-setMethod(f="initialize", signature=signature("BinaryWriter"),
+setMethod(f="initialize", signature=signature(.Object="BinaryWriter"),
 		def=function(.Object, output, byte_offset, data_type, bytes_per_element, endian) {
 			.Object@output <- output
 			.Object@byte_offset <- byte_offset
@@ -284,31 +258,27 @@ setMethod(f="initialize", signature=signature("BinaryWriter"),
 			.Object
 		})
 
-#' Read Elements from a BinaryReader
+#' Read Elements from Binary Reader
 #'
-#' @description
-#' This method reads a specified number of elements from a BinaryReader object.
+#' Read a specified number of elements from a \linkS4class{BinaryReader} object.
 #'
-#' @param x A BinaryReader object.
-#' @param num_elements A numeric value specifying the number of elements to read.
-#' @return A vector of read elements.
-#'
+#' @param x Object of class \linkS4class{BinaryReader}
+#' @param num_elements Integer specifying number of elements to read
+#' @return Numeric vector of read elements
 #' @export
-#' @rdname read_elements-methods
 setMethod(f="read_elements", signature=signature(x= "BinaryReader", num_elements="numeric"),
 		def=function(x, num_elements) {
 			readBin(x@input, what=x@data_type, size=x@bytes_per_element, n=num_elements, endian=x@endian, signed=x@signed)
 		})
 
-#' Write Elements to a BinaryWriter
+#' Write Elements to Binary Writer
 #'
-#' @description
-#' This method writes elements to a BinaryWriter object.
+#' Write elements to a \linkS4class{BinaryWriter} object.
 #'
-#' @param x A BinaryWriter object.
-#' @param els A numeric vector of elements to write.
-#'
-#' @rdname write_elements-methods
+#' @param x Object of class \linkS4class{BinaryWriter}
+#' @param els Numeric vector of elements to write
+#' @return None (called for side effect)
+#' @export
 setMethod(f="write_elements", signature=signature(x= "BinaryWriter", els="numeric"),
 		def=function(x, els) {
 			if (.getRStorage(x@data_type) == "integer") {
@@ -323,8 +293,7 @@ setMethod(f="write_elements", signature=signature(x= "BinaryWriter", els="numeri
 
 #' Close a BinaryReader or BinaryWriter
 #'
-#' @description
-#' This method closes the connection associated with a BinaryReader or BinaryWriter object.
+#' Close the connection associated with a BinaryReader or BinaryWriter object.
 #'
 #' @param con The BinaryReader or BinaryWriter object to close.
 #'
@@ -343,37 +312,22 @@ setMethod(f="close", signature=signature(con= "BinaryWriter"),
 		})
 
 
-#' Create a ColumnReader Object
+#' Create Column Reader Object
 #'
-#' @description
-#' This function creates a new instance of the \code{\linkS4class{ColumnReader}} class,
-#' which represents a reader for column-oriented data.
+#' Create a new instance of the \linkS4class{ColumnReader} class for reading column-oriented data.
 #'
-#' @param nrow An integer specifying the number of rows in the data.
-#' @param ncol An integer specifying the number of columns in the data.
-#' @param reader A function that takes a set of column indices and returns a matrix.
-#'
-#' @return A new instance of the \code{\linkS4class{ColumnReader}} class.
-#'
-#' @details
-#' The \code{ColumnReader} function creates an object for efficient reading of column-oriented data.
-#' The provided reader function should be capable of reading specified columns from the data source.
-#'
-#' @seealso 
-#' \code{\link{ColumnReader-class}} for the class definition and available methods.
-#'
+#' @param nrow Integer specifying number of rows in data
+#' @param ncol Integer specifying number of columns in data
+#' @param reader Function that takes column indices and returns matrix
+#' @return An object of class \linkS4class{ColumnReader}
 #' @examples
 #' \dontrun{
-#' # Create a simple ColumnReader
 #' reader_func <- function(cols) {
-#'   # This is a placeholder function
-#'   matrix(rnorm(100 * length(cols)), nrow = 100, ncol = length(cols))
+#'   matrix(rnorm(100 * length(cols)), 100, length(cols))
 #' }
-#' col_reader <- ColumnReader(nrow = 100, ncol = 10, reader = reader_func)
+#' col_reader <- ColumnReader(nrow = 100L, ncol = 10L, reader = reader_func)
 #' }
-#'
 #' @export
-#' @rdname ColumnReader
 ColumnReader <- function(nrow, ncol, reader) {
   stopifnot(is.function(reader))
   new("ColumnReader", nrow=as.integer(nrow), ncol=as.integer(ncol), reader=reader)

@@ -2,13 +2,15 @@
 % Please edit documentation in R/neurospace.R
 \name{show,NeuroSpace-method}
 \alias{show,NeuroSpace-method}
-\title{show a \code{NeuroSpace}}
+\title{Display NeuroSpace Object Details}
 \usage{
 \S4method{show}{NeuroSpace}(object)
 }
 \arguments{
-\item{object}{the object}
+\item{object}{A NeuroSpace object to display}
 }
 \description{
-show a \code{NeuroSpace}
+Provides a beautifully formatted display of a NeuroSpace object's properties,
+including dimensions, spacing, origin, and transformation information.
+Uses color coding and unicode characters for enhanced readability.
 }

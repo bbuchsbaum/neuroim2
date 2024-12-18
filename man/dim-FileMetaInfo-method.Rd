@@ -2,13 +2,16 @@
 % Please edit documentation in R/meta_info.R
 \name{dim,FileMetaInfo-method}
 \alias{dim,FileMetaInfo-method}
-\title{dim of \code{FileMetaInfo}}
+\title{Get Dimensions of FileMetaInfo Object}
 \usage{
 \S4method{dim}{FileMetaInfo}(x)
 }
 \arguments{
-\item{x}{the object}
+\item{x}{A FileMetaInfo object}
+}
+\value{
+Integer vector of image dimensions
 }
 \description{
-dim of \code{FileMetaInfo}
+Get Dimensions of FileMetaInfo Object
 }

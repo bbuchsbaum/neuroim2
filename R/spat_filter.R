@@ -193,4 +193,57 @@ bilateral_filter_vec <- function(vec, mask, spatial_sigma=2, intensity_sigma=1, 
 
 }
 
+#' Laplacian Enhancement Filter for Volumetric Images
+#'
+#' @description
+#' This function applies a multi-layer Laplacian enhancement filter to a volumetric image (3D brain MRI data).
+#' The filter enhances details while preserving edges using a non-local means approach with multiple scales.
+#'
+#' @param vol A \code{\linkS4class{NeuroVol}} object representing the image volume to be enhanced.
+#' @param mask A \code{\linkS4class{LogicalNeuroVol}} object specifying the region to process. If not provided,
+#'   the entire volume will be processed.
+#' @param k An integer specifying the number of layers in the decomposition (default is 2).
+#' @param patch_size An integer specifying the size of patches for non-local means. Must be odd (default is 3).
+#' @param search_radius An integer specifying the radius of the search window (default is 2).
+#' @param h A numeric value controlling the filtering strength. Higher values mean more smoothing (default is 0.7).
+#' @param mapping_params An optional list of parameters for the enhancement mappings.
+#' @param use_normalization_free Logical indicating whether to use normalization-free weights (default is TRUE).
+#'
+#' @return A \code{\linkS4class{NeuroVol}} object representing the enhanced image.
+#'
+#' @export
+laplace_enhance <- function(vol, mask, k = 2, patch_size = 3, search_radius = 2, 
+                          h = 0.7, mapping_params = NULL, 
+                          use_normalization_free = TRUE) {
+  
+  assert_that(inherits(vol, "NeuroVol"))
+  assert_that(k >= 1)
+  assert_that(patch_size >= 3 && patch_size %% 2 == 1)
+  assert_that(search_radius >= 1)
+  assert_that(h > 0)
+  
+  # Create default mask if not provided
+  if (missing(mask)) {
+    mask <- LogicalNeuroVol(array(TRUE, dim(vol)), space(vol))
+  } else {
+    assert_that(inherits(mask, "LogicalNeuroVol"))
+  }
+  
+  # Call C++ implementation
+  farr <- fast_multilayer_laplacian_enhancement_masked(
+    as.array(vol),
+    as.logical(mask),
+    as.integer(k),
+    as.integer(patch_size),
+    as.integer(search_radius),
+    h,
+    mapping_params,
+    use_normalization_free
+  )
+  
+  # Return enhanced volume
+  out <- NeuroVol(farr, space(vol))
+  out
+}
+
 

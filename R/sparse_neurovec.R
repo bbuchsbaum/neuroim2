@@ -50,16 +50,14 @@ SparseNeuroVecSource <- function(meta_info, indices=NULL, mask) {
 	new("SparseNeuroVecSource", meta_info=meta_info, indices=indices, mask=mask)
 }
 
-
-#' @keywords internal
 #' @noRd
 prep_sparsenvec <- function(data, space, mask) {
   if (!inherits(mask, "LogicalNeuroVol")) {
     mspace <- NeuroSpace(dim(space)[1:3],
-                 spacing(space),
-                 origin(space),
-                 axes(space),
-                 trans(space))
+                         spacing(space),
+                         origin(space),
+                         axes(space),
+                         trans(space))
     mask <- LogicalNeuroVol(as.logical(mask), mspace)
   }
 
@@ -67,15 +65,13 @@ prep_sparsenvec <- function(data, space, mask) {
 
   stopifnot(inherits(mask, "LogicalNeuroVol"))
 
-  D4 <- if (is.matrix(data)) {
+  if (is.matrix(data)) {
     Nind <- sum(mask == TRUE)
     if (nrow(data) == Nind) {
       data <- t(data)
-      assert_that(ncol(data) == cardinality, msg="data matrix must must match cardinality of `mask`")
-      nrow(data)
+      assert_that(ncol(data) == cardinality, msg = "data matrix must match cardinality of `mask`")
     } else if (ncol(data) == Nind) {
-      assert_that(ncol(data) == cardinality, msg="data matrix must must match cardinality of `mask`")
-      nrow(data)
+      assert_that(ncol(data) == cardinality, msg = "data matrix must match cardinality of `mask`")
     } else {
       stop(paste(
         "matrix with dim:",
@@ -84,11 +80,18 @@ prep_sparsenvec <- function(data, space, mask) {
         Nind
       ))
     }
+    D4 <- dim(data)[1]
   } else if (length(dim(data)) == 4) {
-    mat <- apply(data, 4, function(vals)
-      vals)
-    data <- t(mat[mask == TRUE, ])
-    dim(data)[4]
+    dims <- dim(data)
+    data_mat <- matrix(0, nrow = dims[4], ncol = prod(dims[1:3]))
+    for (t in 1:dims[4]) {
+      vol_t <- data[,,,t]
+      data_mat[t,] <- as.vector(vol_t)
+    }
+    data <- data_mat[, mask@.Data, drop=FALSE]  # Only keep masked voxels
+    D4 <- dims[4]
+  } else {
+    stop("Data must be either a matrix or a 4D array.")
   }
 
   if (ndim(space) == 3) {
@@ -97,9 +100,8 @@ prep_sparsenvec <- function(data, space, mask) {
 
   stopifnot(ndim(space) == 4)
 
-  list(mask=mask, data=data, space=space)
+  list(mask = mask, data = data, space = space)
 }
-
 
 #' Construct a SparseNeuroVec Object
 #'
@@ -109,6 +111,7 @@ prep_sparsenvec <- function(data, space, mask) {
 #' @param data A matrix or a 4-D array containing the neuroimaging data. The dimensions of the data should be consistent with the dimensions of the provided NeuroSpace object and mask.
 #' @param space A \link{NeuroSpace} object representing the dimensions and voxel spacing of the neuroimaging data.
 #' @param mask A 3D array, 1D vector of type logical, or an instance of type \link{LogicalNeuroVol}, which specifies the locations of the non-zero values in the data.
+#' @param label Optional character string providing a label for the vector
 #' @return A SparseNeuroVec object, containing the sparse neuroimaging data, mask, and associated NeuroSpace information.
 #' @export
 #'
@@ -119,18 +122,14 @@ prep_sparsenvec <- function(data, space, mask) {
 #' svec <- SparseNeuroVec(mat, bspace, mask)
 #' length(indices(svec)) == sum(mask)
 #' @rdname SparseNeuroVec-class
-SparseNeuroVec <- function(data, space, mask) {
+SparseNeuroVec <- function(data, space, mask, label = "") {
 	stopifnot(inherits(space, "NeuroSpace"))
   p <- prep_sparsenvec(data,space, mask)
 
 	new("SparseNeuroVec", space=p$space, mask=p$mask,
-	    map=IndexLookupVol(space(p$mask), as.integer(which(p$mask))), data=p$data)
+	    map=IndexLookupVol(space(p$mask), as.integer(which(p$mask))), data=p$data, label=label)
 
 }
-
-
-
-
 
 #' @keywords internal
 #' @noRd
@@ -371,42 +370,185 @@ setMethod(f="matricized_access", signature=signature(x = "BigNeuroVec", i = "num
             x@data[,i]
           })
 
-#' @noRd
-#' @keywords internal
-setMethod(f="linear_access", signature=signature(x = "AbstractSparseNeuroVec", i = "numeric"),
-          def=function (x, i) {
-            nels <- prod(dim(x)[1:3])
-            n <- ceiling(i/nels)
-            offset <- i %% nels
-            offset[offset == 0] <- nels
-
-            ll <- lookup(x, offset)
-            nz <- which(ll > 0)
-
-            #if (length(nz) == 0) {
-            #  return(numeric(length(i)))
-            #}
-
-            idx2d <- cbind(n[nz], ll[nz])
-            vals <- matricized_access(x, idx2d)
-            ##vals <- x@data[idx2d]
-
-            ovals <- numeric(length(i))
-            ovals[nz] <- vals
-            ovals
-          })
 
 
-
-#' extractor
 #' @export
-#' @param x the object
-#' @param i first index
-#' @param j second index
-#' @param k third index
-#' @param m the fourth index
-#' @param ... additional args
-#' @param drop dimension
+setMethod(
+  f = "linear_access",
+  signature = signature(x = "AbstractSparseNeuroVec", i = "numeric"),
+  def = function(x, i) {
+    # -------------------------------
+    # Input Validation
+    # -------------------------------
+    if (!is.numeric(i)) {
+      stop("'i' must be a numeric vector.")
+    }
+
+    if (any(is.na(i))) {
+      stop("'i' contains NA values, which are not allowed.")
+    }
+
+    if (any(i <= 0)) {
+      stop("All indices in 'i' must be positive integers.")
+    }
+
+    if (any(i != floor(i))) {
+      stop("All indices in 'i' must be integers.")
+    }
+
+    # -------------------------------
+    # Dimension Retrieval and Validation
+    # -------------------------------
+    dims <- dim(x)
+    if (is.null(dims) || length(dims) < 4) {
+      stop("The object 'x' must have at least 4 dimensions.")
+    }
+
+    spatial_nels <- prod(dims[1:3])  # Number of elements in the first three dimensions
+    num_timepoints <- dims[4]        # Fourth dimension (e.g., time)
+
+    # Total number of elements in 'x'
+    total_elements <- spatial_nels * num_timepoints
+    if (any(i > total_elements)) {
+      stop(sprintf("Indices in 'i' exceed the total number of elements (%d).", total_elements))
+    }
+
+    # -------------------------------
+    # Mapping Linear Indices to 4D Coordinates
+    # -------------------------------
+    # Calculate timepoints and spatial_offsets using integer division and modulo
+    timepoints <- ((i - 1) %/% spatial_nels) + 1
+    spatial_offsets <- ((i - 1) %% spatial_nels) + 1
+
+    # -------------------------------
+    # Sparse Lookup
+    # -------------------------------
+    # Perform lookup to get mapping indices; assumes 'lookup' returns 0 for zeros
+    lookup_values <- lookup(x, spatial_offsets)
+
+    # Identify non-zero lookups
+    non_zero_indices <- which(lookup_values > 0)
+
+    # Early exit if all lookups are zero
+    if (length(non_zero_indices) == 0) {
+      return(rep(0, length(i)))  # All requested values are zero
+    }
+
+    # -------------------------------
+    # Prepare Indices for Data Retrieval
+    # -------------------------------
+    # Extract corresponding timepoints and spatial indices for non-zero lookups
+    data_indices <- lookup_values[non_zero_indices]  # Indices in the sparse data matrix
+
+    # Create a two-column matrix for 'matricized_access'
+    idx_matrix <- cbind(data_indices, timepoints[non_zero_indices])
+
+    # -------------------------------
+    # Retrieve Non-Zero Values
+    # -------------------------------
+    # Retrieve the non-zero values from the data matrix
+    non_zero_values <- matricized_access(x, idx_matrix)
+
+    # -------------------------------
+    # Assemble Output Vector
+    # -------------------------------
+    # Initialize the output vector with zeros
+    output_values <- numeric(length(i))
+
+    # Assign the retrieved non-zero values to their respective positions
+    output_values[non_zero_indices] <- non_zero_values
+
+    return(output_values)
+  }
+)
+
+#' Extractor Method for AbstractSparseNeuroVec
+#'
+#' @description
+#' Extracts a subset of data from a sparse four-dimensional brain image based on provided indices.
+#'
+#' @param x An object of class \code{AbstractSparseNeuroVec}.
+#' @param i Numeric vector specifying the indices for the first dimension.
+#' @param j Numeric vector specifying the indices for the second dimension.
+#' @param k Numeric vector specifying the indices for the third dimension. Defaults to all indices if missing.
+#' @param m Numeric vector specifying the indices for the fourth dimension. Defaults to all indices if missing.
+#' @param ... Additional arguments (currently unused).
+#' @param drop Logical indicating whether to drop dimensions of length one. Defaults to \code{TRUE}.
+#'
+#' @return An array containing the extracted subset. The dimensions correspond to the lengths of \code{i}, \code{j}, \code{k}, and \code{m}. If \code{drop} is \code{TRUE}, dimensions of length one are removed.
+#'
+#' @examples
+#' \dontrun{
+#' # Assuming 'sparse_vec' is a valid SparseNeuroVec object
+#' subset <- sparse_vec[1:10, 1:10, 1:5, 1:100]
+#' }
+#'
+#' @export
+#setMethod(
+#  f = "[",
+#  signature = signature(x = "AbstractSparseNeuroVec", i = "numeric", j = "numeric"),
+#  def = function(x, i, j, k, m, ..., drop = TRUE) {
+#    # -------------------------------
+#    # Input Validation
+#    # -------------------------------
+#    dims <- dim(x)
+#    if (missing(k)) {
+#      k <- seq_len(dims[3])
+#    }
+#    if (missing(m)) {
+#      m <- seq_len(dims[4])
+#    }
+#
+#    # Generate all combinations of spatial indices
+#    grid <- expand.grid(i = i, j = j, k = k)
+#    ind <- .gridToIndex3D(dims[1:3], as.matrix(grid))
+#
+#    # Perform lookup to get data indices in the sparse representation
+#    mapped <- lookup(x, ind)
+#
+#    # Identify non-zero mappings
+#    non_zero_positions <- which(mapped > 0)
+#    if (length(non_zero_positions) == 0) {
+#      result <- array(0, dim = c(length(i), length(j), length(k), length(m)))
+#      if (drop) {
+#        return(drop(result))
+#      } else {
+#        return(result)
+#      }
+#    }
+#
+#    # Extract mapped indices and corresponding grid positions for non-zero entries
+#    data_indices <- mapped[non_zero_positions]  # Indices in the sparse data matrix
+#    grid_indices <- grid[non_zero_positions, ]  # Corresponding spatial indices
+#
+#    # Retrieve data for specified voxels and timepoints
+#    # Data is stored as [time, voxels], where each column is a voxel's time series
+#    data_values <- x@data[m, data_indices, drop = FALSE]  # dimensions: n_m x n_voxels
+#
+#    # Initialize output array
+#    result <- array(0, dim = c(length(i), length(j), length(k), length(m)))
+#
+#    # Calculate output positions
+#    i_pos <- match(grid_indices$i, i)
+#    j_pos <- match(grid_indices$j, j)
+#    k_pos <- match(grid_indices$k, k)
+#
+#    # Fill the output array
+#    for (idx in seq_along(non_zero_positions)) {
+#        result[i_pos[idx], j_pos[idx], k_pos[idx], ] <- data_values[, idx]
+#    }
+#
+#    if (drop) {
+#        return(drop(result))
+#    } else {
+#        return(result)
+#    }
+#  }
+#)
+
+
+
+#' @export
 setMethod(f="[", signature=signature(x = "AbstractSparseNeuroVec", i = "numeric", j = "numeric"),
           def = function (x, i, j, k, m, ..., drop = TRUE) {
             if (missing(k))
@@ -449,8 +591,8 @@ setMethod(f="[", signature=signature(x = "AbstractSparseNeuroVec", i = "numeric"
             }
 })
 
+
 #' @export
-#' @rdname sub_vector-methods
 setMethod(f="sub_vector", signature=signature(x="SparseNeuroVec", i="numeric"),
           def=function(x, i) {
             idx <- which(x@mask > 0)
@@ -533,7 +675,3 @@ setMethod("show",
             cat("   Cardinality: ", length(object@map@indices))
             cat("\n\n")
           })
-
-
-
-

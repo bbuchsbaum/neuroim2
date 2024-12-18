@@ -2,13 +2,13 @@
 % Please edit documentation in R/axis.R
 \name{show,NamedAxis-method}
 \alias{show,NamedAxis-method}
-\title{show an \code{NamedAxis}}
+\title{Show method for NamedAxis objects}
 \usage{
 \S4method{show}{NamedAxis}(object)
 }
 \arguments{
-\item{object}{the object}
+\item{object}{A NamedAxis object}
 }
 \description{
-show an \code{NamedAxis}
+Show method for NamedAxis objects
 }

@@ -25,15 +25,21 @@ index_to_grid(x, idx)
 \S4method{index_to_grid}{NeuroVol,integer}(x, idx)
 }
 \arguments{
-\item{x}{the object}
+\item{x}{A \code{NeuroSlice} object}
 
-\item{idx}{the 1d \code{vector} of indices}
+\item{idx}{Integer vector of linear indices to convert}
 }
 \value{
 a matrix of grid coordinates
+
+A matrix with 2 columns representing the (x,y) coordinates 
+  corresponding to the input indices
 }
 \description{
-Convert 1d indices to n-dimensional grid coordinates
+Converts linear indices to 2D grid coordinates for a \code{NeuroSlice} object.
+}
+\details{
+Convert Linear Indices to Grid Coordinates
 }
 \examples{
 
@@ -42,4 +48,18 @@ Convert 1d indices to n-dimensional grid coordinates
  g <- index_to_grid(bvol, idx)
  bvol[g]
 
+slice_space <- NeuroSpace(c(10, 10))
+slice_data <- matrix(1:100, 10, 10)
+slice <- NeuroSlice(slice_data, slice_space)
+
+# Convert single index
+coords <- index_to_grid(slice, 55)
+
+# Convert multiple indices
+indices <- c(1, 25, 50, 75, 100)
+coords_mat <- index_to_grid(slice, indices)
+
+}
+\seealso{
+\code{\link{grid_to_index}} for the inverse operation
 }

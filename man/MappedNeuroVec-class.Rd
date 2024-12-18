@@ -6,34 +6,61 @@
 \alias{MappedNeuroVec}
 \title{MappedNeuroVec Class}
 \usage{
-MappedNeuroVec(file_name)
+MappedNeuroVec(file_name, label = basename(file_name))
 }
 \arguments{
-\item{file_name}{A character string specifying the name of the 4D image file 
-containing the memory-mapped data source.}
+\item{file_name}{Character string specifying the path to the neuroimaging file.
+Supported formats include NIFTI (.nii) and ANALYZE (.hdr/.img).}
+
+\item{label}{Optional character string providing a label for the vector}
 }
 \value{
-A new instance of class \code{\linkS4class{MappedNeuroVec}}.
+A new \code{\linkS4class{MappedNeuroVec}} object providing:
+\itemize{
+  \item Memory-mapped access to the data
+  \item Spatial and temporal indexing
+  \item Efficient data extraction
+  \item Automatic memory management
+}
 }
 \description{
 A class representing a four-dimensional brain image backed by a memory-mapped file.
 This class provides efficient access to large brain images without loading the
 entire dataset into memory.
 
-This function constructs a MappedNeuroVec object, which represents memory-mapped
-neuroimaging data as a vector.
+The \code{MappedNeuroVec} class provides memory-efficient access to large neuroimaging
+datasets through memory mapping. This allows processing of datasets larger than available
+RAM by keeping data on disk and only loading requested portions into memory.
+
+Creates a \code{\linkS4class{MappedNeuroVec}} object that provides efficient,
+memory-mapped access to large neuroimaging datasets. This allows processing of
+data larger than available RAM by keeping it on disk and only loading requested
+portions into memory.
 }
 \details{
 MappedNeuroVec objects use memory-mapped files to store and access large 4D brain
 images efficiently. This approach allows for rapid access to specific portions of
 the data without requiring the entire dataset to be loaded into memory at once.
 
-The function performs the following steps:
-1. Creates a MappedNeuroVecSource object from the input file.
-2. Loads the data from the source using the \code{load_data} method.
+Create a Memory-Mapped Neuroimaging Vector
 
-This approach allows for efficient handling of large neuroimaging datasets
-by keeping the data on disk and only loading it into memory when needed.
+
+The function implements several key features:
+\itemize{
+  \item Zero-copy access to file data
+  \item Automatic memory management
+  \item Support for large datasets
+  \item Efficient random access
+  \item Proper cleanup on object deletion
+}
+
+Memory mapping is particularly useful when:
+\itemize{
+  \item Working with large datasets
+  \item Only portions of data are needed at once
+  \item Random access is required
+  \item Multiple processes need to share data
+}
 }
 \section{Slots}{
 
@@ -52,6 +79,18 @@ the \code{ArrayLike4D} interface. Additional methods specific to memory-mapped
 operations may be available.
 }
 
+\section{Implementation Details}{
+
+The class uses the \code{mmap} package to establish a memory mapping between the file
+and memory space. Key features include:
+\itemize{
+  \item Zero-copy access to file data
+  \item Automatic memory management
+  \item Support for large datasets
+  \item Efficient random access
+}
+}
+
 \examples{
 \dontrun{
 # Create a MappedNeuroVec object (pseudo-code)
@@ -63,8 +102,17 @@ subset <- mapped_vec[,,, 1:10]
 }
 
 \dontrun{
-# Assuming you have a valid 4D neuroimaging file named "fmri.nii"
-mapped_vec <- MappedNeuroVec("fmri.nii")
+# Create mapped vector from NIFTI file
+mvec <- MappedNeuroVec("path/to/fmri.nii")
+
+# Extract first volume
+vol1 <- mvec[[1]]
+
+# Get dimensions
+dim(mvec)
+
+# Access specific timepoint
+timepoint <- mvec[, , , 10]
 }
 
 }
@@ -72,5 +120,6 @@ mapped_vec <- MappedNeuroVec("fmri.nii")
 \code{\link{NeuroVec-class}} for the parent class.
 \code{\link[mmap]{mmap}} for details on memory-mapped file objects.
 
-\code{\link{MappedNeuroVecSource}}, \code{\link{load_data}}
+\code{\link{MappedNeuroVecSource}} for low-level access
+\code{\link{mmap}} for memory mapping details
 }

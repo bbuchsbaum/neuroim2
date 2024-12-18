@@ -10,33 +10,39 @@ data_file(x, file_name)
 \S4method{data_file}{FileFormat,character}(x, file_name)
 }
 \arguments{
-\item{x}{A FileFormat object.}
+\item{x}{A \linkS4class{FileFormat} object specifying the format requirements}
 
-\item{file_name}{A character string representing the file name to be processed.}
+\item{file_name}{A character string specifying the file name to derive the data
+file name from}
 }
 \value{
 the correct header name
 
-A character string representing the correct data file name.
+A character string representing the data file name
 }
 \description{
-This method derives the data file name from a given file name based on 
-the FileFormat specifications.
+Derives the data file name from a given file name based on the FileFormat
+specifications.
 }
 \details{
 The function performs the following steps:
-1. If the input file_name already matches the data file format, it returns the file_name as is.
-2. If the file_name matches the header file format, it constructs and returns the corresponding data file name.
-3. If the file_name doesn't match either format, it throws an error.
+\enumerate{
+  \item If the input file_name already matches the data file format, it returns
+    the file_name as is.
+  \item If the file_name matches the header file format, it constructs and returns
+    the corresponding data file name.
+  \item If the file_name doesn't match either format, it throws an error.
+}
 }
 \examples{
 \dontrun{
-file_format <- new("FileFormat", header_extension = "hdr", data_extension = "img")
-data_file(file_format, "brain_scan.img")
-data_file(file_format, "brain_scan.hdr")
+fmt <- new("FileFormat", header_extension = "hdr", data_extension = "img")
+data_file(fmt, "brain_scan.img")  # Returns "brain_scan.img"
+data_file(fmt, "brain_scan.hdr")  # Returns "brain_scan.img"
 }
 
 }
 \seealso{
-\code{\link{FileFormat-class}}, \code{\link{data_file_matches}}, \code{\link{header_file_matches}}, \code{\link{strip_extension}}
+\code{\link{header_file}}, \code{\link{strip_extension}} for related file name
+manipulation
 }

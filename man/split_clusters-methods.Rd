@@ -89,7 +89,7 @@ indices <- numeric(prod(dim(mask)[1:3]))
 ## locations with a cluster value of 0 are ignored
 indices[mask.idx] <- kres$cluster
 
-ret2 <- vol \%>\% split_clusters(as.integer(indices)) \%>\% 
+ret2 <- vol \%>\% split_clusters(as.integer(indices)) \%>\%
 purrr::map_dbl(~ mean(values(.)))
 all(ret1 == ret1)
 }

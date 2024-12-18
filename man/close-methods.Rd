@@ -13,5 +13,5 @@
 \item{con}{The BinaryReader or BinaryWriter object to close.}
 }
 \description{
-This method closes the connection associated with a BinaryReader or BinaryWriter object.
+Close the connection associated with a BinaryReader or BinaryWriter object.
 }

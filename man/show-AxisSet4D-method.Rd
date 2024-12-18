@@ -2,13 +2,13 @@
 % Please edit documentation in R/axis.R
 \name{show,AxisSet4D-method}
 \alias{show,AxisSet4D-method}
-\title{show an \code{AxisSet4D}}
+\title{Show method for AxisSet4D objects}
 \usage{
 \S4method{show}{AxisSet4D}(object)
 }
 \arguments{
-\item{object}{the object}
+\item{object}{An AxisSet4D object}
 }
 \description{
-show an \code{AxisSet4D}
+Show method for AxisSet4D objects
 }

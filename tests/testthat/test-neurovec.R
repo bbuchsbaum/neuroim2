@@ -1,6 +1,6 @@
 
 library(purrr)
-gmask <- system.file("extdata", "global_mask.nii", package="neuroim2")
+gmask <- system.file("extdata", "global_mask2.nii.gz", package="neuroim2")
 
 
 gen_dat <- function(d1 = 12,
@@ -242,7 +242,7 @@ test_that("can convert dense NeuroVec to sparse", {
 
 
 
-test_that("can construct a SparseNeuroVol", {
+test_that("can construct a SparseNeuroVec", {
 	dat <- array(rnorm(12*12*12*4), c(12,12,12,4))
 	spc <- NeuroSpace(c(12,12,12,4))
 	tmp <- rnorm(12*12*12)
@@ -269,7 +269,7 @@ test_that("can construct a SparseNeuroVol", {
 test_that("can perform arithmetic on a SparseNeuroVec", {
   dat <- array(rnorm(12*12*12*4), c(12,12,12,4))
   spc <- NeuroSpace(c(12,12,12,4))
-  tmp <- rnorm(12*12*12)
+  tmp <- array(rnorm(12*12*12), c(12,12,12))
   mask <- tmp > .8
   mask <- LogicalNeuroVol(mask, drop_dim(spc))
 

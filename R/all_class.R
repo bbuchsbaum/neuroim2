@@ -7,7 +7,6 @@ setOldClass(c("file", "connection"))
 setOldClass(c("gzfile", "connection"))
 setOldClass("environment")
 setOldClass("mmap")
-setOldClass("H5File")
 #setOldClass("FBM")
 
 setClass("ArrayLike5D")
@@ -194,17 +193,6 @@ setClass("NIFTIFormat", contains = c("FileFormat"))
 #' @noRd
 setClass("AFNIFormat", contains = c("FileFormat"))
 
-#' H5Format Class
-#'
-#' @description
-#' This class represents the HDF5 (Hierarchical Data Format version 5) file format.
-#' It extends the FileFormat class with HDF5-specific attributes.
-#'
-#' @seealso \code{\link{FileFormat-class}}
-#'
-#' @keywords internal
-#' @noRd
-setClass("H5Format", contains = c("FileFormat"))
 
 #' MetaInfo Class
 #'
@@ -352,31 +340,6 @@ setClass("NeuroVolSource", representation(index="integer"), contains="FileSource
 #' @noRd
 setClass("NeuroVecSource", representation(indices="integer"), contains="FileSource")
 
-#' H5NeuroVecSource Class
-#'
-#' @description
-#' A class used to produce a \code{\linkS4class{H5NeuroVec}} instance from an HDF5 file.
-#'
-#' @slot file_name A \code{character} string specifying the name of the HDF5 file.
-#'
-#' @seealso \code{\link{H5NeuroVec-class}}
-#'
-#' @keywords internal
-#' @noRd
-setClass("H5NeuroVecSource", representation(file_name="character"))
-
-#' LatentNeuroVecSource Class
-#'
-#' @description
-#' A class used to produce a \code{\linkS4class{LatentNeuroVec}} instance.
-#'
-#' @slot file_name A \code{character} string specifying the name of the file.
-#'
-#' @seealso \code{\link{LatentNeuroVec-class}}
-#'
-#' @keywords internal
-#' @noRd
-setClass("LatentNeuroVecSource", representation(file_name="character"))
 
 #' BinaryReader Class
 #'
@@ -837,7 +800,9 @@ setClass("IndexLookupVol",
 #'
 #' @export
 #' @rdname NeuroVec-class
-setClass("NeuroVec", contains = "NeuroObj")
+setClass("NeuroVec",
+         slots = c(label = "character"),
+         contains = c("NeuroObj"))
 
 #' DenseNeuroVec Class
 #'
@@ -849,7 +814,7 @@ setClass("NeuroVec", contains = "NeuroObj")
 #' DenseNeuroVec objects store their data in a dense array format, which is efficient
 #' for operations that require frequent access to all voxels. This class inherits from
 #' both \code{\linkS4class{NeuroVec}} and \code{array} classes, combining spatial
-#' information with array-based data storage.
+#' information with array-based storage.
 #'
 #' @section Validity:
 #' A DenseNeuroVec object is considered valid if:
@@ -877,7 +842,7 @@ setClass("NeuroVec", contains = "NeuroObj")
 #'
 #' @export
 #' @rdname DenseNeuroVec-class
-setClass("DenseNeuroVec", contains = c("NeuroVec", "array"))
+setClass("DenseNeuroVec", contains = c("array", "NeuroVec"))
 
 #' @keywords internal
 #' @noRd
@@ -888,72 +853,6 @@ setValidity("DenseNeuroVec", function(object) {
     TRUE
   }
 })
-
-
-#' NeuroHyperVec Class
-#'
-#' @description
-#' This class represents a five-dimensional brain image, extending the functionality
-#' of \code{\linkS4class{NeuroObj}} to handle higher-dimensional neuroimaging data.
-#'
-#' @slot vecs A list of \code{\linkS4class{NeuroVec}} objects, each representing a
-#'   four-dimensional brain image.
-#'
-#' @details
-#' NeuroHyperVec is designed to store and manipulate five-dimensional neuroimaging
-#' data. This can be useful for representing multi-modal imaging data, multiple
-#' time series, or other complex neuroimaging datasets that require more than
-#' four dimensions.
-#'
-#' The class ensures that all contained NeuroVec objects have consistent spatial
-#' dimensions, spacing, and fourth-dimension length.
-#'
-#' @section Validity:
-#' A NeuroHyperVec object is considered valid if:
-#' \itemize{
-#'   \item All elements in the \code{vecs} slot are \code{NeuroVec} objects.
-#'   \item All NeuroVec objects have the same spatial dimensions (first three dimensions).
-#'   \item All NeuroVec objects have the same spacing.
-#'   \item All NeuroVec objects have the same length in the fourth dimension.
-#' }
-#'
-#' @seealso
-#' \code{\link{NeuroObj-class}} for the parent class.
-#' \code{\link{NeuroVec-class}} for the four-dimensional brain image class.
-#'
-#' @examples
-#' \dontrun{
-#' # Create multiple NeuroVec objects
-#' space <- NeuroSpace(dim = c(64, 64, 32), origin = c(0, 0, 0), spacing = c(3, 3, 4))
-#' vec1 <- NeuroVec(data = array(rnorm(64*64*32*100), dim = c(64, 64, 32, 100)), space = space)
-#' vec2 <- NeuroVec(data = array(rnorm(64*64*32*100), dim = c(64, 64, 32, 100)), space = space)
-#'
-#' # Create a NeuroHyperVec object
-#' hyper_vec <- new("NeuroHyperVec", vecs = list(vec1, vec2))
-#'
-#' # Access the first NeuroVec
-#' first_vec <- hyper_vec@vecs[[1]]
-#' }
-#'
-#' @importFrom assertthat assert_that
-#' @importFrom purrr map map_lgl
-#'
-#' @export
-#' @rdname NeuroHyperVec-class
-setClass("NeuroHyperVec",
-         contains = "NeuroObj",
-         representation(vecs = "list"),
-         validity = function(object) {
-           assert_that(all(purrr::map_lgl(object@vecs, ~ inherits(., "NeuroVec"))))
-           dimlist <- purrr::map(object@vecs, ~ dim(.)[1:3])
-           d4 <- purrr::map(object@vecs, ~ dim(.)[4])
-           splist <- purrr::map(object@vecs, ~ spacing(.))
-           assert_that(all(purrr::map_lgl(dimlist, ~ all(dimlist[[1]] == .))))
-           assert_that(all(purrr::map_lgl(splist, ~ all(splist[[1]] == .))))
-           assert_that(all(purrr::map_lgl(d4, ~ all(d4[[1]] == .))))
-           TRUE
-         }
-)
 
 
 
@@ -1094,6 +993,67 @@ setClass("SparseNeuroVec",
          ),
          contains = c("NeuroVec", "AbstractSparseNeuroVec", "ArrayLike4D"))
 
+
+
+#' NeuroHyperVec Class
+#'
+#' @description
+#' A class representing a five-dimensional brain image, where the first three dimensions are spatial, 
+#' the fourth dimension is typically time or trials, and the fifth dimension represents features within a trial.
+#'
+#' @slot mask An object of class \code{\linkS4class{LogicalNeuroVol}} defining the sparse spatial domain of the brain image.
+#' @slot data A 3D array with dimensions [features x trials x voxels] containing the neuroimaging data.
+#' @slot space A \code{\linkS4class{NeuroSpace}} object representing the dimensions and voxel spacing of the neuroimaging data.
+#' @slot lookup_map An integer vector for O(1) spatial index lookups.
+#'
+#' @export
+#' @rdname NeuroHyperVec-class
+setClass(
+  "NeuroHyperVec",
+  slots = c(
+    mask = "LogicalNeuroVol",
+    data = "array",  # Dimensions: [features x trials x voxels]
+    space = "NeuroSpace",
+    lookup_map = "integer"
+  ),
+  contains = c( "ArrayLike5D"),
+  validity = function(object) {
+    # Validate that data is a 3D array
+    if (!is.array(object@data) || length(dim(object@data)) != 3) {
+      return("Data must be a 3D array with dimensions [features x trials x voxels]")
+    }
+    
+    # Get expected dimensions
+    num_voxels <- sum(object@mask@.Data)
+    num_trials <- dim(object@space)[4]
+    num_features <- dim(object@space)[5]
+    
+    # Validate array dimensions
+    expected_dims <- c(num_features, num_trials, num_voxels)
+    if (!identical(dim(object@data), expected_dims)) {
+      return(sprintf(
+        "Data array dimensions [%s] do not match expected [%d x %d x %d] (features x trials x voxels)",
+        paste(dim(object@data), collapse=" x "),
+        num_features, num_trials, num_voxels))
+    }
+    
+    # Validate that mask is consistent with spatial dimensions
+    mask_dims <- dim(object@mask)
+    if (length(mask_dims) != 3) {
+      return("Mask must be a 3D volume")
+    }
+    
+    # Validate lookup_map
+    if (length(object@lookup_map) != prod(dim(object@mask))) {
+      return("lookup_map length must match the total number of voxels in the mask")
+    }
+    
+    TRUE
+  }
+)
+
+
+
 #' BigNeuroVec Class
 #'
 #' @description
@@ -1199,122 +1159,6 @@ setClass("FileBackedNeuroVec",
          ),
          contains = c("NeuroVec", "ArrayLike4D"))
 
-#' H5NeuroVol Class
-#'
-#' @description
-#' A class representing a three-dimensional brain image backed by an HDF5 dataset.
-#' H5NeuroVol objects provide efficient storage and access for large-scale brain
-#' imaging data using the HDF5 file format.
-#'
-#' @slot h5obj An instance of class \code{H5File} from the \code{hdf5r} package,
-#'   representing the underlying HDF5 file containing the brain image data.
-#'
-#' @details
-#' The H5NeuroVol class leverages the HDF5 file format to manage large 3D neuroimaging
-#' datasets. This approach allows for efficient data I/O, compression, and partial
-#' data access, making it suitable for working with large brain volumes that may
-#' exceed available RAM.
-#'
-#' @section Inheritance:
-#' \code{H5NeuroVol} inherits from:
-#' \itemize{
-#'   \item \code{\linkS4class{NeuroVol}}: Base class for 3D brain volumes
-#'   \item \code{ArrayLike3D}: Interface for 3D array-like operations
-#' }
-#'
-#' @seealso
-#' \code{\link{NeuroVol-class}} for the base 3D brain volume class.
-#' \code{\link[hdf5r]{H5File}} for details on HDF5 file objects.
-#'
-#' @examples
-#' \dontrun{
-#' library(hdf5r)
-#'
-#' # Create or open an HDF5 file
-#' h5_file <- H5File$new("brain_volume.h5", mode = "w")
-#'
-#' # Create a dataset in the HDF5 file
-#' h5_file$create_dataset("brain_data", dims = c(64, 64, 64), dtype = h5types$H5T_NATIVE_FLOAT)
-#'
-#' # Create an H5NeuroVol object
-#' h5_vol <- H5NeuroVol(h5obj = h5_file, space = NeuroSpace(dim = c(64, 64, 64)))
-#'
-#' # Access a subset of the data
-#' subset <- h5_vol[1:10, 1:10, 1:10]
-#'
-#' # Close the HDF5 file when done
-#' h5_file$close()
-#' }
-#'
-#' @importFrom hdf5r H5File
-#' @export
-#' @rdname H5NeuroVol-class
-setClass("H5NeuroVol",
-         slots = c(
-           h5obj = "H5File"
-         ),
-         contains = c("NeuroVol", "ArrayLike3D"))
-
-
-#' H5NeuroVec Class
-#'
-#' @description
-#' A class representing a four-dimensional brain image backed by an HDF5 file.
-#' H5NeuroVec objects provide efficient storage and access for large-scale 4D
-#' neuroimaging data using the HDF5 file format.
-#'
-#' @slot obj An instance of class \code{H5File} from the \code{hdf5r} package,
-#'   representing the underlying HDF5 file containing the 4D brain image data.
-#'
-#' @details
-#' The H5NeuroVec class leverages the HDF5 file format to manage large 4D neuroimaging
-#' datasets, such as fMRI time series. This approach allows for efficient data I/O,
-#' compression, and partial data access, making it suitable for working with large
-#' 4D brain images that may exceed available RAM.
-#'
-#' @section Inheritance:
-#' \code{H5NeuroVec} inherits from:
-#' \itemize{
-#'   \item \code{\linkS4class{NeuroVec}}: Base class for 4D brain images
-#'   \item \code{ArrayLike4D}: Interface for 4D array-like operations
-#' }
-#'
-#' @seealso
-#' \code{\link{NeuroVec-class}} for the base 4D brain image class.
-#' \code{\link{H5NeuroVol-class}} for the 3D counterpart.
-#' \code{\link[hdf5r]{H5File}} for details on HDF5 file objects.
-#'
-#' @examples
-#' \dontrun{
-#' library(hdf5r)
-#'
-#' # Create or open an HDF5 file
-#' h5_file <- H5File$new("brain_timeseries.h5", mode = "w")
-#'
-#' # Create a dataset in the HDF5 file
-#' h5_file$create_dataset("fmri_data", dims = c(64, 64, 32, 100), dtype = h5types$H5T_NATIVE_FLOAT)
-#'
-#' # Create an H5NeuroVec object
-#' h5_vec <- H5NeuroVec(obj = h5_file, space = NeuroSpace(dim = c(64, 64, 32)))
-#'
-#' # Access a subset of the data
-#' subset <- h5_vec[1:10, 1:10, 1:10, 1:5]
-#'
-#' # Close the HDF5 file when done
-#' h5_file$close()
-#' }
-#'
-#' @importFrom hdf5r H5File
-#' @export
-#' @rdname H5NeuroVec-class
-setClass("H5NeuroVec",
-         slots = c(
-           obj = "H5File"
-         ),
-         contains = c("NeuroVec", "ArrayLike4D"))
-
-
-
 #' NeuroVecSeq Class
 #'
 #' @description
@@ -1339,74 +1183,6 @@ setClass("NeuroVecSeq",
          })
 
 
-
-#' LatentNeuroVec Class
-#'
-#' @description
-#' A class that represents a 4-dimensional neuroimaging array using a latent space
-#' decomposition. It stores the data as a set of basis functions (dictionary) and
-#' a corresponding set of loadings (coefficients), allowing for efficient
-#' representation and manipulation of high-dimensional neuroimaging data.
-#'
-#' @slot basis A \code{Matrix} object where each column represents a basis vector
-#'   in the latent space.
-#' @slot loadings A \code{Matrix} object (typically sparse) containing the coefficients
-#'   for each basis vector across the spatial dimensions.
-#' @slot offset A \code{numeric} vector representing a constant offset term for
-#'   each voxel or spatial location.
-#'
-#' @details
-#' The LatentNeuroVec class provides a memory-efficient representation of 4D
-#' neuroimaging data by decomposing it into a set of basis functions and their
-#' corresponding loadings. This approach is particularly useful for large datasets
-#' where direct storage of the full 4D array would be prohibitively expensive.
-#'
-#' The original 4D data can be reconstructed as:
-#' data[x,y,z,t] = sum(basis[t,i] * loadings[i,v]) + offset[v]
-#' where v is the voxel index corresponding to coordinates (x,y,z),
-#' and i indexes the basis functions.
-#'
-#' @section Inheritance:
-#' \code{LatentNeuroVec} inherits from:
-#' \itemize{
-#'   \item \code{\linkS4class{NeuroVec}}: Base class for 4D brain images
-#'   \item \code{\linkS4class{AbstractSparseNeuroVec}}: Provides sparse representation framework
-#' }
-#'
-#' @seealso
-#' \code{\link{NeuroVec-class}} for the base 4D brain image class.
-#' \code{\link{AbstractSparseNeuroVec-class}} for the sparse representation framework.
-#'
-#' @examples
-#' \dontrun{
-#' # Create a simple LatentNeuroVec object
-#' basis <- Matrix(rnorm(100 * 10), nrow = 100, ncol = 10)
-#' loadings <- Matrix(rnorm(10 * 1000), nrow = 10, ncol = 1000, sparse = TRUE)
-#' offset <- rnorm(1000)
-#'
-#' latent_vec <- new("LatentNeuroVec",
-#'                   basis = basis,
-#'                   loadings = loadings,
-#'                   offset = offset,
-#'                   space = NeuroSpace(dim = c(10, 10, 10)))  # Assuming 1000 voxels total
-#'
-#' # Access the basis functions
-#' basis_functions <- latent_vec@basis
-#'
-#' # Reconstruct a single time point (this is a simplified example)
-#' time_point_1 <- latent_vec@loadings %*% latent_vec@basis[1,] + latent_vec@offset
-#' }
-#'
-#' @importFrom Matrix Matrix
-#' @export
-#' @rdname LatentNeuroVec-class
-setClass("LatentNeuroVec",
-         slots = c(
-           basis = "Matrix",
-           loadings = "Matrix",
-           offset = "numeric"
-         ),
-         contains = c("NeuroVec", "AbstractSparseNeuroVec"))
 
 
 
@@ -1567,8 +1343,8 @@ setClass("ROIVol",
 #' @name ROIVolWindow-class
 #' @export
 setClass("ROIVolWindow",
-         contains=c("ROIVol"),
          representation=representation(parent_index="integer", center_index="integer"),
+         contains=c("ROIVol"),
          validity = function(object) {
            if (ncol(object@coords) != 3) {
              stop("coords slot must be a matrix with 3 columns")

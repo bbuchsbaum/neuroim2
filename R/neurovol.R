@@ -78,7 +78,7 @@ DenseNeuroVol <- function(data, space, label="", indices=NULL) {
 #' SparseNeuroVol
 #'
 #' Construct a \code{\linkS4class{SparseNeuroVol}} instance
-#' @param data a numeric vector
+#' @param data a numeric vector or ROIVol
 #' @param space an instance of class \code{\linkS4class{NeuroSpace}}
 #' @param indices a index vector indicating the 1-d coordinates of the data values
 #' @param label a \code{character} string
@@ -95,14 +95,25 @@ DenseNeuroVol <- function(data, space, label="", indices=NULL) {
 #' densevol <- NeuroVol(data,bspace,indices=indices)
 #' sum(sparsevol) == sum(densevol)
 #'
-#'
-#'
 #' @rdname SparseNeuroVol-class
 SparseNeuroVol <- function(data, space, indices=NULL, label="") {
+  # Handle ROIVol input
+  if (inherits(data, "ROIVol")) {
+    if (is.null(indices)) {
+      indices <- indices(data)
+    }
+    data <- as.numeric(data)
+  }
+
+  # Ensure data and indices are numeric vectors
+  data <- as.numeric(data)
+  indices <- as.numeric(indices)
+
   if (length(indices) != length(data)) {
     stop(paste("length of 'data' must equal length of 'indices'"))
   }
 
+  # Create sparseVector with explicit class
   sv <- Matrix::sparseVector(x=data, i=indices, length=prod(dim(space)))
 
   new("SparseNeuroVol", data=sv, space=space)
@@ -173,33 +184,6 @@ LogicalNeuroVol <- function(data, space, label="", indices=NULL) {
 setAs(from="DenseNeuroVol", to="array", def=function(from) from@.Data)
 
 
-#' Convert DenseNeuroVol to H5NeuroVol
-#'
-#' This function converts a DenseNeuroVol object to an H5NeuroVol object.
-#'
-#' @param from A DenseNeuroVol object.
-#'
-#' @return An H5NeuroVol object resulting from the conversion.
-#'
-#' @keywords internal
-#' @name DenseNeuroVol,H5NeuroVol
-setAs(from="DenseNeuroVol", to="H5NeuroVol", def=function(from) {
-  to_nih5_vol(from, file_name=NULL, data_type="FLOAT")
-})
-
-#' Convert DenseNeuroVec to H5NeuroVec
-#'
-#' This function converts a DenseNeuroVec object to an H5NeuroVec object.
-#'
-#' @param from A DenseNeuroVec object.
-#'
-#' @return An H5NeuroVec object resulting from the conversion.
-#'
-#' @keywords internal
-#' @name DenseNeuroVec,H5NeuroVec
-setAs(from="DenseNeuroVec", to="H5NeuroVec", def=function(from) {
-  to_nih5_vec(from, file_name=NULL, data_type="FLOAT")
-})
 
 
 
@@ -352,12 +336,17 @@ NeuroVolSource <- function(input, index=1) {
 
 	meta_info <- read_header(input)
 
-	if ( length(meta_info@dims) < 4 && index > 1) {
-		stop("index cannot be greater than 1 for a image with dimensions < 4")
+	if (length(meta_info@dims) < 4) {
+		if (index > 1) {
+			stop(sprintf("index cannot be greater than 1 for a 3D image (dimensions: %s)", 
+			            paste(meta_info@dims, collapse="x")))
+		}
+	} else if (index > meta_info@dims[4]) {
+		stop(sprintf("index %d exceeds available volumes in 4D image (max: %d)", 
+		            index, meta_info@dims[4]))
 	}
 
 	new("NeuroVolSource", meta_info=meta_info, index=as.integer(index))
-
 }
 
 #' Load an image volume from a file
@@ -392,7 +381,6 @@ setMethod(f="slices", signature=signature(x="NeuroVol"),
 
 
 #' @export
-#' @rdname extractor3d
 setMethod(f="[", signature=signature(x = "NeuroVol", i = "ROICoords", j = "missing"),
           def=function (x, i, j, k, ..., drop=TRUE) {
             callGeneric(x, i@coords)
@@ -714,7 +702,7 @@ setMethod(f="mapf", signature=signature(x="NeuroVol", m="Kernel"),
 
 
 
-#' find connected components in NeuroVol
+#' Find connected components in NeuroVol
 #'
 #' @export
 #' @importFrom purrr map_int
@@ -906,14 +894,8 @@ setMethod(f="linear_access", signature=signature(x = "SparseNeuroVol", i = "nume
 
 
 
-#' extractor
+
 #' @export
-#' @param x the object
-#' @param i first index
-#' @param j second index
-#' @param k third index
-#' @param ... additional args
-#' @param drop dimension
 setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "numeric", drop="ANY"),
           def=function (x, i, j, k, ..., drop=TRUE) {
             if (missing(k)) {
@@ -953,13 +935,14 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 #' slice <- NeuroSlice(dat, NeuroSpace(c(100,100)))
 #' #plot(slice)
 setMethod("plot", signature=signature(x="NeuroVol"),
-          def=function(x,cmap=gray(seq(0,1,length.out=255)),
-                                   zlevels=unique(round(seq(1, dim(x)[3], length.out=6))),
-                                   irange=range(x, na.rm=TRUE),
-                                   thresh=c(0,0),
-                                   alpha=1,
-                                   bgvol=NULL,
-                                   bgcmap=gray(seq(0,1,length.out=255))) {
+          def=function(x,
+                       cmap=gray(seq(0,1,length.out=255)),
+                       zlevels=unique(round(seq(1, dim(x)[3], length.out=6))),
+                       irange=range(x, na.rm=TRUE),
+                       thresh=c(0,0),
+                       alpha=1,
+                       bgvol=NULL,
+                       bgcmap=gray(seq(0,1,length.out=255))) {
 
             if (!requireNamespace("ggplot2", quietly = TRUE)) {
               stop("Package \"ggplot2\" needed for this function to work. Please install it.",
@@ -971,9 +954,7 @@ setMethod("plot", signature=signature(x="NeuroVol"),
               assert_that(all(spacing(x) == spacing(bgvol)))
             }
 
-
-
-
+            # Create a data frame of all the slices specified in zlevels
             df1 <- do.call(rbind, purrr::map(zlevels, function(i) {
               if (!is.null(bgvol)) {
                 bgslice <- slice(bgvol, zlevel=i, along=3)
@@ -993,25 +974,25 @@ setMethod("plot", signature=signature(x="NeuroVol"),
 
               cds <- index_to_coord(space(imslice), 1:length(imslice))
               data.frame(x=cds[,1], y=cds[,2], z=i, value=as.vector(fgcols))
-
             }))
 
-            {y=value=NULL}
+            {y = value = NULL} # to appease R CMD check
 
-            p <-
-              ggplot2::ggplot(ggplot2::aes(x=x, y=y), data=df1) +
+            p <- ggplot2::ggplot(df1, ggplot2::aes(x=x, y=y)) +
               ggplot2::coord_fixed() +
-              ggplot2::geom_raster(ggplot2::aes(x=x,y=y, fill=value)) +
-              ggplot2::scale_fill_identity() + ggplot2::xlab("") + ggplot2::ylab("") +
-              ggplot2::scale_x_continuous(expand=c(0,0)) +
-              ggplot2::scale_y_continuous(expand=c(0,0)) +
-              ggplot2::facet_wrap(~ z) +
-              ggplot2::theme_classic()
+              ggplot2::geom_raster(ggplot2::aes(fill=value)) +
+              ggplot2::scale_fill_identity() +
+              ggplot2::facet_wrap(~ z, labeller = ggplot2::labeller(z = function(z) paste("Slice:", z))) +
+              ggplot2::ggtitle("Brain Slices") +
+              ggplot2::theme_void() +
+              ggplot2::theme(
+                strip.background = ggplot2::element_blank(),
+                strip.text = ggplot2::element_text(face="bold", size=10),
+                plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
+                plot.margin = grid::unit(c(0.5, 0.5, 0.5, 0.5), "cm")
+              )
 
             p
-
           })
-
-
 
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/binary_io.R
 \name{BinaryWriter}
 \alias{BinaryWriter}
-\title{Create a BinaryWriter Object}
+\title{Create Binary Writer Object}
 \usage{
 BinaryWriter(
   output,
@@ -13,44 +13,34 @@ BinaryWriter(
 )
 }
 \arguments{
-\item{output}{A file name (character string) to write to or a \code{connection} object.}
+\item{output}{Character string (file name) or connection object to write to}
 
-\item{byte_offset}{An integer specifying the number of bytes to skip at the start of output.}
+\item{byte_offset}{Integer specifying bytes to skip at start of output}
 
-\item{data_type}{A character string specifying the R data type of binary elements to be written.}
+\item{data_type}{Character string specifying R data type ('integer', 'double', etc.)}
 
-\item{bytes_per_element}{An integer specifying the number of bytes in each data element 
-(e.g., 4 or 8 for floating point numbers).}
+\item{bytes_per_element}{Integer specifying bytes per data element (e.g., 4 or 8)}
 
-\item{endian}{A character string specifying the endianness of the binary output connection. 
-Default is \code{.Platform$endian}.}
+\item{endian}{Character string specifying endianness ('big' or 'little', default: platform-specific)}
 }
 \value{
-A new instance of the \code{\linkS4class{BinaryWriter}} class.
+An object of class \linkS4class{BinaryWriter}
 }
 \description{
-This function creates a new instance of the \code{\linkS4class{BinaryWriter}} class,
-which supports writing of bulk binary data to a connection or file.
-}
-\details{
-The \code{BinaryWriter} function creates an object for efficient writing of binary data.
-It can work with both file names and existing connection objects. If a file name is provided,
-it opens a new connection in binary write mode.
+Create a new instance of the \linkS4class{BinaryWriter} class for writing bulk binary data.
 }
 \examples{
 \dontrun{
-# Create a BinaryWriter for a file
-writer <- BinaryWriter("output.bin", byte_offset = 0, data_type = "double", 
-                       bytes_per_element = 8)
-
-# Create a BinaryWriter for an existing connection
+# Create writer for double-precision data
+writer <- BinaryWriter("output.bin", byte_offset = 0L,
+                      data_type = "double", bytes_per_element = 8L)
+                      
+# Write to existing connection with offset
 con <- file("output.bin", "wb")
-writer <- BinaryWriter(con, byte_offset = 100, data_type = "integer", 
-                       bytes_per_element = 4, endian = "little")
+writer <- BinaryWriter(con, byte_offset = 100L,
+                      data_type = "integer", bytes_per_element = 4L)
 }
-
 }
 \seealso{
-\code{\link{BinaryWriter-class}} for the class definition and available methods.
-\code{\link{BinaryReader}} for reading binary data.
+\code{\link{BinaryReader}} for reading binary data
 }

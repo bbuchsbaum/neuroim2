@@ -10,33 +10,39 @@ header_file(x, file_name)
 \S4method{header_file}{FileFormat,character}(x, file_name)
 }
 \arguments{
-\item{x}{A FileFormat object.}
+\item{x}{A \linkS4class{FileFormat} object specifying the format requirements}
 
-\item{file_name}{A character string representing the file name to be processed.}
+\item{file_name}{A character string specifying the file name to derive the header
+file name from}
 }
 \value{
 the correct header name
 
-A character string representing the correct header file name.
+A character string representing the header file name
 }
 \description{
-This method derives the header file name from a given file name based on 
-the FileFormat specifications.
+Derives the header file name from a given file name based on the FileFormat
+specifications.
 }
 \details{
 The function performs the following steps:
-1. If the input file_name already matches the header file format, it returns the file_name as is.
-2. If the file_name matches the data file format, it constructs and returns the corresponding header file name.
-3. If the file_name doesn't match either format, it throws an error.
+\enumerate{
+  \item If the input file_name already matches the header file format, it returns
+    the file_name as is.
+  \item If the file_name matches the data file format, it constructs and returns
+    the corresponding header file name.
+  \item If the file_name doesn't match either format, it throws an error.
+}
 }
 \examples{
 \dontrun{
-file_format <- new("FileFormat", header_extension = "hdr", data_extension = "img")
-header_file(file_format, "brain_scan.hdr")
-header_file(file_format, "brain_scan.img")
+fmt <- new("FileFormat", header_extension = "hdr", data_extension = "img")
+header_file(fmt, "brain_scan.hdr")  # Returns "brain_scan.hdr"
+header_file(fmt, "brain_scan.img")  # Returns "brain_scan.hdr"
 }
 
 }
 \seealso{
-\code{\link{FileFormat-class}}, \code{\link{header_file_matches}}, \code{\link{data_file_matches}}, \code{\link{strip_extension}}
+\code{\link{data_file}}, \code{\link{strip_extension}} for related file name
+manipulation
 }

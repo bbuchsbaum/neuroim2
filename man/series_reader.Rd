@@ -2,17 +2,22 @@
 % Please edit documentation in R/binary_io.R
 \name{series_reader}
 \alias{series_reader}
-\title{Create a series reader function for a 4D image file}
+\title{Create Series Reader for 4D Image}
 \usage{
 series_reader(file_name)
 }
 \arguments{
-\item{file_name}{The name of the 4D image file to read from.}
+\item{file_name}{Character string specifying the path to the 4D image file}
 }
 \value{
-A function that can read series of data from the specified file.
+A function that accepts parameters:
+  \itemize{
+    \item first: Integer index of first element to read
+    \item last: Integer index of last element to read
+    \item input: Optional connection object (if NULL, creates new connection)
+  }
 }
 \description{
-This function creates a closure that can read series of data from a 4D image file.
+Create a closure function that can read time series data from a 4D image file.
 }
 \keyword{internal}

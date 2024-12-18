@@ -2,13 +2,13 @@
 % Please edit documentation in R/axis.R
 \name{show,AxisSet2D-method}
 \alias{show,AxisSet2D-method}
-\title{show an \code{AxisSet2D}}
+\title{Show method for AxisSet2D objects}
 \usage{
 \S4method{show}{AxisSet2D}(object)
 }
 \arguments{
-\item{object}{the object}
+\item{object}{An AxisSet2D object}
 }
 \description{
-show an \code{AxisSet2D}
+Show method for AxisSet2D objects
 }

@@ -2,19 +2,19 @@
 % Please edit documentation in R/binary_io.R
 \name{read_mapped_series}
 \alias{read_mapped_series}
-\title{Read a mapped series from a 4D image file}
+\title{Read Mapped Series from 4D Image}
 \usage{
 read_mapped_series(meta, idx)
 }
 \arguments{
-\item{meta}{An object containing metadata about the file to be read.}
+\item{meta}{An object of class \linkS4class{ImageMetadata} containing file metadata}
 
-\item{idx}{A vector of indices specifying which elements to read.}
+\item{idx}{Integer vector of indices specifying elements to read}
 }
 \value{
-A matrix of values read from the memory-mapped file, transposed.
+A numeric matrix of values with dimensions [time, voxels]
 }
 \description{
-This function reads a series of data from a memory-mapped 4D image file.
+Read a time series of data from a memory-mapped 4D image file.
 }
 \keyword{internal}

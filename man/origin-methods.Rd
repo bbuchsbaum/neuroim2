@@ -4,6 +4,7 @@
 \alias{origin}
 \alias{origin,NeuroSpace-method}
 \alias{origin,NeuroVol-method}
+\alias{origin,NeuroVec-method}
 \title{Extract Image Origin}
 \usage{
 origin(x)
@@ -11,6 +12,8 @@ origin(x)
 \S4method{origin}{NeuroSpace}(x)
 
 \S4method{origin}{NeuroVol}(x)
+
+\S4method{origin}{NeuroVec}(x)
 }
 \arguments{
 \item{x}{an object with an origin}

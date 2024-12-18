@@ -3,22 +3,54 @@ NULL
 #' @include all_class.R
 NULL
 
-
+#' Pre-defined null axis
+#' @export
 None <- new("NamedAxis", axis="None")
 
+#' Pre-defined null axis set
+#' @export
 NullAxis <- new("AxisSet", ndim=as.integer(0))
 
-
+#' Pre-defined anatomical axes
+#'
+#' These constants define standard anatomical axes used in neuroimaging.
+#' Each axis has a defined direction vector in 3D space.
+#'
+#' @name anatomical_axes
+#' @export
 LEFT_RIGHT <- new("NamedAxis", axis="Left-to-Right", direction=c(1,0,0))
+
+#' @rdname anatomical_axes
+#' @export
 RIGHT_LEFT <- new("NamedAxis", axis="Right-to-Left", direction=c(-1,0,0))
+
+#' @rdname anatomical_axes
+#' @export
 ANT_POST   <- new("NamedAxis", axis="Anterior-to-Posterior", direction=c(0,-1,0))
+
+#' @rdname anatomical_axes
+#' @export
 POST_ANT   <- new("NamedAxis", axis="Posterior-to-Anterior", direction=c(0,1,0))
+
+#' @rdname anatomical_axes
+#' @export
 INF_SUP    <- new("NamedAxis", axis="Inferior-to-Superior", direction=c(0,0,1))
+
+#' @rdname anatomical_axes
+#' @export
 SUP_INF    <- new("NamedAxis", axis="Superior-to-Inferior", direction=c(0,0,-1))
 
-
+#' Match anatomical axis abbreviation to full axis object
+#'
+#' @param firstAxis Character string specifying the axis. Can be full name
+#'   (e.g. "LEFT") or abbreviation (e.g. "L")
+#' @return A NamedAxis object corresponding to the specified axis
 #' @keywords internal
-#' @noRd
+#' @examples
+#' \dontrun{
+#' matchAxis("L")  # Returns LEFT_RIGHT axis
+#' matchAxis("ANTERIOR")  # Returns ANT_POST axis
+#' }
 matchAxis <- function(firstAxis) {
   switch(toupper(firstAxis),
          "LEFT"=LEFT_RIGHT,
@@ -36,59 +68,105 @@ matchAxis <- function(firstAxis) {
 
 }
 
-#' @noRd
+#' Time axis
+#' @description Represents the temporal dimension in neuroimaging data
+#' @export
 TIME <- new("NamedAxis", axis="Time")
 
-#' @noRd
+#' Time axis set
+#' @description A one-dimensional axis set representing time
+#' @export
 TimeAxis <- new("AxisSet1D", ndim=as.integer(1), i=TIME)
 
+#' Create a one-dimensional axis set
+#'
+#' @param i A NamedAxis object representing the axis
+#' @return An AxisSet1D object
 #' @keywords internal
-#' @noRd
 AxisSet1D <- function(i) {
   new("AxisSet1D", ndim=as.integer(1), i=i)
 }
 
+#' Create a two-dimensional axis set
+#'
+#' @param i A NamedAxis object representing the first axis
+#' @param j A NamedAxis object representing the second axis
+#' @return An AxisSet2D object
 #' @keywords internal
-#' @noRd
 AxisSet2D <- function(i, j) {
 	new("AxisSet2D", ndim=as.integer(2), i=i, j=j)
 }
 
+#' Create a three-dimensional axis set
+#'
+#' @param i A NamedAxis object representing the first axis
+#' @param j A NamedAxis object representing the second axis
+#' @param k A NamedAxis object representing the third axis
+#' @return An AxisSet3D object
 #' @keywords internal
-#' @noRd
 AxisSet3D <- function(i, j, k) {
 	new("AxisSet3D", ndim=as.integer(3), i=i, j=j, k=k)
 }
 
-
-
+#' Get permutation matrix from axis set
+#'
+#' @param x An AxisSet2D object
+#' @param ... Additional arguments (not used)
+#' @return A matrix representing the axis directions
 #' @export
-#' @rdname perm_mat-methods
+#' @examples
+#' \dontrun{
+#' axes <- AxisSet2D(LEFT_RIGHT, ANT_POST)
+#' perm_mat(axes)
+#' }
 setMethod(f="perm_mat", signature=signature(x = "AxisSet2D"),
           def=function(x, ...) {
             cbind(x@i@direction, x@j@direction)
           })
 
+#' Get permutation matrix from axis set
+#'
+#' @param x An AxisSet3D object
+#' @param ... Additional arguments (not used)
+#' @return A matrix representing the axis directions
 #' @export
-#' @rdname perm_mat-methods
+#' @examples
+#' \dontrun{
+#' axes <- AxisSet3D(LEFT_RIGHT, ANT_POST, INF_SUP)
+#' perm_mat(axes)
+#' }
 setMethod(f="perm_mat", signature=signature(x = "AxisSet3D"),
           def=function(x, ...) {
             cbind(x@i@direction, x@j@direction, x@k@direction)
           })
 
-
-
+#' Get permutation matrix from axis set
+#'
+#' @param x A NeuroSpace object
+#' @param ... Additional arguments (not used)
+#' @return A matrix representing the axis directions
 #' @export
-#' @rdname perm_mat-methods
+#' @examples
+#' \dontrun{
+#' ns <- NeuroSpace(axes=AxisSet3D(LEFT_RIGHT, ANT_POST, INF_SUP))
+#' perm_mat(ns)
+#' }
 setMethod(f="perm_mat", signature=signature(x = "NeuroSpace"),
           def=function(x, ...) {
             callGeneric(x@axes)
           })
 
-
-
+#' Drop dimension from axis set
+#'
+#' @param x An AxisSet2D or AxisSet3D object
+#' @param dimnum Numeric index of dimension to drop
+#' @return An axis set with one fewer dimension
 #' @export
-#' @rdname drop_dim-methods
+#' @examples
+#' \dontrun{
+#' axes3d <- AxisSet3D(LEFT_RIGHT, ANT_POST, INF_SUP)
+#' axes2d <- drop_dim(axes3d, 1)  # Drop first dimension
+#' }
 setMethod(f="drop_dim", signature=signature(x = "AxisSet2D", dimnum="numeric"),
           def=function(x, dimnum) {
             stopifnot(length(dimnum) == 1)
@@ -101,17 +179,33 @@ setMethod(f="drop_dim", signature=signature(x = "AxisSet2D", dimnum="numeric"),
             }
           })
 
-
+#' Drop dimension from axis set
+#'
+#' @param x An AxisSet2D object
+#' @param dimnum Numeric index of dimension to drop (optional)
+#' @return An axis set with one fewer dimension
 #' @export
-#' @rdname drop_dim-methods
+#' @examples
+#' \dontrun{
+#' axes2d <- AxisSet2D(LEFT_RIGHT, ANT_POST)
+#' axes1d <- drop_dim(axes2d)  # Drop first dimension
+#' }
 setMethod(f="drop_dim", signature=signature(x = "AxisSet2D", dimnum="missing"),
           def=function(x, dimnum) {
             AxisSet1D(x@i)
           })
 
-
+#' Drop dimension from axis set
+#'
+#' @param x An AxisSet3D object
+#' @param dimnum Numeric index of dimension to drop
+#' @return An axis set with one fewer dimension
 #' @export
-#' @rdname drop_dim-methods
+#' @examples
+#' \dontrun{
+#' axes3d <- AxisSet3D(LEFT_RIGHT, ANT_POST, INF_SUP)
+#' axes2d <- drop_dim(axes3d, 1)  # Drop first dimension
+#' }
 setMethod(f="drop_dim", signature=signature(x = "AxisSet3D", dimnum="numeric"),
           def=function(x, dimnum) {
             stopifnot(length(dimnum) == 1)
@@ -126,99 +220,140 @@ setMethod(f="drop_dim", signature=signature(x = "AxisSet3D", dimnum="numeric"),
             }
           })
 
-
+#' Drop dimension from axis set
+#'
+#' @param x An AxisSet3D object
+#' @param dimnum Numeric index of dimension to drop (optional)
+#' @return An axis set with one fewer dimension
 #' @export
-#' @rdname drop_dim-methods
+#' @examples
+#' \dontrun{
+#' axes3d <- AxisSet3D(LEFT_RIGHT, ANT_POST, INF_SUP)
+#' axes2d <- drop_dim(axes3d)  # Drop first dimension
+#' }
 setMethod(f="drop_dim", signature=signature(x = "AxisSet3D", dimnum="missing"),
            def=function(x, dimnum) {
              AxisSet2D(x@i, x@j)
            })
 
-
-
+#' Get number of dimensions in axis set
+#'
+#' @param x An AxisSet object
+#' @param ... Additional arguments (not used)
+#' @return Integer number of dimensions
 #' @export
-#' @rdname ndim-methods
+#' @examples
+#' \dontrun{
+#' axes <- AxisSet2D(LEFT_RIGHT, ANT_POST)
+#' ndim(axes)  # Returns 2
+#' }
 setMethod(f="ndim",signature(x= "AxisSet"), function(x, ...) { x@ndim })
 
-
-#' show an \code{NamedAxis}
-#' @param object the object
-#' @export
-setMethod(f="show", signature("NamedAxis"), function(object) { cat(print_(object@axis)) })
-
-#' print a \code{NamedAxis}
-#' @param x the object
-#' @param ... extra arguments
-#' @noRd
+#' Print method for NamedAxis objects
+#'
+#' @param x A NamedAxis object
+#' @param ... Additional arguments (not used)
+#' @return Character string representing the axis
+#' @keywords internal
 setMethod(f="print_", signature=signature("NamedAxis"),
-		def=function(x, ...) {
-			x@axis
-		})
+    def=function(x, ...) {
+        x@axis
+    })
 
-#' show an \code{AxisSet1D}
-#' @param object the object
+#' Show method for NamedAxis objects
+#'
+#' @param object A NamedAxis object
+#' @export
+setMethod(f="show", signature("NamedAxis"),
+    def=function(object) {
+        header <- crayon::bold(crayon::blue("NamedAxis"))
+        cat(header, "\n")
+        cat(crayon::silver(paste(rep("─", 30), collapse="")), "\n")
+        cat(crayon::white(object@axis), "\n")
+    })
+
+#' Show method for AxisSet1D objects
+#'
+#' @param object An AxisSet1D object
 #' @export
 setMethod(f="show", signature=signature("AxisSet1D"),
-		def=function(object) {
-			cat("instance of class:", class(object), "\n\n")
-			cat("Axis 1:", print_(object@i@axis), "\n")
-		})
+    def=function(object) {
+        header <- crayon::bold(crayon::blue("AxisSet1D"))
+        cat(header, "\n")
+        cat(crayon::silver(paste(rep("─", 30), collapse="")), "\n")
+        cat(crayon::yellow("Axis:"), crayon::white(object@i@axis), "\n")
+    })
 
-#' print a \code{AxisSet2D} instance
-#' @param x the object
-#' @param ... extra args
-#' @noRd
+#' Print method for AxisSet2D objects
+#'
+#' @param x An AxisSet2D object
+#' @param ... Additional arguments (not used)
+#' @return Character string representing the axis set
+#' @keywords internal
 setMethod(f="print_", signature=signature("AxisSet2D"),
-		def=function(x, ...) {
-			paste(x@i@axis, "-", x@j@axis)
-		})
+    def=function(x, ...) {
+        paste(x@i@axis, "×", x@j@axis)
+    })
 
-#' show an \code{AxisSet2D}
-#' @param object the object
+#' Show method for AxisSet2D objects
+#'
+#' @param object An AxisSet2D object
 #' @export
 setMethod(f="show", signature=signature("AxisSet2D"),
-		def=function(object) {
-			cat("instance of class:", class(object), "\n\n")
-			cat("Axis 1:", object@i@axis, "\n")
-			cat("Axis 2:", object@j@axis, "\n")
-		})
+    def=function(object) {
+        header <- crayon::bold(crayon::blue("AxisSet2D"))
+        cat(header, "\n")
+        cat(crayon::silver(paste(rep("─", 30), collapse="")), "\n")
+        cat(crayon::yellow("Axis 1:"), crayon::white(object@i@axis), "\n")
+        cat(crayon::yellow("Axis 2:"), crayon::white(object@j@axis), "\n")
+    })
 
-#' print a \code{AxisSet3D} instance
-#' @param x the object
-#' @param ... extra args
-#' @noRd
+#' Print method for AxisSet3D objects
+#'
+#' @param x An AxisSet3D object
+#' @param ... Additional arguments (not used)
+#' @return Character string representing the axis set
+#' @keywords internal
 setMethod(f="print_", signature=signature("AxisSet3D"),
-		def=function(x, ...) {
-			paste(x@i@axis, " -- ", x@j@axis, " -- ", x@k@axis)
-		})
+    def=function(x, ...) {
+        paste(x@i@axis, "×", x@j@axis, "×", x@k@axis)
+    })
 
-
-#' show an \code{AxisSet3D}
-#' @param object the object
+#' Show method for AxisSet3D objects
+#'
+#' @param object An AxisSet3D object
 #' @export
 setMethod(f="show", signature=signature("AxisSet3D"),
-		def=function(object) {
-			cat("instance of class:", class(object), "\n\n")
-			cat("Axis 1:", object@i@axis, "\n")
-			cat("Axis 2:", object@j@axis, "\n")
-			cat("Axis 3:", object@k@axis, "\n")
-		})
+    def=function(object) {
+        header <- crayon::bold(crayon::blue("AxisSet3D"))
+        cat(header, "\n")
+        cat(crayon::silver(paste(rep("─", 30), collapse="")), "\n")
+        cat(crayon::yellow("Axis 1:"), crayon::white(object@i@axis), "\n")
+        cat(crayon::yellow("Axis 2:"), crayon::white(object@j@axis), "\n")
+        cat(crayon::yellow("Axis 3:"), crayon::white(object@k@axis), "\n")
+    })
 
-#' show an \code{AxisSet4D}
-#' @param object the object
+#' Show method for AxisSet4D objects
+#'
+#' @param object An AxisSet4D object
 #' @export
 setMethod(f="show", signature=signature("AxisSet4D"),
-		def=function(object) {
-			cat("instance of class:", class(object), "\n\n")
-			cat("Axis 1:", print_(object@i), "\n")
-			cat("Axis 2:", print_(object@j), "\n")
-			cat("Axis 3:", print_(object@k), "\n")
-			cat("Axis 4:", print_(object@l), "\n")
+    def=function(object) {
+        header <- crayon::bold(crayon::blue("AxisSet4D"))
+        cat(header, "\n")
+        cat(crayon::silver(paste(rep("─", 30), collapse="")), "\n")
+        cat(crayon::yellow("Axis 1:"), crayon::white(object@i@axis), "\n")
+        cat(crayon::yellow("Axis 2:"), crayon::white(object@j@axis), "\n")
+        cat(crayon::yellow("Axis 3:"), crayon::white(object@k@axis), "\n")
+        cat(crayon::yellow("Axis 4:"), crayon::white(object@t@axis), "\n")
+    })
 
-		})
-
-
-
+#' Pre-defined 2D orientation configurations
+#'
+#' A list of standard 2D anatomical orientations used in neuroimaging.
+#' Each orientation defines a pair of anatomical axes.
+#'
+#' @export
 OrientationList2D <- list(
 	SAGITTAL_AI = AxisSet2D(ANT_POST, INF_SUP),
 	SAGITTAL_PI = AxisSet2D(POST_ANT, INF_SUP),
@@ -248,6 +383,12 @@ OrientationList2D <- list(
 	AXIAL_PL = AxisSet2D(POST_ANT, LEFT_RIGHT),
 	AXIAL_PR = AxisSet2D(POST_ANT, RIGHT_LEFT))
 
+#' Pre-defined 3D orientation configurations
+#'
+#' A list of standard 3D anatomical orientations used in neuroimaging.
+#' Each orientation defines a triplet of anatomical axes.
+#'
+#' @export
 OrientationList3D <- list(
 	SAGITTAL_AIL = AxisSet3D(ANT_POST, INF_SUP, LEFT_RIGHT),
 	SAGITTAL_PIL = AxisSet3D(POST_ANT, INF_SUP, LEFT_RIGHT),
@@ -305,6 +446,22 @@ OrientationList3D <- list(
 	AXIAL_PRS = AxisSet3D(POST_ANT,   RIGHT_LEFT, SUP_INF))
 
 
+#' Find 3D anatomical orientation from axis abbreviations
+#'
+#' Creates a 3D anatomical orientation from axis abbreviations.
+#'
+#' @param axis1 Character string for first axis (default: "L" for Left)
+#' @param axis2 Character string for second axis (default: "P" for Posterior)
+#' @param axis3 Character string for third axis (default: "I" for Inferior)
+#' @return An AxisSet3D object representing the anatomical orientation
+#' @export
+#' @examples
+#' \dontrun{
+#' # Create orientation with default LPI axes
+#' orient <- findAnatomy3D()
+#' # Create orientation with custom axes
+#' orient <- findAnatomy3D("R", "A", "S")
+#' }
 findAnatomy3D <- function(axis1="L", axis2="P", axis3="I") {
   res <- lapply(list(axis1, axis2, axis3), function(x) {
     matchAxis(x)
@@ -314,28 +471,14 @@ findAnatomy3D <- function(axis1="L", axis2="P", axis3="I") {
 
 }
 
-#' given three named axes return AxisSet3D singleton
+#' Find matching 2D anatomical orientation
 #'
-#' @param axis1 the first axis
-#' @param axis2 the second axis
-#' @param axis3 the third axis
-#' @noRd
-matchAnatomy3D <- function(axis1, axis2, axis3) {
-	for (orient in OrientationList3D) {
-		if (identical(orient@i,axis1) && identical(orient@j,axis2) && identical(orient@k, axis3)) {
-			return(orient)
-		}
-	}
-
-	stop("did not find legal matching anatomical orientation for axes: ",
-			axis1, axis2, axis3)
-
-}
-
-#' given two named axes return AxisSet2D singleton
-#' @param axis1 the first axis
-#' @param axis2 the second axis
-#' @noRd
+#' Searches through pre-defined 2D orientations to find a match for given axes.
+#'
+#' @param axis1 First NamedAxis object
+#' @param axis2 Second NamedAxis object
+#' @return Matching AxisSet2D object or NULL if no match found
+#' @keywords internal
 matchAnatomy2D <- function(axis1, axis2) {
 	for (orient in OrientationList2D) {
 		if (identical(orient@i,axis1) && identical(orient@j,axis2)) {
@@ -348,9 +491,44 @@ matchAnatomy2D <- function(axis1, axis2) {
 
 }
 
-#' @noRd
-.nearestAnatomy <- function(mat44) {
-  mat33 <- mat44[1:3, 1:3]
+#' Find matching 3D anatomical orientation
+#'
+#' Searches through pre-defined 3D orientations to find a match for given axes.
+#'
+#' @param axis1 First NamedAxis object
+#' @param axis2 Second NamedAxis object
+#' @param axis3 Third NamedAxis object
+#' @return Matching AxisSet3D object or NULL if no match found
+#' @keywords internal
+matchAnatomy3D <- function(axis1, axis2, axis3) {
+	for (orient in OrientationList3D) {
+		if (identical(orient@i,axis1) && identical(orient@j,axis2) && identical(orient@k, axis3)) {
+			return(orient)
+		}
+	}
+
+	stop("did not find legal matching anatomical orientation for axes: ",
+			axis1, axis2, axis3)
+
+}
+
+#' Find anatomical orientation from permutation matrix
+#'
+#' Determines the anatomical orientation corresponding to a given permutation matrix.
+#'
+#' @param pmat A 3x3 permutation matrix
+#' @param tol Tolerance for numerical comparisons (default: 1e-10)
+#' @return An AxisSet3D object representing the anatomical orientation
+#' @export
+#' @examples
+#' \dontrun{
+#' # Create a permutation matrix
+#' pmat <- matrix(c(1,0,0, 0,1,0, 0,0,1), 3, 3)
+#' # Find corresponding anatomical orientation
+#' orient <- findAnatomy(pmat)
+#' }
+findAnatomy <- function(pmat, tol=1e-10) {
+  mat33 <- pmat[1:3, 1:3]
   #mat33 <- sweep(mat33, 2, sqrt(apply(mat33 * mat33, 2, sum)), "/")
   icol <- mat33[,1]
   jcol <- mat33[,2]
@@ -367,6 +545,16 @@ matchAnatomy2D <- function(axis1, axis2) {
   ## normalize jcol
   jcol <- jcol / sqrt(sum(jcol^2))
 
+  #' Orthogonalize two vectors
+  #'
+  #' Internal helper function to make two vectors orthogonal while preserving
+  #' the direction of the first vector.
+  #'
+  #' @param col1 First vector to preserve
+  #' @param col2 Second vector to orthogonalize
+  #' @return Orthogonalized second vector
+  #' @keywords internal
+  #' @noRd
   orthogonalize <- function(col1, col2) {
     dotp <- sum(col1*col2)
     #print(dotp)
@@ -443,12 +631,12 @@ matchAnatomy2D <- function(axis1, axis2) {
 
   .getAxis <- function(num) {
     switch(as.character(as.integer(num)),
-                "1"=LEFT_RIGHT,
-                "-1"=RIGHT_LEFT,
-                "2"=POST_ANT,
-                "-2"=ANT_POST,
-                "3"=INF_SUP,
-                "-3"=SUP_INF)
+           "1"=LEFT_RIGHT,
+           "-1"=RIGHT_LEFT,
+           "2"=POST_ANT,
+           "-2"=ANT_POST,
+           "3"=INF_SUP,
+           "-3"=SUP_INF)
   }
 
   ax1 <- .getAxis(ibest*pbest)
@@ -456,9 +644,148 @@ matchAnatomy2D <- function(axis1, axis2) {
   ax3 <- .getAxis(kbest*rbest)
 
   AxisSet3D(ax1,ax2,ax3)
-
-
-
-
 }
 
+#' Get anatomical axis from direction vector
+#'
+#' Internal helper function to convert a direction vector to an anatomical axis.
+#'
+#' @param x Numeric vector representing direction
+#' @return A NamedAxis object
+#' @keywords internal
+.getAxis <- function(x) {
+  switch(as.character(as.integer(x)),
+         "1"=LEFT_RIGHT,
+         "-1"=RIGHT_LEFT,
+         "2"=POST_ANT,
+         "-2"=ANT_POST,
+         "3"=INF_SUP,
+         "-3"=SUP_INF)
+}
+
+#' Find nearest valid anatomical orientation for a transformation matrix
+#'
+#' Internal helper function that finds the closest valid anatomical orientation
+#' for a given 4x4 transformation matrix.
+#'
+#' @param mat44 A 4x4 transformation matrix
+#' @return An AxisSet3D object representing the nearest valid anatomical orientation
+#' @noRd
+#' @keywords internal
+.nearestAnatomy <- function(mat44) {
+  mat33 <- mat44[1:3, 1:3]
+  #mat33 <- sweep(mat33, 2, sqrt(apply(mat33 * mat33, 2, sum)), "/")
+  icol <- mat33[,1]
+  jcol <- mat33[,2]
+  kcol <- mat33[,3]
+
+  # if (!sum(mat33 == 1) == 3) {
+  #   mat33 = apply(mat33, 2, function(x) (x+runif(3)*.1))
+  #   apply(mat33, 2, function(x) x/sum(x))
+  # }
+
+  ## normalize icol
+  icol <- icol / sqrt(sum(icol^2))
+
+  ## normalize jcol
+  jcol <- jcol / sqrt(sum(jcol^2))
+
+  #' Orthogonalize two vectors
+  #'
+  #' Internal helper function to make two vectors orthogonal while preserving
+  #' the direction of the first vector.
+  #'
+  #' @param col1 First vector to preserve
+  #' @param col2 Second vector to orthogonalize
+  #' @return Orthogonalized second vector
+  #' @keywords internal
+  #' @noRd
+  orthogonalize <- function(col1, col2) {
+    dotp <- sum(col1*col2)
+    #print(dotp)
+    if (abs(dotp) > 1.e-4) {
+      col2 <- col2 - (dotp * col1)
+      norm <- sqrt(sum(col2^2))
+      col2 <- col2 / norm
+    }
+    col2
+  }
+
+  jcol <- orthogonalize(icol, jcol)
+
+  knorm <- sqrt(sum(kcol^2))
+  if (knorm == 0.0) {
+    kcol[1] <- icol[2] * jcol[3] - icol[3] * jcol[2]
+    kcol[2] <- icol[3] * jcol[1] - jcol[3] * icol[1]
+    kcol[3] <- icol[1] * jcol[2] - icol[2] * jcol[1]
+  } else {
+    kcol <- kcol / knorm
+  }
+
+  ## orthogonalize k to i
+  kcol <- orthogonalize(icol, kcol)
+  kcol <- orthogonalize(jcol, kcol)
+
+  Q <- cbind(icol, jcol, kcol)
+  P <- matrix(0,3,3)
+  detQ <- det(Q)
+  if (detQ == 0.0) {
+    stop("invalid matrix input, determinant is 0")
+  }
+
+  vbest = -666
+  ibest = 1
+  pbest = 1
+  qbest = 1
+  rbest = 1
+
+  jbest = 2
+  kbest = 3
+  for (i in 1:3) {
+    for (j in 1:3) {
+      if (i == j) next
+      for (k in 1:3) {
+        if (i == k || j == k) next
+          P <- matrix(0,3,3)
+          for (p in c(-1,1)) {
+            for (q in c(-1,1)) {
+              for (r in c(-1,1)) {
+                P[1, i] <- p
+                P[2, j] <- q
+                P[3, k] <- r
+                detP <- det(P)
+                if (detP * detQ <= 0.0) next
+                M <- P %*% Q
+                crit <- sum(diag(M))
+                if (crit > vbest) {
+                  vbest = crit
+                  ibest = i
+                  jbest = j
+                  kbest = k
+                  pbest = p
+                  qbest = q
+                  rbest = r
+                }
+              }
+            }
+          }
+      }
+    }
+  }
+
+  .getAxis <- function(num) {
+    switch(as.character(as.integer(num)),
+           "1"=LEFT_RIGHT,
+           "-1"=RIGHT_LEFT,
+           "2"=POST_ANT,
+           "-2"=ANT_POST,
+           "3"=INF_SUP,
+           "-3"=SUP_INF)
+  }
+
+  ax1 <- .getAxis(ibest*pbest)
+  ax2 <- .getAxis(jbest*qbest)
+  ax3 <- .getAxis(kbest*rbest)
+
+  AxisSet3D(ax1,ax2,ax3)
+}

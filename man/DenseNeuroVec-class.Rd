@@ -6,13 +6,13 @@
 \alias{DenseNeuroVec}
 \title{DenseNeuroVec Class}
 \usage{
-DenseNeuroVec(data, space, label = "")
+DenseNeuroVec(data, space, label = "none")
 }
 \arguments{
 \item{data}{The image data. This can be:
 \itemize{
   \item A 4-dimensional array
-  \item A 2-dimensional matrix (either nvoxels x ntime-points or 
+  \item A 2-dimensional matrix (either nvoxels x ntime-points or
         ntime-points x nvoxels)
   \item A vector (which will be reshaped to match the space dimensions)
 }}
@@ -28,25 +28,25 @@ A concrete instance of the \code{\linkS4class{DenseNeuroVec}} class.
 A class representing a four-dimensional brain image, backed by a dense array.
 This class is designed for neuroimaging data where most voxels contain non-zero values.
 
-This function constructs a DenseNeuroVec object, which represents a dense 
-four-dimensional brain image. It handles various input data formats and 
+This function constructs a DenseNeuroVec object, which represents a dense
+four-dimensional brain image. It handles various input data formats and
 ensures proper dimensionality.
 }
 \details{
 DenseNeuroVec objects store their data in a dense array format, which is efficient
 for operations that require frequent access to all voxels. This class inherits from
 both \code{\linkS4class{NeuroVec}} and \code{array} classes, combining spatial
-information with array-based data storage.
+information with array-based storage.
 
 The function performs several operations based on the input data type:
 \itemize{
-  \item For matrix input: It determines the correct orientation (voxels x time or time x voxels) 
+  \item For matrix input: It determines the correct orientation (voxels x time or time x voxels)
     and reshapes accordingly. If necessary, it adds a 4th dimension to the space object.
   \item For vector input: It reshapes the data to match the dimensions specified in the space object.
   \item For array input: It ensures the dimensions match those specified in the space object.
 }
 
-Note that the label parameter is currently not used in the object creation, 
+Note that the label parameter is currently not used in the object creation,
 but is included for potential future use or consistency with other constructors.
 }
 \section{Validity}{

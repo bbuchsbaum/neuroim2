@@ -11,10 +11,10 @@ ClusteredNeuroVol(mask, clusters, label_map = NULL, label = "")
 \arguments{
 \item{mask}{an instance of class \code{\linkS4class{LogicalNeuroVol}}}
 
-\item{clusters}{a vector of clusters ids with length equal to number of nonzero 
+\item{clusters}{a vector of clusters ids with length equal to number of nonzero
 voxels in mask \code{mask}}
 
-\item{label_map}{an optional \code{list} that maps from cluster id to a cluster 
+\item{label_map}{an optional \code{list} that maps from cluster id to a cluster
 label, e.g. (1 -> "FFA", 2 -> "PPA")}
 
 \item{label}{an optional \code{character} string used to label of the volume}

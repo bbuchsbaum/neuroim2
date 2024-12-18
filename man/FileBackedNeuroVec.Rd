@@ -2,30 +2,48 @@
 % Please edit documentation in R/filebacked_neurovec.R
 \name{FileBackedNeuroVec}
 \alias{FileBackedNeuroVec}
-\title{Create a FileBackedNeuroVec Object}
+\title{Create a File-Backed Neuroimaging Vector}
 \usage{
-FileBackedNeuroVec(file_name)
+FileBackedNeuroVec(file_name, label = basename(file_name))
 }
 \arguments{
-\item{file_name}{A character string specifying the name of the image file.}
+\item{file_name}{A character string specifying the path to the neuroimaging file.
+Supported formats include NIFTI (.nii) and ANALYZE (.hdr/.img).}
+
+\item{label}{Optional character string providing a label for the vector}
 }
 \value{
-A new instance of class \code{FileBackedNeuroVec}.
+A new instance of class \code{\linkS4class{FileBackedNeuroVec}}.
 }
 \description{
-Constructs a \code{FileBackedNeuroVec} instance, which represents a file-backed
-neuroimaging vector object.
+Constructs a \code{\linkS4class{FileBackedNeuroVec}} instance, which represents a file-backed
+neuroimaging vector object. This constructor provides memory-efficient access to large
+neuroimaging datasets by keeping the data on disk until needed.
 }
 \details{
-This function reads the header of the specified file, creates a NeuroSpace object,
-and initializes a FileBackedNeuroVec with the appropriate metadata.
+Create a FileBackedNeuroVec Object
+
+
+The function performs the following operations:
+\itemize{
+  \item Reads the header information from the specified file
+  \item Validates the dimensionality (must be 4D data)
+  \item Creates a \code{\linkS4class{NeuroSpace}} object with appropriate metadata
+  \item Initializes the file-backed vector with minimal memory footprint
+}
 }
 \examples{
 \dontrun{
-fbvec <- FileBackedNeuroVec("path/to/image.nii")
+# Create a file-backed vector from a NIFTI file
+fbvec <- FileBackedNeuroVec("path/to/fmri_data.nii")
+
+# Access specific volumes without loading entire dataset
+first_vol <- sub_vector(fbvec, 1)
 }
 
 }
 \seealso{
-\code{\link{NeuroSpace}}, \code{\link{read_header}}
+\code{\link{NeuroSpace}} for spatial metadata management
+\code{\link{read_header}} for header information extraction
+\code{\link{sub_vector}} for data access methods
 }

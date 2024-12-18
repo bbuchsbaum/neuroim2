@@ -2,54 +2,69 @@
 % Please edit documentation in R/conncomp.R
 \name{conn_comp_3D}
 \alias{conn_comp_3D}
-\title{Extract Connected Components from a 3D Mask}
+\title{Extract Connected Components from a 3D Binary Mask}
 \usage{
 conn_comp_3D(mask, connect = c("26-connect", "18-connect", "6-connect"))
 }
 \arguments{
-\item{mask}{A 3D binary array representing the mask. Must be a logical array.}
+\item{mask}{A 3D logical array representing the binary mask}
 
-\item{connect}{A character string specifying the connectivity constraint. 
-Options are "6-connect", "18-connect", or "26-connect". Default is "26-connect".}
+\item{connect}{A character string specifying the connectivity constraint. One of 
+"26-connect" (default), "18-connect", or "6-connect"}
 }
 \value{
-A list with two elements:
-  \item{index}{A 3D array containing the cluster index of the connected component for each voxel.}
-  \item{size}{A 3D array containing the size of the connected component for each voxel.}
+A list with the following components:
+  \item{index}{A 3D array of integers. Each non-zero value represents the cluster index 
+               of the connected component for that voxel. Zero values indicate background.}
+  \item{size}{A 3D array of integers. Each non-zero value represents the size (number of voxels) 
+              of the connected component that the voxel belongs to. Zero values indicate background.}
 }
 \description{
-This function identifies and labels connected components in a 3D binary mask using
-different connectivity constraints.
+Identifies and labels connected components in a 3D binary mask using a two-pass algorithm.
+The function supports different connectivity constraints and returns both component indices
+and their sizes.
 }
 \details{
-The function implements a two-pass algorithm to identify connected components:
+The function implements an efficient two-pass connected component labeling algorithm:
+
 \itemize{
-  \item First pass: Assigns initial labels and establishes connectivity.
-  \item Second pass: Resolves label conflicts and assigns final labels.
+  \item First pass: Assigns provisional labels and builds an equivalence table using
+        a union-find data structure for label resolution
+  \item Second pass: Resolves label conflicts and assigns final component labels
 }
 
-The connectivity options determine which voxels are considered neighbors:
+The connectivity options determine which voxels are considered adjacent:
 \itemize{
-  \item 6-connect: Only face-adjacent voxels
+  \item 6-connect: Only face-adjacent voxels (±1 step along each axis)
   \item 18-connect: Face and edge-adjacent voxels
-  \item 26-connect: Face, edge, and vertex-adjacent voxels
+  \item 26-connect: Face, edge, and vertex-adjacent voxels (all neighbors in a 3x3x3 cube)
 }
+
+Time complexity is O(n) where n is the number of voxels in the mask, with
+additional O(k) space for the union-find data structure where k is the number
+of provisional labels.
 }
 \examples{
-# Generate a random 3D binary mask
-set.seed(123)
-dat <- array(as.logical(runif(10*10*10) > 0.5), c(10, 10, 10))
+# Create a simple 3D binary mask with two components
+mask <- array(FALSE, c(4, 4, 4))
+mask[1:2, 1:2, 1:2] <- TRUE  # First component
+mask[3:4, 3:4, 3:4] <- TRUE  # Second component
 
-# Extract connected components using different connectivity constraints
-res1 <- conn_comp_3D(dat, connect = "6-connect")
-res2 <- conn_comp_3D(dat, connect = "18-connect")
-res3 <- conn_comp_3D(dat, connect = "26-connect")
+# Extract components using 6-connectivity
+comps <- conn_comp_3D(mask, connect = "6-connect")
 
-# Compare the number of connected components
-cat("Number of components (6-connect):", max(res1$index), "\n")
-cat("Number of components (18-connect):", max(res2$index), "\n")
-cat("Number of components (26-connect):", max(res3$index), "\n")
+# Number of components
+max_comps <- max(comps$index)
+cat("Found", max_comps, "components\n")
 
+# Size of each component
+unique_sizes <- unique(comps$size[comps$size > 0])
+cat("Component sizes:", paste(unique_sizes, collapse=", "), "\n")
+
+}
+\references{
+Rosenfeld, A., & Pfaltz, J. L. (1966). Sequential operations in digital 
+picture processing. Journal of the ACM, 13(4), 471-494.
 }
 \seealso{
 \code{\link{array}} for creating 3D arrays

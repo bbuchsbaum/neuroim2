@@ -8,6 +8,8 @@
 \usage{
 \S4method{as.matrix}{NeuroVec}(x)
 
+\S4method{as.matrix}{NeuroVec}(x)
+
 \S4method{as.matrix}{ROIVec}(x)
 
 \S4method{as.matrix}{SparseNeuroVec}(x)

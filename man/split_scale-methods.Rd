@@ -22,19 +22,44 @@ split_scale(x, f, center, scale)
 \S4method{split_scale}{DenseNeuroVec,factor,logical,logical}(x, f, center, scale)
 }
 \arguments{
-\item{x}{A numeric matrix or matrix-like object.}
+\item{x}{A \linkS4class{DenseNeuroVec} object}
 
-\item{f}{The splitting object, typically a factor or a set of integer indices. Must be equal to the number of rows in the matrix.}
+\item{f}{Factor for grouping}
 
-\item{center}{Should values within each submatrix be centered? If TRUE, the mean is removed from each column of the submatrix.}
+\item{center}{Logical indicating whether to center}
 
-\item{scale}{Should values be scaled? If TRUE, the vector is divided by the standard deviation for each column of the submatrix.}
+\item{scale}{Logical indicating whether to scale}
 }
 \value{
 A new matrix or matrix-like object in which the original rows have been grouped by 'f' and then centered and/or scaled for each grouping.
+
+Matrix of scaled values
+
+Matrix of scaled values
+
+Scaled DenseNeuroVec object
+
+Scaled DenseNeuroVec object
+
+Scaled DenseNeuroVec object
 }
 \description{
 This function centers and/or scales the row-subsets of a numeric matrix or matrix-like object.
+
+Implementation of split_scale for matrix objects.
+See \code{\link{split_scale}} for the generic definition and complete documentation.
+
+Implementation of split_scale for matrix objects.
+See \code{\link{split_scale}} for the generic definition and complete documentation.
+
+Implementation of split_scale for DenseNeuroVec objects.
+See \code{\link{split_scale}} for the generic definition and complete documentation.
+
+Implementation of split_scale for DenseNeuroVec objects.
+See \code{\link{split_scale}} for the generic definition and complete documentation.
+
+Implementation of split_scale for DenseNeuroVec objects.
+See \code{\link{split_scale}} for the generic definition and complete documentation.
 }
 \examples{
 
@@ -49,4 +74,15 @@ all(abs(apply(Ms[fac == 2,], 2, mean)) < .000001)
 ## Correctly scaled
 all.equal(apply(Ms[fac == 1,], 2, sd), rep(1, ncol(Ms)))
 all.equal(apply(Ms[fac == 2,], 2, sd), rep(1, ncol(Ms)))
+}
+\seealso{
+\code{\link{split_scale}}
+
+\code{\link{split_scale}}
+
+\code{\link{split_scale}}
+
+\code{\link{split_scale}}
+
+\code{\link{split_scale}}
 }

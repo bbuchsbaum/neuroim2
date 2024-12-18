@@ -19,7 +19,7 @@ The way to read an volumetric image file is to use `read_vol`:
 
 ```{r}
     library(neuroim2)
-    file_name <- system.file("extdata", "global_mask.nii", package="neuroim2")
+    file_name <- system.file("extdata", "global_mask2.nii.gz", package="neuroim2")
     vol <- read_vol(file_name)
 ```
 

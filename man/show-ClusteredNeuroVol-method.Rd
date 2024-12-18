@@ -2,13 +2,13 @@
 % Please edit documentation in R/clustervol.R
 \name{show,ClusteredNeuroVol-method}
 \alias{show,ClusteredNeuroVol-method}
-\title{show a \code{ClusteredNeuroVol}}
+\title{Display ClusteredNeuroVol Information}
 \usage{
 \S4method{show}{ClusteredNeuroVol}(object)
 }
 \arguments{
-\item{object}{the object}
+\item{object}{A \linkS4class{ClusteredNeuroVol} object}
 }
 \description{
-show a \code{ClusteredNeuroVol}
+Display ClusteredNeuroVol Information
 }

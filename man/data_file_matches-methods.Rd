@@ -11,33 +11,34 @@ data_file_matches(x, file_name)
 \S4method{data_file_matches}{FileFormat,character}(x, file_name)
 }
 \arguments{
-\item{x}{A FileFormat object.}
+\item{x}{A \linkS4class{FileFormat} object specifying the format requirements}
 
-\item{file_name}{A character string representing the file name to be matched.}
+\item{file_name}{A character string specifying the file name to validate}
 }
 \value{
 TRUE for match, FALSE otherwise
 
-A logical value: TRUE if the file name matches the data file format, 
-  FALSE otherwise.
+A logical value: \code{TRUE} if the file name matches the data format,
+  \code{FALSE} otherwise
 }
 \description{
-This method checks if a given file name conforms to the data file format
-specified in the FileFormat object.
+Validates whether a file name conforms to the data file format specification.
 }
 \details{
-The function uses a regular expression to check if the file name ends with 
-the data extension specified in the FileFormat object. It returns TRUE if 
-there's a match, and FALSE otherwise.
+The function performs case-sensitive pattern matching to verify that the file name
+ends with the specified data extension. The match is performed using a regular
+expression that ensures the extension appears at the end of the file name.
 }
 \examples{
 \dontrun{
-file_format <- new("FileFormat", header_extension = "hdr", data_extension = "img")
-data_file_matches(file_format, "brain_scan.img")
-data_file_matches(file_format, "brain_scan.hdr")
+fmt <- new("FileFormat", header_extension = "hdr", data_extension = "img")
+data_file_matches(fmt, "brain_scan.img")  # TRUE
+data_file_matches(fmt, "brain_scan.hdr")  # FALSE
+data_file_matches(fmt, "brain.img.gz")    # FALSE
 }
 
 }
 \seealso{
-\code{\link{FileFormat-class}}, \code{\link{file_matches}}, \code{\link{header_file_matches}}
+\code{\link{file_matches}}, \code{\link{header_file_matches}} for related
+file format validation
 }

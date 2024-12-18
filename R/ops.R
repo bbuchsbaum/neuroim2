@@ -250,7 +250,8 @@ setMethod(f="Arith", signature=signature(e1="SparseNeuroVec", e2="SparseNeuroVec
             dspace <- space(e1)  # Assuming space remains the same
 
             # Construct the new mask based on non-zero elements
-            new_mask <- rep(FALSE, length(space(e1)@dim))
+            dims <- space(e1)@dim[1:3]
+            new_mask <- array(FALSE, dims)
             new_mask[combined_ind] <- TRUE
 
             # Create the new SparseNeuroVec object
@@ -433,5 +434,3 @@ setMethod(f="Summary", signature=signature(x="DenseNeuroVol", na.rm="ANY"),
     def=function(x, ..., na.rm) {
       callGeneric(x@.Data, ..., na.rm=na.rm)
     })
-
-

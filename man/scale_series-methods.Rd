@@ -20,17 +20,44 @@ scale_series(x, center, scale)
 \S4method{scale_series}{NeuroVec,missing,missing}(x, center, scale)
 }
 \arguments{
-\item{x}{a four dimensional image}
+\item{x}{A \linkS4class{NeuroVec} object}
 
-\item{center}{a \code{logical} value indicating whether series should be centered}
+\item{center}{Logical indicating whether to center}
 
-\item{scale}{a \code{logical} value indicating whether series should be divided by standard deviation}
+\item{scale}{Logical indicating whether to scale}
+}
+\value{
+Scaled NeuroVec object
+
+Scaled NeuroVec object
+
+Scaled NeuroVec object
+
+Scaled NeuroVec object
 }
 \description{
-Generic functions to scale (center and/or normalize by standard deviation) each series of a 4D image
-That is, if the 4th dimension is 'time' each series is a 1D time series.
+Implementation of scale_series for NeuroVec objects.
+See \code{\link{scale_series}} for the generic definition and complete documentation.
+
+Implementation of scale_series for NeuroVec objects.
+See \code{\link{scale_series}} for the generic definition and complete documentation.
+
+Implementation of scale_series for NeuroVec objects.
+See \code{\link{scale_series}} for the generic definition and complete documentation.
+
+Implementation of scale_series for NeuroVec objects.
+See \code{\link{scale_series}} for the generic definition and complete documentation.
 }
 \examples{
 bvec <- NeuroVec(array(rnorm(24*24*24*24), c(24,24,24,24)), NeuroSpace(c(24,24,24,24), c(1,1,1)))
 res <- scale_series(bvec, TRUE, TRUE)
+}
+\seealso{
+\code{\link{scale_series}}
+
+\code{\link{scale_series}}
+
+\code{\link{scale_series}}
+
+\code{\link{scale_series}}
 }

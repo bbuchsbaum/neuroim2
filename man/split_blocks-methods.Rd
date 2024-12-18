@@ -11,6 +11,8 @@ split_blocks(x, indices, ...)
 \S4method{split_blocks}{NeuroVec,integer}(x, indices, ...)
 
 \S4method{split_blocks}{NeuroVec,factor}(x, indices, ...)
+
+\S4method{split_blocks}{NeuroVec,factor}(x, indices, ...)
 }
 \arguments{
 \item{x}{a vector-valued object}

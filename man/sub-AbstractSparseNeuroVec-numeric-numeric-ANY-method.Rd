@@ -2,25 +2,35 @@
 % Please edit documentation in R/sparse_neurovec.R
 \name{[,AbstractSparseNeuroVec,numeric,numeric,ANY-method}
 \alias{[,AbstractSparseNeuroVec,numeric,numeric,ANY-method}
-\title{extractor}
+\title{Extractor Method for AbstractSparseNeuroVec}
 \usage{
 \S4method{[}{AbstractSparseNeuroVec,numeric,numeric,ANY}(x, i, j, k, m, ..., drop = TRUE)
 }
 \arguments{
-\item{x}{the object}
+\item{x}{An object of class \code{AbstractSparseNeuroVec}.}
 
-\item{i}{first index}
+\item{i}{Numeric vector specifying the indices for the first dimension.}
 
-\item{j}{second index}
+\item{j}{Numeric vector specifying the indices for the second dimension.}
 
-\item{k}{third index}
+\item{k}{Numeric vector specifying the indices for the third dimension. Defaults to all indices if missing.}
 
-\item{m}{the fourth index}
+\item{m}{Numeric vector specifying the indices for the fourth dimension. Defaults to all indices if missing.}
 
-\item{...}{additional args}
+\item{...}{Additional arguments (currently unused).}
 
-\item{drop}{dimension}
+\item{drop}{Logical indicating whether to drop dimensions of length one. Defaults to \code{TRUE}.}
+}
+\value{
+An array containing the extracted subset. The dimensions correspond to the lengths of \code{i}, \code{j}, \code{k}, and \code{m}. If \code{drop} is \code{TRUE}, dimensions of length one are removed.
 }
 \description{
-extractor
+Extracts a subset of data from a sparse four-dimensional brain image based on provided indices.
+}
+\examples{
+\dontrun{
+# Assuming 'sparse_vec' is a valid SparseNeuroVec object
+subset <- sparse_vec[1:10, 1:10, 1:5, 1:100]
+}
+
 }

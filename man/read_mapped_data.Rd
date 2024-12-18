@@ -2,19 +2,19 @@
 % Please edit documentation in R/binary_io.R
 \name{read_mapped_data}
 \alias{read_mapped_data}
-\title{Read mapped data from a 4D image file}
+\title{Read Mapped Data from 4D Image}
 \usage{
 read_mapped_data(meta, idx)
 }
 \arguments{
-\item{meta}{An object containing metadata about the file to be read.}
+\item{meta}{An object of class \linkS4class{ImageMetadata} containing file metadata}
 
-\item{idx}{A vector of indices specifying which elements to read.}
+\item{idx}{Integer vector of indices specifying elements to read}
 }
 \value{
-A vector of values read from the memory-mapped file.
+A numeric vector of values
 }
 \description{
-This function reads data from a memory-mapped 4D image file.
+Read data from a memory-mapped 4D image file.
 }
 \keyword{internal}

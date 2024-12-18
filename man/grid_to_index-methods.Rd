@@ -25,13 +25,35 @@ grid_to_index(x, coords)
 \S4method{grid_to_index}{NeuroVol,numeric}(x, coords)
 }
 \arguments{
-\item{x}{the object, typically a \code{NeuroVol} or \code{NeuroSpace} instance.}
+\item{x}{A \code{NeuroSlice} object}
 
-\item{coords}{a matrix where each row is a coordinate or a vector of length equal to \code{ndim(x)}}
+\item{coords}{Either a numeric vector of length 2 or a matrix with 2 columns,
+representing (x,y) coordinates in the slice grid}
 }
 \value{
 a vector of indices
+
+Integer vector of linear indices corresponding to the input coordinates
 }
 \description{
-Generic function to convert N-dimensional grid coordinate to 1D indices
+Converts 2D grid coordinates to linear indices for a \code{NeuroSlice} object.
+}
+\details{
+Convert Grid Coordinates to Linear Indices
+}
+\examples{
+slice_space <- NeuroSpace(c(10, 10))
+slice_data <- matrix(1:100, 10, 10)
+slice <- NeuroSlice(slice_data, slice_space)
+
+# Convert single coordinate
+idx <- grid_to_index(slice, c(5, 5))
+
+# Convert multiple coordinates
+coords <- matrix(c(1,1, 2,2, 3,3), ncol=2, byrow=TRUE)
+indices <- grid_to_index(slice, coords)
+
+}
+\seealso{
+\code{\link{index_to_grid}} for the inverse operation
 }

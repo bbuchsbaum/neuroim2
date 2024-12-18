@@ -3,122 +3,218 @@
 #' @include all_generic.R
 {}
 
-
-#' Construct a NeuroSlice Object
+#' Two-Dimensional Neuroimaging Data Slice
+#'
+#' @title NeuroSlice: 2D Neuroimaging Data Container
 #'
 #' @description
-#' This function creates a NeuroSlice object, which represents a 2D slice of neuroimaging data
-#' with associated spatial information.
+#' Creates a \code{NeuroSlice} object representing a two-dimensional slice of neuroimaging data
+#' with associated spatial information. This class is particularly useful for working with
+#' individual slices from volumetric neuroimaging data or for visualizing 2D cross-sections.
 #'
-#' @param data A vector or matrix containing the slice data.
-#' @param space An instance of class \code{\linkS4class{NeuroSpace}} defining the spatial properties of the slice.
-#' @param indices Optional. A vector of linear indices used when \code{data} is a 1D vector.
-#'   If provided, it specifies where the data should be placed in the 2D slice.
+#' @param data A vector or matrix containing the slice data values.
+#' @param space An object of class \code{\linkS4class{NeuroSpace}} defining the spatial 
+#'   properties (dimensions, spacing, origin) of the slice.
+#' @param indices Optional integer vector. When \code{data} is provided as a 1D vector,
+#'   \code{indices} specifies the linear indices where the data values should be placed
+#'   in the 2D slice. Useful for creating sparse slices. Default is NULL.
 #'
-#' @return A new instance of class \code{\linkS4class{NeuroSlice}}.
+#' @return A new object of class \code{\linkS4class{NeuroSlice}}.
 #'
-#' @details
-#' The function performs several checks and transformations:
+#' @section Input Validation:
+#' The function performs several validation checks:
 #' \itemize{
-#'   \item It ensures that the provided space is 2-dimensional.
-#'   \item If \code{indices} is not provided:
+#'   \item Verifies that \code{space} is 2-dimensional
+#'   \item Ensures data dimensions are compatible with \code{space}
+#'   \item Validates \code{indices} when provided for sparse initialization
+#' }
+#'
+#' @section Data Handling:
+#' The function supports two initialization modes:
+#' \itemize{
+#'   \item Dense mode (indices = NULL):
 #'     \itemize{
-#'       \item If \code{data} is not 2D, it reshapes it to match the dimensions of \code{space}.
-#'       \item It checks that the dimensions of \code{data} match those of \code{space}.
+#'       \item Data is reshaped if necessary to match space dimensions
+#'       \item Dimensions must match exactly after reshaping
 #'     }
-#'   \item If \code{indices} is provided:
+#'   \item Sparse mode (indices provided):
 #'     \itemize{
-#'       \item It creates a zero matrix matching the dimensions of \code{space}.
-#'       \item It places the \code{data} values at the specified \code{indices} in this matrix.
+#'       \item Creates a zero-initialized matrix matching space dimensions
+#'       \item Places data values at specified indices
 #'     }
 #' }
 #'
 #' @examples
-#' # Create a NeuroSpace object for a 64x64 slice
-#' bspace <- NeuroSpace(c(64, 64), spacing = c(1, 1))
+#' # Create a 64x64 slice space
+#' slice_space <- NeuroSpace(c(64, 64), spacing = c(2, 2))
 #'
-#' # Create random data for the slice
-#' dat <- array(rnorm(64*64), c(64, 64))
+#' # Example 1: Dense slice from matrix
+#' slice_data <- matrix(rnorm(64*64), 64, 64)
+#' dense_slice <- NeuroSlice(slice_data, slice_space)
 #'
-#' # Construct a NeuroSlice object
-#' bslice <- NeuroSlice(dat, bspace)
-#' print(bslice)
+#' # Example 2: Dense slice from vector
+#' vec_data <- rnorm(64*64)
+#' vec_slice <- NeuroSlice(vec_data, slice_space)
 #'
-#' # Using indices to create a sparse slice
-#' sparse_data <- rnorm(100)  # 100 non-zero values
-#' sparse_indices <- sample(1:(64*64), 100)  # 100 random positions
-#' sparse_slice <- NeuroSlice(sparse_data, bspace, indices = sparse_indices)
-#' print(sparse_slice)
+#' # Example 3: Sparse slice with specific values
+#' n_points <- 100
+#' sparse_data <- rnorm(n_points)
+#' sparse_indices <- sample(1:(64*64), n_points)
+#' sparse_slice <- NeuroSlice(sparse_data, slice_space, indices = sparse_indices)
 #'
 #' @seealso 
-#' \code{\link{NeuroSpace-class}} for details on the spatial information.
-#' \code{\link{NeuroVol-class}} for 3D volumetric data.
+#' \itemize{
+#'   \item \code{\link{NeuroSpace}} for defining spatial properties
+#'   \item \code{\link{NeuroVol}} for 3D volumetric data
+#'   \item \code{\link{plot.NeuroSlice}} for visualization methods
+#' }
 #'
 #' @export
 NeuroSlice <- function(data, space, indices = NULL) {
-	if (ndim(space) != 2) {
-		stop("incorrect dimension for neuro_slice")
-	}
+  if (ndim(space) != 2) {
+    stop("incorrect dimension for neuro_slice")
+  }
 
-	if (is.null(indices)) {
-		if (length(dim(data)) != 2) {
-		  stopifnot(length(data) == prod(dim(space)[1:2]))
-			data <- matrix(data, dim(space)[1], dim(space)[2])
-		}
+  if (is.null(indices)) {
+    if (length(dim(data)) != 2) {
+      stopifnot(length(data) == prod(dim(space)[1:2]))
+      data <- matrix(data, dim(space)[1], dim(space)[2])
+    }
 
-	  stopifnot(all(dim(data) == dim(space)))
-		new("NeuroSlice", .Data=data, space=space)
+    stopifnot(all(dim(data) == dim(space)))
+    new("NeuroSlice", .Data=data, space=space)
 
-	} else {
-		mdat <- matrix(0, dim(space))
-		mdat[indices] <- data
-		new("NeuroSlice", .Data=mdat, space=space)
-	}
+  } else {
+    mdat <- matrix(0, dim(space))
+    mdat[indices] <- data
+    new("NeuroSlice", .Data=mdat, space=space)
+  }
 }
 
 
+#' Convert Grid Coordinates to Linear Indices
+#'
+#' @title Grid to Linear Index Conversion
+#' @description
+#' Converts 2D grid coordinates to linear indices for a \code{NeuroSlice} object.
+#'
+#' @param x A \code{NeuroSlice} object
+#' @param coords Either a numeric vector of length 2 or a matrix with 2 columns,
+#'   representing (x,y) coordinates in the slice grid
+#'
+#' @return Integer vector of linear indices corresponding to the input coordinates
+#'
+#' @examples
+#' slice_space <- NeuroSpace(c(10, 10))
+#' slice_data <- matrix(1:100, 10, 10)
+#' slice <- NeuroSlice(slice_data, slice_space)
+#'
+#' # Convert single coordinate
+#' idx <- grid_to_index(slice, c(5, 5))
+#'
+#' # Convert multiple coordinates
+#' coords <- matrix(c(1,1, 2,2, 3,3), ncol=2, byrow=TRUE)
+#' indices <- grid_to_index(slice, coords)
+#'
+#' @seealso \code{\link{index_to_grid}} for the inverse operation
+#'
 #' @export
 #' @rdname grid_to_index-methods
-setMethod(f="grid_to_index", signature=signature(x = "NeuroSlice", coords="matrix"),
-		def=function(x, coords) {
-			callGeneric(x@space, coords)
-})
-
-#' @export
-#' @rdname grid_to_index-methods
-setMethod(f="grid_to_index", signature=signature(x = "NeuroSlice", coords="numeric"),
+setMethod(f="grid_to_index", 
+          signature=signature(x = "NeuroSlice", coords="matrix"),
           def=function(x, coords) {
             callGeneric(x@space, coords)
           })
 
+#' @rdname grid_to_index-methods
+#' @export
+setMethod(f="grid_to_index", 
+          signature=signature(x = "NeuroSlice", coords="numeric"),
+          def=function(x, coords) {
+            callGeneric(x@space, coords)
+          })
 
-
+#' Convert Linear Indices to Grid Coordinates
+#'
+#' @title Linear Index to Grid Coordinate Conversion
+#' @description
+#' Converts linear indices to 2D grid coordinates for a \code{NeuroSlice} object.
+#'
+#' @param x A \code{NeuroSlice} object
+#' @param idx Integer vector of linear indices to convert
+#'
+#' @return A matrix with 2 columns representing the (x,y) coordinates 
+#'   corresponding to the input indices
+#'
+#' @examples
+#' slice_space <- NeuroSpace(c(10, 10))
+#' slice_data <- matrix(1:100, 10, 10)
+#' slice <- NeuroSlice(slice_data, slice_space)
+#'
+#' # Convert single index
+#' coords <- index_to_grid(slice, 55)
+#'
+#' # Convert multiple indices
+#' indices <- c(1, 25, 50, 75, 100)
+#' coords_mat <- index_to_grid(slice, indices)
+#'
+#' @seealso \code{\link{grid_to_index}} for the inverse operation
+#'
 #' @export
 #' @rdname index_to_grid-methods
-setMethod(f="index_to_grid", signature=signature(x = "NeuroSlice", idx="numeric"),
-		def=function(x, idx) {
-		  callGeneric(x@space, idx)
-})
+setMethod(f="index_to_grid",
+          signature=signature(x = "NeuroSlice", idx="numeric"),
+          def=function(x, idx) {
+            callGeneric(x@space, idx)
+          })
 
-
-
-
-#' @export
-#' @importFrom graphics plot
-#' @rdname plot-methods
-#' @examples
+#' Plot a NeuroSlice Object
 #'
-#' dat <- matrix(rnorm(100*100), 100, 100)
-#' slice <- NeuroSlice(dat, NeuroSpace(c(100,100)))
-#' #plot(slice)
-setMethod("plot", signature=signature(x="NeuroSlice"),
-          def=function(x,cmap=gray(seq(0,1,length.out=255)), irange=range(x, na.rm=TRUE)) {
+#' @title Visualize 2D Neuroimaging Slice
+#' @description
+#' Creates a 2D visualization of a \code{NeuroSlice} object using \code{ggplot2}.
+#'
+#' @param x A \code{NeuroSlice} object to plot
+#' @param cmap Color mapping function or vector. Default is grayscale.
+#' @param irange Numeric vector of length 2 specifying the intensity range for color mapping.
+#'   Default is the range of the data.
+#' @param ... Additional arguments passed to plotting methods
+#'
+#' @return A \code{ggplot2} object
+#'
+#' @details
+#' The plot method uses \code{ggplot2} to create a raster visualization of the slice data.
+#' The intensity values are mapped to colors using the specified colormap and range.
+#'
+#' @examples
+#' # Create example slice
+#' slice_space <- NeuroSpace(c(100, 100))
+#' slice_data <- matrix(rnorm(100*100), 100, 100)
+#' slice <- NeuroSlice(slice_data, slice_space)
+#'
+#' \dontrun{
+#' # Basic plot
+#' plot(slice)
+#'
+#' # Custom colormap
+#' library(viridis)
+#' plot(slice, cmap = viridis(255))
+#'
+#' # Custom intensity range
+#' plot(slice, irange = c(-2, 2))
+#' }
+#'
+#' @importFrom ggplot2 ggplot aes geom_raster scale_fill_identity xlab ylab theme_bw
+#' @export
+#' @rdname plot-methods
+setMethod("plot", 
+          signature=signature(x="NeuroSlice"),
+          def=function(x, cmap=gray(seq(0,1,length.out=255)), 
+                      irange=range(x, na.rm=TRUE)) {
             if (!requireNamespace("ggplot2", quietly = TRUE)) {
               stop("Package \"ggplot2\" needed for this function to work. Please install it.",
                    call. = FALSE)
             }
-
-
 
             ## map intensities to colors
             imcols <- mapToColors(x, cmap, alpha=1, irange=irange, zero_col="#000000")
@@ -133,7 +229,81 @@ setMethod("plot", signature=signature(x="NeuroSlice"),
 
           })
 
-
+#' Display NeuroSlice Information
+#'
+#' @title Print NeuroSlice Object Details
+#' @description
+#' Displays a formatted summary of a \code{NeuroSlice} object's properties using
+#' color-coded output for improved readability.
+#'
+#' @param object A \code{NeuroSlice} object
+#'
+#' @details
+#' Shows key properties including:
+#' \itemize{
+#'   \item Object type and class
+#'   \item Dimensions and memory usage
+#'   \item Spatial properties (spacing, origin)
+#'   \item Value range and statistics
+#'   \item Axis orientations
+#' }
+#'
+#' @examples
+#' slice <- NeuroSlice(matrix(1:100, 10, 10), NeuroSpace(c(10, 10)))
+#' show(slice)
+#'
+#' @importFrom crayon bold blue green red yellow silver
+#' @importFrom utils object.size
+#' @export
+setMethod(f="show", 
+          signature=signature("NeuroSlice"),
+          def=function(object) {
+            # Get space information
+            sp <- space(object)
+            
+            # Calculate statistics
+            val_range <- range(object, na.rm=TRUE)
+            n_na <- sum(is.na(object))
+            mem_size <- format(object.size(object), units="auto")
+            
+            # Header
+            cat("\n")
+            cat(bold(blue("═══ NeuroSlice Object ═══")), "\n\n")
+            
+            # Type and Dimensions
+            cat(bold(yellow("■ Basic Information")), "\n")
+            cat("  ", silver("Type:"), " ", class(object), "\n", sep="")
+            cat("  ", silver("Dimensions:"), " ", 
+                paste(dim(object), collapse=" × "), 
+                " (", green(mem_size), ")", "\n", sep="")
+            
+            # Value Range and Stats
+            cat("\n", bold(yellow("■ Data Properties")), "\n", sep="")
+            cat("  ", silver("Value Range:"), " [", 
+                blue(sprintf("%.2f", val_range[1])), ", ", 
+                blue(sprintf("%.2f", val_range[2])), "]", "\n", sep="")
+            if (n_na > 0) {
+                cat("  ", silver("Missing Values:"), " ", 
+                    red(n_na), " (", 
+                    sprintf("%.1f%%", 100*n_na/length(object)), ")", 
+                    "\n", sep="")
+            }
+            
+            # Spatial Properties
+            cat("\n", bold(yellow("■ Spatial Properties")), "\n", sep="")
+            cat("  ", silver("Spacing:"), " ", 
+                paste(sprintf("%.2f", sp@spacing), collapse=" × "), 
+                "\n", sep="")
+            cat("  ", silver("Origin:"), "  ", 
+                paste(sprintf("%.2f", sp@origin), collapse=" × "), 
+                "\n", sep="")
+            cat("  ", silver("Axes:"), "    ", 
+                green(sp@axes@i@axis), " × ", 
+                green(sp@axes@j@axis), "\n", sep="")
+            
+            # Footer
+            cat("\n", blue("═" = 28), "\n", sep="")
+          })
 
 #' @import assertthat
 #' @keywords internal
@@ -174,29 +344,3 @@ mapToColors <- function (imslice, col = heat.colors(128, alpha = 1), zero_col = 
     imcols
   }
 }
-
-
-#' show a \code{NeuroSlice}
-#' @param object the object
-#' @export
-setMethod(f="show", signature=signature("NeuroSlice"),
-          def=function(object) {
-            sp <- space(object)
-            cat("NeuroSlice\n")
-            cat("  Type           :", class(object), "\n")
-            cat("  Dimension      :", dim(object), "\n")
-            cat("  Spacing        :", paste(paste(signif(sp@spacing[1:(length(sp@spacing)-1)],2), " X ", collapse=" "),
-                                            sp@spacing[length(sp@spacing)], "\n"))
-            cat("  Origin         :", paste(paste(signif(sp@origin[1:(length(sp@origin)-1)],2), " X ", collapse=" "),
-                                            sp@origin[length(sp@origin)], "\n"))
-            cat("  Axes           :", paste(sp@axes@i@axis, sp@axes@j@axis), "\n")
-
-          }
-)
-
-
-
-
-
-
-

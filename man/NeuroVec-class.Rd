@@ -15,13 +15,13 @@ NeuroVec(data, space = NULL, mask = NULL, label = "")
   \item A 4D array
   \item A list of \code{\linkS4class{NeuroVol}} objects
 }
-If a list of NeuroVol objects is provided, the geometric space (\code{NeuroSpace}) 
+If a list of NeuroVol objects is provided, the geometric space (\code{NeuroSpace})
 will be inferred from the constituent volumes, which must all be identical.}
 
-\item{space}{An optional \code{\linkS4class{NeuroSpace}} object defining the spatial 
+\item{space}{An optional \code{\linkS4class{NeuroSpace}} object defining the spatial
 properties of the image. Not required if \code{data} is a list of NeuroVol objects.}
 
-\item{mask}{An optional logical array specifying which voxels to include. If provided, 
+\item{mask}{An optional logical array specifying which voxels to include. If provided,
 a SparseNeuroVec object will be created.}
 
 \item{label}{A character string providing a label for the NeuroVec object. Default is an empty string.}
@@ -38,8 +38,8 @@ This S4 class represents a four-dimensional brain image, which is used to store
 and process time series neuroimaging data such as fMRI or 4D functional
 connectivity maps. The class extends the basic functionality of \code{\linkS4class{NeuroObj}}.
 
-This function constructs a NeuroVec object, which represents a four-dimensional 
-brain image. It can create either a DenseNeuroVec or SparseNeuroVec object 
+This function constructs a NeuroVec object, which represents a four-dimensional
+brain image. It can create either a DenseNeuroVec or SparseNeuroVec object
 depending on the input parameters.
 }
 \details{
@@ -53,7 +53,7 @@ The function performs several operations:
 \itemize{
   \item If \code{data} is a list of NeuroVol objects, it combines them into a single 4D array.
   \item It checks that the dimensions of \code{data} match the provided \code{space}.
-  \item Depending on whether a \code{mask} is provided, it creates either a DenseNeuroVec 
+  \item Depending on whether a \code{mask} is provided, it creates either a DenseNeuroVec
     or a SparseNeuroVec object.
 }
 }
@@ -98,14 +98,14 @@ example_file <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2
 example_4d_image <- read_vec(example_file)
 
 # Create a DenseNeuroVec object
-dense_vec <- NeuroVec(data = example_4d_image@.Data, 
+dense_vec <- NeuroVec(data = example_4d_image@.Data,
                       space = space(example_4d_image))
 print(dense_vec)
 
 # Create a SparseNeuroVec object with a mask
-mask <- array(runif(prod(dim(example_4d_image)[1:3])) > 0.5, 
+mask <- array(runif(prod(dim(example_4d_image)[1:3])) > 0.5,
               dim = dim(example_4d_image)[1:3])
-sparse_vec <- NeuroVec(data = example_4d_image@.Data, 
+sparse_vec <- NeuroVec(data = example_4d_image@.Data,
                        space = space(example_4d_image),
                        mask = mask)
 print(sparse_vec)
@@ -115,7 +115,7 @@ print(sparse_vec)
 \code{\link{NeuroObj-class}} for the parent class.
 \code{\link{DenseNeuroVec-class}} and \code{\link{SparseNeuroVec-class}} for specific implementations.
 
-\code{\link{DenseNeuroVec-class}}, \code{\link{SparseNeuroVec-class}} for the 
+\code{\link{DenseNeuroVec-class}}, \code{\link{SparseNeuroVec-class}} for the
 specific NeuroVec types.
 \code{\link{NeuroVol-class}} for 3D volumetric data.
 \code{\link{NeuroSpace-class}} for details on spatial properties.

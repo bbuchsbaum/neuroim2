@@ -1,6 +1,6 @@
 context("searchlight")
 
-gmask <- system.file("extdata", "global_mask.nii", package="neuroim2")
+gmask <- system.file("extdata", "global_mask2.nii.gz", package="neuroim2")
 gmask_gz <- system.file("extdata", "global_mask2.nii.gz", package="neuroim2")
 
 

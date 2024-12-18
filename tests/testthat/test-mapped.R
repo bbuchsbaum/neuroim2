@@ -114,7 +114,7 @@ test_that("MappedNeuroVec can be indexed like a DenseNeuroVec", {
 test_that("can map a searchlight over a MappedNeuroVec", {
   mask <- drop(gvec[[1]])
 
-  slight <- searchlight_coords(mask, radius=8)[1:100]
+  slight <- searchlight_coords(mask, radius=8, nonzero=TRUE)[1:100]
   res <- slight %>% map(~ mean(series(gvec, .))) %>% flatten_dbl()
   expect_equal(mean(res), 1)
 })

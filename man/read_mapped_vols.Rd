@@ -2,19 +2,19 @@
 % Please edit documentation in R/binary_io.R
 \name{read_mapped_vols}
 \alias{read_mapped_vols}
-\title{Read mapped volumes from a 4D image file}
+\title{Read Mapped Volumes from 4D Image}
 \usage{
 read_mapped_vols(meta, idx)
 }
 \arguments{
-\item{meta}{An object containing metadata about the file to be read.}
+\item{meta}{An object of class \linkS4class{ImageMetadata} containing file metadata}
 
-\item{idx}{A vector of indices specifying which volumes to read.}
+\item{idx}{Integer vector of indices specifying volumes to read}
 }
 \value{
-A matrix of values read from the memory-mapped file.
+A numeric matrix with dimensions [time, voxels]
 }
 \description{
-This function reads volumes of data from a memory-mapped 4D image file.
+Read volume data from a memory-mapped 4D image file.
 }
 \keyword{internal}

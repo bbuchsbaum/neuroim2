@@ -11,34 +11,42 @@ file_matches(x, file_name)
 \S4method{file_matches}{FileFormat,character}(x, file_name)
 }
 \arguments{
-\item{x}{A FileFormat object.}
+\item{x}{A \linkS4class{FileFormat} object specifying the format requirements}
 
-\item{file_name}{A character string representing the file name to be matched.}
+\item{file_name}{A character string specifying the file name to validate}
 }
 \value{
 TRUE for match, FALSE otherwise
 
-A logical value: TRUE if the file matches the format and both header 
-  and data files exist, FALSE otherwise.
+A logical value: \code{TRUE} if the file matches the format and both header 
+  and data files exist, \code{FALSE} otherwise
 }
 \description{
-This method checks if a given file name matches the specified FileFormat,
-verifying the existence of both header and data files.
+Validates whether a file name conforms to the specified FileFormat and verifies
+the existence of both header and data files.
 }
 \details{
-The function performs the following checks:
-1. If the file name matches the header file format, it checks for the existence of the corresponding data file.
-2. If the file name matches the data file format, it checks for the existence of the corresponding header file.
-3. If neither condition is met, it returns FALSE.
+The function performs the following validation steps:
+\enumerate{
+  \item Checks if the file name matches either the header or data format
+  \item Verifies the existence of the corresponding paired file
+  \item Returns \code{FALSE} if either check fails
+}
+
+File names are validated using case-sensitive extension matching.
 }
 \examples{
 \dontrun{
-file_format <- new("FileFormat", header_extension = "hdr", data_extension = "img")
-file_matches(file_format, "brain_scan.hdr")
-file_matches(file_format, "brain_scan.img")
+# Create a FileFormat for ANALYZE format
+fmt <- new("FileFormat", header_extension = "hdr", data_extension = "img")
+
+# Check if files exist and match format
+file_matches(fmt, "brain_scan.hdr")  # TRUE if both .hdr and .img exist
+file_matches(fmt, "brain_scan.nii")  # FALSE for wrong extension
 }
 
 }
 \seealso{
-\code{\link{FileFormat-class}}, \code{\link{header_file_matches}}, \code{\link{data_file_matches}}
+\code{\link{header_file_matches}}, \code{\link{data_file_matches}} for individual
+file type checking
 }

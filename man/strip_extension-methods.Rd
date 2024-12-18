@@ -10,33 +10,39 @@ strip_extension(x, file_name)
 \S4method{strip_extension}{FileFormat,character}(x, file_name)
 }
 \arguments{
-\item{x}{A FileFormat object.}
+\item{x}{A \linkS4class{FileFormat} object specifying the format requirements}
 
-\item{file_name}{A character string representing the file name to be processed.}
+\item{file_name}{A character string specifying the file name to strip the
+extension from}
 }
 \value{
 file_name without extension
 
-A character string representing the file name without the extension.
+A character string representing the file name without the extension
 }
 \description{
-This method removes the file extension from a given file name based on 
-the FileFormat specifications.
+Removes the file extension from a given file name based on the FileFormat
+specifications.
 }
 \details{
 The function performs the following steps:
-1. If the file_name matches the header file format, it removes the header extension.
-2. If the file_name matches the data file format, it removes the data extension.
-3. If the file_name doesn't match either format, it throws an error.
+\enumerate{
+  \item If the file_name matches the header file format, it removes the header
+    extension.
+  \item If the file_name matches the data file format, it removes the data
+    extension.
+  \item If the file_name doesn't match either format, it throws an error.
+}
 }
 \examples{
 \dontrun{
-file_format <- new("FileFormat", header_extension = "hdr", data_extension = "img")
-strip_extension(file_format, "brain_scan.hdr")
-strip_extension(file_format, "brain_scan.img")
+fmt <- new("FileFormat", header_extension = "hdr", data_extension = "img")
+strip_extension(fmt, "brain_scan.hdr")  # Returns "brain_scan"
+strip_extension(fmt, "brain_scan.img")  # Returns "brain_scan"
 }
 
 }
 \seealso{
-\code{\link{FileFormat-class}}, \code{\link{header_file_matches}}, \code{\link{data_file_matches}}
+\code{\link{header_file}}, \code{\link{data_file}} for related file name
+manipulation
 }

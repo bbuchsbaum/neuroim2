@@ -30,50 +30,77 @@
 #' @export
 #' @rdname random_searchlight
 random_searchlight <- function(mask, radius) {
-  assert_that(inherits(mask, "NeuroVol"))
-
-  done <- array(FALSE, dim(mask))
+  assertthat::assert_that(inherits(mask, "NeuroVol"))
 
   mask.idx <- which(mask != 0)
+  grid <- index_to_grid(mask, mask.idx)
 
-  grid <- index_to_grid(mask, as.numeric(mask.idx))
-  hmap <- as.list(mask.idx)
-  names(hmap) <- 1:length(hmap)
-  hmap <- list2env(hmap)
+  # Logical vector tracking remaining voxels
+  remaining <- rep(TRUE, length(mask.idx))
 
+  # Lookup array: maps voxel coords to index in mask.idx
   lookup <- array(0, dim(mask))
-  lookup[mask.idx] <- 1:length(mask.idx)
+  lookup[mask.idx] <- seq_along(mask.idx)
 
-  slist <- list()
+  # Preallocate a result list
+  slist <- vector("list", length(mask.idx))
   counter <- 1
-  len <- length(mask.idx)
-  keys <- ls(hmap,sorted=FALSE)
 
-  while (len > 0) {
-    ## select a center voxel from remaining indices
-    center <- as.integer(sample(keys,1))
+  # Vector of voxel indices that remain
+  remain_indices <- seq_along(mask.idx)
 
-    ## get a searchlight surrounding the key
-    search <- spherical_roi(mask, grid[center,], radius, nonzero=TRUE)
+  while (length(remain_indices) > 0) {
+    # sample a center index from remain_indices
+    sel <- sample.int(length(remain_indices), 1)
+    center_idx <- remain_indices[sel]
+    center_coord <- grid[center_idx, , drop=FALSE]
 
-
+    # Compute spherical ROI
+    search <- spherical_roi(mask, center_coord, radius, nonzero=TRUE)
     vox <- coords(search)
+
+    # If no voxels in ROI, remove center_idx to avoid infinite loop
+    if (nrow(vox) == 0) {
+      # Mark center voxel as used to progress
+      remaining[center_idx] <- FALSE
+      remain_indices <- remain_indices[remaining[remain_indices]]
+      # continue to next iteration without adding to slist
+      next
+    }
+
+    # Lookup voxel indices
     idx <- lookup[vox]
-    ret <- mget(format(idx, scientific=FALSE, trim=TRUE), envir=hmap, ifnotfound=NA)
-    keep <- !is.na(unlist(ret))
+    keep_mask <- remaining[idx]
 
-    search2 <- new("ROIVolWindow", rep(1,sum(keep)), space=space(mask), coords=coords(search)[keep,,drop=FALSE],
-                   center_index=as.integer(center), parent_index=as.integer(search@parent_index))
+    # If no voxels kept, remove at least the center_idx
+    # to ensure progress
+    if (!any(keep_mask)) {
+      remaining[center_idx] <- FALSE
+      remain_indices <- remain_indices[remaining[remain_indices]]
+      next
+    }
 
-    rm(list=format(idx[keep], scientific=FALSE, trim=TRUE),envir=hmap)
+    kept_vox <- vox[keep_mask, , drop=FALSE]
+
+    search2 <- new("ROIVolWindow",
+                   rep(1, sum(keep_mask)),
+                   space=space(mask),
+                   coords=kept_vox,
+                   center_index=as.integer(center_idx),
+                   parent_index=as.integer(search@parent_index))
+
+    # Mark chosen voxels as used
+    remaining[idx[keep_mask]] <- FALSE
+
+    # Update remain_indices to reflect removed voxels
+    remain_indices <- remain_indices[remaining[remain_indices]]
+
     slist[[counter]] <- search2
-    counter <- counter+1
-
-    keys <- ls(hmap,sorted=FALSE)
-    len <- length(keys)
+    counter <- counter + 1
   }
 
-  slist
+  # Trim slist to the actual number of used slots
+  slist[seq_len(counter - 1)]
 }
 
 #
@@ -204,36 +231,55 @@ bootstrap_searchlight <- function(mask, radius=8, iter=100) {
 #' @export
 #' @importFrom dbscan frNN
 #' @rdname searchlight_coords
+#' Create an exhaustive searchlight iterator for voxel coordinates using spherical_roi
+#'
+#' @description
+#' This function generates an exhaustive searchlight iterator that returns voxel
+#' coordinates for each searchlight sphere within the provided mask, using
+#' `spherical_roi` for neighborhood computation. The iterator
+#' visits every non-zero voxel in the mask as a potential center voxel.
+#'
+#' @param mask A \code{\linkS4class{NeuroVol}} object representing the brain mask.
+#' @param radius A numeric value specifying the radius (in mm) of the spherical searchlight.
+#' @param nonzero A logical value indicating whether to include only coordinates
+#'   with nonzero values in the supplied mask. Default is FALSE.
+#' @param cores An integer specifying the number of cores to use for parallel
+#'   computation. Default is 0, which uses a single core.
+#'
+#' @return A \code{deferred_list} object containing matrices of integer-valued
+#'   voxel coordinates, each representing a searchlight region.
+#'
+#' @examples
+#' # Load an example brain mask
+#' mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
+#'
+#' # Generate an exhaustive searchlight iterator with a radius of 6 mm
+#' \dontrun{
+#' searchlights <- searchlight_coords(mask, radius = 6)
+#' }
+#'
+#' @export
 searchlight_coords <- function(mask, radius, nonzero=FALSE, cores=0) {
-  mask.idx <- which(mask != 0)
-
-  grid <- index_to_grid(mask, mask.idx)
-  cds <- index_to_coord(mask, mask.idx)
-
-  #rad <- rflann::RadiusSearch(cds, cds, radius=radius^2,
-  #                            max_neighbour=as.integer((radius+1))^3,
-  #                            build="kdtree", cores=cores, checks=1)
-
-  rad <- dbscan::frNN(cds, eps=radius, cds)
-
-  spmask <- space(mask)
-
-  f <- function(i) {
-    #ind <- rad$indices[[i]]
-    ind <- rad$id[[i]]
-    grid[ind,,drop=FALSE]
+  # Decide which voxels to consider
+  if (nonzero) {
+    mask.idx <- which(mask != 0)
+  } else {
+    mask.idx <- seq_len(prod(dim(mask)))
   }
 
-  #deferred_list(map(seq_along(rad$indices), ~ f))
-  len <- nrow(cds)
-  deflist::deflist(f, len)
+  # Convert voxel indices to coordinates
+  grid <- index_to_grid(mask, mask.idx) # Nx3 integer voxel coords
 
-  #purrr::map(seq_along(rad$indices), function(i) {
-  #    ind <- rad$indices[[i]]
-  #    grid[ind,,drop=FALSE]
-  #})
+  # Define a function to get the spherical neighborhood for a single voxel
+  f <- function(i) {
+    centroid <- grid[i, , drop=FALSE]
+    roi <- spherical_roi(mask, centroid, radius=radius, nonzero=nonzero)
+    coords(roi) # returns an Nx3 matrix of voxel coordinates
+  }
+
+  # Create a deferred_list for lazy evaluation
+  deflist::deflist(f, length(mask.idx))
 }
-
 
 
 #' Create an exhaustive searchlight iterator
@@ -287,7 +333,7 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
       radius = radius,
       nonzero = nonzero
     )
-    
+
     result_list
   }
 }

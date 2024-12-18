@@ -5,6 +5,15 @@ setMethod(f="read_columns", signature=c(x="ColumnReader", column_indices="intege
             x@reader(column_indices)
           })
 
+#' @title Split-Reduce Implementation for Matrix and Integer
+#' @description Implementation of split_reduce for matrix with integer factors.
+#' See \code{\link{split_reduce}} for the generic definition and complete documentation.
+#'
+#' @param x A matrix
+#' @param fac Integer vector for grouping
+#' @param FUN Function to apply to each group
+#' @return Matrix of reduced values
+#' @seealso \code{\link{split_reduce}}
 #' @export
 #' @rdname split_reduce-methods
 setMethod(f="split_reduce", signature=signature(x = "matrix", fac="integer", FUN="function"),
@@ -12,33 +21,33 @@ setMethod(f="split_reduce", signature=signature(x = "matrix", fac="integer", FUN
             callGeneric(x,as.factor(fac), FUN)
           })
 
-#' @export
-#' @rdname split_reduce-methods
-setMethod(f="split_reduce", signature=signature(x = "matrix", fac="integer", FUN="missing"),
-          def=function(x, fac) {
-            callGeneric(x,as.factor(fac))
-          })
-
+#' @title Split-Reduce Implementation for Matrix and Factor
+#' @description Implementation of split_reduce for matrix with factor grouping.
+#' See \code{\link{split_reduce}} for the generic definition and complete documentation.
+#'
+#' @param x A matrix
+#' @param fac Factor for grouping
+#' @param FUN Optional function to apply (defaults to mean if missing)
+#' @return Matrix of reduced values
+#' @seealso \code{\link{split_reduce}}
 #' @export
 #' @rdname split_reduce-methods
 setMethod(f="split_reduce", signature=signature(x = "matrix", fac="factor", FUN="missing"),
           def=function(x, fac) {
-            if (length(fac) != nrow(x)) {
-              stop(paste("x must be same length as factor used for splitting rows"))
-            }
-
-            ind <- split(seq_along(fac), fac)
-            out <- do.call(rbind, lapply(levels(fac), function(lev) {
-              colMeans(x[ind[[lev]],,drop=FALSE])
-            }))
-
-            row.names(out) <- levels(fac)
-            out
+            callGeneric(x,as.factor(fac))
           })
 
+#' @title Split-Reduce Implementation for Matrix and Factor
+#' @description Implementation of split_reduce for matrix with factor grouping.
+#' See \code{\link{split_reduce}} for the generic definition and complete documentation.
+#'
+#' @param x A matrix
+#' @param fac Factor for grouping
+#' @param FUN Function to apply to each group
+#' @return Matrix of reduced values
+#' @seealso \code{\link{split_reduce}}
 #' @export
 #' @rdname split_reduce-methods
-#' @importFrom future.apply future_apply
 setMethod(f="split_reduce", signature=signature(x = "matrix", fac="factor", FUN="function"),
           def=function(x, fac, FUN) {
             if (length(fac) != nrow(x)) {
@@ -47,13 +56,28 @@ setMethod(f="split_reduce", signature=signature(x = "matrix", fac="factor", FUN=
 
             ind <- split(seq_along(fac), fac)
             out <- do.call(rbind, lapply(names(ind), function(lev) {
-              future_apply(x[ind[[lev]],,drop=FALSE], 2, FUN)
+              future.apply::future_apply(x[ind[[lev]],,drop=FALSE], 2, FUN)
             }))
 
             row.names(out) <- levels(fac)
             out
           })
 
+#' @title Split-Reduce Implementation for NeuroVec
+#' @description Implementation of split_reduce for NeuroVec objects.
+#' See \code{\link{split_reduce}} for the generic definition and complete documentation.
+#'
+#' @param x A \linkS4class{NeuroVec} object
+#' @param fac Factor for grouping
+#' @param FUN Function to apply to each group
+#' @return Matrix of reduced values
+#' @details
+#' This method supports two types of splitting:
+#' \itemize{
+#'   \item By voxel: when length(fac) equals number of voxels
+#'   \item By volume: when length(fac) equals number of volumes
+#' }
+#' @seealso \code{\link{split_reduce}}
 #' @export
 #' @rdname split_reduce-methods
 setMethod(f="split_reduce", signature=signature(x = "NeuroVec", fac="factor", FUN="function"),
@@ -83,6 +107,20 @@ setMethod(f="split_reduce", signature=signature(x = "NeuroVec", fac="factor", FU
             }
           })
 
+#' @title Split-Reduce Implementation for NeuroVec
+#' @description Implementation of split_reduce for NeuroVec objects.
+#' See \code{\link{split_reduce}} for the generic definition and complete documentation.
+#'
+#' @param x A \linkS4class{NeuroVec} object
+#' @param fac Factor for grouping
+#' @return Matrix of reduced values
+#' @details
+#' This method supports two types of splitting:
+#' \itemize{
+#'   \item By voxel: when length(fac) equals number of voxels
+#'   \item By volume: when length(fac) equals number of volumes
+#' }
+#' @seealso \code{\link{split_reduce}}
 #' @export
 #' @rdname split_reduce-methods
 setMethod(f="split_reduce", signature=signature(x = "NeuroVec", fac="factor", FUN="missing"),
@@ -112,6 +150,16 @@ setMethod(f="split_reduce", signature=signature(x = "NeuroVec", fac="factor", FU
 
 
 
+#' @title Split-Scale Implementation for Matrix
+#' @description Implementation of split_scale for matrix objects.
+#' See \code{\link{split_scale}} for the generic definition and complete documentation.
+#'
+#' @param x A matrix
+#' @param f Factor for grouping
+#' @param center Logical indicating whether to center
+#' @param scale Logical indicating whether to scale
+#' @return Matrix of scaled values
+#' @seealso \code{\link{split_scale}}
 #' @export
 #' @rdname split_scale-methods
 setMethod(f="split_scale", signature=signature(x = "matrix", f="factor", center="logical", scale="logical"),
@@ -133,6 +181,14 @@ setMethod(f="split_scale", signature=signature(x = "matrix", f="factor", center=
           })
 
 
+#' @title Split-Scale Implementation for Matrix
+#' @description Implementation of split_scale for matrix objects.
+#' See \code{\link{split_scale}} for the generic definition and complete documentation.
+#'
+#' @param x A matrix
+#' @param f Factor for grouping
+#' @return Matrix of scaled values
+#' @seealso \code{\link{split_scale}}
 #' @export
 #' @rdname split_scale-methods
 setMethod(f="split_scale", signature=signature(x = "matrix", f="factor", center="missing", scale="missing"),
@@ -140,13 +196,30 @@ setMethod(f="split_scale", signature=signature(x = "matrix", f="factor", center=
             callGeneric(x,f, TRUE, TRUE)
           })
 
-#' @rdname scale_series-methods
+#' @title Scale-Series Implementation for NeuroVec
+#' @description Implementation of scale_series for NeuroVec objects.
+#' See \code{\link{scale_series}} for the generic definition and complete documentation.
+#'
+#' @param x A \linkS4class{NeuroVec} object
+#' @param center Logical indicating whether to center
+#' @param scale Logical indicating whether to scale
+#' @return Scaled NeuroVec object
+#' @seealso \code{\link{scale_series}}
 #' @export
+#' @rdname scale_series-methods
 setMethod(f="scale_series", signature=signature(x="NeuroVec", center="logical", scale="missing"),
           def=function(x, center, scale) {
             callGeneric(x, center, TRUE)
           })
 
+#' @title Split-Scale Implementation for DenseNeuroVec
+#' @description Implementation of split_scale for DenseNeuroVec objects.
+#' See \code{\link{split_scale}} for the generic definition and complete documentation.
+#'
+#' @param x A \linkS4class{DenseNeuroVec} object
+#' @param f Factor for grouping
+#' @return Scaled DenseNeuroVec object
+#' @seealso \code{\link{split_scale}}
 #' @export
 #' @rdname split_scale-methods
 setMethod(f="split_scale", signature=signature(x = "DenseNeuroVec", f="factor", center="missing", scale="missing"),
@@ -155,6 +228,15 @@ setMethod(f="split_scale", signature=signature(x = "DenseNeuroVec", f="factor", 
 
           })
 
+#' @title Split-Scale Implementation for DenseNeuroVec
+#' @description Implementation of split_scale for DenseNeuroVec objects.
+#' See \code{\link{split_scale}} for the generic definition and complete documentation.
+#'
+#' @param x A \linkS4class{DenseNeuroVec} object
+#' @param f Factor for grouping
+#' @param center Logical indicating whether to center
+#' @return Scaled DenseNeuroVec object
+#' @seealso \code{\link{split_scale}}
 #' @export
 #' @rdname split_scale-methods
 setMethod(f="split_scale", signature=signature(x = "DenseNeuroVec", f="factor", center="logical", scale="missing"),
@@ -163,6 +245,16 @@ setMethod(f="split_scale", signature=signature(x = "DenseNeuroVec", f="factor", 
 
           })
 
+#' @title Split-Scale Implementation for DenseNeuroVec
+#' @description Implementation of split_scale for DenseNeuroVec objects.
+#' See \code{\link{split_scale}} for the generic definition and complete documentation.
+#'
+#' @param x A \linkS4class{DenseNeuroVec} object
+#' @param f Factor for grouping
+#' @param center Logical indicating whether to center
+#' @param scale Logical indicating whether to scale
+#' @return Scaled DenseNeuroVec object
+#' @seealso \code{\link{split_scale}}
 #' @export
 #' @rdname split_scale-methods
 setMethod(f="split_scale", signature=signature(x = "DenseNeuroVec", f="factor", center="logical", scale="logical"),
@@ -172,8 +264,17 @@ setMethod(f="split_scale", signature=signature(x = "DenseNeuroVec", f="factor", 
           })
 
 
-#' @rdname scale_series-methods
+#' @title Scale-Series Implementation for NeuroVec
+#' @description Implementation of scale_series for NeuroVec objects.
+#' See \code{\link{scale_series}} for the generic definition and complete documentation.
+#'
+#' @param x A \linkS4class{NeuroVec} object
+#' @param center Logical indicating whether to center
+#' @param scale Logical indicating whether to scale
+#' @return Scaled NeuroVec object
+#' @seealso \code{\link{scale_series}}
 #' @export
+#' @rdname scale_series-methods
 setMethod(f="scale_series", signature=signature(x="NeuroVec", center="logical", scale="logical"),
           def=function(x, center, scale) {
             M <- as.matrix(x)
@@ -182,16 +283,34 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="logical", 
 
           })
 
-#' @rdname scale_series-methods
+#' @title Scale-Series Implementation for NeuroVec
+#' @description Implementation of scale_series for NeuroVec objects.
+#' See \code{\link{scale_series}} for the generic definition and complete documentation.
+#'
+#' @param x A \linkS4class{NeuroVec} object
+#' @param center Logical indicating whether to center
+#' @param scale Logical indicating whether to scale
+#' @return Scaled NeuroVec object
+#' @seealso \code{\link{scale_series}}
 #' @export
+#' @rdname scale_series-methods
 setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", scale="logical"),
           def=function(x, center, scale) {
             callGeneric(x, TRUE, scale)
           })
 
 
-#' @rdname scale_series-methods
+#' @title Scale-Series Implementation for NeuroVec
+#' @description Implementation of scale_series for NeuroVec objects.
+#' See \code{\link{scale_series}} for the generic definition and complete documentation.
+#'
+#' @param x A \linkS4class{NeuroVec} object
+#' @param center Logical indicating whether to center
+#' @param scale Logical indicating whether to scale
+#' @return Scaled NeuroVec object
+#' @seealso \code{\link{scale_series}}
 #' @export
+#' @rdname scale_series-methods
 setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", scale="missing"),
           def=function(x, center, scale) {
             callGeneric(x, TRUE, TRUE)
@@ -600,6 +719,3 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 #
 #
 # }
-
-
-

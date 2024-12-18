@@ -9,17 +9,24 @@
 MappedNeuroVecSource(file_name)
 }
 \arguments{
-\item{file_name}{A character string specifying the name of the image file to be memory mapped.}
+\item{file_name}{Character string specifying the path to the neuroimaging file.
+Supported formats include NIFTI (.nii) and ANALYZE (.hdr/.img).}
 }
 \value{
-A new instance of class \code{\linkS4class{MappedNeuroVecSource}}.
+A new \code{\linkS4class{MappedNeuroVecSource}} object containing:
+\itemize{
+  \item Meta information about the dataset
+  \item File format details
+  \item Dimensional information
+}
 }
 \description{
 A class used to produce a \code{\linkS4class{MappedNeuroVec}} instance. It encapsulates
 the necessary information to create a memory-mapped representation of a 4D neuroimaging dataset.
 
-This function constructs a MappedNeuroVecSource object, which represents a source
-for memory-mapped neuroimaging data.
+Creates a \code{\linkS4class{MappedNeuroVecSource}} object that manages the memory
+mapping between a neuroimaging file and memory space. This is typically used internally
+by \code{\link{MappedNeuroVec}} but can be created directly for custom access patterns.
 }
 \details{
 MappedNeuroVecSource acts as a factory for MappedNeuroVec objects. While it doesn't
@@ -28,10 +35,16 @@ a memory-mapped representation of the neuroimaging data. This class is typically
 in data loading pipelines where large datasets need to be accessed efficiently without
 loading the entire dataset into memory.
 
-The function performs the following steps:
-1. Reads the header of the specified file using \code{\link{read_header}}.
-2. Checks that the dimensions of the meta information are at least 3D.
-3. Creates and returns a new MappedNeuroVecSource object with the meta information.
+Create a Memory-Mapped Source for Neuroimaging Data
+
+
+The function performs several important checks:
+\itemize{
+  \item Validates file existence and permissions
+  \item Reads and validates header information
+  \item Ensures proper dimensionality (>= 3D)
+  \item Verifies file format compatibility
+}
 }
 \section{Inheritance}{
 
@@ -52,13 +65,20 @@ mapped_source <- new("MappedNeuroVecSource")
 }
 
 \dontrun{
-# Assuming you have a valid neuroimaging file named "brain.nii"
-source <- MappedNeuroVecSource("brain.nii")
+# Create source from NIFTI file
+source <- MappedNeuroVecSource("path/to/fmri.nii")
+
+# Check dimensions
+dim(source@meta_info)
+
+# View header information
+str(source@meta_info)
 }
 
 }
 \seealso{
 \code{\link{MappedNeuroVec-class}} for the resulting memory-mapped 4D neuroimaging data class.
 
-\code{\link{MappedNeuroVec}}, \code{\link{read_header}}
+\code{\link{MappedNeuroVec}} for the main user interface
+\code{\link{read_header}} for header reading details
 }

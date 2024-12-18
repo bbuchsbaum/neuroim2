@@ -9,7 +9,7 @@
 SparseNeuroVol(data, space, indices = NULL, label = "")
 }
 \arguments{
-\item{data}{a numeric vector}
+\item{data}{a numeric vector or ROIVol}
 
 \item{space}{an instance of class \code{\linkS4class{NeuroSpace}}}
 
@@ -59,8 +59,6 @@ bspace <- NeuroSpace(c(64,64,64), spacing=c(1,1,1))
 sparsevol <- SparseNeuroVol(data,bspace,indices=indices)
 densevol <- NeuroVol(data,bspace,indices=indices)
 sum(sparsevol) == sum(densevol)
-
-
 
 }
 \references{

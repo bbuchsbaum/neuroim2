@@ -12,21 +12,62 @@ read_vec(
 )
 }
 \arguments{
-\item{file_name}{The name(s) of the file(s) to load. If more than one file_name is specified, 
-the files are loaded and concatenated.}
+\item{file_name}{The name(s) of the file(s) to load. If multiple files are specified,
+they are loaded and concatenated along the time dimension.}
 
-\item{indices}{The indices of the sub-volumes to load (e.g. if the file is 4-dimensional).}
+\item{indices}{The indices of the sub-volumes to load (e.g. if the file is 4-dimensional).
+Only supported in "normal" mode.}
 
-\item{mask}{A mask defining the spatial elements to load.}
+\item{mask}{A logical mask defining which spatial elements to load. Required for "bigvec" mode
+and optional for other modes.}
 
-\item{mode}{The IO mode which is one of "normal", "mmap", "bigvec", or "filebacked".}
+\item{mode}{The IO mode which is one of:
+* "normal": Standard in-memory loading
+* "mmap": Memory-mapped access (more memory efficient)
+* "bigvec": Optimized for large datasets with masking
+* "filebacked": File-backed storage with on-demand loading}
 }
 \value{
-An \code{\linkS4class{NeuroVec}} object.
+An \code{\linkS4class{NeuroVec}} object representing the loaded volume(s).
 }
 \description{
-This function loads an image volume from a file.
+Loads a neuroimaging volume from one or more files, with support for various input formats
+and memory management strategies.
+}
+\details{
+This function supports multiple file formats:
+* .nii: Standard NIfTI format
+* .nii.gz: Compressed NIfTI (not supported in mmap mode)
+
+Memory management modes:
+* "normal": Loads entire dataset into memory. Best for smaller datasets or when memory
+  is not a constraint.
+* "mmap": Memory-maps the file, providing efficient access for large files without
+  loading entirely into memory. Not available for compressed files.
+* "bigvec": Optimized for large datasets where only a subset of voxels are of interest.
+  Requires a mask to specify which voxels to load.
+* "filebacked": Similar to mmap but with more flexible caching strategies.
 }
 \note{
-Memory-mapping a gzipped file is not currently allowed.
+* Memory-mapping (.mmap mode) is not supported for gzipped files
+* For .lv.h5 and .h5 files, the indices and mask parameters are ignored
+* The bigvec mode requires a mask to be specified
+* When loading multiple files, they must have compatible dimensions
+}
+\examples{
+\dontrun{
+# Load a single NIfTI file
+img <- read_vec("subject01.nii")
+
+# Load multiple volumes and concatenate
+imgs <- read_vec(c("run1.nii", "run2.nii"))
+
+# Memory-mapped loading for large files
+big_img <- read_vec("large_volume.nii", mode="mmap")
+
+# Load masked data for memory efficiency
+mask <- read_vol("brain_mask.nii")
+masked_data <- read_vec("functional.nii", mask=mask, mode="bigvec")
+}
+
 }

@@ -16,12 +16,19 @@
 \S4method{indices}{AbstractSparseNeuroVec}(x)
 }
 \arguments{
-\item{x}{An IndexLookupVol object.}
+\item{x}{An \code{\linkS4class{IndexLookupVol}} object}
 }
 \value{
-An integer vector of indices.
+An integer vector containing the indices of included voxels
 }
 \description{
-This method retrieves the indices stored in an IndexLookupVol object.
+Retrieves the vector of indices that are included in the lookup volume.
+}
+\examples{
+\dontrun{
+ilv <- IndexLookupVol(space, c(1:100))
+idx <- indices(ilv)  # Get included indices
+}
+
 }
 \keyword{internal}

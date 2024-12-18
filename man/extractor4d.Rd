@@ -5,6 +5,7 @@
 \alias{[,ArrayLike4D,matrix,missing,ANY-method}
 \alias{[,ArrayLike4D,numeric,numeric,ANY-method}
 \alias{[,ArrayLike4D,numeric,missing,ANY-method}
+\alias{[,ArrayLike4D,integer,missing,ANY-method}
 \alias{[,ArrayLike4D,missing,missing,ANY-method}
 \alias{[,ArrayLike4D,missing,numeric,ANY-method}
 \title{Array-like access for 4-dimensional data structures}
@@ -14,6 +15,8 @@
 \S4method{[}{ArrayLike4D,numeric,numeric,ANY}(x, i, j, k, m, ..., drop = TRUE)
 
 \S4method{[}{ArrayLike4D,numeric,missing,ANY}(x, i, j, k, m, ..., drop = TRUE)
+
+\S4method{[}{ArrayLike4D,integer,missing,ANY}(x, i, j, k, m, ..., drop = TRUE)
 
 \S4method{[}{ArrayLike4D,missing,missing,ANY}(x, i, j, k, m, ..., drop = TRUE)
 

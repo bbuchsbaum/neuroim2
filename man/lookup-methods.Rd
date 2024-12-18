@@ -10,14 +10,21 @@
 \S4method{lookup}{AbstractSparseNeuroVec,numeric}(x, i)
 }
 \arguments{
-\item{x}{An IndexLookupVol object.}
+\item{x}{An \code{\linkS4class{IndexLookupVol}} object}
 
-\item{i}{A numeric vector of indices to look up.}
+\item{i}{A numeric vector of indices to look up}
 }
 \value{
-A vector of lookup values corresponding to the input indices.
+A vector of lookup values corresponding to the input indices
 }
 \description{
-This method performs a lookup operation on an IndexLookupVol object.
+Performs a lookup operation on an IndexLookupVol object.
+}
+\examples{
+\dontrun{
+ilv <- IndexLookupVol(space, c(1:100))
+lookup(ilv, c(1, 2, 3))  # Look up values for indices 1, 2, and 3
+}
+
 }
 \keyword{internal}

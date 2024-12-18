@@ -3,9 +3,9 @@
 #' Construct a \code{\linkS4class{ClusteredNeuroVol}} instance
 #'
 #' @param mask an instance of class \code{\linkS4class{LogicalNeuroVol}}
-#' @param clusters a vector of clusters ids with length equal to number of nonzero 
+#' @param clusters a vector of clusters ids with length equal to number of nonzero
 #' voxels in mask \code{mask}
-#' @param label_map an optional \code{list} that maps from cluster id to a cluster 
+#' @param label_map an optional \code{list} that maps from cluster id to a cluster
 #' label, e.g. (1 -> "FFA", 2 -> "PPA")
 #' @param label an optional \code{character} string used to label of the volume
 #' @return \code{\linkS4class{ClusteredNeuroVol}} instance
@@ -75,23 +75,99 @@ setAs(from="ClusteredNeuroVol", to="DenseNeuroVol", def=function(from) {
 })
 
 
-#' show a \code{ClusteredNeuroVol}
-#' @param object the object
+
+#' @export
+setAs(from="ClusteredNeuroVol", to="DenseNeuroVol",
+    def=function(from) {
+        if (length(from@clusters) == 0) {
+            stop("Cannot coerce empty ClusteredNeuroVol to DenseNeuroVol")
+        }
+        data <- from@clusters
+        indices <- which(from@mask == TRUE)
+        if (length(indices) != length(data)) {
+            stop("Mismatch between mask indices and cluster data length")
+        }
+        DenseNeuroVol(data, space(from), indices=indices)
+    })
+
+#' Display ClusteredNeuroVol Information
+#'
+#' @param object A \linkS4class{ClusteredNeuroVol} object
 #' @export
 setMethod(f="show", signature=signature("ClusteredNeuroVol"),
-          def=function(object) {
-            sp <- space(object)
-            cat("NeuroVol\n")
-            cat("  Type           :", class(object), "\n")
-            cat("  Dimension      :", dim(object), "\n")
-            cat("  Spacing        :", paste(paste(signif(sp@spacing[1:(length(sp@spacing)-1)],2), " X ", collapse=" "),
-                                            sp@spacing[length(sp@spacing)], "\n"))
-            cat("  Origin         :", paste(paste(signif(sp@origin[1:(length(sp@origin)-1)],2), " X ", collapse=" "),
-                                            sp@origin[length(sp@origin)], "\n"))
-            cat("  Axes           :", paste(sp@axes@i@axis, sp@axes@j@axis,sp@axes@k@axis), "\n")
-            cat("  Num Clusters   :", num_clusters(object))
-          }
+    def=function(object) {
+      sp <- space(object)
+      dims <- dim(object)
+      spacing <- sp@spacing
+      origin <- sp@origin
+      n_clusters <- num_clusters(object)
+      n_voxels <- sum(object@mask)
+
+      # Header
+      cat("\n")
+      cat(crayon::bold(crayon::blue("ClusteredNeuroVol")), "\n")
+      cat(crayon::silver(paste0(rep("═", 60), collapse="")), "\n\n")
+
+      # Type and basic info
+      cat(crayon::yellow(" ▸ Type:          "),
+          crayon::white("Clustered Volume"), "\n")
+
+      # Dimensions section
+      cat(crayon::yellow(" ▸ Dimensions:    "),
+          crayon::white(paste(dims, collapse=" × ")), "\n")
+
+      # Space information
+      cat(crayon::yellow(" ▸ Spacing:       "),
+          crayon::white(paste(signif(spacing, 3), collapse=" × ")), " ",
+          crayon::silver("mm"), "\n")
+
+      cat(crayon::yellow(" ▸ Origin:        "),
+          crayon::white(paste(signif(origin, 3), collapse=" × ")), " ",
+          crayon::silver("mm"), "\n")
+
+      # Anatomical orientation
+      cat(crayon::yellow(" ▸ Orientation:   "),
+          crayon::white(paste(sp@axes@i@axis, sp@axes@j@axis, sp@axes@k@axis,
+                            collapse=" × ")), "\n")
+
+      # Cluster information
+      cat("\n", crayon::bold(crayon::cyan("Cluster Information")), "\n")
+      cat(crayon::silver(paste0(rep("─", 40), collapse="")), "\n")
+
+      cat(crayon::yellow(" ▸ Total Clusters:"),
+          crayon::white(sprintf("%d", n_clusters)), "\n")
+
+      cat(crayon::yellow(" ▸ Active Voxels: "),
+          crayon::white(sprintf("%d", n_voxels)), " ",
+          crayon::silver(sprintf("(%.1f%% of volume)",
+                               100 * n_voxels/prod(dims[1:3]))), "\n")
+
+      # Label information if available
+      if (!is.null(names(object@label_map))) {
+        cat("\n", crayon::bold(crayon::magenta("Region Labels")), "\n")
+        cat(crayon::silver(paste0(rep("─", 40), collapse="")), "\n")
+
+        # Show first few labels with ellipsis if there are more
+        n_show <- min(5, length(object@label_map))
+        label_sample <- head(names(object@label_map), n_show)
+
+        for (i in seq_along(label_sample)) {
+          cat(crayon::yellow(" ▸ "),
+              crayon::white(sprintf("%-20s", label_sample[i])),
+              crayon::silver(sprintf("[%d]", unlist(object@label_map[label_sample[i]]))),
+              "\n")
+        }
+
+        if (length(object@label_map) > n_show) {
+          cat(crayon::silver(sprintf("   ... and %d more regions\n",
+                                   length(object@label_map) - n_show)))
+        }
+      }
+
+      cat("\n")
+    }
 )
+
 
 #' @export
 #' @param type the type of center of mass: one of "center_of_mass" or "medoid"
@@ -126,10 +202,10 @@ setMethod(f="centroids", signature=signature(x="ClusteredNeuroVol"),
 #'   \item Using a ClusteredNeuroVol object: This method uses the pre-defined clusters in the ClusteredNeuroVol object.
 #'   \item Using an integer vector: This method allows for custom cluster assignments.
 #' }
-#' 
+#'
 #' Both methods return a deflist, which is a lazy-loading list of ROIVec objects.
 #'
-#' @seealso 
+#' @seealso
 #' \code{\link{NeuroVec-class}}, \code{\link{ClusteredNeuroVol-class}}, \code{\link{ROIVec-class}}
 #'
 #' @examples
@@ -138,7 +214,7 @@ setMethod(f="centroids", signature=signature(x="ClusteredNeuroVol"),
 #' neuro_vec <- # ... create a NeuroVec object
 #' clustered_vol <- # ... create a ClusteredNeuroVol object
 #' split_result <- split_clusters(neuro_vec, clustered_vol)
-#' 
+#'
 #' # Using integer vector
 #' cluster_assignments <- # ... create an integer vector of cluster assignments
 #' split_result <- split_clusters(neuro_vec, cluster_assignments)
@@ -152,7 +228,7 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="Cluste
               idx <- clusters@cluster_map[[as.character(i)]]
               ROIVec(space(x), index_to_grid(x, as.numeric(idx)), x[idx])
             }
-            
+
             deflist::deflist(f, num_clusters(clusters))
           })
 
@@ -161,15 +237,15 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="Cluste
 setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="integer"),
           def = function(x, clusters) {
             assert_that(length(clusters) == prod(dim(x)[1:3]))
-            
+
             unique_clusters <- sort(unique(clusters))
             unique_clusters <- unique_clusters[unique_clusters != 0]
-            
+
             f <- function(i) {
               idx <- which(clusters == i)
               ROIVec(space(x), index_to_grid(x, idx), x[idx])
             }
-            
+
             deflist::deflist(f, length(unique_clusters))
           })
 
@@ -201,7 +277,7 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="intege
 #' ## locations with a cluster value of 0 are ignored
 #' indices[mask.idx] <- kres$cluster
 #'
-#' ret2 <- vol %>% split_clusters(as.integer(indices)) %>% 
+#' ret2 <- vol %>% split_clusters(as.integer(indices)) %>%
 #' purrr::map_dbl(~ mean(values(.)))
 #' all(ret1 == ret1)
 setMethod(f="split_clusters", signature=signature(x="NeuroVol", clusters="ClusteredNeuroVol"),
@@ -273,6 +349,3 @@ setMethod("as.dense", signature(x="ClusteredNeuroVol"),
           function(x) {
             NeuroVol(as.vector(x@data), space(x@mask))
           })
-
-
-

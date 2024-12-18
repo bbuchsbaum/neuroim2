@@ -11,6 +11,10 @@
 
 \S4method{as.sparse}{DenseNeuroVec,numeric}(x, mask)
 
+\S4method{as.sparse}{DenseNeuroVec,LogicalNeuroVol}(x, mask)
+
+\S4method{as.sparse}{DenseNeuroVec,numeric}(x, mask)
+
 \S4method{as.sparse}{DenseNeuroVol,LogicalNeuroVol}(x, mask)
 
 \S4method{as.sparse}{DenseNeuroVol,numeric}(x, mask)
@@ -24,8 +28,16 @@
 A SparseNeuroVec object resulting from the conversion.
 
 A SparseNeuroVec object resulting from the conversion.
+
+A SparseNeuroVec object resulting from the conversion.
+
+A SparseNeuroVec object resulting from the conversion.
 }
 \description{
+This method converts a DenseNeuroVec object to a sparse representation using a given LogicalNeuroVol mask.
+
+This method converts a DenseNeuroVec object to a sparse representation using a given numeric mask.
+
 This method converts a DenseNeuroVec object to a sparse representation using a given LogicalNeuroVol mask.
 
 This method converts a DenseNeuroVec object to a sparse representation using a given numeric mask.

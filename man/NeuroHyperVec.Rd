@@ -2,22 +2,20 @@
 % Please edit documentation in R/neurohypervec.R
 \name{NeuroHyperVec}
 \alias{NeuroHyperVec}
-\title{Create a NeuroHyperVec instance}
+\title{Constructor for NeuroHyperVec class}
 \usage{
-NeuroHyperVec(...)
+NeuroHyperVec(data, space, mask)
 }
 \arguments{
-\item{...}{One or more instances of type NeuroVec}
+\item{data}{A matrix or three-dimensional array containing the data}
+
+\item{space}{A NeuroSpace object defining the spatial dimensions}
+
+\item{mask}{A mask volume (array, vector, or LogicalNeuroVol)}
 }
 \value{
-A NeuroHyperVec object
+A new NeuroHyperVec object
 }
 \description{
-Create a NeuroHyperVec instance
-}
-\examples{
-space <- NeuroSpace(dim = c(64, 64, 32), origin = c(0, 0, 0), spacing = c(3, 3, 4))
-vec1 <- NeuroVec(data = array(rnorm(64*64*32*100), dim = c(64, 64, 32, 100)), space = space)
-vec2 <- NeuroVec(data = array(rnorm(64*64*32*100), dim = c(64, 64, 32, 100)), space = space)
-hyper_vec <- NeuroHyperVec(vec1, vec2)
+Constructor for NeuroHyperVec class
 }

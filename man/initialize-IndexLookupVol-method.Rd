@@ -7,16 +7,17 @@
 \S4method{initialize}{IndexLookupVol}(.Object, space, indices)
 }
 \arguments{
-\item{.Object}{The IndexLookupVol object to initialize.}
+\item{.Object}{The IndexLookupVol object to initialize}
 
-\item{space}{A NeuroSpace object representing the 3D space.}
+\item{space}{A \code{\linkS4class{NeuroSpace}} object}
 
-\item{indices}{An integer vector of indices.}
+\item{indices}{An integer vector of indices}
 }
 \value{
-An initialized IndexLookupVol object.
+An initialized IndexLookupVol object
 }
 \description{
-This method initializes an IndexLookupVol object with the given space and indices.
+Internal method to initialize an IndexLookupVol object with proper validation
+and mapping setup.
 }
 \keyword{internal}

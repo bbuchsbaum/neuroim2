@@ -2,70 +2,114 @@
 % Please edit documentation in R/neurospace.R
 \name{NeuroSpace}
 \alias{NeuroSpace}
-\title{Create a NeuroSpace Object}
+\title{NeuroSpace: Spatial Reference System for Neuroimaging Data}
 \usage{
 NeuroSpace(dim, spacing = NULL, origin = NULL, axes = NULL, trans = NULL)
 }
 \arguments{
-\item{dim}{An integer vector describing the dimensions of the image grid.}
+\item{dim}{An integer vector specifying the dimensions of the image grid. Must be positive.}
 
-\item{spacing}{A numeric vector representing the real-valued voxel dimensions 
-(e.g., in millimeters). If not provided, defaults to a vector of ones with 
-the same length as `dim`.}
+\item{spacing}{A numeric vector specifying the physical size of each voxel (typically in 
+millimeters). Must be positive. If NULL, defaults to ones.}
 
-\item{origin}{A numeric vector representing the coordinate origin of the image space. 
-If not provided, defaults to a vector of zeros with the same length as `dim`.}
+\item{origin}{A numeric vector specifying the real-world coordinates of the first voxel. 
+If NULL, defaults to zeros.}
 
-\item{axes}{An \code{\linkS4class{AxisSet}} object representing the image axes ordering. 
-If not provided, the default axes are determined based on the NIFTI standard 
-(Left-Posterior-Inferior for 3D, or LEFT_RIGHT and POST_ANT for 2D).}
+\item{axes}{An \code{\linkS4class{AxisSet}} object defining the orientation and ordering 
+of the coordinate axes. If NULL, defaults to standard neurological convention 
+(Left-Posterior-Inferior for 3D).}
 
-\item{trans}{A matrix representing the coordinate transformation associated with 
-the image space. If not provided, a default transformation is constructed based 
-on the spacing and origin.}
+\item{trans}{A transformation matrix mapping voxel indices to world coordinates. If NULL, 
+constructed from spacing and origin.}
 }
 \value{
-An instance of the \code{\linkS4class{NeuroSpace}} class.
+A new \code{NeuroSpace} object with the following slots:
+\itemize{
+  \item \code{dim}: Integer vector of image dimensions
+  \item \code{spacing}: Numeric vector of voxel sizes
+  \item \code{origin}: Numeric vector of world-space origin
+  \item \code{axes}: AxisSet object defining orientation
+  \item \code{trans}: Matrix for voxel-to-world transformation
+  \item \code{inverse}: Matrix for world-to-voxel transformation
+}
 }
 \description{
-This function constructs a NeuroSpace object, which defines the spatial properties
-of a neuroimaging volume, including its dimensions, origin, spacing, axes, and 
-coordinate transformation.
+The \code{NeuroSpace} class defines the spatial properties and coordinate system of 
+neuroimaging data. It encapsulates all information needed to map between voxel indices 
+and real-world coordinates, including dimensions, voxel spacing, origin, axis orientation, 
+and coordinate transformations.
 }
 \details{
-The function performs several checks and computations:
+Spatial Reference System for Neuroimaging Data
+}
+\section{Coordinate Systems}{
+
+NeuroSpace manages two coordinate systems:
 \itemize{
-  \item It ensures that `spacing` and `origin` have appropriate lengths and values.
-  \item If `trans` is not provided, it constructs a default transformation matrix.
-  \item It determines the appropriate axis set if not provided.
-  \item It creates a NeuroSpace object with the specified or computed properties.
+  \item Voxel coordinates: Zero-based indices into the image grid
+  \item World coordinates: Real-world coordinates (typically in millimeters)
 }
 
-The resulting NeuroSpace object encapsulates all the spatial information necessary 
-to interpret and manipulate neuroimaging data.
+The transformation between these systems is defined by:
+\itemize{
+  \item Voxel spacing (physical size of voxels)
+  \item Origin (world coordinates of first voxel)
+  \item Axis orientation (how image axes map to anatomical directions)
 }
-\note{
-Users rarely need to create a new \code{NeuroSpace} instance directly, as it will 
-almost always be created automatically using information stored in an image header. 
-If an existing image object is available, its \code{NeuroSpace} instance can be 
-easily extracted with the \code{space} method.
 }
+
+\section{Validation}{
+
+The constructor performs extensive validation:
+\itemize{
+  \item All dimensions must be positive integers
+  \item All spacing values must be positive
+  \item Origin and spacing must have matching lengths
+  \item Transformation matrix must be invertible
+}
+}
+
 \examples{
-# Create a 3D NeuroSpace object
-bspace_3d <- NeuroSpace(c(64, 64, 64), origin = c(0, 0, 0), spacing = c(2, 2, 2))
-print(bspace_3d)
-cat("Origin:", origin(bspace_3d), "\n")
-cat("Axes:", axes(bspace_3d), "\n")
-cat("Transformation matrix:\n")
-print(trans(bspace_3d))
+# Create a standard 3D space (64x64x40 voxels, 2mm isotropic)
+space_3d <- NeuroSpace(
+  dim = c(64L, 64L, 40L),
+  spacing = c(2, 2, 2),
+  origin = c(-90, -126, -72)
+)
 
-# Create a 2D NeuroSpace object
-bspace_2d <- NeuroSpace(c(128, 128), spacing = c(1.5, 1.5))
-print(bspace_2d)
+# Check properties
+dim(space_3d)           # Image dimensions
+spacing(space_3d)       # Voxel sizes
+origin(space_3d)        # World-space origin
 
+# Create a 2D slice space
+space_2d <- NeuroSpace(
+  dim = c(128L, 128L),
+  spacing = c(1.5, 1.5),
+  origin = c(-96, -96)
+)
+
+# Convert between coordinate systems
+world_coords <- c(0, 0, 0)
+vox_idx <- coord_to_index(space_3d, world_coords)
+back_to_world <- index_to_coord(space_3d, vox_idx)
+
+}
+\references{
+For details on neuroimaging coordinate systems:
+\itemize{
+  \item Brett, M., Johnsrude, I. S., & Owen, A. M. (2002). 
+    The problem of functional localization in the human brain. 
+    Nature Reviews Neuroscience, 3(3), 243-249.
+  \item Evans, A. C., et al. (1993). 3D statistical neuroanatomical models 
+    from 305 MRI volumes. Nuclear Science Symposium and Medical Imaging Conference.
+}
 }
 \seealso{
-\code{\link{AxisSet-class}} for details on axis specifications.
-\code{\link{NeuroVol-class}} for volumetric data using NeuroSpace.
-\code{\link{space}} for extracting NeuroSpace from existing objects.
+\itemize{
+  \item \code{\link{AxisSet}} for axis orientation specification
+  \item \code{\link{coord_to_index}} for coordinate conversion
+  \item \code{\link{index_to_coord}} for inverse coordinate conversion
+  \item \code{\link{NeuroObj}} for objects using NeuroSpace
+}
 }

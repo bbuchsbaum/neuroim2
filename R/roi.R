@@ -184,7 +184,7 @@ square_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE, fixdi
   center_index <- which(colSums(apply(grid, 1, "==", centroid)) == 3)
   parent_index <- grid_to_index(bvol, grid[center_index,])
   ### add central voxel
-  new("ROIVolWindow", space=space(bvol), coords = grid, center_index=center_index, parent_index=parent_index,vals[keep])
+  new("ROIVolWindow", space=space(bvol), coords = grid, center_index=center_index, parent_index=as.integer(parent_index),vals[keep])
 
 }
 
@@ -240,7 +240,7 @@ cuboid_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE) {
   center_index <- which(colSums(apply(grid, 1, "==", centroid)) == 3)
   parent_index <- grid_to_index(bvol, grid[center_index,])
 
-  new("ROIVolWindow", vals[keep], space=space(bvol), coords = grid, center_index=center_index, parent_index=parent_index)
+  new("ROIVolWindow", vals[keep], space=space(bvol), coords = grid, center_index=center_index, parent_index=as.integer(parent_index))
 
 }
 
@@ -319,27 +319,40 @@ make_spherical_grid <- function(bvol, centroid, radius, use_cpp=TRUE) {
 #'  vox <- coord_to_grid(sp1, c(5, 5, 5))
 #'  cube <- spherical_roi(sp1, vox, 3.5)
 #' @export
-spherical_roi <- function (bvol, centroid, radius, fill=NULL, nonzero=FALSE, use_cpp=TRUE) {
+spherical_roi <- function(bvol, centroid, radius, fill=NULL, nonzero=FALSE, use_cpp=TRUE) {
+  # If centroid is provided as a 1x3 matrix, drop to vector
   if (is.matrix(centroid)) {
-    assertthat::assert_that(ncol(centroid == 3) & nrow(centroid) == 1)
+    assertthat::assert_that(ncol(centroid) == 3 & nrow(centroid) == 1)
     centroid <- drop(centroid)
   }
 
   vdim <- dim(bvol)
-
   assertthat::assert_that(length(centroid) == 3)
-  assertthat::assert_that(centroid[1] <= vdim[1] && centroid[2] <= vdim[2] && centroid[3] <= vdim[3])
   assertthat::assert_that(all(centroid > 0))
+  assertthat::assert_that(centroid[1] <= vdim[1] && centroid[2] <= vdim[2] && centroid[3] <= vdim[3])
 
   if (is.null(fill) && is(bvol, "NeuroSpace")) {
-    fill = 1
+    fill <- 1
   }
 
   bspace <- space(bvol)
-  vspacing <- spacing(bvol)
+  # make_spherical_grid returns zero-based coords
+  grid <- make_spherical_grid(bvol, as.integer(centroid), radius, use_cpp=use_cpp)
 
-  centroid <- as.integer(centroid)
-  grid <- make_spherical_grid(bvol, centroid, radius, use_cpp=use_cpp)
+  # If no voxels returned, return an empty ROIVolWindow
+  if (nrow(grid) == 0) {
+    return(new("ROIVolWindow",
+               numeric(0),
+               space=bspace,
+               coords=matrix(ncol=3, nrow=0),
+               center_index=integer(0),
+               parent_index=as.integer(NA)))
+  }
+
+  # Convert to 1-based indexing
+  grid <- grid + 1L
+  # Sort for consistency
+  grid <- grid[order(grid[,1], grid[,2], grid[,3]), , drop=FALSE]
 
   vals <- if (!is.null(fill)) {
     rep(fill, nrow(grid))
@@ -349,16 +362,38 @@ spherical_roi <- function (bvol, centroid, radius, fill=NULL, nonzero=FALSE, use
 
   if (nonzero) {
     keep <- vals != 0
-    grid <- grid[keep, ,drop=FALSE]
-    center_index <- which(colSums(apply(grid, 1, "==", centroid)) == 3)
-    parent_index <- grid_to_index(bvol, grid[center_index,])
-    new("ROIVolWindow", vals[keep], space=bspace, coords = grid, center_index=center_index, parent_index=parent_index)
-  } else {
-    center_index <- which(colSums(apply(grid, 1, "==", centroid)) == 3)
-    parent_index <- grid_to_index(bvol, grid[center_index,])
-    new("ROIVolWindow", vals, space=bspace, coords = grid,center_index=center_index, parent_index=parent_index)
+    grid <- grid[keep, , drop=FALSE]
+    vals <- vals[keep]
+
+    # If filtering leaves no voxels, return empty
+    if (nrow(grid) == 0) {
+      return(new("ROIVolWindow",
+                 numeric(0),
+                 space=bspace,
+                 coords=matrix(ncol=3, nrow=0),
+                 center_index=integer(0),
+                 parent_index=as.integer(NA)))
+    }
   }
 
+  # Find the center voxel in the grid
+  # Compare each row in grid to centroid
+  # If grid is non-empty, this is safe
+  match_count <- rowSums(grid == matrix(centroid, nrow(grid), 3, byrow=TRUE))
+  center_index <- which(match_count == 3)
+  if (length(center_index) == 0) {
+    # No exact match found, choose first voxel or handle gracefully
+    center_index <- 1L
+  }
+
+  parent_index <- grid_to_index(bvol, grid[center_index, , drop=FALSE])
+
+  new("ROIVolWindow",
+      vals,
+      space=bspace,
+      coords=grid,
+      center_index = as.integer(center_index),
+      parent_index = as.integer(parent_index))
 }
 
 # spherical_basis <- function(bvol, coord, kernel, weight=1) {
@@ -563,7 +598,6 @@ setMethod(f="coords", signature=signature(x="ROICoords"),
 
 
 #' @export
-#' @rdname length-methods
 setMethod(f="length", signature=signature(x="ROIVol"),
           function(x) {
             nrow(x@coords)
@@ -656,10 +690,10 @@ Kernel <- function(kerndim, vdim, FUN=dnorm, ...) {
   voxel.ind <- as.matrix(do.call("expand.grid", grid.vec))
 
   # fractional voxel locations so that the location of a voxel coordinate is centered within the voxel
-  cvoxel.ind <- t(apply(voxel.ind, 1, function(vals) sign(vals)* ifelse(vals == 0, 0, abs(vals)-.5)))
+  cvoxel.ind <- t(t(voxel.ind) * vdim)
 
   ## the coordinates ofthe voxels (i.e. after multiplying by pixel dims)
-  coords <- t(apply(cvoxel.ind, 1, function(v) (v * vdim)))
+  coords <- t(apply(cvoxel.ind, 1, function(vals) sign(vals)* ifelse(vals == 0, 0, abs(vals)-.5)))
 
   ## distance of coordinate from kernel center
   coord.dist <- apply(coords, 1, .distance, c(0,0,0))
@@ -765,7 +799,7 @@ setMethod(f="voxels", signature=signature(x="Kernel"),
 #' @examples
 #' # Create a NeuroSpace object
 #' sp1 <- NeuroSpace(c(10,10,10), c(1,2,3))
-#' 
+#'
 #' # Create multiple ROIs centered at different voxel coordinates
 #' centroids <- matrix(c(5,5,5, 3,3,3, 7,7,7), ncol=3, byrow=TRUE)
 #' rois <- spherical_roi_set(sp1, centroids, 3.5)
@@ -775,88 +809,99 @@ setMethod(f="voxels", signature=signature(x="Kernel"),
 #'
 #' @export
 spherical_roi_set <- function(bvol, centroids, radius, fill=NULL, nonzero=FALSE) {
-  if (!is.matrix(centroids)) {
-    stop("centroids must be a matrix with 3 columns")
+  # Pre-allocate result list
+  n <- nrow(centroids)
+  result_list <- vector("list", n)
+
+  # Just loop and call spherical_roi() for each centroid
+  for (i in seq_len(n)) {
+    result_list[[i]] <- spherical_roi(
+      bvol = bvol,
+      centroid = centroids[i,],
+      radius = radius,
+      fill = if (!is.null(fill)) { if (length(fill) == 1) fill else fill[i] } else NULL,
+      nonzero = nonzero,
+      use_cpp = TRUE
+    )
   }
-  if (ncol(centroids) != 3) {
-    stop("centroids must have exactly 3 columns (i,j,k coordinates)")
-  }
-  
-  # Get spacing and dimensions from bvol
-  bspace <- space(bvol)
-  vspacing <- spacing(bvol)
-  vdim <- dim(bvol)
-  
-  # Set default fill if needed
-  if (is.null(fill) && is(bvol, "NeuroSpace")) {
-    fill <- 1
-  }
-  
-  # Validate fill if provided
-  if (!is.null(fill)) {
-    if (length(fill) != 1 && length(fill) != nrow(centroids)) {
-      stop("fill must be either length 1 or match the number of ROIs")
-    }
-  }
-  
-  # Get all sphere coordinates in bulk
-  sphere_coords_list <- local_spheres(
-    centers = centroids,
-    radius = radius,
-    spacing = vspacing,
-    dim = vdim
-  )
-  
-  # Create list of ROIVolWindow objects
-  result_list <- vector("list", nrow(centroids))
-  
-  for (i in seq_len(nrow(centroids))) {
-    sphere_coords <- sphere_coords_list[[i]]
-    
-    # Convert sphere_coords to integer matrix if it isn't already
-    sphere_coords <- as.matrix(sphere_coords)
-    mode(sphere_coords) <- "integer"
-    
-    # Use the space object's grid_to_index method
-    sphere_idx <- grid_to_index(bspace, sphere_coords)
-    
-    # Filter by mask if nonzero=TRUE
-    if (nonzero) {
-      keep <- bvol[sphere_idx] != 0
-      sphere_coords <- sphere_coords[keep, , drop=FALSE]
-      sphere_idx <- sphere_idx[keep]
-    }
-    
-    # Get fill value for this ROI
-    roi_fill <- if (!is.null(fill)) {
-      if (length(fill) == 1) fill else fill[i]
-    } else {
-      as.numeric(bvol[sphere_coords])
-    }
-    
-    # Create ROIVolWindow with proper center_index
-    center_coords <- matrix(centroids[i,], ncol=3)
-    mode(center_coords) <- "integer"
-    parent_idx <- grid_to_index(bspace, center_coords)[1]
-    
-    # Find center_index in sphere_coords
-    center_index <- which(
-      sphere_coords[,1] == centroids[i,1] & 
-      sphere_coords[,2] == centroids[i,2] & 
-      sphere_coords[,3] == centroids[i,3]
-    )[1]
-    
-    if (is.na(center_index)) center_index <- 1L
-    
-    result_list[[i]] <- new("ROIVolWindow",
-                           roi_fill,
-                           space=bspace,
-                           coords=sphere_coords,
-                           center_index=as.integer(center_index),
-                           parent_index=as.integer(parent_idx))
-  }
-  
+
   result_list
 }
 
-
+# spherical_roi_set <- function(bvol, centroids, radius, fill=NULL, nonzero=FALSE) {
+#   if (!is.matrix(centroids)) {
+#     stop("centroids must be a matrix with 3 columns")
+#   }
+#   if (ncol(centroids) != 3) {
+#     stop("centroids must have exactly 3 columns (i,j,k coordinates)")
+#   }
+#
+#   bspace <- space(bvol)
+#   vspacing <- spacing(bvol)
+#   vdim <- dim(bvol)
+#
+#   if (is.null(fill) && is(bvol, "NeuroSpace")) {
+#     fill <- 1
+#   }
+#
+#   if (!is.null(fill)) {
+#     if (length(fill) != 1 && length(fill) != nrow(centroids)) {
+#       stop("fill must be either length 1 or match the number of ROIs")
+#     }
+#   }
+#
+#   # Call local_spheres returning zero-based coords
+#   sphere_coords_list <- local_spheres(
+#     centers = centroids,
+#     radius = radius,
+#     spacing = vspacing,
+#     dim = vdim
+#   )
+#
+#   result_list <- vector("list", nrow(centroids))
+#
+#   for (i in seq_len(nrow(centroids))) {
+#     sphere_coords <- sphere_coords_list[[i]]
+#
+#     # Convert to integer and now adjust +1 to move from zero-based to one-based
+#     sphere_coords <- as.matrix(sphere_coords)
+#     mode(sphere_coords) <- "integer"
+#     sphere_coords <- sphere_coords + 1L
+#
+#     sphere_idx <- grid_to_index(bspace, sphere_coords)
+#
+#     if (nonzero) {
+#       keep <- bvol[sphere_idx] != 0
+#       sphere_coords <- sphere_coords[keep, , drop=FALSE]
+#       sphere_idx <- sphere_idx[keep]
+#     }
+#
+#     roi_fill <- if (!is.null(fill)) {
+#       if (length(fill) == 1) fill else fill[i]
+#     } else {
+#       as.numeric(bvol[sphere_coords])
+#     }
+#
+#     # Center index calculation remains the same
+#     center_coords <- matrix(centroids[i,], ncol=3)
+#     mode(center_coords) <- "integer"
+#     parent_idx <- grid_to_index(bspace, center_coords)[1]
+#
+#     center_index <- which(
+#       sphere_coords[,1] == centroids[i,1] &
+#         sphere_coords[,2] == centroids[i,2] &
+#         sphere_coords[,3] == centroids[i,3]
+#     )[1]
+#
+#     if (is.na(center_index)) center_index <- 1L
+#
+#     result_list[[i]] <- new("ROIVolWindow",
+#                             roi_fill,
+#                             space=bspace,
+#                             coords=sphere_coords,
+#                             center_index=as.integer(center_index),
+#                             parent_index=as.integer(parent_idx))
+#   }
+#
+#   result_list
+# }
