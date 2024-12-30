@@ -68,8 +68,7 @@ setGeneric(name="values", def=function(x, ...) standardGeneric("values"))
 #' @param x a data source.
 #' @param i a vector of indices.
 #' @param ... additional arguments to be passed to methods.
-#' @keywords internal
-#' @noRd
+#' @export
 setGeneric(name="linear_access", def=function(x, i, ...) standardGeneric("linear_access"))
 
 
@@ -85,8 +84,7 @@ setGeneric(name="linear_access", def=function(x, i, ...) standardGeneric("linear
 #' @param i an index matrix specifying the space-time coordinates.
 #' @param ... additional arguments to be passed to methods.
 #' @rdname matricized_access-methods
-#' @keywords internal
-#' @noRd
+#' @export
 setGeneric(name="matricized_access", def=function(x, i, ...) standardGeneric("matricized_access"))
 
 

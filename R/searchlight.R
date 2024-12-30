@@ -202,35 +202,7 @@ bootstrap_searchlight <- function(mask, radius=8, iter=100) {
   deflist::deflist(f, iter)
 }
 
-#' Create an exhaustive searchlight iterator for voxel coordinates
-#'
-#' @description
-#' This function generates an exhaustive searchlight iterator that returns voxel
-#' coordinates for each searchlight sphere within the provided mask. The iterator
-#' visits every non-zero voxel in the mask as a potential center voxel.
-#'
-#' @param mask A \code{\linkS4class{NeuroVol}} object representing the brain mask.
-#' @param radius A numeric value specifying the radius (in mm) of the spherical searchlight.
-#' @param nonzero A logical value indicating whether to include only coordinates
-#'   with nonzero values in the supplied mask. Default is FALSE.
-#' @param cores An integer specifying the number of cores to use for parallel
-#'   computation. Default is 0, which uses a single core.
-#'
-#' @return A \code{deferred_list} object containing matrices of integer-valued
-#'   voxel coordinates, each representing a searchlight region.
-#'
-#' @examples
-#' # Load an example brain mask
-#' mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
-#'
-#' # Generate an exhaustive searchlight iterator with a radius of 6 mm
-#' \dontrun{
-#' searchlights <- searchlight_coords(mask, radius = 6)
-#' }
-#'
-#' @export
-#' @importFrom dbscan frNN
-#' @rdname searchlight_coords
+
 #' Create an exhaustive searchlight iterator for voxel coordinates using spherical_roi
 #'
 #' @description
