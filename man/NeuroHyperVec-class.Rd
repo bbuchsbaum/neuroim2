@@ -5,7 +5,7 @@
 \alias{NeuroHyperVec-class}
 \title{NeuroHyperVec Class}
 \description{
-A class representing a five-dimensional brain image, where the first three dimensions are spatial, 
+A class representing a five-dimensional brain image, where the first three dimensions are spatial,
 the fourth dimension is typically time or trials, and the fifth dimension represents features within a trial.
 
 The \code{NeuroHyperVec} class provides an efficient container for five-dimensional

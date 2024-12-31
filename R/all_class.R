@@ -9,8 +9,13 @@ setOldClass("environment")
 setOldClass("mmap")
 #setOldClass("FBM")
 
+#' @export
 setClass("ArrayLike5D")
+
+#' @export
 setClass("ArrayLike4D")
+
+#' @export
 setClass("ArrayLike3D")
 
 #' NamedAxis
@@ -998,7 +1003,7 @@ setClass("SparseNeuroVec",
 #' NeuroHyperVec Class
 #'
 #' @description
-#' A class representing a five-dimensional brain image, where the first three dimensions are spatial, 
+#' A class representing a five-dimensional brain image, where the first three dimensions are spatial,
 #' the fourth dimension is typically time or trials, and the fifth dimension represents features within a trial.
 #'
 #' @slot mask An object of class \code{\linkS4class{LogicalNeuroVol}} defining the sparse spatial domain of the brain image.
@@ -1022,12 +1027,12 @@ setClass(
     if (!is.array(object@data) || length(dim(object@data)) != 3) {
       return("Data must be a 3D array with dimensions [features x trials x voxels]")
     }
-    
+
     # Get expected dimensions
     num_voxels <- sum(object@mask@.Data)
     num_trials <- dim(object@space)[4]
     num_features <- dim(object@space)[5]
-    
+
     # Validate array dimensions
     expected_dims <- c(num_features, num_trials, num_voxels)
     if (!identical(dim(object@data), expected_dims)) {
@@ -1036,18 +1041,18 @@ setClass(
         paste(dim(object@data), collapse=" x "),
         num_features, num_trials, num_voxels))
     }
-    
+
     # Validate that mask is consistent with spatial dimensions
     mask_dims <- dim(object@mask)
     if (length(mask_dims) != 3) {
       return("Mask must be a 3D volume")
     }
-    
+
     # Validate lookup_map
     if (length(object@lookup_map) != prod(dim(object@mask))) {
       return("lookup_map length must match the total number of voxels in the mask")
     }
-    
+
     TRUE
   }
 )
