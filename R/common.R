@@ -504,7 +504,7 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
   } else if (data_type == "FLOAT") {
     return(16)
   } else if (data_type == "DOUBLE") {
-    return(32)
+    return(64)
   } else {
     stop(paste("getDataCode: unsupported data type: ", data_type))
   }
@@ -584,9 +584,44 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
   return(extensions)
 }
 
-#' @keywords internal
-#' @noRd
-.matrixToQuatern <- function(mat) {
+#' Convert a Transformation Matrix to a Quaternion Representation
+#'
+#' @description
+#' Extracts the rotation and scaling components from a 3x3 (or 4x4) transformation
+#' matrix, normalizes them, and computes the corresponding quaternion parameters
+#' and a sign factor (`qfac`) indicating whether the determinant is negative.
+#'
+#' @details
+#' This function first checks and corrects for zero-length axes in the upper-left
+#' corner of the matrix, then normalizes each column to extract the pure rotation.
+#' If the determinant of the rotation submatrix is negative, the \code{qfac} is set
+#' to \code{-1}, and the third column is negated. Finally, the quaternion parameters
+#' (\eqn{a, b, c, d}) are computed following standard NIfTI-1 conventions for
+#' representing the rotation in 3D.
+#'
+#' @param mat A numeric matrix with at least the top-left 3x3 portion containing
+#'   rotation/scaling. Often a 4x4 affine transform, but only the 3x3 top-left
+#'   submatrix is used in practice.
+#'
+#' @return A named \code{list} with two elements:
+#'   \describe{
+#'     \item{\code{quaternion}}{A numeric vector of length 3, \eqn{(b, c, d)},
+#'       which—together with \eqn{a} derived internally—represents the rotation.}
+#'     \item{\code{qfac}}{Either \code{+1} or \code{-1}, indicating whether the
+#'       determinant of the rotation submatrix is positive or negative, respectively.}
+#'   }
+#'
+#' @seealso
+#' \code{\link{quaternToMatrix}} for the inverse operation, converting
+#' quaternion parameters back to a transform matrix.
+#'
+#' @references
+#' - Cox RW. *Analysis of Functional NeuroImages* (AFNI) and NIfTI-1 quaternion
+#'   conventions. \url{https://afni.nimh.nih.gov}
+#' - The official NIfTI-1 specification: \url{https://nifti.nimh.nih.gov}
+#'
+#' @export
+matrixToQuatern <- function(mat) {
   xd <- sqrt(drop(crossprod(mat[1:3,1])))
   yd <- sqrt(drop(crossprod(mat[1:3,2])))
   zd <- sqrt(drop(crossprod(mat[1:3,3])))
@@ -651,9 +686,40 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 }
 
 
-#' @keywords internal
-#' @noRd
-.quaternToMatrix <- function(quat, origin, stepSize, qfac) {
+#' Convert Quaternion Parameters to a Transformation Matrix
+#'
+#' @description
+#' Given a quaternion \code{(b, c, d)}, a scalar offset (origin), voxel step sizes,
+#' and the \code{qfac} sign, reconstructs a 4x4 affine matrix representing rotation,
+#' scaling, and translation as used in NIfTI-1.
+#'
+#' @details
+#' This function uses the quaternion formalism common in neuroimaging, adding the
+#' offset (translation) into the 4th column, and applying the voxel sizes along
+#' each axis. If \code{qfac} is \code{-1}, the \eqn{z} scale is negated. The
+#' resulting 4x4 matrix is typically used as an affine transform for voxel-to-world
+#' coordinate mapping.
+#'
+#' @param quat A numeric vector of length 3 containing the quaternion parameters
+#'   \eqn{(b, c, d)}. The scalar part \eqn{a} is computed internally.
+#' @param origin A numeric vector of length 3 specifying the translation components
+#'   (often the real-space origin or offset).
+#' @param stepSize A numeric vector of length 3 giving the voxel dimensions along
+#'   each axis (e.g., \code{(dx, dy, dz)}).
+#' @param qfac Either \code{+1} or \code{-1}, indicating the sign from the
+#'   determinant check in \code{\link{matrixToQuatern}}.
+#'
+#' @return A 4x4 numeric affine transformation matrix. The top-left 3x3 submatrix
+#'   encodes rotation and scaling, and the 4th column encodes translation.
+#'
+#' @seealso
+#' \code{\link{matrixToQuatern}} for converting a matrix back to quaternion form.
+#'
+#' @references
+#' - NIfTI-1 specification for quaternions: \url{https://nifti.nimh.nih.gov}
+#'
+#' @export
+quaternToMatrix <- function(quat, origin, stepSize, qfac) {
   mat <- matrix(0, 4,4)
   mat[4,] <- c(0,0,0,1)
 

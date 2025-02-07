@@ -127,4 +127,44 @@ test_that("can use a MappedNeuroVec as elements in a NeuroVecSeq", {
 
 })
 
+test_that("series() works when NeuroVecSeq has SparseNeuroVec", {
+  # 1) Read a reference dense vec
+  dense_vec <- read_vec(gmask5)  # this is your 4D reference data
+
+  # 2) Create a mask and re-read the same data => yields SparseNeuroVec
+  mvol <- read_vol(mask)
+  sparse_vec <- read_vec(gmask5, mask = as.logical(mvol))  # now a SparseNeuroVec
+
+  # 3) Build a NeuroVecSeq from repeated sparse vectors
+  s1 <- sparse_vec
+  s2 <- sparse_vec
+  s3 <- sparse_vec
+  seq_sparse <- NeuroVecSeq(s1, s2, s3)
+
+  # 4) Build a single 'concat' version as reference
+  concat_sparse <- concat(s1, s2, s3)
+
+  # Basic dimension checks
+  expect_equal(dim(seq_sparse), dim(concat_sparse))
+  expect_equal(space(seq_sparse), space(concat_sparse))
+
+  # 5) Test random voxel indices in 'series'
+  set.seed(123)
+  idx <- sample(seq_len(prod(dim(concat_sparse)[1:3])), 25)  # 25 random voxel indices
+
+  mat_seq <- series(seq_sparse, idx)
+  mat_con <- series(concat_sparse, idx)
+  expect_equal(dim(mat_seq), dim(mat_con))
+  expect_equal(mat_seq, mat_con)
+
+  # 6) Check single-voxel extraction with drop=TRUE => should yield a time vector
+  vox <- idx[1]  # pick one voxel
+  vec_seq <- series(seq_sparse, vox, drop=TRUE)
+  vec_con <- series(concat_sparse, vox, drop=TRUE)
+
+  expect_true(is.numeric(vec_seq) && is.vector(vec_seq))
+  expect_equal(length(vec_seq), dim(concat_sparse)[4])
+  expect_equal(vec_seq, vec_con)
+})
+
 

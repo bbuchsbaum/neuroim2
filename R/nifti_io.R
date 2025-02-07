@@ -54,8 +54,44 @@ write_nifti_volume <- function(vol, file_name, data_type="FLOAT") {
 }
 
 
-#' @keywords internal
-#' @noRd
+#' Construct a Minimal NIfTI-1 Header from a NeuroVol
+#'
+#' @description
+#' Given a \code{\link[neuroim2]{NeuroVol}} object (or similar), this function
+#' builds a basic NIfTI-1 header structure, populating essential fields such as
+#' \code{dim}, \code{pixdim}, \code{datatype}, the affine transform, and the
+#' quaternion parameters.
+#'
+#' @details
+#' This is a convenience function that calls \code{\link{createNIfTIHeader}}
+#' first, then updates the fields (dimensions, \code{pixdim}, orientation, etc.)
+#' based on the \code{vol} argument. The voxel offset is set to 352 bytes, and
+#' the quaternion is derived from the transform matrix via
+#' \code{\link{matrixToQuatern}}.
+#'
+#' Note: This function primarily sets up a minimal header suitable for writing
+#' standard single-file NIfTI-1. If you need a more comprehensive or advanced
+#' usage, consider manually editing the returned list.
+#'
+#' @param vol A \code{\link[neuroim2]{NeuroVol}} (or 3D array-like) specifying
+#'   dimensions, spacing, and affine transform.
+#' @param file_name A character string for the file name (used within the header
+#'   but not necessarily to write data).
+#' @param oneFile Logical; if \code{TRUE}, sets the NIfTI magic to \code{"n+1"},
+#'   implying a single-file format (\code{.nii}). If \code{FALSE}, uses
+#'   \code{"ni1"} (header+image).
+#' @param data_type Character specifying the data representation, e.g. \code{"FLOAT"},
+#'   \code{"DOUBLE"}. The internal code picks an integer NIfTI code.
+#'
+#' @return A \code{list} representing the NIfTI-1 header fields, containing
+#'   elements like \code{dimensions}, \code{pixdim}, \code{datatype}, \code{qform},
+#'   \code{quaternion}, \code{qfac}, etc. This can be passed to other
+#'   functions that write or manipulate the header.
+#'
+#' @seealso
+#' \code{\link{createNIfTIHeader}} for the base constructor of an empty NIfTI header.
+#'
+#' @export
 as_nifti_header <- function(vol, file_name, oneFile=TRUE, data_type="FLOAT") {
 		hd <- createNIfTIHeader(oneFile=oneFile, file_name=file_name)
 		hd$file_name <- file_name
@@ -81,7 +117,7 @@ as_nifti_header <- function(vol, file_name, oneFile=TRUE, data_type="FLOAT") {
 		hd$qform <- tmat
 		hd$sform <- tmat
 
-		quat1 <- .matrixToQuatern(tmat)
+		quat1 <- matrixToQuatern(tmat)
 		hd$quaternion <- quat1$quaternion
 		hd$qfac <- quat1$qfac
 		hd$pixdim[1] <- hd$qfac
@@ -90,8 +126,34 @@ as_nifti_header <- function(vol, file_name, oneFile=TRUE, data_type="FLOAT") {
 }
 
 
-#' @keywords internal
-#' @noRd
+#' Create an Empty NIfTI-1 Header List
+#'
+#' @description
+#' Initializes a list of fields following the NIfTI-1 specification with default
+#' or placeholder values. Users typically call this internally via
+#' \code{\link{as_nifti_header}} rather than using directly.
+#'
+#' @details
+#' This function sets up the skeleton of a NIfTI-1 header, including fields for
+#' \code{diminfo}, \code{pixdim}, \code{qform_code}, \code{magic}, etc. Most fields
+#' are initialized to zero, empty characters, or standard placeholders. The
+#' \code{oneFile} argument controls whether \code{"n+1"} or \code{"ni1"} is used
+#' for the \code{magic} field.
+#'
+#' @param oneFile Logical; if \code{TRUE}, \code{magic} is set to \code{"n+1"}
+#'   indicating a single-file (.nii) approach. Otherwise set to \code{"ni1"}.
+#' @param file_name Optional character string to store in the header, usually
+#'   referencing the intended output file name.
+#'
+#' @return A named \code{list} containing approximately 30 fields that comprise
+#'   the NIfTI-1 header structure. Many of these are placeholders until filled by
+#'   downstream usage.
+#'
+#' @seealso
+#' \code{\link{as_nifti_header}} for populating the returned header with actual
+#' data from a \code{NeuroVol}.
+#'
+#' @export
 createNIfTIHeader <- function(oneFile=TRUE, file_name=NULL) {
 	header <- list()
 	header$file_type <- "NIfTI"
@@ -254,7 +316,7 @@ read_nifti_header <- function(fname) {
 	header$quaternion <- readBin(conn, double(), n=3, size=4, endian=endian)
 
 	header$qoffset <- readBin(conn, double(), n=3, size=4, endian=endian)
-	header$qform <- .quaternToMatrix(header$quaternion, header$qoffset, header$pixdim[2:4], header$qfac)
+	header$qform <- quaternToMatrix(header$quaternion, header$qoffset, header$pixdim[2:4], header$qfac)
 
 	sform  <- readBin(conn, double(), n=12, size=4, endian=endian)
 	header$sform <- rbind(matrix(sform,3,4, byrow=T), c(0,0,0,1))

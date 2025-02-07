@@ -262,48 +262,73 @@ setMethod(f = "linear_access",
 
 
 
+
+# # Ensure we have a series method for NeuroVecSeq that behaves like NeuroVec
+# setMethod("series", signature(x="NeuroVecSeq", i="integer"),
+#           function(x, i, j, k, drop=TRUE) {
+#             # If user only supplies i (voxel indexing)
+#             if (missing(j) && missing(k)) {
+#               # series for a single voxel index i should return a time series vector
+#               # Combine the time series from each underlying NeuroVec
+#               ts_list <- lapply(x@vecs, function(v) series(v, i))
+#               out <- unlist(ts_list, recursive=TRUE, use.names=FALSE)
+#               if (drop) drop(out) else out
+#             } else {
+#               # If j,k provided (3D indexing), do similar logic:
+#               # Convert (i,j,k) to voxel index or directly call series on each vec and combine.
+#               # For simplicity, assume user gave a single voxel coordinate i,j,k:
+#               if (length(i)==1 && length(j)==1 && length(k)==1) {
+#                 # Extract time series by combining from each vec
+#                 ts_list <- lapply(x@vecs, function(v) series(v, i, j, k))
+#                 out <- unlist(ts_list, recursive=TRUE, use.names=FALSE)
+#                 if (drop) drop(out) else out
+#               } else {
+#                 # multiple voxels requested?
+#                 # Then we must replicate the logic used for NeuroVec:
+#                 # For multiple voxels, we get a matrix. Combine each voxel's series similarly.
+#                 # This can be more involved. For now, assume simpler usage.
+#                 stop("Multiple voxel indexing not fully implemented here.")
+#               }
+#             }
+#           })
+
+
 #' @rdname series-methods
-#' @param x A NeuroVecSeq object
-#' @param i Numeric indices specifying voxel coordinates
-#' @param j Optional second coordinate
-#' @param k Optional third coordinate
-#' @param drop whether to drop dimension of length 1
-#' @return A matrix where each column represents a voxel's time series
 #' @export
-setMethod("series", signature(x="NeuroVecSeq", i="numeric"),
-          def=function(x, i, j, k, drop=TRUE) {
-            series(x, as.integer(i), j, k, drop)
-          })
-
-
-# Ensure we have a series method for NeuroVecSeq that behaves like NeuroVec
 setMethod("series", signature(x="NeuroVecSeq", i="integer"),
           function(x, i, j, k, drop=TRUE) {
-            # If user only supplies i (voxel indexing)
+            # Handle the "voxel-index only" case
             if (missing(j) && missing(k)) {
-              # series for a single voxel index i should return a time series vector
-              # Combine the time series from each underlying NeuroVec
-              ts_list <- lapply(x@vecs, function(v) series(v, i))
-              out <- unlist(ts_list, recursive=TRUE, use.names=FALSE)
-              if (drop) drop(out) else out
+              # For each underlying NeuroVec in the sequence,
+              # get a matrix of size [time_of_that_subvec x length(i)]
+              ts_list <- lapply(x@vecs, function(v) {
+                # Force drop=FALSE so we always get a 2D matrix
+                series(v, i, drop=FALSE)
+              })
+              # Now row-bind them so total rows = sum of subvec times
+              out <- do.call(rbind, ts_list)
+
+              # If drop=TRUE and we only asked for 1 voxel, drop to a vector
+              if (drop && length(i) == 1) {
+                out <- drop(out)  # becomes a single vector
+              }
+              return(out)
+
             } else {
-              # If j,k provided (3D indexing), do similar logic:
-              # Convert (i,j,k) to voxel index or directly call series on each vec and combine.
-              # For simplicity, assume user gave a single voxel coordinate i,j,k:
-              if (length(i)==1 && length(j)==1 && length(k)==1) {
-                # Extract time series by combining from each vec
-                ts_list <- lapply(x@vecs, function(v) series(v, i, j, k))
-                out <- unlist(ts_list, recursive=TRUE, use.names=FALSE)
-                if (drop) drop(out) else out
+              # If user gave 3D indices i,j,k
+              # You can adapt or forward to sub-vectors similarly:
+              if (length(i) == 1 && length(j) == 1 && length(k) == 1) {
+                # Combine the single-voxel time series from each subvec
+                ts_list <- lapply(x@vecs, function(v) series(v, i, j, k, drop=FALSE))
+                out <- do.call(rbind, ts_list)
+                if (drop) out <- drop(out)
+                return(out)
               } else {
-                # multiple voxels requested?
-                # Then we must replicate the logic used for NeuroVec:
-                # For multiple voxels, we get a matrix. Combine each voxel's series similarly.
-                # This can be more involved. For now, assume simpler usage.
-                stop("Multiple voxel indexing not fully implemented here.")
+                stop("Multiple 3D voxel coordinates not yet implemented for NeuroVecSeq.")
               }
             }
-          })
+          }
+)
 
 setMethod("series", signature(x="NeuroVecSeq", i="numeric"),
           function(x,i,j,k,drop=TRUE) {

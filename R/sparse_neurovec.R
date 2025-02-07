@@ -215,34 +215,103 @@ setMethod("series", signature(x="AbstractSparseNeuroVec", i="numeric"),
             }
           })
 
+#' @rdname series-methods
+#' @export
+setMethod(
+  "series",
+  signature(x = "AbstractSparseNeuroVec", i = "integer"),
+  function(x, i, j, k, drop = TRUE) {
+    # Case 1: user provided only i (voxel linear indices)
+    if (missing(j) && missing(k)) {
+      # Map linear indices -> actual row in sparse matrix or 0 if none
+      mapped_idx <- lookup(x, i)  # vector of the same length as i
+      # Prepare output: #rows = time, #cols = length(i)
+      out <- matrix(0, nrow = dim(x)[4], ncol = length(i))
 
- #' @export
- #' @rdname series-methods
- #' @param j index for 2nd dimension
- #' @param k index for 3rd dimension
- setMethod("series", signature(x="AbstractSparseNeuroVec", i="integer"),
-		 def=function(x,i, j, k) {
-			 if (missing(j) && missing(k)) {
-				 idx <- lookup(x, as.integer(i))
-				 idx.nz <- idx[idx!=0]
-				 if (length(idx.nz) == 0) {
-					 matrix(0, dim(x)[4], length(i))
-				 } else {
-					 mat <- matrix(0, dim(x)[4], length(i))
-					 #mat[, idx !=0] <- x@data[,idx.nz]
-					 #browser()
-					 mat[, idx !=0] <- matricized_access(x, idx.nz)
-					 mat
-				 }
-			 } else {
-				 vdim <- dim(x)
-				 idx <- gridToIndex3DCpp(vdim[1:3], cbind(i,j,k))
-				 #slicedim <- vdim[1] * vdim[2]
-				 #idx <- slicedim*(k-1) + (j-1)*vdim[1] + i
-				 callGeneric(x, idx)
-			 }
+      # Identify which of those voxel indices are actually non-zero
+      nz <- which(mapped_idx > 0)
+      if (length(nz) > 0) {
+        # Access the non-zero columns from x@data
+        # Because x@data is (time x voxels)
+        # We want to fill the columns out[, nz] from x@data[, mapped_idx[nz]]
+        out[, nz] <- matricized_access(x, mapped_idx[nz])
+      }
 
-		 })
+      # If user says drop=TRUE and asked for a single voxel, drop down to vector
+      if (drop && length(i) == 1) {
+        out <- drop(out)  # becomes a vector
+      }
+      return(out)
+
+    } else {
+      # Case 2: user gave i,j,k (3D coordinates).
+      # same approach: convert (i,j,k) to linear indices, then do the same logic
+      if (length(i) == 1 && length(j) == 1 && length(k) == 1) {
+        # single voxel coordinate => we fill a single time-series
+        # 1) convert (i,j,k) -> linear
+        idx <- .gridToIndex3D(dim(x)[1:3], matrix(c(i, j, k), nrow=1))
+        mapped_idx <- lookup(x, idx)
+        out <- rep(0, dim(x)[4])  # time vector
+        if (mapped_idx > 0) {
+          # fill from x@data
+          out <- x@data[, mapped_idx]
+        }
+        if (drop) {
+          # already a 1D vector, so nothing special
+          return(out)
+        } else {
+          # return a 2D matrix [time x 1]
+          return(matrix(out, nrow = length(out), ncol = 1))
+        }
+      } else {
+        # multiple 3D coords. Return a matrix [time x #coords]
+        # expand (i, j, k) to a set of voxel indices
+        coords_mat <- cbind(i, j, k)
+        lin_idx <- .gridToIndex3D(dim(x)[1:3], coords_mat)
+        mapped_idx <- lookup(x, lin_idx)
+        out <- matrix(0, nrow = dim(x)[4], ncol = nrow(coords_mat))
+        nz <- which(mapped_idx > 0)
+        if (length(nz) > 0) {
+          out[, nz] <- matricized_access(x, mapped_idx[nz])
+        }
+        # If user requested drop=TRUE and exactly one voxel, drop dimension
+        if (drop && nrow(coords_mat) == 1) {
+          out <- drop(out)  # becomes a vector of length = time
+        }
+        return(out)
+      }
+    }
+  }
+)
+
+#'
+#'  #' @export
+#'  #' @rdname series-methods
+#'  #' @param j index for 2nd dimension
+#'  #' @param k index for 3rd dimension
+#'  setMethod("series", signature(x="AbstractSparseNeuroVec", i="integer"),
+#' 		 def=function(x,i, j, k, drop=FALSE) {
+#' 			 if (missing(j) && missing(k)) {
+#' 				 idx <- lookup(x, as.integer(i))
+#' 				 idx.nz <- idx[idx!=0]
+#' 				 if (length(idx.nz) == 0) {
+#' 					 matrix(0, dim(x)[4], length(i))
+#' 				 } else {
+#' 					 mat <- matrix(0, dim(x)[4], length(i))
+#' 					 #mat[, idx !=0] <- x@data[,idx.nz]
+#' 					 #browser()
+#' 					 mat[, idx !=0] <- matricized_access(x, idx.nz)
+#' 					 mat
+#' 				 }
+#' 			 } else {
+#' 				 vdim <- dim(x)
+#' 				 idx <- gridToIndex3DCpp(vdim[1:3], cbind(i,j,k))
+#' 				 #slicedim <- vdim[1] * vdim[2]
+#' 				 #idx <- slicedim*(k-1) + (j-1)*vdim[1] + i
+#' 				 callGeneric(x, idx)
+#' 			 }
+#'
+#' 		 })
 
 
 #' @param nonzero only include nonzero vectors in output list
@@ -668,10 +737,42 @@ setMethod(f="as.list", signature=signature(x = "SparseNeuroVec"), def=function(x
 setMethod("show",
           signature=signature(object="SparseNeuroVec"),
           def=function(object) {
-            cat(class(object), "\n\n")
-            cat("   Dimension: ", dim(object), "\n")
-            cat("   Spacing: ", spacing(object), "\n")
-            cat("   Origin: ", origin(space(object)), "\n")
-            cat("   Cardinality: ", length(object@map@indices))
-            cat("\n\n")
+            # Get class name without package prefix
+            class_name <- sub(".*:", "", class(object)[1])
+
+            # Header
+            cat("\n", crayon::bold(crayon::blue(class_name)), " ", sep = "")
+            if (nchar(object@label) > 0) {
+              cat(crayon::silver(paste0("'", object@label, "'")), "\n")
+            } else {
+              cat("\n")
+            }
+
+            # Spatial Info Block
+            cat(crayon::bold("\n╔═ Spatial Info "), crayon::silver("───────────────────────────"), "\n", sep = "")
+            dims <- dim(object)
+            cat("║ ", crayon::yellow("Dimensions"), "    : ", paste(dims[1:3], collapse = " × "), "\n", sep = "")
+            cat("║ ", crayon::yellow("Time Points"), "   : ", dims[4], "\n", sep = "")
+            cat("║ ", crayon::yellow("Spacing"), "       : ", paste(spacing(object)[1:3], collapse = " × "), "\n", sep = "")
+            cat("║ ", crayon::yellow("Origin"), "        : ", paste(round(origin(object)[1:3], 2), collapse = " × "), "\n", sep = "")
+
+            # Sparse-specific Info Block
+            card <- length(object@map@indices)
+            cat(crayon::bold("\n╠═ Sparse Info  "), crayon::silver("────────────────────────────"), "\n", sep = "")
+            cat("║ ", crayon::yellow("Cardinality"), "   : ", card, "\n", sep = "")
+
+            # Memory Usage Block
+            mem_size <- object.size(object)
+            size_str <- if (mem_size < 1024) {
+              paste0(round(mem_size, 2), " B")
+            } else if (mem_size < 1024^2) {
+              paste0(round(mem_size/1024, 2), " KB")
+            } else if (mem_size < 1024^3) {
+              paste0(round(mem_size/1024^2, 2), " MB")
+            } else {
+              paste0(round(mem_size/1024^3, 2), " GB")
+            }
+            cat(crayon::bold("\n╚═ Memory Usage "), crayon::silver("──────────────────────────"), "\n", sep = "")
+            cat("  ", crayon::yellow("Size"), "          : ", size_str, "\n", sep = "")
+            cat("\n")
           })
