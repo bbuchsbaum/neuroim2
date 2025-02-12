@@ -15,7 +15,7 @@
 \alias{series,DenseNeuroVec,integer-method}
 \alias{series,NeuroVec,numeric-method}
 \alias{series_roi,NeuroVec,numeric-method}
-\alias{series,NeuroVecSeq,numeric-method}
+\alias{series,NeuroVecSeq,integer-method}
 \alias{series,NeuroVecSeq,matrix-method}
 \alias{series_roi,NeuroVecSeq,matrix-method}
 \alias{series,AbstractSparseNeuroVec,ROICoords-method}
@@ -56,7 +56,7 @@ series(x, i, ...)
 
 \S4method{series_roi}{NeuroVec,LogicalNeuroVol}(x, i)
 
-\S4method{series}{NeuroVecSeq,numeric}(x, i, j, k, drop = TRUE)
+\S4method{series}{NeuroVecSeq,integer}(x, i, j, k, drop = TRUE)
 
 \S4method{series}{NeuroVecSeq,matrix}(x, i)
 
@@ -68,7 +68,7 @@ series(x, i, ...)
 
 \S4method{series}{AbstractSparseNeuroVec,numeric}(x, i, j, k)
 
-\S4method{series}{AbstractSparseNeuroVec,integer}(x, i, j, k)
+\S4method{series}{AbstractSparseNeuroVec,integer}(x, i, j, k, drop = TRUE)
 }
 \arguments{
 \item{x}{A NeuroVecSeq object}
@@ -77,15 +77,9 @@ series(x, i, ...)
 
 \item{...}{additional arguments}
 
-\item{j}{index for 2nd dimension}
-
-\item{k}{index for 3rd dimension}
-
 \item{drop}{whether to drop dimension of length 1}
 }
 \value{
-A matrix where each column represents a voxel's time series
-
 A matrix where each column represents a voxel's time series
 
 A ROIVec object containing the time series for the specified ROI
@@ -94,20 +88,4 @@ A ROIVec object containing the time series for the specified ROI
 Extract one or more series from object and return as ROI object
 
 Extract one or more series from object
-
-setMethod("series", signature(x="NeuroVecSeq", i="integer"),
-          def=function(x, i, j, k, drop=TRUE) {
-            if (missing(j) && missing(k)) {
-              # Linear spatial indexing case
-              # Get series from each vector and combine them
-              series_list <- purrr::map(x@vecs, ~ series(., i))
-              # Stack the matrices vertically
-              do.call(rbind, series_list)
-            } else {
-              # Voxel coordinate indexing case
-              assertthat::assert_that(length(i) == 1 && length(j) == 1 && length(k) == 1)
-              purrr::map(x@vecs, ~ series(., i, j, k)) %>%
-                purrr::flatten_dbl()
-            }
-          })
 }

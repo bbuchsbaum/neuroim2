@@ -284,35 +284,6 @@ setMethod(
   }
 )
 
-#'
-#'  #' @export
-#'  #' @rdname series-methods
-#'  #' @param j index for 2nd dimension
-#'  #' @param k index for 3rd dimension
-#'  setMethod("series", signature(x="AbstractSparseNeuroVec", i="integer"),
-#' 		 def=function(x,i, j, k, drop=FALSE) {
-#' 			 if (missing(j) && missing(k)) {
-#' 				 idx <- lookup(x, as.integer(i))
-#' 				 idx.nz <- idx[idx!=0]
-#' 				 if (length(idx.nz) == 0) {
-#' 					 matrix(0, dim(x)[4], length(i))
-#' 				 } else {
-#' 					 mat <- matrix(0, dim(x)[4], length(i))
-#' 					 #mat[, idx !=0] <- x@data[,idx.nz]
-#' 					 #browser()
-#' 					 mat[, idx !=0] <- matricized_access(x, idx.nz)
-#' 					 mat
-#' 				 }
-#' 			 } else {
-#' 				 vdim <- dim(x)
-#' 				 idx <- gridToIndex3DCpp(vdim[1:3], cbind(i,j,k))
-#' 				 #slicedim <- vdim[1] * vdim[2]
-#' 				 #idx <- slicedim*(k-1) + (j-1)*vdim[1] + i
-#' 				 callGeneric(x, idx)
-#' 			 }
-#'
-#' 		 })
-
 
 #' @param nonzero only include nonzero vectors in output list
 #' @export
