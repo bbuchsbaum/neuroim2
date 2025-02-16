@@ -23,3 +23,5 @@ Classes.yml
 Generics.yml
 ^CRAN-SUBMISSION$
 ^dev$
+raw_data
+.vscode

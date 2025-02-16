@@ -2,6 +2,10 @@
 NULL
 #' @include all_generic.R
 NULL
+#' @importFrom methods new
+#' @importFrom assertthat assert_that
+#' @importFrom purrr map map_lgl map_dbl reduce
+#' @importFrom deflist deflist
 
 #' @name NeuroVecSeq
 #'
@@ -58,8 +62,8 @@ NULL
 #' }
 #'
 #' @seealso
-#' \code{\link{NeuroVec-class}} for the base vector class
-#' \code{\link{NeuroSpace-class}} for spatial information
+#' \code{\linkS4class{NeuroVec}} for the base vector class,
+#' \code{\linkS4class{NeuroSpace}} for spatial information
 #'
 #' @export
 NULL
@@ -71,7 +75,7 @@ NULL
 #' This is particularly useful for managing time series data where different segments may have
 #' different lengths.
 #'
-#' @param ... One or more instances of type \code{\link{NeuroVec}}.
+#' @param ... One or more instances of type \code{\linkS4class{NeuroVec}}.
 #'
 #' @return A NeuroVecSeq object containing:
 #' \itemize{
@@ -104,29 +108,38 @@ NULL
 #' @export
 NeuroVecSeq <- function(...) {
   vecs <- list(...)
-  assertthat::assert_that(all(purrr::map_lgl(vecs, ~ inherits(., "NeuroVec"))))
+  assert_that(all(map_lgl(vecs, ~ inherits(., "NeuroVec"))),
+              msg = "All inputs must be NeuroVec objects")
 
   # Validate spatial compatibility
   sp <- space(vecs[[1]])
   base_dims <- dim(sp)[1:3]
-  assertthat::assert_that(
-    all(purrr::map_lgl(vecs, function(x) {
+  assert_that(
+    all(map_lgl(vecs, function(x) {
       all(dim(space(x))[1:3] == base_dims)
     })),
     msg = "All NeuroVec objects must have the same spatial dimensions"
   )
 
   # Calculate lengths and create combined space
-  lens <- purrr::map_dbl(vecs, function(x) dim(x)[4])
+  lens <- map_dbl(vecs, function(x) dim(x)[4])
   sp <- add_dim(drop_dim(sp), sum(lens))
 
   new("NeuroVecSeq", space=sp, vecs=vecs, lens=lens)
 }
 
+#' Get length of NeuroVecSeq object
+#'
+#' @description Returns the total number of time points across all vectors in the sequence
+#'
+#' @param x A NeuroVecSeq object
+#' @return Integer length (total number of time points)
+#'
 #' @export
+#' @rdname length-methods
 setMethod("length", signature=c("NeuroVecSeq"),
           def=function(x) {
-            sum(purrr::map_dbl(x@vecs, ~ length(.)))
+            sum(map_dbl(x@vecs, ~ length(.)))
           })
 
 #' Extract Element from NeuroVecSeq
@@ -143,8 +156,8 @@ setMethod("length", signature=c("NeuroVecSeq"),
 #' @export
 setMethod(f="[[", signature=signature(x="NeuroVecSeq", i="numeric"),
           def = function(x, i) {
-            assertthat::assert_that(length(i) == 1 && i > 0 && i <= dim(x)[4],
-                                  msg = "Index must be a single positive integer within bounds")
+            assert_that(length(i) == 1 && i > 0 && i <= dim(x)[4],
+                        msg = "Index must be a single positive integer within bounds")
 
             # Calculate cumulative offsets
             offsets <- cumsum(c(1, x@lens))[1:(length(x@lens))]
@@ -236,36 +249,51 @@ setMethod(f = "linear_access",
           })
 
 
-
 #' @rdname series-methods
 #' @export
 setMethod("series", signature(x="NeuroVecSeq", i="integer"),
           function(x, i, j, k, drop=TRUE) {
-            # Handle the "voxel-index only" case
+
             if (missing(j) && missing(k)) {
-              # For each underlying NeuroVec in the sequence,
-              # get a matrix of size [time_of_that_subvec x length(i)]
+              # i is a vector of linear voxel indices
+
               ts_list <- lapply(x@vecs, function(v) {
-                # Force drop=FALSE so we always get a 2D matrix
-                series(v, i, drop=FALSE)
+                m <- series(v, i, drop=FALSE)  # This might be [voxels × time]
+
+                # If we want [time × voxels], transpose if needed
+                # (assuming length(i) = # of voxels, and dim(v)[4] = # of timepoints)
+                if (nrow(m) == length(i) && ncol(m) == dim(v)[4]) {
+                  m <- t(m)  # now [time × voxels]
+                }
+                m
               })
-              # Now row-bind them so total rows = sum of subvec times
+
+              # Now row-bind them, so total rows = sum of all time
               out <- do.call(rbind, ts_list)
 
-              # If drop=TRUE and we only asked for 1 voxel, drop to a vector
+              # If only 1 voxel and drop=TRUE, flatten to a single vector
               if (drop && length(i) == 1) {
-                out <- drop(out)  # becomes a single vector
+                out <- drop(out)  # yields length=total_time
               }
               return(out)
 
             } else {
-              # If user gave 3D indices i,j,k
-              # You can adapt or forward to sub-vectors similarly:
+              # i,j,k provided => single 3D coordinate or sets of them
+              # the logic is the same: just ensure each sub-vec's series()
+              # ends up as [time × coordinate], then rbind
               if (length(i) == 1 && length(j) == 1 && length(k) == 1) {
-                # Combine the single-voxel time series from each subvec
-                ts_list <- lapply(x@vecs, function(v) series(v, i, j, k, drop=FALSE))
-                out <- do.call(rbind, ts_list)
-                if (drop) out <- drop(out)
+
+                ts_list <- lapply(x@vecs, function(v) {
+                  m <- series(v, i, j, k)
+                  m
+                })
+                #out <- do.call(rbind, ts_list)
+                out <- unlist(ts_list)
+                if (drop) {
+                  out
+                } else {
+                  as.matrix(out)
+                }
                 return(out)
               } else {
                 stop("Multiple 3D voxel coordinates not yet implemented for NeuroVecSeq.")
@@ -274,6 +302,8 @@ setMethod("series", signature(x="NeuroVecSeq", i="integer"),
           }
 )
 
+#' @export
+#' @rdname series-methods
 setMethod("series", signature(x="NeuroVecSeq", i="numeric"),
           function(x,i,j,k,drop=TRUE) {
             # Just convert numeric i to integer and call the integer method
@@ -316,6 +346,7 @@ setMethod("series_roi", signature(x="NeuroVecSeq", i="matrix"),
 
 
 #' @export
+#' @rdname vectors-methods
 setMethod("vectors", signature(x="NeuroVecSeq", subset="missing"),
           function(x) {
             # For a NeuroVec, vectors() returns a deflist of length nvox,
@@ -327,6 +358,7 @@ setMethod("vectors", signature(x="NeuroVecSeq", subset="missing"),
           })
 
 #' @export
+#' @rdname vectors-methods
 setMethod("vectors", signature(x="NeuroVecSeq", subset="numeric"),
           function(x, subset) {
             n <- length(subset)
@@ -335,6 +367,7 @@ setMethod("vectors", signature(x="NeuroVecSeq", subset="numeric"),
           })
 
 #' @export
+#' @rdname vectors-methods
 setMethod("vectors", signature(x="NeuroVecSeq", subset="logical"),
           function(x, subset) {
             ind <- which(subset)
@@ -343,23 +376,24 @@ setMethod("vectors", signature(x="NeuroVecSeq", subset="logical"),
           })
 
 #' @export
+#' @rdname show-methods
 setMethod("show", "NeuroVecSeq",
           def=function(object) {
             cat("\n", crayon::bold(crayon::blue("NeuroVecSeq")), " ",
                 crayon::silver(paste0("(", length(object@vecs), " vectors)")), "\n", sep="")
 
-            cat(crayon::bold("\n╔═ Sequence Info "), crayon::silver("───────────────────────────"), "\n", sep="")
-            cat("║ ", crayon::yellow("Length"), "        : ", length(object@vecs), "\n", sep="")
-            cat("║ ", crayon::yellow("Total Time"), "    : ", sum(object@lens), " points\n", sep="")
+            cat(crayon::bold("\n+= Sequence Info "), crayon::silver("---------------------------"), "\n", sep="")
+            cat("| ", crayon::yellow("Length"), "        : ", length(object@vecs), "\n", sep="")
+            cat("| ", crayon::yellow("Total Time"), "    : ", sum(object@lens), " points\n", sep="")
 
             sp <- space(object@vecs[[1]])
-            cat(crayon::bold("\n╠═ Spatial Info "), crayon::silver("───────────────────────────"), "\n", sep="")
-            cat("║ ", crayon::yellow("Dimensions"), "    : ", paste(dim(object@vecs[[1]])[1:3], collapse=" × "), "\n", sep="")
-            cat("║ ", crayon::yellow("Spacing"), "       : ", paste(sp@spacing[1:3], collapse=" × "), "\n", sep="")
-            cat("║ ", crayon::yellow("Origin"), "        : ", paste(round(sp@origin[1:3], 2), collapse=" × "), "\n", sep="")
-            cat("║ ", crayon::yellow("Orientation"), "   : ", paste(sp@axes@i@axis, sp@axes@j@axis, sp@axes@k@axis), "\n", sep="")
+            cat(crayon::bold("\n+= Spatial Info "), crayon::silver("---------------------------"), "\n", sep="")
+            cat("| ", crayon::yellow("Dimensions"), "    : ", paste(dim(object@vecs[[1]])[1:3], collapse=" x "), "\n", sep="")
+            cat("| ", crayon::yellow("Spacing"), "       : ", paste(sp@spacing[1:3], collapse=" x "), "\n", sep="")
+            cat("| ", crayon::yellow("Origin"), "        : ", paste(round(sp@origin[1:3], 2), collapse=" x "), "\n", sep="")
+            cat("| ", crayon::yellow("Orientation"), "   : ", paste(sp@axes@i@axis, sp@axes@j@axis, sp@axes@k@axis), "\n", sep="")
 
-            cat(crayon::bold("\n╚═ Vector Details "), crayon::silver("──────────────────────────"), "\n", sep="")
+            cat(crayon::bold("\n+= Vector Details "), crayon::silver("--------------------------"), "\n", sep="")
             for (i in seq_along(object@vecs)) {
               v <- object@vecs[[i]]
               vclass <- sub(".*:", "", class(v)[1])
@@ -370,3 +404,12 @@ setMethod("show", "NeuroVecSeq",
             }
             cat("\n")
           })
+
+#' @rdname NeuroVecSeq-methods
+#' @aliases length,NeuroVecSeq-method
+#'          show,NeuroVecSeq-method
+#'          series,NeuroVecSeq,numeric-method
+#'          vectors,NeuroVecSeq,logical-method
+#'          vectors,NeuroVecSeq,missing-method
+#'          vectors,NeuroVecSeq,numeric-method
+#' @export

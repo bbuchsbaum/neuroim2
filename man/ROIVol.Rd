@@ -2,36 +2,31 @@
 % Please edit documentation in R/roi.R
 \name{ROIVol}
 \alias{ROIVol}
-\title{Create an instance of class \code{\linkS4class{ROIVol}}}
+\title{Create ROI Volume Object}
 \usage{
-ROIVol(vspace, coords, data = rep(1, nrow(coords)))
+ROIVol(space, coords, data)
 }
 \arguments{
-\item{vspace}{An instance of class \code{NeuroSpace} with three dimensions,
-which represents the dimensions and voxel spacing of the 3D volume.}
+\item{space}{A \code{\linkS4class{NeuroSpace}} object defining the spatial reference}
 
-\item{coords}{A 3-column matrix of voxel coordinates for the region of interest.}
+\item{coords}{A matrix with 3 columns representing (x,y,z) coordinates}
 
-\item{data}{The data values associated with the region of interest,
-provided as a numeric vector. By default, it is a vector of ones with a length equal
-to the number of rows in the `coords` matrix.}
+\item{data}{A numeric vector of values corresponding to each coordinate}
 }
 \value{
-An instance of class \code{ROIVol}, containing the NeuroSpace object,
-  voxel coordinates, and data values for the region of interest.
+An \code{\linkS4class{ROIVol}} object
 }
 \description{
-This function constructs an instance of the ROIVol class, which represents
-a region of interest (ROI) in a 3D volume. The class stores the
-NeuroSpace object, voxel coordinates, and data values for the ROI.
+Creates an \code{\linkS4class{ROIVol}} object representing a set of values
+at specific 3D coordinates within a spatial reference system.
+}
+\details{
+ROI Volume
 }
 \examples{
-# Create a NeuroSpace object
-vspace <- NeuroSpace(dim = c(5, 5, 5), spacing = c(1, 1, 1))
+space <- NeuroSpace(c(64,64,64))
+coords <- matrix(c(1,2,3, 4,5,6), ncol=3, byrow=TRUE)
+data <- c(1.5, 2.5)
+roi_vol <- ROIVol(space, coords, data)
 
-# Define voxel coordinates for the ROI
-coords <- matrix(c(1, 2, 3, 2, 2, 2, 3, 3, 3), ncol = 3)
-
-# Create a ROIVol object
-roi_vol <- ROIVol(vspace, coords)
 }

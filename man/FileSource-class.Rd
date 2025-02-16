@@ -14,6 +14,3 @@ low level IO and image loading functionality.
 \item{\code{meta_info}}{An object of class \code{\linkS4class{FileMetaInfo}} containing meta information for the data source.}
 }}
 
-\seealso{
-\code{\link{FileMetaInfo-class}}, \code{\link{NeuroVolSource-class}}, \code{\link{NeuroVecSource-class}}
-}

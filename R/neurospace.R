@@ -24,15 +24,10 @@
 #' @param trans A transformation matrix mapping voxel indices to world coordinates. If NULL, 
 #'   constructed from spacing and origin.
 #'
-#' @return A new \code{NeuroSpace} object with the following slots:
-#' \itemize{
-#'   \item \code{dim}: Integer vector of image dimensions
-#'   \item \code{spacing}: Numeric vector of voxel sizes
-#'   \item \code{origin}: Numeric vector of world-space origin
-#'   \item \code{axes}: AxisSet object defining orientation
-#'   \item \code{trans}: Matrix for voxel-to-world transformation
-#'   \item \code{inverse}: Matrix for world-to-voxel transformation
-#' }
+#' @return A new \code{\linkS4class{NeuroSpace}} object
+#'
+#' @importFrom methods new
+#' @importFrom assertthat assert_that
 #'
 #' @section Coordinate Systems:
 #' NeuroSpace manages two coordinate systems:
@@ -83,12 +78,10 @@
 #' back_to_world <- index_to_coord(space_3d, vox_idx)
 #'
 #' @seealso 
-#' \itemize{
-#'   \item \code{\link{AxisSet}} for axis orientation specification
-#'   \item \code{\link{coord_to_index}} for coordinate conversion
-#'   \item \code{\link{index_to_coord}} for inverse coordinate conversion
-#'   \item \code{\link{NeuroObj}} for objects using NeuroSpace
-#' }
+#' \code{\linkS4class{AxisSet}} for axis orientation specification,
+#' \code{\link{coord_to_index}} for coordinate conversion,
+#' \code{\link{index_to_coord}} for inverse coordinate conversion,
+#' \code{\linkS4class{NeuroObj}} for objects using NeuroSpace
 #'
 #' @references
 #' For details on neuroimaging coordinate systems:
@@ -101,12 +94,9 @@
 #' }
 #'
 #' @export
-#' @importFrom assertthat assert_that
 NeuroSpace <- function(dim, spacing = NULL, origin = NULL, axes = NULL, trans = NULL) {
-  # Input validation
-  if (!is.numeric(dim) || any(dim != as.integer(dim)) || any(dim <= 0)) {
-    stop("'dim' must be a vector of positive integers")
-  }
+  assert_that(is.numeric(dim) && all(dim == as.integer(dim)) && all(dim > 0),
+              msg = "'dim' must be a vector of positive integers")
   dim <- as.integer(dim)
   
   # Set defaults for spacing and origin
@@ -117,24 +107,21 @@ NeuroSpace <- function(dim, spacing = NULL, origin = NULL, axes = NULL, trans = 
     origin <- rep(0, min(length(dim), 3))
   }
   
-  # Validate spacing and origin
-  if (!is.numeric(spacing) || !is.numeric(origin)) {
-    stop("'spacing' and 'origin' must be numeric vectors")
-  }
-  if (length(origin) != length(spacing)) {
-    stop("'origin' and 'spacing' must have the same length")
-  }
-  if (any(spacing <= 0)) {
-    stop("all 'spacing' values must be positive")
-  }
+  assert_that(is.numeric(spacing) && is.numeric(origin),
+              msg = "'spacing' and 'origin' must be numeric vectors")
+  assert_that(length(origin) == length(spacing),
+              msg = "'origin' and 'spacing' must have the same length")
+  assert_that(all(spacing > 0),
+              msg = "all 'spacing' values must be positive")
   
   # Create transformation matrix if not provided
   if (is.null(trans)) {
     D <- min(length(dim), 3)
     trans <- diag(c(spacing, 1))
     trans[1:D, D+1] <- origin
-  } else if (!is.matrix(trans) || nrow(trans) != ncol(trans)) {
-    stop("'trans' must be a square matrix")
+  } else {
+    assert_that(is.matrix(trans) && nrow(trans) == ncol(trans),
+                msg = "'trans' must be a square matrix")
   }
   
   # Ensure matrix is invertible
@@ -180,6 +167,7 @@ NeuroSpace <- function(dim, spacing = NULL, origin = NULL, axes = NULL, trans = 
 #'
 #' @importFrom crayon bold blue green red yellow silver white bgBlue
 #' @importFrom utils object.size
+#' @rdname show-methods
 #' @export
 setMethod(f="show", 
           signature=signature("NeuroSpace"),
@@ -193,10 +181,21 @@ setMethod(f="show",
             
             # Helper for matrix formatting
             format_matrix <- function(mat, digits=3) {
-              formatted <- apply(mat, 1, function(row) {
-                paste(sprintf(paste0("%", digits + 4, ".", digits, "f"), row), collapse="  ")
-              })
-              paste(formatted, collapse="\n")
+              # Format each element using formatC to a fixed number of decimal places
+              formatted_numbers <- apply(mat, c(1,2), function(x) formatC(x, format="f", digits=digits))
+
+              # For each column, determine the maximum width
+              max_widths <- apply(formatted_numbers, 2, function(col) max(nchar(col)))
+
+              # Pad each element to its column's max width
+              padded <- matrix("", nrow = nrow(mat), ncol = ncol(mat))
+              for (j in 1:ncol(mat)) {
+                padded[,j] <- format(formatted_numbers[,j], width = max_widths[j], justify = "right")
+              }
+
+              # Combine each row into a string
+              row_strings <- apply(padded, 1, paste, collapse = "  ")
+              paste(row_strings, collapse = "\n")
             }
             
             # Calculate memory footprint
@@ -208,20 +207,20 @@ setMethod(f="show",
             cat("\n")
             
             # Dimension Information
-            cat("\n", bold(yellow("▶ Dimensions")), "\n")
-            dim_str <- paste(object@dim, collapse=" × ")
+            cat("\n", bold(yellow(">> Dimensions")), "\n")
+            dim_str <- paste(object@dim, collapse=" x ")
             cat("  ", silver("Grid Size:"), " ", green(dim_str), "\n", sep="")
             cat("  ", silver("Memory:"), "   ", green(mem_size), "\n", sep="")
             
             # Spatial Properties
-            cat("\n", bold(yellow("▶ Spatial Properties")), "\n")
-            spacing_str <- paste(sprintf("%.2f", object@spacing), collapse=" × ")
-            origin_str <- paste(sprintf("%.2f", object@origin), collapse=" × ")
+            cat("\n", bold(yellow(">> Spatial Properties")), "\n")
+            spacing_str <- paste(sprintf("%.2f", object@spacing), collapse=" x ")
+            origin_str <- paste(sprintf("%.2f", object@origin), collapse=" x ")
             cat("  ", silver("Spacing:"), "   ", blue(spacing_str), " ", silver("mm"), "\n", sep="")
             cat("  ", silver("Origin:"), "    ", blue(origin_str), " ", silver("mm"), "\n", sep="")
             
             # Anatomical Orientation
-            cat("\n", bold(yellow("▶ Anatomical Orientation")), "\n")
+            cat("\n", bold(yellow(">> Anatomical Orientation")), "\n")
             if (length(object@dim) >= 3) {
               orientations <- c(
                 paste0("X: ", green(object@axes@i@axis)),
@@ -237,14 +236,14 @@ setMethod(f="show",
             cat(paste0("  ", paste(orientations, collapse="  |  ")), "\n")
             
             # World Transformation
-            cat("\n", bold(yellow("▶ World Transformation")), "\n")
-            cat(silver("  Forward (Voxel → World):"), "\n")
+            cat("\n", bold(yellow(">> World Transformation")), "\n")
+            cat(silver("  Forward (Voxel to World):"), "\n")
             cat(blue(paste0("    ", format_matrix(object@trans))), "\n")
-            cat(silver("  Inverse (World → Voxel):"), "\n")
+            cat(silver("  Inverse (World to Voxel):"), "\n")
             cat(blue(paste0("    ", format_matrix(object@inverse))), "\n")
             
             # Bounding Box (in world coordinates)
-            cat("\n", bold(yellow("▶ Bounding Box")), "\n")
+            cat("\n", bold(yellow(">> Bounding Box")), "\n")
             ndim <- length(object@dim)
             if (ndim == 2) {
               corners <- matrix(c(0, 0, 
@@ -285,7 +284,7 @@ setMethod(f="show",
             }
             
             # Footer
-            cat("\n", bgBlue(white(bold(paste(rep("═", 50), collapse="")))), "\n", sep="")
+            cat("\n", bgBlue(white(bold(paste(rep("=", 50), collapse="")))), "\n", sep="")
           })
 
 #' add dimension to \code{\linkS4class{NeuroSpace}}
@@ -302,7 +301,8 @@ setMethod(f="add_dim", signature=signature(x = "NeuroSpace", n="numeric"),
 setMethod(f="drop_dim", signature=signature(x="NeuroSpace", dimnum="numeric"),
           def=function(x, dimnum) {
             D <- dim(x)
-            stopifnot(length(D) >= 2)
+            assert_that(length(D) >= 2,
+                       msg = "Cannot drop dimension from space with less than 2 dimensions")
 
             Dind <- seq(1,length(D))[-dimnum]
             if (ndim(x) > 3) {

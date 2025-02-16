@@ -58,40 +58,79 @@ Both methods return a deflist, which is a lazy-loading list of ROIVec objects.
 }
 \examples{
 \dontrun{
-# Using ClusteredNeuroVol
-neuro_vec <- # ... create a NeuroVec object
-clustered_vol <- # ... create a ClusteredNeuroVol object
-split_result <- split_clusters(neuro_vec, clustered_vol)
+  # Create a synthetic 3D volume and its NeuroSpace
+  space <- NeuroSpace(c(10, 10, 10))
+  vol_data <- array(rnorm(10 * 10 * 10), dim = c(10, 10, 10))
+  neuro_vec <- NeuroVec(vol_data, space)
 
-# Using integer vector
-cluster_assignments <- # ... create an integer vector of cluster assignments
-split_result <- split_clusters(neuro_vec, cluster_assignments)
+  # Create a binary mask (e.g., select voxels with values > 0)
+  mask_data <- vol_data > 0
+  mask_vol <- LogicalNeuroVol(mask_data, space)
+
+  # Extract indices and coordinates for the masked voxels
+  mask_idx <- which(mask_data)
+  coords <- index_to_coord(mask_vol, mask_idx)
+
+  # Perform k-means clustering on the coordinates (e.g., 3 clusters)
+  set.seed(123)  # for reproducibility
+  k_res <- kmeans(coords, centers = 3)
+
+  # Create a ClusteredNeuroVol using the mask and k-means cluster assignments
+  clustered_vol <- ClusteredNeuroVol(mask_vol, k_res$cluster)
+
+  # Split the NeuroVec by clusters using the ClusteredNeuroVol method
+  split_result_clust <- split_clusters(neuro_vec, clustered_vol)
+
+  # Calculate and print the mean value for each cluster
+  means_clust <- sapply(split_result_clust, function(x) mean(values(x)))
+  print(means_clust)
+
+  # Alternatively, create an integer vector of cluster assignments:
+  cluster_assignments <- numeric(prod(dim(space)))
+  cluster_assignments[mask_idx] <- k_res$cluster
+  split_result_int <- split_clusters(neuro_vec, as.integer(cluster_assignments))
+
+  # Verify that both splitting methods yield the same cluster means
+  means_int <- sapply(split_result_int, function(x) mean(values(x)))
+  print(all.equal(sort(means_clust), sort(means_int)))
 }
 
 
-## split 'NeuroVol' with a 'ClusteredNeuroVol'
-vol <- NeuroVol(array(runif(10*10*10),c(10,10,10)), NeuroSpace(c(10,10,10)))
-mask <- as.logical(vol > .5)
-mask.idx <- which(mask != 0)
-grid <- index_to_coord(mask, mask.idx)
-vox <- index_to_grid(mask, mask.idx)
+# Create a simple example space and data
+space <- NeuroSpace(c(10, 10, 10,4))
+data <- array(rnorm(1000*4), dim = c(10, 10, 10,4))
+vec <- NeuroVec(data, space)
 
-library(purrr)
-## partition coordinates into 50 clusters using 'kmeans'
-kres <- kmeans(grid, centers=50, iter.max=500)
-kvol <- ClusteredNeuroVol(mask, kres$cluster)
-klis <- split_clusters(mask, kvol)
-ret1 <- vol \%>\% split_clusters(kvol) \%>\% purrr::map_dbl(~ mean(values(.)))
+# Create a mask for clustering (e.g., values > 0)
+mask <- vec[,,,1] > 0
+mask_vol <- LogicalNeuroVol(as.array(mask), NeuroSpace(c(10, 10, 10)))
 
-## split NeuroVol with 'integer' vector of clusters.
-indices <- numeric(prod(dim(mask)[1:3]))
+# Get coordinates of masked voxels for clustering
+mask_idx <- which(mask)
+coords <- index_to_coord(mask_vol, mask_idx)
 
-## locations with a cluster value of 0 are ignored
-indices[mask.idx] <- kres$cluster
+# Perform clustering on the coordinates (3 clusters for example)
+set.seed(123) # for reproducibility
+kmeans_result <- kmeans(coords, centers = 3)
 
-ret2 <- vol \%>\% split_clusters(as.integer(indices)) \%>\%
-purrr::map_dbl(~ mean(values(.)))
-all(ret1 == ret1)
+# Create a ClusteredNeuroVol
+clustered_vol <- ClusteredNeuroVol(mask_vol, kmeans_result$cluster)
+
+# Split the NeuroVec by clusters
+split_result <- split_clusters(vec, clustered_vol)
+
+# Calculate mean value for each cluster
+cluster_means <- sapply(split_result, function(x) mean(values(x)))
+print(cluster_means)
+
+# Alternative: using integer cluster assignments
+cluster_indices <- numeric(prod(dim(space)[1:3]))
+cluster_indices[mask_idx] <- kmeans_result$cluster
+split_result2 <- split_clusters(vec, as.integer(cluster_indices))
+
+# Verify both methods give same results
+cluster_means2 <- sapply(split_result2, function(x) mean(values(x)))
+print(all.equal(sort(cluster_means), sort(cluster_means2)))
 }
 \seealso{
 \code{\link{NeuroVec-class}}, \code{\link{ClusteredNeuroVol-class}}, \code{\link{ROIVec-class}}

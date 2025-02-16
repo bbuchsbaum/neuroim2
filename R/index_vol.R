@@ -10,6 +10,8 @@
 #' The class uses an integer mapping array for O(1) lookups between linear indices
 #' and their corresponding positions in the sparse representation.
 #'
+#' @seealso \code{\link{IndexLookupVol}} for creating instances of this class
+#'
 NULL
 
 #' Create an IndexLookupVol Object
@@ -36,38 +38,37 @@ NULL
 #' \dontrun{
 #' # Create a 64x64x64 space
 #' space <- NeuroSpace(c(64, 64, 64), c(1, 1, 1), c(0, 0, 0))
-#' 
+#'
 #' # Create a lookup volume with random indices
 #' indices <- sample(1:262144, 10000)  # Select 10000 random voxels
 #' ilv <- IndexLookupVol(space, indices)
-#' 
+#'
 #' # Look up coordinates for specific indices
 #' coords <- coords(ilv, indices[1:10])
 #' }
 #'
-#' @seealso 
-#' \code{\link{coords}} for coordinate lookup
-#' \code{\link{lookup}} for index mapping
+#' @seealso
+#' \code{\link{coords}} for coordinate lookup,
+#' \code{\link{lookup}} for index mapping,
 #' \code{\linkS4class{NeuroSpace}} for space representation
+#'
+#' @importFrom methods new
+#' @importFrom assertthat assert_that
 #'
 #' @export
 #' @rdname IndexLookupVol-class
 IndexLookupVol <- function(space, indices) {
-  # Input validation
-  if (!inherits(space, "NeuroSpace")) {
-    stop("'space' must be a NeuroSpace object")
-  }
-  if (!is.numeric(indices) || !all(is.finite(indices))) {
-    stop("'indices' must be a vector of finite numeric values")
-  }
-  
+  assert_that(inherits(space, "NeuroSpace"),
+              msg = "'space' must be a NeuroSpace object")
+  assert_that(is.numeric(indices) && all(is.finite(indices)),
+              msg = "'indices' must be a vector of finite numeric values")
+
   # Convert to integer and validate range
   indices <- as.integer(indices)
   nels <- prod(dim(space)[1:3])
-  if (any(indices < 1) || any(indices > nels)) {
-    stop("'indices' must be within the range of the space dimensions")
-  }
-  
+  assert_that(all(indices >= 1) && all(indices <= nels),
+              msg = "'indices' must be within the range of the space dimensions")
+
   new("IndexLookupVol", space = space, indices = indices)
 }
 
@@ -84,21 +85,22 @@ IndexLookupVol <- function(space, indices) {
 #' @return An initialized IndexLookupVol object
 #'
 #' @keywords internal
-setMethod(f = "initialize", 
+#' @noRd
+setMethod(f = "initialize",
           signature = signature("IndexLookupVol"),
           def = function(.Object, space, indices) {
             # Ensure indices are unique and sorted
             indices <- sort(unique(as.integer(indices)))
-            
+
             .Object@space <- space
             .Object@indices <- indices
-            
+
             # Create reverse mapping
             nels <- prod(dim(space)[1:3])
             map <- integer(nels)
             map[indices] <- seq_along(indices)
             .Object@map <- map
-            
+
             .Object
           })
 
@@ -119,7 +121,7 @@ setMethod(f = "initialize",
 #'
 #' @export
 #' @rdname indices-methods
-setMethod(f = "indices", 
+setMethod(f = "indices",
           signature = signature(x = "IndexLookupVol"),
           def = function(x) {
             x@indices
@@ -143,21 +145,18 @@ setMethod(f = "indices",
 #'
 #' @export
 #' @rdname lookup-methods
-setMethod(f = "lookup", 
+setMethod(f = "lookup",
           signature = signature(x = "IndexLookupVol", i = "numeric"),
           def = function(x, i) {
-            # Input validation
-            if (!is.numeric(i) || !all(is.finite(i))) {
-              stop("'i' must be a vector of finite numeric values")
-            }
-            
+            assert_that(is.numeric(i) && all(is.finite(i)),
+                       msg = "'i' must be a vector of finite numeric values")
+
             # Convert to integer and validate range
             i <- as.integer(i)
             nels <- prod(dim(x@space)[1:3])
-            if (any(i < 1) || any(i > nels)) {
-              stop("'i' must be within the range of the space dimensions")
-            }
-            
+            assert_that(all(i >= 1) && all(i <= nels),
+                       msg = "'i' must be within the range of the space dimensions")
+
             x@map[i]
           })
 
@@ -178,7 +177,7 @@ setMethod(f = "lookup",
 #'
 #' @export
 #' @rdname space-methods
-setMethod(f = "space", 
+setMethod(f = "space",
           signature = signature(x = "IndexLookupVol"),
           def = function(x) {
             x@space
@@ -203,21 +202,21 @@ setMethod(f = "space",
 #'
 #' @export
 #' @rdname coords-methods
-setMethod(f = "coords", 
+setMethod(f = "coords",
           signature = signature(x = "IndexLookupVol"),
           def = function(x, i) {
             # Input validation
             if (!is.numeric(i) || !all(is.finite(i))) {
               stop("'i' must be a vector of finite numeric values")
             }
-            
+
             # Convert to integer and validate range
             i <- as.integer(i)
             nels <- prod(dim(x@space)[1:3])
             if (any(i < 1) || any(i > nels)) {
               stop("'i' must be within the range of the space dimensions")
             }
-            
+
             idx <- lookup(x, i)
             idx <- idx[idx != 0]
             if (length(idx) == 0) {
@@ -225,4 +224,17 @@ setMethod(f = "coords",
             } else {
               index_to_grid(x@space, idx)
             }
+          })
+
+#' Show method for IndexLookupVol Objects
+#' @export
+#' @rdname show-methods
+setMethod("show", signature(object = "IndexLookupVol"),
+          def = function(object) {
+            cat("\nIndexLookupVol Object\n")
+            cat("-----------------------\n")
+            cat("Space:\n")
+            show(object@space)
+            cat("Indices: ", paste(object@indices, collapse = ", "), "\n")
+            cat("Reverse Map: ", paste(object@map, collapse = ", "), "\n\n")
           })

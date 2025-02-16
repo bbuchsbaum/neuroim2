@@ -60,7 +60,7 @@ true_proportion <- sum(brain_mask) / prod(dim(brain_mask))
 print(paste("Proportion of TRUE voxels:", true_proportion))
 
 # Load an example brain mask
-brain_mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
+brain_mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 
 # Convert the brain mask to a LogicalNeuroVol
 logical_vol <- LogicalNeuroVol(brain_mask, space(brain_mask))

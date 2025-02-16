@@ -17,3 +17,12 @@ Numeric vector of read elements
 \description{
 Read a specified number of elements from a \linkS4class{BinaryReader} object.
 }
+\examples{
+\dontrun{
+reader <- BinaryReader("data.bin", byte_offset = 0L,
+                      data_type = "double", bytes_per_element = 8L)
+# Read 100 elements
+data <- read_elements(reader, 100)
+close(reader)
+}
+}

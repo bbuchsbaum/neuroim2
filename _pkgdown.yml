@@ -10,6 +10,9 @@ reference:
     contents:
     - AbstractSparseNeuroVec-class
     - AFNIMetaInfo
+    - ArrayLike3D-class
+    - ArrayLike4D-class
+    - ArrayLike5D-class
     - AxisSet-class
     - AxisSet1D-class
     - AxisSet2D-class
@@ -17,34 +20,41 @@ reference:
     - AxisSet4D-class
     - AxisSet5D-class
     - BigNeuroVec-class
+    - BigNeuroVec
     - BinaryReader
     - BinaryWriter
+    - BinaryWriter-class
     - ClusteredNeuroVol
     - DenseNeuroVec
     - DenseNeuroVol
     - FileBackedNeuroVec
-    - H5NeuroVec
     - IndexLookupVol
-    - LatentNeuroVec
     - LogicalNeuroVol
     - MappedNeuroVec
     - MetaInfo-class
+    - MetaInfo
     - NeuroBucket-class
     - NeuroHyperVec-class
+    - NeuroHyperVec
     - NeuroObj-class
     - NeuroSlice
     - NeuroSpace
     - NeuroVec
     - NeuroVecSeq
     - NeuroVecSource
+    - NeuroVecSource-class
     - NeuroVolSource
     - NeuroVol
     - NIFTIMetaInfo
     - ROICoords-class
+    - ROICoords
     - ROIVec
     - ROIVol
     - SparseNeuroVec
     - SparseNeuroVol
+    - TimeAxis
+    - NullAxis
+    - numericOrMatrix-class
 
   - title: "S4 Classes"
     desc: >
@@ -54,10 +64,9 @@ reference:
     - ColumnReader-class
     - FileBackedNeuroVec-class
     - FileFormat-class
+    - FileFormat-operations
     - FileMetaInfo-class
     - FileSource-class
-    - H5NeuroVec-class
-    - H5NeuroVol-class
     - MappedNeuroVecSource-class
     - NamedAxis-class
     - NeuroSlice-class
@@ -70,6 +79,9 @@ reference:
     - ROIVol-class
     - ROIVolWindow-class
     - SparseNeuroVecSource-class
+    - OrientationList2D
+    - OrientationList3D
+
   - title: "Data Loading and Manipulation"
     desc: >
       Methods for loading and manipulating neuroimaging data
@@ -83,6 +95,11 @@ reference:
     - data_reader
     - file_matches
     - read_elements
+    - createNIfTIHeader
+    - linear_access
+    - image
+    - scale
+
   - title: "Coordinate and Dimension Operations"
     desc: >
       Methods for operating on coordinates and dimensions
@@ -110,6 +127,12 @@ reference:
     - origin
     - perm_mat
     - strip_extension
+    - anatomical_axes
+    - TIME
+    - findAnatomy3D
+    - matrixToQuatern
+    - quaternToMatrix
+
   - title: "ROI and Clustering"
     desc: >
       Methods for working with regions of interest and clustering
@@ -127,6 +150,8 @@ reference:
     - slice
     - vectors
     - values
+    - spherical_roi_set
+
   - title: "Kernel and Extraction"
     desc: >
       Methods for kernel operations and feature extraction
@@ -148,6 +173,9 @@ reference:
     - bilateral_filter
     - reorient
     - clustered_searchlight
+    - spatial-filter
+    - searchlight-methods
+    - laplace_enhance
 
   - title: "Lookup and Mapping"
     desc: >
@@ -156,6 +184,8 @@ reference:
     - lookup
     - map_values
     - resample
+    - neuro-resample
+
   - title: "Data Access and Indexing"
     desc: >
       Methods for accessing and indexing neuroimaging data
@@ -163,6 +193,7 @@ reference:
     - sub_vector
     - indices
     - length,NeuroVec-method
+    - neuro-ops
 
   - title: "Scaling and Resampling"
     desc: >
@@ -171,12 +202,14 @@ reference:
     - scale_series
     - resample
     - starts_with("split_")
+
   - title: "Visualization and Rendering"
     desc: >
       Methods for visualizing and rendering neuroimaging data
     contents:
     - render
     - render_slice
+
   - title: "IO"
     desc: >
       Methods for input-output operations
@@ -194,6 +227,7 @@ reference:
     - read_header
     - read_meta_info
     - read_vol_list
+
   - title: "Miscellaneous"
     desc: >
       Miscellaneous methods and functions
@@ -211,6 +245,7 @@ reference:
       - starts_with("Arith")
       - starts_with("Compare")
       - ends_with("-method")
+      - None
 
 
 

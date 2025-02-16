@@ -12,4 +12,3 @@
 \description{
 Displays a formatted summary of a MappedNeuroVec object.
 }
-\keyword{internal}

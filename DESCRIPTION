@@ -1,7 +1,7 @@
 Package: neuroim2
 Type: Package
 Title: Data Structures and IO for Neuroimaging Data with an Emphasis on Functional Magnetic Resonance Imaging (FMRI)
-Version: 0.8.0
+Version: 0.8.1
 LinkingTo: 
   Rcpp,
   RcppArmadillo,
@@ -34,6 +34,7 @@ Collate:
     'conncomp.R'
     'file_format.R'
     'filebacked_neurovec.R'
+    'globals.R'
     'index_vol.R'
     'mapped_neurovec.R'
     'meta_info.R'
@@ -60,7 +61,6 @@ Imports:
   assertthat,
   mmap,
   Rcpp,
-  RcppArmadillo,
   RcppParallel,
   RNifti,
   dbscan,
@@ -72,13 +72,11 @@ Imports:
   future.apply,
   deflist,
   crayon,
-  bit64,
   ggplot2
 Suggests: 
     testthat,
     covr,
     knitr,
-    ggplot2,
     roxygen2,
     rmarkdown,
     Gmedian,
@@ -88,4 +86,4 @@ URL: https://github.com/bbuchsbaum/neuroim2,
     https://bbuchsbaum.github.io/neuroim2/
 BugReports: https://github.com/bbuchsbaum/neuroim2/issues
 Language: en-US
-SystemRequirements: GNU make, C++17
+SystemRequirements: C++11

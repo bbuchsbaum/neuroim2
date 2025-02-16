@@ -1,4 +1,3 @@
-
 #' @keywords internal
 #' @importFrom stringr str_split str_trim str_sub
 #' @noRd
@@ -6,16 +5,28 @@ parseIntAttribute <- function(line){
 	as.integer(str_split(str_trim(paste(line, collapse=" ")), "\\s+")[[1]])
 }
 
+#' Parse float attribute
+#'
+#' This function parses one or more lines of text to extract numeric values.
+#'
+#' @param line A character vector representing one or more lines of text.
+#' @return A numeric vector parsed from the input.
 #' @keywords internal
 #' @noRd
 parseFloatAttribute <- function(line){
 	as.numeric(str_split(str_trim(paste(line, collapse=" ")), "\\s+")[[1]])
 }
 
+#' Parse string attribute
+#'
+#' This function parses a line (or lines) of text delimited by tildes ('~') to extract string values.
+#'
+#' @param line A character vector representing one or more lines of text.
+#' @return A character vector containing the extracted string values.
 #' @keywords internal
 #' @noRd
 parseStringAttribute <- function(line) {
-
+	
 	res <- str_split(line, "~")[[1]]
 	if (length(res) > 1) {
 		res[1] <- str_sub(res[1], 2)
@@ -25,6 +36,12 @@ parseStringAttribute <- function(line) {
 	}
 }
 
+#' Parse header element
+#'
+#' This function extracts attribute information from a collection of input lines.
+#'
+#' @param inputLines A character vector containing lines representing an attribute element.
+#' @return A list with elements: type, name, count, and content.
 #' @keywords internal
 #' @noRd
 parseElement <- function(inputLines) {
@@ -45,10 +62,12 @@ parseElement <- function(inputLines) {
 
 }
 
-#' read_afni_header
-#
-#' @param file_name the name of the AFNI header file (ending in .HEAD)
-#' @return a \code{list} representation of an AFNI header
+#' Read an AFNI header
+#'
+#' This function reads an AFNI header file and returns its parsed contents as a list.
+#'
+#' @param file_name The name of the AFNI header file (ending in .HEAD).
+#' @return A list representation of the AFNI header.
 #' @keywords internal
 #' @noRd
 read_afni_header <- function(file_name) {
@@ -67,6 +86,19 @@ read_afni_header <- function(file_name) {
 	names(header) <- unlist(lapply(header, "[[", "name"))
 	header
 
+}
+
+#' Parse integer attribute
+#'
+#' This function parses one or more lines of text to extract integer values.
+#'
+#' @param line A character vector representing one or more lines of text.
+#' @return An integer vector parsed from the input.
+#' @keywords internal
+#' @importFrom stringr str_split str_trim str_sub
+#' @noRd
+parseIntAttribute <- function(line){
+	as.integer(str_split(str_trim(paste(line, collapse=" ")), "\\s+")[[1]])
 }
 
 

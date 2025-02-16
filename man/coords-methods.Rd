@@ -2,11 +2,16 @@
 % Please edit documentation in R/index_vol.R, R/roi.R, R/sparse_neurovec.R
 \name{coords,IndexLookupVol-method}
 \alias{coords,IndexLookupVol-method}
+\alias{coords,ROIVol-method}
 \alias{coords,ROICoords-method}
 \alias{coords,AbstractSparseNeuroVec-method}
 \title{Extract Coordinates from an IndexLookupVol Object}
 \usage{
 \S4method{coords}{IndexLookupVol}(x, i)
+
+\S4method{coords}{ROIVol}(x, real = FALSE)
+
+\S4method{coords}{ROICoords}(x, real = FALSE)
 
 \S4method{coords}{ROICoords}(x, real = FALSE)
 
@@ -22,6 +27,8 @@
 \value{
 The extracted coordinates corresponding to the provided index
         If the index is not found, it returns NA
+
+A matrix of coordinates
 }
 \description{
 Extracts the coordinates from an IndexLookupVol object based on a given index.

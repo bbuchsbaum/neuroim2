@@ -43,7 +43,7 @@ first_vol <- sub_vector(fbvec, 1)
 
 }
 \seealso{
-\code{\link{NeuroSpace}} for spatial metadata management
-\code{\link{read_header}} for header information extraction
+\code{\linkS4class{NeuroSpace}} for spatial metadata management,
+\code{\link{read_header}} for header information extraction,
 \code{\link{sub_vector}} for data access methods
 }

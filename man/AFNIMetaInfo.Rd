@@ -53,7 +53,5 @@ meta <- AFNIMetaInfo(fmt, header)
 dim(meta)
 }
 
-}
-\seealso{
-\code{\link{MetaInfo}}, \code{\link{read_afni_header}}
+
 }

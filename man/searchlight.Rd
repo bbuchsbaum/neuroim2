@@ -33,7 +33,7 @@ potential center voxel.
 }
 \examples{
 # Load an example brain mask
-mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
+mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 
 # Generate an exhaustive searchlight iterator with a radius of 6 mm
 \dontrun{

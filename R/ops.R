@@ -3,6 +3,12 @@ NULL
 #' @include all_generic.R
 NULL
 
+#' Arithmetic and Comparison Operations for Neuroimaging Objects
+#'
+#' @name neuro-ops
+#' @description Methods for performing arithmetic and comparison operations on neuroimaging objects
+NULL
+
 #' @importFrom assertthat assert_that
 #' @keywords internal
 #' @noRd
@@ -12,9 +18,13 @@ checkDim <- function(e1,e2) {
 
 }
 
-#' Compare a SparseNeuroVol object with a numeric value
+#' Comparison Operations
 #'
-#' This method compares the data of a SparseNeuroVol object (\code{e1}) with a numeric value (\code{e2}) using a generic comparison function.
+#' @name Compare-methods
+#' @aliases Compare,SparseNeuroVol,numeric-method
+#'          Compare,numeric,SparseNeuroVol-method
+#'          Compare,NeuroVec,NeuroVec-method
+#' @description Methods for comparing neuroimaging objects
 #'
 #' @param e1 A SparseNeuroVol object containing the data to be compared.
 #' @param e2 A numeric value to compare with the data of the SparseNeuroVol object.
@@ -27,13 +37,6 @@ setMethod(f="Compare", signature=signature(e1="SparseNeuroVol", e2="numeric"),
           })
 
 
-#' Compare a numeric value with a SparseNeuroVol object
-#'
-#' This method compares a numeric value (\code{e1}) with the data of a SparseNeuroVol object (\code{e2}) using a generic comparison function.
-#'
-#' @param e1 A numeric value to compare with the data of the SparseNeuroVol object.
-#' @param e2 A SparseNeuroVol object containing the data to be compared.
-#' @return The result of the comparison between the numeric value and the SparseNeuroVol object's data.
 #' @rdname Compare-methods
 #' @export
 setMethod(f="Compare", signature=signature(e1="numeric", e2="SparseNeuroVol"),
@@ -42,14 +45,18 @@ setMethod(f="Compare", signature=signature(e1="numeric", e2="SparseNeuroVol"),
           })
 
 
-#' Perform arithmetic operations between two SparseNeuroVol objects
+#' Arithmetic Operations
 #'
-#' This method performs arithmetic operations between two SparseNeuroVol objects (\code{e1} and \code{e2}) using a generic arithmetic function.
-#' The dimensions of both objects are checked for compatibility before performing the operation.
+#' @name Arith-methods
+#' @aliases Arith,SparseNeuroVol,SparseNeuroVol-method
+#'          Arith,DenseNeuroVec,DenseNeuroVec-method
+#'          Arith,SparseNeuroVol,NeuroVol-method
+#'          Arith,NeuroVol,SparseNeuroVol-method
+#' @description Methods for performing arithmetic operations on neuroimaging objects
 #'
-#' @param e1 A SparseNeuroVol object to be used in the arithmetic operation.
-#' @param e2 A SparseNeuroVol object to be used in the arithmetic operation.
-#' @return A SparseNeuroVol object containing the result of the arithmetic operation between \code{e1} and \code{e2}.
+#' @param e1 A SparseNeuroVol object.
+#' @param e2 A SparseNeuroVol object.
+#' @return A DenseNeuroVol object representing the result of the arithmetic operation.
 #' @rdname Arith-methods
 #' @export
 setMethod(f="Arith", signature=signature(e1="SparseNeuroVol", e2="SparseNeuroVol"),
@@ -168,11 +175,6 @@ setMethod(f="Arith", signature=signature(e1="DenseNeuroVec", e2="DenseNeuroVec")
           })
 
 
-# setMethod(f="Compare", signature=signature(e1="NeuroVec", e2="NeuroVec"),
-#           def=function(e1, e2) {
-#             checkDim(e1,e2)
-#
-#           })
 
 
 #' @export
@@ -354,40 +356,37 @@ setMethod(f="Arith", signature=signature(e1="NeuroVol", e2="NeuroVec"),
           })
 
 
-#' Summary of SparseNeuroVec
-#'
-#' This function computes a summary of a SparseNeuroVec object.
-#'
-#' @param x A SparseNeuroVec object.
-#'
-#' @return A summary of the input SparseNeuroVec object.
-#'
+
 #' @export
+#' @rdname Summary-methods
+#' @param x A SparseNeuroVec object
+#' @param ... Additional arguments passed to methods
+#' @param na.rm Logical indicating whether to remove NA values before computation
 setMethod(f="Summary", signature=signature(x="SparseNeuroVec"),
-		def=function(x) {
-			callGeneric(x@data)
+		def=function(x, ..., na.rm = FALSE) {
+			callGeneric(x@data, ..., na.rm = na.rm)
 		})
 
-
-
-#' Summary of SparseNeuroVol
-#'
-#' This function computes a summary of a SparseNeuroVol object.
-#'
-#' @param x A SparseNeuroVol object.
-#' @param ... Additional arguments (currently ignored).
-#' @param na.rm A logical value indicating whether NA values should be removed before computation.
-#'
-#' @return A summary of the input SparseNeuroVol object.
-#'
 #' @export
-setMethod(f="Summary", signature=signature(x="SparseNeuroVol", na.rm="ANY"),
-    def=function(x, ..., na.rm) {
-      callGeneric(x@data)
+#' @rdname Summary-methods
+setMethod(f="Summary", signature=signature(x="SparseNeuroVol"),
+    def=function(x, ..., na.rm = FALSE) {
+      callGeneric(x@data, ..., na.rm = na.rm)
     })
 
+#' @export
+#' @rdname Summary-methods
+setMethod(f="Summary", signature=signature(x="DenseNeuroVol"),
+    def=function(x, ..., na.rm = FALSE) {
+      callGeneric(x@.Data, ..., na.rm = na.rm)
+    })
 
-#setMethod("sum", signature()
+#' @export
+#' @rdname Summary-methods
+setMethod(f="Summary", signature=signature(x="DenseNeuroVol", na.rm="ANY"),
+    def=function(x, ..., na.rm) {
+      callGeneric(x@.Data, ..., na.rm=na.rm)
+    })
 
 #' Compare two NeuroVec objects
 #'
@@ -419,18 +418,63 @@ setMethod(f="Arith", signature=signature(e1="NeuroVol", e2="SparseNeuroVol"),
             ret <- callGeneric(as.vector(e1@.Data), as.vector(e2@data))
             DenseNeuroVol(ret, space(e1))
           })
-#' Summary of DenseNeuroVol
-#'
-#' This function computes a summary of a DenseNeuroVol object.
-#'
-#' @param x A DenseNeuroVol object.
-#' @param ... Additional arguments (currently ignored).
-#' @param na.rm A logical value indicating whether NA values should be removed before computation.
-#'
-#' @return A summary of the input DenseNeuroVol object.
-#'
+
+
+#' Summary method for Neuroimaging objects
+#' @rdname Summary-methods
 #' @export
 setMethod(f="Summary", signature=signature(x="DenseNeuroVol", na.rm="ANY"),
     def=function(x, ..., na.rm) {
       callGeneric(x@.Data, ..., na.rm=na.rm)
     })
+
+#' Arithmetic operations for SparseNeuroVec objects
+#' @name Arith-methods
+#' @rdname Arith-methods
+#' @aliases Arith,SparseNeuroVec,SparseNeuroVec-method
+setMethod(f="Arith", signature=signature(e1="SparseNeuroVec", e2="SparseNeuroVec"),
+          def=function(e1, e2) {
+            # Ensure dimensions match
+            checkDim(e1, e2)
+
+            # Extract the fourth dimension from the space slot
+            D4 <- space(e1)@dim[4]
+
+            # Initialize lists to store results
+            vols <- vector("list", D4)
+            ind <- vector("list", D4)
+
+            # Iterate over the fourth dimension
+            for (i in seq_len(D4)) {
+              # Perform the arithmetic operation on the i-th slice
+              # Access data directly from the @data slot
+              vols[[i]] <- callGeneric(e1@data[i, ], e2@data[i, ])
+
+              # Extract non-zero indices from the result
+              ind[[i]] <- which(vols[[i]] != 0)
+            }
+
+            # Combine all unique non-zero indices across all dimensions
+            combined_ind <- sort(unique(unlist(ind)))
+
+            # Handle case where there are no non-zero elements
+            if (length(combined_ind) == 0) {
+              stop("Resulting SparseNeuroVec has no non-zero elements.")
+            }
+
+            # Extract the non-zero data for each volume based on combined indices
+            vret <- do.call(rbind, lapply(vols, function(vol) vol[combined_ind]))
+
+            # Update the NeuroSpace object by ensuring the fourth dimension remains consistent
+            dspace <- space(e1)  # Assuming space remains the same
+
+            # Construct the new mask based on non-zero elements
+            dims <- space(e1)@dim[1:3]
+            new_mask <- array(FALSE, dims)
+            new_mask[combined_ind] <- TRUE
+
+            # Create the new SparseNeuroVec object
+            SparseNeuroVec(data = vret,
+                           space = dspace,
+                           mask = new_mask)
+          })

@@ -17,3 +17,12 @@ None (called for side effect)
 \description{
 Write elements to a \linkS4class{BinaryWriter} object.
 }
+\examples{
+\dontrun{
+writer <- BinaryWriter("output.bin", byte_offset = 0L,
+                      data_type = "double", bytes_per_element = 8L)
+# Write some data
+write_elements(writer, rnorm(100))
+close(writer)
+}
+}

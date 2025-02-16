@@ -31,14 +31,14 @@ The kernel size is determined by the 'window' parameter, and its shape by the 's
 }
 \examples{
 # Load a sample brain mask
-brain_mask <- read_vol(system.file("extdata", "global_mask.nii", package = "neuroim2"))
+brain_mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
 
 # Apply Gaussian blurring to the brain volume
 blurred_vol <- gaussian_blur(brain_mask, brain_mask, sigma = 2, window = 1)
 
 # View a slice of the original and blurred volumes
-image(brain_mask[,,50])
-image(blurred_vol[,,50])
+image(brain_mask[,,12])
+image(blurred_vol[,,12])
 
 }
 \references{

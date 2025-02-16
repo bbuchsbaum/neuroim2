@@ -34,7 +34,7 @@ setMethod(f="split_reduce", signature=signature(x = "matrix", fac="integer", FUN
 #' @rdname split_reduce-methods
 setMethod(f="split_reduce", signature=signature(x = "matrix", fac="factor", FUN="missing"),
           def=function(x, fac) {
-            callGeneric(x,as.factor(fac))
+            split_reduce(x, fac, mean)
           })
 
 #' @title Split-Reduce Implementation for Matrix and Factor
@@ -173,7 +173,7 @@ setMethod(f="split_scale", signature=signature(x = "matrix", f="factor", center=
 
             for (lev in names(ind)) {
               keep <- ind[[lev]]
-              xs <- scale(x[keep,,drop=FALSE], center=center, scale=scale)
+              xs <- base::scale(x[keep,,drop=FALSE], center=center, scale=scale)
               out[keep,] <- xs
             }
 
@@ -278,7 +278,7 @@ setMethod(f="split_scale", signature=signature(x = "DenseNeuroVec", f="factor", 
 setMethod(f="scale_series", signature=signature(x="NeuroVec", center="logical", scale="logical"),
           def=function(x, center, scale) {
             M <- as.matrix(x)
-            Ms <- scale(t(M), center, scale)
+            Ms <- base::scale(t(M), center, scale)
             NeuroVec(Ms, space(x))
 
           })

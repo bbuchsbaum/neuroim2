@@ -9,7 +9,11 @@
 \arguments{
 \item{x}{The NeuroHyperVec object}
 
-\item{i, j, k}{The spatial indices}
+\item{i}{first index}
+
+\item{j}{second index}
+
+\item{k}{third index}
 
 \item{...}{Additional arguments (not used)}
 }

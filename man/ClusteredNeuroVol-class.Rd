@@ -94,11 +94,28 @@ clustered_vol <- new("ClusteredNeuroVol",
 }
 
 
-bspace <- NeuroSpace(c(16,16,16), spacing=c(1,1,1))
-grid <- index_to_grid(bspace, 1:(16*16*16))
-kres <- kmeans(grid, centers=10)
-mask <- NeuroVol(rep(1, 16^3),bspace)
-clusvol <- ClusteredNeuroVol(mask, kres$cluster)
+# Create a simple space and volume
+space <- NeuroSpace(c(16, 16, 16), spacing = c(1, 1, 1))
+vol_data <- array(rnorm(16^3), dim = c(16, 16, 16))
+vol <- NeuroVol(vol_data, space)
+
+# Create a binary mask (e.g., values > 0)
+mask_data <- vol_data > 0
+mask_vol <- LogicalNeuroVol(mask_data, space)
+
+# Get coordinates of masked voxels
+mask_idx <- which(mask_data)
+coords <- index_to_coord(mask_vol, mask_idx)
+
+# Cluster the coordinates into 10 groups
+set.seed(123)  # for reproducibility
+kmeans_result <- kmeans(coords, centers = 10)
+
+# Create the clustered volume
+clustered_vol <- ClusteredNeuroVol(mask_vol, kmeans_result$cluster)
+
+# Print information about the clusters
+print(clustered_vol)
 }
 \seealso{
 \code{\link{SparseNeuroVol-class}} for the parent sparse volume class.

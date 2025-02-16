@@ -3,6 +3,48 @@
 #' @include all_generic.R
 {}
 
+## Helper Functions for enforcing seekability
+
+#' Ensure that the input connection for BinaryReader is seekable
+#'
+#' @param con A connection object used for reading.
+#' @param byte_offset Byte offset to move to.
+#' @param bytes_per_element Number of bytes per element.
+#' @param data_type The R data type.
+#' @param endian The endianness of the data.
+#'
+#' @keywords internal
+#' @noRd
+ensure_reader_seekable <- function(con, byte_offset, bytes_per_element, data_type, endian) {
+  if (!inherits(con, "gzfile")) {
+    test <- try(seek(con, where = byte_offset, origin="start"), silent=TRUE)
+    if(inherits(test, "try-error"))
+      stop("Input connection must be seekable for Binary I/O.")
+  } else {
+    n <- as.integer(byte_offset / bytes_per_element)
+    readBin(con, what = data_type, size = bytes_per_element, endian = endian, n = n)
+  }
+  invisible(NULL)
+}
+
+#' Ensure that the output connection for BinaryWriter is seekable
+#'
+#' @param con A connection object used for writing.
+#' @param byte_offset Byte offset to move to.
+#'
+#' @keywords internal
+#' @noRd
+ensure_writer_seekable <- function(con, byte_offset) {
+  if (!inherits(con, "gzfile")) {
+    test <- try(seek(con, where = byte_offset, origin="start"), silent=TRUE)
+    if(inherits(test, "try-error"))
+      stop("Output connection must be seekable for Binary I/O.")
+  } else {
+    stop("Cannot use gzipped connection for BinaryWriter")
+  }
+  invisible(NULL)
+}
+
 #' Read Data Using Memory Mapping
 #'
 #' Read data from a memory-mapped file based on metadata and indices.
@@ -11,6 +53,7 @@
 #' @param idx Integer vector of indices specifying elements to read
 #' @return A numeric vector of values read from the memory-mapped file
 #' @keywords internal
+#' @noRd
 .read_mmap <- function(meta, idx) {
   if (.Platform$endian != meta@endian) {
     stop(".read_mmap: swapped endian data not supported.")
@@ -32,6 +75,7 @@
 #' @param idx Integer vector of indices specifying elements to read
 #' @return A numeric matrix of values with dimensions [time, voxels]
 #' @keywords internal
+#' @noRd
 read_mapped_series <- function(meta, idx) {
   if (endsWith(meta@data_file, ".gz")) {
     stop(paste("Cannot create series_reader with gzipped file", meta@data_file))
@@ -54,6 +98,7 @@ read_mapped_series <- function(meta, idx) {
 #' @param idx Integer vector of indices specifying elements to read
 #' @return A numeric vector of values
 #' @keywords internal
+#' @noRd
 read_mapped_data <- function(meta, idx) {
   if (endsWith(meta@data_file, ".gz")) {
     stop(paste("Cannot create series_reader with gzipped file", meta@data_file))
@@ -73,6 +118,7 @@ read_mapped_data <- function(meta, idx) {
 #' @param idx Integer vector of indices specifying volumes to read
 #' @return A numeric matrix with dimensions [time, voxels]
 #' @keywords internal
+#' @noRd
 read_mapped_vols <- function(meta, idx) {
   if (endsWith(meta@data_file, ".gz")) {
     stop(paste("Cannot create series_reader with gzipped file", meta@data_file))
@@ -102,6 +148,7 @@ read_mapped_vols <- function(meta, idx) {
 #'     \item input: Optional connection object (if NULL, creates new connection)
 #'   }
 #' @keywords internal
+#' @noRd
 series_reader <- function(file_name) {
   if (endsWith(file_name, ".gz")) {
     stop(paste("Cannot create series_reader with gzipped file", file_name))
@@ -223,38 +270,30 @@ BinaryWriter <- function(output, byte_offset, data_type, bytes_per_element,
 setMethod(f="initialize", signature=signature(.Object="BinaryReader"),
 		def=function(.Object, input, byte_offset, data_type, bytes_per_element, endian, signed) {
 			.Object@input <- input
-			.Object@byte_offset <- byte_offset
+			.Object@byte_offset <- as.integer(byte_offset)
 			.Object@data_type <- data_type
-			.Object@bytes_per_element <- bytes_per_element
+			.Object@bytes_per_element <- as.integer(bytes_per_element)
 			.Object@endian <- endian
 			.Object@signed <- signed
 
-			## must be seekable connection, should enforce this
-			##
-
-			if (attr(.Object@input, "class")[[1]] != "gzfile") {
-				seek(.Object@input, where=.Object@byte_offset, origin="start")
-			} else {
-				n <- as.integer(.Object@byte_offset/.Object@bytes_per_element)
-				readBin(.Object@input, what=.Object@data_type, size=.Object@bytes_per_element, endian=.Object@endian, n=n)
-			}
+			# Ensure the reader's connection is seekable (or properly skipped if gzipped)
+			ensure_reader_seekable(.Object@input, .Object@byte_offset, .Object@bytes_per_element, .Object@data_type, .Object@endian)
 
 			.Object
-
 		})
 
 ## code duplication, fix me
 setMethod(f="initialize", signature=signature(.Object="BinaryWriter"),
 		def=function(.Object, output, byte_offset, data_type, bytes_per_element, endian) {
 			.Object@output <- output
-			.Object@byte_offset <- byte_offset
+			.Object@byte_offset <- as.integer(byte_offset)
 			.Object@data_type <- data_type
-			.Object@bytes_per_element <- bytes_per_element
+			.Object@bytes_per_element <- as.integer(bytes_per_element)
 			.Object@endian <- endian
 
-			## must be seekable connection, should enforce this
-			##
-			#seek(.Object@output, where=.Object@byte_offset, origin="start")
+			# Ensure that the writer's connection is seekable
+			ensure_writer_seekable(.Object@output, .Object@byte_offset)
+
 			.Object
 		})
 
@@ -265,6 +304,14 @@ setMethod(f="initialize", signature=signature(.Object="BinaryWriter"),
 #' @param x Object of class \linkS4class{BinaryReader}
 #' @param num_elements Integer specifying number of elements to read
 #' @return Numeric vector of read elements
+#' @examples
+#' \dontrun{
+#' reader <- BinaryReader("data.bin", byte_offset = 0L,
+#'                       data_type = "double", bytes_per_element = 8L)
+#' # Read 100 elements
+#' data <- read_elements(reader, 100)
+#' close(reader)
+#' }
 #' @export
 setMethod(f="read_elements", signature=signature(x= "BinaryReader", num_elements="numeric"),
 		def=function(x, num_elements) {
@@ -278,6 +325,14 @@ setMethod(f="read_elements", signature=signature(x= "BinaryReader", num_elements
 #' @param x Object of class \linkS4class{BinaryWriter}
 #' @param els Numeric vector of elements to write
 #' @return None (called for side effect)
+#' @examples
+#' \dontrun{
+#' writer <- BinaryWriter("output.bin", byte_offset = 0L,
+#'                       data_type = "double", bytes_per_element = 8L)
+#' # Write some data
+#' write_elements(writer, rnorm(100))
+#' close(writer)
+#' }
 #' @export
 setMethod(f="write_elements", signature=signature(x= "BinaryWriter", els="numeric"),
 		def=function(x, els) {
@@ -293,9 +348,23 @@ setMethod(f="write_elements", signature=signature(x= "BinaryWriter", els="numeri
 
 #' Close a BinaryReader or BinaryWriter
 #'
-#' Close the connection associated with a BinaryReader or BinaryWriter object.
+#' Closes the underlying connection associated with a BinaryReader or BinaryWriter object.
+#' This should be called when you're done with the reader/writer to free system resources.
 #'
 #' @param con The BinaryReader or BinaryWriter object to close.
+#' @return Invisibly returns NULL.
+#' @examples
+#' \dontrun{
+#' # Create and close a binary reader
+#' reader <- BinaryReader("data.bin", byte_offset = 0L,
+#'                       data_type = "double", bytes_per_element = 8L)
+#' close(reader)
+#' 
+#' # Create and close a binary writer
+#' writer <- BinaryWriter("output.bin", byte_offset = 0L,
+#'                       data_type = "double", bytes_per_element = 8L)
+#' close(writer)
+#' }
 #'
 #' @export
 #' @rdname close-methods

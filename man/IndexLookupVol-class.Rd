@@ -79,7 +79,7 @@ indices <- which(mask)
 map <- seq_along(indices)
 
 # Create an IndexLookupVol object
-ilv <- new("IndexLookupVol", space = space, indices = as.integer(indices), map = map)
+ilv <- IndexLookupVol(space = space, indices = as.integer(indices))
 
 # Access the indices
 print(ilv@indices)
@@ -104,7 +104,9 @@ coords <- coords(ilv, indices[1:10])
 \code{\link{SparseNeuroVec-class}} for the primary class that utilizes IndexLookupVol.
 \code{\link{NeuroVol-class}} for the base volumetric image class.
 
-\code{\link{coords}} for coordinate lookup
-\code{\link{lookup}} for index mapping
+\code{\link{IndexLookupVol}} for creating instances of this class
+
+\code{\link{coords}} for coordinate lookup,
+\code{\link{lookup}} for index mapping,
 \code{\linkS4class{NeuroSpace}} for space representation
 }

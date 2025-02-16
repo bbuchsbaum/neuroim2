@@ -46,26 +46,21 @@ SUP_INF    <- new("NamedAxis", axis="Superior-to-Inferior", direction=c(0,0,-1))
 #'   (e.g. "LEFT") or abbreviation (e.g. "L")
 #' @return A NamedAxis object corresponding to the specified axis
 #' @keywords internal
-#' @examples
-#' \dontrun{
-#' matchAxis("L")  # Returns LEFT_RIGHT axis
-#' matchAxis("ANTERIOR")  # Returns ANT_POST axis
-#' }
+#' @noRd
 matchAxis <- function(firstAxis) {
   switch(toupper(firstAxis),
-         "LEFT"=LEFT_RIGHT,
-         "L"=LEFT_RIGHT,
-         "RIGHT"=RIGHT_LEFT,
-         "R"=RIGHT_LEFT,
-         "ANTERIOR"=ANT_POST,
-         "A"=ANT_POST,
-         "POSTERIOR"=POST_ANT,
-         "P"=POST_ANT,
-         "INFERIOR"=INF_SUP,
-         "I"=INF_SUP,
-         "SUPERIOR"=SUP_INF,
-         "S"=SUP_INF)
-
+         "LEFT" = LEFT_RIGHT,
+         "L" = LEFT_RIGHT,
+         "RIGHT" = RIGHT_LEFT,
+         "R" = RIGHT_LEFT,
+         "ANTERIOR" = ANT_POST,
+         "A" = ANT_POST,
+         "POSTERIOR" = POST_ANT,
+         "P" = POST_ANT,
+         "INFERIOR" = INF_SUP,
+         "I" = INF_SUP,
+         "SUPERIOR" = SUP_INF,
+         "S" = SUP_INF)
 }
 
 #' Time axis
@@ -83,8 +78,9 @@ TimeAxis <- new("AxisSet1D", ndim=as.integer(1), i=TIME)
 #' @param i A NamedAxis object representing the axis
 #' @return An AxisSet1D object
 #' @keywords internal
+#' @noRd
 AxisSet1D <- function(i) {
-  new("AxisSet1D", ndim=as.integer(1), i=i)
+  new("AxisSet1D", ndim = as.integer(1), i = i)
 }
 
 #' Create a two-dimensional axis set
@@ -93,8 +89,9 @@ AxisSet1D <- function(i) {
 #' @param j A NamedAxis object representing the second axis
 #' @return An AxisSet2D object
 #' @keywords internal
+#' @noRd
 AxisSet2D <- function(i, j) {
-	new("AxisSet2D", ndim=as.integer(2), i=i, j=j)
+	new("AxisSet2D", ndim = as.integer(2), i = i, j = j)
 }
 
 #' Create a three-dimensional axis set
@@ -104,8 +101,9 @@ AxisSet2D <- function(i, j) {
 #' @param k A NamedAxis object representing the third axis
 #' @return An AxisSet3D object
 #' @keywords internal
+#' @noRd
 AxisSet3D <- function(i, j, k) {
-	new("AxisSet3D", ndim=as.integer(3), i=i, j=j, k=k)
+	new("AxisSet3D", ndim = as.integer(3), i = i, j = j, k = k)
 }
 
 #' Get permutation matrix from axis set
@@ -255,6 +253,7 @@ setMethod(f="ndim",signature(x= "AxisSet"), function(x, ...) { x@ndim })
 #' @param ... Additional arguments (not used)
 #' @return Character string representing the axis
 #' @keywords internal
+#' @noRd
 setMethod(f="print_", signature=signature("NamedAxis"),
     def=function(x, ...) {
         x@axis
@@ -268,7 +267,7 @@ setMethod(f="show", signature("NamedAxis"),
     def=function(object) {
         header <- crayon::bold(crayon::blue("NamedAxis"))
         cat(header, "\n")
-        cat(crayon::silver(paste(rep("─", 30), collapse="")), "\n")
+        cat(crayon::silver(paste(rep("-", 30), collapse="")), "\n")
         cat(crayon::white(object@axis), "\n")
     })
 
@@ -280,7 +279,7 @@ setMethod(f="show", signature=signature("AxisSet1D"),
     def=function(object) {
         header <- crayon::bold(crayon::blue("AxisSet1D"))
         cat(header, "\n")
-        cat(crayon::silver(paste(rep("─", 30), collapse="")), "\n")
+        cat(crayon::silver(paste(rep("-", 30), collapse="")), "\n")
         cat(crayon::yellow("Axis:"), crayon::white(object@i@axis), "\n")
     })
 
@@ -290,9 +289,10 @@ setMethod(f="show", signature=signature("AxisSet1D"),
 #' @param ... Additional arguments (not used)
 #' @return Character string representing the axis set
 #' @keywords internal
+#' @noRd
 setMethod(f="print_", signature=signature("AxisSet2D"),
     def=function(x, ...) {
-        paste(x@i@axis, "×", x@j@axis)
+        paste(x@i@axis, "x", x@j@axis)
     })
 
 #' Show method for AxisSet2D objects
@@ -303,7 +303,7 @@ setMethod(f="show", signature=signature("AxisSet2D"),
     def=function(object) {
         header <- crayon::bold(crayon::blue("AxisSet2D"))
         cat(header, "\n")
-        cat(crayon::silver(paste(rep("─", 30), collapse="")), "\n")
+        cat(crayon::silver(paste(rep("-", 30), collapse="")), "\n")
         cat(crayon::yellow("Axis 1:"), crayon::white(object@i@axis), "\n")
         cat(crayon::yellow("Axis 2:"), crayon::white(object@j@axis), "\n")
     })
@@ -314,9 +314,10 @@ setMethod(f="show", signature=signature("AxisSet2D"),
 #' @param ... Additional arguments (not used)
 #' @return Character string representing the axis set
 #' @keywords internal
+#' @noRd
 setMethod(f="print_", signature=signature("AxisSet3D"),
     def=function(x, ...) {
-        paste(x@i@axis, "×", x@j@axis, "×", x@k@axis)
+        paste(x@i@axis, "x", x@j@axis, "x", x@k@axis)
     })
 
 #' Show method for AxisSet3D objects
@@ -327,7 +328,7 @@ setMethod(f="show", signature=signature("AxisSet3D"),
     def=function(object) {
         header <- crayon::bold(crayon::blue("AxisSet3D"))
         cat(header, "\n")
-        cat(crayon::silver(paste(rep("─", 30), collapse="")), "\n")
+        cat(crayon::silver(paste(rep("-", 30), collapse="")), "\n")
         cat(crayon::yellow("Axis 1:"), crayon::white(object@i@axis), "\n")
         cat(crayon::yellow("Axis 2:"), crayon::white(object@j@axis), "\n")
         cat(crayon::yellow("Axis 3:"), crayon::white(object@k@axis), "\n")
@@ -341,7 +342,7 @@ setMethod(f="show", signature=signature("AxisSet4D"),
     def=function(object) {
         header <- crayon::bold(crayon::blue("AxisSet4D"))
         cat(header, "\n")
-        cat(crayon::silver(paste(rep("─", 30), collapse="")), "\n")
+        cat(crayon::silver(paste(rep("-", 30), collapse="")), "\n")
         cat(crayon::yellow("Axis 1:"), crayon::white(object@i@axis), "\n")
         cat(crayon::yellow("Axis 2:"), crayon::white(object@j@axis), "\n")
         cat(crayon::yellow("Axis 3:"), crayon::white(object@k@axis), "\n")
@@ -479,6 +480,7 @@ findAnatomy3D <- function(axis1="L", axis2="P", axis3="I") {
 #' @param axis2 Second NamedAxis object
 #' @return Matching AxisSet2D object or NULL if no match found
 #' @keywords internal
+#' @noRd
 matchAnatomy2D <- function(axis1, axis2) {
 	for (orient in OrientationList2D) {
 		if (identical(orient@i,axis1) && identical(orient@j,axis2)) {
@@ -500,6 +502,7 @@ matchAnatomy2D <- function(axis1, axis2) {
 #' @param axis3 Third NamedAxis object
 #' @return Matching AxisSet3D object or NULL if no match found
 #' @keywords internal
+#' @noRd
 matchAnatomy3D <- function(axis1, axis2, axis3) {
 	for (orient in OrientationList3D) {
 		if (identical(orient@i,axis1) && identical(orient@j,axis2) && identical(orient@k, axis3)) {
@@ -519,14 +522,8 @@ matchAnatomy3D <- function(axis1, axis2, axis3) {
 #' @param pmat A 3x3 permutation matrix
 #' @param tol Tolerance for numerical comparisons (default: 1e-10)
 #' @return An AxisSet3D object representing the anatomical orientation
-#' @export
-#' @examples
-#' \dontrun{
-#' # Create a permutation matrix
-#' pmat <- matrix(c(1,0,0, 0,1,0, 0,0,1), 3, 3)
-#' # Find corresponding anatomical orientation
-#' orient <- findAnatomy(pmat)
-#' }
+#' @keywords internal
+#' @noRd
 findAnatomy <- function(pmat, tol=1e-10) {
   mat33 <- pmat[1:3, 1:3]
   #mat33 <- sweep(mat33, 2, sqrt(apply(mat33 * mat33, 2, sum)), "/")
@@ -545,16 +542,6 @@ findAnatomy <- function(pmat, tol=1e-10) {
   ## normalize jcol
   jcol <- jcol / sqrt(sum(jcol^2))
 
-  #' Orthogonalize two vectors
-  #'
-  #' Internal helper function to make two vectors orthogonal while preserving
-  #' the direction of the first vector.
-  #'
-  #' @param col1 First vector to preserve
-  #' @param col2 Second vector to orthogonalize
-  #' @return Orthogonalized second vector
-  #' @keywords internal
-  #' @noRd
   orthogonalize <- function(col1, col2) {
     dotp <- sum(col1*col2)
     #print(dotp)
@@ -653,14 +640,15 @@ findAnatomy <- function(pmat, tol=1e-10) {
 #' @param x Numeric vector representing direction
 #' @return A NamedAxis object
 #' @keywords internal
+#' @noRd
 .getAxis <- function(x) {
   switch(as.character(as.integer(x)),
-         "1"=LEFT_RIGHT,
-         "-1"=RIGHT_LEFT,
-         "2"=POST_ANT,
-         "-2"=ANT_POST,
-         "3"=INF_SUP,
-         "-3"=SUP_INF)
+         "1" = LEFT_RIGHT,
+         "-1" = RIGHT_LEFT,
+         "2" = POST_ANT,
+         "-2" = ANT_POST,
+         "3" = INF_SUP,
+         "-3" = SUP_INF)
 }
 
 #' Find nearest valid anatomical orientation for a transformation matrix
@@ -690,16 +678,6 @@ findAnatomy <- function(pmat, tol=1e-10) {
   ## normalize jcol
   jcol <- jcol / sqrt(sum(jcol^2))
 
-  #' Orthogonalize two vectors
-  #'
-  #' Internal helper function to make two vectors orthogonal while preserving
-  #' the direction of the first vector.
-  #'
-  #' @param col1 First vector to preserve
-  #' @param col2 Second vector to orthogonalize
-  #' @return Orthogonalized second vector
-  #' @keywords internal
-  #' @noRd
   orthogonalize <- function(col1, col2) {
     dotp <- sum(col1*col2)
     #print(dotp)

@@ -50,7 +50,18 @@ NULL
 # Utility Functions
 # ------------------------------------------------------------------
 
-# Function to validate indices for each dimension
+#' Validate Indices
+#'
+#' A helper function to validate numeric indices for each dimension.
+#'
+#' @param dimensions A numeric vector representing the dimensions of an array.
+#' @param indices A list of numeric index vectors, one for each dimension to be validated.
+#' @param dim_names A character vector of names corresponding to each dimension.
+#'
+#' @return Invisibly returns if all indices are valid. 
+#'
+#' @keywords internal
+#' @noRd
 validate_indices <- function(dimensions, indices, dim_names) {
   for (d in seq_along(indices)) {
     idx <- indices[[d]]

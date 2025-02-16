@@ -31,7 +31,7 @@ This function partitions an image into a set of disjoint clusters using k-means 
 \examples{
 # Load an example 3D image
 library(neuroim2)
-img <- read_vol(system.file("extdata", "global_mask.nii", package = "neuroim2"))
+img <- read_vol(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
 
 # Partition the image into 5 clusters using default options
 clusters <- partition(img, 5)

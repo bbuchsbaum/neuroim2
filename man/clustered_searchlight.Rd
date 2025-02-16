@@ -27,7 +27,7 @@ clustered volume or performing k-means clustering to generate the clusters.
 }
 \examples{
 # Load an example brain mask
-mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
+mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 
 # Generate a clustered searchlight iterator with 5 clusters
 \dontrun{

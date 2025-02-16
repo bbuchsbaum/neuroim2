@@ -60,21 +60,21 @@ A DenseNeuroVec object is considered valid if:
 \examples{
 \dontrun{
 # Create a simple 4D brain image
-data <- array(rnorm(64*64*32*100), dim = c(64, 64, 32, 100))
-space <- NeuroSpace(dim = c(64, 64, 32), origin = c(0, 0, 0), spacing = c(3, 3, 4))
+data <- array(rnorm(64*64*32*10), dim = c(64, 64, 32, 10))
+space <- NeuroSpace(dim = c(64, 64, 32,10), origin = c(0, 0, 0), spacing = c(3, 3, 4))
 dense_vec <- new("DenseNeuroVec", .Data = data, space = space)
 
 # Access dimensions
 dim(dense_vec)
 
 # Extract a single 3D volume
-first_volume <- dense_vec[,,,1]
+first_volume <- dense_vec[[1]]
 }
 
 # Create a simple 4D brain image
 dim <- c(64, 64, 32, 10)  # 64x64x32 volume with 10 time points
 data <- array(rnorm(prod(dim)), dim)
-space <- NeuroSpace(dim, spacing = c(3, 3, 4, 1))
+space <- NeuroSpace(dim, spacing = c(3, 3, 4))
 
 # Create a DenseNeuroVec object
 dense_vec <- DenseNeuroVec(data = data, space = space, label = "Example")

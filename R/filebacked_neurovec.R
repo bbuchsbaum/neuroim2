@@ -10,6 +10,8 @@
 #' Data is read from disk on-demand, reducing memory usage compared to in-memory storage.
 #' The trade-off is slightly slower access times due to disk I/O operations.
 #'
+#' @seealso \code{\link{FileBackedNeuroVec}} for creating instances of this class
+#'
 NULL
 
 #' Create a FileBackedNeuroVec Object
@@ -45,23 +47,23 @@ NULL
 #' }
 #'
 #' @seealso 
-#' \code{\link{NeuroSpace}} for spatial metadata management
-#' \code{\link{read_header}} for header information extraction
+#' \code{\linkS4class{NeuroSpace}} for spatial metadata management,
+#' \code{\link{read_header}} for header information extraction,
 #' \code{\link{sub_vector}} for data access methods
+#'
+#' @importFrom methods new
+#' @importFrom assertthat assert_that
 #'
 #' @export
 FileBackedNeuroVec <- function(file_name, label = basename(file_name)) {
-  if (!is.character(file_name) || length(file_name) != 1) {
-    stop("'file_name' must be a single character string")
-  }
-  if (!file.exists(file_name)) {
-    stop("File '", file_name, "' does not exist")
-  }
+  assert_that(is.character(file_name) && length(file_name) == 1,
+              msg = "'file_name' must be a single character string")
+  assert_that(file.exists(file_name),
+              msg = paste("File", file_name, "does not exist"))
   
   meta <- read_header(file_name)
-  if (length(meta@dims) != 4) {
-    stop("Input data must be 4-dimensional (3D + time)")
-  }
+  assert_that(length(meta@dims) == 4,
+              msg = "Input data must be 4-dimensional (3D + time)")
   
   sp <- NeuroSpace(meta@dims, meta@spacing, meta@origin,
                    meta@spatial_axes, trans(meta))
@@ -107,12 +109,10 @@ FileBackedNeuroVec <- function(file_name, label = basename(file_name)) {
 setMethod(f = "sub_vector", 
           signature = signature(x = "FileBackedNeuroVec", i = "numeric"),
           def = function(x, i) {
-            if (!is.numeric(i) || any(is.na(i))) {
-              stop("Index 'i' must be a numeric vector without NA values")
-            }
-            if (any(i < 1) || any(i > dim(x)[4])) {
-              stop("Index out of bounds")
-            }
+            assert_that(is.numeric(i) && !any(is.na(i)),
+                        msg = "Index 'i' must be a numeric vector without NA values")
+            assert_that(all(i >= 1) && all(i <= dim(x)[4]),
+                        msg = "Index out of bounds")
             
             mat <- read_mapped_vols(x@meta, i)
             sp <- add_dim(drop_dim(space(x)), length(i))
@@ -173,6 +173,7 @@ setMethod(f = "as.list",
 #' mat <- as.matrix(fbvec)
 #' }
 #'
+#' @keywords internal
 #' @noRd
 setAs(from = "FileBackedNeuroVec", to = "matrix",
       def = function(from) {
@@ -185,17 +186,25 @@ setAs(from = "FileBackedNeuroVec", to = "matrix",
 #' @param x A FileBackedNeuroVec object
 #' @param i A numeric vector of indices
 #' @return A numeric vector of values
+#' 
+#' @examples
+#' \dontrun{
+#' fbvec <- FileBackedNeuroVec("fmri_data.nii")
+#' 
+#' # Access first 10 values
+#' values <- linear_access(fbvec, 1:10)
+#' }
+#'
 #' @export
+#' @rdname linear_access-methods
 setMethod(
   f = "linear_access",
   signature = signature(x = "FileBackedNeuroVec", i = "numeric"),
   def = function(x, i) {
-    if (!is.numeric(i) || any(is.na(i))) {
-      stop("Index 'i' must be a numeric vector without NA values")
-    }
-    if (any(i < 1) || any(i > prod(dim(x)))) {
-      stop("Index out of bounds")
-    }
+    assert_that(is.numeric(i) && !any(is.na(i)),
+                msg = "Index 'i' must be a numeric vector without NA values")
+    assert_that(all(i >= 1) && all(i <= prod(dim(x))),
+                msg = "Index out of bounds")
     
     dims <- dim(x)
     spatial_nels <- prod(dims[1:3])

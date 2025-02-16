@@ -55,5 +55,5 @@ dim(meta)
 
 }
 \seealso{
-\code{\link{MetaInfo}}, \code{\link{readNIftiHeader}}
+\code{\link{MetaInfo}}
 }

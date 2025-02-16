@@ -44,5 +44,6 @@ data <- reader$read(100)
 
 }
 \seealso{
-\code{\link{read_header}}, \code{\link{BinaryReader}}
+\code{\link{read_header}} for reading headers,
+\code{\linkS4class{BinaryReader}} for reading binary data
 }

@@ -1,3 +1,19 @@
+#' @include all_class.R
+NULL
+#' @include all_generic.R
+NULL
+
+#' Spatial Filtering Methods for Neuroimaging Data
+#'
+#' @name spatial-filter
+#' @description Methods for applying spatial filters to neuroimaging data
+NULL
+
+#' @importFrom assertthat assert_that
+#' @importFrom methods new
+#' @importFrom stats dnorm
+NULL
+
 #' Gaussian Blur for Volumetric Images
 #'
 #' @description
@@ -20,16 +36,16 @@
 #'
 #' @examples
 #' # Load a sample brain mask
-#' brain_mask <- read_vol(system.file("extdata", "global_mask.nii", package = "neuroim2"))
+#' brain_mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
 #'
 #' # Apply Gaussian blurring to the brain volume
 #' blurred_vol <- gaussian_blur(brain_mask, brain_mask, sigma = 2, window = 1)
 #'
 #' # View a slice of the original and blurred volumes
-#' image(brain_mask[,,50])
-#' image(blurred_vol[,,50])
+#' image(brain_mask[,,12])
+#' image(blurred_vol[,,12])
 #'
-#' @seealso 
+#' @seealso
 #' \code{\link{NeuroVol-class}}, \code{\link{LogicalNeuroVol-class}}, \code{\link{bilateral_filter}}
 #'
 #' @references
@@ -37,8 +53,16 @@
 #'
 #' @export
 gaussian_blur <- function(vol, mask, sigma = 2, window = 1) {
-  assert_that(window >= 1)
-  assert_that(sigma > 0)
+  assert_that(inherits(vol, "NeuroVol"),
+              msg = "vol must be a NeuroVol object")
+  assert_that(window >= 1,
+              msg = "window must be >= 1")
+  assert_that(sigma > 0,
+              msg = "sigma must be positive")
+  if (!missing(mask)) {
+    assert_that(inherits(mask, "NeuroVol"),
+                msg = "mask must be a NeuroVol object")
+  }
 
   if (missing(mask)) {
     mask.idx <- 1:prod(dim(vol))
@@ -56,29 +80,29 @@ gaussian_blur <- function(vol, mask, sigma = 2, window = 1) {
 #' Edge-Preserving Guided Filter for Volumetric Images
 #'
 #' @description
-#' This function applies a guided filter to a volumetric image (3D brain MRI data) 
-#' to perform edge-preserving smoothing. The guided filter smooths the image while 
+#' This function applies a guided filter to a volumetric image (3D brain MRI data)
+#' to perform edge-preserving smoothing. The guided filter smooths the image while
 #' preserving edges, providing a balance between noise reduction and structural preservation.
 #'
 #' @param vol A \code{\linkS4class{NeuroVol}} object representing the image volume to be filtered.
 #' @param radius An integer specifying the spatial radius of the filter. Default is 4.
-#' @param epsilon A numeric value specifying the regularization parameter. It controls 
+#' @param epsilon A numeric value specifying the regularization parameter. It controls
 #'   the degree of smoothing and edge preservation. Default is 0.49 (0.7^2).
 #'
 #' @return A \code{\linkS4class{NeuroVol}} object representing the filtered image.
 #'
 #' @details
-#' The guided filter operates by computing local linear models between the guidance 
-#' image (which is the same as the input image in this implementation) and the output. 
-#' The 'radius' parameter determines the size of the local neighborhood, while 'epsilon' 
+#' The guided filter operates by computing local linear models between the guidance
+#' image (which is the same as the input image in this implementation) and the output.
+#' The 'radius' parameter determines the size of the local neighborhood, while 'epsilon'
 #' controls the smoothness of the filter.
 #'
-#' The implementation uses box blur operations for efficiency, which approximates 
+#' The implementation uses box blur operations for efficiency, which approximates
 #' the behavior of the original guided filter algorithm.
 #'
 #' @examples
 #' # Load an example brain volume
-#' brain_vol <- read_vol(system.file("extdata", "global_mask.nii", package = "neuroim2"))
+#' brain_vol <- read_vol(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
 #'
 #' # Apply guided filtering to the brain volume
 #' \dontrun{
@@ -86,19 +110,26 @@ gaussian_blur <- function(vol, mask, sigma = 2, window = 1) {
 #'
 #' # Visualize a slice of the original and filtered volumes
 #' par(mfrow = c(1, 2))
-#' image(brain_vol[,,50], main = "Original")
-#' image(filtered_vol[,,50], main = "Filtered")
+#' image(brain_vol[,,12], main = "Original")
+#' image(filtered_vol[,,12], main = "Filtered")
 #' }
 #'
 #' @references
-#' He, K., Sun, J., & Tang, X. (2013). Guided Image Filtering. IEEE Transactions 
+#' He, K., Sun, J., & Tang, X. (2013). Guided Image Filtering. IEEE Transactions
 #' on Pattern Analysis and Machine Intelligence, 35(6), 1397-1409.
 #'
-#' @seealso 
+#' @seealso
 #' \code{\link{gaussian_blur}}, \code{\link{bilateral_filter}}, \code{\link{NeuroVol-class}}
 #'
 #' @export
 guided_filter <- function(vol, radius = 4, epsilon = 0.7^2) {
+  assert_that(inherits(vol, "NeuroVol"),
+              msg = "vol must be a NeuroVol object")
+  assert_that(radius >= 1,
+              msg = "radius must be >= 1")
+  assert_that(epsilon > 0,
+              msg = "epsilon must be positive")
+
   mask_idx <- which(vol !=0)
   mean_I = box_blur(vol, mask_idx, radius)
   mean_II = box_blur(vol*vol, mask_idx, radius)
@@ -113,6 +144,7 @@ guided_filter <- function(vol, radius = 4, epsilon = 0.7^2) {
   mean_b = box_blur(b, mask_idx, radius)
   out = mean_a * vol + mean_b
   ovol = NeuroVol(out, space(vol))
+  ovol
 }
 
 #' Apply a bilateral filter to a volumetric image
@@ -129,7 +161,7 @@ guided_filter <- function(vol, radius = 4, epsilon = 0.7^2) {
 #' @return A smoothed image of class \code{\linkS4class{NeuroVol}}.
 #'
 #' @examples
-#' brain_mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
+#' brain_mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #'
 #' # Apply bilateral filtering to the brain volume
 #' filtered_vol <- bilateral_filter(brain_mask, brain_mask, spatial_sigma = 2,
@@ -166,7 +198,7 @@ bilateral_filter <- function(vol, mask, spatial_sigma=2, intensity_sigma=1, wind
 #' @param window The size of the window for the bilateral filter (default = 1).
 #' @return A NeuroVec object with the filtered volumes.
 #' @examples
-#' brain_mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
+#' brain_mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #' vec <- read_vec(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #' out <- bilateral_filter_vec(vec,brain_mask)
 #' @noRd
@@ -212,23 +244,23 @@ bilateral_filter_vec <- function(vec, mask, spatial_sigma=2, intensity_sigma=1, 
 #' @return A \code{\linkS4class{NeuroVol}} object representing the enhanced image.
 #'
 #' @export
-laplace_enhance <- function(vol, mask, k = 2, patch_size = 3, search_radius = 2, 
-                          h = 0.7, mapping_params = NULL, 
+laplace_enhance <- function(vol, mask, k = 2, patch_size = 3, search_radius = 2,
+                          h = 0.7, mapping_params = NULL,
                           use_normalization_free = TRUE) {
-  
+
   assert_that(inherits(vol, "NeuroVol"))
   assert_that(k >= 1)
   assert_that(patch_size >= 3 && patch_size %% 2 == 1)
   assert_that(search_radius >= 1)
   assert_that(h > 0)
-  
+
   # Create default mask if not provided
   if (missing(mask)) {
     mask <- LogicalNeuroVol(array(TRUE, dim(vol)), space(vol))
   } else {
     assert_that(inherits(mask, "LogicalNeuroVol"))
   }
-  
+
   # Call C++ implementation
   farr <- fast_multilayer_laplacian_enhancement_masked(
     as.array(vol),
@@ -240,7 +272,7 @@ laplace_enhance <- function(vol, mask, k = 2, patch_size = 3, search_radius = 2,
     mapping_params,
     use_normalization_free
   )
-  
+
   # Return enhanced volume
   out <- NeuroVol(farr, space(vol))
   out

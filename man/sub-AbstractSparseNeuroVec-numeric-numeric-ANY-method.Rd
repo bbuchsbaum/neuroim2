@@ -7,22 +7,22 @@
 \S4method{[}{AbstractSparseNeuroVec,numeric,numeric,ANY}(x, i, j, k, m, ..., drop = TRUE)
 }
 \arguments{
-\item{x}{An object of class \code{AbstractSparseNeuroVec}.}
+\item{x}{An object of class \code{AbstractSparseNeuroVec}}
 
-\item{i}{Numeric vector specifying the indices for the first dimension.}
+\item{i}{Numeric vector specifying the indices for the first dimension}
 
-\item{j}{Numeric vector specifying the indices for the second dimension.}
+\item{j}{Numeric vector specifying the indices for the second dimension}
 
-\item{k}{Numeric vector specifying the indices for the third dimension. Defaults to all indices if missing.}
+\item{k}{Numeric vector specifying the indices for the third dimension (optional)}
 
-\item{m}{Numeric vector specifying the indices for the fourth dimension. Defaults to all indices if missing.}
+\item{m}{Numeric vector specifying the indices for the fourth dimension (optional)}
 
-\item{...}{Additional arguments (currently unused).}
+\item{...}{Additional arguments passed to methods}
 
-\item{drop}{Logical indicating whether to drop dimensions of length one. Defaults to \code{TRUE}.}
+\item{drop}{Logical indicating whether to drop dimensions of length one (default: TRUE)}
 }
 \value{
-An array containing the extracted subset. The dimensions correspond to the lengths of \code{i}, \code{j}, \code{k}, and \code{m}. If \code{drop} is \code{TRUE}, dimensions of length one are removed.
+An array containing the extracted subset
 }
 \description{
 Extracts a subset of data from a sparse four-dimensional brain image based on provided indices.

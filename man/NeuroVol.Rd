@@ -2,24 +2,26 @@
 % Please edit documentation in R/neurovol.R
 \name{NeuroVol}
 \alias{NeuroVol}
-\title{Construct a NeuroVol object}
+\title{NeuroVol: 3D Neuroimaging Volume Class}
 \usage{
 NeuroVol(data, space, label = "", indices = NULL)
 }
 \arguments{
-\item{data}{a three-dimensional \code{array}}
+\item{data}{A 3D array containing the volumetric data.}
 
-\item{space}{an instance of class \code{\linkS4class{NeuroSpace}}}
+\item{space}{An object of class \code{\linkS4class{NeuroSpace}} defining the spatial properties.}
 
-\item{label}{a \code{character} string to identify volume}
+\item{label}{A character string providing a label for the volume (default: "").}
 
-\item{indices}{an 1D vector that gives the linear indices of the associated \code{data} vector}
+\item{indices}{An optional vector of indices for sparse representation (default: NULL).}
 }
 \value{
-a \code{\linkS4class{DenseNeuroVol}} instance
+A \code{NeuroVol} object.
 }
 \description{
-Construct a \code{\linkS4class{NeuroVol}} instance, using default (dense) implementation
+The \code{NeuroVol} class encapsulates 3D volumetric neuroimaging data. It provides methods
+for accessing slices, performing spatial transformations, and integrating with the spatial
+reference provided by \code{\linkS4class{NeuroSpace}}.
 }
 \examples{
 bspace <- NeuroSpace(c(64,64,64), spacing=c(1,1,1))

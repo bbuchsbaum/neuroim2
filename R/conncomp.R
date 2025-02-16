@@ -36,12 +36,12 @@
 #' of provisional labels.
 #'
 #' @examples
-#' # Create a simple 3D binary mask with two components
+#' # Create a simple 3D binary mask with two disconnected components
 #' mask <- array(FALSE, c(4, 4, 4))
 #' mask[1:2, 1:2, 1:2] <- TRUE  # First component
 #' mask[3:4, 3:4, 3:4] <- TRUE  # Second component
 #'
-#' # Extract components using 6-connectivity
+#' # Extract components using different connectivity patterns
 #' comps <- conn_comp_3D(mask, connect = "6-connect")
 #'
 #' # Number of components
@@ -52,25 +52,29 @@
 #' unique_sizes <- unique(comps$size[comps$size > 0])
 #' cat("Component sizes:", paste(unique_sizes, collapse=", "), "\n")
 #'
+#' # Try with different connectivity
+#' comps_26 <- conn_comp_3D(mask, connect = "26-connect")
+#' cat("Number of components with 26-connectivity:", max(comps_26$index), "\n")
+#'
 #' @references
 #' Rosenfeld, A., & Pfaltz, J. L. (1966). Sequential operations in digital 
 #' picture processing. Journal of the ACM, 13(4), 471-494.
 #'
 #' @seealso 
-#' \code{\link{array}} for creating 3D arrays
+#' \code{\link[base]{array}} for creating 3D arrays,
+#' \code{\link{ClusteredNeuroVol}} for working with clustered neuroimaging data
 #' 
 #' @importFrom purrr map flatten_dbl
 #' @importFrom stats setNames
+#' @importFrom assertthat assert_that
 #'
 #' @export
 conn_comp_3D <- function(mask, connect = c("26-connect", "18-connect", "6-connect")) {
   # Input validation with more informative messages
-  if (!is.array(mask) || length(dim(mask)) != 3) {
-    stop("'mask' must be a 3D array")
-  }
-  if (!is.logical(mask[1])) {
-    stop("'mask' must be a logical array")
-  }
+  assert_that(is.array(mask) && length(dim(mask)) == 3,
+              msg = "'mask' must be a 3D array")
+  assert_that(is.logical(mask[1]),
+              msg = "'mask' must be a logical array")
 
   connect <- match.arg(connect)
 

@@ -7,7 +7,7 @@
 NeuroVecSeq(...)
 }
 \arguments{
-\item{...}{One or more instances of type \code{\link{NeuroVec}}.}
+\item{...}{One or more instances of type \code{\linkS4class{NeuroVec}}.}
 }
 \value{
 A NeuroVecSeq object containing:
@@ -94,6 +94,6 @@ print(vs)
 
 }
 \seealso{
-\code{\link{NeuroVec-class}} for the base vector class
-\code{\link{NeuroSpace-class}} for spatial information
+\code{\linkS4class{NeuroVec}} for the base vector class,
+\code{\linkS4class{NeuroSpace}} for spatial information
 }

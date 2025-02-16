@@ -3,7 +3,24 @@
 \docType{class}
 \name{NeuroHyperVec-class}
 \alias{NeuroHyperVec-class}
+\alias{[,NeuroHyperVec,ANY,ANY,ANY-method}
+\alias{[.NeuroHyperVec}
 \title{NeuroHyperVec Class}
+\usage{
+\S4method{[}{NeuroHyperVec,ANY,ANY,ANY}(x, i, j, k, l, m, ..., drop = TRUE)
+}
+\arguments{
+\item{x}{The NeuroHyperVec object}
+
+\item{i, j, k, l, m}{Indices for each dimension}
+
+\item{...}{Additional arguments (not used)}
+
+\item{drop}{Whether to drop dimensions of length 1}
+}
+\value{
+A subset of the NeuroHyperVec data.
+}
 \description{
 A class representing a five-dimensional brain image, where the first three dimensions are spatial,
 the fourth dimension is typically time or trials, and the fifth dimension represents features within a trial.
@@ -50,11 +67,11 @@ Key features:
 
 \item{\code{lookup_map}}{An integer vector for O(1) spatial index lookups.}
 
-\item{\code{mask}}{A \code{\linkS4class{LogicalNeuroVol}} object defining the spatial mask}
+\item{\code{mask}}{A \code{\linkS4class{LogicalNeuroVol}} object defining the spatial mask.}
 
-\item{\code{data}}{A three-dimensional array with dimensions [features x trials x voxels] containing the data}
+\item{\code{data}}{A three-dimensional array with dimensions [features x trials x voxels] containing the data.}
 
-\item{\code{space}}{A \code{\linkS4class{NeuroSpace}} object defining the 5D space}
+\item{\code{space}}{A \code{\linkS4class{NeuroSpace}} object defining the 5D space.}
 
 \item{\code{lookup_map}}{An integer vector for O(1) spatial index lookups.}
 }}
@@ -86,5 +103,5 @@ hvec[,,,2,1]
 
 }
 \seealso{
-\code{\link{NeuroVec}}, \code{\link{LogicalNeuroVol}}, \code{\link{NeuroSpace}}
+\code{\linkS4class{NeuroVec}}, \code{\linkS4class{LogicalNeuroVol}}, \code{\linkS4class{NeuroSpace}}
 }

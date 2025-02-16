@@ -38,9 +38,9 @@ This S4 class represents a four-dimensional brain image, which is used to store
 and process time series neuroimaging data such as fMRI or 4D functional
 connectivity maps. The class extends the basic functionality of \code{\linkS4class{NeuroObj}}.
 
-This function constructs a NeuroVec object, which represents a four-dimensional
-brain image. It can create either a DenseNeuroVec or SparseNeuroVec object
-depending on the input parameters.
+The \code{NeuroVec} class represents a vectorized form of neuroimaging data, supporting both in-memory
+and file-backed data modes. It provides efficient data storage and access methods and integrates with
+the spatial reference system provided by \code{\linkS4class{NeuroSpace}}.
 }
 \details{
 NeuroVec objects are designed to handle 4D neuroimaging data, where the first
@@ -59,7 +59,10 @@ The function performs several operations:
 }
 \section{Slots}{
 
-This class inherits all slots from \code{\linkS4class{NeuroObj}}.
+\describe{
+  \item{space}{A \code{\linkS4class{NeuroSpace}} object defining the spatial properties of the image.}
+  \item{label}{A character string providing a label for the NeuroVec object.}
+}
 }
 
 \section{Methods}{
@@ -83,8 +86,8 @@ example_4d_image <- read_vec(system.file("extdata", "example_4d.nii", package = 
 # Create a NeuroVec object
 neuro_vec <- NeuroVec(data = array(rnorm(64*64*32*100), dim = c(64, 64, 32, 100)),
                       space = NeuroSpace(dim = c(64, 64, 32),
-                                        origin = c(0, 0, 0),
-                                        spacing = c(3, 3, 4)))
+                      origin = c(0, 0, 0),
+                      spacing = c(3, 3, 4))
 
 # Access the dimensions of the 4D image
 dim(neuro_vec)
@@ -115,8 +118,10 @@ print(sparse_vec)
 \code{\link{NeuroObj-class}} for the parent class.
 \code{\link{DenseNeuroVec-class}} and \code{\link{SparseNeuroVec-class}} for specific implementations.
 
+\code{\linkS4class{NeuroSpace}} for spatial information,
+\code{\link{sub_vector}} for subsetting routines, and
+\code{\link{index_to_coord}} for coordinate conversion.
 \code{\link{DenseNeuroVec-class}}, \code{\link{SparseNeuroVec-class}} for the
 specific NeuroVec types.
 \code{\link{NeuroVol-class}} for 3D volumetric data.
-\code{\link{NeuroSpace-class}} for details on spatial properties.
 }

@@ -45,12 +45,12 @@ additional O(k) space for the union-find data structure where k is the number
 of provisional labels.
 }
 \examples{
-# Create a simple 3D binary mask with two components
+# Create a simple 3D binary mask with two disconnected components
 mask <- array(FALSE, c(4, 4, 4))
 mask[1:2, 1:2, 1:2] <- TRUE  # First component
 mask[3:4, 3:4, 3:4] <- TRUE  # Second component
 
-# Extract components using 6-connectivity
+# Extract components using different connectivity patterns
 comps <- conn_comp_3D(mask, connect = "6-connect")
 
 # Number of components
@@ -61,11 +61,16 @@ cat("Found", max_comps, "components\n")
 unique_sizes <- unique(comps$size[comps$size > 0])
 cat("Component sizes:", paste(unique_sizes, collapse=", "), "\n")
 
+# Try with different connectivity
+comps_26 <- conn_comp_3D(mask, connect = "26-connect")
+cat("Number of components with 26-connectivity:", max(comps_26$index), "\n")
+
 }
 \references{
 Rosenfeld, A., & Pfaltz, J. L. (1966). Sequential operations in digital 
 picture processing. Journal of the ACM, 13(4), 471-494.
 }
 \seealso{
-\code{\link{array}} for creating 3D arrays
+\code{\link[base]{array}} for creating 3D arrays,
+\code{\link{ClusteredNeuroVol}} for working with clustered neuroimaging data
 }

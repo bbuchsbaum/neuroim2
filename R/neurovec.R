@@ -5,12 +5,12 @@ NULL
 
 
 
-#' NeuroVec
+#' NeuroVec: Neuroimaging Data Vector Class
 #'
 #' @description
-#' This function constructs a NeuroVec object, which represents a four-dimensional
-#' brain image. It can create either a DenseNeuroVec or SparseNeuroVec object
-#' depending on the input parameters.
+#' The \code{NeuroVec} class represents a vectorized form of neuroimaging data, supporting both in-memory
+#' and file-backed data modes. It provides efficient data storage and access methods and integrates with
+#' the spatial reference system provided by \code{\linkS4class{NeuroSpace}}.
 #'
 #' @param data The image data. This can be:
 #'   \itemize{
@@ -59,13 +59,16 @@ NULL
 #'                        mask = mask)
 #' print(sparse_vec)
 #'
-#' @seealso
+#' @seealso \code{\linkS4class{NeuroSpace}} for spatial information,
+#' \code{\link{sub_vector}} for subsetting routines, and
+#' \code{\link{index_to_coord}} for coordinate conversion.
 #' \code{\link{DenseNeuroVec-class}}, \code{\link{SparseNeuroVec-class}} for the
 #' specific NeuroVec types.
 #' \code{\link{NeuroVol-class}} for 3D volumetric data.
-#' \code{\link{NeuroSpace-class}} for details on spatial properties.
 #'
 #' @export
+#' @importFrom methods new
+#' @importFrom assertthat assert_that
 #' @rdname NeuroVec-class
 NeuroVec <- function(data, space = NULL, mask = NULL, label = "") {
   if (is.list(data)) {
@@ -124,7 +127,7 @@ NeuroVec <- function(data, space = NULL, mask = NULL, label = "") {
 #' # Create a simple 4D brain image
 #' dim <- c(64, 64, 32, 10)  # 64x64x32 volume with 10 time points
 #' data <- array(rnorm(prod(dim)), dim)
-#' space <- NeuroSpace(dim, spacing = c(3, 3, 4, 1))
+#' space <- NeuroSpace(dim, spacing = c(3, 3, 4))
 #'
 #' # Create a DenseNeuroVec object
 #' dense_vec <- DenseNeuroVec(data = data, space = space, label = "Example")
@@ -199,7 +202,8 @@ DenseNeuroVec <- function(data, space, label="none") {
 #' vec_data <- load_data(source)
 #' }
 #'
-#' @noRd
+#' @rdname load_data-methods
+#' @export
 setMethod(f="load_data", signature=c("NeuroVecSource"),
           def=function(x) {
             #browser()
@@ -302,20 +306,20 @@ NeuroVecSource <- function(file_name, indices=NULL, mask=NULL) {
 
 
 
-#' Get the length of a NeuroVec object
+
+#' Get length of NeuroVec object
 #'
-#' @description
-#' This function returns the number of volumes in a NeuroVec object.
+#' @description Returns the number of time points (4th dimension) in a NeuroVec object
 #'
-#' @param x The NeuroVec object.
-#'
-#' @return The number of volumes in the NeuroVec object.
+#' @param x A NeuroVec object
+#' @return Integer length (number of time points)
 #'
 #' @export
+#' @rdname length-methods
 setMethod("length", signature=c(x="NeuroVec"),
-		def=function(x) {
-			dim(x)[4]
-		})
+          def=function(x) {
+            dim(x)[4]
+          })
 
 
 
@@ -449,12 +453,12 @@ setMethod(f="show", signature=signature("NeuroVec"),
             }
 
             # Spatial Info
-            cat(crayon::bold("\n╔═ Spatial Info "), crayon::silver("───────────────────────────"), "\n", sep="")
-            cat("║ ", crayon::yellow("Dimensions"), "    : ", paste(dim(object)[1:3], collapse=" × "), "\n", sep="")
-            cat("║ ", crayon::yellow("Time Points"), "   : ", dim(object)[4], "\n", sep="")
-            cat("║ ", crayon::yellow("Spacing"), "       : ", paste(spacing(object)[1:3], collapse=" × "), "\n", sep="")
-            cat("║ ", crayon::yellow("Origin"), "        : ", paste(round(origin(object)[1:3], 2), collapse=" × "), "\n", sep="")
-            cat("║ ", crayon::yellow("Orientation"), "   : ", paste(object@space@axes@i@axis, object@space@axes@j@axis, object@space@axes@k@axis), "\n", sep="")
+            cat(crayon::bold("\n- Spatial Info"), crayon::silver(" ---------------------------"), "\n", sep="")
+            cat("| ", crayon::yellow("Dimensions"), "    : ", paste(dim(object)[1:3], collapse=" x "), "\n", sep="")
+            cat("| ", crayon::yellow("Time Points"), "   : ", dim(object)[4], "\n", sep="")
+            cat("| ", crayon::yellow("Spacing"), "       : ", paste(spacing(object)[1:3], collapse=" x "), "\n", sep="")
+            cat("| ", crayon::yellow("Origin"), "        : ", paste(round(origin(object)[1:3], 2), collapse=" x "), "\n", sep="")
+            cat("| ", crayon::yellow("Orientation"), "   : ", paste(object@space@axes@i@axis, object@space@axes@j@axis, object@space@axes@k@axis), "\n", sep="")
 
             # Memory Info
             mem_size <- object.size(object)
@@ -468,7 +472,7 @@ setMethod(f="show", signature=signature("NeuroVec"),
               paste0(round(mem_size/1024^3, 2), " GB")
             }
 
-            cat(crayon::bold("\n╚═ Memory Usage "), crayon::silver("──────────────────────────"), "\n", sep="")
+            cat(crayon::bold("\n- Memory Usage"), crayon::silver(" --------------------------"), "\n", sep="")
             cat("  ", crayon::yellow("Size"), "          : ", size_str, "\n", sep="")
             cat("\n")
           })
@@ -603,6 +607,8 @@ setMethod("series_roi", signature(x="NeuroVec", i="LogicalNeuroVol"),
 
 
 #' @export
+#' @param j second dimension index
+#' @param k third dimension index
 #' @param drop whether to drop dimension of length 1
 #' @rdname series-methods
 setMethod(f="series", signature(x="NeuroVec", i="integer"),
@@ -624,6 +630,8 @@ setMethod(f="series", signature(x="NeuroVec", i="integer"),
 
 
 #' @export
+#' @param j second dimension index
+#' @param k third dimension index
 #' @param drop whether to drop dimension of length 1
 #' @rdname series-methods
 setMethod(f="series", signature=signature(x="DenseNeuroVec", i="integer"),
@@ -644,9 +652,9 @@ setMethod(f="series", signature=signature(x="DenseNeuroVec", i="integer"),
 #' @rdname series-methods
 #' @export
 setMethod("series", signature(x="NeuroVec", i="numeric"),
-		def=function(x, i, j, k) {
+		def=function(x, i, j, k, drop=TRUE) {
 		  if (missing(j) && missing(k)) {
-			  callGeneric(x,as.integer(i))
+			  callGeneric(x,as.integer(i), drop=drop)
 		  } else {
 		    callGeneric(x,as.integer(i), as.integer(j), as.integer(k))
 		  }
@@ -654,6 +662,9 @@ setMethod("series", signature(x="NeuroVec", i="numeric"),
 
 
 #' @rdname series-methods
+#' @param i first dimension index
+#' @param j second dimension index
+#' @param k third dimension index
 #' @export
 setMethod("series_roi", signature(x="NeuroVec", i="numeric"),
           def=function(x, i, j, k) {
@@ -685,8 +696,8 @@ setAs(from="NeuroVec", to="matrix",
         dm <- dim(from)
         d123 <- prod(dm[1:3])
         d4 <- dm[4]
-        vals <- from[,]
-        dim(vals) <- c(d123,d4)
+        vals <- from[]
+        dim(vals) <- c(d123, d4)
         vals
       })
 
@@ -719,10 +730,16 @@ setMethod(f="as.list", signature=signature(x = "NeuroVec"), def=function(x) {
 #'
 #' @rdname as.matrix-methods
 #' @param x the object
+#' @param ... Additional arguments
 #' @export
 setMethod(f="as.matrix", signature=signature(x = "NeuroVec"), def=function(x) {
-			as(x, "matrix")
-		})
+  dm <- dim(x)
+  d123 <- prod(dm[1:3])
+  d4 <- dm[4]
+  vals <- as.vector(x@.Data)
+  dim(vals) <- c(d123, d4)
+  vals
+})
 
 
 #' @export
@@ -825,6 +842,8 @@ setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character",
 
 
 #' @export
+#' @rdname show-methods
+#' @aliases show,DenseNeuroVec-method
 setMethod("show", "DenseNeuroVec",
           def=function(object) {
             # Get class name without package prefix
@@ -838,32 +857,29 @@ setMethod("show", "DenseNeuroVec",
                 crayon::silver(paste0("(", mem_size, " MB)")), "\n", sep="")
 
             # Spatial information
-            cat(crayon::bold("\n╔═ Spatial Info "), crayon::silver("───────────────────────────"), "\n", sep="")
-            cat("║ ", crayon::yellow("Dimensions"), "    : ",
-                paste(dim(object)[1:3], collapse=" × "),
+            cat(crayon::bold("\n- Spatial Info"), crayon::silver(" ---------------------------"), "\n", sep="")
+            cat("| ", crayon::yellow("Dimensions"), "    : ",
+                paste(dim(object)[1:3], collapse=" x "),
                 crayon::silver(" ("), dim(object)[4], " timepoints", crayon::silver(")"), "\n", sep="")
-            cat("║ ", crayon::yellow("Total Voxels"), "  : ",
+            cat("| ", crayon::yellow("Total Voxels"), "  : ",
                 format(prod(dim(object)[1:3]), big.mark=","), "\n", sep="")
-            cat("║ ", crayon::yellow("Spacing"), "       : ",
-                paste(object@space@spacing[1:3], collapse=" × "), "\n", sep="")
+            cat("| ", crayon::yellow("Spacing"), "       : ",
+                paste(object@space@spacing[1:3], collapse=" x "), "\n", sep="")
 
             # Data properties
-            cat(crayon::bold("\n╠═ Properties "), crayon::silver("───────────────────────────"), "\n", sep="")
-            cat("║ ", crayon::yellow("Origin"), "        : ",
-                paste(round(object@space@origin[1:3], 2), collapse=" × "), "\n", sep="")
-            cat("║ ", crayon::yellow("Orientation"), "   : ",
+            cat(crayon::bold("\n- Properties"), crayon::silver(" ---------------------------"), "\n", sep="")
+            cat("| ", crayon::yellow("Origin"), "        : ",
+                paste(round(object@space@origin[1:3], 2), collapse=" x "), "\n", sep="")
+            cat("| ", crayon::yellow("Orientation"), "   : ",
                 paste(object@space@axes@i@axis, object@space@axes@j@axis, object@space@axes@k@axis), "\n", sep="")
 
             # Summary statistics
-            cat(crayon::bold("\n╚═ Statistics "), crayon::silver("───────────────────────────"), "\n", sep="")
+            cat(crayon::bold("\n- Statistics"), crayon::silver(" ---------------------------"), "\n", sep="")
 
             # Calculate stats efficiently for the first timepoint
             first_vol <- object[,,,1]
-            cat("  ", crayon::green("First Volume"), "\n", sep="")
-            cat("    ", crayon::silver("Range"), "     : [",
-                paste(round(range(first_vol, na.rm=TRUE), 3), collapse=", "), "]\n", sep="")
-            cat("    ", crayon::silver("Mean±SD"), "    : ",
-                round(mean(first_vol, na.rm=TRUE), 3), " ± ",
+            cat("    ", crayon::silver("Mean +/- SD"), "    : ",
+                round(mean(first_vol, na.rm=TRUE), 3), " +/- ",
                 round(sd(first_vol, na.rm=TRUE), 3), "\n", sep="")
 
             if(!is.null(object@label) && nchar(object@label) > 0) {
@@ -1054,12 +1070,15 @@ setMethod(f="as.matrix", signature=signature(x = "NeuroVec"), def=function(x) {
   dm <- dim(x)
   d123 <- prod(dm[1:3])
   d4 <- dm[4]
-  vals <- x[,]
-  dim(vals) <- c(d123,d4)
+  vals <- as.vector(x@.Data)
+  dim(vals) <- c(d123, d4)
   vals
 })
 
 #' @rdname series-methods
+#' @param i first dimension index
+#' @param j second dimension index
+#' @param k third dimension index
 #' @export
 setMethod("series_roi", signature(x="NeuroVec", i="numeric"),
           def=function(x, i, j, k) {
@@ -1102,7 +1121,7 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="intege
             clusters <- clusters[keep]
             assert_that(length(clusters) > 0)
 
-            isplit <<- split(keep, clusters)
+            isplit <- split(keep, clusters)
 
             f <- function(i) {
               series_roi(x, isplit[[i]])
@@ -1376,13 +1395,6 @@ setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character",
 		def=function(x, file_name, format, nbit=FALSE, compression=5, chunk_dim=c(10,10,10,dim(x)[4])) {
 			if (toupper(format) == "NIFTI" || toupper(format) == "NIFTI1" || toupper(format) == "NIFTI-1") {
 				callGeneric(x, file_name)
-			  #else if (toupper(format) == "H5") {
-			  #if (!endsWith(file_name, ".h5")) {
-			  #  file_name <- paste0(file_name, ".h5")
-			  #}
-
-				#h5obj <- to_nih5_vec(x, file_name, nbit=nbit, compression=compression, chunk_dim=chunk_dim)
-				#h5obj
 			} else {
 			  stop(paste("format ", format, "not supported."))
 			}
@@ -1397,4 +1409,46 @@ setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character",
 			write_nifti_vector(x, file_name, data_type)
 
 		})
+
+
+
+#' @export
+#' @rdname show-methods
+setMethod("show", "NeuroVecSeq",
+          def=function(object) {
+            cat("\n", crayon::bold(crayon::blue("NeuroVecSeq")), " ",
+                crayon::silver(paste0("(", length(object@vecs), " vectors)")), "\n", sep="")
+
+            cat(crayon::bold("\n- Sequence Info"), crayon::silver(" ---------------------------"), "\n", sep="")
+            cat("  ", crayon::yellow("Length"), "        : ", length(object@vecs), "\n", sep="")
+            cat("  ", crayon::yellow("Total Time"), "    : ", sum(object@lens), " points\n", sep="")
+
+            sp <- space(object@vecs[[1]])
+            cat(crayon::bold("\n- Spatial Info"), crayon::silver(" ---------------------------"), "\n", sep="")
+            cat("  ", crayon::yellow("Dimensions"), "    : ", paste(dim(object@vecs[[1]])[1:3], collapse=" x "), "\n", sep="")
+            cat("  ", crayon::yellow("Spacing"), "       : ", paste(sp@spacing[1:3], collapse=" x "), "\n", sep="")
+            cat("  ", crayon::yellow("Origin"), "        : ", paste(round(sp@origin[1:3], 2), collapse=" x "), "\n", sep="")
+            cat("  ", crayon::yellow("Orientation"), "   : ", paste(sp@axes@i@axis, sp@axes@j@axis, sp@axes@k@axis), "\n", sep="")
+
+            cat(crayon::bold("\n- Vector Details"), crayon::silver(" --------------------------"), "\n", sep="")
+            for (i in seq_along(object@vecs)) {
+              v <- object@vecs[[i]]
+              vclass <- sub(".*:", "", class(v)[1])
+              cat("  ", crayon::green(paste0(i, ".")), " ",
+                  crayon::cyan(vclass), " ",
+                  crayon::silver(paste0("(", dim(v)[4], " timepoints)")),
+                  "\n", sep="")
+            }
+            cat("\n")
+          })
+
+
+#' @export
+#' @rdname as.matrix-methods
+setMethod("as.matrix", "DenseNeuroVec",
+  function(x) {
+    d <- dim(x)
+    matrix(as.array(x@.Data), nrow = prod(d[1:3]), ncol = d[4])
+  }
+)
 

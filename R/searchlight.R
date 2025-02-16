@@ -1,7 +1,20 @@
+#' @include all_class.R
+NULL
+#' @include all_generic.R
+NULL
 
-#searchlight_table <- function(x, mask, radius, type=c("standard", "random")) {
-#
-#}
+#' Searchlight Analysis Methods
+#'
+#' @name searchlight-methods
+#' @description Methods for performing searchlight analyses on neuroimaging data
+NULL
+
+#' @importFrom assertthat assert_that
+#' @importFrom purrr map map_dbl map_int
+#' @importFrom stats kmeans
+#' @importFrom dbscan frNN
+#' @importFrom utils object.size
+NULL
 
 
 #' Create a spherical random searchlight iterator
@@ -28,9 +41,11 @@
 #' }
 #'
 #' @export
-#' @rdname random_searchlight
 random_searchlight <- function(mask, radius) {
-  assertthat::assert_that(inherits(mask, "NeuroVol"))
+  assert_that(inherits(mask, "NeuroVol"),
+              msg = "mask must be a NeuroVol object")
+  assert_that(radius > 0,
+              msg = "radius must be positive")
 
   mask.idx <- which(mask != 0)
   grid <- index_to_grid(mask, mask.idx)
@@ -180,7 +195,7 @@ random_searchlight <- function(mask, radius) {
 #'
 #' @examples
 #' # Load an example brain mask
-#' mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
+#' mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #'
 #' # Generate a bootstrap searchlight iterator with a radius of 6 voxels
 #' \dontrun{
@@ -223,7 +238,7 @@ bootstrap_searchlight <- function(mask, radius=8, iter=100) {
 #'
 #' @examples
 #' # Load an example brain mask
-#' mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
+#' mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #'
 #' # Generate an exhaustive searchlight iterator with a radius of 6 mm
 #' \dontrun{
@@ -277,7 +292,7 @@ searchlight_coords <- function(mask, radius, nonzero=FALSE, cores=0) {
 #'
 #' @examples
 #' # Load an example brain mask
-#' mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
+#' mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #'
 #' # Generate an exhaustive searchlight iterator with a radius of 6 mm
 #' \dontrun{
@@ -285,10 +300,19 @@ searchlight_coords <- function(mask, radius, nonzero=FALSE, cores=0) {
 #' }
 #'
 #' @export
-#' @importFrom dbscan frNN
-#' @importFrom purrr map
 #' @rdname searchlight
 searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
+  assert_that(inherits(mask, "NeuroVol"),
+              msg = "mask must be a NeuroVol object")
+  assert_that(radius > 0,
+              msg = "radius must be positive")
+  assert_that(is.logical(eager),
+              msg = "eager must be TRUE or FALSE")
+  assert_that(is.logical(nonzero),
+              msg = "nonzero must be TRUE or FALSE")
+  assert_that(cores >= 0,
+              msg = "cores must be non-negative")
+
   mask.idx <- which(mask != 0)
   grid <- index_to_grid(mask, mask.idx)
 
@@ -330,19 +354,23 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
 #'
 #' @examples
 #' # Load an example brain mask
-#' mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
+#' mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #'
 #' # Generate a clustered searchlight iterator with 5 clusters
 #' \dontrun{
 #' clust_searchlight <- clustered_searchlight(mask, csize = 5)
 #' }
 #'
-#' @importFrom stats kmeans
-#' @export
 #' @rdname clustered_searchlight
+#' @export
 clustered_searchlight <- function(mask, cvol=NULL, csize=NULL) {
-  if (is.null(csize) && is.null(cvol)) {
-    stop(paste("must provide either 'cvol' or 'csize' argument"))
+  assert_that(!is.null(csize) || !is.null(cvol),
+              msg = "must provide either 'cvol' or 'csize' argument")
+  assert_that(inherits(mask, "NeuroVol"),
+              msg = "mask must be a NeuroVol object")
+  if (!is.null(csize)) {
+    assert_that(csize > 0,
+                msg = "csize must be positive")
   }
 
   mask.idx <- which(mask != 0)

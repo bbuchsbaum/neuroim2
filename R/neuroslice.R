@@ -63,25 +63,24 @@
 #' sparse_slice <- NeuroSlice(sparse_data, slice_space, indices = sparse_indices)
 #'
 #' @seealso 
-#' \itemize{
-#'   \item \code{\link{NeuroSpace}} for defining spatial properties
-#'   \item \code{\link{NeuroVol}} for 3D volumetric data
-#'   \item \code{\link{plot.NeuroSlice}} for visualization methods
-#' }
+#' \code{\linkS4class{NeuroSpace}} for defining spatial properties,
+#' \code{\linkS4class{NeuroVol}} for 3D volumetric data,
+#' \code{\link{plot}} for visualization methods
 #'
 #' @export
 NeuroSlice <- function(data, space, indices = NULL) {
-  if (ndim(space) != 2) {
-    stop("incorrect dimension for neuro_slice")
-  }
-
+  assert_that(ndim(space) == 2,
+              msg = "Space must be 2-dimensional for NeuroSlice")
+  
   if (is.null(indices)) {
     if (length(dim(data)) != 2) {
-      stopifnot(length(data) == prod(dim(space)[1:2]))
+      assert_that(length(data) == prod(dim(space)[1:2]),
+                  msg = "Data length must match space dimensions")
       data <- matrix(data, dim(space)[1], dim(space)[2])
     }
 
-    stopifnot(all(dim(data) == dim(space)))
+    assert_that(all(dim(data) == dim(space)),
+                msg = "Data dimensions must match space dimensions")
     new("NeuroSlice", .Data=data, space=space)
 
   } else {
@@ -104,6 +103,8 @@ NeuroSlice <- function(data, space, indices = NULL) {
 #'
 #' @return Integer vector of linear indices corresponding to the input coordinates
 #'
+#' @rdname grid_to_index-methods
+#'
 #' @examples
 #' slice_space <- NeuroSpace(c(10, 10))
 #' slice_data <- matrix(1:100, 10, 10)
@@ -119,7 +120,6 @@ NeuroSlice <- function(data, space, indices = NULL) {
 #' @seealso \code{\link{index_to_grid}} for the inverse operation
 #'
 #' @export
-#' @rdname grid_to_index-methods
 setMethod(f="grid_to_index", 
           signature=signature(x = "NeuroSlice", coords="matrix"),
           def=function(x, coords) {
@@ -168,19 +168,11 @@ setMethod(f="index_to_grid",
             callGeneric(x@space, idx)
           })
 
-#' Plot a NeuroSlice Object
+#' Plot a NeuroSlice
 #'
-#' @title Visualize 2D Neuroimaging Slice
-#' @description
-#' Creates a 2D visualization of a \code{NeuroSlice} object using \code{ggplot2}.
-#'
-#' @param x A \code{NeuroSlice} object to plot
-#' @param cmap Color mapping function or vector. Default is grayscale.
-#' @param irange Numeric vector of length 2 specifying the intensity range for color mapping.
-#'   Default is the range of the data.
-#' @param ... Additional arguments passed to plotting methods
-#'
-#' @return A \code{ggplot2} object
+#' @name plot,NeuroSlice-method
+#' @param cmap Color map to use for plotting, defaults to grayscale
+#' @param irange Intensity range for scaling the plot values, defaults to the data range
 #'
 #' @details
 #' The plot method uses \code{ggplot2} to create a raster visualization of the slice data.
@@ -205,6 +197,7 @@ setMethod(f="index_to_grid",
 #' }
 #'
 #' @importFrom ggplot2 ggplot aes geom_raster scale_fill_identity xlab ylab theme_bw
+#' @importFrom grDevices gray
 #' @export
 #' @rdname plot-methods
 setMethod("plot", 
@@ -254,6 +247,7 @@ setMethod("plot",
 #'
 #' @importFrom crayon bold blue green red yellow silver
 #' @importFrom utils object.size
+#' @rdname show-methods
 #' @export
 setMethod(f="show", 
           signature=signature("NeuroSlice"),
@@ -268,17 +262,17 @@ setMethod(f="show",
             
             # Header
             cat("\n")
-            cat(bold(blue("═══ NeuroSlice Object ═══")), "\n\n")
+            cat(bold(blue("=== NeuroSlice Object ===")), "\n\n")
             
             # Type and Dimensions
-            cat(bold(yellow("■ Basic Information")), "\n")
+            cat(bold(yellow("* Basic Information")), "\n")
             cat("  ", silver("Type:"), " ", class(object), "\n", sep="")
             cat("  ", silver("Dimensions:"), " ", 
-                paste(dim(object), collapse=" × "), 
+                paste(dim(object), collapse=" x "), 
                 " (", green(mem_size), ")", "\n", sep="")
             
             # Value Range and Stats
-            cat("\n", bold(yellow("■ Data Properties")), "\n", sep="")
+            cat("\n", bold(yellow("* Data Properties")), "\n", sep="")
             cat("  ", silver("Value Range:"), " [", 
                 blue(sprintf("%.2f", val_range[1])), ", ", 
                 blue(sprintf("%.2f", val_range[2])), "]", "\n", sep="")
@@ -290,19 +284,19 @@ setMethod(f="show",
             }
             
             # Spatial Properties
-            cat("\n", bold(yellow("■ Spatial Properties")), "\n", sep="")
+            cat("\n", bold(yellow("* Spatial Properties")), "\n", sep="")
             cat("  ", silver("Spacing:"), " ", 
-                paste(sprintf("%.2f", sp@spacing), collapse=" × "), 
+                paste(sprintf("%.2f", sp@spacing), collapse=" x "), 
                 "\n", sep="")
             cat("  ", silver("Origin:"), "  ", 
-                paste(sprintf("%.2f", sp@origin), collapse=" × "), 
+                paste(sprintf("%.2f", sp@origin), collapse=" x "), 
                 "\n", sep="")
             cat("  ", silver("Axes:"), "    ", 
-                green(sp@axes@i@axis), " × ", 
+                green(sp@axes@i@axis), " x ", 
                 green(sp@axes@j@axis), "\n", sep="")
             
             # Footer
-            cat("\n", blue("═" = 28), "\n", sep="")
+            cat("\n", blue("=" = 28), "\n", sep="")
           })
 
 #' @import assertthat

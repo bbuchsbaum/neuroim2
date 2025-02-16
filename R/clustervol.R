@@ -18,11 +18,28 @@
 #' @export ClusteredNeuroVol
 #' @examples
 #'
-#' bspace <- NeuroSpace(c(16,16,16), spacing=c(1,1,1))
-#' grid <- index_to_grid(bspace, 1:(16*16*16))
-#' kres <- kmeans(grid, centers=10)
-#' mask <- NeuroVol(rep(1, 16^3),bspace)
-#' clusvol <- ClusteredNeuroVol(mask, kres$cluster)
+#' # Create a simple space and volume
+#' space <- NeuroSpace(c(16, 16, 16), spacing = c(1, 1, 1))
+#' vol_data <- array(rnorm(16^3), dim = c(16, 16, 16))
+#' vol <- NeuroVol(vol_data, space)
+#'
+#' # Create a binary mask (e.g., values > 0)
+#' mask_data <- vol_data > 0
+#' mask_vol <- LogicalNeuroVol(mask_data, space)
+#'
+#' # Get coordinates of masked voxels
+#' mask_idx <- which(mask_data)
+#' coords <- index_to_coord(mask_vol, mask_idx)
+#'
+#' # Cluster the coordinates into 10 groups
+#' set.seed(123)  # for reproducibility
+#' kmeans_result <- kmeans(coords, centers = 10)
+#'
+#' # Create the clustered volume
+#' clustered_vol <- ClusteredNeuroVol(mask_vol, kmeans_result$cluster)
+#'
+#' # Print information about the clusters
+#' print(clustered_vol)
 #' @rdname ClusteredNeuroVol-class
 ClusteredNeuroVol <- function(mask, clusters, label_map=NULL, label="") {
   mask <- as(mask, "LogicalNeuroVol")
@@ -62,21 +79,24 @@ ClusteredNeuroVol <- function(mask, clusters, label_map=NULL, label="") {
       label_map=label_map, cluster_map=cluster_map, space=space)
 }
 
-#' Conversion from ClusteredNeuroVol to LogicalNeuroVol
+#' Convert a ClusteredNeuroVol Object to a DenseNeuroVol Object
+#' @name as-ClusteredNeuroVol-DenseNeuroVol
+#' @aliases coerce,ClusteredNeuroVol,DenseNeuroVol-method
+#' @title Convert ClusteredNeuroVol to DenseNeuroVol
+#' @description This method converts a ClusteredNeuroVol into an equivalent DenseNeuroVol object.
+#' @param from A \code{\linkS4class{ClusteredNeuroVol}} object to be converted
+#' @return A \code{\linkS4class{DenseNeuroVol}} object
+#' @examples
+#' \dontrun{
+#' # Create a clustered volume
+#' mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
+#' clusters <- rep(1:5, each=sum(mask)/5)
+#' cvol <- ClusteredNeuroVol(mask, clusters)
 #'
-#' @keywords internal
-#' @rdname ClusteredNeuroVol-methods
-#' @name as,ClusteredNeuroVol,DenseNeuroVol
-#' @noRd
-setAs(from="ClusteredNeuroVol", to="DenseNeuroVol", def=function(from) {
-  data = from@clusters
-  indices <- which(from@mask == TRUE)
-  DenseNeuroVol(data, space(from), indices=indices)
-})
-
-
-
-#' @export
+#' # Convert to DenseNeuroVol
+#' dvol <- as(cvol, "DenseNeuroVol")
+#' }
+#' @seealso \code{\linkS4class{ClusteredNeuroVol}}, \code{\linkS4class{DenseNeuroVol}}
 setAs(from="ClusteredNeuroVol", to="DenseNeuroVol",
     def=function(from) {
         if (length(from@clusters) == 0) {
@@ -106,38 +126,38 @@ setMethod(f="show", signature=signature("ClusteredNeuroVol"),
       # Header
       cat("\n")
       cat(crayon::bold(crayon::blue("ClusteredNeuroVol")), "\n")
-      cat(crayon::silver(paste0(rep("═", 60), collapse="")), "\n\n")
+      cat(crayon::silver(paste0(rep("=", 60), collapse="")), "\n\n")
 
       # Type and basic info
-      cat(crayon::yellow(" ▸ Type:          "),
+      cat(crayon::yellow(" > Type:          "),
           crayon::white("Clustered Volume"), "\n")
 
       # Dimensions section
-      cat(crayon::yellow(" ▸ Dimensions:    "),
-          crayon::white(paste(dims, collapse=" × ")), "\n")
+      cat(crayon::yellow(" > Dimensions:    "),
+          crayon::white(paste(dims, collapse=" x ")), "\n")
 
       # Space information
-      cat(crayon::yellow(" ▸ Spacing:       "),
-          crayon::white(paste(signif(spacing, 3), collapse=" × ")), " ",
+      cat(crayon::yellow(" > Spacing:       "),
+          crayon::white(paste(signif(spacing, 3), collapse=" x ")), " ",
           crayon::silver("mm"), "\n")
 
-      cat(crayon::yellow(" ▸ Origin:        "),
-          crayon::white(paste(signif(origin, 3), collapse=" × ")), " ",
+      cat(crayon::yellow(" > Origin:        "),
+          crayon::white(paste(signif(origin, 3), collapse=" x ")), " ",
           crayon::silver("mm"), "\n")
 
       # Anatomical orientation
-      cat(crayon::yellow(" ▸ Orientation:   "),
+      cat(crayon::yellow(" > Orientation:   "),
           crayon::white(paste(sp@axes@i@axis, sp@axes@j@axis, sp@axes@k@axis,
-                            collapse=" × ")), "\n")
+                            collapse=" x ")), "\n")
 
       # Cluster information
       cat("\n", crayon::bold(crayon::cyan("Cluster Information")), "\n")
-      cat(crayon::silver(paste0(rep("─", 40), collapse="")), "\n")
+      cat(crayon::silver(paste0(rep("-", 40), collapse="")), "\n")
 
-      cat(crayon::yellow(" ▸ Total Clusters:"),
+      cat(crayon::yellow(" > Total Clusters:"),
           crayon::white(sprintf("%d", n_clusters)), "\n")
 
-      cat(crayon::yellow(" ▸ Active Voxels: "),
+      cat(crayon::yellow(" > Active Voxels: "),
           crayon::white(sprintf("%d", n_voxels)), " ",
           crayon::silver(sprintf("(%.1f%% of volume)",
                                100 * n_voxels/prod(dims[1:3]))), "\n")
@@ -145,14 +165,14 @@ setMethod(f="show", signature=signature("ClusteredNeuroVol"),
       # Label information if available
       if (!is.null(names(object@label_map))) {
         cat("\n", crayon::bold(crayon::magenta("Region Labels")), "\n")
-        cat(crayon::silver(paste0(rep("─", 40), collapse="")), "\n")
+        cat(crayon::silver(paste0(rep("-", 40), collapse="")), "\n")
 
         # Show first few labels with ellipsis if there are more
         n_show <- min(5, length(object@label_map))
         label_sample <- head(names(object@label_map), n_show)
 
         for (i in seq_along(label_sample)) {
-          cat(crayon::yellow(" ▸ "),
+          cat(crayon::yellow(" > "),
               crayon::white(sprintf("%-20s", label_sample[i])),
               crayon::silver(sprintf("[%d]", unlist(object@label_map[label_sample[i]]))),
               "\n")
@@ -182,7 +202,7 @@ setMethod(f="centroids", signature=signature(x="ClusteredNeuroVol"),
                 stop("Package \"Gmedian\" needed for this function to work. Please install it.",
                      call. = FALSE)
               }
-              do.call(rbind, split_clusters(x@mask, x) %>% map(~ Gmedian::Gmedian(coords(., real=TRUE)) ))
+              do.call(rbind, split_clusters(x@mask, x) %>% map(~ Gmedian::Gmedian(coords(.)) ))
             }
           })
 
@@ -210,14 +230,41 @@ setMethod(f="centroids", signature=signature(x="ClusteredNeuroVol"),
 #'
 #' @examples
 #' \dontrun{
-#' # Using ClusteredNeuroVol
-#' neuro_vec <- # ... create a NeuroVec object
-#' clustered_vol <- # ... create a ClusteredNeuroVol object
-#' split_result <- split_clusters(neuro_vec, clustered_vol)
+#'   # Create a synthetic 3D volume and its NeuroSpace
+#'   space <- NeuroSpace(c(10, 10, 10))
+#'   vol_data <- array(rnorm(10 * 10 * 10), dim = c(10, 10, 10))
+#'   neuro_vec <- NeuroVec(vol_data, space)
 #'
-#' # Using integer vector
-#' cluster_assignments <- # ... create an integer vector of cluster assignments
-#' split_result <- split_clusters(neuro_vec, cluster_assignments)
+#'   # Create a binary mask (e.g., select voxels with values > 0)
+#'   mask_data <- vol_data > 0
+#'   mask_vol <- LogicalNeuroVol(mask_data, space)
+#'
+#'   # Extract indices and coordinates for the masked voxels
+#'   mask_idx <- which(mask_data)
+#'   coords <- index_to_coord(mask_vol, mask_idx)
+#'
+#'   # Perform k-means clustering on the coordinates (e.g., 3 clusters)
+#'   set.seed(123)  # for reproducibility
+#'   k_res <- kmeans(coords, centers = 3)
+#'
+#'   # Create a ClusteredNeuroVol using the mask and k-means cluster assignments
+#'   clustered_vol <- ClusteredNeuroVol(mask_vol, k_res$cluster)
+#'
+#'   # Split the NeuroVec by clusters using the ClusteredNeuroVol method
+#'   split_result_clust <- split_clusters(neuro_vec, clustered_vol)
+#'
+#'   # Calculate and print the mean value for each cluster
+#'   means_clust <- sapply(split_result_clust, function(x) mean(values(x)))
+#'   print(means_clust)
+#'
+#'   # Alternatively, create an integer vector of cluster assignments:
+#'   cluster_assignments <- numeric(prod(dim(space)))
+#'   cluster_assignments[mask_idx] <- k_res$cluster
+#'   split_result_int <- split_clusters(neuro_vec, as.integer(cluster_assignments))
+#'
+#'   # Verify that both splitting methods yield the same cluster means
+#'   means_int <- sapply(split_result_int, function(x) mean(values(x)))
+#'   print(all.equal(sort(means_clust), sort(means_int)))
 #' }
 #'
 #' @export
@@ -257,29 +304,41 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="intege
 #' @rdname split_clusters-methods
 #' @examples
 #'
-#' ## split 'NeuroVol' with a 'ClusteredNeuroVol'
-#' vol <- NeuroVol(array(runif(10*10*10),c(10,10,10)), NeuroSpace(c(10,10,10)))
-#' mask <- as.logical(vol > .5)
-#' mask.idx <- which(mask != 0)
-#' grid <- index_to_coord(mask, mask.idx)
-#' vox <- index_to_grid(mask, mask.idx)
+#' # Create a simple example space and data
+#' space <- NeuroSpace(c(10, 10, 10,4))
+#' data <- array(rnorm(1000*4), dim = c(10, 10, 10,4))
+#' vec <- NeuroVec(data, space)
 #'
-#' library(purrr)
-#' ## partition coordinates into 50 clusters using 'kmeans'
-#' kres <- kmeans(grid, centers=50, iter.max=500)
-#' kvol <- ClusteredNeuroVol(mask, kres$cluster)
-#' klis <- split_clusters(mask, kvol)
-#' ret1 <- vol %>% split_clusters(kvol) %>% purrr::map_dbl(~ mean(values(.)))
+#' # Create a mask for clustering (e.g., values > 0)
+#' mask <- vec[,,,1] > 0
+#' mask_vol <- LogicalNeuroVol(as.array(mask), NeuroSpace(c(10, 10, 10)))
 #'
-#' ## split NeuroVol with 'integer' vector of clusters.
-#' indices <- numeric(prod(dim(mask)[1:3]))
+#' # Get coordinates of masked voxels for clustering
+#' mask_idx <- which(mask)
+#' coords <- index_to_coord(mask_vol, mask_idx)
 #'
-#' ## locations with a cluster value of 0 are ignored
-#' indices[mask.idx] <- kres$cluster
+#' # Perform clustering on the coordinates (3 clusters for example)
+#' set.seed(123) # for reproducibility
+#' kmeans_result <- kmeans(coords, centers = 3)
 #'
-#' ret2 <- vol %>% split_clusters(as.integer(indices)) %>%
-#' purrr::map_dbl(~ mean(values(.)))
-#' all(ret1 == ret1)
+#' # Create a ClusteredNeuroVol
+#' clustered_vol <- ClusteredNeuroVol(mask_vol, kmeans_result$cluster)
+#'
+#' # Split the NeuroVec by clusters
+#' split_result <- split_clusters(vec, clustered_vol)
+#'
+#' # Calculate mean value for each cluster
+#' cluster_means <- sapply(split_result, function(x) mean(values(x)))
+#' print(cluster_means)
+#'
+#' # Alternative: using integer cluster assignments
+#' cluster_indices <- numeric(prod(dim(space)[1:3]))
+#' cluster_indices[mask_idx] <- kmeans_result$cluster
+#' split_result2 <- split_clusters(vec, as.integer(cluster_indices))
+#'
+#' # Verify both methods give same results
+#' cluster_means2 <- sapply(split_result2, function(x) mean(values(x)))
+#' print(all.equal(sort(cluster_means), sort(cluster_means2)))
 setMethod(f="split_clusters", signature=signature(x="NeuroVol", clusters="ClusteredNeuroVol"),
           def = function(x,clusters) {
             f <- function(i) {
@@ -287,7 +346,6 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVol", clusters="Cluste
               ROIVol(space(x), index_to_grid(x,as.numeric(idx)), x[idx])
             }
 
-            #dlis <- deferred_list(lapply(1:num_clusters(clusters), function(i) f))
             dlis <- deflist::deflist(f, num_clusters(clusters))
 
           })
@@ -307,7 +365,7 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVol", clusters="intege
               ROIVol(space(x), index_to_grid(x,as.numeric(idx)), x[idx])
             }
 
-            #dlis <- deferred_list(lapply(1:length(clist), function(i) f))
+
             dlis <- deflist::deflist(f, length(clist))
           })
 

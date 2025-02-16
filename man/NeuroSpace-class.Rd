@@ -43,8 +43,8 @@ The following methods are available for \code{NeuroSpace} objects:
   \item \code{\link{origin}}: Get or set the origin of the space.
   \item \code{\link{spacing}}: Get or set the spacing of the space.
   \item \code{\link{axes}}: Get the axes of the space.
-  \item \code{\link{transform}}: Apply the affine transformation to coordinates.
-  \item \code{\link{inverse_transform}}: Apply the inverse transformation to coordinates.
+  \item \code{\link{trans}}: Apply the affine transformation to coordinates.
+  \item \code{\link{inverse}}: Apply the inverse transformation to coordinates.
 }
 }
 
@@ -65,12 +65,7 @@ space <- NeuroSpace(dim = c(64L, 64L, 64L),
 # Get the dimensions
 dim(space)
 
-# Set a new origin
-origin(space) <- c(-32, -32, -32)
 
-# Apply a transformation to a set of coordinates
-coords <- matrix(c(10, 20, 30), ncol = 3)
-transformed_coords <- transform(space, coords)
 
 }
 \references{

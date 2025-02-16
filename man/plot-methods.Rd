@@ -3,7 +3,7 @@
 \name{plot,NeuroSlice-method}
 \alias{plot,NeuroSlice-method}
 \alias{plot,NeuroVol-method}
-\title{Visualize 2D Neuroimaging Slice}
+\title{Plot a NeuroSlice}
 \usage{
 \S4method{plot}{NeuroSlice}(
   x,
@@ -38,19 +38,13 @@
 \item{bgvol}{a background volume that serves as an image underlay (currently ignored).}
 
 \item{bgcmap}{a color map for backround layer consisting of a vector of colors in hex format (e.g. \code{gray(n=255)})}
-
-\item{...}{Additional arguments passed to plotting methods}
-}
-\value{
-A \code{ggplot2} object
 }
 \description{
-Creates a 2D visualization of a \code{NeuroSlice} object using \code{ggplot2}.
+Plot a NeuroSlice
+
+plot an NeuroVol as a series of 2D slices
 }
 \details{
-Plot a NeuroSlice Object
-
-
 The plot method uses \code{ggplot2} to create a raster visualization of the slice data.
 The intensity values are mapped to colors using the specified colormap and range.
 }

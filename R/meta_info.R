@@ -30,13 +30,16 @@ NULL
 #' # Create reader for NIFTI file
 #' meta <- read_header("brain.nii")
 #' reader <- data_reader(meta, offset = 0)
-#' 
+#'
 #' # Read first 100 voxels
 #' data <- reader$read(100)
 #' }
 #'
-#' @seealso 
-#' \code{\link{read_header}}, \code{\link{BinaryReader}}
+#' @seealso
+#' \code{\link{read_header}} for reading headers,
+#' \code{\linkS4class{BinaryReader}} for reading binary data
+#'
+#' @importFrom methods new setGeneric
 #'
 #' @export
 setGeneric("data_reader", function(x, offset) standardGeneric("data_reader"))
@@ -45,24 +48,20 @@ setGeneric("data_reader", function(x, offset) standardGeneric("data_reader"))
 #'
 #' @param x A FileMetaInfo object
 #' @return Integer vector of image dimensions
+#' @rdname dim-methods
 #' @export
 setMethod("dim", "FileMetaInfo", function(x) x@dims)
 
-#' Create Data Reader for NIFTI Format
-#'
-#' @param x NIFTIMetaInfo object
-#' @param offset Numeric byte offset
-#' @return BinaryReader object
-#' @keywords internal
-#' @noRd
+
+#' @param offset the offset to read from the file
+#' @rdname data_reader-methods
 setMethod("data_reader", "NIFTIMetaInfo",
   function(x, offset = 0) {
-    if (!is.numeric(offset) || length(offset) != 1) {
-      stop("'offset' must be a single numeric value")
-    }
-    
+    assert_that(is.numeric(offset) && length(offset) == 1,
+                msg = "'offset' must be a single numeric value")
+
     total_offset <- x@data_offset + offset
-    
+
     if (x@descriptor@data_encoding == "gzip") {
       con <- tryCatch({
         gzfile(x@data_file, "rb")
@@ -72,8 +71,8 @@ setMethod("data_reader", "NIFTIMetaInfo",
     } else {
       con <- x@data_file
     }
-    
-    BinaryReader(con, 
+
+    BinaryReader(con,
                 total_offset,
                 .getRStorage(x@data_type),
                 x@bytes_per_element,
@@ -86,16 +85,14 @@ setMethod("data_reader", "NIFTIMetaInfo",
 #' @param x AFNIMetaInfo object
 #' @param offset Numeric byte offset
 #' @return BinaryReader object
-#' @keywords internal
-#' @noRd
+#' @rdname data_reader-methods
 setMethod("data_reader", "AFNIMetaInfo",
   function(x, offset = 0) {
-    if (!is.numeric(offset) || length(offset) != 1) {
-      stop("'offset' must be a single numeric value")
-    }
-    
+    assert_that(is.numeric(offset) && length(offset) == 1,
+                msg = "'offset' must be a single numeric value")
+
     total_offset <- x@data_offset + offset
-    
+
     if (x@descriptor@data_encoding == "gzip") {
       con <- tryCatch({
         gzfile(x@data_file, "rb")
@@ -105,7 +102,7 @@ setMethod("data_reader", "AFNIMetaInfo",
     } else {
       con <- x@data_file
     }
-    
+
     BinaryReader(con,
                 total_offset,
                 .getRStorage(x@data_type),
@@ -114,12 +111,11 @@ setMethod("data_reader", "AFNIMetaInfo",
                 .isSigned(x@data_type))
   })
 
-#' Get Transformation Matrix
-#'
-#' @param x MetaInfo object
-#' @return 4x4 transformation matrix
-#' @keywords internal
-#' @noRd
+#' Get transformation matrix
+#' @name trans
+#' @rdname trans-methods
+#' @aliases trans,MetaInfo-method trans,NIFTIMetaInfo-method
+#' @export
 setMethod("trans", "MetaInfo",
   function(x) {
     D <- min(length(x@dims), 3)
@@ -142,15 +138,14 @@ setMethod("trans", "NIFTIMetaInfo",
 #' @param nifti_header NIFTI header list
 #' @return Vector of image dimensions
 #' @keywords internal
+#' @noRd
 niftiDim <- function(nifti_header) {
   dimarray <- nifti_header$dimensions
-  if (!is.numeric(dimarray)) {
-    stop("Invalid dimension array in NIFTI header")
-  }
+  assert_that(is.numeric(dimarray),
+              msg = "Invalid dimension array in NIFTI header")
   lastidx <- min(which(dimarray == 1)) - 1
-  if (lastidx < 1) {
-    stop("Invalid dimension specification in NIFTI header")
-  }
+  assert_that(lastidx >= 1,
+              msg = "Invalid dimension specification in NIFTI header")
   dimarray[2:lastidx]
 }
 
@@ -202,36 +197,32 @@ niftiDim <- function(nifti_header) {
 #' # Get transformation matrix
 #' trans(meta)
 #'
-#' @seealso 
-#' \code{\link{NIFTIMetaInfo}}, \code{\link{AFNIMetaInfo}}
+#' @seealso
+#' \code{\linkS4class{NIFTIMetaInfo}}, \code{\linkS4class{AFNIMetaInfo}}
+#'
+#' @importFrom methods new
+#' @importFrom assertthat assert_that
 #'
 #' @export
 MetaInfo <- function(Dim, spacing, origin = rep(0, length(spacing)),
                     data_type = "FLOAT", label = "",
                     spatial_axes = OrientationList3D$AXIAL_LPI,
                     additional_axes = NullAxis) {
-                    
-  # Validate dimensions
-  if (!is.numeric(Dim) || any(Dim <= 0) || any(Dim != floor(Dim))) {
-    stop("'Dim' must be a vector of positive integers")
-  }
-  
-  # Validate spacing
-  if (!is.numeric(spacing) || any(spacing <= 0)) {
-    stop("'spacing' must be a vector of positive numbers")
-  }
-  
-  # Validate origin
-  if (!is.numeric(origin) || any(!is.finite(origin))) {
-    stop("'origin' must be a vector of finite numbers")
-  }
-  
+
+  assert_that(is.numeric(Dim) && all(Dim > 0) && all(Dim == floor(Dim)),
+              msg = "'Dim' must be a vector of positive integers")
+
+  assert_that(is.numeric(spacing) && all(spacing > 0),
+              msg = "'spacing' must be a vector of positive numbers")
+
+  assert_that(is.numeric(origin) && all(is.finite(origin)),
+              msg = "'origin' must be a vector of finite numbers")
+
   # Validate data type
   valid_types <- c("BYTE", "SHORT", "INT", "FLOAT", "DOUBLE")
-  if (!data_type %in% valid_types) {
-    stop("'data_type' must be one of: ", paste(valid_types, collapse = ", "))
-  }
-  
+  assert_that(data_type %in% valid_types,
+              msg = paste("'data_type' must be one of:", paste(valid_types, collapse = ", ")))
+
   # Create object
   new("MetaInfo",
       dims = as.integer(Dim),
@@ -275,19 +266,19 @@ MetaInfo <- function(Dim, spacing, origin = rep(0, length(spacing)),
 #' \dontrun{
 #' # Read NIFTI header
 #' header <- readNIftiHeader("brain.nii")
-#' 
+#'
 #' # Create format descriptor
 #' fmt <- NIFTIFormat()
-#' 
+#'
 #' # Create metadata
 #' meta <- NIFTIMetaInfo(fmt, header)
-#' 
+#'
 #' # Check dimensions
 #' dim(meta)
 #' }
 #'
-#' @seealso 
-#' \code{\link{MetaInfo}}, \code{\link{readNIftiHeader}}
+#' @seealso
+#' \code{\link{MetaInfo}}
 #'
 #' @export
 NIFTIMetaInfo <- function(descriptor, nifti_header) {
@@ -301,19 +292,19 @@ NIFTIMetaInfo <- function(descriptor, nifti_header) {
   if (is.null(nifti_header$file_type) || tolower(nifti_header$file_type) != "nifti") {
     stop("Invalid NIFTI header: missing or incorrect file_type")
   }
-  
+
   # Validate dimensions
   dims <- try(niftiDim(nifti_header), silent = TRUE)
   if (inherits(dims, "try-error")) {
     stop("Invalid dimensions in NIFTI header")
   }
-  
+
   # Validate transformation
-  if (!is.matrix(nifti_header$qform) || nrow(nifti_header$qform) != 4 || 
+  if (!is.matrix(nifti_header$qform) || nrow(nifti_header$qform) != 4 ||
       ncol(nifti_header$qform) != 4) {
     stop("Invalid qform matrix in NIFTI header")
   }
-  
+
   # Create object with validation
   tryCatch({
     new("NIFTIMetaInfo",
@@ -370,19 +361,17 @@ NIFTIMetaInfo <- function(descriptor, nifti_header) {
 #' \dontrun{
 #' # Read AFNI header
 #' header <- read_afni_header("brain+orig.HEAD")
-#' 
+#'
 #' # Create format descriptor
 #' fmt <- AFNIFormat()
-#' 
+#'
 #' # Create metadata
 #' meta <- AFNIMetaInfo(fmt, header)
-#' 
+#'
 #' # Check dimensions
 #' dim(meta)
 #' }
 #'
-#' @seealso 
-#' \code{\link{MetaInfo}}, \code{\link{read_afni_header}}
 #'
 #' @export
 AFNIMetaInfo <- function(descriptor, afni_header) {
@@ -393,56 +382,56 @@ AFNIMetaInfo <- function(descriptor, afni_header) {
   if (!is.list(afni_header)) {
     stop("'afni_header' must be a list")
   }
-  
+
   # Extract and validate dimensions
-  if (is.null(afni_header$DATASET_DIMENSIONS) || 
+  if (is.null(afni_header$DATASET_DIMENSIONS) ||
       is.null(afni_header$DATASET_DIMENSIONS$content)) {
     stop("Missing DATASET_DIMENSIONS in AFNI header")
   }
-  
+
   .Dim <- afni_header$DATASET_DIMENSIONS$content[
     afni_header$DATASET_DIMENSIONS$content > 0
   ]
-  
+
   if (length(.Dim) < 3) {
     stop("AFNI dataset must have at least 3 dimensions")
   }
-  
+
   # Add time dimension if present
-  if (!is.null(afni_header$DATASET_RANK$content) && 
+  if (!is.null(afni_header$DATASET_RANK$content) &&
       afni_header$DATASET_RANK$content[2] > 1) {
     .Dim <- c(.Dim, afni_header$DATASET_RANK$content[2])
   }
-  
+
   # Generate or extract labels
   labs <- if (is.null(afni_header$BRICK_LABS$content)) {
     paste0("#", seq(0, afni_header$DATASET_RANK$content[2] - 1))
   } else {
     afni_header$BRICK_LABS$content
   }
-  
+
   # Calculate space transformation
   Tdicom <- tryCatch({
     matrix(afni_header$IJK_TO_DICOM$content, 3, 4, byrow = TRUE)
   }, error = function(e) {
     stop("Invalid IJK_TO_DICOM transformation in AFNI header")
   })
-  
+
   TLPI <- perm_mat(OrientationList3D$AXIAL_RAI) %*% Tdicom[1:3, ]
   TLPI <- rbind(TLPI, c(0, 0, 0, 1))
-  
+
   # Determine data type and size
   data_type <- switch(as.character(afni_header$BRICK_TYPES$content[1]),
                      "0" = "BYTE",
                      "1" = "SHORT",
                      "3" = "FLOAT",
                      stop("Unsupported BRICK_TYPE in AFNI header"))
-  
+
   bytes_per_element <- switch(as.character(afni_header$BRICK_TYPES$content[1]),
                             "0" = 1L,
                             "1" = 2L,
                             "3" = 4L)
-  
+
   # Create object with validation
   tryCatch({
     new("AFNIMetaInfo",
@@ -517,3 +506,10 @@ setMethod(f="show", signature=signature("FileMetaInfo"),
 
     cat("additional format-specific info may be contained in @header slot", "\n")
   })
+
+#' @rdname MetaInfo-methods
+#' @aliases trans,MetaInfo-method
+#'          trans,NIFTIMetaInfo-method
+#'          data_reader,AFNIMetaInfo-method
+#'          data_reader,NIFTIMetaInfo-method
+#' @export

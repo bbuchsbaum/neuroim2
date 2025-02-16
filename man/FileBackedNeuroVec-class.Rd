@@ -57,4 +57,6 @@ subset <- file_backed_vec[,,, 1:10]
 \seealso{
 \code{\link{NeuroVec-class}} for the base 4D brain image class.
 \code{\link{FileMetaInfo-class}} for details on file metadata representation.
+
+\code{\link{FileBackedNeuroVec}} for creating instances of this class
 }

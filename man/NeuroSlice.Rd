@@ -74,9 +74,7 @@ sparse_slice <- NeuroSlice(sparse_data, slice_space, indices = sparse_indices)
 
 }
 \seealso{
-\itemize{
-  \item \code{\link{NeuroSpace}} for defining spatial properties
-  \item \code{\link{NeuroVol}} for 3D volumetric data
-  \item \code{\link{plot.NeuroSlice}} for visualization methods
-}
+\code{\linkS4class{NeuroSpace}} for defining spatial properties,
+\code{\linkS4class{NeuroVol}} for 3D volumetric data,
+\code{\link{plot}} for visualization methods
 }

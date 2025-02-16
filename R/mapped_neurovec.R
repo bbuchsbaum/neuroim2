@@ -16,6 +16,8 @@
 #'   \item Efficient random access
 #' }
 #'
+#' @seealso \code{\link{MappedNeuroVec}} for creating instances of this class
+#'
 NULL
 
 #' Create a Memory-Mapped Source for Neuroimaging Data
@@ -49,38 +51,36 @@ NULL
 #' \dontrun{
 #' # Create source from NIFTI file
 #' source <- MappedNeuroVecSource("path/to/fmri.nii")
-#' 
+#'
 #' # Check dimensions
 #' dim(source@meta_info)
-#' 
+#'
 #' # View header information
 #' str(source@meta_info)
 #' }
 #'
-#' @seealso 
-#' \code{\link{MappedNeuroVec}} for the main user interface
+#' @seealso
+#' \code{\link{MappedNeuroVec}} for the main user interface,
 #' \code{\link{read_header}} for header reading details
+#'
+#' @importFrom methods new
+#' @importFrom assertthat assert_that
 #'
 #' @export
 #' @rdname MappedNeuroVecSource-class
 MappedNeuroVecSource <- function(file_name) {
-  # Input validation
-  if (!is.character(file_name) || length(file_name) != 1) {
-    stop("'file_name' must be a single character string")
-  }
-  if (!file.exists(file_name)) {
-    stop("File '", file_name, "' does not exist")
-  }
-  if (!file.access(file_name, mode = 4) == 0) {
-    stop("File '", file_name, "' is not readable")
-  }
-  
+  assert_that(is.character(file_name) && length(file_name) == 1,
+              msg = "'file_name' must be a single character string")
+  assert_that(file.exists(file_name),
+              msg = paste("File", file_name, "does not exist"))
+  assert_that(file.access(file_name, mode = 4) == 0,
+              msg = paste("File", file_name, "is not readable"))
+
   # Read and validate header
   meta <- read_header(file_name)
-  if (length(dim(meta)) < 3) {
-    stop("Input data must be at least 3-dimensional")
-  }
-  
+  assert_that(length(dim(meta)) >= 3,
+              msg = "Input data must be at least 3-dimensional")
+
   new("MappedNeuroVecSource", meta_info = meta)
 }
 
@@ -127,76 +127,69 @@ MappedNeuroVecSource <- function(file_name) {
 #' \dontrun{
 #' # Create mapped vector from NIFTI file
 #' mvec <- MappedNeuroVec("path/to/fmri.nii")
-#' 
+#'
 #' # Extract first volume
 #' vol1 <- mvec[[1]]
-#' 
+#'
 #' # Get dimensions
 #' dim(mvec)
-#' 
+#'
 #' # Access specific timepoint
 #' timepoint <- mvec[, , , 10]
 #' }
 #'
-#' @seealso 
-#' \code{\link{MappedNeuroVecSource}} for low-level access
-#' \code{\link{mmap}} for memory mapping details
+#' @seealso
+#
+#' \code{\link[mmap]{mmap}} for memory mapping details
+#'
+#' @importFrom mmap mmap mmapFlags
+#' @importFrom methods new
+#' @importFrom assertthat assert_that
 #'
 #' @export
 #' @rdname MappedNeuroVec-class
 MappedNeuroVec <- function(file_name, label = basename(file_name)) {
-  # Input validation
-  if (!is.character(file_name) || length(file_name) != 1) {
-    stop("'file_name' must be a single character string")
-  }
-  if (!file.exists(file_name)) {
-    stop("File '", file_name, "' does not exist")
-  }
-  
+  assert_that(is.character(file_name) && length(file_name) == 1,
+              msg = "'file_name' must be a single character string")
+  assert_that(file.exists(file_name),
+              msg = paste("File", file_name, "does not exist"))
+
   # Create source and load data
   src <- MappedNeuroVecSource(file_name)
   load_data(src)
 }
 
-#' Load Data from Memory-Mapped Source
-#'
-#' @description
-#' Internal method to load data from a MappedNeuroVecSource and create a MappedNeuroVec.
-#'
-#' @param x A MappedNeuroVecSource object
-#'
-#' @return A new MappedNeuroVec object
-#'
-#' @keywords internal
-#' @noRd
-setMethod(f = "load_data", 
+
+#' @rdname load_data-methods
+#' @export
+setMethod(f = "load_data",
           signature = "MappedNeuroVecSource",
           def = function(x) {
             # Extract meta information
             meta <- x@meta_info
-            
+
             # Create memory mapping
             tryCatch({
-              fmap <- mmap::mmap(meta@data_file, 
+              fmap <- mmap::mmap(meta@data_file,
                                 mode = .getMMapMode(meta@data_type),
                                 prot = mmap::mmapFlags("PROT_READ"))
             }, error = function(e) {
               stop("Failed to create memory mapping: ", e$message)
             })
-            
+
             # Calculate data offset
             offset <- meta@data_offset / .getDataSize(meta@data_type)
-            
+
             # Create space object
-            bspace <- NeuroSpace(dim(meta), 
-                               meta@spacing, 
+            bspace <- NeuroSpace(dim(meta),
+                               meta@spacing,
                                meta@origin,
-                               meta@spatial_axes, 
+                               meta@spatial_axes,
                                trans = trans(meta))
-            
+
             # Create mapped vector with basename as label
-            new("MappedNeuroVec", 
-                space = bspace, 
+            new("MappedNeuroVec",
+                space = bspace,
                 filemap = fmap,
                 offset = as.integer(offset),
                 label = basename(meta@data_file))
@@ -212,23 +205,20 @@ setMethod(f = "load_data",
 #'
 #' @return Numeric vector of values
 #'
-#' @keywords internal
-#' @noRd
-setMethod(f = "linear_access", 
+#' @rdname linear_access-methods
+setMethod(f = "linear_access",
           signature = signature(x = "MappedNeuroVec", i = "numeric"),
           def = function(x, i) {
-            if (!is.numeric(i) || any(is.na(i))) {
-              stop("Index 'i' must be a numeric vector without NA values")
-            }
-            
+            assert_that(is.numeric(i) && !any(is.na(i)),
+                        msg = "Index 'i' must be a numeric vector without NA values")
+
             # Calculate adjusted indices
             idx <- i + x@offset
-            
+
             # Bounds checking
-            if (any(idx < 1) || any(idx > length(x@filemap))) {
-              stop("Index out of bounds")
-            }
-            
+            assert_that(all(idx >= 1) && all(idx <= length(x@filemap)),
+                        msg = "Index out of bounds")
+
             # Access mapped data
             x@filemap[idx]
           })
@@ -243,40 +233,53 @@ setMethod(f = "linear_access",
 #' @importFrom crayon bold red green blue yellow silver
 #' @importFrom utils object.size
 #'
-#' @keywords internal
+#' @export
 setMethod("show", "MappedNeuroVec",
           function(object) {
             # Header
             cat("\n", crayon::bold(crayon::blue("MappedNeuroVec Object")), "\n")
-            cat(crayon::silver("══════════════════════\n"))
-            
+            cat(crayon::silver("====================\n"))
+
             # Dimensions
             dims <- dim(object)
-            spatial_dims <- paste(dims[1:3], collapse=" × ")
+            spatial_dims <- paste(dims[1:3], collapse=" x ")
             temporal_dim <- if(length(dims) > 3) dims[4] else 1
-            
+
             cat("\n", crayon::yellow("Dimensions:"), "\n")
-            cat(" ", crayon::silver("•"), " Spatial: ", crayon::green(spatial_dims), "\n")
-            cat(" ", crayon::silver("•"), " Temporal: ", crayon::green(temporal_dim), "\n")
-            
+            cat(" ", crayon::silver("."), " Spatial: ", crayon::green(spatial_dims), "\n")
+            cat(" ", crayon::silver("."), " Temporal: ", crayon::green(temporal_dim), "\n")
+
             # Memory Mapping Information
             cat("\n", crayon::yellow("Memory Mapping:"), "\n")
-            cat(" ", crayon::silver("•"), " Offset: ", crayon::green(object@offset), " elements\n")
-            
+            cat(" ", crayon::silver("."), " Offset: ", crayon::green(object@offset), " elements\n")
+
             # Space Information
             sp <- space(object)
-            spacing_str <- paste(round(spacing(sp), 2), collapse=" × ")
-            origin_str <- paste(round(origin(sp), 2), collapse=" × ")
-            
+            spacing_str <- paste(round(spacing(sp), 2), collapse=" x ")
+            origin_str <- paste(round(origin(sp), 2), collapse=" x ")
+
             cat("\n", crayon::yellow("Space Information:"), "\n")
-            cat(" ", crayon::silver("•"), " Spacing: ", crayon::green(spacing_str), "\n")
-            cat(" ", crayon::silver("•"), " Origin: ", crayon::green(origin_str), "\n")
-            
+            cat(" ", crayon::silver("."), " Spacing: ", crayon::green(spacing_str), "\n")
+            cat(" ", crayon::silver("."), " Origin: ", crayon::green(origin_str), "\n")
+
             # Label
             if (!is.null(object@label) && object@label != "") {
               cat("\n", crayon::yellow("Label:"), "\n")
-              cat(" ", crayon::silver("•"), " ", crayon::green(object@label), "\n")
+              cat(" ", crayon::silver("."), " ", crayon::green(object@label), "\n")
             }
-            
+
             cat("\n")
           })
+
+#' @export
+#' @rdname as.matrix-methods
+setMethod("as.matrix", "MappedNeuroVec",
+  function(x) {
+    dm <- dim(x) 
+    d123 <- prod(dm[1:3])
+    d4 <- dm[4]
+    tot <- d123 * d4
+    vals <- linear_access(x, seq_len(tot))
+    matrix(vals, d123, d4)
+  }
+)

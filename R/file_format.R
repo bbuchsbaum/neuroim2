@@ -10,6 +10,7 @@ NULL
 #' and data files (e.g., ANALYZE, NIFTI). These methods provide functionality for
 #' file name validation, extension handling, and file path manipulation.
 #'
+#'
 #' @section File Format Structure:
 #' Neuroimaging formats often use paired files:
 #' \itemize{
@@ -24,6 +25,9 @@ NULL
 #'   \item Checking file existence and compatibility
 #' }
 #'
+#' @importFrom methods new
+#' @importFrom assertthat assert_that
+#'
 NULL
 
 #' Check if a File Matches the FileFormat
@@ -35,7 +39,7 @@ NULL
 #' @param x A \linkS4class{FileFormat} object specifying the format requirements
 #' @param file_name A character string specifying the file name to validate
 #'
-#' @return A logical value: \code{TRUE} if the file matches the format and both header 
+#' @return A logical value: \code{TRUE} if the file matches the format and both header
 #'   and data files exist, \code{FALSE} otherwise
 #'
 #' @details
@@ -58,23 +62,20 @@ NULL
 #' file_matches(fmt, "brain_scan.nii")  # FALSE for wrong extension
 #' }
 #'
-#' @seealso 
+#' @seealso
 #' \code{\link{header_file_matches}}, \code{\link{data_file_matches}} for individual
 #' file type checking
 #'
 #' @export
 #' @rdname file_matches-methods
-setMethod(f = "file_matches", 
+setMethod(f = "file_matches",
           signature = signature(x = "FileFormat", file_name = "character"),
           def = function(x, file_name) {
-            # Input validation
-            if (!is.character(file_name) || length(file_name) != 1) {
-              stop("'file_name' must be a single character string")
-            }
-            if (is.na(file_name) || nchar(file_name) == 0) {
-              stop("'file_name' cannot be NA or empty")
-            }
-            
+            assert_that(is.character(file_name) && length(file_name) == 1,
+                       msg = "'file_name' must be a single character string")
+            assert_that(!is.na(file_name) && nchar(file_name) > 0,
+                       msg = "'file_name' cannot be NA or empty")
+
             # Check file existence and format matching
             if (header_file_matches(x, file_name)) {
               data_file <- paste(strip_extension(x, file_name), ".", x@data_extension, sep = "")
@@ -113,13 +114,13 @@ setMethod(f = "file_matches",
 #' header_file_matches(fmt, "brain.hdr.gz")    # FALSE
 #' }
 #'
-#' @seealso 
+#' @seealso
 #' \code{\link{file_matches}}, \code{\link{data_file_matches}} for related
 #' file format validation
 #'
 #' @export
 #' @rdname header_file_matches-methods
-setMethod(f = "header_file_matches", 
+setMethod(f = "header_file_matches",
           signature = signature(x = "FileFormat", file_name = "character"),
           def = function(x, file_name) {
             # Input validation
@@ -129,7 +130,7 @@ setMethod(f = "header_file_matches",
             if (is.na(file_name) || nchar(file_name) == 0) {
               stop("'file_name' cannot be NA or empty")
             }
-            
+
             # Use anchored regex for exact extension matching
             pattern <- paste0("\\.", x@header_extension, "$")
             grepl(pattern, file_name, perl = TRUE)
@@ -159,13 +160,13 @@ setMethod(f = "header_file_matches",
 #' data_file_matches(fmt, "brain.img.gz")    # FALSE
 #' }
 #'
-#' @seealso 
+#' @seealso
 #' \code{\link{file_matches}}, \code{\link{header_file_matches}} for related
 #' file format validation
 #'
 #' @export
 #' @rdname data_file_matches-methods
-setMethod(f = "data_file_matches", 
+setMethod(f = "data_file_matches",
           signature = signature(x = "FileFormat", file_name = "character"),
           def = function(x, file_name) {
             # Input validation
@@ -175,7 +176,7 @@ setMethod(f = "data_file_matches",
             if (is.na(file_name) || nchar(file_name) == 0) {
               stop("'file_name' cannot be NA or empty")
             }
-            
+
             # Use anchored regex for exact extension matching
             pattern <- paste0("\\.", x@data_extension, "$")
             grepl(pattern, file_name, perl = TRUE)
@@ -210,7 +211,7 @@ setMethod(f = "data_file_matches",
 #' header_file(fmt, "brain_scan.img")  # Returns "brain_scan.hdr"
 #' }
 #'
-#' @seealso 
+#' @seealso
 #' \code{\link{data_file}}, \code{\link{strip_extension}} for related file name
 #' manipulation
 #'
@@ -226,7 +227,7 @@ setMethod(f = "header_file",
             if (is.na(file_name) || nchar(file_name) == 0) {
               stop("'file_name' cannot be NA or empty")
             }
-            
+
             # Derive header file name based on format
             if (header_file_matches(x, file_name)) {
               file_name
@@ -266,7 +267,7 @@ setMethod(f = "header_file",
 #' data_file(fmt, "brain_scan.hdr")  # Returns "brain_scan.img"
 #' }
 #'
-#' @seealso 
+#' @seealso
 #' \code{\link{header_file}}, \code{\link{strip_extension}} for related file name
 #' manipulation
 #'
@@ -282,7 +283,7 @@ setMethod(f = "data_file",
             if (is.na(file_name) || nchar(file_name) == 0) {
               stop("'file_name' cannot be NA or empty")
             }
-            
+
             # Derive data file name based on format
             if (data_file_matches(x, file_name)) {
               file_name
@@ -322,7 +323,7 @@ setMethod(f = "data_file",
 #' strip_extension(fmt, "brain_scan.img")  # Returns "brain_scan"
 #' }
 #'
-#' @seealso 
+#' @seealso
 #' \code{\link{header_file}}, \code{\link{data_file}} for related file name
 #' manipulation
 #'
@@ -338,7 +339,7 @@ setMethod(f = "strip_extension",
             if (is.na(file_name) || nchar(file_name) == 0) {
               stop("'file_name' cannot be NA or empty")
             }
-            
+
             # Remove extension based on format
             if (header_file_matches(x, file_name)) {
               ret <- strsplit(file_name, paste(x@header_extension, "$", sep = ""))[[1]][1]
@@ -369,18 +370,14 @@ setMethod(f = "strip_extension",
 #' @param file_name A character string specifying the file name to read meta
 #'   information from
 #'
-#' @return An object of class NIFTIMetaInfo or AFNIMetaInfo, depending on the input
-#'   format
+#' @return An object of class \linkS4class{NIFTIMetaInfo} or \linkS4class{AFNIMetaInfo},
+#'   depending on the input format
 #'
 #' @details
 #' These methods use format-specific functions to read the header information and
 #' create the appropriate meta information object. The `.read_meta_info` helper
 #' function is used internally to streamline the process for both formats.
 #'
-#' @seealso 
-#' \code{\link{FileFormat-class}}, \code{\link{NIFTIFormat-class}},
-#' \code{\link{AFNIFormat-class}}, \code{\link{NIFTIMetaInfo-class}},
-#' \code{\link{AFNIMetaInfo-class}}
 #'
 #' @examples
 #' \dontrun{

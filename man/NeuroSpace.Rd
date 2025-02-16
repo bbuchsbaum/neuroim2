@@ -23,15 +23,7 @@ of the coordinate axes. If NULL, defaults to standard neurological convention
 constructed from spacing and origin.}
 }
 \value{
-A new \code{NeuroSpace} object with the following slots:
-\itemize{
-  \item \code{dim}: Integer vector of image dimensions
-  \item \code{spacing}: Numeric vector of voxel sizes
-  \item \code{origin}: Numeric vector of world-space origin
-  \item \code{axes}: AxisSet object defining orientation
-  \item \code{trans}: Matrix for voxel-to-world transformation
-  \item \code{inverse}: Matrix for world-to-voxel transformation
-}
+A new \code{\linkS4class{NeuroSpace}} object
 }
 \description{
 The \code{NeuroSpace} class defines the spatial properties and coordinate system of 
@@ -106,10 +98,8 @@ For details on neuroimaging coordinate systems:
 }
 }
 \seealso{
-\itemize{
-  \item \code{\link{AxisSet}} for axis orientation specification
-  \item \code{\link{coord_to_index}} for coordinate conversion
-  \item \code{\link{index_to_coord}} for inverse coordinate conversion
-  \item \code{\link{NeuroObj}} for objects using NeuroSpace
-}
+\code{\linkS4class{AxisSet}} for axis orientation specification,
+\code{\link{coord_to_index}} for coordinate conversion,
+\code{\link{index_to_coord}} for inverse coordinate conversion,
+\code{\linkS4class{NeuroObj}} for objects using NeuroSpace
 }

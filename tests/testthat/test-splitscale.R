@@ -32,8 +32,8 @@ test_that("split_scale works with matrix and factor inputs", {
   output <- split_scale(mat, fac, center=TRUE, scale=TRUE)
 
   # Expected output
-  expected_output <- rbind(scale(mat[1:2,], center=TRUE, scale=TRUE),
-                           scale(mat[3:4,], center=TRUE, scale=TRUE))
+  expected_output <- rbind(base::scale(mat[1:2,], center=TRUE, scale=TRUE),
+                           base::scale(mat[3:4,], center=TRUE, scale=TRUE))
 
   expect_equivalent(output, expected_output)
 })

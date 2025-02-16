@@ -4,7 +4,7 @@
 \alias{read_meta_info}
 \alias{read_meta_info,NIFTIFormat-method}
 \alias{read_meta_info,AFNIFormat-method}
-\title{Generic function to read image meta info given a file and a \code{\linkS4class{FileFormat}} instance.}
+\title{Generic function to read image meta info given a file}
 \usage{
 read_meta_info(x, file_name)
 
@@ -19,8 +19,8 @@ read_meta_info(x, file_name)
 information from}
 }
 \value{
-An object of class NIFTIMetaInfo or AFNIMetaInfo, depending on the input
-  format
+An object of class \linkS4class{NIFTIMetaInfo} or \linkS4class{AFNIMetaInfo},
+  depending on the input format
 }
 \description{
 Reads meta information from image files based on their format (NIFTI or AFNI).
@@ -41,9 +41,4 @@ afni_format <- new("AFNIFormat")
 afni_meta <- read_meta_info(afni_format, "brain_scan+orig.HEAD")
 }
 
-}
-\seealso{
-\code{\link{FileFormat-class}}, \code{\link{NIFTIFormat-class}},
-\code{\link{AFNIFormat-class}}, \code{\link{NIFTIMetaInfo-class}},
-\code{\link{AFNIMetaInfo-class}}
 }

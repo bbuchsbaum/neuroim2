@@ -25,7 +25,7 @@ This function smooths a volumetric image (3D brain MRI data) using a bilateral f
 The bilateral filter considers both spatial closeness and intensity similarity for smoothing.
 }
 \examples{
-brain_mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
+brain_mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 
 # Apply bilateral filtering to the brain volume
 filtered_vol <- bilateral_filter(brain_mask, brain_mask, spatial_sigma = 2,

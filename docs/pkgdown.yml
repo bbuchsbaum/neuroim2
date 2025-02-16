@@ -1,14 +1,13 @@
-pandoc: 3.1.1
-pkgdown: 2.0.7
+pandoc: 3.1.11
+pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   ImageVolumes: ImageVolumes.html
-  NeuroVector: NeuroVector.html
   neuroim: neuroim.html
+  NeuroVector: NeuroVector.html
   pipelines: pipelines.html
   regionOfInterest: regionOfInterest.html
-last_built: 2023-12-21T20:19Z
+last_built: 2025-02-16T21:55Z
 urls:
   reference: https://bbuchsbaum.github.io/neuroim2/reference
   article: https://bbuchsbaum.github.io/neuroim2/articles
-

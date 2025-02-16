@@ -7,15 +7,18 @@
 NeuroHyperVec(data, space, mask)
 }
 \arguments{
-\item{data}{A matrix or three-dimensional array containing the data}
+\item{data}{A matrix or three-dimensional array containing the data.}
 
-\item{space}{A NeuroSpace object defining the spatial dimensions}
+\item{space}{A \code{\linkS4class{NeuroSpace}} object defining the spatial dimensions.}
 
-\item{mask}{A mask volume (array, vector, or LogicalNeuroVol)}
+\item{mask}{A mask volume (array, vector, or \code{\linkS4class{LogicalNeuroVol}}).}
 }
 \value{
-A new NeuroHyperVec object
+A new \code{\linkS4class{NeuroHyperVec}} object.
 }
 \description{
 Constructor for NeuroHyperVec class
+}
+\seealso{
+\code{\linkS4class{NeuroSpace}}, \code{\linkS4class{LogicalNeuroVol}}
 }

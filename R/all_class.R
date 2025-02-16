@@ -9,12 +9,27 @@ setOldClass("environment")
 setOldClass("mmap")
 #setOldClass("FBM")
 
+#' ArrayLike5D Class
+#'
+#' A virtual class for representing five-dimensional array-like objects.
+#' This class serves as an interface for objects that mimic 5D arrays.
+#'
 #' @export
 setClass("ArrayLike5D")
 
+#' ArrayLike4D Class
+#'
+#' A virtual class for representing four-dimensional array-like objects.
+#' It is intended to serve as a base class for 4D array representations.
+#'
 #' @export
 setClass("ArrayLike4D")
 
+#' ArrayLike3D Class
+#'
+#' A virtual class for representing three-dimensional array-like objects.
+#' It provides a common interface for 3D array operations.
+#'
 #' @export
 setClass("ArrayLike3D")
 
@@ -160,7 +175,6 @@ setClass("AxisSet5D", representation(m="NamedAxis"), contains=c("AxisSet4D"))
 #'                     data_encoding = "raw",
 #'                     data_extension = "nii")
 #'
-#' @seealso \code{\link{NIFTIFormat-class}}, \code{\link{AFNIFormat-class}}
 #'
 #' @export
 #' @rdname FileFormat-class
@@ -180,7 +194,6 @@ setClass("FileFormat",
 #' This class represents the NIFTI (Neuroimaging Informatics Technology Initiative) file format.
 #' It extends the FileFormat class with NIFTI-specific attributes.
 #'
-#' @seealso \code{\link{FileFormat-class}}
 #'
 #' @keywords internal
 #' @noRd
@@ -192,7 +205,6 @@ setClass("NIFTIFormat", contains = c("FileFormat"))
 #' This class represents the AFNI (Analysis of Functional NeuroImages) file format.
 #' It extends the FileFormat class with AFNI-specific attributes.
 #'
-#' @seealso \code{\link{FileFormat-class}}
 #'
 #' @keywords internal
 #' @noRd
@@ -313,7 +325,6 @@ setClass("AFNIMetaInfo",
 #'
 #' @slot meta_info An object of class \code{\linkS4class{FileMetaInfo}} containing meta information for the data source.
 #'
-#' @seealso \code{\link{FileMetaInfo-class}}, \code{\link{NeuroVolSource-class}}, \code{\link{NeuroVecSource-class}}
 #'
 #' @export
 #' @rdname FileSource-class
@@ -341,8 +352,7 @@ setClass("NeuroVolSource", representation(index="integer"), contains="FileSource
 #'
 #' @seealso \code{\link{FileSource-class}}, \code{\link{NeuroVec-class}}
 #'
-#' @keywords internal
-#' @noRd
+#' @export
 setClass("NeuroVecSource", representation(indices="integer"), contains="FileSource")
 
 
@@ -418,8 +428,8 @@ setClass("BinaryWriter",
 #'   \item \code{\link{origin}}: Get or set the origin of the space.
 #'   \item \code{\link{spacing}}: Get or set the spacing of the space.
 #'   \item \code{\link{axes}}: Get the axes of the space.
-#'   \item \code{\link{transform}}: Apply the affine transformation to coordinates.
-#'   \item \code{\link{inverse_transform}}: Apply the inverse transformation to coordinates.
+#'   \item \code{\link{trans}}: Apply the affine transformation to coordinates.
+#'   \item \code{\link{inverse}}: Apply the inverse transformation to coordinates.
 #' }
 #'
 #' @section Usage:
@@ -437,12 +447,7 @@ setClass("BinaryWriter",
 #' # Get the dimensions
 #' dim(space)
 #'
-#' # Set a new origin
-#' origin(space) <- c(-32, -32, -32)
 #'
-#' # Apply a transformation to a set of coordinates
-#' coords <- matrix(c(10, 20, 30), ncol = 3)
-#' transformed_coords <- transform(space, coords)
 #'
 #' @seealso
 #' \code{\link{AxisSet-class}} for details on the axis set representation.
@@ -737,7 +742,7 @@ setClass("ClusteredNeuroVol",
 #' map <- seq_along(indices)
 #'
 #' # Create an IndexLookupVol object
-#' ilv <- new("IndexLookupVol", space = space, indices = as.integer(indices), map = map)
+#' ilv <- IndexLookupVol(space = space, indices = as.integer(indices))
 #'
 #' # Access the indices
 #' print(ilv@indices)
@@ -770,7 +775,10 @@ setClass("IndexLookupVol",
 #' states, or multiple 3D volumes in a single object.
 #'
 #' @section Slots:
-#' This class inherits all slots from \code{\linkS4class{NeuroObj}}.
+#' \describe{
+#'   \item{space}{A \code{\linkS4class{NeuroSpace}} object defining the spatial properties of the image.}
+#'   \item{label}{A character string providing a label for the NeuroVec object.}
+#' }
 #'
 #' @section Methods:
 #' Methods specific to NeuroVec objects may include operations for time series
@@ -793,8 +801,8 @@ setClass("IndexLookupVol",
 #' # Create a NeuroVec object
 #' neuro_vec <- NeuroVec(data = array(rnorm(64*64*32*100), dim = c(64, 64, 32, 100)),
 #'                       space = NeuroSpace(dim = c(64, 64, 32),
-#'                                         origin = c(0, 0, 0),
-#'                                         spacing = c(3, 3, 4)))
+#'                       origin = c(0, 0, 0),
+#'                       spacing = c(3, 3, 4))
 #'
 #' # Access the dimensions of the 4D image
 #' dim(neuro_vec)
@@ -807,6 +815,7 @@ setClass("IndexLookupVol",
 #' @rdname NeuroVec-class
 setClass("NeuroVec",
          slots = c(label = "character"),
+         prototype = list(label = ""),
          contains = c("NeuroObj"))
 
 #' DenseNeuroVec Class
@@ -834,15 +843,15 @@ setClass("NeuroVec",
 #' @examples
 #' \dontrun{
 #' # Create a simple 4D brain image
-#' data <- array(rnorm(64*64*32*100), dim = c(64, 64, 32, 100))
-#' space <- NeuroSpace(dim = c(64, 64, 32), origin = c(0, 0, 0), spacing = c(3, 3, 4))
+#' data <- array(rnorm(64*64*32*10), dim = c(64, 64, 32, 10))
+#' space <- NeuroSpace(dim = c(64, 64, 32,10), origin = c(0, 0, 0), spacing = c(3, 3, 4))
 #' dense_vec <- new("DenseNeuroVec", .Data = data, space = space)
 #'
 #' # Access dimensions
 #' dim(dense_vec)
 #'
 #' # Extract a single 3D volume
-#' first_volume <- dense_vec[,,,1]
+#' first_volume <- dense_vec[[1]]
 #' }
 #'
 #' @export
@@ -905,6 +914,7 @@ setClass("MappedNeuroVec",
            filemap = "mmap",
            offset = "integer"
          ),
+         prototype = list(label = ""),
          contains = c("NeuroVec", "ArrayLike4D"))
 
 #' AbstractSparseNeuroVec Class
@@ -1255,16 +1265,13 @@ setClass("SparseNeuroVecSource",
 #'   \item \code{\linkS4class{NeuroVecSource}}: Base class for NeuroVec source objects
 #' }
 #'
-#' @seealso
-#' \code{\link{MappedNeuroVec-class}} for the resulting memory-mapped 4D neuroimaging data class.
-#'
 #' @examples
 #' \dontrun{
 #' # Create a MappedNeuroVecSource
 #' mapped_source <- new("MappedNeuroVecSource")
 #'
 #' # Use the source to create a MappedNeuroVec (pseudo-code)
-#' # file_path <- "/path/to/large/brain/image.dat"
+#' # file_path <- "/path/to/large/brain/image.nii"
 #' # mapped_vec <- create_mapped_neuro_vec(mapped_source, file_path)
 #' }
 #'
@@ -1272,6 +1279,11 @@ setClass("SparseNeuroVecSource",
 #' @rdname MappedNeuroVecSource-class
 setClass("MappedNeuroVecSource", contains = "NeuroVecSource")
 
+#' numericOrMatrix Union
+#'
+#' A class union that includes both numeric vectors and matrices.
+#'
+#' @export
 setClassUnion("numericOrMatrix", c("numeric", "matrix"))
 
 #' ROI

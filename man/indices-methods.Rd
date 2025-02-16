@@ -11,6 +11,8 @@
 
 \S4method{indices}{ROIVol}(x)
 
+\S4method{indices}{ROIVol}(x)
+
 \S4method{indices}{ROIVec}(x)
 
 \S4method{indices}{AbstractSparseNeuroVec}(x)

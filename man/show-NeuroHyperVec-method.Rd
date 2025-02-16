@@ -7,7 +7,7 @@
 \S4method{show}{NeuroHyperVec}(object)
 }
 \arguments{
-\item{object}{NeuroHyperVec object to display}
+\item{object}{A NeuroHyperVec object to display.}
 }
 \description{
 Displays a formatted summary of a NeuroHyperVec object, including dimensions,

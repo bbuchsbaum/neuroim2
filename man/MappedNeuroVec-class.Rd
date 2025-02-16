@@ -120,6 +120,7 @@ timepoint <- mvec[, , , 10]
 \code{\link{NeuroVec-class}} for the parent class.
 \code{\link[mmap]{mmap}} for details on memory-mapped file objects.
 
-\code{\link{MappedNeuroVecSource}} for low-level access
-\code{\link{mmap}} for memory mapping details
+\code{\link{MappedNeuroVec}} for creating instances of this class
+
+\code{\link[mmap]{mmap}} for memory mapping details
 }

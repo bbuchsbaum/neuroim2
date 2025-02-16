@@ -2,7 +2,7 @@ library(purrr)
 
 context("h5neurovec")
 
-gmask <- system.file("extdata", "global_mask.nii", package="neuroim2")
+gmask <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
 
 
 gen_dat <- function(d1 = 12,

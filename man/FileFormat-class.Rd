@@ -35,7 +35,5 @@ nifti_format <- new("FileFormat",
                     data_encoding = "raw",
                     data_extension = "nii")
 
-}
-\seealso{
-\code{\link{NIFTIFormat-class}}, \code{\link{AFNIFormat-class}}
+
 }

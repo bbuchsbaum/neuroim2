@@ -73,5 +73,5 @@ trans(meta)
 
 }
 \seealso{
-\code{\link{NIFTIMetaInfo}}, \code{\link{AFNIMetaInfo}}
+\code{\linkS4class{NIFTIMetaInfo}}, \code{\linkS4class{AFNIMetaInfo}}
 }

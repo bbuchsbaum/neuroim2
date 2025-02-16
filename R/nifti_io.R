@@ -2,20 +2,22 @@
 {}
 #' @include binary_io.R
 {}
+#' @importFrom assertthat assert_that
 
 #' @keywords internal
 #' @noRd
 .checkDimensions <- function(dimvec) {
-	if (any(dimvec < 0)) {
-		stop(paste("nifti(checkDimensons): illegal dimension vector in header: ", dimvec))
-	}
+	assert_that(all(dimvec >= 0),
+				msg = sprintf("Illegal dimension vector in header: %s", 
+							paste(dimvec, collapse=" x ")))
 }
 
 
 #' @keywords internal
 #' @noRd
 write_nifti_vector <- function(vec, file_name, data_type="FLOAT") {
-	assertthat::assert_that(length(dim(vec)) == 4)
+	assert_that(length(dim(vec)) == 4,
+				msg = "Input vector must be 4-dimensional")
 	hdr <- as_nifti_header(vec, file_name=file_name, data_type=data_type)
 
 	conn <- if (substr(file_name, nchar(file_name)-2, nchar(file_name)) == ".gz") {
@@ -38,7 +40,8 @@ write_nifti_vector <- function(vec, file_name, data_type="FLOAT") {
 #' @keywords internal
 #' @noRd
 write_nifti_volume <- function(vol, file_name, data_type="FLOAT") {
-	stopifnot(length(dim(vol)) == 3)
+	assert_that(length(dim(vol)) == 3,
+				msg = "Input volume must be 3-dimensional")
 	hdr <- as_nifti_header(vol, file_name=file_name, data_type=data_type)
 
 	conn <- if (substr(file_name, nchar(file_name)-2, nchar(file_name)) == ".gz") {

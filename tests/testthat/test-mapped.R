@@ -4,7 +4,7 @@ library(assertthat)
 
 context("mapped neurovec")
 
-gmask <- system.file("extdata", "global_mask.nii", package="neuroim2")
+gmask <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
 gmask5 <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
 
 gvec <- read_vec(gmask5, mode="mmap")

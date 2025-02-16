@@ -60,7 +60,7 @@ The function performs several important checks:
 mapped_source <- new("MappedNeuroVecSource")
 
 # Use the source to create a MappedNeuroVec (pseudo-code)
-# file_path <- "/path/to/large/brain/image.dat"
+# file_path <- "/path/to/large/brain/image.nii"
 # mapped_vec <- create_mapped_neuro_vec(mapped_source, file_path)
 }
 
@@ -77,8 +77,6 @@ str(source@meta_info)
 
 }
 \seealso{
-\code{\link{MappedNeuroVec-class}} for the resulting memory-mapped 4D neuroimaging data class.
-
-\code{\link{MappedNeuroVec}} for the main user interface
+\code{\link{MappedNeuroVec}} for the main user interface,
 \code{\link{read_header}} for header reading details
 }

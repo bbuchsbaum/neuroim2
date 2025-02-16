@@ -24,7 +24,7 @@ can be converted to LPI (Left-Posterior-Inferior) by multiplying a coordinate ve
 }
 \examples{
 
-fname <- system.file("extdata", "global_mask.nii", package="neuroim2")
+fname <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
 vol <- read_vol(fname)
 pmat <- perm_mat(space(vol))
 

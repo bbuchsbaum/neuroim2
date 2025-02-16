@@ -18,7 +18,7 @@ file_matches(x, file_name)
 \value{
 TRUE for match, FALSE otherwise
 
-A logical value: \code{TRUE} if the file matches the format and both header 
+A logical value: \code{TRUE} if the file matches the format and both header
   and data files exist, \code{FALSE} otherwise
 }
 \description{

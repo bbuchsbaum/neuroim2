@@ -1,16 +1,34 @@
-
-
 #' @export
 setGeneric("plot", function(x, y, ...) standardGeneric("plot"))
 
+#' Generic Drop Method
+#'
+#' Provides a mechanism to remove dimensions or elements from an object.
+#'
+#' @param x An object.
+#'
 #' @export
 setGeneric("drop", function(x) standardGeneric("drop"))
 
+#' Generic as.matrix Method
+#'
+#' Coerces an object to a matrix.
+#'
+#' @param x An object to be coerced to a matrix.
+#' @param ... Additional arguments passed to methods.
+#'
 #' @export
-setGeneric("as.matrix", function(x) standardGeneric("as.matrix"))
+setGeneric("as.matrix", function(x, ...) standardGeneric("as.matrix"))
 
-
-setGeneric("scale")
+#' Generic Scale Method
+#'
+#' Scales an object by (typically) subtracting the mean and dividing by the standard deviation.
+#'
+#' @param x The object to be scaled.
+#' @param ... Additional arguments for scaling methods.
+#'
+#' @export
+setGeneric("scale", function(x, ...) standardGeneric("scale"))
 
 #' Resample an Image to Match the Space of Another Image
 #'
@@ -24,7 +42,7 @@ setGeneric("scale")
 #'
 #' @examples
 #'
-#' img <- read_vol(system.file("extdata", "global_mask.nii", package = "neuroim2"))
+#' img <- read_vol(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
 #' rspace <- space(img)
 #'
 #' ### normally, one would resample from two existing soource and target spaces.
@@ -175,7 +193,7 @@ split_blocks <- function(x, indices, ...) standardGeneric("split_blocks")
 #' @examples
 #' # Load an example 3D image
 #' library(neuroim2)
-#' img <- read_vol(system.file("extdata", "global_mask.nii", package = "neuroim2"))
+#' img <- read_vol(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
 #'
 #' # Partition the image into 5 clusters using default options
 #' clusters <- partition(img, 5)
@@ -859,10 +877,20 @@ setGeneric(name="indices", def=function(x) standardGeneric("indices"))
 setGeneric(name="lookup", def=function(x, i, ...) standardGeneric("lookup"))
 
 
-#' Extract one or more series from object and return as ROI object
+#' Extract time series from specific voxel coordinates and return as ROI object
 #'
-#' @rdname series-methods
-setGeneric(name="series_roi", def=function(x, i, ...) standardGeneric("series_roi"))
+#' @description
+#' Extracts time series data from a NeuroVec object at specified voxel coordinates
+#' and returns it as an ROI object.
+#'
+#' @param x The NeuroVec object
+#' @param i Numeric index for the first dimension
+#' @param ... Additional arguments
+#'
+#' @return A ROIVec object containing the time series data for the specified coordinates
+#'
+#' @export
+setGeneric("series_roi", function(x, i, ...) standardGeneric("series_roi"))
 
 #' Extract one or more series from object
 #' @param x the object
@@ -928,7 +956,7 @@ setGeneric(name="render_slice", def=function(x, zpos, width, height, colmap,...)
 #'
 #' @examples
 #'
-#' fname <- system.file("extdata", "global_mask.nii", package="neuroim2")
+#' fname <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
 #' vol <- read_vol(fname)
 #' pmat <- perm_mat(space(vol))
 #'
@@ -986,9 +1014,25 @@ setGeneric(name="conn_comp", def=function(x, ...) standardGeneric("conn_comp"))
 setGeneric(name="voxels", def=function(x, ...) standardGeneric("voxels"))
 
 
+#' @name image
+#' @title Generic Image Method for Creating Visual Representations
+#'
+#' @description Creates a visual representation (or image) from an object.
+#'
+#' @param x An object to be rendered as an image.
+#' @param ... Additional arguments passed to methods.
+#'
+#' @export
 if (!isGeneric("image"))
   setGeneric("image", function(x, ...) standardGeneric("image"))
 
+#' @name as.raster
+#' @title Generic Method for Converting Objects to Raster Format
+#'
+#' @description Converts an object to a raster (bitmap) representation.
+#'
+#' @param x An object to be converted.
+#' @param ... Additional arguments passed to the conversion methods.
 if (!isGeneric("as.raster"))
   setGeneric("as.raster", function(x, ...) standardGeneric("as.raster"))
 
@@ -1045,7 +1089,7 @@ setGeneric(name="data_file", def=function(x, file_name) standardGeneric("data_fi
 #' @rdname strip_extension-methods
 setGeneric(name="strip_extension", def=function(x, file_name) standardGeneric("strip_extension"))
 
-#' Generic function to read image meta info given a file and a \code{\linkS4class{FileFormat}} instance.
+#' Generic function to read image meta info given a file
 #' @param x descriptor instance
 #' @param file_name file name contianing meta information
 #' @export

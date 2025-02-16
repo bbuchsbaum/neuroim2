@@ -2,13 +2,13 @@
 % Please edit documentation in R/neurovol.R
 \name{show,NeuroVol-method}
 \alias{show,NeuroVol-method}
-\title{show a \code{NeuroVol}}
+\title{Display NeuroVol Object}
 \usage{
 \S4method{show}{NeuroVol}(object)
 }
 \arguments{
-\item{object}{the object}
+\item{object}{A \code{NeuroVol} object.}
 }
 \description{
-show a \code{NeuroVol}
+Displays a formatted summary of a \code{NeuroVol} object.
 }

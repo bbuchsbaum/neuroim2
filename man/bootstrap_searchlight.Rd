@@ -30,7 +30,7 @@ voxel can belong to multiple searchlight samples.
 }
 \examples{
 # Load an example brain mask
-mask <- read_vol(system.file("extdata", "global_mask.nii", package="neuroim2"))
+mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 
 # Generate a bootstrap searchlight iterator with a radius of 6 voxels
 \dontrun{
