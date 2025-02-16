@@ -80,7 +80,7 @@ static arma::sp_mat buildW(const arma::sp_mat &K, const arma::vec &d_vals, bool 
     for (int i=0; i<n; i++) {
       std::size_t key = (std::size_t)i + (std::size_t)n*(std::size_t)i;
       // Check if diagonal was present
-      double added = 1.0;
+      //double added = 1.0;
       // If diagonal element existed in Vv:
       auto f = diag_map.find(key);
       if (f != diag_map.end()) {
@@ -186,7 +186,7 @@ inline double base_map(double x, double a, double width) {
 
 // [[Rcpp::export]]
 NumericVector fast_multilayer_laplacian_enhancement_masked(
-    NumericVector img, 
+    NumericVector img,
     LogicalVector mask,
     int k=2,
     int patch_size=3,
@@ -199,14 +199,14 @@ NumericVector fast_multilayer_laplacian_enhancement_masked(
     stop("img must have dim attribute");
   if (!mask.hasAttribute("dim"))
     stop("mask must have dim attribute");
-  
+
   IntegerVector dims = img.attr("dim");
   if (dims.size() != 3) stop("img must be 3D");
   int nx = dims[0];
   int ny = dims[1];
   int nz = dims[2];
   int nvox = nx*ny*nz;
-  
+
   IntegerVector mask_dims = mask.attr("dim");
   if (mask_dims.size()!=3 || mask_dims[0]!=nx || mask_dims[1]!=ny || mask_dims[2]!=nz)
     stop("mask dimensions must match img");
@@ -251,7 +251,7 @@ NumericVector fast_multilayer_laplacian_enhancement_masked(
   dx.reserve((2*search_radius+1)*(2*search_radius+1)*(2*search_radius+1));
   dy.reserve(dx.capacity());
   dz.reserve(dx.capacity());
-  
+
   for (int ddz=-half_s; ddz<=half_s; ddz++){
     for (int ddy=-half_s; ddy<=half_s; ddy++){
       for (int ddx=-half_s; ddx<=half_s; ddx++){

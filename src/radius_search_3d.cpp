@@ -2,8 +2,10 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <array>
 #include <cmath>
 #include <algorithm>
+#include <climits>
 
 struct IdxDist {
   int idx;

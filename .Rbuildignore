@@ -25,3 +25,6 @@ Generics.yml
 ^dev$
 raw_data
 .vscode
+experimental
+codecov.yml
+
