@@ -429,7 +429,6 @@ setClass("BinaryWriter",
 #'   \item \code{\link{spacing}}: Get or set the spacing of the space.
 #'   \item \code{\link{axes}}: Get the axes of the space.
 #'   \item \code{\link{trans}}: Apply the affine transformation to coordinates.
-#'   \item \code{\link{inverse}}: Apply the inverse transformation to coordinates.
 #' }
 #'
 #' @section Usage:
@@ -567,7 +566,6 @@ setClass("DenseNeuroVol", contains=c("NeuroVol", "array"))
 #' @seealso
 #' \code{\link{NeuroVol-class}} for the base volumetric image class.
 #' \code{\link{DenseNeuroVol-class}} for a dense representation of 3D brain images.
-#' \code{\link[Matrix]{sparseVector-class}} for details on the underlying sparse data structure.
 #'
 #' @examples
 #' \dontrun{

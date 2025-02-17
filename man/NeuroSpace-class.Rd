@@ -44,7 +44,6 @@ The following methods are available for \code{NeuroSpace} objects:
   \item \code{\link{spacing}}: Get or set the spacing of the space.
   \item \code{\link{axes}}: Get the axes of the space.
   \item \code{\link{trans}}: Apply the affine transformation to coordinates.
-  \item \code{\link{inverse}}: Apply the inverse transformation to coordinates.
 }
 }
 

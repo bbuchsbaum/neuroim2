@@ -69,5 +69,4 @@ https://CRAN.R-project.org/package=Matrix
 \seealso{
 \code{\link{NeuroVol-class}} for the base volumetric image class.
 \code{\link{DenseNeuroVol-class}} for a dense representation of 3D brain images.
-\code{\link[Matrix]{sparseVector-class}} for details on the underlying sparse data structure.
 }
