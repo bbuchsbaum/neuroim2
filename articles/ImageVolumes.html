@@ -241,21 +241,6 @@ using the <code>space</code> extractor function when needed:</p>
 <span>    </span>
 <span>    <span class="co">## adding a '.gz' extension results ina gzipped file.</span></span>
 <span>    <span class="fu"><a href="../reference/write_vol-methods.html">write_vol</a></span><span class="op">(</span><span class="va">vol2</span>, <span class="st">"output.nii.gz"</span><span class="op">)</span></span></code></pre></div>
-<p>We can also display a <code>NeuroVol</code> instance. Lets download
-an MNI image from the web and plot it.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>    <span class="va">temp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>    <span class="va">uri</span> <span class="op">=</span> <span class="st">"http://www.bic.mni.mcgill.ca/~vfonov/nihpd/obj1/nihpd_asym_07.5-13.5_nifti.zip"</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/utils/download.file.html" class="external-link">download.file</a></span><span class="op">(</span><span class="va">uri</span>,<span class="va">temp</span><span class="op">)</span></span>
-<span>    <span class="va">cmd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"unzip "</span>, <span class="st">"-d"</span>, <span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">dirname</a></span><span class="op">(</span><span class="va">temp</span><span class="op">)</span>, <span class="va">temp</span><span class="op">)</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/system.html" class="external-link">system</a></span><span class="op">(</span><span class="va">cmd</span><span class="op">)</span></span>
-<span>    <span class="va">vol</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">dirname</a></span><span class="op">(</span><span class="va">temp</span><span class="op">)</span>, <span class="st">"/nihpd_asym_07.5-13.5_t1w.nii"</span><span class="op">)</span><span class="op">)</span></span>
-<span>    </span></code></pre></div>
-<p>Now we can display it using the <code>plot</code> command. We will
-show every 15th slice.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>   <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">vol</span>, zlevels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>, by<span class="op">=</span><span class="fl">15</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="ImageVolumes_files/figure-html/unnamed-chunk-12-1.png" width="700"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
