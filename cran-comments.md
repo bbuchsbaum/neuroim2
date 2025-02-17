@@ -5,3 +5,9 @@
 * This is a new release.
 
 * Installed package size is 6.2Mb due to need for example volumetric images in the package.
+
+* There are no general references for the package.
+
+* wrapped slow example in \donttest{} to avoid long run times.
+
+

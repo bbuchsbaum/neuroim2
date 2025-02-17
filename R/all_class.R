@@ -556,11 +556,11 @@ setClass("DenseNeuroVol", contains=c("NeuroVol", "array"))
 #'
 #' @details
 #' The SparseNeuroVol class extends the \code{\linkS4class{NeuroVol}} class and
-#' implements the ArrayLike3D interface. It uses a \code{\linkS4class{sparseVector}}
+#' implements the ArrayLike3D interface. It uses a \code{sparseVector}
 #' from the Matrix package to store the image data, which allows for memory-efficient
 #' representation of sparse 3D neuroimaging data.
 #'
-#' @slot data A \code{\linkS4class{sparseVector}} object from the Matrix package,
+#' @slot data A \code{sparseVector} object from the Matrix package,
 #'   storing the image volume data in a sparse format.
 #'
 #' @seealso

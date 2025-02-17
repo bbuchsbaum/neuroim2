@@ -29,7 +29,7 @@ Construct a \code{\linkS4class{SparseNeuroVol}} instance
 }
 \details{
 The SparseNeuroVol class extends the \code{\linkS4class{NeuroVol}} class and
-implements the ArrayLike3D interface. It uses a \code{\linkS4class{sparseVector}}
+implements the ArrayLike3D interface. It uses a \code{sparseVector}
 from the Matrix package to store the image data, which allows for memory-efficient
 representation of sparse 3D neuroimaging data.
 
@@ -38,7 +38,7 @@ Image data is backed by \code{Matrix::sparseVector}.
 \section{Slots}{
 
 \describe{
-\item{\code{data}}{A \code{\linkS4class{sparseVector}} object from the Matrix package,
+\item{\code{data}}{A \code{sparseVector} object from the Matrix package,
 storing the image volume data in a sparse format.}
 }}
 

@@ -18,7 +18,7 @@ Encoding: UTF-8
 LazyData: true
 VignetteBuilder: knitr, rmarkdown
 Depends:
-    R (>= 4.0.0),
+    R (>= 4.3.0),
     Matrix
 Collate:
     'RcppExports.R'
@@ -86,4 +86,4 @@ URL: https://github.com/bbuchsbaum/neuroim2,
     https://bbuchsbaum.github.io/neuroim2/
 BugReports: https://github.com/bbuchsbaum/neuroim2/issues
 Language: en-US
-SystemRequirements: C++11
+
