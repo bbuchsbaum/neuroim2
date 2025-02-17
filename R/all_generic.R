@@ -53,7 +53,9 @@ setGeneric("scale", function(x, ...) standardGeneric("scale"))
 #' newtrans <- cbind(newtrans4X3, c(space(img)@origin,1))
 #'
 #' rspace <- NeuroSpace(rspace@dim*2, rspace@spacing/2, origin=rspace@origin, trans=trans(img))
+#' \dontrun{
 #' rvol <- resample(img, rspace)
+#' }
 #'
 #'
 #' @export

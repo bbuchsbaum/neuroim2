@@ -46,7 +46,9 @@ newtrans4X3 <- newtrans4X3 * c(.5,.5,.5,1)
 newtrans <- cbind(newtrans4X3, c(space(img)@origin,1))
 
 rspace <- NeuroSpace(rspace@dim*2, rspace@spacing/2, origin=rspace@origin, trans=trans(img))
+\dontrun{
 rvol <- resample(img, rspace)
+}
 
 
 \dontrun{

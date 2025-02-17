@@ -1,6 +1,6 @@
 Package: neuroim2
 Type: Package
-Title: Data Structures and IO for Neuroimaging Data with an Emphasis on Functional Magnetic Resonance Imaging (FMRI)
+Title: Data Structures and IO for Brain Imaging Data with an Emphasis on Functional Magnetic Resonance Imaging (FMRI)
 Version: 0.8.1
 LinkingTo: 
   Rcpp,
@@ -11,8 +11,7 @@ Authors@R: c(
 Maintainer: Bradley R Buchsbaum <brad.buchsbaum@gmail.com>
 Description: A collection of data structures that represent
     volumetric brain imaging data. The focus is on basic data handling for 3D
-    and 4D neuroimaging data. In addition, there are functions to read and write
-    NIfTI-1 formats and some support for reading AFNI files.
+    and 4D brain image data. In addition, there are functions to read and write brain images.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
