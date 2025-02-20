@@ -11,6 +11,9 @@ write_elements(x, els)
 
 \item{els}{the elements to write}
 }
+\value{
+Invisibly returns NULL after writing the elements.
+}
 \description{
 Write a sequence of elements from an input source
 }

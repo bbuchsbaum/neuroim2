@@ -31,6 +31,9 @@ matricized_access(x, i, ...)
 
 \item{...}{additional arguments to be passed to methods.}
 }
+\value{
+A vector containing the values at the specified space-time coordinates.
+}
 \description{
 This function extracts the values of the elements in a 4D tensor, where the first three dimensions
 (x,y,z) have been matricized into a single dimension, using a space-time coordinate matrix.

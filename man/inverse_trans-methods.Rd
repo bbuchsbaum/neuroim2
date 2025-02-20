@@ -12,6 +12,9 @@ inverse_trans(x)
 \arguments{
 \item{x}{an object}
 }
+\value{
+A 4x4 transformation matrix that maps from real world coordinates back to grid coordinates.
+}
 \description{
 Extract inverse image coordinate transformation
 }

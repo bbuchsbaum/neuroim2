@@ -112,11 +112,6 @@ AxisSet3D <- function(i, j, k) {
 #' @param ... Additional arguments (not used)
 #' @return A matrix representing the axis directions
 #' @export
-#' @examples
-#' \dontrun{
-#' axes <- AxisSet2D(LEFT_RIGHT, ANT_POST)
-#' perm_mat(axes)
-#' }
 setMethod(f="perm_mat", signature=signature(x = "AxisSet2D"),
           def=function(x, ...) {
             cbind(x@i@direction, x@j@direction)
@@ -128,11 +123,6 @@ setMethod(f="perm_mat", signature=signature(x = "AxisSet2D"),
 #' @param ... Additional arguments (not used)
 #' @return A matrix representing the axis directions
 #' @export
-#' @examples
-#' \dontrun{
-#' axes <- AxisSet3D(LEFT_RIGHT, ANT_POST, INF_SUP)
-#' perm_mat(axes)
-#' }
 setMethod(f="perm_mat", signature=signature(x = "AxisSet3D"),
           def=function(x, ...) {
             cbind(x@i@direction, x@j@direction, x@k@direction)
@@ -142,13 +132,11 @@ setMethod(f="perm_mat", signature=signature(x = "AxisSet3D"),
 #'
 #' @param x A NeuroSpace object
 #' @param ... Additional arguments (not used)
-#' @return A matrix representing the axis directions
 #' @export
 #' @examples
-#' \dontrun{
-#' ns <- NeuroSpace(axes=AxisSet3D(LEFT_RIGHT, ANT_POST, INF_SUP))
+#' ns <- NeuroSpace(dim=c(10,10,10))
 #' perm_mat(ns)
-#' }
+#'
 setMethod(f="perm_mat", signature=signature(x = "NeuroSpace"),
           def=function(x, ...) {
             callGeneric(x@axes)
@@ -158,13 +146,7 @@ setMethod(f="perm_mat", signature=signature(x = "NeuroSpace"),
 #'
 #' @param x An AxisSet2D or AxisSet3D object
 #' @param dimnum Numeric index of dimension to drop
-#' @return An axis set with one fewer dimension
 #' @export
-#' @examples
-#' \dontrun{
-#' axes3d <- AxisSet3D(LEFT_RIGHT, ANT_POST, INF_SUP)
-#' axes2d <- drop_dim(axes3d, 1)  # Drop first dimension
-#' }
 setMethod(f="drop_dim", signature=signature(x = "AxisSet2D", dimnum="numeric"),
           def=function(x, dimnum) {
             stopifnot(length(dimnum) == 1)
@@ -181,13 +163,7 @@ setMethod(f="drop_dim", signature=signature(x = "AxisSet2D", dimnum="numeric"),
 #'
 #' @param x An AxisSet2D object
 #' @param dimnum Numeric index of dimension to drop (optional)
-#' @return An axis set with one fewer dimension
 #' @export
-#' @examples
-#' \dontrun{
-#' axes2d <- AxisSet2D(LEFT_RIGHT, ANT_POST)
-#' axes1d <- drop_dim(axes2d)  # Drop first dimension
-#' }
 setMethod(f="drop_dim", signature=signature(x = "AxisSet2D", dimnum="missing"),
           def=function(x, dimnum) {
             AxisSet1D(x@i)
@@ -197,13 +173,7 @@ setMethod(f="drop_dim", signature=signature(x = "AxisSet2D", dimnum="missing"),
 #'
 #' @param x An AxisSet3D object
 #' @param dimnum Numeric index of dimension to drop
-#' @return An axis set with one fewer dimension
 #' @export
-#' @examples
-#' \dontrun{
-#' axes3d <- AxisSet3D(LEFT_RIGHT, ANT_POST, INF_SUP)
-#' axes2d <- drop_dim(axes3d, 1)  # Drop first dimension
-#' }
 setMethod(f="drop_dim", signature=signature(x = "AxisSet3D", dimnum="numeric"),
           def=function(x, dimnum) {
             stopifnot(length(dimnum) == 1)
@@ -222,13 +192,7 @@ setMethod(f="drop_dim", signature=signature(x = "AxisSet3D", dimnum="numeric"),
 #'
 #' @param x An AxisSet3D object
 #' @param dimnum Numeric index of dimension to drop (optional)
-#' @return An axis set with one fewer dimension
 #' @export
-#' @examples
-#' \dontrun{
-#' axes3d <- AxisSet3D(LEFT_RIGHT, ANT_POST, INF_SUP)
-#' axes2d <- drop_dim(axes3d)  # Drop first dimension
-#' }
 setMethod(f="drop_dim", signature=signature(x = "AxisSet3D", dimnum="missing"),
            def=function(x, dimnum) {
              AxisSet2D(x@i, x@j)
@@ -238,13 +202,7 @@ setMethod(f="drop_dim", signature=signature(x = "AxisSet3D", dimnum="missing"),
 #'
 #' @param x An AxisSet object
 #' @param ... Additional arguments (not used)
-#' @return Integer number of dimensions
 #' @export
-#' @examples
-#' \dontrun{
-#' axes <- AxisSet2D(LEFT_RIGHT, ANT_POST)
-#' ndim(axes)  # Returns 2
-#' }
 setMethod(f="ndim",signature(x= "AxisSet"), function(x, ...) { x@ndim })
 
 #' Print method for NamedAxis objects
@@ -323,6 +281,7 @@ setMethod(f="print_", signature=signature("AxisSet3D"),
 #' Show method for AxisSet3D objects
 #'
 #' @param object An AxisSet3D object
+#' @return Invisibly returns NULL after printing the axis set information.
 #' @export
 setMethod(f="show", signature=signature("AxisSet3D"),
     def=function(object) {
@@ -337,6 +296,7 @@ setMethod(f="show", signature=signature("AxisSet3D"),
 #' Show method for AxisSet4D objects
 #'
 #' @param object An AxisSet4D object
+#' @return Invisibly returns NULL after printing the axis set information.
 #' @export
 setMethod(f="show", signature=signature("AxisSet4D"),
     def=function(object) {
@@ -457,12 +417,10 @@ OrientationList3D <- list(
 #' @return An AxisSet3D object representing the anatomical orientation
 #' @export
 #' @examples
-#' \dontrun{
 #' # Create orientation with default LPI axes
 #' orient <- findAnatomy3D()
 #' # Create orientation with custom axes
 #' orient <- findAnatomy3D("R", "A", "S")
-#' }
 findAnatomy3D <- function(axis1="L", axis2="P", axis3="I") {
   res <- lapply(list(axis1, axis2, axis3), function(x) {
     matchAxis(x)

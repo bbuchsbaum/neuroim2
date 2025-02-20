@@ -18,9 +18,6 @@
 
 \item{drop}{Whether to drop dimensions of length 1}
 }
-\value{
-A subset of the NeuroHyperVec data.
-}
 \description{
 A class representing a five-dimensional brain image, where the first three dimensions are spatial,
 the fourth dimension is typically time or trials, and the fifth dimension represents features within a trial.
@@ -77,7 +74,7 @@ Key features:
 }}
 
 \examples{
-\dontrun{
+
 # Create a simple 5D dataset (10x10x10 spatial, 5 trials, 3 features)
 dims <- c(10, 10, 10)
 space <- NeuroSpace(c(dims, 5, 3))
@@ -99,7 +96,7 @@ series(hvec, 5, 5, 5)
 
 # Extract a 3D volume for specific trial and feature
 hvec[,,,2,1]
-}
+
 
 }
 \seealso{

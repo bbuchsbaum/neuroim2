@@ -31,9 +31,6 @@ index_to_grid(x, idx)
 }
 \value{
 a matrix of grid coordinates
-
-A matrix with 2 columns representing the (x,y) coordinates 
-  corresponding to the input indices
 }
 \description{
 Converts linear indices to 2D grid coordinates for a \code{NeuroSlice} object.

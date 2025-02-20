@@ -17,6 +17,9 @@ values(x, ...)
 
 \item{...}{additional arguments}
 }
+\value{
+A vector or array containing the values extracted from the object.
+}
 \description{
 Extract Data Values of an Object
 }

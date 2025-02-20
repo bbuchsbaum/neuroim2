@@ -32,8 +32,6 @@ representing (x,y) coordinates in the slice grid}
 }
 \value{
 a vector of indices
-
-Integer vector of linear indices corresponding to the input coordinates
 }
 \description{
 Converts 2D grid coordinates to linear indices for a \code{NeuroSlice} object.

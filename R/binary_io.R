@@ -195,32 +195,37 @@ series_reader <- function(file_name) {
 #' @param signed Logical indicating if data type is signed (default: TRUE)
 #' @return An object of class \linkS4class{BinaryReader}
 #' @examples
-#' \dontrun{
-#' # Create reader for double-precision data
-#' reader <- BinaryReader("data.bin", byte_offset = 0L,
-#'                       data_type = "double", bytes_per_element = 8L)
-#'                       
+#' \donttest{
+#' # Create a temporary binary file
+#' tmp <- tempfile()
+#' writeBin(rnorm(100), tmp, size = 8)
+#'
+#'
 #' # Read from existing connection with offset
-#' con <- file("data.bin", "rb")
-#' reader <- BinaryReader(con, byte_offset = 100L,
-#'                       data_type = "integer", bytes_per_element = 4L)
+#' con <- file(tmp, "rb")
+#' reader <- BinaryReader(con, byte_offset=0,
+#'                       data_type = "DOUBLE", bytes_per_element = 8L)
+#' close(reader)
+#'
+#' # Clean up
+#' unlink(tmp)
 #' }
 #' @seealso \code{\link{BinaryWriter}} for writing binary data
 #' @export
 BinaryReader <- function(input, byte_offset, data_type, bytes_per_element,
                         endian = .Platform$endian, signed = TRUE) {
   if (is.character(input)) {
-    new("BinaryReader", input = file(input, open = "rb"), 
+    new("BinaryReader", input = file(input, open = "rb"),
         byte_offset = as.integer(byte_offset),
-        data_type = data_type, 
-        bytes_per_element = as.integer(bytes_per_element), 
+        data_type = data_type,
+        bytes_per_element = as.integer(bytes_per_element),
         endian = endian, signed = signed)
   } else {
     stopifnot(inherits(input, "connection"))
-    new("BinaryReader", input = input, 
-        byte_offset = as.integer(byte_offset), 
+    new("BinaryReader", input = input,
+        byte_offset = as.integer(byte_offset),
         data_type = data_type,
-        bytes_per_element = as.integer(bytes_per_element), 
+        bytes_per_element = as.integer(bytes_per_element),
         endian = endian, signed = signed)
   }
 }
@@ -236,32 +241,31 @@ BinaryReader <- function(input, byte_offset, data_type, bytes_per_element,
 #' @param endian Character string specifying endianness ('big' or 'little', default: platform-specific)
 #' @return An object of class \linkS4class{BinaryWriter}
 #' @examples
-#' \dontrun{
-#' # Create writer for double-precision data
-#' writer <- BinaryWriter("output.bin", byte_offset = 0L,
-#'                       data_type = "double", bytes_per_element = 8L)
-#'                       
+#' \donttest{
+#'
+#' tmp <- tempfile()
 #' # Write to existing connection with offset
-#' con <- file("output.bin", "wb")
+#' con <- file(tmp, "wb")
 #' writer <- BinaryWriter(con, byte_offset = 100L,
 #'                       data_type = "integer", bytes_per_element = 4L)
+#' unlink(tmp)
 #' }
 #' @seealso \code{\link{BinaryReader}} for reading binary data
 #' @export
 BinaryWriter <- function(output, byte_offset, data_type, bytes_per_element,
                         endian = .Platform$endian) {
   if (is.character(output)) {
-    new("BinaryWriter", output = file(output, open = "wb"), 
-        byte_offset = as.integer(byte_offset), 
-        data_type = data_type, 
-        bytes_per_element = as.integer(bytes_per_element), 
+    new("BinaryWriter", output = file(output, open = "wb"),
+        byte_offset = as.integer(byte_offset),
+        data_type = data_type,
+        bytes_per_element = as.integer(bytes_per_element),
         endian = endian)
   } else {
     stopifnot(inherits(output, "connection"))
-    new("BinaryWriter", output = output, 
-        byte_offset = as.integer(byte_offset), 
-        data_type = data_type, 
-        bytes_per_element = as.integer(bytes_per_element), 
+    new("BinaryWriter", output = output,
+        byte_offset = as.integer(byte_offset),
+        data_type = data_type,
+        bytes_per_element = as.integer(bytes_per_element),
         endian = endian)
   }
 }
@@ -305,12 +309,22 @@ setMethod(f="initialize", signature=signature(.Object="BinaryWriter"),
 #' @param num_elements Integer specifying number of elements to read
 #' @return Numeric vector of read elements
 #' @examples
-#' \dontrun{
-#' reader <- BinaryReader("data.bin", byte_offset = 0L,
-#'                       data_type = "double", bytes_per_element = 8L)
-#' # Read 100 elements
+#' \donttest{
+#' # Create a temporary binary file with some test data
+#' tmp <- tempfile()
+#' con <- file(tmp, "wb")
+#' test_data <- rnorm(100)
+#' writeBin(test_data, con, size = 8)
+#' close(con)
+#'
+#' # Create reader and read the data
+#' reader <- BinaryReader(tmp, byte_offset = 0L,
+#'                       data_type = "DOUBLE", bytes_per_element = 8L)
 #' data <- read_elements(reader, 100)
 #' close(reader)
+#'
+#' # Clean up
+#' unlink(tmp)
 #' }
 #' @export
 setMethod(f="read_elements", signature=signature(x= "BinaryReader", num_elements="numeric"),
@@ -324,14 +338,18 @@ setMethod(f="read_elements", signature=signature(x= "BinaryReader", num_elements
 #'
 #' @param x Object of class \linkS4class{BinaryWriter}
 #' @param els Numeric vector of elements to write
-#' @return None (called for side effect)
 #' @examples
-#' \dontrun{
-#' writer <- BinaryWriter("output.bin", byte_offset = 0L,
-#'                       data_type = "double", bytes_per_element = 8L)
+#' \donttest{
+#' # Create a temporary binary file for writing
+#' tmp <- tempfile()
+#' writer <- BinaryWriter(tmp, byte_offset = 0L,
+#'                       data_type = "DOUBLE", bytes_per_element = 8L)
 #' # Write some data
 #' write_elements(writer, rnorm(100))
 #' close(writer)
+#'
+#' # Clean up
+#' unlink(tmp)
 #' }
 #' @export
 setMethod(f="write_elements", signature=signature(x= "BinaryWriter", els="numeric"),
@@ -352,18 +370,23 @@ setMethod(f="write_elements", signature=signature(x= "BinaryWriter", els="numeri
 #' This should be called when you're done with the reader/writer to free system resources.
 #'
 #' @param con The BinaryReader or BinaryWriter object to close.
-#' @return Invisibly returns NULL.
 #' @examples
-#' \dontrun{
-#' # Create and close a binary reader
-#' reader <- BinaryReader("data.bin", byte_offset = 0L,
-#'                       data_type = "double", bytes_per_element = 8L)
-#' close(reader)
-#' 
-#' # Create and close a binary writer
-#' writer <- BinaryWriter("output.bin", byte_offset = 0L,
-#'                       data_type = "double", bytes_per_element = 8L)
+#' \donttest{
+#' # Create a temporary file and write some data
+#' tmp <- tempfile()
+#' writer <- BinaryWriter(tmp, byte_offset = 0L,
+#'                       data_type = "DOUBLE", bytes_per_element = 8L)
+#' write_elements(writer, rnorm(100))
 #' close(writer)
+#'
+#' # Read the data back
+#' reader <- BinaryReader(tmp, byte_offset = 0L,
+#'                       data_type = "DOUBLE", bytes_per_element = 8L)
+#' data <- read_elements(reader, 100)
+#' close(reader)
+#'
+#' # Clean up
+#' unlink(tmp)
 #' }
 #'
 #' @export
@@ -375,6 +398,7 @@ setMethod(f="close", signature=signature(con= "BinaryReader"),
 
 
 #' @rdname close-methods
+#' @export
 setMethod(f="close", signature=signature(con= "BinaryWriter"),
 		def=function(con) {
 			base::close(con@output)
@@ -390,12 +414,12 @@ setMethod(f="close", signature=signature(con= "BinaryWriter"),
 #' @param reader Function that takes column indices and returns matrix
 #' @return An object of class \linkS4class{ColumnReader}
 #' @examples
-#' \dontrun{
+#'
 #' reader_func <- function(cols) {
 #'   matrix(rnorm(100 * length(cols)), 100, length(cols))
 #' }
 #' col_reader <- ColumnReader(nrow = 100L, ncol = 10L, reader = reader_func)
-#' }
+#'
 #' @export
 ColumnReader <- function(nrow, ncol, reader) {
   stopifnot(is.function(reader))

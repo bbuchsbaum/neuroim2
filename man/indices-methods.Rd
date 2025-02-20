@@ -20,17 +20,15 @@
 \arguments{
 \item{x}{An \code{\linkS4class{IndexLookupVol}} object}
 }
-\value{
-An integer vector containing the indices of included voxels
-}
 \description{
 Retrieves the vector of indices that are included in the lookup volume.
 }
 \examples{
-\dontrun{
+
+space <- NeuroSpace(c(64, 64, 64), c(1, 1, 1), c(0, 0, 0))
 ilv <- IndexLookupVol(space, c(1:100))
 idx <- indices(ilv)  # Get included indices
-}
+
 
 }
 \keyword{internal}

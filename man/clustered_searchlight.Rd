@@ -30,8 +30,7 @@ clustered volume or performing k-means clustering to generate the clusters.
 mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 
 # Generate a clustered searchlight iterator with 5 clusters
-\dontrun{
 clust_searchlight <- clustered_searchlight(mask, csize = 5)
-}
+
 
 }

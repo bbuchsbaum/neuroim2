@@ -30,15 +30,14 @@ An object of class \linkS4class{BinaryWriter}
 Create a new instance of the \linkS4class{BinaryWriter} class for writing bulk binary data.
 }
 \examples{
-\dontrun{
-# Create writer for double-precision data
-writer <- BinaryWriter("output.bin", byte_offset = 0L,
-                      data_type = "double", bytes_per_element = 8L)
-                      
+\donttest{
+
+tmp <- tempfile()
 # Write to existing connection with offset
-con <- file("output.bin", "wb")
+con <- file(tmp, "wb")
 writer <- BinaryWriter(con, byte_offset = 100L,
                       data_type = "integer", bytes_per_element = 4L)
+unlink(tmp)
 }
 }
 \seealso{

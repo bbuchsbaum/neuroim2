@@ -20,14 +20,15 @@ trans(x)
 \arguments{
 \item{x}{an object with a transformation}
 }
+\value{
+A 4x4 transformation matrix that maps from grid coordinates to real world coordinates.
+}
 \description{
 Extract image coordinate transformation
 
 Get transformation matrix
 }
 \details{
-This function returns a transformation that can be used to go from "grid coordinates" to "real world coordinates" in millimeters.
-
 This function returns a transformation that can be used to go from "grid coordinates" to "real world coordinates" in millimeters.
 see \code{\linkS4class{NeuroSpace}}
 }

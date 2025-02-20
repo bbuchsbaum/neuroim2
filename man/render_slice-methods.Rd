@@ -19,6 +19,9 @@ render_slice(x, zpos, width, height, colmap, ...)
 
 \item{...}{additional arguments}
 }
+\value{
+A rendered image of the specified slice with the given dimensions and color mapping.
+}
 \description{
 Render a slice at z coordinate
 }

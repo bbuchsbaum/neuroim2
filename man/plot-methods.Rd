@@ -47,23 +47,18 @@ plot an NeuroVol as a series of 2D slices
 \details{
 The plot method uses \code{ggplot2} to create a raster visualization of the slice data.
 The intensity values are mapped to colors using the specified colormap and range.
+
+when `x` is a NeuroSlice object, the plot method returns a \code{ggplot2} object containing the raster visualization of the slice data.
+        The plot can be further customized using standard ggplot2 functions.
 }
 \examples{
 # Create example slice
 slice_space <- NeuroSpace(c(100, 100))
 slice_data <- matrix(rnorm(100*100), 100, 100)
 slice <- NeuroSlice(slice_data, slice_space)
-
-\dontrun{
+\donttest{
 # Basic plot
 plot(slice)
-
-# Custom colormap
-library(viridis)
-plot(slice, cmap = viridis(255))
-
-# Custom intensity range
-plot(slice, irange = c(-2, 2))
 }
 
 

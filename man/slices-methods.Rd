@@ -10,12 +10,15 @@ slices(x, ...)
 \S4method{slices}{NeuroVol}(x)
 }
 \arguments{
-\item{x}{The 3D or 4D object to extract slices from}
+\item{x}{A NeuroVol object}
 
 \item{...}{Additional arguments to be passed to the underlying methods}
 }
 \value{
 A list of 2D matrices, each containing a slice from the input object
+
+A deflist object containing functions that return 2D slices of the volume along the z-axis.
+        The length of the deflist equals the number of slices in the z dimension.
 }
 \description{
 This function extracts an ordered series of 2D slices from a 3D or 4D object. The returned slices are in the order they appear in the original object.

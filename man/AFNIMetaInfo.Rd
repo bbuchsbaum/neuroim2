@@ -38,20 +38,4 @@ The function handles:
   \item Data type and scaling setup
 }
 }
-\examples{
-\dontrun{
-# Read AFNI header
-header <- read_afni_header("brain+orig.HEAD")
-
-# Create format descriptor
-fmt <- AFNIFormat()
-
-# Create metadata
-meta <- AFNIMetaInfo(fmt, header)
-
-# Check dimensions
-dim(meta)
-}
-
-
-}
+\keyword{internal}

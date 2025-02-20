@@ -34,6 +34,9 @@
 
 \item{drop}{drop dimension}
 }
+\value{
+A subset of the input object, with dimensions depending on the indexing and the `drop` parameter.
+}
 \description{
 Extract or replace parts of an object
 

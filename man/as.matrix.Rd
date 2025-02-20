@@ -11,6 +11,9 @@ as.matrix(x, ...)
 
 \item{...}{Additional arguments passed to methods.}
 }
+\value{
+A matrix representation of the input object.
+}
 \description{
 Coerces an object to a matrix.
 }

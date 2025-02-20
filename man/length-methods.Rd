@@ -25,12 +25,13 @@
 \item{x}{A NeuroVecSeq object}
 }
 \value{
-Integer length (number of time points)
-
 Integer length (total number of time points)
+
+An integer representing the number of coordinates in the ROICoords object.
 }
 \description{
-Returns the number of time points (4th dimension) in a NeuroVec object
+Returns the number of time points (4th dimension) in a NeuroVec object.
+This represents the temporal dimension of the neuroimaging data.
 
 Returns the total number of time points across all vectors in the sequence
 }

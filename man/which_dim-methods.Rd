@@ -10,9 +10,9 @@ which_dim(x, axis)
 \S4method{which_dim}{NeuroSpace,NamedAxis}(x, axis)
 }
 \arguments{
-\item{x}{An object representing the input data, such as a matrix or an array.}
+\item{x}{The NeuroSpace object}
 
-\item{axis}{An integer representing the axis for which the dimension is requested. For example, 1 for rows, 2 for columns, or 3 for the depth in a 3D array.}
+\item{axis}{The NamedAxis to find}
 }
 \value{
 An integer representing the dimension of the specified axis for the given object.

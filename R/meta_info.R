@@ -26,14 +26,14 @@ NULL
 #' }
 #'
 #' @examples
-#' \dontrun{
+#'
 #' # Create reader for NIFTI file
-#' meta <- read_header("brain.nii")
+#' meta <- read_header(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #' reader <- data_reader(meta, offset = 0)
 #'
 #' # Read first 100 voxels
-#' data <- reader$read(100)
-#' }
+#' data <- read_elements(reader, 100)
+#'
 #'
 #' @seealso
 #' \code{\link{read_header}} for reading headers,
@@ -47,7 +47,6 @@ setGeneric("data_reader", function(x, offset) standardGeneric("data_reader"))
 #' Get Dimensions of FileMetaInfo Object
 #'
 #' @param x A FileMetaInfo object
-#' @return Integer vector of image dimensions
 #' @rdname dim-methods
 #' @export
 setMethod("dim", "FileMetaInfo", function(x) x@dims)
@@ -263,19 +262,24 @@ MetaInfo <- function(Dim, spacing, origin = rep(0, length(spacing)),
 #' }
 #'
 #' @examples
-#' \dontrun{
+#'
 #' # Read NIFTI header
-#' header <- readNIftiHeader("brain.nii")
+#' header <- read_header(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #'
 #' # Create format descriptor
-#' fmt <- NIFTIFormat()
+#' fmt <- new("NIFTIFormat",
+#'            file_format = "NIFTI",
+#'            header_encoding = "raw",
+#'            header_extension = "nii",
+#'            data_encoding = "raw",
+#'            data_extension = "nii")
 #'
 #' # Create metadata
-#' meta <- NIFTIMetaInfo(fmt, header)
+#' meta <- NIFTIMetaInfo(fmt, header@header)
 #'
 #' # Check dimensions
 #' dim(meta)
-#' }
+#'
 #'
 #' @seealso
 #' \code{\link{MetaInfo}}
@@ -357,23 +361,8 @@ NIFTIMetaInfo <- function(descriptor, nifti_header) {
 #'   \item Data type and scaling setup
 #' }
 #'
-#' @examples
-#' \dontrun{
-#' # Read AFNI header
-#' header <- read_afni_header("brain+orig.HEAD")
 #'
-#' # Create format descriptor
-#' fmt <- AFNIFormat()
-#'
-#' # Create metadata
-#' meta <- AFNIMetaInfo(fmt, header)
-#'
-#' # Check dimensions
-#' dim(meta)
-#' }
-#'
-#'
-#' @export
+#' @keywords internal
 AFNIMetaInfo <- function(descriptor, afni_header) {
   # Validate inputs
   if (!inherits(descriptor, "AFNIFormat")) {

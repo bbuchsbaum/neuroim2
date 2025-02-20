@@ -17,15 +17,15 @@ This method converts a ClusteredNeuroVol into an equivalent DenseNeuroVol object
 Convert a ClusteredNeuroVol Object to a DenseNeuroVol Object
 }
 \examples{
-\dontrun{
+
 # Create a clustered volume
 mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
-clusters <- rep(1:5, each=sum(mask)/5)
+clusters <- rep(1:5, length.out=sum(mask))
 cvol <- ClusteredNeuroVol(mask, clusters)
 
 # Convert to DenseNeuroVol
 dvol <- as(cvol, "DenseNeuroVol")
-}
+
 }
 \seealso{
 \code{\linkS4class{ClusteredNeuroVol}}, \code{\linkS4class{DenseNeuroVol}}

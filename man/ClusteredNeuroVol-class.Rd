@@ -70,28 +70,27 @@ ClusteredNeuroVol objects are particularly useful for:
 }
 
 \examples{
-\dontrun{
+
 # Create a simple clustered brain volume
 dim <- c(10L, 10L, 10L)
 mask_data <- array(rep(c(TRUE, FALSE), 500), dim)
 mask <- new("LogicalNeuroVol", .Data = mask_data,
             space = NeuroSpace(dim = dim, origin = c(0,0,0), spacing = c(1,1,1)))
 
-clusters <- as.integer(runif(sum(mask_data)) * 5)
+clusters <- as.integer(runif(sum(mask_data)) * 5)+1
 label_map <- list("Cluster1" = 1, "Cluster2" = 2, "Cluster3" = 3,
                   "Cluster4" = 4, "Cluster5" = 5)
 
-cluster_map <- new.env()
+cluster_map <- list()
 for (i in 1:5) {
   cluster_map[[as.character(i)]] <- which(clusters == i)
 }
 
-clustered_vol <- new("ClusteredNeuroVol",
+clustered_vol <- ClusteredNeuroVol(
                      mask = mask,
                      clusters = clusters,
-                     label_map = label_map,
-                     cluster_map = cluster_map)
-}
+                     label_map = label_map)
+
 
 
 # Create a simple space and volume

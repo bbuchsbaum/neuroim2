@@ -61,7 +61,7 @@
 
       <h1>Regions of Interest</h1>
             
-            <h4 data-toc-skip class="date">2025-02-16</h4>
+            <h4 data-toc-skip class="date">2025-02-20</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/neuroim2/blob/HEAD/vignettes/regionOfInterest.Rmd" class="external-link"><code>vignettes/regionOfInterest.Rmd</code></a></small>
       <div class="d-none name"><code>regionOfInterest.Rmd</code></div>
@@ -69,6 +69,7 @@
 
     
     
+<pre><code><span><span class="co">## Warning: package 'purrr' was built under R version 4.3.3</span></span></code></pre>
 <div class="section level2">
 <h2 id="regions-of-interest">Regions of interest<a class="anchor" aria-label="anchor" href="#regions-of-interest"></a>
 </h2>
@@ -81,14 +82,14 @@ point, we need an existing object of type <code>NeuroVol</code> or
 <code>NeuroSpace</code>.</p>
 <p>To create a spherical region of interest with a 5mm radius around a
 central voxel at i=20, j=20, k=20, we first read in an image.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>      <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bbuchsbaum/neuroim2" class="external-link">neuroim2</a></span><span class="op">)</span>        </span>
 <span>      <span class="va">file_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask2.nii.gz"</span>, package<span class="op">=</span><span class="st">"neuroim2"</span><span class="op">)</span></span>
 <span>      <span class="va">vol</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">file_name</span><span class="op">)</span></span></code></pre></div>
 <p>Next, we create a spherical ROI centered around voxel coordinates
 [20,20,20] with a 5mm radius, filling all values in the ROI with
 100.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>      <span class="va">sphere</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spherical_roi.html">spherical_roi</a></span><span class="op">(</span><span class="va">vol</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>,<span class="fl">20</span>,<span class="fl">20</span><span class="op">)</span>, radius<span class="op">=</span><span class="fl">5</span>, fill<span class="op">=</span><span class="fl">100</span>, use_cpp<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  <span style="color: #0000BB; font-weight: bold;">ROIVol Object</span> </span></span>
@@ -105,20 +106,20 @@ central voxel at i=20, j=20, k=20, we first read in an image.</p>
 millimeters, we need to first convert the real-valued coordinates to a
 voxel-based coordinate. Suppose our real-world coordinate is at -50,
 -28, 10 in coordinate space.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span>    <span class="va">rpoint</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">34</span>,<span class="op">-</span><span class="fl">28</span>,<span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <p>Because the function <code>spherical_roi</code> takes a coordinate in
 <em>voxel units</em>, we need to convert the real-world coordinate
 (i.e. in millimeter units) to voxel coordinates.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span>    <span class="va">vox</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/coord_to_grid-methods.html">coord_to_grid</a></span><span class="op">(</span><span class="va">vol</span>, <span class="va">rpoint</span><span class="op">)</span></span>
 <span>    <span class="va">sphere</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spherical_roi.html">spherical_roi</a></span><span class="op">(</span><span class="va">vol</span>, <span class="va">vox</span>, radius<span class="op">=</span><span class="fl">10</span>, fill<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="fu"><a href="../reference/coords.html">coords</a></span><span class="op">(</span><span class="va">sphere</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 85  3</span></span></code></pre></div>
 <p>Now we convert back to real-world coordinates</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>    <span class="va">coords</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/index_to_coord-methods.html">index_to_coord</a></span><span class="op">(</span><span class="va">vol</span>, <span class="fu"><a href="../reference/indices.html">indices</a></span><span class="op">(</span><span class="va">sphere</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="va">center_of_mass</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">coords</span><span class="op">)</span></span>
 <span>    <span class="va">center_of_mass</span></span>
@@ -132,7 +133,7 @@ But we don’t want to store every value in a dense array. Here we can
 make use of the <code>SparseNeuroVol</code> class which only stores
 non-zero values my using a <code><a href="https://rdrr.io/pkg/Matrix/man/sparseVector.html" class="external-link">Matrix::sparseVector</a></code> under the
 hood.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span>    <span class="va">sphere</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spherical_roi.html">spherical_roi</a></span><span class="op">(</span><span class="va">vol</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">50</span>,<span class="fl">10</span>,<span class="fl">10</span><span class="op">)</span>, radius<span class="op">=</span><span class="fl">10</span>, fill<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
 <span>    <span class="va">sphere</span></span>
@@ -145,7 +146,7 @@ hood.</p>
 <span><span class="co">#&gt;   <span style="color: #555555;">Value Range:</span> [<span style="color: #0000BB;">1.00</span>, <span style="color: #0000BB;">1.00</span>]</span></span></code></pre></div>
 <p>Now we construct a <code>SparseNeuroVol</code> and fill it with the
 values stored in the ROI:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>    <span class="va">sparsevol</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SparseNeuroVol-class.html">SparseNeuroVol</a></span><span class="op">(</span><span class="va">sphere</span>, <span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span>,indices<span class="op">=</span><span class="fu"><a href="../reference/indices.html">indices</a></span><span class="op">(</span><span class="va">sphere</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">sparsevol</span><span class="op">)</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">sphere</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span>
@@ -163,7 +164,7 @@ carry out searchlight analyses. These functions produces
 the local neighborhood around each voxel.</p>
 <p>Here, we compute the mean value in an exhaustive set of spherical
 searchlights in an image volume.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## generate a list of searchlight ROIs</span></span>
@@ -174,19 +175,19 @@ searchlights in an image volume.</p>
 <p>We can also use a “randomized searchlight”, which samples voxels
 without replacement until all voxels have been included in at least one
 searchlight.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ret</span> <span class="op">&lt;-</span> <span class="va">vol</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="../reference/random_searchlight.html">random_searchlight</a></span><span class="op">(</span>radius<span class="op">=</span><span class="fl">8</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">vol</span><span class="op">[</span><span class="fu"><a href="../reference/coords.html">coords</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Another related method involves using a “parcellation” or clustering
 to define successive regions of interest for an analysis. Here we show
 how to do this in a similar way as above. First we must define a
 ‘clustering’ over the voxel space:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/index_to_coord-methods.html">index_to_coord</a></span><span class="op">(</span><span class="va">vol</span>, <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">vol</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">kres</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/kmeans.html" class="external-link">kmeans</a></span><span class="op">(</span><span class="va">grid</span>, centers<span class="op">=</span><span class="fl">50</span>, iter.max<span class="op">=</span><span class="fl">500</span><span class="op">)</span></span></code></pre></div>
 <p>Now we create a <code>ClusteredNeuroVol</code> and map the
 <code>mean</code> function over all clusters:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">kvol</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ClusteredNeuroVol-class.html">ClusteredNeuroVol</a></span><span class="op">(</span><span class="va">vol</span>, <span class="va">kres</span><span class="op">$</span><span class="va">cluster</span><span class="op">)</span></span>
 <span><span class="va">ret</span> <span class="op">&lt;-</span> <span class="va">vol</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="../reference/clustered_searchlight.html">clustered_searchlight</a></span><span class="op">(</span>cvol<span class="op">=</span><span class="va">kvol</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">vol</span><span class="op">[</span><span class="fu"><a href="../reference/coords.html">coords</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -202,7 +203,7 @@ that at edges, ‘patches’ will be padded out with the value at the image
 extremes.</p>
 <p>Here we create a patch set consistting of 3 by 3 by 1 square patches
 that span the image.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">pset</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/patch_set.html">patch_set</a></span><span class="op">(</span><span class="va">vol</span>, dims<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>,<span class="fl">3</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">pset</span><span class="op">)</span></span>
@@ -210,7 +211,7 @@ that span the image.</p>
 <span><span class="va">ret</span> <span class="op">&lt;-</span> <span class="va">pset</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Now we limit patches so that the set of patch centers are within a
 mask.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">pset</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/patch_set.html">patch_set</a></span><span class="op">(</span><span class="va">vol</span>, dims<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>,<span class="fl">3</span>,<span class="fl">1</span><span class="op">)</span>, mask<span class="op">=</span><span class="fu"><a href="../reference/as.logical-methods.html">as.logical</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">pset</span><span class="op">)</span></span>

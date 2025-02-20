@@ -17,6 +17,9 @@ render(x, width, height, colmap, ...)
 
 \item{...}{additional arguments}
 }
+\value{
+A rendered image with the specified dimensions and color mapping.
+}
 \description{
 Map an image intensities to an image with color values.
 }

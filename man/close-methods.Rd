@@ -12,24 +12,27 @@
 \arguments{
 \item{con}{The BinaryReader or BinaryWriter object to close.}
 }
-\value{
-Invisibly returns NULL.
-}
 \description{
 Closes the underlying connection associated with a BinaryReader or BinaryWriter object.
 This should be called when you're done with the reader/writer to free system resources.
 }
 \examples{
-\dontrun{
-# Create and close a binary reader
-reader <- BinaryReader("data.bin", byte_offset = 0L,
-                      data_type = "double", bytes_per_element = 8L)
+\donttest{
+# Create a temporary file and write some data
+tmp <- tempfile()
+writer <- BinaryWriter(tmp, byte_offset = 0L,
+                      data_type = "DOUBLE", bytes_per_element = 8L)
+write_elements(writer, rnorm(100))
+close(writer)
+
+# Read the data back
+reader <- BinaryReader(tmp, byte_offset = 0L,
+                      data_type = "DOUBLE", bytes_per_element = 8L)
+data <- read_elements(reader, 100)
 close(reader)
 
-# Create and close a binary writer
-writer <- BinaryWriter("output.bin", byte_offset = 0L,
-                      data_type = "double", bytes_per_element = 8L)
-close(writer)
+# Clean up
+unlink(tmp)
 }
 
 }

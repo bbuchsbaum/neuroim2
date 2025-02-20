@@ -30,12 +30,6 @@
 \item{...}{Additional arguments (not used)}
 }
 \value{
-A numeric vector of values
-
-Numeric vector of values
-
-A numeric vector or array
-
 Numeric vector of accessed values
 }
 \description{
@@ -44,11 +38,18 @@ Internal method providing linear access to memory-mapped data.
 Provides linear access to the data across all vectors in the sequence.
 }
 \examples{
-\dontrun{
-fbvec <- FileBackedNeuroVec("fmri_data.nii")
+\donttest{
+# Create a small NeuroVec and save it
+nvec <- NeuroVec(matrix(1:32, 8, 4), NeuroSpace(c(2,2,2,4)))
+tmp <- tempfile(fileext = ".nii")
+write_vec(nvec, tmp)
 
-# Access first 10 values
+# Load as FileBackedNeuroVec and access values
+fbvec <- FileBackedNeuroVec(tmp)
 values <- linear_access(fbvec, 1:10)
+
+# Clean up
+unlink(tmp)
 }
 
 }

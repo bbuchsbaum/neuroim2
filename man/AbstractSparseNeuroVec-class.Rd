@@ -32,13 +32,6 @@ storage mechanisms and methods for efficient access and manipulation of sparse
 4D brain image data.
 }
 
-\examples{
-\dontrun{
-# This is an abstract class and should not be instantiated directly.
-# Instead, use one of its concrete subclasses, such as SparseNeuroVec.
-}
-
-}
 \seealso{
 \code{\link{NeuroVec-class}} for the parent class.
 \code{\link{LogicalNeuroVol-class}} for the mask representation.

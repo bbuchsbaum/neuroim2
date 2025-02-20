@@ -25,18 +25,16 @@
 \item{real}{if \code{TRUE}, return coordinates in real world units}
 }
 \value{
-The extracted coordinates corresponding to the provided index
-        If the index is not found, it returns NA
-
 A matrix of coordinates
 }
 \description{
 Extracts the coordinates from an IndexLookupVol object based on a given index.
 }
 \examples{
-\dontrun{
+
+space <- NeuroSpace(c(64, 64, 64), c(1, 1, 1), c(0, 0, 0))
 ilv <- IndexLookupVol(space, c(1:100))
 coords(ilv, 1)  # Extract coordinates for index 1
-}
+
 
 }

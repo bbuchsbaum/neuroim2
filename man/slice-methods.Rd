@@ -23,6 +23,9 @@ slice(x, zlevel, along, orientation, ...)
 
 \item{...}{additional arguments}
 }
+\value{
+A 2D slice from the image volume.
+}
 \description{
 Extract a 2D slice from an image volume
 }

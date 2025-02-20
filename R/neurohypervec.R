@@ -39,7 +39,7 @@
 #' \code{\linkS4class{NeuroVec}}, \code{\linkS4class{LogicalNeuroVol}}, \code{\linkS4class{NeuroSpace}}
 #'
 #' @examples
-#' \dontrun{
+#' 
 #' # Create a simple 5D dataset (10x10x10 spatial, 5 trials, 3 features)
 #' dims <- c(10, 10, 10)
 #' space <- NeuroSpace(c(dims, 5, 3))
@@ -61,7 +61,7 @@
 #'
 #' # Extract a 3D volume for specific trial and feature
 #' hvec[,,,2,1]
-#' }
+#' 
 #'
 #' @name NeuroHyperVec-class
 #' @rdname NeuroHyperVec-class
@@ -248,7 +248,7 @@ NeuroHyperVec <- function(data, space, mask) {
 #' @param k third index
 #' @param ... Additional arguments (not used)
 #'
-#' @return A 2D array with dimensions [features x trials]
+#' @details when x is a NeuroHyperVec object, the series method returns a 2D array with dimensions [features x trials]
 #'
 setMethod("series", signature(x = "NeuroHyperVec"),
   function(x, i, j, k, ...) {
@@ -284,7 +284,6 @@ setMethod("series", signature(x = "NeuroHyperVec"),
 #' @param i The linear indices
 #' @param ... Additional arguments (not used)
 #'
-#' @return A numeric vector or array
 #' @rdname linear_access-methods
 setMethod("linear_access", signature(x = "NeuroHyperVec"),
   function(x, i, ...) {
@@ -337,7 +336,6 @@ setMethod("linear_access", signature(x = "NeuroHyperVec"),
 #'
 #' @rdname NeuroHyperVec-class
 #' @aliases [.NeuroHyperVec
-#' @return A subset of the NeuroHyperVec data.
 setMethod("[", signature(x = "NeuroHyperVec"),
   function(x, i, j, k, l, m, ..., drop = TRUE) {
     dims <- dim(x@space)

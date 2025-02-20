@@ -36,13 +36,25 @@ The function performs the following validation steps:
 File names are validated using case-sensitive extension matching.
 }
 \examples{
-\dontrun{
-# Create a FileFormat for ANALYZE format
-fmt <- new("FileFormat", header_extension = "hdr", data_extension = "img")
+
+# Create a FileFormat for NIFTI format
+\donttest{
+fmt <- new("FileFormat",
+  file_format = "NIFTI",
+  header_encoding = "raw",
+  header_extension = "nii",
+  data_encoding = "raw",
+  data_extension = "nii")
+
+# Create temporary file
+tmp <- tempfile("brainscan", fileext = ".nii")
+file.create(tmp)
 
 # Check if files exist and match format
-file_matches(fmt, "brain_scan.hdr")  # TRUE if both .hdr and .img exist
-file_matches(fmt, "brain_scan.nii")  # FALSE for wrong extension
+file_matches(fmt, tmp)
+
+# Clean up
+unlink(tmp)
 }
 
 }

@@ -43,7 +43,7 @@ storing the image volume data in a sparse format.}
 }}
 
 \examples{
-\dontrun{
+
 # Create a sparse 3D brain image
 dim <- c(64L, 64L, 64L)
 space <- NeuroSpace(dim = dim, origin = c(0, 0, 0), spacing = c(1, 1, 1))
@@ -51,7 +51,7 @@ sparse_data <- Matrix::sparseVector(x = c(1, 2, 3),
                                     i = c(100, 1000, 10000),
                                     length = prod(dim))
 sparse_vol <- new("SparseNeuroVol", space = space, data = sparse_data)
-}
+sparse_vol[1000] == 1
 
 data <- 1:10
 indices <- seq(1,1000, length.out=10)

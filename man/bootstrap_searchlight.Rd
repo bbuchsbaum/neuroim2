@@ -33,8 +33,8 @@ voxel can belong to multiple searchlight samples.
 mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 
 # Generate a bootstrap searchlight iterator with a radius of 6 voxels
-\dontrun{
+
 searchlights <- bootstrap_searchlight(mask, radius = 6)
-}
+
 
 }

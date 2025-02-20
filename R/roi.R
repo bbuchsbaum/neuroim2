@@ -78,6 +78,7 @@ ROIVol <- function(space, coords, data) {
 #' @param j Second index (if applicable)
 #' @param ... Additional arguments passed to methods
 #' @param drop Whether to drop dimensions of length 1
+#' @return A subset of the input object, with dimensions depending on the indexing and the `drop` parameter.
 #' @export
 setMethod(f="[", signature=signature(x = "ROIVol", i = "numeric", j = "missing"),
           def=function (x, i, j, k, ..., drop=TRUE) {
@@ -257,6 +258,7 @@ setMethod(f="show", signature=signature(object = "ROIVol"),
 #' @name show
 #' @rdname show-methods
 #' @aliases show,ROICoords-method
+#' @return Invisibly returns NULL after printing the object summary.
 #' @export
 setMethod(f="show", signature=signature(object = "ROICoords"),
           def=function(object) {
@@ -266,6 +268,8 @@ setMethod(f="show", signature=signature(object = "ROICoords"),
 
 
 #' @export
+#' @rdname dim-methods
+#' @return A numeric vector of length 2 containing the dimensions of the ROICoords object.
 setMethod(f="dim", signature=signature(x = "ROICoords"),
           def=function(x) {
             dim(x@coords)
@@ -274,6 +278,7 @@ setMethod(f="dim", signature=signature(x = "ROICoords"),
 
 #' @export
 #' @rdname length-methods
+#' @return An integer representing the number of coordinates in the ROICoords object.
 setMethod(f="length", signature=signature(x = "ROICoords"),
           def=function(x) {
             nrow(x@coords)
@@ -466,7 +471,7 @@ square_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE, fixdi
 #' @param surround the number of voxels on either side of the central voxel. A \code{vector} of length 3.
 #' @param fill optional value(s) to assign to data slot.
 #' @param nonzero keep only nonzero elements from \code{bvol}. If \code{bvol} is A \code{NeuroSpace} then this argument is ignored.
-#' @return an instance of class \code{ROIVol}
+#' @return An instance of class \code{ROIVol} representing the cuboid region of interest, containing the coordinates and values of voxels within the specified region.
 #' @examples
 #'  sp1 <- NeuroSpace(c(10,10,10), c(1,1,1))
 #'  cube <- cuboid_roi(sp1, c(5,5,5), 3)

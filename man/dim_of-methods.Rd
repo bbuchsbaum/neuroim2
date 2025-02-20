@@ -10,9 +10,9 @@ dim_of(x, axis)
 \S4method{dim_of}{NeuroSpace,NamedAxis}(x, axis)
 }
 \arguments{
-\item{x}{the object whose axis to query}
+\item{x}{The NeuroSpace object}
 
-\item{axis}{an integer or character string indicating which axis to query}
+\item{axis}{The NamedAxis to query}
 }
 \value{
 An integer representing the length of the specified axis.

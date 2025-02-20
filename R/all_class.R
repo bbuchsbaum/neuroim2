@@ -568,7 +568,7 @@ setClass("DenseNeuroVol", contains=c("NeuroVol", "array"))
 #' \code{\link{DenseNeuroVol-class}} for a dense representation of 3D brain images.
 #'
 #' @examples
-#' \dontrun{
+#'
 #' # Create a sparse 3D brain image
 #' dim <- c(64L, 64L, 64L)
 #' space <- NeuroSpace(dim = dim, origin = c(0, 0, 0), spacing = c(1, 1, 1))
@@ -576,7 +576,7 @@ setClass("DenseNeuroVol", contains=c("NeuroVol", "array"))
 #'                                     i = c(100, 1000, 10000),
 #'                                     length = prod(dim))
 #' sparse_vol <- new("SparseNeuroVol", space = space, data = sparse_data)
-#' }
+#' sparse_vol[1000] == 1
 #'
 #' @references
 #' Bates, D., & Maechler, M. (2019). Matrix: Sparse and Dense Matrix Classes
@@ -669,28 +669,27 @@ setClass("LogicalNeuroVol", contains = c("DenseNeuroVol"))
 #' \code{\link{LogicalNeuroVol-class}} for the mask representation.
 #'
 #' @examples
-#' \dontrun{
+#'
 #' # Create a simple clustered brain volume
 #' dim <- c(10L, 10L, 10L)
 #' mask_data <- array(rep(c(TRUE, FALSE), 500), dim)
 #' mask <- new("LogicalNeuroVol", .Data = mask_data,
 #'             space = NeuroSpace(dim = dim, origin = c(0,0,0), spacing = c(1,1,1)))
 #'
-#' clusters <- as.integer(runif(sum(mask_data)) * 5)
+#' clusters <- as.integer(runif(sum(mask_data)) * 5)+1
 #' label_map <- list("Cluster1" = 1, "Cluster2" = 2, "Cluster3" = 3,
 #'                   "Cluster4" = 4, "Cluster5" = 5)
 #'
-#' cluster_map <- new.env()
+#' cluster_map <- list()
 #' for (i in 1:5) {
 #'   cluster_map[[as.character(i)]] <- which(clusters == i)
 #' }
 #'
-#' clustered_vol <- new("ClusteredNeuroVol",
+#' clustered_vol <- ClusteredNeuroVol(
 #'                      mask = mask,
 #'                      clusters = clusters,
-#'                      label_map = label_map,
-#'                      cluster_map = cluster_map)
-#' }
+#'                      label_map = label_map)
+#'
 #'
 #' @export
 #' @rdname ClusteredNeuroVol-class
@@ -792,22 +791,22 @@ setClass("IndexLookupVol",
 #' \code{\link{DenseNeuroVec-class}} and \code{\link{SparseNeuroVec-class}} for specific implementations.
 #'
 #' @examples
-#' \dontrun{
+#'
 #' # Load an example 4D brain image
-#' example_4d_image <- read_vec(system.file("extdata", "example_4d.nii", package = "neuroim2"))
+#' example_4d_image <- read_vec(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
 #'
 #' # Create a NeuroVec object
-#' neuro_vec <- NeuroVec(data = array(rnorm(64*64*32*100), dim = c(64, 64, 32, 100)),
-#'                       space = NeuroSpace(dim = c(64, 64, 32),
+#' neuro_vec <- NeuroVec(data = array(rnorm(64*64*32*10), dim = c(64, 64, 32, 10)),
+#'                       space = NeuroSpace(dim = c(64, 64, 32,10),
 #'                       origin = c(0, 0, 0),
-#'                       spacing = c(3, 3, 4))
+#'                       spacing = c(3, 3, 4)))
 #'
-#' # Access the dimensions of the 4D image
+#'
 #' dim(neuro_vec)
 #'
 #' # Extract a single 3D volume (e.g., the first time point)
-#' first_volume <- neuro_vec[,,,1]
-#' }
+#' first_volume <- neuro_vec[[1]]
+#'
 #'
 #' @export
 #' @rdname NeuroVec-class
@@ -839,7 +838,7 @@ setClass("NeuroVec",
 #' \code{\link{SparseNeuroVec-class}} for a sparse representation alternative.
 #'
 #' @examples
-#' \dontrun{
+#'
 #' # Create a simple 4D brain image
 #' data <- array(rnorm(64*64*32*10), dim = c(64, 64, 32, 10))
 #' space <- NeuroSpace(dim = c(64, 64, 32,10), origin = c(0, 0, 0), spacing = c(3, 3, 4))
@@ -850,7 +849,7 @@ setClass("NeuroVec",
 #'
 #' # Extract a single 3D volume
 #' first_volume <- dense_vec[[1]]
-#' }
+#'
 #'
 #' @export
 #' @rdname DenseNeuroVec-class
@@ -895,14 +894,15 @@ setValidity("DenseNeuroVec", function(object) {
 #' \code{\link[mmap]{mmap}} for details on memory-mapped file objects.
 #'
 #' @examples
-#' \dontrun{
+#'
+#
 #' # Create a MappedNeuroVec object (pseudo-code)
-#' file_path <- "/path/to/large/brain/image.dat"
-#' mapped_vec <- MappedNeuroVec(file_path, dim = c(64, 64, 32, 100))
+#' file_path <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
+#' mapped_vec <- MappedNeuroVec(file_path)
 #'
 #' # Access a subset of the data
-#' subset <- mapped_vec[,,, 1:10]
-#' }
+#' subset <- mapped_vec[,,, 1:2]
+#'
 #'
 #' @importFrom mmap mmap
 #' @export
@@ -943,11 +943,7 @@ setClass("MappedNeuroVec",
 #' \code{\link{LogicalNeuroVol-class}} for the mask representation.
 #' \code{\link{IndexLookupVol-class}} for the spatial-to-index mapping.
 #'
-#' @examples
-#' \dontrun{
-#' # This is an abstract class and should not be instantiated directly.
-#' # Instead, use one of its concrete subclasses, such as SparseNeuroVec.
-#' }
+#'
 #'
 #' @export
 #' @rdname AbstractSparseNeuroVec-class
@@ -988,15 +984,15 @@ setClass("AbstractSparseNeuroVec",
 #' \code{\link{NeuroVec-class}} for the base 4D brain image class.
 #'
 #' @examples
-#' \dontrun{
+#'
 #' # Create a sparse 4D brain image
-#' mask <- LogicalNeuroVol(array(runif(64*64*32) > 0.7, dim=c(64,64,32)))
+#' mask <- LogicalNeuroVol(array(runif(64*64*32) > 0.7, c(64,64,32)), NeuroSpace(c(64,64,32)))
 #' data <- matrix(rnorm(sum(mask) * 100), nrow=sum(mask), ncol=100)
-#' sparse_vec <- SparseNeuroVec(data=data, mask=mask, space=NeuroSpace(dim=c(64,64,32)))
+#' sparse_vec <- SparseNeuroVec(data=data, mask=mask, space=NeuroSpace(dim=c(64,64,32,100)))
 #'
 #' # Access a subset of the data
 #' subset <- sparse_vec[,,, 1:10]
-#' }
+#'
 #'
 #' @export
 #' @rdname SparseNeuroVec-class
@@ -1098,24 +1094,6 @@ setClass(
 #' \code{\link{NeuroVec-class}} for the base 4D brain image class.
 #' \code{\link[bigstatsr]{FBM}} for details on File-Backed Big Matrix objects.
 #'
-#' @examples
-#' \dontrun{
-#' # Create a BigNeuroVec object
-#' library(bigstatsr)
-#'
-#' # Create a file-backed big matrix
-#' fbm <- FBM(10000, 1000, init = rnorm(10000000))
-#'
-#' # Create a mask for sparse representation
-#' mask <- LogicalNeuroVol(array(runif(100*100*100) > 0.7, dim=c(100,100,100)))
-#'
-#' # Create a BigNeuroVec object
-#' big_vec <- BigNeuroVec(data = fbm, mask = mask, space = NeuroSpace(dim=c(100,100,100)))
-#'
-#' # Access a subset of the data
-#' subset <- big_vec[,,, 1:10]
-#' }
-#'
 #' @importFrom bigstatsr FBM
 #' @export
 #' @rdname BigNeuroVec-class
@@ -1149,20 +1127,23 @@ setClass("BigNeuroVec",
 #'   \item \code{ArrayLike4D}: Interface for 4D array-like operations
 #' }
 #'
+#' @examples
+#' # Load example 4D image file included with package
+#' file_path <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
+#' fbvec <- FileBackedNeuroVec(file_path)
+#'
+#' # Get dimensions of the image
+#' dim(fbvec)
+#'
+#' # Extract first volume
+#' vol1 <- sub_vector(fbvec, 1)
+#'
+#' # Extract multiple volumes
+#' vols <- sub_vector(fbvec, 1:2)
+#'
 #' @seealso
 #' \code{\link{NeuroVec-class}} for the base 4D brain image class.
 #' \code{\link{FileMetaInfo-class}} for details on file metadata representation.
-#'
-#' @examples
-#' \dontrun{
-#' # Create a FileBackedNeuroVec object
-#' file_path <- "/path/to/large/brain/image.nii.gz"
-#' file_meta <- FileMetaInfo(file_path, format = "NIFTI")
-#' file_backed_vec <- FileBackedNeuroVec(meta = file_meta)
-#'
-#' # Access a subset of the data (this will load only the required portion)
-#' subset <- file_backed_vec[,,, 1:10]
-#' }
 #'
 #' @export
 #' @rdname FileBackedNeuroVec-class
@@ -1226,7 +1207,6 @@ setClass("NeuroVecSeq",
 #' \code{\link{LogicalNeuroVol-class}} for the mask representation.
 #'
 #' @examples
-#' \dontrun{
 #' # Create a simple mask
 #' mask_data <- array(runif(64*64*32) > 0.7, dim = c(64, 64, 32))
 #' mask <- LogicalNeuroVol(mask_data, space = NeuroSpace(dim = c(64, 64, 32)))
@@ -1234,9 +1214,6 @@ setClass("NeuroVecSeq",
 #' # Create a SparseNeuroVecSource
 #' sparse_source <- new("SparseNeuroVecSource", mask = mask)
 #'
-#' # Use the source to create a SparseNeuroVec (pseudo-code)
-#' # sparse_vec <- create_sparse_neuro_vec(sparse_source, data)
-#' }
 #'
 #' @export
 #' @rdname SparseNeuroVecSource-class
@@ -1264,14 +1241,8 @@ setClass("SparseNeuroVecSource",
 #' }
 #'
 #' @examples
-#' \dontrun{
 #' # Create a MappedNeuroVecSource
 #' mapped_source <- new("MappedNeuroVecSource")
-#'
-#' # Use the source to create a MappedNeuroVec (pseudo-code)
-#' # file_path <- "/path/to/large/brain/image.nii"
-#' # mapped_vec <- create_mapped_neuro_vec(mapped_source, file_path)
-#' }
 #'
 #' @export
 #' @rdname MappedNeuroVecSource-class

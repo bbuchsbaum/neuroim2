@@ -1,6 +1,6 @@
 Package: neuroim2
 Type: Package
-Title: Data Structures and IO for Brain Imaging Data with an Emphasis on Functional Magnetic Resonance Imaging (FMRI)
+Title: Data Structures and IO for Brain Imaging with Focus on FMRI
 Version: 0.8.1
 LinkingTo: 
   Rcpp,
@@ -9,9 +9,14 @@ LinkingTo:
 Authors@R: c(
     person(c("Bradley", "R"), "Buchsbaum", role = c("aut", "cre", "cph"), email = "brad.buchsbaum@gmail.com"))
 Maintainer: Bradley R Buchsbaum <brad.buchsbaum@gmail.com>
-Description: A collection of data structures that represent
-    volumetric brain imaging data. The focus is on basic data handling for 3D
-    and 4D brain image data. In addition, there are functions to read and write brain images.
+Description: A collection of data structures and methods for handling volumetric
+    brain imaging data, with a focus on functional MRI (fMRI). Provides efficient
+    representations for 3D and 4D neuroimaging data through sparse and dense array
+    implementations, memory-mapped file access for large datasets, and
+    spatial transformation capabilities. Implements methods for image resampling,
+    spatial filtering, ROI analysis, and connected component labeling. General introduction 
+    to MRI and fMRI analysis can be found in Poldrack et al. (2024, "Handbook of functional MRI data analysis",
+    <ISBN:9781108795760>). 
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -71,7 +76,8 @@ Imports:
   future.apply,
   deflist,
   crayon,
-  ggplot2
+  ggplot2,
+  magrittr
 Suggests: 
     testthat,
     covr,

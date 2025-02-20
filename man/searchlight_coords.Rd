@@ -32,8 +32,8 @@ visits every non-zero voxel in the mask as a potential center voxel.
 mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 
 # Generate an exhaustive searchlight iterator with a radius of 6 mm
-\dontrun{
+
 searchlights <- searchlight_coords(mask, radius = 6)
-}
+
 
 }

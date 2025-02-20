@@ -20,10 +20,8 @@ An AxisSet3D object representing the anatomical orientation
 Creates a 3D anatomical orientation from axis abbreviations.
 }
 \examples{
-\dontrun{
 # Create orientation with default LPI axes
 orient <- findAnatomy3D()
 # Create orientation with custom axes
 orient <- findAnatomy3D("R", "A", "S")
-}
 }

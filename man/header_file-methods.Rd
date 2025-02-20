@@ -35,11 +35,11 @@ The function performs the following steps:
 }
 }
 \examples{
-\dontrun{
+
 fmt <- new("FileFormat", header_extension = "hdr", data_extension = "img")
 header_file(fmt, "brain_scan.hdr")  # Returns "brain_scan.hdr"
 header_file(fmt, "brain_scan.img")  # Returns "brain_scan.hdr"
-}
+
 
 }
 \seealso{

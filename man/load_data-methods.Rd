@@ -19,9 +19,6 @@
 \arguments{
 \item{x}{The NeuroVecSource object containing the image metadata and file information.}
 }
-\value{
-A DenseNeuroVec object containing the loaded image data and associated spatial information.
-}
 \description{
 This function loads the image data from a NeuroVecSource object, handling various
 dimensionalities and applying any necessary transformations.
@@ -37,13 +34,6 @@ This method performs the following steps:
 }
 \note{
 This method currently only supports NIfTI file format through RNifti.
-}
-\examples{
-\dontrun{
-# Assuming 'source' is a valid NeuroVecSource object
-vec_data <- load_data(source)
-}
-
 }
 \seealso{
 \code{\link{NeuroVecSource}}, \code{\link{DenseNeuroVec}}, \code{\link{NeuroSpace}}

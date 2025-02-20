@@ -33,15 +33,20 @@ An object of class \linkS4class{BinaryReader}
 Create a new instance of the \linkS4class{BinaryReader} class for reading bulk binary data.
 }
 \examples{
-\dontrun{
-# Create reader for double-precision data
-reader <- BinaryReader("data.bin", byte_offset = 0L,
-                      data_type = "double", bytes_per_element = 8L)
-                      
+\donttest{
+# Create a temporary binary file
+tmp <- tempfile()
+writeBin(rnorm(100), tmp, size = 8)
+
+
 # Read from existing connection with offset
-con <- file("data.bin", "rb")
-reader <- BinaryReader(con, byte_offset = 100L,
-                      data_type = "integer", bytes_per_element = 4L)
+con <- file(tmp, "rb")
+reader <- BinaryReader(con, byte_offset=0,
+                      data_type = "DOUBLE", bytes_per_element = 8L)
+close(reader)
+
+# Clean up
+unlink(tmp)
 }
 }
 \seealso{

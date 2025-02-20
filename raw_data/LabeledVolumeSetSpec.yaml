@@ -1,0 +1,200 @@
+# Brain Image HDF5 File Format Specification
+
+# This YAML document specifies the structure of a brain image file format based on HDF5.
+# The format includes a header resembling the NIfTI-1 header, a mask volume, labels,
+# and data volumes corresponding to each label. Each data volume contains values only
+# where the mask is non-zero, and volumes can be individually compressed.
+
+---
+
+# Root of the HDF5 file structure
+root:
+  # Header group containing NIfTI-1 header fields
+  header:
+    # Each field corresponds to an entry in the NIfTI-1 header
+    sizeof_hdr: int32             # Must be 348
+    data_type: str[10]            # Unused
+    db_name: str[18]              # Unused
+    extents: int32                # Unused
+    session_error: int16          # Unused
+    regular: char                 # Unused
+    dim_info: uint8               # MRI slice ordering
+    dim:                          # Data array dimensions
+      - int16                     # dim[0], number of dimensions; should be 4
+      - int16                     # dim[1], size along x-axis
+      - int16                     # dim[2], size along y-axis
+      - int16                     # dim[3], size along z-axis
+      - int16                     # dim[4], number of volumes (labels)
+      - int16                     # dim[5], unused
+      - int16                     # dim[6], unused
+      - int16                     # dim[7], unused
+    intent_p1: float32            # First intent parameter
+    intent_p2: float32            # Second intent parameter
+    intent_p3: float32            # Third intent parameter
+    intent_code: int16            # NIFTI_INTENT_* code
+    datatype: int16               # Data type code
+    bitpix: int16                 # Number of bits per voxel
+    slice_start: int16            # First slice index
+    pixdim:                       # Grid spacings (voxel dimensions)
+      - float32                   # pixdim[0], unused
+      - float32                   # pixdim[1], voxel width
+      - float32                   # pixdim[2], voxel height
+      - float32                   # pixdim[3], voxel depth
+      - float32                   # pixdim[4], time between volumes
+      - float32                   # pixdim[5], unused
+      - float32                   # pixdim[6], unused
+      - float32                   # pixdim[7], unused
+    vox_offset: float32           # Offset into .nii file (unused here)
+    scl_slope: float32            # Data scaling: slope
+    scl_inter: float32            # Data scaling: intercept
+    slice_end: int16              # Last slice index
+    slice_code: uint8             # Slice timing order
+    xyzt_units: uint8             # Units of pixdim[1..4]
+    cal_max: float32              # Max display intensity
+    cal_min: float32              # Min display intensity
+    slice_duration: float32       # Time for one slice
+    toffset: float32              # Time axis shift
+    glmax: int32                  # Unused
+    glmin: int32                  # Unused
+    descrip: str[80]              # Any text description
+    aux_file: str[24]             # Auxiliary filename
+    qform_code: int16             # NIFTI_XFORM_* code
+    sform_code: int16             # NIFTI_XFORM_* code
+    quatern_b: float32            # Quaternion b parameter
+    quatern_c: float32            # Quaternion c parameter
+    quatern_d: float32            # Quaternion d parameter
+    qoffset_x: float32            # Quaternion x shift
+    qoffset_y: float32            # Quaternion y shift
+    qoffset_z: float32            # Quaternion z shift
+    srow_x:                       # First row of affine transform
+      - float32
+      - float32
+      - float32
+      - float32
+    srow_y:                       # Second row of affine transform
+      - float32
+      - float32
+      - float32
+      - float32
+    srow_z:                       # Third row of affine transform
+      - float32
+      - float32
+      - float32
+      - float32
+    intent_name: str[16]          # Name or meaning of data
+    magic: str[4]                 # Must be "ni1\0" or "n+1\0"
+
+  # Mask dataset indicating non-zero indices
+  mask:
+    path: "/mask"                 # HDF5 dataset path
+    datatype: uint8               # Data type: unsigned 8-bit integer (0 or 1)
+    dimensions:                   # Dimensions of the mask volume
+      - dim[1]                    # Size along x-axis
+      - dim[2]                    # Size along y-axis
+      - dim[3]                    # Size along z-axis
+    description: "Mask volume indicating non-zero data indices."
+
+  # Labels list corresponding to each data volume
+  labels:
+    path: "/labels"               # HDF5 dataset path
+    datatype: str                 # Data type: string array
+    dimensions:                   # Number of labels
+      - dim[4]                    # Number of volumes (labels)
+    description: "List of labels for each data volume."
+
+  # Data group containing datasets for each label
+  data:
+    path: "/data"                 # HDF5 group path
+    datasets:
+      # For each label in 'labels', there is a corresponding dataset
+      - name: "<label_name>"      # Placeholder for actual label name
+        datatype: as per 'datatype' in header  # Data type of the volume
+        dimensions:
+          - number_of_nonzero_mask_elements   # Length of the data array
+        compression: optional       # Compression can be applied per dataset
+        description: "Data volume for label '<label_name>', containing values where mask == 1."
+      # Repeat the above block for each label in 'labels'
+
+# Notes:
+
+# - The 'header' group contains datasets or attributes for each NIfTI-1 header field.
+# - The 'mask' dataset is a 3D volume stored in standard NIfTI ordering.
+# - The 'labels' dataset is an array of strings, each representing a label name.
+# - Under the '/data' group, each dataset is named after a label from 'labels'.
+# - Each data dataset contains a 1D array of values corresponding to the non-zero elements in 'mask'.
+# - The ordering of data in each dataset matches the order of non-zero elements in 'mask'.
+# - Data types for 'datatype' codes follow the NIfTI-1 specification.
+# - Compression (e.g., gzip) can be applied to individual datasets under '/data'.
+
+# Example:
+
+# For a dataset with dimensions 64 x 64 x 64 and three labels "stat1", "stat2", "stat3":
+
+root:
+  header:
+    sizeof_hdr: 348
+    dim: [4, 64, 64, 64, 3, 1, 1, 1]
+    datatype: 16                    # NIfTI code for float32
+    bitpix: 32
+    pixdim: [0.0, 1.0, 1.0, 1.0, 2.0, 0.0, 0.0, 0.0]
+    # ... other header fields as required
+  mask:
+    path: "/mask"
+    datatype: uint8
+    dimensions: [64, 64, 64]
+  labels:
+    path: "/labels"
+    datatype: str
+    dimensions: [3]
+    data: ["stat1", "stat2", "stat3"]
+  data:
+    path: "/data"
+    datasets:
+      - name: "stat1"
+        datatype: float32
+        dimensions: [number_of_nonzero_mask_elements]
+        compression: gzip
+      - name: "stat2"
+        datatype: float32
+        dimensions: [number_of_nonzero_mask_elements]
+        compression: gzip
+      - name: "stat3"
+        datatype: float32
+        dimensions: [number_of_nonzero_mask_elements]
+        compression: gzip
+
+# End of Specification
+## additional notes
+# Explanation:
+#	•	Header Group (/header):
+#	•	Contains datasets or attributes corresponding to each field in the NIfTI-1 header.
+#	•	Data types and field names match those specified in the NIfTI-1 standard.
+#	•	Mask Dataset (/mask):
+#	•	A 3D dataset indicating which voxels contain valid data (non-zero).
+#	•	Dimensions are defined by dim[1], dim[2], and dim[3] from the header.
+#	•	Stored in standard NIfTI voxel ordering.
+#	•	Labels Dataset (/labels):
+#	•	An array of strings, each representing a label for the corresponding data volume.
+#	•	The number of labels matches dim[4] from the header.
+#	•	Data Group (/data):
+#	•	Contains datasets for each label specified in /labels.
+#	•	Each dataset contains data values only where the mask is non-zero.
+#	•	The length of each dataset is equal to the number of non-zero elements in /mask.
+#	•	Datasets can be individually compressed using HDF5 compression options.
+#	•	Data Ordering:
+#	•	The ordering of data in each label dataset corresponds to the order of non-zero elements in /mask.
+#	•	This ensures that data can be accurately mapped back to the original 3D space using the mask.
+#	•	Compression:
+#	•	Optional compression can be applied to each dataset under /data.
+#	•	This allows for efficient storage without affecting random access capabilities.
+
+# Usage Notes:
+#	•	When reading the data:
+#	•	Load the /mask dataset to identify valid voxel indices.
+#	•	For each label in /labels, read the corresponding dataset under /data.
+#	•	Map the 1D data array back to the 3D space using the mask.
+#	•	When writing the data:
+#	•	Create the /mask dataset representing where data exists.
+#	•	For each label, store the data values corresponding to non-zero mask elements under /data.
+
+# This specification provides a clear and structured format for storing labeled 4D brain images with efficient data access and optional compression, leveraging the capabilities of HDF5 and adhering closely to the NIfTI-1 header format.

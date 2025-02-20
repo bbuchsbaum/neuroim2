@@ -9,26 +9,26 @@ NeuroSpace(dim, spacing = NULL, origin = NULL, axes = NULL, trans = NULL)
 \arguments{
 \item{dim}{An integer vector specifying the dimensions of the image grid. Must be positive.}
 
-\item{spacing}{A numeric vector specifying the physical size of each voxel (typically in 
+\item{spacing}{A numeric vector specifying the physical size of each voxel (typically in
 millimeters). Must be positive. If NULL, defaults to ones.}
 
-\item{origin}{A numeric vector specifying the real-world coordinates of the first voxel. 
+\item{origin}{A numeric vector specifying the real-world coordinates of the first voxel.
 If NULL, defaults to zeros.}
 
-\item{axes}{An \code{\linkS4class{AxisSet}} object defining the orientation and ordering 
-of the coordinate axes. If NULL, defaults to standard neurological convention 
+\item{axes}{An \code{\linkS4class{AxisSet}} object defining the orientation and ordering
+of the coordinate axes. If NULL, defaults to standard neurological convention
 (Left-Posterior-Inferior for 3D).}
 
-\item{trans}{A transformation matrix mapping voxel indices to world coordinates. If NULL, 
+\item{trans}{A transformation matrix mapping voxel indices to world coordinates. If NULL,
 constructed from spacing and origin.}
 }
 \value{
 A new \code{\linkS4class{NeuroSpace}} object
 }
 \description{
-The \code{NeuroSpace} class defines the spatial properties and coordinate system of 
-neuroimaging data. It encapsulates all information needed to map between voxel indices 
-and real-world coordinates, including dimensions, voxel spacing, origin, axis orientation, 
+The \code{NeuroSpace} class defines the spatial properties and coordinate system of
+neuroimaging data. It encapsulates all information needed to map between voxel indices
+and real-world coordinates, including dimensions, voxel spacing, origin, axis orientation,
 and coordinate transformations.
 }
 \details{
@@ -90,10 +90,10 @@ back_to_world <- index_to_coord(space_3d, vox_idx)
 \references{
 For details on neuroimaging coordinate systems:
 \itemize{
-  \item Brett, M., Johnsrude, I. S., & Owen, A. M. (2002). 
-    The problem of functional localization in the human brain. 
+  \item Brett, M., Johnsrude, I. S., & Owen, A. M. (2002).
+    The problem of functional localization in the human brain.
     Nature Reviews Neuroscience, 3(3), 243-249.
-  \item Evans, A. C., et al. (1993). 3D statistical neuroanatomical models 
+  \item Evans, A. C., et al. (1993). 3D statistical neuroanatomical models
     from 305 MRI volumes. Nuclear Science Symposium and Medical Imaging Conference.
 }
 }

@@ -3,7 +3,7 @@
 \name{embed_kernel}
 \alias{embed_kernel}
 \alias{embed_kernel,Kernel,NeuroSpace,numeric-method}
-\title{Generic function to position kernel in a postion in image space}
+\title{Generic function to position kernel in a position in image space}
 \usage{
 embed_kernel(x, sp, center_voxel, ...)
 
@@ -20,6 +20,9 @@ embed_kernel(x, sp, center_voxel, ...)
 
 \item{weight}{multiply kernel weights by this value}
 }
+\value{
+An object representing the embedded kernel in the specified space.
+}
 \description{
-Generic function to position kernel in a postion in image space
+Generic function to position kernel in a position in image space
 }

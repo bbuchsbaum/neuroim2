@@ -105,13 +105,14 @@ gaussian_blur <- function(vol, mask, sigma = 2, window = 1) {
 #' brain_vol <- read_vol(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
 #'
 #' # Apply guided filtering to the brain volume
-#' \dontrun{
+#' \donttest{
 #' filtered_vol <- guided_filter(brain_vol, radius = 4, epsilon = 0.49)
 #'
 #' # Visualize a slice of the original and filtered volumes
-#' par(mfrow = c(1, 2))
+#' oldpar <- par(mfrow = c(1, 2))
 #' image(brain_vol[,,12], main = "Original")
 #' image(filtered_vol[,,12], main = "Filtered")
+#' par(oldpar)
 #' }
 #'
 #' @references

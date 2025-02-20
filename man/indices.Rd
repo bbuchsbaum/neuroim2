@@ -9,6 +9,9 @@ indices(x)
 \arguments{
 \item{x}{the object to extract indices}
 }
+\value{
+A vector of indices from the object.
+}
 \description{
 Extract indices
 }

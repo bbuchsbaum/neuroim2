@@ -34,14 +34,6 @@ The function performs the following steps:
   \item If the file_name doesn't match either format, it throws an error.
 }
 }
-\examples{
-\dontrun{
-fmt <- new("FileFormat", header_extension = "hdr", data_extension = "img")
-strip_extension(fmt, "brain_scan.hdr")  # Returns "brain_scan"
-strip_extension(fmt, "brain_scan.img")  # Returns "brain_scan"
-}
-
-}
 \seealso{
 \code{\link{header_file}}, \code{\link{data_file}} for related file name
 manipulation

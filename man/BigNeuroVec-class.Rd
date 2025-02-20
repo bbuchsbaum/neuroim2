@@ -34,25 +34,6 @@ structure stored on disk, enabling efficient handling of large-scale data.}
 }
 }
 
-\examples{
-\dontrun{
-# Create a BigNeuroVec object
-library(bigstatsr)
-
-# Create a file-backed big matrix
-fbm <- FBM(10000, 1000, init = rnorm(10000000))
-
-# Create a mask for sparse representation
-mask <- LogicalNeuroVol(array(runif(100*100*100) > 0.7, dim=c(100,100,100)))
-
-# Create a BigNeuroVec object
-big_vec <- BigNeuroVec(data = fbm, mask = mask, space = NeuroSpace(dim=c(100,100,100)))
-
-# Access a subset of the data
-subset <- big_vec[,,, 1:10]
-}
-
-}
 \seealso{
 \code{\link{AbstractSparseNeuroVec-class}} for the parent sparse representation class.
 \code{\link{NeuroVec-class}} for the base 4D brain image class.

@@ -33,14 +33,14 @@ neuroimaging formats. It handles:
 }
 }
 \examples{
-\dontrun{
+
 # Create reader for NIFTI file
-meta <- read_header("brain.nii")
+meta <- read_header(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 reader <- data_reader(meta, offset = 0)
 
 # Read first 100 voxels
-data <- reader$read(100)
-}
+data <- read_elements(reader, 100)
+
 
 }
 \seealso{

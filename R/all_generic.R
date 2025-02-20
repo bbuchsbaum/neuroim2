@@ -6,6 +6,7 @@ setGeneric("plot", function(x, y, ...) standardGeneric("plot"))
 #' Provides a mechanism to remove dimensions or elements from an object.
 #'
 #' @param x An object.
+#' @return A modified version of the input object with reduced dimensions or elements.
 #'
 #' @export
 setGeneric("drop", function(x) standardGeneric("drop"))
@@ -16,6 +17,7 @@ setGeneric("drop", function(x) standardGeneric("drop"))
 #'
 #' @param x An object to be coerced to a matrix.
 #' @param ... Additional arguments passed to methods.
+#' @return A matrix representation of the input object.
 #'
 #' @export
 setGeneric("as.matrix", function(x, ...) standardGeneric("as.matrix"))
@@ -26,6 +28,7 @@ setGeneric("as.matrix", function(x, ...) standardGeneric("as.matrix"))
 #'
 #' @param x The object to be scaled.
 #' @param ... Additional arguments for scaling methods.
+#' @return A scaled version of the input object.
 #'
 #' @export
 setGeneric("scale", function(x, ...) standardGeneric("scale"))
@@ -53,7 +56,7 @@ setGeneric("scale", function(x, ...) standardGeneric("scale"))
 #' newtrans <- cbind(newtrans4X3, c(space(img)@origin,1))
 #'
 #' rspace <- NeuroSpace(rspace@dim*2, rspace@spacing/2, origin=rspace@origin, trans=trans(img))
-#' \dontrun{
+#' \donttest{
 #' rvol <- resample(img, rspace)
 #' }
 #'
@@ -75,6 +78,7 @@ setGeneric(name="print_", def=function(x, ...) standardGeneric("print_"))
 #'
 #' @param x the object to get values from
 #' @param ... additional arguments
+#' @return A vector or array containing the values extracted from the object.
 #' @export
 #' @rdname values-methods
 setGeneric(name="values", def=function(x, ...) standardGeneric("values"))
@@ -88,6 +92,7 @@ setGeneric(name="values", def=function(x, ...) standardGeneric("values"))
 #' @param x a data source.
 #' @param i a vector of indices.
 #' @param ... additional arguments to be passed to methods.
+#' @return A vector containing the values at the specified linear indices.
 #' @export
 setGeneric(name="linear_access", def=function(x, i, ...) standardGeneric("linear_access"))
 
@@ -103,6 +108,7 @@ setGeneric(name="linear_access", def=function(x, i, ...) standardGeneric("linear
 #' @param x a data source.
 #' @param i an index matrix specifying the space-time coordinates.
 #' @param ... additional arguments to be passed to methods.
+#' @return A vector containing the values at the specified space-time coordinates.
 #' @rdname matricized_access-methods
 #' @export
 setGeneric(name="matricized_access", def=function(x, i, ...) standardGeneric("matricized_access"))
@@ -117,6 +123,7 @@ setGeneric(name="matricized_access", def=function(x, i, ...) standardGeneric("ma
 #'
 #' @param x a data source.
 #' @param ... additional arguments to be passed to methods.
+#' @return A data object in a format compatible with neuroim2 package functions.
 #' @keywords internal
 #' @export
 setGeneric(name="load_data", def=function(x, ...) standardGeneric("load_data"))
@@ -131,6 +138,7 @@ setGeneric(name="load_data", def=function(x, ...) standardGeneric("load_data"))
 #' @param x the object that is mapped.
 #' @param m the mapping object.
 #' @param ... additional arguments to be passed to the function.
+#' @return The result of applying the mapping function to the input object.
 #' @export
 #' @rdname map-methods
 setGeneric(name="mapf", def=function(x, m, ...) standardGeneric("mapf"))
@@ -178,6 +186,7 @@ setGeneric(name="vectors", def=function(x, subset, ...) standardGeneric("vectors
 #' @param x a vector-valued object
 #' @param indices a vector of indices defining the sub-blocks. Must match the length of the input vector.
 #' @param ... additional arguments
+#' @return A list of sub-blocks, where each sub-block contains the elements from the input object corresponding to the matching indices.
 #' @export
 #' @rdname split_blocks-methods
 split_blocks <- function(x, indices, ...) standardGeneric("split_blocks")
@@ -213,6 +222,7 @@ setGeneric(name="partition", def=function(x, k, ...) standardGeneric("partition"
 #' @param x The object to split. The input object must be a 4D tensor, where the first three dimensions correspond to the spatial dimensions of the data and the fourth dimension corresponds to time.
 #' @param clusters A vector of cluster indices to split by.
 #' @param ... Additional arguments to be passed to methods.
+#' @return A list of sub-objects, where each sub-object corresponds to a unique cluster index.
 #' @export
 #' @rdname split_clusters-methods
 setGeneric(name="split_clusters", def=function(x, clusters, ...) standardGeneric("split_clusters"))
@@ -570,7 +580,7 @@ setGeneric(name="centroid", def=function(x, ...) standardGeneric("centroid"))
 #'
 #' @param x an object with multiple centroids (e.g. a \code{ClusteredNeuroVol})
 #' @param ... extra args
-#'
+#' @return A matrix where each row represents the coordinates of a centroid.
 #' @export
 #' @rdname centroids-methods
 setGeneric(name="centroids", def=function(x, ...) standardGeneric("centroids"))
@@ -580,9 +590,8 @@ setGeneric(name="centroids", def=function(x, ...) standardGeneric("centroids"))
 #' Extract image coordinate transformation
 #'
 #' @param x an object with a transformation
+#' @return A 4x4 transformation matrix that maps from grid coordinates to real world coordinates.
 #' @export
-#' @details
-#' This function returns a transformation that can be used to go from "grid coordinates" to "real world coordinates" in millimeters.
 #' @details This function returns a transformation that can be used to go from "grid coordinates" to "real world coordinates" in millimeters.
 #' see \code{\linkS4class{NeuroSpace}}
 #' @examples
@@ -595,6 +604,7 @@ setGeneric(name="trans",  def=function(x) standardGeneric("trans"))
 #' Extract inverse image coordinate transformation
 #'
 #' @param x an object
+#' @return A 4x4 transformation matrix that maps from real world coordinates back to grid coordinates.
 #' @export
 #' @examples
 #' bspace <- NeuroSpace(c(10,10,10), c(2,2,2))
@@ -625,6 +635,7 @@ setGeneric(name="read_columns", def=function(x, column_indices) standardGeneric(
 #'
 #' @param x the output channel
 #' @param els the elements to write
+#' @return Invisibly returns NULL after writing the elements.
 #' @export
 #' @rdname write_elements-methods
 setGeneric(name="write_elements", def=function(x, els) standardGeneric("write_elements"))
@@ -637,6 +648,7 @@ setGeneric(name="write_elements", def=function(x, els) standardGeneric("write_el
 #' @param format file format string. Since "NIFTI" is the only currently supported format, this parameter can be safely ignored and omitted.
 #' @param data_type output data type, If specified should be a \code{character} vector of: "BINARY", "UBYTE", "SHORT", "INT", "FLOAT", "DOUBLE".
 #' Otherwise output format will be inferred from R the datatype of the image.
+#' @return Invisibly returns NULL after writing the volume to disk.
 #' @export
 #' @details
 #'
@@ -651,9 +663,10 @@ setGeneric(name="write_elements", def=function(x, els) standardGeneric("write_el
 #' @examples
 #'
 #' bvol <- NeuroVol(array(0, c(10,10,10)), NeuroSpace(c(10,10,10), c(1,1,1)))
-#' \dontrun{
-#' write_vol(bvol, "out.nii")
-#' write_vol(bvol, "out.nii.gz")
+#' \donttest{
+#' tmp1 <- tempfile(fileext = ".nii")
+#' write_vol(bvol, tmp1)
+#' unlink(tmp1)
 #' }
 #' @rdname write_vol-methods
 setGeneric(name="write_vol",  def=function(x, file_name, format, data_type) standardGeneric("write_vol"))
@@ -667,15 +680,20 @@ setGeneric(name="write_vol",  def=function(x, file_name, format, data_type) stan
 #' @param data_type the numeric data type. If specified should be a \code{character} vector of: "BINARY", "UBYTE", "SHORT", "INT", "FLOAT", "DOUBLE".
 #' Otherwise output format will be inferred from R the datatype of the image.
 #' @param ... extra args
+#' @return Invisibly returns NULL after writing the vector to disk.
 #' @export
 #' @examples
 #'
 #' bvec <- NeuroVec(array(0, c(10,10,10,10)), NeuroSpace(c(10,10,10,10), c(1,1,1)))
-#' \dontrun{
-#' write_vec(bvol, "out.nii")
-#' write_vec(bvol, "out.nii.gz")
-#' write_vec(bvec, "out.nii")
-#' write_vec(bvec, "out.nii.gz")
+#' \donttest{
+#' # Create temporary files
+#' tmp1 <- tempfile(fileext = ".nii")
+#'
+#' # Write vectors to temporary files
+#' write_vec(bvec, tmp1)
+#'
+#' # Clean up
+#' unlink(tmp1)
 #' }
 #' @rdname write_vec-methods
 setGeneric(name="write_vec",  def=function(x, file_name, format, data_type, ...) standardGeneric("write_vec"))
@@ -798,6 +816,7 @@ setGeneric(name="sub_vector", def=function(x, i, ...) standardGeneric("sub_vecto
 #' @param x a four dimensional image
 #' @param center a \code{logical} value indicating whether series should be centered
 #' @param scale a \code{logical} value indicating whether series should be divided by standard deviation
+#' @return A scaled version of the input 4D image, with each time series centered and/or scaled according to the parameters.
 #' @export
 #' @examples
 #' bvec <- NeuroVec(array(rnorm(24*24*24*24), c(24,24,24,24)), NeuroSpace(c(24,24,24,24), c(1,1,1)))
@@ -811,7 +830,7 @@ setGeneric(name="scale_series", def=function(x, center, scale) standardGeneric("
 #' @param x the object to make sparse, e.g. \code{DenseNeuroVol} or \code{DenseNeuroVec}
 #' @param mask the elements to retain
 #' @param ... additional arguments
-#'
+#' @return A sparse representation of the input object, containing only the elements specified by the mask.
 #' @details \code{mask} can be an integer vector of 1D indices or a mask volume of class \code{LogicalNeuroVol}
 #' @export
 #' @examples
@@ -828,6 +847,7 @@ setGeneric(name="as.sparse", def=function(x, mask, ...) standardGeneric("as.spar
 #' Convert to dense representation
 #'
 #' @param x the object to densify
+#' @return A dense representation of the input object.
 #' @export
 setGeneric(name="as.dense", def=function(x) standardGeneric("as.dense"))
 
@@ -835,6 +855,7 @@ setGeneric(name="as.dense", def=function(x) standardGeneric("as.dense"))
 #'
 #' @param x the object to binarize
 #' @param indices the indices to set to TRUE
+#' @return A LogicalNeuroVol object with TRUE values at the specified indices.
 #' @export
 setGeneric(name="as.mask", def=function(x, indices) standardGeneric("as.mask"))
 
@@ -846,12 +867,14 @@ setGeneric(name="as.mask", def=function(x, indices) standardGeneric("as.mask"))
 #' @param dims a vector indicating the dimensions of the patches
 #' @param mask mask indicating the valid patch area
 #' @param ... additional args
+#' @return A list of coordinate patches, each representing a fixed-size region of the input object.
 #' @export
 setGeneric(name="patch_set", def=function(x, dims, mask, ...) standardGeneric("patch_set"))
 
 #' Number of Clusters
 #'
 #' @param x the object to extract number of clusters
+#' @return An integer representing the number of clusters in the object.
 #' @export
 setGeneric(name="num_clusters", def=function(x) standardGeneric("num_clusters"))
 
@@ -868,6 +891,7 @@ setGeneric(name="coords", def=function(x, ...) standardGeneric("coords"))
 #' Extract indices
 #'
 #' @param x the object to extract indices
+#' @return A vector of indices from the object.
 #' @export
 setGeneric(name="indices", def=function(x) standardGeneric("indices"))
 
@@ -875,6 +899,7 @@ setGeneric(name="indices", def=function(x) standardGeneric("indices"))
 #' @param x the object to query
 #' @param i the index to lookup
 #' @param ... additional arguments
+#' @return The value(s) at the specified index/indices.
 #' @export
 setGeneric(name="lookup", def=function(x, i, ...) standardGeneric("lookup"))
 
@@ -898,6 +923,7 @@ setGeneric("series_roi", function(x, i, ...) standardGeneric("series_roi"))
 #' @param x the object
 #' @param i the series indices
 #' @param ... additional arguments
+#' @return A list or array containing the extracted series.
 #' @export
 #' @rdname series-methods
 setGeneric(name="series", def=function(x, i, ...) standardGeneric("series"))
@@ -911,6 +937,7 @@ setGeneric(name="series", def=function(x, i, ...) standardGeneric("series"))
 #' @param along the axis along which to slice
 #' @param orientation the target orientation of the 2D slice
 #' @param ... additional arguments
+#' @return A 2D slice from the image volume.
 #' @export
 #' @rdname slice-methods
 setGeneric(name="slice", def=function(x, zlevel, along, orientation, ...) standardGeneric("slice"))
@@ -924,6 +951,7 @@ setGeneric(name="slice", def=function(x, zlevel, along, orientation, ...) standa
 #' @param height height of the rendered image
 #' @param colmap the colors used to map from values to RGBA colors.
 #' @param ... additional arguments
+#' @return A rendered image with the specified dimensions and color mapping.
 #' @rdname render-methods
 setGeneric(name="render", def=function(x, width, height, colmap,...) standardGeneric("render"))
 
@@ -936,6 +964,7 @@ setGeneric(name="render", def=function(x, width, height, colmap,...) standardGen
 #' @param height height of the rendered image
 #' @param colmap the colors used to map from values to RGBA colors.
 #' @param ... additional arguments
+#' @return A rendered image of the specified slice with the given dimensions and color mapping.
 #' @rdname render_slice-methods
 setGeneric(name="render_slice", def=function(x, zpos, width, height, colmap,...) standardGeneric("render_slice"))
 
@@ -1093,17 +1122,19 @@ setGeneric(name="strip_extension", def=function(x, file_name) standardGeneric("s
 
 #' Generic function to read image meta info given a file
 #' @param x descriptor instance
-#' @param file_name file name contianing meta information
+#' @param file_name file name containing meta information
+#' @return A list containing the meta information read from the file.
 #' @export
 #' @rdname read_meta_info-methods
 setGeneric(name="read_meta_info", def=function(x, file_name) standardGeneric("read_meta_info"))
 
 
-#' Generic function to position kernel in a postion in image space
+#' Generic function to position kernel in a position in image space
 #' @param x the kernel object
 #' @param sp the space to embed the kernel
 #' @param center_voxel the voxel marking the center of the kernel in the embedded space
 #' @param ... extra args
+#' @return An object representing the embedded kernel in the specified space.
 #' @export
 #' @rdname embed_kernel-methods
 setGeneric("embed_kernel", def=function(x, sp, center_voxel, ...) standardGeneric("embed_kernel"))

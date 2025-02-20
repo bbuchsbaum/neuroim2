@@ -2,7 +2,7 @@
 % Please edit documentation in R/neurovec.R
 \name{drop,NeuroVec-method}
 \alias{drop,NeuroVec-method}
-\title{drop}
+\title{Drop singleton dimensions from a NeuroVec object}
 \usage{
 \S4method{drop}{NeuroVec}(x)
 
@@ -10,13 +10,6 @@
 }
 \arguments{
 \item{x}{The NeuroVec object.}
-}
-\value{
-If the last dimension of the NeuroVec object is of length 1, a DenseNeuroVol
-  object is returned. Otherwise, the original NeuroVec object is returned.
-
-If the last dimension of the NeuroVec object is of length 1, a DenseNeuroVol
-  object is returned. Otherwise, the original NeuroVec object is returned.
 }
 \description{
 This function drops the last dimension of a NeuroVec object if it is of length 1.

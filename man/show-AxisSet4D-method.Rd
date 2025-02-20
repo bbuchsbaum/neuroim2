@@ -9,6 +9,9 @@
 \arguments{
 \item{object}{An AxisSet4D object}
 }
+\value{
+Invisibly returns NULL after printing the axis set information.
+}
 \description{
 Show method for AxisSet4D objects
 }

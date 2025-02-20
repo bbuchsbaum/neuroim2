@@ -87,15 +87,15 @@ ClusteredNeuroVol <- function(mask, clusters, label_map=NULL, label="") {
 #' @param from A \code{\linkS4class{ClusteredNeuroVol}} object to be converted
 #' @return A \code{\linkS4class{DenseNeuroVol}} object
 #' @examples
-#' \dontrun{
+#' 
 #' # Create a clustered volume
 #' mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
-#' clusters <- rep(1:5, each=sum(mask)/5)
+#' clusters <- rep(1:5, length.out=sum(mask))
 #' cvol <- ClusteredNeuroVol(mask, clusters)
 #'
 #' # Convert to DenseNeuroVol
 #' dvol <- as(cvol, "DenseNeuroVol")
-#' }
+#' 
 #' @seealso \code{\linkS4class{ClusteredNeuroVol}}, \code{\linkS4class{DenseNeuroVol}}
 setAs(from="ClusteredNeuroVol", to="DenseNeuroVol",
     def=function(from) {
@@ -191,6 +191,7 @@ setMethod(f="show", signature=signature("ClusteredNeuroVol"),
 
 #' @export
 #' @param type the type of center of mass: one of "center_of_mass" or "medoid"
+#' @details For `type = "center_of_mass"`, returns arithmetic mean coordinates; for `"medoid"`, returns the most central point.
 #' @rdname centroids-methods
 setMethod(f="centroids", signature=signature(x="ClusteredNeuroVol"),
           def = function(x, type=c("center_of_mass", "medoid")) {
@@ -214,7 +215,6 @@ setMethod(f="centroids", signature=signature(x="ClusteredNeuroVol"),
 #' @param x A NeuroVec object to be split.
 #' @param clusters Either a ClusteredNeuroVol object or an integer vector of cluster assignments.
 #'
-#' @return A deflist object containing ROIVec instances for each cluster.
 #'
 #' @details
 #' There are two methods for splitting clusters:
@@ -223,21 +223,21 @@ setMethod(f="centroids", signature=signature(x="ClusteredNeuroVol"),
 #'   \item Using an integer vector: This method allows for custom cluster assignments.
 #' }
 #'
-#' Both methods return a deflist, which is a lazy-loading list of ROIVec objects.
+#' methods return a deflist, which is a lazy-loading list of ROIVec objects.
 #'
 #' @seealso
 #' \code{\link{NeuroVec-class}}, \code{\link{ClusteredNeuroVol-class}}, \code{\link{ROIVec-class}}
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #'   # Create a synthetic 3D volume and its NeuroSpace
-#'   space <- NeuroSpace(c(10, 10, 10))
-#'   vol_data <- array(rnorm(10 * 10 * 10), dim = c(10, 10, 10))
+#'   space <- NeuroSpace(c(10, 10, 10,4))
+#'   vol_data <- array(rnorm(10 * 10 * 10 * 4), dim = c(10, 10, 10,4))
 #'   neuro_vec <- NeuroVec(vol_data, space)
 #'
 #'   # Create a binary mask (e.g., select voxels with values > 0)
-#'   mask_data <- vol_data > 0
-#'   mask_vol <- LogicalNeuroVol(mask_data, space)
+#'   mask_data <- as.logical(neuro_vec[[1]] > .5)
+#'   mask_vol <- LogicalNeuroVol(mask_data, NeuroSpace(c(10, 10, 10)))
 #'
 #'   # Extract indices and coordinates for the masked voxels
 #'   mask_idx <- which(mask_data)
@@ -258,7 +258,7 @@ setMethod(f="centroids", signature=signature(x="ClusteredNeuroVol"),
 #'   print(means_clust)
 #'
 #'   # Alternatively, create an integer vector of cluster assignments:
-#'   cluster_assignments <- numeric(prod(dim(space)))
+#'   cluster_assignments <- numeric(prod(dim(space)[1:3]))
 #'   cluster_assignments[mask_idx] <- k_res$cluster
 #'   split_result_int <- split_clusters(neuro_vec, as.integer(cluster_assignments))
 #'

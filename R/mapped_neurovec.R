@@ -48,9 +48,9 @@ NULL
 #' }
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Create source from NIFTI file
-#' source <- MappedNeuroVecSource("path/to/fmri.nii")
+#' source <- MappedNeuroVecSource(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
 #'
 #' # Check dimensions
 #' dim(source@meta_info)
@@ -124,9 +124,8 @@ MappedNeuroVecSource <- function(file_name) {
 #' }
 #'
 #' @examples
-#' \dontrun{
 #' # Create mapped vector from NIFTI file
-#' mvec <- MappedNeuroVec("path/to/fmri.nii")
+#' mvec <- MappedNeuroVec(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
 #'
 #' # Extract first volume
 #' vol1 <- mvec[[1]]
@@ -135,8 +134,8 @@ MappedNeuroVecSource <- function(file_name) {
 #' dim(mvec)
 #'
 #' # Access specific timepoint
-#' timepoint <- mvec[, , , 10]
-#' }
+#' timepoint <- mvec[, , , 2]
+#'
 #'
 #' @seealso
 #
@@ -203,7 +202,6 @@ setMethod(f = "load_data",
 #' @param x A MappedNeuroVec object
 #' @param i Numeric vector of indices
 #'
-#' @return Numeric vector of values
 #'
 #' @rdname linear_access-methods
 setMethod(f = "linear_access",
@@ -275,7 +273,7 @@ setMethod("show", "MappedNeuroVec",
 #' @rdname as.matrix-methods
 setMethod("as.matrix", "MappedNeuroVec",
   function(x) {
-    dm <- dim(x) 
+    dm <- dim(x)
     d123 <- prod(dm[1:3])
     d4 <- dm[4]
     tot <- d123 * d4

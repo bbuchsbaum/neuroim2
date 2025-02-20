@@ -9,6 +9,9 @@ drop(x)
 \arguments{
 \item{x}{An object.}
 }
+\value{
+A modified version of the input object with reduced dimensions or elements.
+}
 \description{
 Provides a mechanism to remove dimensions or elements from an object.
 }

@@ -79,7 +79,6 @@ Retrieves the NeuroSpace object associated with an IndexLookupVol object."></hea
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An object representing the geometric space of the image, of type <code><a href="NeuroSpace-class.html">NeuroSpace</a></code>.</p>
-<p>A NeuroSpace object</p>
     </div>
 
     <div class="section level2">
@@ -94,10 +93,41 @@ Retrieves the NeuroSpace object associated with an IndexLookupVol object."></hea
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu">space</span><span class="op">(</span><span class="va">vol</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="va">space</span> <span class="op">&lt;-</span> <span class="fu"><a href="NeuroSpace.html">NeuroSpace</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">64</span>, <span class="fl">64</span>, <span class="fl">64</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">ilv</span> <span class="op">&lt;-</span> <span class="fu"><a href="IndexLookupVol-class.html">IndexLookupVol</a></span><span class="op">(</span><span class="va">space</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">space</span><span class="op">(</span><span class="va">ilv</span><span class="op">)</span>  <span class="co"># Get the associated NeuroSpace object</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BBBBBB; background-color: #0000BB; font-weight: bold;"> NeuroSpace Object </span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #BBBB00; font-weight: bold;">&gt;&gt; Dimensions</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #555555;">Grid Size:</span> <span style="color: #00BB00;">64 x 64 x 64</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #555555;">Memory:</span>   <span style="color: #00BB00;">5.9 KB</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #BBBB00; font-weight: bold;">&gt;&gt; Spatial Properties</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #555555;">Spacing:</span>   <span style="color: #0000BB;">1.00 x 1.00 x 1.00</span> <span style="color: #555555;">mm</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #555555;">Origin:</span>    <span style="color: #0000BB;">0.00 x 0.00 x 0.00</span> <span style="color: #555555;">mm</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #BBBB00; font-weight: bold;">&gt;&gt; Anatomical Orientation</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   X: <span style="color: #00BB00;">Left-to-Right</span>  |  Y: <span style="color: #00BB00;">Posterior-to-Anterior</span>  |  Z: <span style="color: #00BB00;">Inferior-to-Superior</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #BBBB00; font-weight: bold;">&gt;&gt; World Transformation</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #555555;">  Forward (Voxel to World):</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">    1.000  0.000  0.000  0.000</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">0.000  1.000  0.000  0.000</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">0.000  0.000  1.000  0.000</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">0.000  0.000  0.000  1.000</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #555555;">  Inverse (World to Voxel):</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">    1.000  0.000  0.000  0.000</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">0.000  1.000  0.000  0.000</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">0.000  0.000  1.000  0.000</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">0.000  0.000  0.000  1.000</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #BBBB00; font-weight: bold;">&gt;&gt; Bounding Box</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #555555;">Min Corner:</span> <span style="color: #00BB00;">0.0, 0.0, 0.0</span> mm</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #555555;">Max Corner:</span> <span style="color: #00BB00;">63.0, 63.0, 63.0</span> mm</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BBBBBB; background-color: #0000BB; font-weight: bold;">==================================================</span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -31,8 +31,6 @@ sub_vector(x, i, ...)
 \value{
 a  \code{NeuroVec} object that is a sub-sequence of the supplied object.
 
-A \code{\linkS4class{DenseNeuroVec}} object containing the extracted volumes.
-
 A NeuroVecSeq object containing the extracted subsequence
 }
 \description{
@@ -62,14 +60,4 @@ svec <- SparseNeuroVec(array(rnorm(24*24*24*24), c(24,24,24,24)),
 NeuroSpace(c(24,24,24,24), c(1,1,1)), mask)
 vec <- sub_vector(svec, c(1,3,5))
 all.equal(3, dim(vec)[4])
-\dontrun{
-fbvec <- FileBackedNeuroVec("fmri_data.nii")
-
-# Extract first 10 volumes
-subset <- sub_vector(fbvec, 1:10)
-
-# Extract specific timepoints
-volumes <- sub_vector(fbvec, c(1, 5, 10))
-}
-
 }

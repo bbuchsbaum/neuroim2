@@ -11,6 +11,9 @@ scale(x, ...)
 
 \item{...}{Additional arguments for scaling methods.}
 }
+\value{
+A scaled version of the input object.
+}
 \description{
 Scales an object by (typically) subtracting the mean and dividing by the standard deviation.
 }

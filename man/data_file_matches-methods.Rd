@@ -30,12 +30,12 @@ ends with the specified data extension. The match is performed using a regular
 expression that ensures the extension appears at the end of the file name.
 }
 \examples{
-\dontrun{
+
 fmt <- new("FileFormat", header_extension = "hdr", data_extension = "img")
 data_file_matches(fmt, "brain_scan.img")  # TRUE
 data_file_matches(fmt, "brain_scan.hdr")  # FALSE
 data_file_matches(fmt, "brain.img.gz")    # FALSE
-}
+
 
 }
 \seealso{

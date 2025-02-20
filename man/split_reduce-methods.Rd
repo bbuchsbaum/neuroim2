@@ -22,60 +22,23 @@ split_reduce(x, fac, FUN)
 \S4method{split_reduce}{NeuroVec,factor,missing}(x, fac, FUN)
 }
 \arguments{
-\item{x}{A \linkS4class{NeuroVec} object}
+\item{x}{A numeric matrix or matrix-like object.}
 
-\item{fac}{Factor for grouping}
+\item{fac}{A factor to define subsets of the object.}
 
-\item{FUN}{Function to apply to each group}
+\item{FUN}{The summary function to apply to each subset. If not provided, the mean of each sub-matrix column is computed.}
 }
 \value{
 A new matrix where the original values have been "reduced" by the supplied function.
-
-Matrix of reduced values
-
-Matrix of reduced values
-
-Matrix of reduced values
-
-Matrix of reduced values
-
-Matrix of reduced values
 }
 \description{
 This function summarizes subsets of a numeric matrix or matrix-like object by first splitting the object by row and then applying a summary function.
-
-Implementation of split_reduce for matrix with integer factors.
-See \code{\link{split_reduce}} for the generic definition and complete documentation.
-
-Implementation of split_reduce for matrix with factor grouping.
-See \code{\link{split_reduce}} for the generic definition and complete documentation.
-
-Implementation of split_reduce for matrix with factor grouping.
-See \code{\link{split_reduce}} for the generic definition and complete documentation.
-
-Implementation of split_reduce for NeuroVec objects.
-See \code{\link{split_reduce}} for the generic definition and complete documentation.
-
-Implementation of split_reduce for NeuroVec objects.
-See \code{\link{split_reduce}} for the generic definition and complete documentation.
 }
 \details{
 If 'FUN' is supplied, it must take a vector and return a single scalar value. If it returns more than one value, an error will occur.
 
 If 'x' is a NeuroVec instance, voxels (dimensions 1:3) are treated as columns and time-series (dimension 4) as rows.
 The summary function is then applied to groups of voxels. However, if the goal is to apply a function to groups of time-points.
-
-This method supports two types of splitting:
-\itemize{
-  \item By voxel: when length(fac) equals number of voxels
-  \item By volume: when length(fac) equals number of volumes
-}
-
-This method supports two types of splitting:
-\itemize{
-  \item By voxel: when length(fac) equals number of voxels
-  \item By volume: when length(fac) equals number of volumes
-}
 }
 \examples{
 mat = matrix(rnorm(100*100), 100, 100)
@@ -96,15 +59,4 @@ ms2 <- split_reduce(bvec, fac, mean)
 all.equal(row.names(ms), levels(fac))
 all.equal(ms, ms2)
 
-}
-\seealso{
-\code{\link{split_reduce}}
-
-\code{\link{split_reduce}}
-
-\code{\link{split_reduce}}
-
-\code{\link{split_reduce}}
-
-\code{\link{split_reduce}}
 }

@@ -11,10 +11,11 @@
 #' @param type Storage type, one of "double", "float", or "integer"
 #' @param backingfile Path to the file used for memory mapping (defaults to tempfile())
 #'
-#' @return A new BigNeuroVec object
+#' @return A new BigNeuroVec object that provides memory-efficient access to large neuroimaging data through memory mapping.
+#'         The object contains the spatial properties, mask, and memory-mapped data storage.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Load an example 4D brain image
 #' example_file <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
 #' example_4d_image <- read_vec(example_file)

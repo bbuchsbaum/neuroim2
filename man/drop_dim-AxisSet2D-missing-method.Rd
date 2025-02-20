@@ -11,15 +11,6 @@
 
 \item{dimnum}{Numeric index of dimension to drop (optional)}
 }
-\value{
-An axis set with one fewer dimension
-}
 \description{
 Drop dimension from axis set
-}
-\examples{
-\dontrun{
-axes2d <- AxisSet2D(LEFT_RIGHT, ANT_POST)
-axes1d <- drop_dim(axes2d)  # Drop first dimension
-}
 }

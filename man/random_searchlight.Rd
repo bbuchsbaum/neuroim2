@@ -26,8 +26,8 @@ mask_data[1, 1, 1] <- FALSE
 mask <- LogicalNeuroVol(mask_data, NeuroSpace(c(10,10,10)))
 
 # Generate random searchlight iterator with a radius of 2 voxels
-\dontrun{
-searchlights <- random_searchlight(mask, radius = 2)
+\donttest{
+searchlights <- random_searchlight(mask, radius = 6)
 }
 
 }

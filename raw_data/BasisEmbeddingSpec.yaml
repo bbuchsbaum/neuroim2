@@ -1,0 +1,340 @@
+# Latent Representation HDF5 File Format Specification
+#
+# This YAML document specifies the structure of a brain imaging data file format based on HDF5.
+# The format includes a header resembling the NIfTI-1 header, a binary mask, a basis set (either stored or referenced),
+# and embedding vectors (loadings) for each scan, representing the data in a latent space.
+# Detailed explanations and alignment instructions are embedded within the YAML structure for clarity.
+
+---
+
+# Root of the HDF5 file structure
+root:
+  # Header group containing NIfTI-1 header fields
+  header:
+    sizeof_hdr: int32             # Must be 348
+    data_type: str[10]            # Unused
+    db_name: str[18]              # Unused
+    extents: int32                # Unused
+    session_error: int16          # Unused
+    regular: char                 # Unused
+    dim_info: uint8               # MRI slice ordering
+    dim:                          # Data array dimensions
+      - int16                     # dim[0]: Number of dimensions; should be 4
+      - int16                     # dim[1]: Size along x-axis
+      - int16                     # dim[2]: Size along y-axis
+      - int16                     # dim[3]: Size along z-axis
+      - int16                     # dim[4]: Number of time points per scan
+      - int16                     # dim[5]: Unused
+      - int16                     # dim[6]: Unused
+      - int16                     # dim[7]: Unused
+    intent_p1: float32            # First intent parameter
+    intent_p2: float32            # Second intent parameter
+    intent_p3: float32            # Third intent parameter
+    intent_code: int16            # NIFTI_INTENT_* code
+    datatype: int16               # Data type code
+    bitpix: int16                 # Number of bits per voxel
+    slice_start: int16            # First slice index
+    pixdim:                       # Grid spacings (voxel dimensions)
+      - float32                   # pixdim[0]: Unused
+      - float32                   # pixdim[1]: Voxel width
+      - float32                   # pixdim[2]: Voxel height
+      - float32                   # pixdim[3]: Voxel depth
+      - float32                   # pixdim[4]: TR (time between scans)
+      - float32                   # pixdim[5]: Unused
+      - float32                   # pixdim[6]: Unused
+      - float32                   # pixdim[7]: Unused
+    vox_offset: float32           # Offset into .nii file (unused here)
+    scl_slope: float32            # Data scaling: slope
+    scl_inter: float32            # Data scaling: intercept
+    slice_end: int16              # Last slice index
+    slice_code: uint8             # Slice timing order
+    xyzt_units: uint8             # Units of pixdim[1..4]
+    cal_max: float32              # Max display intensity
+    cal_min: float32              # Min display intensity
+    slice_duration: float32       # Time for one slice
+    toffset: float32              # Time axis shift
+    glmax: int32                  # Unused
+    glmin: int32                  # Unused
+    descrip: str[80]              # Any text description
+    aux_file: str[24]             # Auxiliary filename
+    qform_code: int16             # NIFTI_XFORM_* code
+    sform_code: int16             # NIFTI_XFORM_* code
+    quatern_b: float32            # Quaternion b parameter
+    quatern_c: float32            # Quaternion c parameter
+    quatern_d: float32            # Quaternion d parameter
+    qoffset_x: float32            # Quaternion x shift
+    qoffset_y: float32            # Quaternion y shift
+    qoffset_z: float32            # Quaternion z shift
+    srow_x:
+      - float32
+      - float32
+      - float32
+      - float32
+    srow_y:
+      - float32
+      - float32
+      - float32
+      - float32
+    srow_z:
+      - float32
+      - float32
+      - float32
+      - float32
+    intent_name: str[16]          # Name or meaning of data
+    magic: str[4]                 # Must be "ni1\0" or "n+1\0"
+    notes:
+      - "The 'header' group contains datasets corresponding to each field in the NIfTI-1 header."
+      - "Data types and field names match those specified in the NIfTI-1 standard."
+
+  # Mask dataset indicating non-zero voxel indices
+  mask:
+    path: "/mask"                 # HDF5 dataset path
+    datatype: uint8               # Data type: unsigned 8-bit integer (0 or 1)
+    dimensions:
+      - dim[1]                    # Size along x-axis
+      - dim[2]                    # Size along y-axis
+      - dim[3]                    # Size along z-axis
+    description: "Binary mask volume indicating non-zero data voxels."
+    notes:
+      - "The 'mask' dataset is a 3D binary volume stored in standard NIfTI voxel ordering."
+      - "It defines which voxels are of interest (non-zero) for the latent representation."
+
+  # Voxel coordinates of non-zero mask elements
+  voxel_coords:
+    path: "/voxel_coords"         # HDF5 dataset path
+    datatype: int32               # Data type: 32-bit integers
+    dimensions:
+      - number_of_nonzero_voxels
+      - 3                         # For x, y, z coordinates
+    description: "Voxel coordinates (x, y, z) of non-zero voxels in the mask."
+    notes:
+      - "Provides spatial mapping to reconstruct data back to their 3D locations."
+      - "Coordinates are stored as integer triplets corresponding to voxel indices."
+      - "The order of voxels in 'voxel_coords' matches the order in 'basis' and 'loadings'."
+
+  # Basis set group or dataset
+  basis:
+    path: "/basis"                # HDF5 group path or dataset path
+    notes:
+      - "Defines the basis vectors used to reconstruct the data from the embeddings."
+      - "Can be stored directly as a dataset ('stored_basis') or referenced by an identifier ('basis_reference')."
+
+    # Option 1: Directly stored basis matrix
+    stored_basis:
+      dataset_name: "/basis/basis_matrix"
+      datatype: float32
+      dimensions:
+        - k                       # Number of components (basis vectors)
+        - number_of_nonzero_voxels  # Number of voxels (non-zero voxels in mask)
+      description: "Basis matrix stored directly, dimensions [k, number_of_nonzero_voxels]."
+      notes:
+        - "The basis matrix is stored as a 2D dataset."
+        - "Rows correspond to basis components."
+        - "Columns correspond to voxels (non-zero voxels in mask)."
+        - "The order of voxels matches the order in 'voxel_coords' and 'loadings'."
+
+    # Option 2: Referencing the basis by an identifier
+    basis_reference:
+      basis_id: string            # Identifier for the basis set
+      basis_type: string          # Type or method to generate the basis (e.g., 'DCT', 'Spline')
+      basis_parameters:           # Optional parameters required to generate the basis
+        param1: value
+        param2: value
+      description: "Reference to a basis set identified by 'basis_id' and 'basis_type'."
+      notes:
+        - "When the basis is referenced, 'basis_id' provides a unique identifier."
+        - "The 'basis_type' indicates how to generate or retrieve the basis."
+        - "Additional parameters can be included in 'basis_parameters' as needed."
+        - "The application reading the file must be able to generate or retrieve the basis using this information."
+
+    # Only one of 'stored_basis' or 'basis_reference' should be used.
+    # If 'stored_basis' is present, the basis is stored directly.
+    # If 'basis_reference' is present, the basis is referenced.
+
+  # Offset vector (optional)
+  offset:
+    path: "/offset"               # HDF5 dataset path
+    datatype: float32
+    dimensions:
+      - number_of_nonzero_voxels
+    description: "Optional offset vector added during reconstruction."
+    notes:
+      - "The offset vector is of length equal to the number of non-zero voxels."
+      - "If not present, it is assumed to be zero."
+      - "The order of elements in 'offset' matches the order in 'voxel_coords'."
+
+  # Scans group containing embedding vectors for each scan
+  scans:
+    path: "/scans"                # HDF5 group path
+    groups:
+      - name: "<scan_name>"       # Placeholder for actual scan name (e.g., "run1")
+        metadata:                 # Scan metadata (extensible)
+          subject_id: string
+          task: string
+          run_length: int32       # Number of time points
+          TR: float32
+          session: string
+          # Additional metadata fields as needed
+        embedding:
+          path: "/scans/<scan_name>/embedding"
+          datatype: float32
+          dimensions:
+            - run_length          # Number of time points in this scan
+            - k                   # Number of components (size of embedding vector)
+          compression: optional   # Compression can be applied (e.g., gzip)
+          description: "Embedding vectors (coefficients) for scan '<scan_name>'."
+          notes:
+            - "Each scan is represented by embedding vectors of size [run_length, k]."
+            - "Rows correspond to time points; columns correspond to basis components."
+            - "The basis components are shared across all scans."
+            - "Data is stored in the order of time points."
+
+        notes:
+          - "Each scan is stored as a separate subgroup under '/scans'."
+          - "Scan metadata includes essential information such as subject ID, task, run length, TR, and session."
+          - "The embeddings represent the scan data in the latent space."
+          - "To reconstruct the scan data, multiply the embeddings with the basis matrix and add the offset vector."
+
+      # Repeat the above 'groups' block for each scan in the dataset
+
+  # Global Notes
+  notes:
+    - "**Header Group (`/header`):**"
+    - "Contains datasets corresponding to each field in the NIfTI-1 header."
+    - "Ensures compatibility with NIfTI-1 standards for essential metadata."
+    - ""
+    - "**Mask Dataset (`/mask`):**"
+    - "A 3D binary volume indicating which voxels contain valid data (non-zero)."
+    - "Stored in standard NIfTI voxel ordering for compatibility."
+    - ""
+    - "**Voxel Coordinates Dataset (`/voxel_coords`):**"
+    - "Provides the (x, y, z) coordinates of each non-zero voxel in `/mask`."
+    - "Allows mapping reconstructed data back to their spatial locations in the volume."
+    - "The order of voxels in `/voxel_coords` matches the order in `basis` and `loadings`."
+    - ""
+    - "**Basis Set (`/basis`):**"
+    - "Defines the basis vectors used to reconstruct the data from the embeddings."
+    - "Can be stored directly as a dataset ('stored_basis') or referenced by an identifier ('basis_reference')."
+    - "When stored directly, the basis matrix dimensions are [k, number_of_nonzero_voxels]."
+    - "When referenced, the application must be able to generate or retrieve the basis using the provided information."
+    - ""
+    - "**Offset Vector (`/offset`):**"
+    - "An optional vector added during reconstruction to center or scale the data."
+    - "If not present, it is assumed to be zero."
+    - ""
+    - "**Scans Group (`/scans`):**"
+    - "Contains subgroups for each scan, named by their identifiers (e.g., 'run1')."
+    - "Each scan subgroup includes metadata and embedding vectors."
+    - ""
+    - "**Embeddings (`/scans/<scan_name>/embedding`):**"
+    - "Each scan is represented by embedding vectors of dimensions [run_length, k]."
+    - "Rows correspond to time points; columns correspond to basis components."
+    - "The embeddings are used to reconstruct the scan data using the basis and offset."
+    - ""
+    - "**Data Reconstruction:**"
+    - "To reconstruct the data for a scan:"
+    - "1. For each time point t:"
+    - "   a. Extract the embedding vector e_t (size k) from the scan's 'embedding' dataset."
+    - "   b. Compute the data vector x_t = e_t × basis + offset."
+    - "   c. Map x_t back to the spatial volume using 'voxel_coords' and 'mask'."
+    - "2. Repeat for all time points."
+    - ""
+    - "**Data Access Workflow:**"
+    - "1. Load the 'mask', 'voxel_coords', and 'offset' datasets to understand the spatial mapping."
+    - "2. Load the 'basis' matrix, either directly from 'stored_basis' or generate it using 'basis_reference'."
+    - "3. For each scan:"
+    - "   a. Load the scan's 'embedding' dataset."
+    - "   b. Use the embeddings and basis to reconstruct the data as described above."
+    - ""
+    - "**Extensibility and Flexibility:**"
+    - "The format supports storing multiple scans in a single file, each with its own metadata."
+    - "Only one basis set is allowed per file, shared among all scans."
+    - "Basis can be stored directly or referenced, allowing for efficient storage and flexibility."
+    - "Metadata fields within scans are extensible, allowing for additional information to be added without altering the core structure."
+    - ""
+    - "**Compression and Storage Efficiency:**"
+    - "HDF5's built-in compression options can be applied to individual datasets to optimize storage."
+    - "Compressing the 'embedding' datasets can significantly reduce file size, especially with large numbers of scans or components."
+
+# Example:
+
+# For a dataset with dimensions 64 x 64 x 64, a mask with non-zero voxels, a basis with 10 components, and three scans ("run1", "run2", "run3"):
+
+example:
+  root:
+    header:
+      sizeof_hdr: 348
+      dim: [4, 64, 64, 64, 200, 1, 1, 1]  # 200 time points per scan
+      datatype: 16                        # NIfTI code for float32
+      bitpix: 32
+      pixdim: [0.0, 2.0, 2.0, 2.0, 2.0, 0.0, 0.0, 0.0]
+      # ... other header fields as required
+    mask:
+      path: "/mask"
+      datatype: uint8
+      dimensions: [64, 64, 64]
+    voxel_coords:
+      path: "/voxel_coords"
+      datatype: int32
+      dimensions: [number_of_nonzero_voxels, 3]
+      data:
+        - [x1, y1, z1]
+        - [x2, y2, z2]
+        - ...
+        - [xn, yn, zn]
+    basis:
+      # Option 1: Stored basis matrix
+      stored_basis:
+        dataset_name: "/basis/basis_matrix"
+        datatype: float32
+        dimensions: [10, number_of_nonzero_voxels]
+        # ... data for the basis matrix
+    offset:
+      path: "/offset"
+      datatype: float32
+      dimensions: [number_of_nonzero_voxels]
+      # ... data for the offset vector
+    scans:
+      path: "/scans"
+      groups:
+        - name: "run1"
+          metadata:
+            subject_id: "subj01"
+            task: "rest"
+            run_length: 200
+            TR: 2.0
+            session: "sess1"
+          embedding:
+            path: "/scans/run1/embedding"
+            datatype: float32
+            dimensions: [200, 10]
+            compression: gzip
+            # ... data for the embeddings
+        - name: "run2"
+          metadata:
+            subject_id: "subj01"
+            task: "rest"
+            run_length: 200
+            TR: 2.0
+            session: "sess1"
+          embedding:
+            path: "/scans/run2/embedding"
+            datatype: float32
+            dimensions: [200, 10]
+            compression: gzip
+            # ... data for the embeddings
+        - name: "run3"
+          metadata:
+            subject_id: "subj01"
+            task: "rest"
+            run_length: 200
+            TR: 2.0
+            session: "sess1"
+          embedding:
+            path: "/scans/run3/embedding"
+            datatype: float32
+            dimensions: [200, 10]
+            compression: gzip
+            # ... data for the embeddings
+
+# End of Specification

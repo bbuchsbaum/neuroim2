@@ -9,6 +9,9 @@
 \arguments{
 \item{object}{the object}
 }
+\value{
+Invisibly returns NULL after printing object information to the console.
+}
 \description{
 show a \code{SparseNeuroVol}
 }

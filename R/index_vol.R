@@ -35,7 +35,7 @@ NULL
 #' }
 #'
 #' @examples
-#' \dontrun{
+#'
 #' # Create a 64x64x64 space
 #' space <- NeuroSpace(c(64, 64, 64), c(1, 1, 1), c(0, 0, 0))
 #'
@@ -45,7 +45,7 @@ NULL
 #'
 #' # Look up coordinates for specific indices
 #' coords <- coords(ilv, indices[1:10])
-#' }
+#'
 #'
 #' @seealso
 #' \code{\link{coords}} for coordinate lookup,
@@ -111,13 +111,13 @@ setMethod(f = "initialize",
 #'
 #' @param x An \code{\linkS4class{IndexLookupVol}} object
 #'
-#' @return An integer vector containing the indices of included voxels
 #'
 #' @examples
-#' \dontrun{
+#'
+#' space <- NeuroSpace(c(64, 64, 64), c(1, 1, 1), c(0, 0, 0))
 #' ilv <- IndexLookupVol(space, c(1:100))
 #' idx <- indices(ilv)  # Get included indices
-#' }
+#'
 #'
 #' @export
 #' @rdname indices-methods
@@ -135,13 +135,13 @@ setMethod(f = "indices",
 #' @param x An \code{\linkS4class{IndexLookupVol}} object
 #' @param i A numeric vector of indices to look up
 #'
-#' @return A vector of lookup values corresponding to the input indices
 #'
 #' @examples
-#' \dontrun{
+#'
+#' space <- NeuroSpace(c(64, 64, 64), c(1, 1, 1), c(0, 0, 0))
 #' ilv <- IndexLookupVol(space, c(1:100))
 #' lookup(ilv, c(1, 2, 3))  # Look up values for indices 1, 2, and 3
-#' }
+#'
 #'
 #' @export
 #' @rdname lookup-methods
@@ -167,13 +167,12 @@ setMethod(f = "lookup",
 #'
 #' @param x An \code{\linkS4class{IndexLookupVol}} object
 #'
-#' @return A NeuroSpace object
 #'
 #' @examples
-#' \dontrun{
+#' space <- NeuroSpace(c(64, 64, 64), c(1, 1, 1), c(0, 0, 0))
 #' ilv <- IndexLookupVol(space, c(1:100))
 #' space(ilv)  # Get the associated NeuroSpace object
-#' }
+#'
 #'
 #' @export
 #' @rdname space-methods
@@ -191,14 +190,13 @@ setMethod(f = "space",
 #' @param x An \code{\linkS4class{IndexLookupVol}} object to extract coordinates from
 #' @param i The index into the lookup volume
 #'
-#' @return The extracted coordinates corresponding to the provided index
-#'         If the index is not found, it returns NA
 #'
 #' @examples
-#' \dontrun{
+#'
+#' space <- NeuroSpace(c(64, 64, 64), c(1, 1, 1), c(0, 0, 0))
 #' ilv <- IndexLookupVol(space, c(1:100))
 #' coords(ilv, 1)  # Extract coordinates for index 1
-#' }
+#'
 #'
 #' @export
 #' @rdname coords-methods
@@ -231,10 +229,32 @@ setMethod(f = "coords",
 #' @rdname show-methods
 setMethod("show", signature(object = "IndexLookupVol"),
           def = function(object) {
-            cat("\nIndexLookupVol Object\n")
-            cat("-----------------------\n")
-            cat("Space:\n")
-            show(object@space)
-            cat("Indices: ", paste(object@indices, collapse = ", "), "\n")
-            cat("Reverse Map: ", paste(object@map, collapse = ", "), "\n\n")
+            # Calculate summary statistics
+            n_indices <- length(object@indices)
+            n_nonzero <- sum(object@indices != 0)
+            n_map <- length(object@map)
+
+            cat("\n", crayon::bold(crayon::blue("IndexLookupVol")), "\n", sep="")
+
+            # Spatial information
+            cat(crayon::bold("\n- Spatial Info"), crayon::silver(" ---------------------------"), "\n", sep="")
+            cat("| ", crayon::yellow("Dimensions"), "    : ",
+                paste(dim(object@space)[1:3], collapse=" x "), "\n", sep="")
+            cat("| ", crayon::yellow("Total Voxels"), "  : ",
+                format(prod(dim(object@space)[1:3]), big.mark=","), "\n", sep="")
+
+            # Index information
+            cat(crayon::bold("\n- Index Info"), crayon::silver(" ----------------------------"), "\n", sep="")
+            cat("| ", crayon::yellow("Total Indices"), "  : ", format(n_indices, big.mark=","), "\n", sep="")
+            cat("| ", crayon::yellow("Non-zero"), "       : ", format(n_nonzero, big.mark=","),
+                " (", round(100*n_nonzero/n_indices, 1), "%)", "\n", sep="")
+            cat("| ", crayon::yellow("Map Length"), "     : ", format(n_map, big.mark=","), "\n", sep="")
+
+            # Range information
+            if(n_indices > 0) {
+              cat("| ", crayon::yellow("Index Range"), "    : [",
+                  min(object@indices), ", ", max(object@indices), "]\n", sep="")
+            }
+
+            cat("\n")
           })

@@ -27,7 +27,8 @@ BigNeuroVec(
 \item{backingfile}{Path to the file used for memory mapping (defaults to tempfile())}
 }
 \value{
-A new BigNeuroVec object
+A new BigNeuroVec object that provides memory-efficient access to large neuroimaging data through memory mapping.
+        The object contains the spatial properties, mask, and memory-mapped data storage.
 }
 \description{
 Creates a BigNeuroVec object, which represents a large neuroimaging vector using
@@ -35,7 +36,7 @@ memory-mapped file storage. This allows working with neuroimaging data that is
 too large to fit in memory.
 }
 \examples{
-\dontrun{
+\donttest{
 # Load an example 4D brain image
 example_file <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
 example_4d_image <- read_vec(example_file)

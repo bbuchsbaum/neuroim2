@@ -8,20 +8,20 @@
 #' @title NeuroSpace: Spatial Reference System for Neuroimaging Data
 #'
 #' @description
-#' The \code{NeuroSpace} class defines the spatial properties and coordinate system of 
-#' neuroimaging data. It encapsulates all information needed to map between voxel indices 
-#' and real-world coordinates, including dimensions, voxel spacing, origin, axis orientation, 
+#' The \code{NeuroSpace} class defines the spatial properties and coordinate system of
+#' neuroimaging data. It encapsulates all information needed to map between voxel indices
+#' and real-world coordinates, including dimensions, voxel spacing, origin, axis orientation,
 #' and coordinate transformations.
 #'
 #' @param dim An integer vector specifying the dimensions of the image grid. Must be positive.
-#' @param spacing A numeric vector specifying the physical size of each voxel (typically in 
+#' @param spacing A numeric vector specifying the physical size of each voxel (typically in
 #'   millimeters). Must be positive. If NULL, defaults to ones.
-#' @param origin A numeric vector specifying the real-world coordinates of the first voxel. 
+#' @param origin A numeric vector specifying the real-world coordinates of the first voxel.
 #'   If NULL, defaults to zeros.
-#' @param axes An \code{\linkS4class{AxisSet}} object defining the orientation and ordering 
-#'   of the coordinate axes. If NULL, defaults to standard neurological convention 
+#' @param axes An \code{\linkS4class{AxisSet}} object defining the orientation and ordering
+#'   of the coordinate axes. If NULL, defaults to standard neurological convention
 #'   (Left-Posterior-Inferior for 3D).
-#' @param trans A transformation matrix mapping voxel indices to world coordinates. If NULL, 
+#' @param trans A transformation matrix mapping voxel indices to world coordinates. If NULL,
 #'   constructed from spacing and origin.
 #'
 #' @return A new \code{\linkS4class{NeuroSpace}} object
@@ -35,7 +35,7 @@
 #'   \item Voxel coordinates: Zero-based indices into the image grid
 #'   \item World coordinates: Real-world coordinates (typically in millimeters)
 #' }
-#' 
+#'
 #' The transformation between these systems is defined by:
 #' \itemize{
 #'   \item Voxel spacing (physical size of voxels)
@@ -59,25 +59,25 @@
 #'   spacing = c(2, 2, 2),
 #'   origin = c(-90, -126, -72)
 #' )
-#' 
+#'
 #' # Check properties
 #' dim(space_3d)           # Image dimensions
 #' spacing(space_3d)       # Voxel sizes
 #' origin(space_3d)        # World-space origin
-#' 
+#'
 #' # Create a 2D slice space
 #' space_2d <- NeuroSpace(
 #'   dim = c(128L, 128L),
 #'   spacing = c(1.5, 1.5),
 #'   origin = c(-96, -96)
 #' )
-#' 
+#'
 #' # Convert between coordinate systems
 #' world_coords <- c(0, 0, 0)
 #' vox_idx <- coord_to_index(space_3d, world_coords)
 #' back_to_world <- index_to_coord(space_3d, vox_idx)
 #'
-#' @seealso 
+#' @seealso
 #' \code{\linkS4class{AxisSet}} for axis orientation specification,
 #' \code{\link{coord_to_index}} for coordinate conversion,
 #' \code{\link{index_to_coord}} for inverse coordinate conversion,
@@ -86,10 +86,10 @@
 #' @references
 #' For details on neuroimaging coordinate systems:
 #' \itemize{
-#'   \item Brett, M., Johnsrude, I. S., & Owen, A. M. (2002). 
-#'     The problem of functional localization in the human brain. 
+#'   \item Brett, M., Johnsrude, I. S., & Owen, A. M. (2002).
+#'     The problem of functional localization in the human brain.
 #'     Nature Reviews Neuroscience, 3(3), 243-249.
-#'   \item Evans, A. C., et al. (1993). 3D statistical neuroanatomical models 
+#'   \item Evans, A. C., et al. (1993). 3D statistical neuroanatomical models
 #'     from 305 MRI volumes. Nuclear Science Symposium and Medical Imaging Conference.
 #' }
 #'
@@ -98,7 +98,7 @@ NeuroSpace <- function(dim, spacing = NULL, origin = NULL, axes = NULL, trans = 
   assert_that(is.numeric(dim) && all(dim == as.integer(dim)) && all(dim > 0),
               msg = "'dim' must be a vector of positive integers")
   dim <- as.integer(dim)
-  
+
   # Set defaults for spacing and origin
   if (is.null(spacing)) {
     spacing <- rep(1, min(length(dim), 3))
@@ -106,14 +106,14 @@ NeuroSpace <- function(dim, spacing = NULL, origin = NULL, axes = NULL, trans = 
   if (is.null(origin)) {
     origin <- rep(0, min(length(dim), 3))
   }
-  
+
   assert_that(is.numeric(spacing) && is.numeric(origin),
               msg = "'spacing' and 'origin' must be numeric vectors")
   assert_that(length(origin) == length(spacing),
               msg = "'origin' and 'spacing' must have the same length")
   assert_that(all(spacing > 0),
               msg = "all 'spacing' values must be positive")
-  
+
   # Create transformation matrix if not provided
   if (is.null(trans)) {
     D <- min(length(dim), 3)
@@ -123,18 +123,18 @@ NeuroSpace <- function(dim, spacing = NULL, origin = NULL, axes = NULL, trans = 
     assert_that(is.matrix(trans) && nrow(trans) == ncol(trans),
                 msg = "'trans' must be a square matrix")
   }
-  
+
   # Ensure matrix is invertible
   tryCatch({
     inverse <- solve(trans)
   }, error = function(e) {
     stop("transformation matrix must be invertible")
   })
-  
+
   # Round to avoid numerical issues
   trans <- signif(trans, 6)
   inverse <- signif(inverse, 6)
-  
+
   # Set up axes
   if (is.null(axes)) {
     if (length(dim) >= 3) {
@@ -145,7 +145,7 @@ NeuroSpace <- function(dim, spacing = NULL, origin = NULL, axes = NULL, trans = 
       stop("unsupported number of dimensions")
     }
   }
-  
+
   # Create object
   new("NeuroSpace",
       dim = dim,
@@ -156,20 +156,12 @@ NeuroSpace <- function(dim, spacing = NULL, origin = NULL, axes = NULL, trans = 
       inverse = inverse)
 }
 
-#' Display NeuroSpace Object Details
-#'
-#' @description
-#' Provides a beautifully formatted display of a NeuroSpace object's properties,
-#' including dimensions, spacing, origin, and transformation information.
-#' Uses color coding and unicode characters for enhanced readability.
-#'
-#' @param object A NeuroSpace object to display
-#'
+
 #' @importFrom crayon bold blue green red yellow silver white bgBlue
 #' @importFrom utils object.size
 #' @rdname show-methods
 #' @export
-setMethod(f="show", 
+setMethod(f="show",
           signature=signature("NeuroSpace"),
           def=function(object) {
             # Helper function for memory size formatting
@@ -178,7 +170,7 @@ setMethod(f="show",
               i <- floor(log2(bytes) / 10)
               sprintf("%.1f %s", bytes / 2^(10 * i), units[i + 1])
             }
-            
+
             # Helper for matrix formatting
             format_matrix <- function(mat, digits=3) {
               # Format each element using formatC to a fixed number of decimal places
@@ -197,28 +189,28 @@ setMethod(f="show",
               row_strings <- apply(padded, 1, paste, collapse = "  ")
               paste(row_strings, collapse = "\n")
             }
-            
+
             # Calculate memory footprint
             mem_size <- format_bytes(utils::object.size(object))
-            
+
             # Header
             cat("\n")
             cat(bgBlue(white(bold(" NeuroSpace Object "))))
             cat("\n")
-            
+
             # Dimension Information
             cat("\n", bold(yellow(">> Dimensions")), "\n")
             dim_str <- paste(object@dim, collapse=" x ")
             cat("  ", silver("Grid Size:"), " ", green(dim_str), "\n", sep="")
             cat("  ", silver("Memory:"), "   ", green(mem_size), "\n", sep="")
-            
+
             # Spatial Properties
             cat("\n", bold(yellow(">> Spatial Properties")), "\n")
             spacing_str <- paste(sprintf("%.2f", object@spacing), collapse=" x ")
             origin_str <- paste(sprintf("%.2f", object@origin), collapse=" x ")
             cat("  ", silver("Spacing:"), "   ", blue(spacing_str), " ", silver("mm"), "\n", sep="")
             cat("  ", silver("Origin:"), "    ", blue(origin_str), " ", silver("mm"), "\n", sep="")
-            
+
             # Anatomical Orientation
             cat("\n", bold(yellow(">> Anatomical Orientation")), "\n")
             if (length(object@dim) >= 3) {
@@ -234,60 +226,62 @@ setMethod(f="show",
               )
             }
             cat(paste0("  ", paste(orientations, collapse="  |  ")), "\n")
-            
+
             # World Transformation
             cat("\n", bold(yellow(">> World Transformation")), "\n")
             cat(silver("  Forward (Voxel to World):"), "\n")
             cat(blue(paste0("    ", format_matrix(object@trans))), "\n")
             cat(silver("  Inverse (World to Voxel):"), "\n")
             cat(blue(paste0("    ", format_matrix(object@inverse))), "\n")
-            
+
             # Bounding Box (in world coordinates)
             cat("\n", bold(yellow(">> Bounding Box")), "\n")
             ndim <- length(object@dim)
             if (ndim == 2) {
-              corners <- matrix(c(0, 0, 
+              corners <- matrix(c(0, 0,
                                 object@dim[1]-1, 0,
                                 0, object@dim[2]-1,
-                                object@dim[1]-1, object@dim[2]-1), 
+                                object@dim[1]-1, object@dim[2]-1),
                               nrow=4, byrow=TRUE)
-              world_corners <- t(object@trans[1:2, 1:2, drop=FALSE] %*% t(corners) + 
+              world_corners <- t(object@trans[1:2, 1:2, drop=FALSE] %*% t(corners) +
                                  matrix(object@trans[1:2, 3], nrow=2, ncol=4))
               min_corner <- apply(world_corners, 2, min)
               max_corner <- apply(world_corners, 2, max)
-              cat("  ", silver("Min Corner:"), " ", 
-                  green(paste(sprintf("%.1f", min_corner), collapse=", ")), 
+              cat("  ", silver("Min Corner:"), " ",
+                  green(paste(sprintf("%.1f", min_corner), collapse=", ")),
                   " mm\n", sep="")
-              cat("  ", silver("Max Corner:"), " ", 
-                  green(paste(sprintf("%.1f", max_corner), collapse=", ")), 
+              cat("  ", silver("Max Corner:"), " ",
+                  green(paste(sprintf("%.1f", max_corner), collapse=", ")),
                   " mm\n", sep="")
             } else {
-              corners <- matrix(c(0, 0, 0, 
+              corners <- matrix(c(0, 0, 0,
                                 object@dim[1]-1, 0, 0,
                                 0, object@dim[2]-1, 0,
                                 object@dim[1]-1, object@dim[2]-1, 0,
                                 0, 0, object@dim[3]-1,
                                 object@dim[1]-1, 0, object@dim[3]-1,
                                 0, object@dim[2]-1, object@dim[3]-1,
-                                object@dim[1]-1, object@dim[2]-1, object@dim[3]-1), 
+                                object@dim[1]-1, object@dim[2]-1, object@dim[3]-1),
                               nrow=8, byrow=TRUE)
-              world_corners <- t(object@trans[1:3, 1:3, drop=FALSE] %*% t(corners) + 
+              world_corners <- t(object@trans[1:3, 1:3, drop=FALSE] %*% t(corners) +
                                  matrix(object@trans[1:3, 4], nrow=3, ncol=8))
               min_corner <- apply(world_corners, 2, min)
               max_corner <- apply(world_corners, 2, max)
-              cat("  ", silver("Min Corner:"), " ", 
-                  green(paste(sprintf("%.1f", min_corner), collapse=", ")), 
+              cat("  ", silver("Min Corner:"), " ",
+                  green(paste(sprintf("%.1f", min_corner), collapse=", ")),
                   " mm\n", sep="")
-              cat("  ", silver("Max Corner:"), " ", 
-                  green(paste(sprintf("%.1f", max_corner), collapse=", ")), 
+              cat("  ", silver("Max Corner:"), " ",
+                  green(paste(sprintf("%.1f", max_corner), collapse=", ")),
                   " mm\n", sep="")
             }
-            
+
             # Footer
             cat("\n", bgBlue(white(bold(paste(rep("=", 50), collapse="")))), "\n", sep="")
           })
 
 #' add dimension to \code{\linkS4class{NeuroSpace}}
+#' @param x The NeuroSpace object
+#' @param n Numeric value specifying the size of the new dimension
 #' @export
 #' @rdname add_dim-methods
 setMethod(f="add_dim", signature=signature(x = "NeuroSpace", n="numeric"),
@@ -296,6 +290,9 @@ setMethod(f="add_dim", signature=signature(x = "NeuroSpace", n="numeric"),
 		})
 
 
+#' Drop a dimension from a NeuroSpace object
+#' @param x The NeuroSpace object
+#' @param dimnum The dimension number to drop (if missing, drops the last dimension)
 #' @export
 #' @rdname drop_dim-methods
 setMethod(f="drop_dim", signature=signature(x="NeuroSpace", dimnum="numeric"),
@@ -355,6 +352,8 @@ setMethod(f="dim", signature=signature(x = "NeuroSpace"),
 setMethod(f="ndim", signature=signature(x = "NeuroSpace"),
 		def=function(x) length(x@dim))
 
+#' Calculate the centroid of a NeuroSpace object
+#' @param x The NeuroSpace object
 #' @export
 #' @rdname centroid-methods
 setMethod(f="centroid", signature=signature(x = "NeuroSpace"),
@@ -364,6 +363,9 @@ setMethod(f="centroid", signature=signature(x = "NeuroSpace"),
           })
 
 
+#' Get dimension size along a specific axis
+#' @param x The NeuroSpace object
+#' @param axis The NamedAxis to query
 #' @export
 #' @rdname dim_of-methods
 setMethod(f="dim_of", signature=signature(x = "NeuroSpace", axis="NamedAxis"),
@@ -374,6 +376,9 @@ setMethod(f="dim_of", signature=signature(x = "NeuroSpace", axis="NamedAxis"),
   dim(x)[dnum]
 })
 
+#' Find which dimension corresponds to a given axis
+#' @param x The NeuroSpace object
+#' @param axis The NamedAxis to find
 #' @export
 #' @rdname which_dim-methods
 setMethod(f="which_dim", signature=signature(x = "NeuroSpace", axis="NamedAxis"),

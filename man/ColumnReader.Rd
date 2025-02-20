@@ -20,10 +20,10 @@ An object of class \linkS4class{ColumnReader}
 Create a new instance of the \linkS4class{ColumnReader} class for reading column-oriented data.
 }
 \examples{
-\dontrun{
+
 reader_func <- function(cols) {
   matrix(rnorm(100 * length(cols)), 100, length(cols))
 }
 col_reader <- ColumnReader(nrow = 100L, ncol = 10L, reader = reader_func)
-}
+
 }

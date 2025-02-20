@@ -87,7 +87,7 @@ print(ilv@indices)
 # Access the map
 print(ilv@map)
 
-\dontrun{
+
 # Create a 64x64x64 space
 space <- NeuroSpace(c(64, 64, 64), c(1, 1, 1), c(0, 0, 0))
 
@@ -97,7 +97,7 @@ ilv <- IndexLookupVol(space, indices)
 
 # Look up coordinates for specific indices
 coords <- coords(ilv, indices[1:10])
-}
+
 
 }
 \seealso{

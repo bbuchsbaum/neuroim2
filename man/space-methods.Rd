@@ -26,8 +26,6 @@ space(x, ...)
 }
 \value{
 An object representing the geometric space of the image, of type \code{\linkS4class{NeuroSpace}}.
-
-A NeuroSpace object
 }
 \description{
 This function retrieves the geometric properties of a given image, such as dimensions and voxel size.
@@ -44,9 +42,9 @@ vol <- NeuroVol(rnorm(10 * 10 * 10), x)
 # Retrieve the geometric properties of the NeuroVol object
 identical(x, space(vol))
 
-\dontrun{
+space <- NeuroSpace(c(64, 64, 64), c(1, 1, 1), c(0, 0, 0))
 ilv <- IndexLookupVol(space, c(1:100))
 space(ilv)  # Get the associated NeuroSpace object
-}
+
 
 }

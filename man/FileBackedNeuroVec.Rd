@@ -33,13 +33,13 @@ The function performs the following operations:
 }
 }
 \examples{
-\dontrun{
+
 # Create a file-backed vector from a NIFTI file
-fbvec <- FileBackedNeuroVec("path/to/fmri_data.nii")
+fbvec <- FileBackedNeuroVec(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
 
 # Access specific volumes without loading entire dataset
 first_vol <- sub_vector(fbvec, 1)
-}
+
 
 }
 \seealso{

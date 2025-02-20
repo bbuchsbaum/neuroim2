@@ -14,17 +14,15 @@
 
 \item{i}{A numeric vector of indices to look up}
 }
-\value{
-A vector of lookup values corresponding to the input indices
-}
 \description{
 Performs a lookup operation on an IndexLookupVol object.
 }
 \examples{
-\dontrun{
+
+space <- NeuroSpace(c(64, 64, 64), c(1, 1, 1), c(0, 0, 0))
 ilv <- IndexLookupVol(space, c(1:100))
 lookup(ilv, c(1, 2, 3))  # Look up values for indices 1, 2, and 3
-}
+
 
 }
 \keyword{internal}

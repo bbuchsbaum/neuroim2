@@ -18,6 +18,9 @@ mapf(x, m, ...)
 
 \item{mask}{restrict application of kernel to masked area}
 }
+\value{
+The result of applying the mapping function to the input object.
+}
 \description{
 This function applies a function to an object, with additional arguments passed to the function
 using the \code{...} argument. The mapping object specifies how the function is to be applied,

@@ -11,9 +11,6 @@
 
 \item{i}{The volume index to extract.}
 }
-\value{
-A DenseNeuroVol object representing the extracted volume.
-}
 \description{
 This function extracts a single volume from a NeuroVec object.
 }

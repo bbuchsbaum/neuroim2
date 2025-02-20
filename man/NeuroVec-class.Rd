@@ -79,22 +79,22 @@ structure and associated spatial information.
 }
 
 \examples{
-\dontrun{
+
 # Load an example 4D brain image
-example_4d_image <- read_vec(system.file("extdata", "example_4d.nii", package = "neuroim2"))
+example_4d_image <- read_vec(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
 
 # Create a NeuroVec object
-neuro_vec <- NeuroVec(data = array(rnorm(64*64*32*100), dim = c(64, 64, 32, 100)),
-                      space = NeuroSpace(dim = c(64, 64, 32),
+neuro_vec <- NeuroVec(data = array(rnorm(64*64*32*10), dim = c(64, 64, 32, 10)),
+                      space = NeuroSpace(dim = c(64, 64, 32,10),
                       origin = c(0, 0, 0),
-                      spacing = c(3, 3, 4))
+                      spacing = c(3, 3, 4)))
 
-# Access the dimensions of the 4D image
+
 dim(neuro_vec)
 
 # Extract a single 3D volume (e.g., the first time point)
-first_volume <- neuro_vec[,,,1]
-}
+first_volume <- neuro_vec[[1]]
+
 
 # Load an example 4D brain image
 example_file <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")

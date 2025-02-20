@@ -16,9 +16,6 @@
 \arguments{
 \item{x}{the object}
 }
-\value{
-A deferred list of DenseNeuroVol objects.
-}
 \description{
 Converts a FileBackedNeuroVec object to a list of DenseNeuroVol objects.
 
@@ -27,13 +24,4 @@ convert SparseNeuroVec to list of \code{\linkS4class{DenseNeuroVol}}
 \details{
 This method creates a deferred list, where each element is a DenseNeuroVol
 object representing a single volume from the FileBackedNeuroVec.
-}
-\examples{
-\dontrun{
-fbvec <- FileBackedNeuroVec("fmri_data.nii")
-
-# Convert to list of volumes
-vol_list <- as.list(fbvec)
-}
-
 }

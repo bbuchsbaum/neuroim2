@@ -92,18 +92,17 @@ and memory space. Key features include:
 }
 
 \examples{
-\dontrun{
+
 # Create a MappedNeuroVec object (pseudo-code)
-file_path <- "/path/to/large/brain/image.dat"
-mapped_vec <- MappedNeuroVec(file_path, dim = c(64, 64, 32, 100))
+file_path <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
+mapped_vec <- MappedNeuroVec(file_path)
 
 # Access a subset of the data
-subset <- mapped_vec[,,, 1:10]
-}
+subset <- mapped_vec[,,, 1:2]
 
-\dontrun{
+
 # Create mapped vector from NIFTI file
-mvec <- MappedNeuroVec("path/to/fmri.nii")
+mvec <- MappedNeuroVec(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
 
 # Extract first volume
 vol1 <- mvec[[1]]
@@ -112,8 +111,8 @@ vol1 <- mvec[[1]]
 dim(mvec)
 
 # Access specific timepoint
-timepoint <- mvec[, , , 10]
-}
+timepoint <- mvec[, , , 2]
+
 
 }
 \seealso{

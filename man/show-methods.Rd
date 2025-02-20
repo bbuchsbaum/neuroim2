@@ -26,28 +26,17 @@
 \S4method{show}{ROICoords}(object)
 }
 \arguments{
-\item{object}{A NeuroSpace object to display}
+\item{object}{A \code{NeuroSlice} object}
+}
+\value{
+Invisibly returns NULL after printing the object summary.
 }
 \description{
 Displays a formatted summary of a \code{NeuroSlice} object's properties using
 color-coded output for improved readability.
-
-Provides a beautifully formatted display of a NeuroSpace object's properties,
-including dimensions, spacing, origin, and transformation information.
-Uses color coding and unicode characters for enhanced readability.
 }
 \details{
 Display NeuroSlice Information
-
-
-Shows key properties including:
-\itemize{
-  \item Object type and class
-  \item Dimensions and memory usage
-  \item Spatial properties (spacing, origin)
-  \item Value range and statistics
-  \item Axis orientations
-}
 }
 \examples{
 slice <- NeuroSlice(matrix(1:100, 10, 10), NeuroSpace(c(10, 10)))

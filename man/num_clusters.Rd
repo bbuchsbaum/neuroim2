@@ -9,6 +9,9 @@ num_clusters(x)
 \arguments{
 \item{x}{the object to extract number of clusters}
 }
+\value{
+An integer representing the number of clusters in the object.
+}
 \description{
 Number of Clusters
 }

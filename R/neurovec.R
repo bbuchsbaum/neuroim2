@@ -181,7 +181,6 @@ DenseNeuroVec <- function(data, space, label="none") {
 #'
 #' @param x The NeuroVecSource object containing the image metadata and file information.
 #'
-#' @return A DenseNeuroVec object containing the loaded image data and associated spatial information.
 #'
 #' @details
 #' This method performs the following steps:
@@ -195,12 +194,6 @@ DenseNeuroVec <- function(data, space, label="none") {
 #' @note This method currently only supports NIfTI file format through RNifti.
 #'
 #' @seealso \code{\link{NeuroVecSource}}, \code{\link{DenseNeuroVec}}, \code{\link{NeuroSpace}}
-#'
-#' @examples
-#' \dontrun{
-#' # Assuming 'source' is a valid NeuroVecSource object
-#' vec_data <- load_data(source)
-#' }
 #'
 #' @rdname load_data-methods
 #' @export
@@ -309,10 +302,11 @@ NeuroVecSource <- function(file_name, indices=NULL, mask=NULL) {
 
 #' Get length of NeuroVec object
 #'
-#' @description Returns the number of time points (4th dimension) in a NeuroVec object
+#' @description
+#' Returns the number of time points (4th dimension) in a NeuroVec object.
+#' This represents the temporal dimension of the neuroimaging data.
 #'
 #' @param x A NeuroVec object
-#' @return Integer length (number of time points)
 #'
 #' @export
 #' @rdname length-methods
@@ -377,22 +371,19 @@ read_vol_list <- function(file_names, mask=NULL) {
 	}
 }
 
-#' drop
+#' Drop singleton dimensions from a NeuroVec object
 #'
 #' @description
 #' This function drops the last dimension of a NeuroVec object if it is of length 1.
 #'
-#' @param x The NeuroVec object.
+#' @param x The NeuroVec object
 #'
-#' @return If the last dimension of the NeuroVec object is of length 1, a DenseNeuroVol
-#'   object is returned. Otherwise, the original NeuroVec object is returned.
 #'
 #' @export
 setMethod("drop", signature=(x="NeuroVec"),
           def=function(x) {
             if (dim(x)[4] == 1) {
-              idx <- seq(1, prod(dim(x)[1:3]))
-              series(x, idx)
+              x[[1]]
             } else {
               x
             }
@@ -425,7 +416,6 @@ setMethod(f="show",
 			cat("   meta_info: \n")
 			show(object@meta_info)
 			cat("\n\n")
-
 		})
 
 
@@ -958,20 +948,19 @@ setMethod(f="split_blocks", signature=signature(x="NeuroVec", indices="factor"),
 #' @return An \code{\linkS4class{NeuroVec}} object representing the loaded volume(s).
 #'
 #' @examples
-#' \dontrun{
-#' # Load a single NIfTI file
-#' img <- read_vec("subject01.nii")
 #'
-#' # Load multiple volumes and concatenate
-#' imgs <- read_vec(c("run1.nii", "run2.nii"))
+#' # Load a single NIfTI file
+#' img <- read_vec(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
+#'
 #'
 #' # Memory-mapped loading for large files
-#' big_img <- read_vec("large_volume.nii", mode="mmap")
+#' big_img <- read_vec(system.file("extdata", "global_mask_v4.nii", package="neuroim2"), mode="mmap")
 #'
 #' # Load masked data for memory efficiency
-#' mask <- read_vol("brain_mask.nii")
-#' masked_data <- read_vec("functional.nii", mask=mask, mode="bigvec")
-#' }
+#' mask <- as.logical(big_img[[1]])
+#' masked_data <- read_vec(system.file("extdata", "global_mask_v4.nii", package="neuroim2"),
+#'                mask=mask, mode="bigvec")
+#'
 #'
 #' @export
 #' @note
@@ -1290,7 +1279,6 @@ setMethod(f="sub_vector", signature=signature(x="NeuroVecSeq", i="numeric"),
 #' @param x The NeuroVec object.
 #' @param i The volume index to extract.
 #'
-#' @return A DenseNeuroVol object representing the extracted volume.
 #'
 #' @export
 setMethod(f="[[", signature=signature(x="NeuroVec", i="numeric"),
@@ -1298,10 +1286,12 @@ setMethod(f="[[", signature=signature(x="NeuroVec", i="numeric"),
             ## or ... drop(sub_vector(x,i))
             assert_that(length(i) == 1)
             xs <- space(x)
-            dat <- x[,,,i]
+            # Use drop=FALSE to prevent dropping dimensions
+            dat <- x[,,,i, drop=FALSE]
             newdim <- dim(x)[1:3]
+            dat <- array(dat, dim=newdim)
             bspace <- NeuroSpace(newdim, spacing=spacing(xs),
-            origin=origin(xs), axes(xs), trans(xs))
+                                 origin=origin(xs), axes(xs), trans(xs))
             DenseNeuroVol(dat, bspace)
           })
 
@@ -1313,8 +1303,6 @@ setMethod(f="[[", signature=signature(x="NeuroVec", i="numeric"),
 #'
 #' @param x The NeuroVec object.
 #'
-#' @return If the last dimension of the NeuroVec object is of length 1, a DenseNeuroVol
-#'   object is returned. Otherwise, the original NeuroVec object is returned.
 #'
 #' @export
 setMethod("drop", signature(x="NeuroVec"),

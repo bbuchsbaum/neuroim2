@@ -53,6 +53,7 @@ OrientationList
 PPA
 Pfaltz
 Pipelining
+Poldrack
 Pre
 Quaternion
 RGBA
@@ -92,8 +93,8 @@ dimensioned
 drawable
 endianness
 et
-fac
 filebacked
+ggplot
 gz
 gzip
 gzipped
@@ -119,7 +120,6 @@ nvoxels
 parallelize
 parcellated
 parcellation
-postion
 pre
 qfac
 qform
@@ -134,13 +134,8 @@ tempfile
 th
 timepoint
 trilinear
-unicode
 untransformed
 vec
 vectorized
 voxel's
 wikipedia
-AFNI
-NIfTI
-Neuroimaging
-neuroimaging

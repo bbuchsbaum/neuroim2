@@ -123,11 +123,16 @@ prep_sparsenvec <- function(data, space, mask) {
 #' @rdname SparseNeuroVec-class
 SparseNeuroVec <- function(data, space, mask, label = "") {
 	stopifnot(inherits(space, "NeuroSpace"))
-  p <- prep_sparsenvec(data,space, mask)
+  
+  # Ensure space has 4 dimensions
+  if (ndim(space) != 4) {
+    stop("The 'space' argument must have exactly 4 dimensions")
+  }
+  
+  p <- prep_sparsenvec(data, space, mask)
 
 	new("SparseNeuroVec", space=p$space, mask=p$mask,
 	    map=IndexLookupVol(space(p$mask), as.integer(which(p$mask))), data=p$data, label=label)
-
 }
 
 #' @rdname load_data-methods
@@ -580,13 +585,7 @@ setMethod(
 #' @param drop Logical indicating whether to drop dimensions of length one (default: TRUE)
 #'
 #' @return An array containing the extracted subset
-#'
-#' @examples
-#' \dontrun{
-#' # Assuming 'sparse_vec' is a valid SparseNeuroVec object
-#' subset <- sparse_vec[1:10, 1:10, 1:5, 1:100]
-#' }
-#'
+#' 
 #' @export
 setMethod(f="[", signature=signature(x = "AbstractSparseNeuroVec", i = "numeric", j = "numeric"),
           def = function (x, i, j, k, m, ..., drop = TRUE) {
@@ -638,12 +637,20 @@ setMethod(f="[", signature=signature(x = "AbstractSparseNeuroVec", i = "numeric"
 #' @export
 setMethod(f="sub_vector", signature=signature(x="SparseNeuroVec", i="numeric"),
           def=function(x, i) {
-            idx <- which(x@mask > 0)
-            bspace <- drop_dim(space(x))
-
-            res <- lapply(i, function(i) x@data[i,])
-            res <- do.call("cbind", res)
-            SparseNeuroVec(res, bspace, x@mask)
+            assertthat::assert_that(max(i) <= dim(x)[4])
+            
+            # Get the subset of data for the requested timepoints
+            res <- x@data[i,, drop=FALSE]
+            
+            # Create new space with updated dimensions
+            xs <- space(x)
+            newdim <- c(dim(x)[1:3], length(i))
+            bspace <- NeuroSpace(newdim, spacing=spacing(xs), origin=origin(xs), 
+                               axes(xs), trans(xs))
+            
+            # Create new SparseNeuroVec with subset of data
+            new("SparseNeuroVec", space=bspace, mask=x@mask,
+                map=x@map, data=res, label=x@label)
           })
 
 #' [[

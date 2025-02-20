@@ -11,15 +11,6 @@
 
 \item{...}{Additional arguments (not used)}
 }
-\value{
-Integer number of dimensions
-}
 \description{
 Get number of dimensions in axis set
-}
-\examples{
-\dontrun{
-axes <- AxisSet2D(LEFT_RIGHT, ANT_POST)
-ndim(axes)  # Returns 2
-}
 }

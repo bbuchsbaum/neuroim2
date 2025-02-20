@@ -59,16 +59,23 @@ Otherwise output format will be inferred from R the datatype of the image.}
 
 \item{chunk_dim}{the dimensions of each chunk}
 }
+\value{
+Invisibly returns NULL after writing the vector to disk.
+}
 \description{
 Write a 4d image vector to disk
 }
 \examples{
 
 bvec <- NeuroVec(array(0, c(10,10,10,10)), NeuroSpace(c(10,10,10,10), c(1,1,1)))
-\dontrun{
-write_vec(bvol, "out.nii")
-write_vec(bvol, "out.nii.gz")
-write_vec(bvec, "out.nii")
-write_vec(bvec, "out.nii.gz")
+\donttest{
+# Create temporary files
+tmp1 <- tempfile(fileext = ".nii")
+
+# Write vectors to temporary files
+write_vec(bvec, tmp1)
+
+# Clean up
+unlink(tmp1)
 }
 }

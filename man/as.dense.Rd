@@ -9,6 +9,9 @@ as.dense(x)
 \arguments{
 \item{x}{the object to densify}
 }
+\value{
+A dense representation of the input object.
+}
 \description{
 Convert to dense representation
 }

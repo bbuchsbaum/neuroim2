@@ -31,7 +31,6 @@ resulting SparseNeuroVec.}
 }
 
 \examples{
-\dontrun{
 # Create a simple mask
 mask_data <- array(runif(64*64*32) > 0.7, dim = c(64, 64, 32))
 mask <- LogicalNeuroVol(mask_data, space = NeuroSpace(dim = c(64, 64, 32)))
@@ -39,9 +38,6 @@ mask <- LogicalNeuroVol(mask_data, space = NeuroSpace(dim = c(64, 64, 32)))
 # Create a SparseNeuroVecSource
 sparse_source <- new("SparseNeuroVecSource", mask = mask)
 
-# Use the source to create a SparseNeuroVec (pseudo-code)
-# sparse_vec <- create_sparse_neuro_vec(sparse_source, data)
-}
 
 }
 \seealso{

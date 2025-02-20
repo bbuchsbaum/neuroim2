@@ -27,10 +27,3 @@ An array containing the extracted subset
 \description{
 Extracts a subset of data from a sparse four-dimensional brain image based on provided indices.
 }
-\examples{
-\dontrun{
-# Assuming 'sparse_vec' is a valid SparseNeuroVec object
-subset <- sparse_vec[1:10, 1:10, 1:5, 1:100]
-}
-
-}

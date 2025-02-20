@@ -260,6 +260,7 @@ setAs(from="NeuroVol", to="array", def=function(from) from[,,])
 #' @description Displays a formatted summary of a \code{NeuroVol} object.
 #'
 #' @param object A \code{NeuroVol} object.
+#' @return Invisibly returns NULL after printing object information to the console.
 #'
 #' @importFrom crayon bold blue green red yellow silver
 #' @importFrom utils object.size
@@ -324,6 +325,7 @@ setMethod(f="show", signature=signature("NeuroVol"),
 
 #' show a \code{SparseNeuroVol}
 #' @param object the object
+#' @return Invisibly returns NULL after printing object information to the console.
 #' @importFrom crayon bold blue green red yellow silver
 #' @importFrom utils object.size
 #' @importFrom Matrix which
@@ -486,6 +488,9 @@ read_vol  <- function(file_name, index=1) {
 
 #' @export
 #' @rdname slices-methods
+#' @param x A NeuroVol object
+#' @return A deflist object containing functions that return 2D slices of the volume along the z-axis.
+#'         The length of the deflist equals the number of slices in the z dimension.
 setMethod(f="slices", signature=signature(x="NeuroVol"),
           def = function(x) {
             nslices <- dim(x)[3]

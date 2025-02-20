@@ -101,7 +101,6 @@ NeuroSlice <- function(data, space, indices = NULL) {
 #' @param coords Either a numeric vector of length 2 or a matrix with 2 columns,
 #'   representing (x,y) coordinates in the slice grid
 #'
-#' @return Integer vector of linear indices corresponding to the input coordinates
 #'
 #' @rdname grid_to_index-methods
 #'
@@ -143,8 +142,6 @@ setMethod(f="grid_to_index",
 #' @param x A \code{NeuroSlice} object
 #' @param idx Integer vector of linear indices to convert
 #'
-#' @return A matrix with 2 columns representing the (x,y) coordinates 
-#'   corresponding to the input indices
 #'
 #' @examples
 #' slice_space <- NeuroSpace(c(10, 10))
@@ -178,22 +175,17 @@ setMethod(f="index_to_grid",
 #' The plot method uses \code{ggplot2} to create a raster visualization of the slice data.
 #' The intensity values are mapped to colors using the specified colormap and range.
 #'
+#' @details when `x` is a NeuroSlice object, the plot method returns a \code{ggplot2} object containing the raster visualization of the slice data.
+#'         The plot can be further customized using standard ggplot2 functions.
+#'
 #' @examples
 #' # Create example slice
 #' slice_space <- NeuroSpace(c(100, 100))
 #' slice_data <- matrix(rnorm(100*100), 100, 100)
 #' slice <- NeuroSlice(slice_data, slice_space)
-#'
-#' \dontrun{
+#' \donttest{
 #' # Basic plot
 #' plot(slice)
-#'
-#' # Custom colormap
-#' library(viridis)
-#' plot(slice, cmap = viridis(255))
-#'
-#' # Custom intensity range
-#' plot(slice, irange = c(-2, 2))
 #' }
 #'
 #' @importFrom ggplot2 ggplot aes geom_raster scale_fill_identity xlab ylab theme_bw
@@ -231,15 +223,7 @@ setMethod("plot",
 #'
 #' @param object A \code{NeuroSlice} object
 #'
-#' @details
-#' Shows key properties including:
-#' \itemize{
-#'   \item Object type and class
-#'   \item Dimensions and memory usage
-#'   \item Spatial properties (spacing, origin)
-#'   \item Value range and statistics
-#'   \item Axis orientations
-#' }
+#'
 #'
 #' @examples
 #' slice <- NeuroSlice(matrix(1:100, 10, 10), NeuroSpace(c(10, 10)))

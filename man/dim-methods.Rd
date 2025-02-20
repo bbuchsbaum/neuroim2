@@ -3,14 +3,16 @@
 \name{dim,FileMetaInfo-method}
 \alias{dim,FileMetaInfo-method}
 \alias{dim,NeuroObj-method}
-\alias{dim}
 \alias{dim,ROICoords-method}
+\alias{dim}
 \alias{dim,ROIVol-method}
 \title{Get Dimensions of FileMetaInfo Object}
 \usage{
 \S4method{dim}{FileMetaInfo}(x)
 
 \S4method{dim}{NeuroObj}(x)
+
+\S4method{dim}{ROICoords}(x)
 
 \S4method{dim}{ROIVol}(x)
 
@@ -20,7 +22,7 @@
 \item{x}{the object}
 }
 \value{
-Integer vector of image dimensions
+A numeric vector of length 2 containing the dimensions of the ROICoords object.
 }
 \description{
 Get Dimensions of FileMetaInfo Object

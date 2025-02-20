@@ -23,10 +23,6 @@ resample(source, target, ...)
 }
 \value{
 An object representing the resampled source image, with the same spatial properties as the target image.
-
-A resampled volume in the target space
-
-A NeuroVol object with the resampled source volume matched to the target space's dimensions and orientation.
 }
 \description{
 This function resamples a source image to match the spatial properties (dimensions, resolution, and orientation) of a target image.
@@ -46,19 +42,18 @@ newtrans4X3 <- newtrans4X3 * c(.5,.5,.5,1)
 newtrans <- cbind(newtrans4X3, c(space(img)@origin,1))
 
 rspace <- NeuroSpace(rspace@dim*2, rspace@spacing/2, origin=rspace@origin, trans=trans(img))
-\dontrun{
+\donttest{
 rvol <- resample(img, rspace)
 }
 
 
-\dontrun{
 # Create source and target volumes
-src_vol <- read_vol(system.file("extdata", "example1.nii", package="neuroim2"))
-targ_vol <- read_vol(system.file("extdata", "example2.nii", package="neuroim2"))
+src_vol <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
+targ_vol <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 
 # Resample source to match target
 resampled <- resample(src_vol, targ_vol, interpolation=1)
-}
+
 
 }
 \seealso{

@@ -53,13 +53,25 @@ NULL
 #' File names are validated using case-sensitive extension matching.
 #'
 #' @examples
-#' \dontrun{
-#' # Create a FileFormat for ANALYZE format
-#' fmt <- new("FileFormat", header_extension = "hdr", data_extension = "img")
+#'
+#' # Create a FileFormat for NIFTI format
+#' \donttest{
+#' fmt <- new("FileFormat",
+#'   file_format = "NIFTI",
+#'   header_encoding = "raw",
+#'   header_extension = "nii",
+#'   data_encoding = "raw",
+#'   data_extension = "nii")
+#'
+#' # Create temporary file
+#' tmp <- tempfile("brainscan", fileext = ".nii")
+#' file.create(tmp)
 #'
 #' # Check if files exist and match format
-#' file_matches(fmt, "brain_scan.hdr")  # TRUE if both .hdr and .img exist
-#' file_matches(fmt, "brain_scan.nii")  # FALSE for wrong extension
+#' file_matches(fmt, tmp)
+#'
+#' # Clean up
+#' unlink(tmp)
 #' }
 #'
 #' @seealso
@@ -107,12 +119,12 @@ setMethod(f = "file_matches",
 #' expression that ensures the extension appears at the end of the file name.
 #'
 #' @examples
-#' \dontrun{
+#' 
 #' fmt <- new("FileFormat", header_extension = "hdr", data_extension = "img")
 #' header_file_matches(fmt, "brain_scan.hdr")  # TRUE
 #' header_file_matches(fmt, "brain_scan.img")  # FALSE
 #' header_file_matches(fmt, "brain.hdr.gz")    # FALSE
-#' }
+#' 
 #'
 #' @seealso
 #' \code{\link{file_matches}}, \code{\link{data_file_matches}} for related
@@ -153,12 +165,12 @@ setMethod(f = "header_file_matches",
 #' expression that ensures the extension appears at the end of the file name.
 #'
 #' @examples
-#' \dontrun{
+#' 
 #' fmt <- new("FileFormat", header_extension = "hdr", data_extension = "img")
 #' data_file_matches(fmt, "brain_scan.img")  # TRUE
 #' data_file_matches(fmt, "brain_scan.hdr")  # FALSE
 #' data_file_matches(fmt, "brain.img.gz")    # FALSE
-#' }
+#' 
 #'
 #' @seealso
 #' \code{\link{file_matches}}, \code{\link{header_file_matches}} for related
@@ -205,11 +217,11 @@ setMethod(f = "data_file_matches",
 #' }
 #'
 #' @examples
-#' \dontrun{
+#' 
 #' fmt <- new("FileFormat", header_extension = "hdr", data_extension = "img")
 #' header_file(fmt, "brain_scan.hdr")  # Returns "brain_scan.hdr"
 #' header_file(fmt, "brain_scan.img")  # Returns "brain_scan.hdr"
-#' }
+#' 
 #'
 #' @seealso
 #' \code{\link{data_file}}, \code{\link{strip_extension}} for related file name
@@ -261,11 +273,11 @@ setMethod(f = "header_file",
 #' }
 #'
 #' @examples
-#' \dontrun{
+#' 
 #' fmt <- new("FileFormat", header_extension = "hdr", data_extension = "img")
 #' data_file(fmt, "brain_scan.img")  # Returns "brain_scan.img"
-#' data_file(fmt, "brain_scan.hdr")  # Returns "brain_scan.img"
-#' }
+#' data_file(fmt, "brain_scan.hdr")  # Also Returns "brain_scan.img"
+#' 
 #'
 #' @seealso
 #' \code{\link{header_file}}, \code{\link{strip_extension}} for related file name
@@ -316,12 +328,7 @@ setMethod(f = "data_file",
 #'   \item If the file_name doesn't match either format, it throws an error.
 #' }
 #'
-#' @examples
-#' \dontrun{
-#' fmt <- new("FileFormat", header_extension = "hdr", data_extension = "img")
-#' strip_extension(fmt, "brain_scan.hdr")  # Returns "brain_scan"
-#' strip_extension(fmt, "brain_scan.img")  # Returns "brain_scan"
-#' }
+#'
 #'
 #' @seealso
 #' \code{\link{header_file}}, \code{\link{data_file}} for related file name
@@ -377,18 +384,6 @@ setMethod(f = "strip_extension",
 #' These methods use format-specific functions to read the header information and
 #' create the appropriate meta information object. The `.read_meta_info` helper
 #' function is used internally to streamline the process for both formats.
-#'
-#'
-#' @examples
-#' \dontrun{
-#' # For NIFTI format
-#' nifti_format <- new("NIFTIFormat")
-#' nifti_meta <- read_meta_info(nifti_format, "brain_scan.nii")
-#'
-#' # For AFNI format
-#' afni_format <- new("AFNIFormat")
-#' afni_meta <- read_meta_info(afni_format, "brain_scan+orig.HEAD")
-#' }
 #'
 #' @export
 #' @rdname read_meta_info-methods

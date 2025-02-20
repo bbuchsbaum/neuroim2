@@ -39,7 +39,7 @@ split_clusters(x, clusters, ...)
 \item{...}{Additional arguments to be passed to methods.}
 }
 \value{
-A deflist object containing ROIVec instances for each cluster.
+A list of sub-objects, where each sub-object corresponds to a unique cluster index.
 }
 \description{
 This function cuts an object into a list of sub-objects based on a vector of cluster indices.
@@ -54,18 +54,18 @@ There are two methods for splitting clusters:
   \item Using an integer vector: This method allows for custom cluster assignments.
 }
 
-Both methods return a deflist, which is a lazy-loading list of ROIVec objects.
+methods return a deflist, which is a lazy-loading list of ROIVec objects.
 }
 \examples{
-\dontrun{
+\donttest{
   # Create a synthetic 3D volume and its NeuroSpace
-  space <- NeuroSpace(c(10, 10, 10))
-  vol_data <- array(rnorm(10 * 10 * 10), dim = c(10, 10, 10))
+  space <- NeuroSpace(c(10, 10, 10,4))
+  vol_data <- array(rnorm(10 * 10 * 10 * 4), dim = c(10, 10, 10,4))
   neuro_vec <- NeuroVec(vol_data, space)
 
   # Create a binary mask (e.g., select voxels with values > 0)
-  mask_data <- vol_data > 0
-  mask_vol <- LogicalNeuroVol(mask_data, space)
+  mask_data <- as.logical(neuro_vec[[1]] > .5)
+  mask_vol <- LogicalNeuroVol(mask_data, NeuroSpace(c(10, 10, 10)))
 
   # Extract indices and coordinates for the masked voxels
   mask_idx <- which(mask_data)
@@ -86,7 +86,7 @@ Both methods return a deflist, which is a lazy-loading list of ROIVec objects.
   print(means_clust)
 
   # Alternatively, create an integer vector of cluster assignments:
-  cluster_assignments <- numeric(prod(dim(space)))
+  cluster_assignments <- numeric(prod(dim(space)[1:3]))
   cluster_assignments[mask_idx] <- k_res$cluster
   split_result_int <- split_clusters(neuro_vec, as.integer(cluster_assignments))
 

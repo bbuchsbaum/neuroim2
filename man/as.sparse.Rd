@@ -13,6 +13,9 @@ as.sparse(x, mask, ...)
 
 \item{...}{additional arguments}
 }
+\value{
+A sparse representation of the input object, containing only the elements specified by the mask.
+}
 \description{
 Convert to from dense to sparse representation
 }

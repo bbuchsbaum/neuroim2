@@ -43,15 +43,18 @@ The trade-off is slightly slower access times due to disk I/O operations.
 }
 
 \examples{
-\dontrun{
-# Create a FileBackedNeuroVec object
-file_path <- "/path/to/large/brain/image.nii.gz"
-file_meta <- FileMetaInfo(file_path, format = "NIFTI")
-file_backed_vec <- FileBackedNeuroVec(meta = file_meta)
+# Load example 4D image file included with package
+file_path <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
+fbvec <- FileBackedNeuroVec(file_path)
 
-# Access a subset of the data (this will load only the required portion)
-subset <- file_backed_vec[,,, 1:10]
-}
+# Get dimensions of the image
+dim(fbvec)
+
+# Extract first volume
+vol1 <- sub_vector(fbvec, 1)
+
+# Extract multiple volumes
+vols <- sub_vector(fbvec, 1:2)
 
 }
 \seealso{

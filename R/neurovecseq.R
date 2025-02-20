@@ -41,7 +41,6 @@ NULL
 #' }
 #'
 #' @examples
-#' \dontrun{
 #' # Create some example NeuroVec objects
 #' v1 <- NeuroVec(array(0, c(5, 5, 5, 2)),
 #'                space = NeuroSpace(dim = c(5, 5, 5, 2)))
@@ -59,7 +58,7 @@ NULL
 #'
 #' # Extract a subsequence
 #' sub_seq <- sub_vector(vs, 1:5)
-#' }
+#' 
 #'
 #' @seealso
 #' \code{\linkS4class{NeuroVec}} for the base vector class,
@@ -93,7 +92,6 @@ NULL
 #' }
 #'
 #' @examples
-#' \dontrun{
 #' # Create sample vectors
 #' v1 <- NeuroVec(array(0, c(5, 5, 5, 2)),
 #'                space = NeuroSpace(dim = c(5, 5, 5, 2)))
@@ -103,7 +101,7 @@ NULL
 #' # Combine into sequence
 #' vs <- NeuroVecSeq(v1, v2)
 #' print(vs)
-#' }
+#' 
 #'
 #' @export
 NeuroVecSeq <- function(...) {
@@ -347,6 +345,8 @@ setMethod("series_roi", signature(x="NeuroVecSeq", i="matrix"),
 
 #' @export
 #' @rdname vectors-methods
+#' @return A deflist object where each element is a function that returns the time series
+#'         for a voxel. The length of the deflist equals the total number of voxels.
 setMethod("vectors", signature(x="NeuroVecSeq", subset="missing"),
           function(x) {
             # For a NeuroVec, vectors() returns a deflist of length nvox,

@@ -39,19 +39,24 @@ Validation ensures:
 }
 }
 \examples{
-\dontrun{
+
 # Read NIFTI header
-header <- readNIftiHeader("brain.nii")
+header <- read_header(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 
 # Create format descriptor
-fmt <- NIFTIFormat()
+fmt <- new("NIFTIFormat",
+           file_format = "NIFTI",
+           header_encoding = "raw",
+           header_extension = "nii",
+           data_encoding = "raw",
+           data_extension = "nii")
 
 # Create metadata
-meta <- NIFTIMetaInfo(fmt, header)
+meta <- NIFTIMetaInfo(fmt, header@header)
 
 # Check dimensions
 dim(meta)
-}
+
 
 }
 \seealso{

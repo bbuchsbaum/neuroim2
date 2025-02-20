@@ -53,15 +53,15 @@ correspond to voxels in the sparse domain defined by the mask.}
 }
 
 \examples{
-\dontrun{
+
 # Create a sparse 4D brain image
-mask <- LogicalNeuroVol(array(runif(64*64*32) > 0.7, dim=c(64,64,32)))
+mask <- LogicalNeuroVol(array(runif(64*64*32) > 0.7, c(64,64,32)), NeuroSpace(c(64,64,32)))
 data <- matrix(rnorm(sum(mask) * 100), nrow=sum(mask), ncol=100)
-sparse_vec <- SparseNeuroVec(data=data, mask=mask, space=NeuroSpace(dim=c(64,64,32)))
+sparse_vec <- SparseNeuroVec(data=data, mask=mask, space=NeuroSpace(dim=c(64,64,32,100)))
 
 # Access a subset of the data
 subset <- sparse_vec[,,, 1:10]
-}
+
 
 bspace <- NeuroSpace(c(10,10,10,100), c(1,1,1))
 mask <- array(rnorm(10*10*10) > .5, c(10,10,10))

@@ -18,7 +18,7 @@ cuboid_roi(bvol, centroid, surround, fill = NULL, nonzero = FALSE)
 \item{nonzero}{keep only nonzero elements from \code{bvol}. If \code{bvol} is A \code{NeuroSpace} then this argument is ignored.}
 }
 \value{
-an instance of class \code{ROIVol}
+An instance of class \code{ROIVol} representing the cuboid region of interest, containing the coordinates and values of voxels within the specified region.
 }
 \description{
 Create A Cuboid Region of Interest

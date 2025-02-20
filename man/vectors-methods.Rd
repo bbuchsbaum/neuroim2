@@ -61,6 +61,10 @@ vectors(x, subset, ...)
 
 \item{nonzero}{only include nonzero vectors in output list}
 }
+\value{
+A deflist object where each element is a function that returns the time series
+        for a voxel. The length of the deflist equals the total number of voxels.
+}
 \description{
 This function extracts an ordered list of 1D vectors from an object that supplies vector data.
 The \code{subset} argument specifies the subset of vectors to extract, and can be a vector

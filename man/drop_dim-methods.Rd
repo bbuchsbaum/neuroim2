@@ -13,9 +13,9 @@ drop_dim(x, dimnum)
 \S4method{drop_dim}{NeuroSpace,missing}(x)
 }
 \arguments{
-\item{x}{A dimensioned object, such as a NeuroSpace object.}
+\item{x}{The NeuroSpace object}
 
-\item{dimnum}{An integer representing the index of the dimension to drop.}
+\item{dimnum}{The dimension number to drop (if missing, drops the last dimension)}
 }
 \value{
 An updated dimensioned object with the specified dimension removed.

@@ -60,7 +60,6 @@ The function performs several validations:
 }
 
 \examples{
-\dontrun{
 # Create some example NeuroVec objects
 v1 <- NeuroVec(array(0, c(5, 5, 5, 2)),
                space = NeuroSpace(dim = c(5, 5, 5, 2)))
@@ -78,9 +77,8 @@ vs[[5]]     # Get the 5th volume
 
 # Extract a subsequence
 sub_seq <- sub_vector(vs, 1:5)
-}
 
-\dontrun{
+
 # Create sample vectors
 v1 <- NeuroVec(array(0, c(5, 5, 5, 2)),
                space = NeuroSpace(dim = c(5, 5, 5, 2)))
@@ -90,7 +88,7 @@ v2 <- NeuroVec(array(0, c(5, 5, 5, 4)),
 # Combine into sequence
 vs <- NeuroVecSeq(v1, v2)
 print(vs)
-}
+
 
 }
 \seealso{

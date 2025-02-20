@@ -9,6 +9,9 @@
 \arguments{
 \item{object}{A \code{NeuroVol} object.}
 }
+\value{
+Invisibly returns NULL after printing object information to the console.
+}
 \description{
 Displays a formatted summary of a \code{NeuroVol} object.
 }

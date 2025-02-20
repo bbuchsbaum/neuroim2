@@ -31,6 +31,9 @@ write_vol(x, file_name, format, data_type)
 \item{data_type}{output data type, If specified should be a \code{character} vector of: "BINARY", "UBYTE", "SHORT", "INT", "FLOAT", "DOUBLE".
 Otherwise output format will be inferred from R the datatype of the image.}
 }
+\value{
+Invisibly returns NULL after writing the volume to disk.
+}
 \description{
 Write a 3d image volume to disk
 }
@@ -46,8 +49,9 @@ No other file output formats are currently supported.
 \examples{
 
 bvol <- NeuroVol(array(0, c(10,10,10)), NeuroSpace(c(10,10,10), c(1,1,1)))
-\dontrun{
-write_vol(bvol, "out.nii")
-write_vol(bvol, "out.nii.gz")
+\donttest{
+tmp1 <- tempfile(fileext = ".nii")
+write_vol(bvol, tmp1)
+unlink(tmp1)
 }
 }

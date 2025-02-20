@@ -36,8 +36,8 @@ NULL
 #' mask <- LogicalNeuroVol(mask_data, NeuroSpace(c(10,10,10)))
 #'
 #' # Generate random searchlight iterator with a radius of 2 voxels
-#' \dontrun{
-#' searchlights <- random_searchlight(mask, radius = 2)
+#' \donttest{
+#' searchlights <- random_searchlight(mask, radius = 6)
 #' }
 #'
 #' @export
@@ -198,9 +198,9 @@ random_searchlight <- function(mask, radius) {
 #' mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #'
 #' # Generate a bootstrap searchlight iterator with a radius of 6 voxels
-#' \dontrun{
+#' 
 #' searchlights <- bootstrap_searchlight(mask, radius = 6)
-#' }
+#' 
 #'
 #' @export
 #' @rdname bootstrap_searchlight
@@ -241,9 +241,9 @@ bootstrap_searchlight <- function(mask, radius=8, iter=100) {
 #' mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #'
 #' # Generate an exhaustive searchlight iterator with a radius of 6 mm
-#' \dontrun{
+#'
 #' searchlights <- searchlight_coords(mask, radius = 6)
-#' }
+#' 
 #'
 #' @export
 searchlight_coords <- function(mask, radius, nonzero=FALSE, cores=0) {
@@ -295,9 +295,9 @@ searchlight_coords <- function(mask, radius, nonzero=FALSE, cores=0) {
 #' mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #'
 #' # Generate an exhaustive searchlight iterator with a radius of 6 mm
-#' \dontrun{
-#' searchlights <- searchlight(mask, radius = 6, eager = TRUE)
-#' }
+#' 
+#' searchlights <- searchlight(mask, radius = 6, eager = FALSE)
+#' 
 #'
 #' @export
 #' @rdname searchlight
@@ -357,9 +357,8 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
 #' mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #'
 #' # Generate a clustered searchlight iterator with 5 clusters
-#' \dontrun{
 #' clust_searchlight <- clustered_searchlight(mask, csize = 5)
-#' }
+#' 
 #'
 #' @rdname clustered_searchlight
 #' @export
@@ -390,8 +389,6 @@ clustered_searchlight <- function(mask, cvol=NULL, csize=NULL) {
     ROIVol(sp, index_to_grid(sp,ind), data=rep(1, length(ind)))
   }
 
-  #dlis <- deferred_list(lapply(1:csize, function(i) f))
-  #dlis
 
   deflist::deflist(f, csize)
 

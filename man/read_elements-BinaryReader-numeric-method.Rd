@@ -18,11 +18,21 @@ Numeric vector of read elements
 Read a specified number of elements from a \linkS4class{BinaryReader} object.
 }
 \examples{
-\dontrun{
-reader <- BinaryReader("data.bin", byte_offset = 0L,
-                      data_type = "double", bytes_per_element = 8L)
-# Read 100 elements
+\donttest{
+# Create a temporary binary file with some test data
+tmp <- tempfile()
+con <- file(tmp, "wb")
+test_data <- rnorm(100)
+writeBin(test_data, con, size = 8)
+close(con)
+
+# Create reader and read the data
+reader <- BinaryReader(tmp, byte_offset = 0L,
+                      data_type = "DOUBLE", bytes_per_element = 8L)
 data <- read_elements(reader, 100)
 close(reader)
+
+# Clean up
+unlink(tmp)
 }
 }

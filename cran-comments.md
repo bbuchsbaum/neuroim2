@@ -1,13 +1,15 @@
 ## R CMD check results
 
-* 0 errors ✔ | 0 warnings ✔ | 1 note ✖
+* 0 errors ✔ | 0 warnings ✔ | 0 notes ✖
 
 * This is a new release.
 
-* Installed package size is 6.2Mb due to need for example volumetric images in the package.
+* We have added a reference in description
 
-* There are no general references for the package.
-
-* wrapped slow example in \donttest{} to avoid long run times and avoid NOTE.
+* We have removed "dontrun" from examples and instead used "donttest" in some cases
 
 * updated spelling wordlist to avoid mispelling NOTE
+
+* We have reset user options that were set with "par".
+
+* We have made the title shorter than 65 characters

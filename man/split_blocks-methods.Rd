@@ -21,6 +21,9 @@ split_blocks(x, indices, ...)
 
 \item{...}{additional arguments}
 }
+\value{
+A list of sub-blocks, where each sub-block contains the elements from the input object corresponding to the matching indices.
+}
 \description{
 Splits a vector-valued object into a list of sub-blocks defined by a vector of indices.
 }

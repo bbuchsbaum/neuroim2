@@ -11,6 +11,9 @@ as.mask(x, indices)
 
 \item{indices}{the indices to set to TRUE}
 }
+\value{
+A LogicalNeuroVol object with TRUE values at the specified indices.
+}
 \description{
 Convert to a LogicalNeuroVol
 }

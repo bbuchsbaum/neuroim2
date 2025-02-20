@@ -117,8 +117,7 @@ different lengths.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="co"># Create some example NeuroVec objects</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Create some example NeuroVec objects</span></span></span>
 <span class="r-in"><span><span class="va">v1</span> <span class="op">&lt;-</span> <span class="fu"><a href="NeuroVec-class.html">NeuroVec</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/array.html" class="external-link">array</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>               space <span class="op">=</span> <span class="fu"><a href="NeuroSpace.html">NeuroSpace</a></span><span class="op">(</span>dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">v2</span> <span class="op">&lt;-</span> <span class="fu"><a href="NeuroVec-class.html">NeuroVec</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/array.html" class="external-link">array</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span>,</span></span>
@@ -131,13 +130,36 @@ different lengths.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Access properties</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">vs</span><span class="op">)</span>  <span class="co"># Total time points</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 12</span>
 <span class="r-in"><span><span class="va">vs</span><span class="op">[[</span><span class="fl">5</span><span class="op">]</span><span class="op">]</span>     <span class="co"># Get the 5th volume</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #0000BB; font-weight: bold;">=== NeuroVol Object ===</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00; font-weight: bold;">* Basic Information</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #555555;">Type:</span>      DenseNeuroVol</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #555555;">Dimensions:</span> 5 x 5 x 5 (<span style="color: #00BB00;">7.6 Kb</span>)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #555555;">Total Voxels:</span> 125</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00; font-weight: bold;">* Data Properties</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #555555;">Value Range:</span> [<span style="color: #0000BB;">1.00</span>, <span style="color: #0000BB;">1.00</span>]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00; font-weight: bold;">* Spatial Properties</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #555555;">Spacing:</span> 1.00 x 1.00 x 1.00<span style="color: #555555;"> mm</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #555555;">Origin:</span>  0.0, 0.0, 0.0<span style="color: #555555;"> mm</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #555555;">Axes:</span>    <span style="color: #00BB00;">Left-to-Right</span> x <span style="color: #00BB00;">Posterior-to-Anterior</span> x <span style="color: #00BB00;">Inferior-to-Superior</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #555555;">======================================</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="font-weight: bold;">Access Methods:</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #555555;">.</span>  Get Slice:   <span style="color: #0000BB;">slice(object, zlevel=10)</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #555555;">.</span>  Get Value:   <span style="color: #0000BB;">object[i, j, k]</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #555555;">.</span>  Plot:       <span style="color: #0000BB;">plot(object)</span> <span style="color: #555555;"> # shows multiple slices</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Extract a subsequence</span></span></span>
 <span class="r-in"><span><span class="va">sub_seq</span> <span class="op">&lt;-</span> <span class="fu"><a href="sub_vector-methods.html">sub_vector</a></span><span class="op">(</span><span class="va">vs</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create sample vectors</span></span></span>
 <span class="r-in"><span><span class="va">v1</span> <span class="op">&lt;-</span> <span class="fu"><a href="NeuroVec-class.html">NeuroVec</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/array.html" class="external-link">array</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>               space <span class="op">=</span> <span class="fu"><a href="NeuroSpace.html">NeuroSpace</a></span><span class="op">(</span>dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -147,7 +169,24 @@ different lengths.</p>
 <span class="r-in"><span><span class="co"># Combine into sequence</span></span></span>
 <span class="r-in"><span><span class="va">vs</span> <span class="op">&lt;-</span> <span class="fu">NeuroVecSeq</span><span class="op">(</span><span class="va">v1</span>, <span class="va">v2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">vs</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB; font-weight: bold;">NeuroVecSeq</span> <span style="color: #555555;">(2 vectors)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">+= Sequence Info </span><span style="color: #555555;">---------------------------</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> | <span style="color: #BBBB00;">Length</span>        : 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> | <span style="color: #BBBB00;">Total Time</span>    : 6 points</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">+= Spatial Info </span><span style="color: #555555;">---------------------------</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> | <span style="color: #BBBB00;">Dimensions</span>    : 5 x 5 x 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> | <span style="color: #BBBB00;">Spacing</span>       : 1 x 1 x 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> | <span style="color: #BBBB00;">Origin</span>        : 0 x 0 x 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> | <span style="color: #BBBB00;">Orientation</span>   : Left-to-Right Posterior-to-Anterior Inferior-to-Superior</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">+= Vector Details </span><span style="color: #555555;">--------------------------</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #00BB00;">1.</span> <span style="color: #00BBBB;">DenseNeuroVec</span> <span style="color: #555555;">(2 timepoints)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #00BB00;">2.</span> <span style="color: #00BBBB;">DenseNeuroVec</span> <span style="color: #555555;">(4 timepoints)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

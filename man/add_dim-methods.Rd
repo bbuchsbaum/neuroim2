@@ -10,9 +10,9 @@ add_dim(x, n)
 \S4method{add_dim}{NeuroSpace,numeric}(x, n)
 }
 \arguments{
-\item{x}{A dimensioned object, such as a matrix, an array, or a NeuroSpace object.}
+\item{x}{The NeuroSpace object}
 
-\item{n}{An integer representing the size of the dimension to add.}
+\item{n}{Numeric value specifying the size of the new dimension}
 }
 \value{
 An updated dimensioned object with the new dimension added.

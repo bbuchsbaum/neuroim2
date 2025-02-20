@@ -55,18 +55,12 @@ The function performs several important checks:
 }
 
 \examples{
-\dontrun{
 # Create a MappedNeuroVecSource
 mapped_source <- new("MappedNeuroVecSource")
 
-# Use the source to create a MappedNeuroVec (pseudo-code)
-# file_path <- "/path/to/large/brain/image.nii"
-# mapped_vec <- create_mapped_neuro_vec(mapped_source, file_path)
-}
-
-\dontrun{
+\donttest{
 # Create source from NIFTI file
-source <- MappedNeuroVecSource("path/to/fmri.nii")
+source <- MappedNeuroVecSource(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
 
 # Check dimensions
 dim(source@meta_info)

@@ -38,13 +38,13 @@ NULL
 #' }
 #'
 #' @examples
-#' \dontrun{
+#' 
 #' # Create a file-backed vector from a NIFTI file
-#' fbvec <- FileBackedNeuroVec("path/to/fmri_data.nii")
+#' fbvec <- FileBackedNeuroVec(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
 #'
 #' # Access specific volumes without loading entire dataset
 #' first_vol <- sub_vector(fbvec, 1)
-#' }
+#' 
 #'
 #' @seealso 
 #' \code{\linkS4class{NeuroSpace}} for spatial metadata management,
@@ -83,7 +83,6 @@ FileBackedNeuroVec <- function(file_name, label = basename(file_name)) {
 #' @param x A \code{\linkS4class{FileBackedNeuroVec}} object.
 #' @param i A numeric vector specifying the indices of volumes to extract.
 #'
-#' @return A \code{\linkS4class{DenseNeuroVec}} object containing the extracted volumes.
 #'
 #' @details
 #' This method efficiently reads only the requested volumes from disk, converting them
@@ -93,16 +92,6 @@ FileBackedNeuroVec <- function(file_name, label = basename(file_name)) {
 #' Memory usage is proportional to the number of volumes requested, not the size of
 #' the full dataset.
 #'
-#' @examples
-#' \dontrun{
-#' fbvec <- FileBackedNeuroVec("fmri_data.nii")
-#' 
-#' # Extract first 10 volumes
-#' subset <- sub_vector(fbvec, 1:10)
-#' 
-#' # Extract specific timepoints
-#' volumes <- sub_vector(fbvec, c(1, 5, 10))
-#' }
 #'
 #' @export
 #' @rdname sub_vector-methods
@@ -126,19 +115,11 @@ setMethod(f = "sub_vector",
 #'
 #' @param x A FileBackedNeuroVec object.
 #'
-#' @return A deferred list of DenseNeuroVol objects.
 #'
 #' @details
 #' This method creates a deferred list, where each element is a DenseNeuroVol
 #' object representing a single volume from the FileBackedNeuroVec.
 #'
-#' @examples
-#' \dontrun{
-#' fbvec <- FileBackedNeuroVec("fmri_data.nii")
-#' 
-#' # Convert to list of volumes
-#' vol_list <- as.list(fbvec)
-#' }
 #'
 #' @export
 #' @rdname as.list-methods
@@ -165,13 +146,6 @@ setMethod(f = "as.list",
 #' The resulting matrix will have rows representing time points (or the 4th dimension)
 #' and columns representing voxels. The voxels are arranged in a linear order.
 #'
-#' @examples
-#' \dontrun{
-#' fbvec <- FileBackedNeuroVec("fmri_data.nii")
-#' 
-#' # Convert to matrix
-#' mat <- as.matrix(fbvec)
-#' }
 #'
 #' @keywords internal
 #' @noRd
@@ -185,15 +159,21 @@ setAs(from = "FileBackedNeuroVec", to = "matrix",
 #'
 #' @param x A FileBackedNeuroVec object
 #' @param i A numeric vector of indices
-#' @return A numeric vector of values
 #' 
 #' @examples
-#' \dontrun{
-#' fbvec <- FileBackedNeuroVec("fmri_data.nii")
-#' 
-#' # Access first 10 values
-#' values <- linear_access(fbvec, 1:10)
-#' }
+  #' \donttest{
+  #' # Create a small NeuroVec and save it
+  #' nvec <- NeuroVec(matrix(1:32, 8, 4), NeuroSpace(c(2,2,2,4)))
+  #' tmp <- tempfile(fileext = ".nii")
+  #' write_vec(nvec, tmp)
+  #' 
+  #' # Load as FileBackedNeuroVec and access values
+  #' fbvec <- FileBackedNeuroVec(tmp)
+  #' values <- linear_access(fbvec, 1:10)
+  #' 
+  #' # Clean up
+  #' unlink(tmp)
+  #' }
 #'
 #' @export
 #' @rdname linear_access-methods

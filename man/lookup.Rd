@@ -13,6 +13,9 @@ lookup(x, i, ...)
 
 \item{...}{additional arguments}
 }
+\value{
+The value(s) at the specified index/indices.
+}
 \description{
 Index Lookup operation
 }

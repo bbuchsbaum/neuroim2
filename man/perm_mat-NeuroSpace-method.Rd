@@ -11,15 +11,11 @@
 
 \item{...}{Additional arguments (not used)}
 }
-\value{
-A matrix representing the axis directions
-}
 \description{
 Get permutation matrix from axis set
 }
 \examples{
-\dontrun{
-ns <- NeuroSpace(axes=AxisSet3D(LEFT_RIGHT, ANT_POST, INF_SUP))
+ns <- NeuroSpace(dim=c(10,10,10))
 perm_mat(ns)
-}
+
 }

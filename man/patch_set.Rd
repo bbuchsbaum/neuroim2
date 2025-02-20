@@ -15,6 +15,9 @@ patch_set(x, dims, mask, ...)
 
 \item{...}{additional args}
 }
+\value{
+A list of coordinate patches, each representing a fixed-size region of the input object.
+}
 \description{
 Generate a set of coordinate "patches" of fixed size from an image object.
 }

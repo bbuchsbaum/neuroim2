@@ -13,7 +13,7 @@ centroid(x, ...)
 \S4method{centroid}{ROICoords}(x)
 }
 \arguments{
-\item{x}{an object with a centroid}
+\item{x}{The NeuroSpace object}
 
 \item{...}{extra args}
 }
@@ -22,6 +22,8 @@ the centroid of the object
 }
 \description{
 return the centroid of an object
+
+Calculate the centroid of a NeuroSpace object
 }
 \examples{
 
