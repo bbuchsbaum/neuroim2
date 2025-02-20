@@ -70,7 +70,8 @@ information from</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>An object of class <a href="FileMetaInfo-class.html">NIFTIMetaInfo</a> or <a href="FileMetaInfo-class.html">AFNIMetaInfo</a>,
+    <p>A list containing the meta information read from the file.</p>
+<p>An object of class <a href="FileMetaInfo-class.html">NIFTIMetaInfo</a> or <a href="FileMetaInfo-class.html">AFNIMetaInfo</a>,
   depending on the input format</p>
     </div>
     <div class="section level2">
@@ -80,20 +81,6 @@ create the appropriate meta information object. The `.read_meta_info` helper
 function is used internally to streamline the process for both formats.</p>
     </div>
 
-    <div class="section level2">
-    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="co"># For NIFTI format</span></span></span>
-<span class="r-in"><span><span class="va">nifti_format</span> <span class="op">&lt;-</span> <span class="fu">new</span><span class="op">(</span><span class="st">"NIFTIFormat"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">nifti_meta</span> <span class="op">&lt;-</span> <span class="fu">read_meta_info</span><span class="op">(</span><span class="va">nifti_format</span>, <span class="st">"brain_scan.nii"</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># For AFNI format</span></span></span>
-<span class="r-in"><span><span class="va">afni_format</span> <span class="op">&lt;-</span> <span class="fu">new</span><span class="op">(</span><span class="st">"AFNIFormat"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">afni_meta</span> <span class="op">&lt;-</span> <span class="fu">read_meta_info</span><span class="op">(</span><span class="va">afni_format</span>, <span class="st">"brain_scan+orig.HEAD"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
-<span class="r-in"><span></span></span>
-</code></pre></div>
-    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

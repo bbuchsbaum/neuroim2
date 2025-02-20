@@ -92,12 +92,13 @@ too large to fit in memory.</p>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A new BigNeuroVec object</p>
+    <p>A new BigNeuroVec object that provides memory-efficient access to large neuroimaging data through memory mapping.
+        The object contains the spatial properties, mask, and memory-mapped data storage.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co"># Load an example 4D brain image</span></span></span>
 <span class="r-in"><span><span class="va">example_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask_v4.nii"</span>, package <span class="op">=</span> <span class="st">"neuroim2"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">example_4d_image</span> <span class="op">&lt;-</span> <span class="fu"><a href="read_vec.html">read_vec</a></span><span class="op">(</span><span class="va">example_file</span><span class="op">)</span></span></span>
@@ -114,7 +115,20 @@ too large to fit in memory.</p>
 <span class="r-in"><span>                         label <span class="op">=</span> <span class="st">"Example BigNeuroVec"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">big_vec</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB; font-weight: bold;">BigNeuroVec</span> <span style="color: #555555;">'Example BigNeuroVec'</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">- Spatial Info</span><span style="color: #555555;"> ---------------------------</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> | <span style="color: #BBBB00;">Dimensions</span>    : 64 x 64 x 25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> | <span style="color: #BBBB00;">Time Points</span>   : 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> | <span style="color: #BBBB00;">Spacing</span>       : 3.5 x 3.5 x 3.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> | <span style="color: #BBBB00;">Origin</span>        : 112 x -108 x -46.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> | <span style="color: #BBBB00;">Orientation</span>   : Right-to-Left Posterior-to-Anterior Inferior-to-Superior</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">- Memory Usage</span><span style="color: #555555;"> --------------------------</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #BBBB00;">Size</span>          : 936.48 KB</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

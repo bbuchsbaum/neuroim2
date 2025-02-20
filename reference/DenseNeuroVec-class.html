@@ -115,7 +115,7 @@ but is included for potential future use or consistency with other constructors.
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create a simple 4D brain image</span></span></span>
 <span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/array.html" class="external-link">array</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">64</span><span class="op">*</span><span class="fl">64</span><span class="op">*</span><span class="fl">32</span><span class="op">*</span><span class="fl">10</span><span class="op">)</span>, dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">64</span>, <span class="fl">64</span>, <span class="fl">32</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">space</span> <span class="op">&lt;-</span> <span class="fu"><a href="NeuroSpace.html">NeuroSpace</a></span><span class="op">(</span>dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">64</span>, <span class="fl">64</span>, <span class="fl">32</span>,<span class="fl">10</span><span class="op">)</span>, origin <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span>, spacing <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -123,10 +123,11 @@ but is included for potential future use or consistency with other constructors.
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Access dimensions</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="dim-methods.html">dim</a></span><span class="op">(</span><span class="va">dense_vec</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 64 64 32 10</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Extract a single 3D volume</span></span></span>
 <span class="r-in"><span><span class="va">first_volume</span> <span class="op">&lt;-</span> <span class="va">dense_vec</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create a simple 4D brain image</span></span></span>
 <span class="r-in"><span><span class="va">dim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">64</span>, <span class="fl">64</span>, <span class="fl">32</span>, <span class="fl">10</span><span class="op">)</span>  <span class="co"># 64x64x32 volume with 10 time points</span></span></span>
@@ -149,7 +150,7 @@ but is included for potential future use or consistency with other constructors.
 <span class="r-out co"><span class="r-pr">#&gt;</span> | <span style="color: #BBBB00;">Orientation</span>   : Left-to-Right Posterior-to-Anterior Inferior-to-Superior</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">- Statistics</span><span style="color: #555555;"> ---------------------------</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     <span style="color: #555555;">Mean +/- SD</span>    : 0.002 +/- 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     <span style="color: #555555;">Mean +/- SD</span>    : -0.005 +/- 0.996</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">Label: Example</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -171,7 +172,7 @@ but is included for potential future use or consistency with other constructors.
 <span class="r-out co"><span class="r-pr">#&gt;</span> | <span style="color: #BBBB00;">Orientation</span>   : Left-to-Right Posterior-to-Anterior Inferior-to-Superior</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">- Statistics</span><span style="color: #555555;"> ---------------------------</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     <span style="color: #555555;">Mean +/- SD</span>    : -0.005 +/- 0.996</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     <span style="color: #555555;">Mean +/- SD</span>    : -0.001 +/- 0.997</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">Label: none</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

@@ -103,15 +103,19 @@ The trade-off is slightly slower access times due to disk I/O operations.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="co"># Create a FileBackedNeuroVec object</span></span></span>
-<span class="r-in"><span><span class="va">file_path</span> <span class="op">&lt;-</span> <span class="st">"/path/to/large/brain/image.nii.gz"</span></span></span>
-<span class="r-in"><span><span class="va">file_meta</span> <span class="op">&lt;-</span> <span class="fu">FileMetaInfo</span><span class="op">(</span><span class="va">file_path</span>, format <span class="op">=</span> <span class="st">"NIFTI"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">file_backed_vec</span> <span class="op">&lt;-</span> <span class="fu"><a href="FileBackedNeuroVec.html">FileBackedNeuroVec</a></span><span class="op">(</span>meta <span class="op">=</span> <span class="va">file_meta</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Load example 4D image file included with package</span></span></span>
+<span class="r-in"><span><span class="va">file_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask_v4.nii"</span>, package <span class="op">=</span> <span class="st">"neuroim2"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fbvec</span> <span class="op">&lt;-</span> <span class="fu"><a href="FileBackedNeuroVec.html">FileBackedNeuroVec</a></span><span class="op">(</span><span class="va">file_path</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Access a subset of the data (this will load only the required portion)</span></span></span>
-<span class="r-in"><span><span class="va">subset</span> <span class="op">&lt;-</span> <span class="va">file_backed_vec</span><span class="op">[</span>,,, <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="co"># Get dimensions of the image</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="dim-methods.html">dim</a></span><span class="op">(</span><span class="va">fbvec</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 64 64 25  4</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Extract first volume</span></span></span>
+<span class="r-in"><span><span class="va">vol1</span> <span class="op">&lt;-</span> <span class="fu"><a href="sub_vector-methods.html">sub_vector</a></span><span class="op">(</span><span class="va">fbvec</span>, <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Extract multiple volumes</span></span></span>
+<span class="r-in"><span><span class="va">vols</span> <span class="op">&lt;-</span> <span class="fu"><a href="sub_vector-methods.html">sub_vector</a></span><span class="op">(</span><span class="va">fbvec</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

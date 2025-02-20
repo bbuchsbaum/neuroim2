@@ -156,28 +156,28 @@ and memory space. Key features include:</p><ul><li><p>Zero-copy access to file d
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create a MappedNeuroVec object (pseudo-code)</span></span></span>
-<span class="r-in"><span><span class="va">file_path</span> <span class="op">&lt;-</span> <span class="st">"/path/to/large/brain/image.dat"</span></span></span>
-<span class="r-in"><span><span class="va">mapped_vec</span> <span class="op">&lt;-</span> <span class="fu">MappedNeuroVec</span><span class="op">(</span><span class="va">file_path</span>, dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">64</span>, <span class="fl">64</span>, <span class="fl">32</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">file_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask_v4.nii"</span>, package <span class="op">=</span> <span class="st">"neuroim2"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">mapped_vec</span> <span class="op">&lt;-</span> <span class="fu">MappedNeuroVec</span><span class="op">(</span><span class="va">file_path</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Access a subset of the data</span></span></span>
-<span class="r-in"><span><span class="va">subset</span> <span class="op">&lt;-</span> <span class="va">mapped_vec</span><span class="op">[</span>,,, <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="va">subset</span> <span class="op">&lt;-</span> <span class="va">mapped_vec</span><span class="op">[</span>,,, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create mapped vector from NIFTI file</span></span></span>
-<span class="r-in"><span><span class="va">mvec</span> <span class="op">&lt;-</span> <span class="fu">MappedNeuroVec</span><span class="op">(</span><span class="st">"path/to/fmri.nii"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">mvec</span> <span class="op">&lt;-</span> <span class="fu">MappedNeuroVec</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask_v4.nii"</span>, package <span class="op">=</span> <span class="st">"neuroim2"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Extract first volume</span></span></span>
 <span class="r-in"><span><span class="va">vol1</span> <span class="op">&lt;-</span> <span class="va">mvec</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Get dimensions</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="dim-methods.html">dim</a></span><span class="op">(</span><span class="va">mvec</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 64 64 25  4</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Access specific timepoint</span></span></span>
-<span class="r-in"><span><span class="va">timepoint</span> <span class="op">&lt;-</span> <span class="va">mvec</span><span class="op">[</span>, , , <span class="fl">10</span><span class="op">]</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="va">timepoint</span> <span class="op">&lt;-</span> <span class="va">mvec</span><span class="op">[</span>, , , <span class="fl">2</span><span class="op">]</span></span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

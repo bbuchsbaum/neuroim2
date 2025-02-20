@@ -109,6 +109,8 @@ plot an NeuroVol as a series of 2D slices"></head><body>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The plot method uses <code>ggplot2</code> to create a raster visualization of the slice data.
 The intensity values are mapped to colors using the specified colormap and range.</p>
+<p>when `x` is a NeuroSlice object, the plot method returns a <code>ggplot2</code> object containing the raster visualization of the slice data.
+        The plot can be further customized using standard ggplot2 functions.</p>
     </div>
 
     <div class="section level2">
@@ -117,18 +119,315 @@ The intensity values are mapped to colors using the specified colormap and range
 <span class="r-in"><span><span class="va">slice_space</span> <span class="op">&lt;-</span> <span class="fu"><a href="NeuroSpace.html">NeuroSpace</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">slice_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">*</span><span class="fl">100</span><span class="op">)</span>, <span class="fl">100</span>, <span class="fl">100</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">slice</span> <span class="op">&lt;-</span> <span class="fu"><a href="NeuroSlice.html">NeuroSlice</a></span><span class="op">(</span><span class="va">slice_data</span>, <span class="va">slice_space</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co"># Basic plot</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">slice</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Custom colormap</span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sjmgarnier.github.io/viridis/" class="external-link">viridis</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">slice</span>, cmap <span class="op">=</span> <span class="fu">viridis</span><span class="op">(</span><span class="fl">255</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Custom intensity range</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">slice</span>, irange <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 136</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ line                            :List of 6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ colour       : chr "black"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ linewidth    : num 0.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ linetype     : num 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ lineend      : chr "butt"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ arrow        : logi FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ inherit.blank: logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr [1:2] "element_line" "element"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ rect                            :List of 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ fill         : chr "white"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ colour       : chr "black"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ linewidth    : num 0.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ linetype     : num 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ inherit.blank: logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr [1:2] "element_rect" "element"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ text                            :List of 11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ family       : chr ""</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ face         : chr "plain"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ colour       : chr "black"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ size         : num 11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ hjust        : num 0.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ vjust        : num 0.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ angle        : num 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ lineheight   : num 0.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ margin       : 'margin' num [1:4] 0points 0points 0points 0points</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "unit")= int 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ debug        : logi FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ inherit.blank: logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr [1:2] "element_text" "element"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ title                           : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ aspect.ratio                    : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.title                      : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.title.x                    :List of 11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ family       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ face         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ colour       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ size         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ hjust        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ vjust        : num 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ angle        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ lineheight   : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ margin       : 'margin' num [1:4] 2.75points 0points 0points 0points</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "unit")= int 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ debug        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ inherit.blank: logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr [1:2] "element_text" "element"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.title.x.top                :List of 11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ family       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ face         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ colour       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ size         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ hjust        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ vjust        : num 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ angle        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ lineheight   : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ margin       : 'margin' num [1:4] 0points 0points 2.75points 0points</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "unit")= int 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ debug        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ inherit.blank: logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr [1:2] "element_text" "element"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.title.x.bottom             : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.title.y                    :List of 11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ family       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ face         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ colour       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ size         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ hjust        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ vjust        : num 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ angle        : num 90</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ lineheight   : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ margin       : 'margin' num [1:4] 0points 2.75points 0points 0points</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "unit")= int 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ debug        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ inherit.blank: logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr [1:2] "element_text" "element"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.title.y.left               : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.title.y.right              :List of 11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ family       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ face         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ colour       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ size         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ hjust        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ vjust        : num 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ angle        : num -90</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ lineheight   : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ margin       : 'margin' num [1:4] 0points 0points 0points 2.75points</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "unit")= int 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ debug        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ inherit.blank: logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr [1:2] "element_text" "element"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.text                       :List of 11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ family       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ face         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ colour       : chr "grey30"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ size         : 'rel' num 0.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ hjust        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ vjust        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ angle        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ lineheight   : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ margin       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ debug        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ inherit.blank: logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr [1:2] "element_text" "element"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.text.x                     :List of 11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ family       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ face         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ colour       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ size         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ hjust        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ vjust        : num 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ angle        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ lineheight   : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ margin       : 'margin' num [1:4] 2.2points 0points 0points 0points</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "unit")= int 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ debug        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ inherit.blank: logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr [1:2] "element_text" "element"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.text.x.top                 :List of 11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ family       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ face         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ colour       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ size         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ hjust        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ vjust        : num 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ angle        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ lineheight   : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ margin       : 'margin' num [1:4] 0points 0points 2.2points 0points</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "unit")= int 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ debug        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ inherit.blank: logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr [1:2] "element_text" "element"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.text.x.bottom              : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.text.y                     :List of 11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ family       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ face         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ colour       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ size         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ hjust        : num 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ vjust        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ angle        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ lineheight   : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ margin       : 'margin' num [1:4] 0points 2.2points 0points 0points</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "unit")= int 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ debug        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ inherit.blank: logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr [1:2] "element_text" "element"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.text.y.left                : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.text.y.right               :List of 11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ family       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ face         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ colour       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ size         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ hjust        : num 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ vjust        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ angle        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ lineheight   : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ margin       : 'margin' num [1:4] 0points 0points 0points 2.2points</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "unit")= int 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ debug        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ inherit.blank: logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr [1:2] "element_text" "element"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.text.theta                 : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.text.r                     :List of 11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ family       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ face         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ colour       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ size         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ hjust        : num 0.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ vjust        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ angle        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ lineheight   : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ margin       : 'margin' num [1:4] 0points 2.2points 0points 2.2points</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..- attr(*, "unit")= int 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ debug        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ inherit.blank: logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr [1:2] "element_text" "element"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.ticks                      :List of 6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ colour       : chr "grey20"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ linewidth    : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ linetype     : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ lineend      : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ arrow        : logi FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ inherit.blank: logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr [1:2] "element_line" "element"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.ticks.x                    : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.ticks.x.top                : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.ticks.x.bottom             : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.ticks.y                    : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.ticks.y.left               : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.ticks.y.right              : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.ticks.theta                : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.ticks.r                    : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.minor.ticks.x.top          : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.minor.ticks.x.bottom       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.minor.ticks.y.left         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.minor.ticks.y.right        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.minor.ticks.theta          : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.minor.ticks.r              : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.ticks.length               : 'simpleUnit' num 2.75points</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "unit")= int 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.ticks.length.x             : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.ticks.length.x.top         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.ticks.length.x.bottom      : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.ticks.length.y             : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.ticks.length.y.left        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.ticks.length.y.right       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.ticks.length.theta         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.ticks.length.r             : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.minor.ticks.length         : 'rel' num 0.75</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.minor.ticks.length.x       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.minor.ticks.length.x.top   : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.minor.ticks.length.x.bottom: NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.minor.ticks.length.y       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.minor.ticks.length.y.left  : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.minor.ticks.length.y.right : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.minor.ticks.length.theta   : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.minor.ticks.length.r       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.line                       : list()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr [1:2] "element_blank" "element"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.line.x                     : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.line.x.top                 : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.line.x.bottom              : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.line.y                     : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.line.y.left                : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.line.y.right               : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.line.theta                 : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ axis.line.r                     : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.background               :List of 5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ fill         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ colour       : logi NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ linewidth    : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ linetype     : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ inherit.blank: logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr [1:2] "element_rect" "element"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.margin                   : 'margin' num [1:4] 5.5points 5.5points 5.5points 5.5points</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "unit")= int 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.spacing                  : 'simpleUnit' num 11points</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "unit")= int 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.spacing.x                : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.spacing.y                : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.key                      : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.key.size                 : 'simpleUnit' num 1.2lines</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "unit")= int 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.key.height               : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.key.width                : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.key.spacing              : 'simpleUnit' num 5.5points</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "unit")= int 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.key.spacing.x            : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.key.spacing.y            : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.frame                    : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.ticks                    : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.ticks.length             : 'rel' num 0.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.axis.line                : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.text                     :List of 11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ family       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ face         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ colour       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ size         : 'rel' num 0.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ hjust        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ vjust        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ angle        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ lineheight   : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ margin       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ debug        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ inherit.blank: logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr [1:2] "element_text" "element"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.text.position            : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.title                    :List of 11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ family       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ face         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ colour       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ size         : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ hjust        : num 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ vjust        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ angle        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ lineheight   : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ margin       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ debug        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ inherit.blank: logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr [1:2] "element_text" "element"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.title.position           : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.position                 : chr "right"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.position.inside          : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.direction                : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.byrow                    : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.justification            : chr "center"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.justification.top        : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.justification.bottom     : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.justification.left       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.justification.right      : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.justification.inside     : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.location                 : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.box                      : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.box.just                 : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.box.margin               : 'margin' num [1:4] 0cm 0cm 0cm 0cm</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "unit")= int 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.box.background           : list()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "class")= chr [1:2] "element_blank" "element"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ legend.box.spacing              : 'simpleUnit' num 11points</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "unit")= int 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [list output truncated]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr [1:2] "theme" "gg"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "complete")= logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "validate")= logi TRUE</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">*</span><span class="fl">100</span><span class="op">)</span>, <span class="fl">100</span>, <span class="fl">100</span><span class="op">)</span></span></span>
