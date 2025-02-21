@@ -80,7 +80,7 @@ This method resamples a NeuroVol object (source) to match the dimensions and ori
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>An object representing the resampled source image, with the same spatial properties as the target image.</p>
+    <p>An object representing the resampled <code>source</code> image, with the same spatial properties as <code>target</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -93,8 +93,6 @@ This method resamples a NeuroVol object (source) to match the dimensions and ori
 <span class="r-in"><span><span class="va">img</span> <span class="op">&lt;-</span> <span class="fu"><a href="read_vol.html">read_vol</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask_v4.nii"</span>, package <span class="op">=</span> <span class="st">"neuroim2"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">rspace</span> <span class="op">&lt;-</span> <span class="fu"><a href="space-methods.html">space</a></span><span class="op">(</span><span class="va">img</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">### normally, one would resample from two existing soource and target spaces.</span></span></span>
-<span class="r-in"><span><span class="co">### But here we manually create the target space, which is a bit ugly.</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">newtrans4X3</span> <span class="op">&lt;-</span> <span class="fu"><a href="trans-methods.html">trans</a></span><span class="op">(</span><span class="va">img</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">newtrans4X3</span> <span class="op">&lt;-</span> <span class="va">newtrans4X3</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.5</span>,<span class="fl">.5</span>,<span class="fl">.5</span>,<span class="fl">1</span><span class="op">)</span></span></span>

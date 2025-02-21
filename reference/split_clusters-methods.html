@@ -100,7 +100,7 @@ The resulting list contains each of the clusters as separate objects.</p>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list of sub-objects, where each sub-object corresponds to a unique cluster index.</p>
+    <p>A <code>list</code> of sub-objects, where each sub-object corresponds to a unique cluster index.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -142,7 +142,7 @@ The resulting list contains each of the clusters as separate objects.</p>
 <span class="r-in"><span>  <span class="co"># Calculate and print the mean value for each cluster</span></span></span>
 <span class="r-in"><span>  <span class="va">means_clust</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">split_result_clust</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="values-methods.html">values</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">means_clust</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.2783091 0.3157967 0.2633020</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.3611358 0.2766651 0.3770769</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># Alternatively, create an integer vector of cluster assignments:</span></span></span>
 <span class="r-in"><span>  <span class="va">cluster_assignments</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/prod.html" class="external-link">prod</a></span><span class="op">(</span><span class="fu"><a href="dim-methods.html">dim</a></span><span class="op">(</span><span class="va">space</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>

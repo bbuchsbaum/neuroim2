@@ -66,9 +66,36 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>a reoriented image space</p>
+    <p>A reoriented version of <code>x</code>.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>When <code>x</code> is a <code>NeuroSpace</code> object, the <code>orient</code> argument should be a character vector
+of length 3 specifying the desired anatomical orientation using single-letter codes. Each letter represents
+an anatomical direction:</p><ul><li><p>First position: "R" (Right) or "L" (Left)</p></li>
+<li><p>Second position: "A" (Anterior) or "P" (Posterior)</p></li>
+<li><p>Third position: "S" (Superior) or "I" (Inferior)</p></li>
+</ul><p>For example, <code>c("R", "A", "S")</code> specifies Right-Anterior-Superior orientation, while
+<code>c("L", "P", "I")</code> specifies Left-Posterior-Inferior orientation. The orientation codes
+determine how the voxel grid coordinates map to real-world anatomical space.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Create a NeuroSpace object in LPI (Left-Posterior-Inferior) orientation</span></span></span>
+<span class="r-in"><span><span class="va">space</span> <span class="op">&lt;-</span> <span class="fu"><a href="NeuroSpace.html">NeuroSpace</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">64</span>, <span class="fl">64</span>, <span class="fl">40</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Reorient to RAS (Right-Anterior-Superior) orientation</span></span></span>
+<span class="r-in"><span><span class="co"># Use individual axis codes: "R" for Right, "A" for Anterior, "S" for Superior</span></span></span>
+<span class="r-in"><span><span class="va">space_ras</span> <span class="op">&lt;-</span> <span class="fu">reorient</span><span class="op">(</span><span class="va">space</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"R"</span>, <span class="st">"A"</span>, <span class="st">"S"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># The transformation matrix will be updated to reflect the new orientation</span></span></span>
+<span class="r-in"><span><span class="co"># Original and reoriented spaces will have different coordinate mappings</span></span></span>
+<span class="r-in"><span><span class="va">coords</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">32</span>, <span class="fl">32</span>, <span class="fl">20</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">orig_world</span> <span class="op">&lt;-</span> <span class="fu"><a href="grid_to_coord-methods.html">grid_to_coord</a></span><span class="op">(</span><span class="va">space</span>, <span class="va">coords</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">new_world</span> <span class="op">&lt;-</span> <span class="fu"><a href="grid_to_coord-methods.html">grid_to_coord</a></span><span class="op">(</span><span class="va">space_ras</span>, <span class="va">coords</span><span class="op">)</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
