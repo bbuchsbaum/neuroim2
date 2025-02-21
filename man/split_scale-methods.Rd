@@ -31,7 +31,7 @@ split_scale(x, f, center, scale)
 \item{scale}{Should values be scaled? If TRUE, the vector is divided by the standard deviation for each column of the submatrix.}
 }
 \value{
-A new matrix or matrix-like object in which the original rows have been grouped by 'f' and then centered and/or scaled for each grouping.
+An object of the same class as \code{x}, with row-subsets centered and/or scaled according to \code{f}.
 }
 \description{
 This function centers and/or scales the row-subsets of a numeric matrix or matrix-like object.

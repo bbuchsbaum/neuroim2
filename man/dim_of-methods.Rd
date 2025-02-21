@@ -15,7 +15,7 @@ dim_of(x, axis)
 \item{axis}{The NamedAxis to query}
 }
 \value{
-An integer representing the length of the specified axis.
+An integer representing the length of the specified \code{axis} of \code{x}.
 }
 \description{
 This function returns the length of a given axis (dimension) of an object. The

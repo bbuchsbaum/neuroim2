@@ -780,7 +780,19 @@ setMethod(f="patch_set", signature=signature(x="NeuroVol",
           })
 
 
+#' @rdname values-methods
+#' @export
+setMethod(f="values", signature=signature(x="DenseNeuroVol"),
+          def=function(x) {
+            x@.Data
+          })
 
+#' @rdname values-methods
+#' @export
+setMethod(f="values", signature=signature(x="SparseNeuroVol"),
+          def=function(x) {
+            as.vector(x@data)
+          })
 
 #' apply a kernel function to a \code{\linkS4class{NeuroVol}}
 #'

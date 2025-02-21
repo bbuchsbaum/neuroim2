@@ -39,7 +39,7 @@ split_clusters(x, clusters, ...)
 \item{...}{Additional arguments to be passed to methods.}
 }
 \value{
-A list of sub-objects, where each sub-object corresponds to a unique cluster index.
+A \code{list} of sub-objects, where each sub-object corresponds to a unique cluster index.
 }
 \description{
 This function cuts an object into a list of sub-objects based on a vector of cluster indices.

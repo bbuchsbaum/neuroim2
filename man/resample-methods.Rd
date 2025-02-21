@@ -22,7 +22,7 @@ resample(source, target, ...)
 \item{interpolation}{A single integer specifying the type of interpolation to be applied to the final resampled image. May be 0 (nearest neighbor), 1 (trilinear), or 3 (cubic spline). No other values are valid.}
 }
 \value{
-An object representing the resampled source image, with the same spatial properties as the target image.
+An object representing the resampled \code{source} image, with the same spatial properties as \code{target}.
 }
 \description{
 This function resamples a source image to match the spatial properties (dimensions, resolution, and orientation) of a target image.
@@ -34,8 +34,6 @@ This method resamples a NeuroVol object (\code{source}) to match the dimensions 
 img <- read_vol(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
 rspace <- space(img)
 
-### normally, one would resample from two existing soource and target spaces.
-### But here we manually create the target space, which is a bit ugly.
 
 newtrans4X3 <- trans(img)[1:4, 1:3]
 newtrans4X3 <- newtrans4X3 * c(.5,.5,.5,1)

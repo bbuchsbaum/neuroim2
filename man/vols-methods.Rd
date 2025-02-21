@@ -19,6 +19,9 @@ vols(x, indices, ...)
 
 \item{...}{additional arguments to be passed to methods.}
 }
+\value{
+A \code{list} containing the extracted 3D volumes from \code{x} in the same order as \code{indices}.
+}
 \description{
 This function extracts an ordered series of 3D volumes from an object that supplies volume data.
 The \code{indices} argument specifies the subset of volumes to extract, and can be a vector

@@ -15,7 +15,7 @@ which_dim(x, axis)
 \item{axis}{The NamedAxis to find}
 }
 \value{
-An integer representing the dimension of the specified axis for the given object.
+An integer representing the dimension index of the specified \code{axis} for the object \code{x}.
 }
 \description{
 This function returns the dimension of the specified axis for a given object, such as a matrix or an array.
@@ -24,5 +24,4 @@ This function returns the dimension of the specified axis for a given object, su
 
 x <- NeuroSpace(c(10,10,10), spacing=c(1,1,1))
 which_dim(x, x@axes@j) == 2
-
 }

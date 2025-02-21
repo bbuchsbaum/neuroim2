@@ -18,7 +18,7 @@ map_values(x, lookup)
 \item{lookup}{The lookup table. The first column is the "key" and the second column is the "value".}
 }
 \value{
-A new object in which the original values have been replaced with the values from the lookup table.
+An object of the same class as \code{x}, in which the original values have been replaced with the lookup table values.
 }
 \description{
 This function maps values from one set to another using a lookup table provided by the user.

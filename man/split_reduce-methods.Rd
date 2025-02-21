@@ -29,7 +29,7 @@ split_reduce(x, fac, FUN)
 \item{FUN}{The summary function to apply to each subset. If not provided, the mean of each sub-matrix column is computed.}
 }
 \value{
-A new matrix where the original values have been "reduced" by the supplied function.
+A \code{matrix} (or matrix-like object) containing the summarized values after applying \code{FUN}.
 }
 \description{
 This function summarizes subsets of a numeric matrix or matrix-like object by first splitting the object by row and then applying a summary function.

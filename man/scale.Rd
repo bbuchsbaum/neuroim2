@@ -12,7 +12,7 @@ scale(x, ...)
 \item{...}{Additional arguments for scaling methods.}
 }
 \value{
-A scaled version of the input object.
+An object of the same class as \code{x}, scaled by the specified method.
 }
 \description{
 Scales an object by (typically) subtracting the mean and dividing by the standard deviation.

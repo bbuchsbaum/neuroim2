@@ -501,6 +501,7 @@ setMethod(f="coord_to_grid", signature=signature(x="NeuroSpace", coords="numeric
           })
 
 
+
 #' @export
 #' @rdname grid_to_grid-methods
 #' @importFrom purrr map_int
@@ -526,6 +527,7 @@ setMethod(f="grid_to_grid", signature=signature(x="NeuroSpace", vox="matrix"),
             t(sweep(ovox, 1,offset, "+"))
           })
 
+
 #' @export
 #' @rdname grid_to_grid-methods
 setMethod(f="grid_to_grid", signature=signature(x="matrix", vox="matrix"),
@@ -546,6 +548,17 @@ setMethod(f="grid_to_grid", signature=signature(x="matrix", vox="matrix"),
 
           })
 
+
+
+#' @export
+#' @rdname grid_to_coord-methods
+setMethod(f="grid_to_coord", signature=signature(x="NeuroSpace", coords="matrix"),
+          def=function(x, coords) {
+            input <- t(cbind(coords-1, rep(1, nrow(coords))))
+            ret <- t(trans(x) %*% input)
+            md <- min(ndim(x), 3)
+            ret[,1:md,drop=FALSE]
+          })
 
 
 #' @export

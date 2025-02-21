@@ -44,7 +44,8 @@ write_nifti_volume <- function(vol, file_name, data_type="FLOAT") {
 				msg = "Input volume must be 3-dimensional")
 	hdr <- as_nifti_header(vol, file_name=file_name, data_type=data_type)
 
-	conn <- if (substr(file_name, nchar(file_name)-2, nchar(file_name)) == ".gz") {
+	is_gzipped <- endsWith(file_name, ".gz")
+	conn <- if (is_gzipped) {
 		gzfile(file_name, open="wb")
 	} else {
 		file(file_name, open="wb")

@@ -17,7 +17,7 @@ centroids(x, ...)
 \item{type}{the type of center of mass: one of "center_of_mass" or "medoid"}
 }
 \value{
-A matrix where each row represents the coordinates of a centroid.
+A numeric \code{matrix} where each row represents the coordinates of a centroid.
 }
 \description{
 Return a matrix of centroids of an object

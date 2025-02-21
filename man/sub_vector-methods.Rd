@@ -29,7 +29,7 @@ sub_vector(x, i, ...)
 \item{...}{additional arguments}
 }
 \value{
-a  \code{NeuroVec} object that is a sub-sequence of the supplied object.
+A \code{NeuroVec} object that is a sub-sequence of the supplied object.
 
 A NeuroVecSeq object containing the extracted subsequence
 }

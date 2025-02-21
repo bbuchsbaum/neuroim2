@@ -19,7 +19,7 @@ spacing(x)
 \item{x}{The object representing the image.}
 }
 \value{
-A numeric vector containing the voxel dimensions of the image.
+A numeric vector specifying the voxel dimensions of \code{x}.
 }
 \description{
 This function extracts the voxel dimensions of an image represented by the input object.

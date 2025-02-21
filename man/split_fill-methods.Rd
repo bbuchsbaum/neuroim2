@@ -17,7 +17,7 @@ split_fill(x, fac, FUN)
 \item{FUN}{The function used to summarize the sets.}
 }
 \value{
-A new object in which the original values have been replaced by the output of the function.
+An object of the same class as \code{x}, with values replaced by the output of \code{FUN}.
 }
 \description{
 This function splits an object into disjoint sets of values based on a factor, applies a specified function to each set,

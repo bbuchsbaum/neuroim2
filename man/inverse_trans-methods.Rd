@@ -13,7 +13,7 @@ inverse_trans(x)
 \item{x}{an object}
 }
 \value{
-A 4x4 transformation matrix that maps from real world coordinates back to grid coordinates.
+A numeric 4x4 \code{matrix} that maps from real-world coordinates back to grid coordinates.
 }
 \description{
 Extract inverse image coordinate transformation

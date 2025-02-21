@@ -16,7 +16,7 @@ file_matches(x, file_name)
 \item{file_name}{A character string specifying the file name to validate}
 }
 \value{
-TRUE for match, FALSE otherwise
+\code{TRUE} for match, \code{FALSE} otherwise.
 
 A logical value: \code{TRUE} if the file matches the format and both header
   and data files exist, \code{FALSE} otherwise

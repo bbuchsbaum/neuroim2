@@ -13,7 +13,7 @@ axes(x)
 \item{x}{an object with a set of axes}
 }
 \value{
-the `axes` associated with the object.
+An object representing the \code{axes} of \code{x}.
 }
 \description{
 Extract Image Axes

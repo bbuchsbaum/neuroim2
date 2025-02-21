@@ -21,7 +21,7 @@ trans(x)
 \item{x}{an object with a transformation}
 }
 \value{
-A 4x4 transformation matrix that maps from grid coordinates to real world coordinates.
+A numeric 4x4 matrix that maps from grid coordinates to real-world coordinates.
 }
 \description{
 Extract image coordinate transformation

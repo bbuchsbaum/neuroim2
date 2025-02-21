@@ -24,7 +24,7 @@ index_to_coord(x, idx)
 \item{idx}{the 1D indices}
 }
 \value{
-a matrix of real coordinates
+A numeric \code{matrix} of real-world coordinates.
 }
 \description{
 convert 1d indices to n-dimensional real world coordinates

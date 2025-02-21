@@ -24,8 +24,16 @@ coord_to_grid(x, coords)
 \item{coords}{a matrix of real world coordinates}
 }
 \value{
-a matrix of grid coordinates
+A numeric \code{matrix} of grid coordinates.
 }
 \description{
 convert n-dimensional real world coordinates to grid coordinates
+}
+\examples{
+# Create a simple 3D volume
+bvol <- NeuroVol(array(0, c(10,10,10)), NeuroSpace(c(10,10,10), c(1,1,1)))
+coords <- matrix(c(.5,.5,.5, 1.5,1.5,1.5), ncol=3, byrow=TRUE)
+grid <- coord_to_grid(bvol, coords)
+world <- grid_to_coord(bvol, grid)
+all.equal(coords, world)
 }

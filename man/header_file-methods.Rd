@@ -16,7 +16,7 @@ header_file(x, file_name)
 file name from}
 }
 \value{
-the correct header name
+The correct header file name as a \code{character} string.
 
 A character string representing the header file name
 }

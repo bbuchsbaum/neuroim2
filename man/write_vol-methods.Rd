@@ -32,7 +32,7 @@ write_vol(x, file_name, format, data_type)
 Otherwise output format will be inferred from R the datatype of the image.}
 }
 \value{
-Invisibly returns NULL after writing the volume to disk.
+Invisibly returns \code{NULL} after writing the volume to disk.
 }
 \description{
 Write a 3d image volume to disk

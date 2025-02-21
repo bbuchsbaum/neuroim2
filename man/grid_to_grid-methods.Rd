@@ -18,8 +18,20 @@ grid_to_grid(x, vox)
 \item{vox}{a matrix of LPI voxel coordinates}
 }
 \value{
-a matrix of native voxel coordinates
+A numeric \code{matrix} of native voxel coordinates.
 }
 \description{
 Generic function to convert voxel coordinates in the reference space (LPI) to native array space.
+}
+\examples{
+# Create a simple 3D volume in LPI orientation
+space <- NeuroSpace(c(10,10,10), c(2,2,2))
+
+# Create a reoriented space in RAS orientation
+space_ras <- reorient(space, c("R", "A", "S"))
+
+# Convert coordinates between orientations
+voxel_coords <- matrix(rbind(c(1,1,1)))
+new_coords <- grid_to_grid(space_ras, voxel_coords)
+
 }

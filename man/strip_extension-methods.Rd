@@ -16,7 +16,7 @@ strip_extension(x, file_name)
 extension from}
 }
 \value{
-file_name without extension
+A \code{character} string \code{file_name} without its extension.
 
 A character string representing the file name without the extension
 }

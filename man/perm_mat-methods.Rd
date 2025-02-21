@@ -12,7 +12,7 @@ perm_mat(x, ...)
 \item{...}{additional arguments}
 }
 \value{
-an N x N permutation matrix, where N is the dimensionality of the image.
+A numeric N x N \code{matrix} representing the permutation transform, where N is the dimensionality of the image.
 }
 \description{
 A permutation matrix defines how the native voxel coordinates can be transformed to standard (LPI) orientation.

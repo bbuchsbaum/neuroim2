@@ -62,6 +62,8 @@ vectors(x, subset, ...)
 \item{nonzero}{only include nonzero vectors in output list}
 }
 \value{
+A \code{list} containing the extracted vectors from \code{x} in the same order as \code{subset}.
+
 A deflist object where each element is a function that returns the time series
         for a voxel. The length of the deflist equals the total number of voxels.
 }

@@ -12,8 +12,26 @@ read_elements(x, num_elements)
 \item{num_elements}{the number of elements to read}
 }
 \value{
-the elements as a vector
+A \code{vector} containing the elements read from \code{x}.
 }
 \description{
 Read a sequence of elements from an input source
 }
+\examples{
+# Create a temporary binary file with test data
+tmp <- tempfile()
+con <- file(tmp, "wb")
+test_data <- rnorm(100)
+writeBin(test_data, con, size = 8)
+close(con)
+
+# Create a BinaryReader and read the data
+reader <- BinaryReader(tmp, byte_offset = 0L,
+                      data_type = "double", bytes_per_element = 8L)
+data <- read_elements(reader, 100)
+close(reader)
+
+# Clean up
+unlink(tmp)
+}
+\keyword{internal}

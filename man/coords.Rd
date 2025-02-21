@@ -12,7 +12,7 @@ coords(x, ...)
 \item{...}{Additional arguments (not used in the generic function).}
 }
 \value{
-The extracted coordinates.
+A numeric \code{matrix} or \code{vector} containing the coordinates of \code{x}.
 }
 \description{
 This function extracts the coordinates from an input object.

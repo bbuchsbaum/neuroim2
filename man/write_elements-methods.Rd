@@ -12,8 +12,31 @@ write_elements(x, els)
 \item{els}{the elements to write}
 }
 \value{
-Invisibly returns NULL after writing the elements.
+Invisibly returns \code{NULL} after writing the elements.
 }
 \description{
 Write a sequence of elements from an input source
+}
+\examples{
+# Create a temporary binary file for writing
+tmp <- tempfile()
+writer <- BinaryWriter(tmp, byte_offset = 0L,
+                      data_type = "DOUBLE", bytes_per_element = 8L)
+
+# Write some random data
+data <- rnorm(100)
+write_elements(writer, data)
+close(writer)
+
+# Read back the data to verify
+reader <- BinaryReader(tmp, byte_offset = 0L,
+                      data_type = "double", bytes_per_element = 8L)
+read_data <- read_elements(reader, 100)
+close(reader)
+
+# Verify data was written correctly
+all.equal(data, read_data)
+
+# Clean up
+unlink(tmp)
 }

@@ -19,11 +19,22 @@ mapf(x, m, ...)
 \item{mask}{restrict application of kernel to masked area}
 }
 \value{
-The result of applying the mapping function to the input object.
+The result of applying the mapping function to \code{x}.
 }
 \description{
 This function applies a function to an object, with additional arguments passed to the function
 using the \code{...} argument. The mapping object specifies how the function is to be applied,
 and can take many different forms, depending on the object and function used. The return value
 depends on the function used.
+}
+\examples{
+# Create a simple 3D volume
+bspace <- NeuroSpace(c(10,10,10), c(1,1,1))
+vol <- NeuroVol(array(rnorm(10*10*10), c(10,10,10)), bspace)
+
+# Create a 3x3x3 mean smoothing kernel
+kern <- Kernel(c(3,3,3),  vdim=c(3,3,3))
+
+# Apply the kernel to smooth the volume
+smoothed_vol <- mapf(vol, kern)
 }

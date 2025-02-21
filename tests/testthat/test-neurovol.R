@@ -1,4 +1,3 @@
-
 gmask <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
 gmask_gz <- system.file("extdata", "global_mask2.nii.gz", package="neuroim2")
 
@@ -285,6 +284,25 @@ test_that("Can partition a NeuroVol into a set of ROIVols", {
   kvol <- ClusteredNeuroVol(mask, kres$cluster)
   p <- split_clusters(mask, kvol)
   expect_equal(50, length(p))
+})
+
+test_that("can write and read back a gzipped nifti file", {
+  # Read original mask
+  mask <- read_vol(gmask)
+  
+  # Create temporary gzipped file
+  fname <- paste(tempfile(), ".nii.gz", sep="")
+  write_vol(mask, fname)
+  
+  # Read back the gzipped file
+  vol2 <- read_vol(fname)
+  
+  # Verify contents and metadata match
+  expect_true(all(mask@.Data == vol2@.Data))
+  expect_true(identical(dim(space(mask)), dim(space(vol2))))
+  
+  # Clean up
+  unlink(fname)
 })
 
 

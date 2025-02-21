@@ -21,5 +21,5 @@ render(x, width, height, colmap, ...)
 A rendered image with the specified dimensions and color mapping.
 }
 \description{
-Map an image intensities to an image with color values.
+Map image intensities to an image with color values.
 }

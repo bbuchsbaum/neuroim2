@@ -18,7 +18,7 @@ centroid(x, ...)
 \item{...}{extra args}
 }
 \value{
-the centroid of the object
+A numeric vector giving the centroid of \code{x}.
 }
 \description{
 return the centroid of an object

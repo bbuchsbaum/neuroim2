@@ -37,10 +37,12 @@ ensure_reader_seekable <- function(con, byte_offset, bytes_per_element, data_typ
 ensure_writer_seekable <- function(con, byte_offset) {
   if (!inherits(con, "gzfile")) {
     test <- try(seek(con, where = byte_offset, origin="start"), silent=TRUE)
-    if(inherits(test, "try-error"))
+    if (inherits(test, "try-error")) {
       stop("Output connection must be seekable for Binary I/O.")
+    }
   } else {
-    stop("Cannot use gzipped connection for BinaryWriter")
+    # For gzipped output, do nothing here,
+    # because write_nifti_header() applies the necessary offset/padding.
   }
   invisible(NULL)
 }

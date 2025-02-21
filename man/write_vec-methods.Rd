@@ -60,7 +60,7 @@ Otherwise output format will be inferred from R the datatype of the image.}
 \item{chunk_dim}{the dimensions of each chunk}
 }
 \value{
-Invisibly returns NULL after writing the vector to disk.
+Invisibly returns \code{NULL} after writing the vector to disk.
 }
 \description{
 Write a 4d image vector to disk

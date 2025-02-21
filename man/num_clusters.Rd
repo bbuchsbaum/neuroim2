@@ -10,7 +10,7 @@ num_clusters(x)
 \item{x}{the object to extract number of clusters}
 }
 \value{
-An integer representing the number of clusters in the object.
+An \code{integer} representing the number of clusters in \code{x}.
 }
 \description{
 Number of Clusters

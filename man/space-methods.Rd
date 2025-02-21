@@ -25,7 +25,7 @@ space(x, ...)
 \item{...}{Additional arguments, if needed.}
 }
 \value{
-An object representing the geometric space of the image, of type \code{\linkS4class{NeuroSpace}}.
+A \code{\linkS4class{NeuroSpace}} object representing the geometric space of \code{x}.
 }
 \description{
 This function retrieves the geometric properties of a given image, such as dimensions and voxel size.

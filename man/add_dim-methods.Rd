@@ -15,7 +15,7 @@ add_dim(x, n)
 \item{n}{Numeric value specifying the size of the new dimension}
 }
 \value{
-An updated dimensioned object with the new dimension added.
+An object of the same class as \code{x} with the new dimension added.
 }
 \description{
 This function adds a new dimension to a given object, such as a matrix or an array.

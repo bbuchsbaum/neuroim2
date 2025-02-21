@@ -22,8 +22,18 @@ split_blocks(x, indices, ...)
 \item{...}{additional arguments}
 }
 \value{
-A list of sub-blocks, where each sub-block contains the elements from the input object corresponding to the matching indices.
+A \code{list} of sub-blocks, where each sub-block contains the elements from \code{x} corresponding to the matching \code{indices}.
 }
 \description{
 Splits a vector-valued object into a list of sub-blocks defined by a vector of indices.
+}
+\examples{
+# Create a 4D neuroimaging vector with 20 timepoints
+space <- NeuroSpace(c(10,10,10,20), c(1,1,1))
+vec <- NeuroVec(array(rnorm(10*10*10*20), c(10,10,10,20)), space)
+
+# Split into 4 blocks by assigning timepoints to blocks 1-4 repeatedly
+block_indices <- rep(1:4, length.out=20)
+blocks <- split_blocks(vec, block_indices)
+
 }

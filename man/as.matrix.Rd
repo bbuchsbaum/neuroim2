@@ -12,7 +12,7 @@ as.matrix(x, ...)
 \item{...}{Additional arguments passed to methods.}
 }
 \value{
-A matrix representation of the input object.
+A \code{matrix} representation of the input \code{x}.
 }
 \description{
 Coerces an object to a matrix.

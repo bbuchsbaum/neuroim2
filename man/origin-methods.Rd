@@ -19,7 +19,7 @@ origin(x)
 \item{x}{an object with an origin}
 }
 \value{
-the origin of the image
+A numeric vector giving the origin of \code{x}.
 }
 \description{
 Extract Image Origin

@@ -27,7 +27,7 @@ scale_series(x, center, scale)
 \item{scale}{a \code{logical} value indicating whether series should be divided by standard deviation}
 }
 \value{
-A scaled version of the input 4D image, with each time series centered and/or scaled according to the parameters.
+An object of the same class as \code{x}, with each time series centered and/or scaled.
 }
 \description{
 Generic functions to scale (center and/or normalize by standard deviation) each series of a 4D image

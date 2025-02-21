@@ -8,6 +8,9 @@
 
 \item{...}{Additional arguments passed to the conversion methods.}
 }
+\value{
+A \code{raster} object representing \code{x}.
+}
 \description{
 Converts an object to a raster (bitmap) representation.
 }

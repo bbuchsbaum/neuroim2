@@ -8,7 +8,7 @@
 \alias{matricized_access,BigNeuroVec,matrix-method}
 \alias{matricized_access,BigNeuroVec,integer-method}
 \alias{matricized_access,BigNeuroVec,numeric-method}
-\title{Extract values from a matricized (x,y,z) of a 4D tensor using a space-time coordinate matrix.}
+\title{Extract values from a 4D tensor using a matrix of time-space indices.}
 \usage{
 matricized_access(x, i, ...)
 
@@ -25,19 +25,39 @@ matricized_access(x, i, ...)
 \S4method{matricized_access}{BigNeuroVec,numeric}(x, i)
 }
 \arguments{
-\item{x}{a data source.}
+\item{x}{a data source, typically a \code{SparseNeuroVec} object containing 4D neuroimaging data}
 
-\item{i}{an index matrix specifying the space-time coordinates.}
+\item{i}{Either:
+\itemize{
+  \item A matrix with 2 columns: [time_index, space_index] specifying which values to extract
+  \item A numeric vector of spatial indices to extract all timepoints for those locations
+}}
 
 \item{...}{additional arguments to be passed to methods.}
 }
 \value{
-A vector containing the values at the specified space-time coordinates.
+When \code{i} is a matrix, returns a numeric vector of values at the specified time-space coordinates.
+        When \code{i} is a vector, returns a matrix where each column contains the full time series for each spatial index.
 }
 \description{
-This function extracts the values of the elements in a 4D tensor, where the first three dimensions
-(x,y,z) have been matricized into a single dimension, using a space-time coordinate matrix.
-The input \code{i} is an index matrix, where each row specifies a (x,y,z,t) coordinate.
-The output is a vector containing the values of the elements in \code{x} at the specified
-space-time coordinates.
+This function efficiently extracts values from a 4D tensor (typically neuroimaging data) using a matrix of indices where each row contains
+a time index in column 1 and a spatial index in column 2. The spatial index refers to the position
+in the flattened spatial dimensions (x,y,z). This is primarily used internally by the \code{series()} 
+method to efficiently access time series data for specific voxels.
+}
+\examples{
+# Create a sparse 4D neuroimaging vector
+bspace <- NeuroSpace(c(10,10,10,100), c(1,1,1))
+mask <- array(rnorm(10*10*10) > .5, c(10,10,10))
+mat <- matrix(rnorm(sum(mask)), 100, sum(mask))
+svec <- SparseNeuroVec(mat, bspace, mask)
+
+# Extract specific timepoint-voxel pairs
+# Get value at timepoint 1, voxel 1 and timepoint 2, voxel 2
+idx_mat <- matrix(c(1,1, 2,2), ncol=2, byrow=TRUE)
+vals <- matricized_access(svec, idx_mat)
+
+# Get full time series for voxels 1 and 2
+ts_mat <- matricized_access(svec, c(1,2))
+# Each column in ts_mat contains the full time series for that voxel
 }

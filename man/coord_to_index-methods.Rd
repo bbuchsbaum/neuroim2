@@ -21,8 +21,15 @@ coord_to_index(x, coords)
 \item{coords}{a matrix of real world coordinates}
 }
 \value{
-a vector of indices
+An integer \code{vector} of 1D indices corresponding to \code{coords}.
 }
 \description{
 convert n-dimensional real world coordinates to 1D indices
+}
+\examples{
+bvol <- NeuroVol(array(0, c(10,10,10)), NeuroSpace(c(10,10,10), c(1,1,1)))
+coords <- matrix(c(.5,.5,.5, 1.5,1.5,1.5), ncol=3, byrow=TRUE)
+idx <- coord_to_index(bvol, coords)
+coords2 <- index_to_coord(bvol, idx)
+all.equal(coords, coords2)
 }

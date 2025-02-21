@@ -18,7 +18,7 @@ drop_dim(x, dimnum)
 \item{dimnum}{The dimension number to drop (if missing, drops the last dimension)}
 }
 \value{
-An updated dimensioned object with the specified dimension removed.
+An object of the same class as \code{x} with the specified dimension removed.
 }
 \description{
 This function removes a specified dimension from a given object, such as a matrix or an array.

@@ -14,7 +14,7 @@ lookup(x, i, ...)
 \item{...}{additional arguments}
 }
 \value{
-The value(s) at the specified index/indices.
+The value(s) at the specified index/indices of \code{x}.
 }
 \description{
 Index Lookup operation

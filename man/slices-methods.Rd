@@ -15,11 +15,25 @@ slices(x, ...)
 \item{...}{Additional arguments to be passed to the underlying methods}
 }
 \value{
-A list of 2D matrices, each containing a slice from the input object
+A \code{list} of 2D \code{matrices}, each containing a slice from the input \code{x}.
 
 A deflist object containing functions that return 2D slices of the volume along the z-axis.
         The length of the deflist equals the number of slices in the z dimension.
 }
 \description{
 This function extracts an ordered series of 2D slices from a 3D or 4D object. The returned slices are in the order they appear in the original object.
+}
+\examples{
+# Create a simple 3D volume
+space <- NeuroSpace(c(10,10,10), c(1,1,1))
+vol <- NeuroVol(array(rnorm(10*10*10), c(10,10,10)), space)
+
+# Get all slices along the z-axis
+slc <- slices(vol)
+
+# Number of slices equals the z dimension
+length(slc) == dim(vol)[3]
+
+# Each slice is a 2D matrix
+dim(slc[[1]]) == c(10,10)
 }

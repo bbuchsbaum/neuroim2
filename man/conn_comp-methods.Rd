@@ -29,6 +29,9 @@ conn_comp(x, ...)
 
 \item{local_maxima_dist}{the distance used to define minum distance between local maxima}
 }
+\value{
+An object representing the connected components of \code{x}.
+}
 \description{
 Find connected components in an image
 }

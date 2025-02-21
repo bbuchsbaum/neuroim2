@@ -15,8 +15,23 @@ read_columns(x, column_indices)
 \item{column_indices}{the column indices}
 }
 \value{
-a \code{matrix} consisting of the requested column vectors
+A numeric \code{matrix} consisting of the requested column vectors.
 }
 \description{
 Read a set of column vector from an input source (e.g. \code{ColumnReader})
 }
+\examples{
+# Create a reader function that returns random data
+reader_func <- function(cols) {
+  matrix(rnorm(100 * length(cols)), 100, length(cols))
+}
+
+# Create a ColumnReader with 100 rows and 10 columns
+col_reader <- ColumnReader(nrow = 100L, ncol = 10L, reader = reader_func)
+
+# Read columns 1, 3, and 5
+cols <- read_columns(col_reader, c(1L, 3L, 5L))
+dim(cols) == c(100, 3)
+
+}
+\keyword{internal}

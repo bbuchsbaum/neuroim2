@@ -10,7 +10,7 @@ drop(x)
 \item{x}{An object.}
 }
 \value{
-A modified version of the input object with reduced dimensions or elements.
+An object of the same class as \code{x} with reduced dimensions or elements.
 }
 \description{
 Provides a mechanism to remove dimensions or elements from an object.

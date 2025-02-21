@@ -7,16 +7,16 @@
 series_roi(x, i, ...)
 }
 \arguments{
-\item{x}{The NeuroVec object}
+\item{x}{The \code{NeuroVec} object}
 
 \item{i}{Numeric index for the first dimension}
 
 \item{...}{Additional arguments}
 }
 \value{
-A ROIVec object containing the time series data for the specified coordinates
+A \code{ROIVec} object containing the time series data for the specified coordinates.
 }
 \description{
-Extracts time series data from a NeuroVec object at specified voxel coordinates
+Extracts time series data from a \code{NeuroVec} object at specified voxel coordinates
 and returns it as an ROI object.
 }

@@ -18,7 +18,7 @@ ndim(x, ...)
 \item{...}{additional arguments}
 }
 \value{
-The number of dimensions of the input object `x`
+An integer representing the number of dimensions in \code{x}.
 }
 \description{
 Extract the number of dimensions of an object

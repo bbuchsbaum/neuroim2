@@ -39,13 +39,13 @@ concat(x, y, ...)
 \item{...}{additional objects}
 }
 \value{
-a temporally concatenated object.
+A temporally concatenated object.
 }
 \description{
 Concatenate two objects in the time dimension
 }
 \details{
-The \code{x} and \code{y} images must have compatible dimensions. a \code{NeuroVol} can be concatenated to \code{NeuroVec}, and vice versa. See examples.
+The \code{x} and \code{y} images must have compatible dimensions. A \code{NeuroVol} can be concatenated to \code{NeuroVec}, and vice versa. See examples.
 }
 \note{
 dimensions of x and y must be equal

@@ -16,6 +16,9 @@ voxels(x, ...)
 
 \item{center_voxel}{the absolute location of the center of the voxel, default is (0,0,0)}
 }
+\value{
+A \code{matrix} or \code{vector} representing voxel coordinates from \code{x}.
+}
 \description{
 extract voxel coordinates
 }

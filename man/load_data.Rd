@@ -2,7 +2,7 @@
 % Please edit documentation in R/all_generic.R
 \name{load_data}
 \alias{load_data}
-\title{Load data from a data source.}
+\title{Read data from a data source.}
 \usage{
 load_data(x, ...)
 }
@@ -12,11 +12,20 @@ load_data(x, ...)
 \item{...}{additional arguments to be passed to methods.}
 }
 \value{
-A data object in a format compatible with neuroim2 package functions.
+An R object containing loaded data, in a format compatible with the \pkg{neuroim2} package.
 }
 \description{
 This function loads data from a data source and returns it in a format that is compatible with
 other functions in the neuroim2 package. The format of the returned data depends on the type
 of data source used.
+}
+\examples{
+# Create a NeuroVolSource from a NIFTI file and load it
+fname <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
+src <- NeuroVolSource(fname)
+vol <- load_data(src)
+# The loaded volume is a DenseNeuroVol object
+class(vol)
+dim(vol)
 }
 \keyword{internal}

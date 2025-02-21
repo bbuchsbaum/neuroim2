@@ -8,7 +8,7 @@
 \alias{grid_to_index,NeuroSpace,numeric-method}
 \alias{grid_to_index,NeuroVol,matrix-method}
 \alias{grid_to_index,NeuroVol,numeric-method}
-\title{Generic function to convert N-dimensional grid coordinate to 1D indices}
+\title{Generic function to convert N-dimensional grid coordinates to 1D indices}
 \usage{
 grid_to_index(x, coords)
 
@@ -31,7 +31,7 @@ grid_to_index(x, coords)
 representing (x,y) coordinates in the slice grid}
 }
 \value{
-a vector of indices
+An integer \code{vector} of 1D indices corresponding to \code{coords}.
 }
 \description{
 Converts 2D grid coordinates to linear indices for a \code{NeuroSlice} object.
@@ -40,6 +40,25 @@ Converts 2D grid coordinates to linear indices for a \code{NeuroSlice} object.
 Convert Grid Coordinates to Linear Indices
 }
 \examples{
+# Create a 2D space (10x10)
+space_2d <- NeuroSpace(c(10,10), c(1,1))
+
+# Convert 2D grid coordinates to linear indices
+coords_2d <- matrix(c(1,1, 2,2), ncol=2, byrow=TRUE)
+idx_2d <- grid_to_index(space_2d, coords_2d)
+# First coordinate (1,1) maps to index 1
+# Second coordinate (2,2) maps to index 12 (= 2 + (2-1)*10)
+
+# Create a 3D space (10x10x10)
+space_3d <- NeuroSpace(c(10,10,10), c(1,1,1))
+
+# Convert 3D grid coordinates to linear indices
+coords_3d <- matrix(c(1,1,1, 2,2,2), ncol=3, byrow=TRUE)
+idx_3d <- grid_to_index(space_3d, coords_3d)
+
+# Single coordinate can also be converted
+idx <- grid_to_index(space_3d, c(1,1,1))
+
 slice_space <- NeuroSpace(c(10, 10))
 slice_data <- matrix(1:100, 10, 10)
 slice <- NeuroSlice(slice_data, slice_space)

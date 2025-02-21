@@ -19,7 +19,7 @@ read_meta_info(x, file_name)
 information from}
 }
 \value{
-A list containing the meta information read from the file.
+A \code{list} containing the meta information read from the file.
 
 An object of class \linkS4class{NIFTIMetaInfo} or \linkS4class{AFNIMetaInfo},
   depending on the input format

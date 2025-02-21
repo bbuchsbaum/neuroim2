@@ -13,7 +13,7 @@ bounds(x)
 \item{x}{The object with the `bounds` property, typically an image.}
 }
 \value{
-A matrix where each row contains the min (column 1) and max (column 2) bounds of the image dimension from 1 to `ndim(image)`.
+A numeric \code{matrix} with two columns specifying the min (column 1) and max (column 2) bounds of each dimension of \code{x}.
 }
 \description{
 This function extracts the spatial bounds (origin + dim * spacing) of an image represented by the input object.

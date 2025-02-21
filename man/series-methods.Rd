@@ -84,7 +84,7 @@ series(x, i, ...)
 \item{drop}{whether to drop dimension of length 1}
 }
 \value{
-A list or array containing the extracted series.
+A \code{list} or \code{array} containing the extracted series.
 
 A matrix where each column represents a voxel's time series
 

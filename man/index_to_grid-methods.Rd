@@ -30,7 +30,7 @@ index_to_grid(x, idx)
 \item{idx}{Integer vector of linear indices to convert}
 }
 \value{
-a matrix of grid coordinates
+A numeric \code{matrix} of grid coordinates.
 }
 \description{
 Converts linear indices to 2D grid coordinates for a \code{NeuroSlice} object.

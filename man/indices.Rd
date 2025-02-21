@@ -10,7 +10,7 @@ indices(x)
 \item{x}{the object to extract indices}
 }
 \value{
-A vector of indices from the object.
+A \code{vector} of indices from \code{x}.
 }
 \description{
 Extract indices

@@ -23,7 +23,7 @@ partition(x, k, ...)
 \item{...}{additional arguments passed to the kmeans function.}
 }
 \value{
-a 3D array where each voxel is assigned to a cluster.
+a 3D \code{array} where each voxel is assigned to a cluster.
 }
 \description{
 This function partitions an image into a set of disjoint clusters using k-means clustering.

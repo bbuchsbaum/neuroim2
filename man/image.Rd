@@ -8,6 +8,9 @@
 
 \item{...}{Additional arguments passed to methods.}
 }
+\value{
+An image object representing \code{x}.
+}
 \description{
 Creates a visual representation (or image) from an object.
 }
