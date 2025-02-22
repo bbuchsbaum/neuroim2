@@ -20,3 +20,18 @@ A \code{ROIVec} object containing the time series data for the specified coordin
 Extracts time series data from a \code{NeuroVec} object at specified voxel coordinates
 and returns it as an ROI object.
 }
+\examples{
+# Create a simple 4D neuroimaging vector
+space <- NeuroSpace(c(10,10,10,20), c(1,1,1))
+vec <- NeuroVec(array(rnorm(10*10*10*20), c(10,10,10,20)), space)
+
+# Extract time series for first 100 voxels as ROI
+roi1 <- series_roi(vec, 1:100)
+
+# Extract time series using 3D coordinates
+coords <- matrix(c(1,1,1, 2,2,2, 3,3,3), ncol=3, byrow=TRUE)
+roi2 <- series_roi(vec, coords)
+}
+\seealso{
+\code{\link{series}}
+}

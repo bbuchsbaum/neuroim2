@@ -34,6 +34,16 @@ The function performs the following steps:
   \item If the file_name doesn't match either format, it throws an error.
 }
 }
+\examples{
+# Create a FileFormat for NIFTI files
+fmt <- new("FileFormat",
+           header_extension = "nii",
+           data_extension = "nii")
+
+# Strip extension from a NIFTI file
+strip_extension(fmt, "brain_scan.nii")  # Returns "brain_scan"
+
+}
 \seealso{
 \code{\link{header_file}}, \code{\link{data_file}} for related file name
 manipulation

@@ -613,7 +613,6 @@ setMethod(f="slice", signature=signature(x="NeuroVol", zlevel="numeric", along="
             ydim <- dim_of(along, orientation@j)
             zdim <- dim_of(along, orientation@k)
 
-            #browser()
 
             stopifnot(zlevel >= 1 && zlevel <= zdim)
 
@@ -830,7 +829,29 @@ setMethod(f="mapf", signature=signature(x="NeuroVol", m="Kernel"),
           })
 
 
+#' @export
+#' @importFrom utils capture.output
+#' @rdname show-methods
+setMethod("show", "Kernel", function(object) {
+  # Get dimensions of kernel
+  kernel_dims <- dim(object@weights)
 
+  # Create header string
+  header <- sprintf("Kernel object of dimensions: %s", paste(kernel_dims, collapse=" x "))
+
+  # Get kernel width info
+  width_str <- sprintf("Kernel widths: %s", paste(object@width, collapse=" x "))
+
+  # Format weights matrix/array nicely
+  weights_str <- capture.output(print(round(object@weights, 4)))
+  weights_str <- paste(weights_str, collapse="\n")
+
+  # Print everything
+  cat(header, "\n")
+  cat(width_str, "\n")
+  cat("\nKernel weights:\n")
+  cat(weights_str, "\n")
+})
 
 
 

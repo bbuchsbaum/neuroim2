@@ -415,6 +415,36 @@ setMethod(f="matricized_access", signature=signature(x = "BigNeuroVec", i = "num
           })
 
 
+#' @export
+#' @rdname as.dense-methods
+setMethod(f="as.dense", signature=signature(x="SparseNeuroVec"),
+          def=function(x) {
+            # Get dimensions from space
+            dims <- dim(x@space)
+            
+            # Create empty array with proper dimensions 
+            arr <- array(0, dim=dims)
+            
+            # Get mask indices
+            mask_idx <- which(x@mask == TRUE)
+            
+            # The data matrix is [timepoints x voxels]
+            # Transpose to get [voxels x timepoints]
+            data_t <- t(x@data)
+            
+            # Fill array by assigning each voxel's timeseries
+            for (i in seq_along(mask_idx)) {
+              vox_idx <- mask_idx[i]
+              arr_idx <- arrayInd(vox_idx, dims[1:3])
+              arr[arr_idx[1], arr_idx[2], arr_idx[3], ] <- data_t[i,]
+            }
+            
+            # Create DenseNeuroVec with array data and same space as input
+            DenseNeuroVec(arr, x@space)
+          })
+
+
+
 
 #' @export
 #' @rdname linear_access-methods

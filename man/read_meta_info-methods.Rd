@@ -32,3 +32,23 @@ These methods use format-specific functions to read the header information and
 create the appropriate meta information object. The `.read_meta_info` helper
 function is used internally to streamline the process for both formats.
 }
+\examples{
+# Create a NIFTI format descriptor
+fmt <- new("NIFTIFormat",
+           file_format = "NIFTI",
+           header_encoding = "raw",
+           header_extension = "nii",
+           data_encoding = "raw",
+           data_extension = "nii")
+
+# Read metadata from a NIFTI file
+\donttest{
+fname <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
+meta <- read_meta_info(fmt, fname)
+
+# Access metadata properties
+dim(meta)          # Image dimensions
+trans(meta)        # Transformation matrix
+}
+
+}

@@ -21,16 +21,16 @@ A reoriented version of \code{x}.
 Remap the grid-to-world coordinates mapping of an image.
 }
 \details{
-When \code{x} is a \code{NeuroSpace} object, the \code{orient} argument should be a character vector 
-of length 3 specifying the desired anatomical orientation using single-letter codes. Each letter represents 
+When \code{x} is a \code{NeuroSpace} object, the \code{orient} argument should be a character vector
+of length 3 specifying the desired anatomical orientation using single-letter codes. Each letter represents
 an anatomical direction:
 \itemize{
   \item First position: "R" (Right) or "L" (Left)
   \item Second position: "A" (Anterior) or "P" (Posterior)
   \item Third position: "S" (Superior) or "I" (Inferior)
 }
-For example, \code{c("R", "A", "S")} specifies Right-Anterior-Superior orientation, while 
-\code{c("L", "P", "I")} specifies Left-Posterior-Inferior orientation. The orientation codes 
+For example, \code{c("R", "A", "S")} specifies Right-Anterior-Superior orientation, while
+\code{c("L", "P", "I")} specifies Left-Posterior-Inferior orientation. The orientation codes
 determine how the voxel grid coordinates map to real-world anatomical space.
 }
 \examples{

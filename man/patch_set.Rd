@@ -21,3 +21,18 @@ A \code{list} of coordinate patches, each representing a fixed-size region of th
 \description{
 Generate a set of coordinate "patches" of fixed size from an image object.
 }
+\examples{
+# Create a simple 3D volume
+space <- NeuroSpace(c(10,10,10), spacing=c(1,1,1))
+vol <- NeuroVol(array(rnorm(1000), c(10,10,10)), space)
+
+# Create a mask with some active voxels
+mask <- LogicalNeuroVol(vol > 0, space)
+
+# Extract 3x3x3 patches centered at each active voxel
+patches <- patch_set(vol, dims=c(3,3,3), mask=mask)
+
+# Access the first patch
+patch1 <- patches[[1]]
+dim(patch1)  # Should be c(27) (flattened 3x3x3 patch)
+}

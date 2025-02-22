@@ -35,6 +35,6 @@ vals <- linear_access(svec, indices)
 
 # Get values from multiple timepoints and voxels
 # First voxel at timepoint 1, second voxel at timepoint 2
-indices <- c(1, 1000 + 2) # 1000 = prod(10,10,10) 
+indices <- c(1, 1000 + 2) # 1000 = prod(10,10,10)
 vals <- linear_access(svec, indices)
 }

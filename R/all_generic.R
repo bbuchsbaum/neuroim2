@@ -103,15 +103,15 @@ setGeneric(name="values", def=function(x, ...) standardGeneric("values"))
 #' mask <- array(rnorm(10*10*10) > .5, c(10,10,10))
 #' mat <- matrix(rnorm(sum(mask)), 100, sum(mask))
 #' svec <- SparseNeuroVec(mat, bspace, mask)
-#' 
+#'
 #' # Extract values using linear indices
 #' # Get values from first timepoint at voxels 1,2,3
 #' indices <- c(1,2,3)
 #' vals <- linear_access(svec, indices)
-#' 
+#'
 #' # Get values from multiple timepoints and voxels
 #' # First voxel at timepoint 1, second voxel at timepoint 2
-#' indices <- c(1, 1000 + 2) # 1000 = prod(10,10,10) 
+#' indices <- c(1, 1000 + 2) # 1000 = prod(10,10,10)
 #' vals <- linear_access(svec, indices)
 setGeneric(name="linear_access", def=function(x, i, ...) standardGeneric("linear_access"))
 
@@ -119,7 +119,7 @@ setGeneric(name="linear_access", def=function(x, i, ...) standardGeneric("linear
 #'
 #' This function efficiently extracts values from a 4D tensor (typically neuroimaging data) using a matrix of indices where each row contains
 #' a time index in column 1 and a spatial index in column 2. The spatial index refers to the position
-#' in the flattened spatial dimensions (x,y,z). This is primarily used internally by the \code{series()} 
+#' in the flattened spatial dimensions (x,y,z). This is primarily used internally by the \code{series()}
 #' method to efficiently access time series data for specific voxels.
 #'
 #' @param x a data source, typically a \code{SparseNeuroVec} object containing 4D neuroimaging data
@@ -133,18 +133,18 @@ setGeneric(name="linear_access", def=function(x, i, ...) standardGeneric("linear
 #'         When \code{i} is a vector, returns a matrix where each column contains the full time series for each spatial index.
 #' @rdname matricized_access-methods
 #' @export
-#' @examples 
+#' @examples
 #' # Create a sparse 4D neuroimaging vector
 #' bspace <- NeuroSpace(c(10,10,10,100), c(1,1,1))
 #' mask <- array(rnorm(10*10*10) > .5, c(10,10,10))
 #' mat <- matrix(rnorm(sum(mask)), 100, sum(mask))
 #' svec <- SparseNeuroVec(mat, bspace, mask)
-#' 
+#'
 #' # Extract specific timepoint-voxel pairs
 #' # Get value at timepoint 1, voxel 1 and timepoint 2, voxel 2
 #' idx_mat <- matrix(c(1,1, 2,2), ncol=2, byrow=TRUE)
 #' vals <- matricized_access(svec, idx_mat)
-#' 
+#'
 #' # Get full time series for voxels 1 and 2
 #' ts_mat <- matricized_access(svec, c(1,2))
 #' # Each column in ts_mat contains the full time series for that voxel
@@ -187,10 +187,10 @@ setGeneric(name="load_data", def=function(x, ...) standardGeneric("load_data"))
 #' # Create a simple 3D volume
 #' bspace <- NeuroSpace(c(10,10,10), c(1,1,1))
 #' vol <- NeuroVol(array(rnorm(10*10*10), c(10,10,10)), bspace)
-#' 
+#'
 #' # Create a 3x3x3 mean smoothing kernel
 #' kern <- Kernel(c(3,3,3),  vdim=c(3,3,3))
-#' 
+#'
 #' # Apply the kernel to smooth the volume
 #' smoothed_vol <- mapf(vol, kern)
 #' @rdname map-methods
@@ -246,7 +246,7 @@ setGeneric(name="vectors", def=function(x, subset, ...) standardGeneric("vectors
 #' # Create a 4D neuroimaging vector with 20 timepoints
 #' space <- NeuroSpace(c(10,10,10,20), c(1,1,1))
 #' vec <- NeuroVec(array(rnorm(10*10*10*20), c(10,10,10,20)), space)
-#' 
+#'
 #' # Split into 4 blocks by assigning timepoints to blocks 1-4 repeatedly
 #' block_indices <- rep(1:4, length.out=20)
 #' blocks <- split_blocks(vec, block_indices)
@@ -304,13 +304,13 @@ setGeneric(name="split_clusters", def=function(x, clusters, ...) standardGeneric
 #' # Create a simple 3D volume
 #' space <- NeuroSpace(c(10,10,10), c(1,1,1))
 #' vol <- NeuroVol(array(rnorm(10*10*10), c(10,10,10)), space)
-#' 
+#'
 #' # Get all slices along the z-axis
 #' slc <- slices(vol)
-#' 
+#'
 #' # Number of slices equals the z dimension
 #' length(slc) == dim(vol)[3]
-#' 
+#'
 #' # Each slice is a 2D matrix
 #' dim(slc[[1]]) == c(10,10)
 setGeneric(name="slices", def=function(x, ...) standardGeneric("slices"))
@@ -686,13 +686,13 @@ setGeneric(name="inverse_trans", def=function(x) standardGeneric("inverse_trans"
 #' test_data <- rnorm(100)
 #' writeBin(test_data, con, size = 8)
 #' close(con)
-#' 
+#'
 #' # Create a BinaryReader and read the data
 #' reader <- BinaryReader(tmp, byte_offset = 0L,
 #'                       data_type = "double", bytes_per_element = 8L)
 #' data <- read_elements(reader, 100)
 #' close(reader)
-#' 
+#'
 #' # Clean up
 #' unlink(tmp)
 setGeneric(name="read_elements", def=function(x, num_elements) standardGeneric("read_elements"))
@@ -709,14 +709,14 @@ setGeneric(name="read_elements", def=function(x, num_elements) standardGeneric("
 #' reader_func <- function(cols) {
 #'   matrix(rnorm(100 * length(cols)), 100, length(cols))
 #' }
-#' 
+#'
 #' # Create a ColumnReader with 100 rows and 10 columns
 #' col_reader <- ColumnReader(nrow = 100L, ncol = 10L, reader = reader_func)
-#' 
+#'
 #' # Read columns 1, 3, and 5
 #' cols <- read_columns(col_reader, c(1L, 3L, 5L))
 #' dim(cols) == c(100, 3)
-#' 
+#'
 setGeneric(name="read_columns", def=function(x, column_indices) standardGeneric("read_columns"))
 
 
@@ -732,21 +732,21 @@ setGeneric(name="read_columns", def=function(x, column_indices) standardGeneric(
 #' tmp <- tempfile()
 #' writer <- BinaryWriter(tmp, byte_offset = 0L,
 #'                       data_type = "DOUBLE", bytes_per_element = 8L)
-#' 
+#'
 #' # Write some random data
 #' data <- rnorm(100)
 #' write_elements(writer, data)
 #' close(writer)
-#' 
+#'
 #' # Read back the data to verify
 #' reader <- BinaryReader(tmp, byte_offset = 0L,
 #'                       data_type = "double", bytes_per_element = 8L)
 #' read_data <- read_elements(reader, 100)
 #' close(reader)
-#' 
+#'
 #' # Verify data was written correctly
 #' all.equal(data, read_data)
-#' 
+#'
 #' # Clean up
 #' unlink(tmp)
 setGeneric(name="write_elements", def=function(x, els) standardGeneric("write_elements"))
@@ -815,27 +815,27 @@ setGeneric(name="write_vec",  def=function(x, file_name, format, data_type, ...)
 #' @param x the object
 #' @param orient the orientation code indicating the "remapped" axes.
 #' @return A reoriented version of \code{x}.
-#' @details When \code{x} is a \code{NeuroSpace} object, the \code{orient} argument should be a character vector 
-#' of length 3 specifying the desired anatomical orientation using single-letter codes. Each letter represents 
+#' @details When \code{x} is a \code{NeuroSpace} object, the \code{orient} argument should be a character vector
+#' of length 3 specifying the desired anatomical orientation using single-letter codes. Each letter represents
 #' an anatomical direction:
 #' \itemize{
 #'   \item First position: "R" (Right) or "L" (Left)
 #'   \item Second position: "A" (Anterior) or "P" (Posterior)
 #'   \item Third position: "S" (Superior) or "I" (Inferior)
 #' }
-#' For example, \code{c("R", "A", "S")} specifies Right-Anterior-Superior orientation, while 
-#' \code{c("L", "P", "I")} specifies Left-Posterior-Inferior orientation. The orientation codes 
+#' For example, \code{c("R", "A", "S")} specifies Right-Anterior-Superior orientation, while
+#' \code{c("L", "P", "I")} specifies Left-Posterior-Inferior orientation. The orientation codes
 #' determine how the voxel grid coordinates map to real-world anatomical space.
 #' @rdname reorient-methods
 #' @export
 #' @examples
 #' # Create a NeuroSpace object in LPI (Left-Posterior-Inferior) orientation
 #' space <- NeuroSpace(c(64, 64, 40), c(2, 2, 2))
-#' 
+#'
 #' # Reorient to RAS (Right-Anterior-Superior) orientation
 #' # Use individual axis codes: "R" for Right, "A" for Anterior, "S" for Superior
 #' space_ras <- reorient(space, c("R", "A", "S"))
-#' 
+#'
 #' # The transformation matrix will be updated to reflect the new orientation
 #' # Original and reoriented spaces will have different coordinate mappings
 #' coords <- c(32, 32, 20)
@@ -931,14 +931,14 @@ setGeneric(name="grid_to_coord",   def=function(x, coords) standardGeneric("grid
 #' @examples
 #' # Create a simple 3D volume in LPI orientation
 #' space <- NeuroSpace(c(10,10,10), c(2,2,2))
-#' 
+#'
 #' # Create a reoriented space in RAS orientation
 #' space_ras <- reorient(space, c("R", "A", "S"))
-#' 
+#'
 #' # Convert coordinates between orientations
-#' voxel_coords <- matrix(rbind(c(1,1,1)))
+#' voxel_coords <- t(matrix(c(1,1,1)))
 #' new_coords <- grid_to_grid(space_ras, voxel_coords)
-#' 
+#' print(new_coords)
 #' @rdname grid_to_grid-methods
 setGeneric(name="grid_to_grid",   def=function(x, vox) standardGeneric("grid_to_grid"))
 
@@ -951,23 +951,23 @@ setGeneric(name="grid_to_grid",   def=function(x, vox) standardGeneric("grid_to_
 #' @examples
 #' # Create a 2D space (10x10)
 #' space_2d <- NeuroSpace(c(10,10), c(1,1))
-#' 
+#'
 #' # Convert 2D grid coordinates to linear indices
 #' coords_2d <- matrix(c(1,1, 2,2), ncol=2, byrow=TRUE)
 #' idx_2d <- grid_to_index(space_2d, coords_2d)
 #' # First coordinate (1,1) maps to index 1
 #' # Second coordinate (2,2) maps to index 12 (= 2 + (2-1)*10)
-#' 
+#'
 #' # Create a 3D space (10x10x10)
 #' space_3d <- NeuroSpace(c(10,10,10), c(1,1,1))
-#' 
+#'
 #' # Convert 3D grid coordinates to linear indices
 #' coords_3d <- matrix(c(1,1,1, 2,2,2), ncol=3, byrow=TRUE)
 #' idx_3d <- grid_to_index(space_3d, coords_3d)
-#' 
+#'
 #' # Single coordinate can also be converted
 #' idx <- grid_to_index(space_3d, c(1,1,1))
-#' 
+#'
 #' @rdname grid_to_index-methods
 setGeneric(name="grid_to_index",   def=function(x, coords) standardGeneric("grid_to_index"))
 
@@ -1034,6 +1034,18 @@ setGeneric(name="as.sparse", def=function(x, mask, ...) standardGeneric("as.spar
 #' @param x the object to densify
 #' @return A dense representation of the input object.
 #' @export
+#' @examples
+#' # Create a sparse representation
+#' space <- NeuroSpace(c(10,10,10,4), c(1,1,1))
+#' mask <- array(runif(10*10*10) > 0.8, c(10,10,10))  # ~20% of voxels active
+#' data <- matrix(rnorm(sum(mask) * 4), 4, sum(mask))  # Random data for active voxels
+#' sparse_vec <- SparseNeuroVec(data, space, mask)
+#'
+#' # Convert to dense representation
+#' dense_vec <- as.dense(sparse_vec)
+#' # The dense representation has the same dimensions but stores all voxels
+#' identical(dim(sparse_vec), dim(dense_vec))
+#'
 setGeneric(name="as.dense", def=function(x) standardGeneric("as.dense"))
 
 #' Convert to a LogicalNeuroVol
@@ -1041,8 +1053,22 @@ setGeneric(name="as.dense", def=function(x) standardGeneric("as.dense"))
 #' @param x the object to binarize
 #' @param indices the indices to set to TRUE
 #' @return A \code{LogicalNeuroVol} object with \code{TRUE} values at the specified \code{indices}.
+#' @examples
+#' # Create a simple 3D volume with random values
+#' space <- NeuroSpace(c(10,10,10), spacing=c(1,1,1))
+#' vol <- NeuroVol(array(runif(1000), c(10,10,10)), space)
+#'
+#' # Create a mask by thresholding (values > 0.5 become TRUE)
+#' mask1 <- as.mask(vol > 0.5)
+#'
+#' # Create a mask by specifying indices
+#' indices <- which(vol > 0.8)  # get indices of high values
+#' mask2 <- as.mask(vol, indices)
+#'
+#' # Both masks are LogicalNeuroVol objects
+#' identical(class(mask1), class(mask2))
 #' @export
-setGeneric(name="as.mask", def=function(x, indices) standardGeneric("as.mask"))
+setGeneric("as.mask", function(x, indices) standardGeneric("as.mask"))
 
 
 
@@ -1053,6 +1079,20 @@ setGeneric(name="as.mask", def=function(x, indices) standardGeneric("as.mask"))
 #' @param mask mask indicating the valid patch area
 #' @param ... additional args
 #' @return A \code{list} of coordinate patches, each representing a fixed-size region of the input object.
+#' @examples
+#' # Create a simple 3D volume
+#' space <- NeuroSpace(c(10,10,10), spacing=c(1,1,1))
+#' vol <- NeuroVol(array(rnorm(1000), c(10,10,10)), space)
+#'
+#' # Create a mask with some active voxels
+#' mask <- LogicalNeuroVol(vol > 0, space)
+#'
+#' # Extract 3x3x3 patches centered at each active voxel
+#' patches <- patch_set(vol, dims=c(3,3,3), mask=mask)
+#'
+#' # Access the first patch
+#' patch1 <- patches[[1]]
+#' dim(patch1)  # Should be c(27) (flattened 3x3x3 patch)
 #' @export
 setGeneric(name="patch_set", def=function(x, dims, mask, ...) standardGeneric("patch_set"))
 
@@ -1061,6 +1101,27 @@ setGeneric(name="patch_set", def=function(x, dims, mask, ...) standardGeneric("p
 #' @param x the object to extract number of clusters
 #' @return An \code{integer} representing the number of clusters in \code{x}.
 #' @export
+#' @examples
+#' # Create a simple 3D volume and mask
+#' space <- NeuroSpace(c(16, 16, 16), spacing = c(1, 1, 1))
+#' vol_data <- array(rnorm(16^3), dim = c(16, 16, 16))
+#' mask_vol <- LogicalNeuroVol(vol_data > 0, space)
+#'
+#' # Get coordinates of masked voxels for clustering
+#' mask_idx <- which(mask_vol)
+#' coords <- index_to_coord(mask_vol, mask_idx)
+#'
+#' # Cluster the coordinates into 10 groups using k-means
+#' set.seed(123)  # for reproducibility
+#' kmeans_result <- kmeans(coords, centers = 10)
+#'
+#' # Create a clustered volume
+#' clustered_vol <- ClusteredNeuroVol(mask_vol, kmeans_result$cluster)
+#'
+#' # Get the number of clusters
+#' n_clusters <- num_clusters(clustered_vol)
+#' n_clusters == 10
+#' @rdname num_clusters-methods
 setGeneric(name="num_clusters", def=function(x) standardGeneric("num_clusters"))
 
 
@@ -1071,6 +1132,21 @@ setGeneric(name="num_clusters", def=function(x) standardGeneric("num_clusters"))
 #' @return A numeric \code{matrix} or \code{vector} containing the coordinates of \code{x}.
 #' @export
 #' @name coords
+#' @examples
+#' # Create a NeuroSpace object with 3mm voxels
+#' space <- NeuroSpace(c(10,10,10), spacing=c(3,3,3))
+#'
+#' # Create ROI coordinates in voxel space
+#' coords <- matrix(c(1,1,1, 2,2,2), ncol=3, byrow=TRUE)
+#' roi_coords <- ROICoords(coords)
+#'
+#' # Get coordinates in voxel space
+#' vox_coords <- coords(roi_coords)
+#' # First coordinate is (1,1,1)
+#'
+#' # Get coordinates
+#' cds <- coords(roi_coords)
+#' nrow(cds) == 2
 setGeneric(name="coords", def=function(x, ...) standardGeneric("coords"))
 
 #' Extract indices
@@ -1078,6 +1154,19 @@ setGeneric(name="coords", def=function(x, ...) standardGeneric("coords"))
 #' @param x the object to extract indices
 #' @return A \code{vector} of indices from \code{x}.
 #' @export
+#' @examples
+#' # Create a NeuroSpace object with 3mm voxels
+#' space <- NeuroSpace(c(10,10,10), spacing=c(3,3,3))
+#'
+#' # Create ROI coordinates in voxel space
+#' coords <- matrix(c(1,1,1, 2,2,2), ncol=3, byrow=TRUE)
+#'
+#' # Create ROI volume
+#' roi_vol <- ROIVol(space, coords, data=c(1,2))
+#'
+#' # Get linear indices of ROI voxels
+#' idx <- indices(roi_vol)
+#' # These indices can be used to index into a 3D array of size 10x10x10
 setGeneric(name="indices", def=function(x) standardGeneric("indices"))
 
 #' Index Lookup operation
@@ -1086,31 +1175,79 @@ setGeneric(name="indices", def=function(x) standardGeneric("indices"))
 #' @param ... additional arguments
 #' @return The value(s) at the specified index/indices of \code{x}.
 #' @export
+#' @examples
+#' # Create a 64x64x64 space
+#' space <- NeuroSpace(c(64, 64, 64), c(1, 1, 1), c(0, 0, 0))
+#'
+#' # Create a lookup volume with first 100 indices
+#' ilv <- IndexLookupVol(space, 1:100)
+#'
+#' # Look up values for indices 1, 2, and 3
+#' # Returns their positions in the sparse representation
+#' lookup(ilv, c(1, 2, 3))
+#'
+#' # Look up values outside the included indices
+#' # Returns 0 for indices not in the lookup volume
+#' lookup(ilv, c(101, 102))
 setGeneric(name="lookup", def=function(x, i, ...) standardGeneric("lookup"))
 
 
 #' Extract time series from specific voxel coordinates and return as ROI object
 #'
-#' @description
 #' Extracts time series data from a \code{NeuroVec} object at specified voxel coordinates
 #' and returns it as an ROI object.
 #'
 #' @param x The \code{NeuroVec} object
 #' @param i Numeric index for the first dimension
 #' @param ... Additional arguments
-#'
 #' @return A \code{ROIVec} object containing the time series data for the specified coordinates.
+#' @examples
+#' # Create a simple 4D neuroimaging vector
+#' space <- NeuroSpace(c(10,10,10,20), c(1,1,1))
+#' vec <- NeuroVec(array(rnorm(10*10*10*20), c(10,10,10,20)), space)
 #'
+#' # Extract time series for first 100 voxels as ROI
+#' roi1 <- series_roi(vec, 1:100)
+#'
+#' # Extract time series using 3D coordinates
+#' coords <- matrix(c(1,1,1, 2,2,2, 3,3,3), ncol=3, byrow=TRUE)
+#' roi2 <- series_roi(vec, coords)
+#' @seealso \code{\link{series}}
 #' @export
 setGeneric("series_roi", function(x, i, ...) standardGeneric("series_roi"))
 
 #' Extract one or more series from object
+#'
+#' This function extracts time series data from specific voxel coordinates in a 4D neuroimaging object.
+#' It supports multiple ways of specifying the coordinates:
+#' \itemize{
+#'   \item Linear indices (1D)
+#'   \item Grid coordinates (3D matrix)
+#'   \item Individual x,y,z coordinates
+#' }
+#'
 #' @param x the object
 #' @param i the series indices
 #' @param ... additional arguments
 #' @return A \code{list} or \code{array} containing the extracted series.
+#' @examples
+#' # Create a simple 4D neuroimaging vector (10x10x10 volume with 20 timepoints)
+#' space <- NeuroSpace(c(10,10,10,20), c(1,1,1))
+#' vec <- NeuroVec(array(rnorm(10*10*10*20), c(10,10,10,20)), space)
+#'
+#' # Extract time series using linear indices
+#' ts1 <- series(vec, 1:10)  # Get time series for first 10 voxels
+#'
+#' # Extract time series using 3D coordinates
+#' coords <- matrix(c(1,1,1, 2,2,2, 3,3,3), ncol=3, byrow=TRUE)
+#' ts2 <- series(vec, coords)  # Get time series for 3 specific voxel locations
+#'
+#' # Extract single time series using x,y,z coordinates
+#' ts3 <- series(vec, 5, 5, 5)  # Get time series from middle voxel
+#'
 #' @export
 #' @rdname series-methods
+#' @seealso \code{\link{series_roi}}
 setGeneric(name="series", def=function(x, i, ...) standardGeneric("series"))
 
 #' Extract image slice
@@ -1137,7 +1274,7 @@ setGeneric(name="slice", def=function(x, zlevel, along, orientation, ...) standa
 #' @param colmap the colors used to map from values to RGBA colors.
 #' @param ... additional arguments
 #' @return A rendered image with the specified dimensions and color mapping.
-#' @rdname render-methods
+#' @noRd
 setGeneric(name="render", def=function(x, width, height, colmap,...) standardGeneric("render"))
 
 
@@ -1150,7 +1287,7 @@ setGeneric(name="render", def=function(x, width, height, colmap,...) standardGen
 #' @param colmap the colors used to map from values to RGBA colors.
 #' @param ... additional arguments
 #' @return A rendered image of the specified slice with the given dimensions and color mapping.
-#' @rdname render_slice-methods
+#' @noRd
 setGeneric(name="render_slice", def=function(x, zpos, width, height, colmap,...) standardGeneric("render_slice"))
 
 
@@ -1212,11 +1349,58 @@ setGeneric(name="concat", def=function(x,y, ...) standardGeneric("concat"))
 
 #' Connected components
 #'
-#' Find connected components in an image
+#' Find connected components in an image. This function identifies and labels spatially
+#' connected regions in neuroimaging data, supporting both binary masks and thresholded volumes.
 #'
 #' @name conn_comp
 #' @param x the image object
-#' @param ... additional arguments
+#' @param ... additional arguments including:
+#'   \itemize{
+#'     \item threshold - numeric value defining lower intensity bound for image mask
+#'     \item cluster_table - logical indicating whether to return cluster statistics
+#'     \item local_maxima - logical indicating whether to compute local maxima
+#'     \item local_maxima_dist - minimum distance between local maxima
+#'     \item connect - connectivity pattern ("26-connect", "18-connect", or "6-connect")
+#'   }
+#' @return A list containing:
+#'   \itemize{
+#'     \item index - A \code{ClusteredNeuroVol} object with cluster labels
+#'     \item size - A \code{NeuroVol} object with cluster sizes
+#'     \item voxels - A list of cluster voxel coordinates
+#'     \item cluster_table - (optional) Data frame with cluster statistics
+#'     \item local_maxima - (optional) Matrix of local maxima coordinates
+#'   }
+#' @examples
+#' # Create a simple 3D volume with two distinct regions
+#' space <- NeuroSpace(c(10,10,10), c(1,1,1))
+#' vol_data <- array(0, c(10,10,10))
+#'
+#' # Create first cluster in corner (2x2x2)
+#' vol_data[1:2, 1:2, 1:2] <- 1
+#'
+#' # Create second cluster in opposite corner (2x2x2)
+#' vol_data[8:9, 8:9, 8:9] <- 1
+#'
+#' # Create NeuroVol object
+#' vol <- NeuroVol(vol_data, space)
+#'
+#' # Find connected components with default 26-connectivity
+#' # Returns components above threshold 0
+#' comps <- conn_comp(vol, threshold=0)
+#'
+#' # Access results
+#' max(comps$index) == 2  # Should have 2 clusters
+#' all(comps$size >= 0)    # All clusters should have >= 0
+#'
+#' # Get cluster statistics
+#' comps <- conn_comp(vol, threshold=0, cluster_table=TRUE)
+#' # cluster_table contains: index, x, y, z, N (size), Area, value
+#'
+#' # Find local maxima within clusters
+#' comps <- conn_comp(vol, threshold=0, local_maxima=TRUE,
+#'                   local_maxima_dist=2)
+#' # local_maxima contains: index, x, y, z, value
+#'
 #' @export
 #' @rdname conn_comp-methods
 #' @return An object representing the connected components of \code{x}.
@@ -1229,6 +1413,19 @@ setGeneric(name="conn_comp", def=function(x, ...) standardGeneric("conn_comp"))
 #' @export
 #' @rdname voxels-methods
 #' @return A \code{matrix} or \code{vector} representing voxel coordinates from \code{x}.
+#' @examples
+#' # Create a 3D kernel with dimensions 3x3x3 and voxel size 1x1x1
+#' kern <- Kernel(kerndim = c(3,3,3), vdim = c(1,1,1))
+#'
+#' # Get voxel coordinates centered at origin (0,0,0)
+#' vox <- voxels(kern)
+#' # Returns a matrix where each row is a voxel coordinate
+#' # relative to the kernel center
+#'
+#' # Get voxel coordinates centered at specific point (5,5,5)
+#' vox_centered <- voxels(kern, center_voxel = c(5,5,5))
+#' # Returns coordinates shifted to be centered at (5,5,5)
+#'
 setGeneric(name="voxels", def=function(x, ...) standardGeneric("voxels"))
 
 
@@ -1308,6 +1505,15 @@ setGeneric(name="data_file", def=function(x, file_name) standardGeneric("data_fi
 #' @return A \code{character} string \code{file_name} without its extension.
 #' @export
 #' @rdname strip_extension-methods
+#' @examples
+#' # Create a FileFormat for NIFTI files
+#' fmt <- new("FileFormat",
+#'            header_extension = "nii",
+#'            data_extension = "nii")
+#'
+#' # Strip extension from a NIFTI file
+#' strip_extension(fmt, "brain_scan.nii")  # Returns "brain_scan"
+#'
 setGeneric(name="strip_extension", def=function(x, file_name) standardGeneric("strip_extension"))
 
 #' Generic function to read image meta info given a file
@@ -1316,6 +1522,25 @@ setGeneric(name="strip_extension", def=function(x, file_name) standardGeneric("s
 #' @return A \code{list} containing the meta information read from the file.
 #' @export
 #' @rdname read_meta_info-methods
+#' @examples
+#' # Create a NIFTI format descriptor
+#' fmt <- new("NIFTIFormat",
+#'            file_format = "NIFTI",
+#'            header_encoding = "raw",
+#'            header_extension = "nii",
+#'            data_encoding = "raw",
+#'            data_extension = "nii")
+#'
+#' # Read metadata from a NIFTI file
+#' \donttest{
+#' fname <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
+#' meta <- read_meta_info(fmt, fname)
+#'
+#' # Access metadata properties
+#' dim(meta)          # Image dimensions
+#' trans(meta)        # Transformation matrix
+#' }
+#'
 setGeneric(name="read_meta_info", def=function(x, file_name) standardGeneric("read_meta_info"))
 
 
@@ -1327,4 +1552,21 @@ setGeneric(name="read_meta_info", def=function(x, file_name) standardGeneric("re
 #' @return An object representing the embedded kernel in the specified space.
 #' @export
 #' @rdname embed_kernel-methods
+#' @examples
+#' # Create a 3D Gaussian kernel with dimensions 3x3x3 and voxel size 1x1x1
+#' kern <- Kernel(kerndim = c(3,3,3), vdim = c(1,1,1), FUN = dnorm, sd = 1)
+#'
+#' # Create a NeuroSpace object to embed the kernel in
+#' space <- NeuroSpace(c(10,10,10), c(1,1,1))
+#'
+#' # Embed the kernel at the center of the space (position 5,5,5)
+#' embedded_kern <- embed_kernel(kern, space, c(5,5,5))
+#'
+#' # The result is a SparseNeuroVol with kernel weights centered at (5,5,5)
+#' # We can also scale the kernel weights by using the weight parameter
+#' embedded_kern_scaled <- embed_kernel(kern, space, c(5,5,5), weight = 2)
+#'
+#' # The scaled kernel has weights twice as large as the original
+#' max(values(embedded_kern_scaled)) == 2 * max(values(embedded_kern))
+#'
 setGeneric("embed_kernel", def=function(x, sp, center_voxel, ...) standardGeneric("embed_kernel"))

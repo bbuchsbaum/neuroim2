@@ -42,7 +42,7 @@ When \code{i} is a matrix, returns a numeric vector of values at the specified t
 \description{
 This function efficiently extracts values from a 4D tensor (typically neuroimaging data) using a matrix of indices where each row contains
 a time index in column 1 and a spatial index in column 2. The spatial index refers to the position
-in the flattened spatial dimensions (x,y,z). This is primarily used internally by the \code{series()} 
+in the flattened spatial dimensions (x,y,z). This is primarily used internally by the \code{series()}
 method to efficiently access time series data for specific voxels.
 }
 \examples{

@@ -17,3 +17,19 @@ A numeric \code{matrix} or \code{vector} containing the coordinates of \code{x}.
 \description{
 This function extracts the coordinates from an input object.
 }
+\examples{
+# Create a NeuroSpace object with 3mm voxels
+space <- NeuroSpace(c(10,10,10), spacing=c(3,3,3))
+
+# Create ROI coordinates in voxel space
+coords <- matrix(c(1,1,1, 2,2,2), ncol=3, byrow=TRUE)
+roi_coords <- ROICoords(coords)
+
+# Get coordinates in voxel space
+vox_coords <- coords(roi_coords)
+# First coordinate is (1,1,1)
+
+# Get coordinates
+cds <- coords(roi_coords)
+nrow(cds) == 2
+}
