@@ -35,9 +35,6 @@ each axis. If \code{qfac} is \code{-1}, the \eqn{z} scale is negated. The
 resulting 4x4 matrix is typically used as an affine transform for voxel-to-world
 coordinate mapping.
 }
-\references{
-- NIfTI-1 specification for quaternions: \url{https://nifti.nimh.nih.gov}
-}
 \seealso{
 \code{\link{matrixToQuatern}} for converting a matrix back to quaternion form.
 }

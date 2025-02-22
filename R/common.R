@@ -495,7 +495,6 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 #' @references
 #' - Cox RW. *Analysis of Functional NeuroImages* (AFNI) and NIfTI-1 quaternion
 #'   conventions. \url{https://afni.nimh.nih.gov}
-#' - The official NIfTI-1 specification: \url{https://nifti.nimh.nih.gov}
 #'
 #' @export
 matrixToQuatern <- function(mat) {
@@ -591,9 +590,6 @@ matrixToQuatern <- function(mat) {
 #'
 #' @seealso
 #' \code{\link{matrixToQuatern}} for converting a matrix back to quaternion form.
-#'
-#' @references
-#' - NIfTI-1 specification for quaternions: \url{https://nifti.nimh.nih.gov}
 #'
 #' @export
 quaternToMatrix <- function(quat, origin, stepSize, qfac) {

@@ -36,7 +36,6 @@ representing the rotation in 3D.
 \references{
 - Cox RW. *Analysis of Functional NeuroImages* (AFNI) and NIfTI-1 quaternion
   conventions. \url{https://afni.nimh.nih.gov}
-- The official NIfTI-1 specification: \url{https://nifti.nimh.nih.gov}
 }
 \seealso{
 \code{\link{quaternToMatrix}} for the inverse operation, converting
