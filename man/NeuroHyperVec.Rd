@@ -19,6 +19,27 @@ A new \code{\linkS4class{NeuroHyperVec}} object.
 \description{
 Constructor for NeuroHyperVec class
 }
+\examples{
+# Create a 5D space (10x10x10 spatial, 2 trials, 2 features)
+space <- NeuroSpace(c(10,10,10,2,2))
+
+# Create a mask for the spatial dimensions
+space3d <- NeuroSpace(c(10,10,10))
+mask_data <- array(TRUE, dim=c(10,10,10))  # All voxels active
+mask <- LogicalNeuroVol(mask_data, space3d)
+
+# Create data in the format expected by NeuroHyperVec:
+# 3D array with dimensions [features x trials x voxels]
+n_features <- 2
+n_trials <- 2
+n_voxels <- sum(mask_data)  # 1000 voxels
+data_array <- array(rnorm(n_features * n_trials * n_voxels), 
+                   dim = c(n_features, n_trials, n_voxels))
+
+# Create the NeuroHyperVec object
+hvec <- NeuroHyperVec(data_array, space, mask)
+
+}
 \seealso{
 \code{\linkS4class{NeuroSpace}}, \code{\linkS4class{LogicalNeuroVol}}
 }

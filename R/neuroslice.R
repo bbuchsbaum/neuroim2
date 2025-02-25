@@ -233,6 +233,7 @@ setMethod("plot",
 #' @importFrom utils object.size
 #' @rdname show-methods
 #' @export
+#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 setMethod(f="show", 
           signature=signature("NeuroSlice"),
           def=function(object) {

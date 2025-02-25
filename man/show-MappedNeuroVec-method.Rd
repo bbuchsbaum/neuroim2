@@ -9,6 +9,9 @@
 \arguments{
 \item{object}{A MappedNeuroVec object}
 }
+\value{
+Invisibly returns \code{NULL}, called for its side effect of displaying the object.
+}
 \description{
 Displays a formatted summary of a MappedNeuroVec object.
 }

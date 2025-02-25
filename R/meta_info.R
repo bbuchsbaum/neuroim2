@@ -453,6 +453,8 @@ AFNIMetaInfo <- function(descriptor, afni_header) {
 #'
 #' @param file_name the name of the file to read
 #' @return an instance of class \code{\linkS4class{FileMetaInfo}}
+#' @examples
+#' header <- read_header(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #' @export read_header
 read_header <- function(file_name) {
   desc <- find_descriptor(file_name)
@@ -478,6 +480,7 @@ setAs(from="MetaInfo", to="NIFTIMetaInfo", def=function(from) {
 #' show a \code{FileMetaInfo}
 #' @param object the object
 #' @export
+#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 setMethod(f="show", signature=signature("FileMetaInfo"),
   def=function(object) {
     cat("an instance of class",  class(object), "\n\n")

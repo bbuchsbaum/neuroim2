@@ -12,6 +12,9 @@
 \arguments{
 \item{con}{The BinaryReader or BinaryWriter object to close.}
 }
+\value{
+Invisibly returns \code{NULL}, called for its side effect of closing the connection.
+}
 \description{
 Closes the underlying connection associated with a BinaryReader or BinaryWriter object.
 This should be called when you're done with the reader/writer to free system resources.

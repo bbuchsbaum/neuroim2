@@ -18,6 +18,8 @@ centroids(x, ...)
 }
 \value{
 A numeric \code{matrix} where each row represents the coordinates of a centroid.
+
+A matrix of coordinates where each row represents the centroid of a cluster.
 }
 \description{
 Return a matrix of centroids of an object

@@ -65,7 +65,6 @@ parse_niml_header <- function(fconn) {
   while(TRUE ) {
 
     ch <- suppressWarnings(readChar(fconn,1))
-    #print(ch)
     if (length(ch) == 0) {
       break
     } else if (ch == "<" && STATE == "BEGIN") {

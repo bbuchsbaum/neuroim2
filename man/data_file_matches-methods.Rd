@@ -17,9 +17,6 @@ data_file_matches(x, file_name)
 }
 \value{
 \code{TRUE} for match, \code{FALSE} otherwise.
-
-A logical value: \code{TRUE} if the file name matches the data format,
-  \code{FALSE} otherwise
 }
 \description{
 Validates whether a file name conforms to the data file format specification.

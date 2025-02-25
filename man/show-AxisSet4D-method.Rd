@@ -10,7 +10,7 @@
 \item{object}{An AxisSet4D object}
 }
 \value{
-Invisibly returns NULL after printing the axis set information.
+Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 }
 \description{
 Show method for AxisSet4D objects

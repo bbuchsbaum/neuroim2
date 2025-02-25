@@ -123,6 +123,7 @@ setMethod(f = "sub_vector",
 #'
 #' @export
 #' @rdname as.list-methods
+#' @return A list of DenseNeuroVol objects
 setMethod(f = "as.list", 
           signature = signature(x = "FileBackedNeuroVec"),
           def = function(x) {
@@ -161,19 +162,19 @@ setAs(from = "FileBackedNeuroVec", to = "matrix",
 #' @param i A numeric vector of indices
 #' 
 #' @examples
-  #' \donttest{
-  #' # Create a small NeuroVec and save it
-  #' nvec <- NeuroVec(matrix(1:32, 8, 4), NeuroSpace(c(2,2,2,4)))
-  #' tmp <- tempfile(fileext = ".nii")
-  #' write_vec(nvec, tmp)
-  #' 
-  #' # Load as FileBackedNeuroVec and access values
-  #' fbvec <- FileBackedNeuroVec(tmp)
-  #' values <- linear_access(fbvec, 1:10)
-  #' 
-  #' # Clean up
-  #' unlink(tmp)
-  #' }
+#' \donttest{
+#' # Create a small NeuroVec and save it
+#' nvec <- NeuroVec(matrix(1:32, 8, 4), NeuroSpace(c(2,2,2,4)))
+#' tmp <- tempfile(fileext = ".nii")
+#' write_vec(nvec, tmp)
+#' 
+#' # Load as FileBackedNeuroVec and access values
+#' fbvec <- FileBackedNeuroVec(tmp)
+#' values <- linear_access(fbvec, 1:10)
+#' 
+#' # Clean up
+#' unlink(tmp)
+#' }
 #'
 #' @export
 #' @rdname linear_access-methods

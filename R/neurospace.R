@@ -161,6 +161,7 @@ NeuroSpace <- function(dim, spacing = NULL, origin = NULL, axes = NULL, trans = 
 #' @importFrom utils object.size
 #' @rdname show-methods
 #' @export
+#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 setMethod(f="show",
           signature=signature("NeuroSpace"),
           def=function(object) {
@@ -352,8 +353,7 @@ setMethod(f="dim", signature=signature(x = "NeuroSpace"),
 setMethod(f="ndim", signature=signature(x = "NeuroSpace"),
 		def=function(x) length(x@dim))
 
-#' Calculate the centroid of a NeuroSpace object
-#' @param x The NeuroSpace object
+
 #' @export
 #' @rdname centroid-methods
 setMethod(f="centroid", signature=signature(x = "NeuroSpace"),

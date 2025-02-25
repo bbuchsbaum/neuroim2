@@ -11,6 +11,9 @@
 
 \item{dimnum}{Numeric index of dimension to drop (optional)}
 }
+\value{
+An object of the same class as the input with the specified dimension removed.
+}
 \description{
 Drop dimension from axis set
 }

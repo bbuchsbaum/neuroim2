@@ -224,9 +224,10 @@ setMethod(f = "coords",
             }
           })
 
-#' Show method for IndexLookupVol Objects
+
 #' @export
 #' @rdname show-methods
+#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 setMethod("show", signature(object = "IndexLookupVol"),
           def = function(object) {
             # Calculate summary statistics

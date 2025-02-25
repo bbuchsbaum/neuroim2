@@ -192,6 +192,7 @@ setMethod(f="indices", signature=signature(x = "ROIVol"),
 
 #' @rdname as.numeric-methods
 #' @export
+#' @return A numeric vector of length \code{nrow(x@coords)}
 setMethod(f="as.numeric", signature=signature(x = "ROIVol"),
           def=function(x) {
             x@.Data
@@ -237,6 +238,7 @@ setMethod(f="coords", signature=signature(x = "ROIVol"),
 
 
 #' @export
+#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 setMethod(f="show", signature=signature(object = "ROIVol"),
           def=function(object) {
             cat("\n", crayon::bold(crayon::blue("ROIVol Object")), "\n\n")
@@ -905,6 +907,7 @@ setMethod("[", signature=signature(x="ROIVol", i="logical", j="missing", drop="A
 #' show an \code{\linkS4class{ROIVol}}
 #' @param object the object
 #' @export
+#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 setMethod("show", signature=signature(object = "ROIVol"),
 		  function (object) {
 			  cat("\n", crayon::bold(crayon::blue("ROIVol Object")), "\n\n")
@@ -926,6 +929,7 @@ setMethod("show", signature=signature(object = "ROIVol"),
 #' @param object the object
 #' @importFrom crayon bold blue green red yellow silver
 #' @export
+#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 setMethod("show", signature=signature(object = "ROIVec"),
           function (object) {
             # Calculate statistics

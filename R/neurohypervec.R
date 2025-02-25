@@ -121,6 +121,26 @@ setClass(
 #' @return A new \code{\linkS4class{NeuroHyperVec}} object.
 #'
 #' @seealso \code{\linkS4class{NeuroSpace}}, \code{\linkS4class{LogicalNeuroVol}}
+#' 
+#' @examples 
+#' # Create a 5D space (10x10x10 spatial, 2 trials, 2 features)
+#' space <- NeuroSpace(c(10,10,10,2,2))
+#' 
+#' # Create a mask for the spatial dimensions
+#' space3d <- NeuroSpace(c(10,10,10))
+#' mask_data <- array(TRUE, dim=c(10,10,10))  # All voxels active
+#' mask <- LogicalNeuroVol(mask_data, space3d)
+#' 
+#' # Create data in the format expected by NeuroHyperVec:
+#' # 3D array with dimensions [features x trials x voxels]
+#' n_features <- 2
+#' n_trials <- 2
+#' n_voxels <- sum(mask_data)  # 1000 voxels
+#' data_array <- array(rnorm(n_features * n_trials * n_voxels), 
+#'                    dim = c(n_features, n_trials, n_voxels))
+#' 
+#' # Create the NeuroHyperVec object
+#' hvec <- NeuroHyperVec(data_array, space, mask)
 #'
 #' @export
 NeuroHyperVec <- function(data, space, mask) {
@@ -249,7 +269,7 @@ NeuroHyperVec <- function(data, space, mask) {
 #' @param ... Additional arguments (not used)
 #'
 #' @details when x is a NeuroHyperVec object, the series method returns a 2D array with dimensions [features x trials]
-#'
+#' @return A 2D array with dimensions [features x trials]
 setMethod("series", signature(x = "NeuroHyperVec"),
   function(x, i, j, k, ...) {
     # Validate indices
@@ -420,6 +440,8 @@ setMethod("[", signature(x = "NeuroHyperVec"),
 #' @importFrom crayon bold blue green red yellow silver
 #' @importFrom utils object.size
 #' @export
+#' @rdname show-methods
+#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 setMethod("show", signature(object="NeuroHyperVec"),
           def=function(object) {
             cat("\n", crayon::bold(crayon::blue("NeuroHyperVec Object")), "\n")

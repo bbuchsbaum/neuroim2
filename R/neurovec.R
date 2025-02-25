@@ -834,6 +834,7 @@ setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character",
 #' @export
 #' @rdname show-methods
 #' @aliases show,DenseNeuroVec-method
+#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 setMethod("show", "DenseNeuroVec",
           def=function(object) {
             # Get class name without package prefix
@@ -1402,6 +1403,7 @@ setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character",
 
 #' @export
 #' @rdname show-methods
+#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 setMethod("show", "NeuroVecSeq",
           def=function(object) {
             cat("\n", crayon::bold(crayon::blue("NeuroVecSeq")), " ",

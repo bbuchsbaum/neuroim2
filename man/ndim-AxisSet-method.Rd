@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments (not used)}
 }
+\value{
+An integer representing the number of dimensions in \code{x}.
+}
 \description{
 Get number of dimensions in axis set
 }

@@ -128,15 +128,13 @@ setMethod(f="perm_mat", signature=signature(x = "AxisSet3D"),
             cbind(x@i@direction, x@j@direction, x@k@direction)
           })
 
-#' Get permutation matrix from axis set
+#' Get permutation matrix from NeuroSpace
 #'
 #' @param x A NeuroSpace object
 #' @param ... Additional arguments (not used)
+#' @return A numeric N x N \code{matrix} representing the permutation transform, where N is the dimensionality of the image.
 #' @export
-#' @examples
-#' ns <- NeuroSpace(dim=c(10,10,10))
-#' perm_mat(ns)
-#'
+#' @rdname perm_mat-methods
 setMethod(f="perm_mat", signature=signature(x = "NeuroSpace"),
           def=function(x, ...) {
             callGeneric(x@axes)
@@ -146,7 +144,9 @@ setMethod(f="perm_mat", signature=signature(x = "NeuroSpace"),
 #'
 #' @param x An AxisSet2D or AxisSet3D object
 #' @param dimnum Numeric index of dimension to drop
+#' @return An object of the same class as the input with the specified dimension removed.
 #' @export
+#' @rdname drop_dim-methods
 setMethod(f="drop_dim", signature=signature(x = "AxisSet2D", dimnum="numeric"),
           def=function(x, dimnum) {
             stopifnot(length(dimnum) == 1)
@@ -163,6 +163,7 @@ setMethod(f="drop_dim", signature=signature(x = "AxisSet2D", dimnum="numeric"),
 #'
 #' @param x An AxisSet2D object
 #' @param dimnum Numeric index of dimension to drop (optional)
+#' @return An object of the same class as the input with the specified dimension removed.
 #' @export
 setMethod(f="drop_dim", signature=signature(x = "AxisSet2D", dimnum="missing"),
           def=function(x, dimnum) {
@@ -173,6 +174,7 @@ setMethod(f="drop_dim", signature=signature(x = "AxisSet2D", dimnum="missing"),
 #'
 #' @param x An AxisSet3D object
 #' @param dimnum Numeric index of dimension to drop
+#' @return An object of the same class as the input with the specified dimension removed.
 #' @export
 setMethod(f="drop_dim", signature=signature(x = "AxisSet3D", dimnum="numeric"),
           def=function(x, dimnum) {
@@ -192,6 +194,7 @@ setMethod(f="drop_dim", signature=signature(x = "AxisSet3D", dimnum="numeric"),
 #'
 #' @param x An AxisSet3D object
 #' @param dimnum Numeric index of dimension to drop (optional)
+#' @return An object of the same class as the input with the specified dimension removed.
 #' @export
 setMethod(f="drop_dim", signature=signature(x = "AxisSet3D", dimnum="missing"),
            def=function(x, dimnum) {
@@ -202,6 +205,7 @@ setMethod(f="drop_dim", signature=signature(x = "AxisSet3D", dimnum="missing"),
 #'
 #' @param x An AxisSet object
 #' @param ... Additional arguments (not used)
+#' @return An integer representing the number of dimensions in \code{x}.
 #' @export
 setMethod(f="ndim",signature(x= "AxisSet"), function(x, ...) { x@ndim })
 
@@ -220,6 +224,7 @@ setMethod(f="print_", signature=signature("NamedAxis"),
 #' Show method for NamedAxis objects
 #'
 #' @param object A NamedAxis object
+#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 #' @export
 setMethod(f="show", signature("NamedAxis"),
     def=function(object) {
@@ -232,6 +237,7 @@ setMethod(f="show", signature("NamedAxis"),
 #' Show method for AxisSet1D objects
 #'
 #' @param object An AxisSet1D object
+#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 #' @export
 setMethod(f="show", signature=signature("AxisSet1D"),
     def=function(object) {
@@ -256,6 +262,7 @@ setMethod(f="print_", signature=signature("AxisSet2D"),
 #' Show method for AxisSet2D objects
 #'
 #' @param object An AxisSet2D object
+#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 #' @export
 setMethod(f="show", signature=signature("AxisSet2D"),
     def=function(object) {
@@ -281,7 +288,7 @@ setMethod(f="print_", signature=signature("AxisSet3D"),
 #' Show method for AxisSet3D objects
 #'
 #' @param object An AxisSet3D object
-#' @return Invisibly returns NULL after printing the axis set information.
+#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 #' @export
 setMethod(f="show", signature=signature("AxisSet3D"),
     def=function(object) {
@@ -296,7 +303,7 @@ setMethod(f="show", signature=signature("AxisSet3D"),
 #' Show method for AxisSet4D objects
 #'
 #' @param object An AxisSet4D object
-#' @return Invisibly returns NULL after printing the axis set information.
+#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 #' @export
 setMethod(f="show", signature=signature("AxisSet4D"),
     def=function(object) {
@@ -502,7 +509,7 @@ findAnatomy <- function(pmat, tol=1e-10) {
 
   orthogonalize <- function(col1, col2) {
     dotp <- sum(col1*col2)
-    #print(dotp)
+
     if (abs(dotp) > 1.e-4) {
       col2 <- col2 - (dotp * col1)
       norm <- sqrt(sum(col2^2))
@@ -638,7 +645,6 @@ findAnatomy <- function(pmat, tol=1e-10) {
 
   orthogonalize <- function(col1, col2) {
     dotp <- sum(col1*col2)
-    #print(dotp)
     if (abs(dotp) > 1.e-4) {
       col2 <- col2 - (dotp * col1)
       norm <- sqrt(sum(col2^2))

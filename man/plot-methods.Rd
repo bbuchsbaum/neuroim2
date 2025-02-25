@@ -64,5 +64,7 @@ plot(slice)
 
 dat <- matrix(rnorm(100*100), 100, 100)
 slice <- NeuroSlice(dat, NeuroSpace(c(100,100)))
-#plot(slice)
+\donttest{
+plot(slice)
+}
 }

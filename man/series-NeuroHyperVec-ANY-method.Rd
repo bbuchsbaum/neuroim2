@@ -17,6 +17,9 @@
 
 \item{...}{Additional arguments (not used)}
 }
+\value{
+A 2D array with dimensions [features x trials]
+}
 \description{
 Series method for NeuroHyperVec
 }

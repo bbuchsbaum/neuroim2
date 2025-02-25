@@ -11,6 +11,9 @@
 
 \item{els}{Numeric vector of elements to write}
 }
+\value{
+Invisibly returns \code{NULL}, called for its side effect of writing elements to the binary writer.
+}
 \description{
 Write elements to a \linkS4class{BinaryWriter} object.
 }

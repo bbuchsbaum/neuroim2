@@ -16,6 +16,9 @@
 \arguments{
 \item{x}{the object}
 }
+\value{
+A list of DenseNeuroVol objects
+}
 \description{
 Converts a FileBackedNeuroVec object to a list of DenseNeuroVol objects.
 

@@ -12,6 +12,9 @@
 \arguments{
 \item{x}{the object to convert}
 }
+\value{
+A numeric vector of length \code{nrow(x@coords)}
+}
 \description{
 Convert SparseNeuroVol to numeric
 }

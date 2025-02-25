@@ -9,6 +9,9 @@
 \arguments{
 \item{object}{An AxisSet1D object}
 }
+\value{
+Invisibly returns \code{NULL}, called for its side effect of displaying the object.
+}
 \description{
 Show method for AxisSet1D objects
 }

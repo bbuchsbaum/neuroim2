@@ -232,6 +232,7 @@ setMethod(f = "linear_access",
 #' @importFrom utils object.size
 #'
 #' @export
+#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 setMethod("show", "MappedNeuroVec",
           function(object) {
             # Header

@@ -340,6 +340,7 @@ setMethod(f="read_elements", signature=signature(x= "BinaryReader", num_elements
 #'
 #' @param x Object of class \linkS4class{BinaryWriter}
 #' @param els Numeric vector of elements to write
+#' @return Invisibly returns \code{NULL}, called for its side effect of writing elements to the binary writer.
 #' @examples
 #' \donttest{
 #' # Create a temporary binary file for writing
@@ -372,6 +373,7 @@ setMethod(f="write_elements", signature=signature(x= "BinaryWriter", els="numeri
 #' This should be called when you're done with the reader/writer to free system resources.
 #'
 #' @param con The BinaryReader or BinaryWriter object to close.
+#' @return Invisibly returns \code{NULL}, called for its side effect of closing the connection.
 #' @examples
 #' \donttest{
 #' # Create a temporary file and write some data

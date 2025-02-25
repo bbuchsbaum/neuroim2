@@ -377,6 +377,7 @@ setMethod("vectors", signature(x="NeuroVecSeq", subset="logical"),
 
 #' @export
 #' @rdname show-methods
+#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 setMethod("show", "NeuroVecSeq",
           def=function(object) {
             cat("\n", crayon::bold(crayon::blue("NeuroVecSeq")), " ",

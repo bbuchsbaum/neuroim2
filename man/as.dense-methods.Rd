@@ -16,6 +16,8 @@
 \item{x}{An object of class \code{ROIVol} to be coerced to a \code{DenseNeuroVol}.}
 }
 \value{
+A \code{\linkS4class{NeuroVol}} object representing the dense version of the clustered volume.
+
 A \code{DenseNeuroVol} object obtained by coercing the \code{ROIVol} object.
 }
 \description{

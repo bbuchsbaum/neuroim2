@@ -750,6 +750,7 @@ setMethod(f="as.list", signature=signature(x = "SparseNeuroVec"), def=function(x
 #' @param object the object
 #' @importFrom crayon bold blue green red yellow silver
 #' @export
+#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 setMethod("show",
           signature=signature(object="SparseNeuroVec"),
           def=function(object) {

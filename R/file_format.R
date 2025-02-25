@@ -156,8 +156,6 @@ setMethod(f = "header_file_matches",
 #' @param x A \linkS4class{FileFormat} object specifying the format requirements
 #' @param file_name A character string specifying the file name to validate
 #'
-#' @return A logical value: \code{TRUE} if the file name matches the data format,
-#'   \code{FALSE} otherwise
 #'
 #' @details
 #' The function performs case-sensitive pattern matching to verify that the file name

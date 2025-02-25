@@ -40,6 +40,8 @@ split_clusters(x, clusters, ...)
 }
 \value{
 A \code{list} of sub-objects, where each sub-object corresponds to a unique cluster index.
+
+A deflist (lazy-loading list) of ROIVec objects, where each element corresponds to a cluster.
 }
 \description{
 This function cuts an object into a list of sub-objects based on a vector of cluster indices.

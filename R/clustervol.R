@@ -114,6 +114,7 @@ setAs(from="ClusteredNeuroVol", to="DenseNeuroVol",
 #'
 #' @param object A \linkS4class{ClusteredNeuroVol} object
 #' @export
+#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 setMethod(f="show", signature=signature("ClusteredNeuroVol"),
     def=function(object) {
       sp <- space(object)
@@ -192,6 +193,7 @@ setMethod(f="show", signature=signature("ClusteredNeuroVol"),
 #' @export
 #' @param type the type of center of mass: one of "center_of_mass" or "medoid"
 #' @details For `type = "center_of_mass"`, returns arithmetic mean coordinates; for `"medoid"`, returns the most central point.
+#' @return A matrix of coordinates where each row represents the centroid of a cluster.
 #' @rdname centroids-methods
 setMethod(f="centroids", signature=signature(x="ClusteredNeuroVol"),
           def = function(x, type=c("center_of_mass", "medoid")) {
@@ -215,6 +217,7 @@ setMethod(f="centroids", signature=signature(x="ClusteredNeuroVol"),
 #' @param x A NeuroVec object to be split.
 #' @param clusters Either a ClusteredNeuroVol object or an integer vector of cluster assignments.
 #'
+#' @return A deflist (lazy-loading list) of ROIVec objects, where each element corresponds to a cluster.
 #'
 #' @details
 #' There are two methods for splitting clusters:
@@ -403,6 +406,7 @@ setMethod(f="num_clusters", signature=signature(x="ClusteredNeuroVol"),
 
 #' @rdname as.dense-methods
 #' @export
+#' @return A \code{\linkS4class{NeuroVol}} object representing the dense version of the clustered volume.
 setMethod("as.dense", signature(x="ClusteredNeuroVol"),
           function(x) {
             NeuroVol(as.vector(x@data), space(x@mask))

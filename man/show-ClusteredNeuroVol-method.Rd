@@ -9,6 +9,9 @@
 \arguments{
 \item{object}{A \linkS4class{ClusteredNeuroVol} object}
 }
+\value{
+Invisibly returns \code{NULL}, called for its side effect of displaying the object.
+}
 \description{
 Display ClusteredNeuroVol Information
 }

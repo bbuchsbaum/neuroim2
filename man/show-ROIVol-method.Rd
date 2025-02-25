@@ -5,9 +5,16 @@
 \title{show an \code{\linkS4class{ROIVol}}}
 \usage{
 \S4method{show}{ROIVol}(object)
+
+\S4method{show}{ROIVol}(object)
 }
 \arguments{
 \item{object}{the object}
+}
+\value{
+Invisibly returns \code{NULL}, called for its side effect of displaying the object.
+
+Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 }
 \description{
 show an \code{\linkS4class{ROIVol}}
