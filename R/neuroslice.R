@@ -178,6 +178,8 @@ setMethod(f="index_to_grid",
 #' @details when `x` is a NeuroSlice object, the plot method returns a \code{ggplot2} object containing the raster visualization of the slice data.
 #'         The plot can be further customized using standard ggplot2 functions.
 #'
+#' @seealso \code{\link{as.raster}}
+#'
 #' @examples
 #' # Create example slice
 #' slice_space <- NeuroSpace(c(100, 100))

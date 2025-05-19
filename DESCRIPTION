@@ -58,6 +58,7 @@ Collate:
     'searchlight.R'
     'sparse_neurovec.R'
     'spat_filter.R'
+    'as_raster.R'
     'zzz.R'
 RoxygenNote: 7.3.2.9000
 Imports: 

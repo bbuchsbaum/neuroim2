@@ -1083,6 +1083,7 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 #' @param alpha the level of alpha transparency
 #' @param bgvol a background volume that serves as an image underlay (currently ignored).
 #' @param bgcmap a color map for backround layer consisting of a vector of colors in hex format (e.g. \code{gray(n=255)})
+#' @seealso \code{\link{as.raster}}
 #' @export
 #' @importFrom graphics plot
 #' @import colorplane

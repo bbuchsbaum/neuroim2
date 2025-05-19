@@ -1450,6 +1450,7 @@ if (!isGeneric("image"))
 #' @param x An object to be converted.
 #' @param ... Additional arguments passed to the conversion methods.
 #' @return A \code{raster} object representing \code{x}.
+#' @export
 #' @rdname as.raster
 if (!isGeneric("as.raster"))
   setGeneric("as.raster", function(x, ...) standardGeneric("as.raster"))
