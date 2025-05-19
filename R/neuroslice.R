@@ -170,6 +170,7 @@ setMethod(f="index_to_grid",
 #' @name plot,NeuroSlice-method
 #' @param cmap Color map to use for plotting, defaults to grayscale
 #' @param irange Intensity range for scaling the plot values, defaults to the data range
+#' @param legend Logical indicating whether to display the color legend. Defaults to TRUE.
 #'
 #' @details
 #' The plot method uses \code{ggplot2} to create a raster visualization of the slice data.
@@ -188,28 +189,31 @@ setMethod(f="index_to_grid",
 #' plot(slice)
 #' }
 #'
-#' @importFrom ggplot2 ggplot aes geom_raster scale_fill_identity xlab ylab theme_bw
+#' @importFrom ggplot2 ggplot aes geom_raster scale_fill_gradientn xlab ylab theme_bw
 #' @importFrom grDevices gray
 #' @export
 #' @rdname plot-methods
-setMethod("plot", 
+setMethod("plot",
           signature=signature(x="NeuroSlice"),
-          def=function(x, cmap=gray(seq(0,1,length.out=255)), 
-                      irange=range(x, na.rm=TRUE)) {
+          def=function(x, cmap=gray(seq(0,1,length.out=255)),
+                      irange=range(x, na.rm=TRUE),
+                      legend=TRUE) {
             if (!requireNamespace("ggplot2", quietly = TRUE)) {
               stop("Package \"ggplot2\" needed for this function to work. Please install it.",
                    call. = FALSE)
             }
 
-            ## map intensities to colors
-            imcols <- mapToColors(x, cmap, alpha=1, irange=irange, zero_col="#000000")
-
-            {y=value=NULL}
+            {y = value = NULL}
 
             cds <- index_to_coord(space(x), 1:length(x))
-            df1 <- data.frame(x=cds[,1], y=cds[,2], value=as.vector(imcols))
-            ggplot2::ggplot(ggplot2::aes(x=x, y=y), data=df1) + ggplot2::geom_raster(ggplot2::aes(fill=value)) +
-              ggplot2::scale_fill_identity() + ggplot2::xlab("") + ggplot2::ylab("")
+            df1 <- data.frame(x = cds[,1], y = cds[,2], value = as.vector(x))
+
+            ggplot2::ggplot(df1, ggplot2::aes(x = x, y = y, fill = value)) +
+              ggplot2::geom_raster() +
+              ggplot2::scale_fill_gradientn(colours = cmap,
+                                           limits = irange,
+                                           guide = if (legend) "colourbar" else "none") +
+              ggplot2::xlab("") + ggplot2::ylab("") +
               ggplot2::theme_bw()
 
           })

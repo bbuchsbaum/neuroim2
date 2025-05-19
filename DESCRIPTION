@@ -70,7 +70,6 @@ Imports:
   dbscan,
   stringr,
   methods,
-  colorplane,
   bigstatsr,
   RNiftyReg,
   future.apply,
