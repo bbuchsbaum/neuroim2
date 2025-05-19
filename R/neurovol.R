@@ -1078,6 +1078,7 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 #' @param x the object to display
 #' @param cmap a color map consisting of a vector of colors in hex format (e.g. \code{gray(n=255)})
 #' @param zlevels the series of slice indices to display.
+#' @param along the axis along which to slice
 #' @param irange the intensity range indicating the low and high values of the color scale.
 #' @param thresh a 2-element vector indicating the lower and upper transparency thresholds.
 #' @param alpha the level of alpha transparency
@@ -1093,10 +1094,17 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 #' \donttest{
 #' plot(slice)
 #' }
+#'
+#' vol_data <- array(rnorm(10 * 10 * 10), c(10, 10, 10))
+#' vol <- NeuroVol(vol_data, NeuroSpace(c(10, 10, 10)))
+#' \donttest{
+#' plot(vol, along=3)
+#' }
 setMethod("plot", signature=signature(x="NeuroVol"),
           def=function(x,
                        cmap=gray(seq(0,1,length.out=255)),
                        zlevels=unique(round(seq(1, dim(x)[3], length.out=6))),
+                       along=3,
                        irange=range(x, na.rm=TRUE),
                        thresh=c(0,0),
                        alpha=1,
@@ -1116,12 +1124,12 @@ setMethod("plot", signature=signature(x="NeuroVol"),
             # Create a data frame of all the slices specified in zlevels
             df1 <- do.call(rbind, purrr::map(zlevels, function(i) {
               if (!is.null(bgvol)) {
-                bgslice <- slice(bgvol, zlevel=i, along=3)
+                bgslice <- slice(bgvol, zlevel=i, along=along)
                 bgplane <- colorplane::IntensityColorPlane(as.numeric(bgslice), cols=bgcmap)
                 bgcols <- colorplane::map_colors(bgplane)
               }
 
-              imslice <- slice(x, zlevel=i, along=3)
+              imslice <- slice(x, zlevel=i, along=along)
               implane <- colorplane::IntensityColorPlane(as.numeric(imslice), cols=cmap, alpha=alpha)
               fgcols <- colorplane::map_colors(implane, threshold=thresh, irange=irange)
 

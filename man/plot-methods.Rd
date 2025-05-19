@@ -15,6 +15,7 @@
   x,
   cmap = gray(seq(0, 1, length.out = 255)),
   zlevels = unique(round(seq(1, dim(x)[3], length.out = 6))),
+  along = 3,
   irange = range(x, na.rm = TRUE),
   thresh = c(0, 0),
   alpha = 1,
@@ -30,6 +31,7 @@
 \item{irange}{the intensity range indicating the low and high values of the color scale.}
 
 \item{zlevels}{the series of slice indices to display.}
+\item{along}{the axis along which to slice}
 
 \item{thresh}{a 2-element vector indicating the lower and upper transparency thresholds.}
 
