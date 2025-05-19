@@ -1083,9 +1083,9 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 #' @param alpha the level of alpha transparency
 #' @param bgvol a background volume that serves as an image underlay (currently ignored).
 #' @param bgcmap a color map for backround layer consisting of a vector of colors in hex format (e.g. \code{gray(n=255)})
+#' @param legend Logical indicating whether to display the color legend. Defaults to TRUE.
 #' @export
 #' @importFrom graphics plot
-#' @import colorplane
 #' @examples
 #'
 #' dat <- matrix(rnorm(100*100), 100, 100)
@@ -1099,9 +1099,10 @@ setMethod("plot", signature=signature(x="NeuroVol"),
                        zlevels=unique(round(seq(1, dim(x)[3], length.out=6))),
                        irange=range(x, na.rm=TRUE),
                        thresh=c(0,0),
-                       alpha=1,
-                       bgvol=NULL,
-                       bgcmap=gray(seq(0,1,length.out=255))) {
+                      alpha=1,
+                      bgvol=NULL,
+                      bgcmap=gray(seq(0,1,length.out=255)),
+                      legend=TRUE) {
 
             if (!requireNamespace("ggplot2", quietly = TRUE)) {
               stop("Package \"ggplot2\" needed for this function to work. Please install it.",
@@ -1115,32 +1116,26 @@ setMethod("plot", signature=signature(x="NeuroVol"),
 
             # Create a data frame of all the slices specified in zlevels
             df1 <- do.call(rbind, purrr::map(zlevels, function(i) {
-              if (!is.null(bgvol)) {
-                bgslice <- slice(bgvol, zlevel=i, along=3)
-                bgplane <- colorplane::IntensityColorPlane(as.numeric(bgslice), cols=bgcmap)
-                bgcols <- colorplane::map_colors(bgplane)
-              }
+              imslice <- slice(x, zlevel = i, along = 3)
+              vals <- as.numeric(imslice)
 
-              imslice <- slice(x, zlevel=i, along=3)
-              implane <- colorplane::IntensityColorPlane(as.numeric(imslice), cols=cmap, alpha=alpha)
-              fgcols <- colorplane::map_colors(implane, threshold=thresh, irange=irange)
-
-              if (!is.null(bgvol)) {
-                fgcols <- colorplane::as_hexcol(colorplane::blend_colors(bgcols, fgcols, alpha=alpha))
-              } else {
-                fgcols <- colorplane::as_hexcol(fgcols)
+              if (diff(thresh) > 0) {
+                vals[vals >= thresh[1] & vals <= thresh[2]] <- NA
               }
 
               cds <- index_to_coord(space(imslice), 1:length(imslice))
-              data.frame(x=cds[,1], y=cds[,2], z=i, value=as.vector(fgcols))
+              data.frame(x = cds[,1], y = cds[,2], z = i, value = vals)
             }))
 
             {y = value = NULL} # to appease R CMD check
 
-            p <- ggplot2::ggplot(df1, ggplot2::aes(x=x, y=y)) +
+            p <- ggplot2::ggplot(df1, ggplot2::aes(x = x, y = y, fill = value)) +
               ggplot2::coord_fixed() +
-              ggplot2::geom_raster(ggplot2::aes(fill=value)) +
-              ggplot2::scale_fill_identity() +
+              ggplot2::geom_raster(alpha = alpha) +
+              ggplot2::scale_fill_gradientn(colours = cmap,
+                                           limits = irange,
+                                           guide = if (legend) "colourbar" else "none",
+                                           na.value = "transparent") +
               ggplot2::facet_wrap(~ z, labeller = ggplot2::labeller(z = function(z) paste("Slice:", z))) +
               ggplot2::ggtitle("Brain Slices") +
               ggplot2::theme_void() +
