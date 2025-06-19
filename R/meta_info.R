@@ -454,7 +454,9 @@ AFNIMetaInfo <- function(descriptor, afni_header) {
 #' @param file_name the name of the file to read
 #' @return an instance of class \code{\linkS4class{FileMetaInfo}}
 #' @examples
-#' header <- read_header(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
+#' hdr <- read_header(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
+#' dim(hdr)                  # image dimensions
+#' hdr@header$pixdim[5]      # TR in seconds
 #' @export read_header
 read_header <- function(file_name) {
   desc <- find_descriptor(file_name)
