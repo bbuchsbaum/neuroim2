@@ -60,6 +60,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// downsample_4d_cpp
+NumericVector downsample_4d_cpp(NumericVector arr, IntegerVector new_dims, IntegerVector old_dims);
+RcppExport SEXP _neuroim2_downsample_4d_cpp(SEXP arrSEXP, SEXP new_dimsSEXP, SEXP old_dimsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type arr(arrSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type new_dims(new_dimsSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type old_dims(old_dimsSEXP);
+    rcpp_result_gen = Rcpp::wrap(downsample_4d_cpp(arr, new_dims, old_dims));
+    return rcpp_result_gen;
+END_RCPP
+}
 // fast_multilayer_laplacian_enhancement_masked
 NumericVector fast_multilayer_laplacian_enhancement_masked(NumericVector img, LogicalVector mask, int k, int patch_size, int search_radius, double h, List mapping_params, bool use_normalization_free);
 RcppExport SEXP _neuroim2_fast_multilayer_laplacian_enhancement_masked(SEXP imgSEXP, SEXP maskSEXP, SEXP kSEXP, SEXP patch_sizeSEXP, SEXP search_radiusSEXP, SEXP hSEXP, SEXP mapping_paramsSEXP, SEXP use_normalization_freeSEXP) {
@@ -295,6 +308,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_neuroim2_bilateral_weights", (DL_FUNC) &_neuroim2_bilateral_weights, 5},
     {"_neuroim2_bilateral_filter_cpp", (DL_FUNC) &_neuroim2_bilateral_filter_cpp, 6},
     {"_neuroim2_bilateral_filter_4d_cpp_par", (DL_FUNC) &_neuroim2_bilateral_filter_4d_cpp_par, 8},
+    {"_neuroim2_downsample_4d_cpp", (DL_FUNC) &_neuroim2_downsample_4d_cpp, 3},
     {"_neuroim2_fast_multilayer_laplacian_enhancement_masked", (DL_FUNC) &_neuroim2_fast_multilayer_laplacian_enhancement_masked, 8},
     {"_neuroim2_indexToGridCpp", (DL_FUNC) &_neuroim2_indexToGridCpp, 2},
     {"_neuroim2_gridToIndex3DCpp", (DL_FUNC) &_neuroim2_gridToIndex3DCpp, 2},

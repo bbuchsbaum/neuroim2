@@ -63,6 +63,19 @@ setGeneric("scale", function(x, ...) standardGeneric("scale"))
 #' @rdname resample-methods
 setGeneric("resample", function(source, target, ...) standardGeneric("resample"))
 
+#' Downsample an Image
+#'
+#' This function downsamples a neuroimaging object, reducing its spatial resolution while preserving the temporal dimension.
+#'
+#' @param x An object representing the image to be downsampled (typically a DenseNeuroVec for 4D data).
+#' @param ... Additional arguments passed to specific downsample methods.
+#'
+#' @return An object of the same class as \code{x}, downsampled according to the specified parameters.
+#'
+#' @export
+#' @rdname downsample-methods
+setGeneric("downsample", function(x, ...) standardGeneric("downsample"))
+
 
 #' print an object
 #'

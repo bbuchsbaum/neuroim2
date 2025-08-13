@@ -13,6 +13,10 @@ bilateral_filter_4d_cpp_par <- function(arr, mask_idx, spatial_window, temporal_
     .Call(`_neuroim2_bilateral_filter_4d_cpp_par`, arr, mask_idx, spatial_window, temporal_window, spatial_sigma, intensity_sigma, temporal_sigma, spacing)
 }
 
+downsample_4d_cpp <- function(arr, new_dims, old_dims) {
+    .Call(`_neuroim2_downsample_4d_cpp`, arr, new_dims, old_dims)
+}
+
 fast_multilayer_laplacian_enhancement_masked <- function(img, mask, k = 2L, patch_size = 3L, search_radius = 2L, h = 0.7, mapping_params = NULL, use_normalization_free = TRUE) {
     .Call(`_neuroim2_fast_multilayer_laplacian_enhancement_masked`, img, mask, k, patch_size, search_radius, h, mapping_params, use_normalization_free)
 }

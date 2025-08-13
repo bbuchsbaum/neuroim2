@@ -36,6 +36,7 @@ Collate:
     'clustervol.R'
     'common.R'
     'conncomp.R'
+    'downsample.R'
     'file_format.R'
     'filebacked_neurovec.R'
     'globals.R'
