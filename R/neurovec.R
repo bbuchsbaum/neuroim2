@@ -90,6 +90,55 @@ NeuroVec <- function(data, space = NULL, mask = NULL, label = "") {
 
 }
 
+#' Create NeuroVec from list of NeuroVol objects
+#'
+#' @description
+#' Factory function to create a NeuroVec object from a list of NeuroVol objects.
+#' This is a convenience wrapper around the NeuroVec constructor that combines
+#' multiple 3D volumes into a single 4D NeuroVec.
+#'
+#' @param vols A list of \code{\linkS4class{NeuroVol}} objects. All volumes must have
+#'   identical spatial dimensions.
+#' @param mask An optional logical array or \code{\linkS4class{LogicalNeuroVol}} object
+#'   defining the subset of voxels to include. If provided, a SparseNeuroVec will be created.
+#'
+#' @return A \code{\linkS4class{NeuroVec}} object (either DenseNeuroVec or SparseNeuroVec
+#'   depending on whether a mask is provided).
+#'
+#' @examples
+#' # Create a simple NeuroVec from list of volumes
+#' spc <- NeuroSpace(c(10, 10, 10))
+#' vol1 <- NeuroVol(rnorm(10*10*10), spc)
+#' vol2 <- NeuroVol(rnorm(10*10*10), spc)
+#' vec <- vec_from_vols(list(vol1, vol2))
+#' print(dim(vec))  # Should be c(10, 10, 10, 2)
+#'
+#' @export
+#' @seealso \code{\link{NeuroVec}}, \code{\link{NeuroVol}}
+vec_from_vols <- function(vols, mask = NULL) {
+  if (!is.list(vols)) {
+    stop("Input must be a list of NeuroVol objects")
+  }
+  
+  if (length(vols) == 0) {
+    stop("List of volumes cannot be empty")
+  }
+  
+  # Check that all elements are NeuroVol objects
+  if (!all(sapply(vols, function(x) inherits(x, "NeuroVol")))) {
+    stop("All elements in the list must be NeuroVol objects")
+  }
+  
+  # Check that all volumes have the same dimensions
+  dims <- lapply(vols, dim)
+  if (!all(sapply(dims, function(d) identical(d, dims[[1]])))) {
+    stop("All volumes must have the same dimensions")
+  }
+  
+  # Call the NeuroVec constructor with the list
+  NeuroVec(vols, mask = mask)
+}
+
 
 
 #' DenseNeuroVec
@@ -196,6 +245,7 @@ DenseNeuroVec <- function(data, space, label="none") {
 #' @seealso \code{\link{NeuroVecSource}}, \code{\link{DenseNeuroVec}}, \code{\link{NeuroSpace}}
 #'
 #' @rdname load_data-methods
+#' @return a DenseNeuroVec object
 #' @export
 setMethod(f="load_data", signature=c("NeuroVecSource"),
           def=function(x) {
@@ -371,15 +421,11 @@ read_vol_list <- function(file_names, mask=NULL) {
 	}
 }
 
-#' Drop singleton dimensions from a NeuroVec object
-#'
-#' @description
-#' This function drops the last dimension of a NeuroVec object if it is of length 1.
-#'
-#' @param x The NeuroVec object
-#'
-#'
+#' Drop a dimension
 #' @export
+#' @param x the object to drop a dimension from
+#' @rdname drop-methods
+#' @return An object of the same class as x with reduced dimensions or elements.
 setMethod("drop", signature=(x="NeuroVec"),
           def=function(x) {
             if (dim(x)[4] == 1) {
@@ -400,13 +446,7 @@ setAs("NeuroVec", "array", function(from) {
   vals
 })
 
-#' show a NeuroVecSource object
-#'
-#' @description
-#' This function prints a summary of a NeuroVecSource object.
-#'
-#' @param object The NeuroVecSource object to display.
-#'
+#' @rdname show-methods
 #' @export
 setMethod(f="show",
 		signature=signature(object="NeuroVecSource"),
@@ -421,13 +461,7 @@ setMethod(f="show",
 
 
 
-#' show a NeuroVec object
-#'
-#' @description
-#' This function prints a summary of a NeuroVec object.
-#'
-#' @param object The NeuroVec object to display.
-#'
+#' @rdname show-methods
 #' @export
 setMethod(f="show", signature=signature("NeuroVec"),
           def=function(object) {
@@ -833,8 +867,6 @@ setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character",
 
 #' @export
 #' @rdname show-methods
-#' @aliases show,DenseNeuroVec-method
-#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 setMethod("show", "DenseNeuroVec",
           def=function(object) {
             # Get class name without package prefix
@@ -1280,7 +1312,7 @@ setMethod(f="sub_vector", signature=signature(x="NeuroVecSeq", i="numeric"),
 #' @param x The NeuroVec object.
 #' @param i The volume index to extract.
 #'
-#'
+#' @return a DenseNeuroVol object
 #' @export
 setMethod(f="[[", signature=signature(x="NeuroVec", i="numeric"),
           def = function(x, i) {
@@ -1297,14 +1329,7 @@ setMethod(f="[[", signature=signature(x="NeuroVec", i="numeric"),
           })
 
 
-#' drop
-#'
-#' @description
-#' This function drops the last dimension of a NeuroVec object if it is of length 1.
-#'
-#' @param x The NeuroVec object.
-#'
-#'
+#' @rdname drop-methods
 #' @export
 setMethod("drop", signature(x="NeuroVec"),
           def=function(x) {
@@ -1403,7 +1428,6 @@ setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character",
 
 #' @export
 #' @rdname show-methods
-#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 setMethod("show", "NeuroVecSeq",
           def=function(object) {
             cat("\n", crayon::bold(crayon::blue("NeuroVecSeq")), " ",
