@@ -168,3 +168,159 @@ setMethod(f="downsample", signature=signature("NeuroVec"),
             }
             callGeneric(x, spacing, factor, outdim, method)
           })
+
+#' Calculate new dimensions for 3D downsampling
+#' @keywords internal
+#' @noRd
+calculate_downsample_dims_3d <- function(current_dims, current_spacing, 
+                                        spacing = NULL, factor = NULL, outdim = NULL) {
+  
+  # current_dims should be 3D (x, y, z)
+  spatial_dims <- current_dims
+  
+  if (!is.null(spacing)) {
+    # Validate spacing values
+    if (length(spacing) != 3) {
+      stop("spacing must be a numeric vector of length 3")
+    }
+    if (any(spacing <= 0)) {
+      stop("spacing values must be positive")
+    }
+    
+    # Downsample to achieve target spacing
+    # New dims = old dims * (old spacing / new spacing)
+    new_spatial_dims <- round(spatial_dims * (current_spacing[1:3] / spacing))
+    new_spatial_dims <- pmax(new_spatial_dims, 1) # Ensure at least 1 voxel
+    
+  } else if (!is.null(factor)) {
+    # Downsample by factor
+    if (length(factor) == 1) {
+      factor <- rep(factor, 3)
+    }
+    if (any(factor <= 0) || any(factor > 1)) {
+      stop("factor must be between 0 (exclusive) and 1 (inclusive)")
+    }
+    new_spatial_dims <- round(spatial_dims * factor)
+    new_spatial_dims <- pmax(new_spatial_dims, 1)
+    
+  } else if (!is.null(outdim)) {
+    # Check aspect ratio preservation
+    if (length(outdim) != 3) {
+      stop("outdim must have exactly 3 values for spatial dimensions")
+    }
+    
+    # Calculate the implied factors
+    factors <- outdim / spatial_dims
+    
+    # Check if aspect ratios are preserved (within tolerance)
+    factor_range <- range(factors)
+    mean_factor <- mean(factors)
+    
+    # Check for zero mean (which would happen if outdim has zeros)
+    if (mean_factor == 0) {
+      stop("Output dimensions cannot be zero")
+    }
+    
+    if ((factor_range[2] - factor_range[1]) / mean_factor > 0.01) {
+      warning("Output dimensions do not preserve aspect ratios. Using uniform scaling based on smallest dimension.")
+      # Use the smallest factor to preserve aspect ratio
+      uniform_factor <- min(factors)
+      new_spatial_dims <- round(spatial_dims * uniform_factor)
+    } else {
+      new_spatial_dims <- outdim
+    }
+    new_spatial_dims <- pmax(new_spatial_dims, 1)
+    
+  } else {
+    stop("Must specify one of: spacing, factor, or outdim")
+  }
+  
+  # Return 3D dimensions
+  new_spatial_dims
+}
+
+#' Downsample a DenseNeuroVol
+#'
+#' @rdname downsample-methods
+#' @param x A DenseNeuroVol object to downsample
+#' @param spacing Target voxel spacing (numeric vector of length 3)
+#' @param factor Downsampling factor (single value or vector of length 3, between 0 and 1)
+#' @param outdim Target output dimensions (numeric vector of length 3)
+#' @param method Downsampling method (currently only "box" for box averaging)
+#'
+#' @examples
+#' # Create a sample 3D volume
+#' data <- array(rnorm(64*64*32), dim = c(64, 64, 32))
+#' space <- NeuroSpace(dim = c(64, 64, 32), 
+#'                     origin = c(0, 0, 0),
+#'                     spacing = c(2, 2, 2))
+#' vol <- DenseNeuroVol(data, space)
+#'
+#' # Downsample by factor
+#' vol_down1 <- downsample(vol, factor = 0.5)
+#' 
+#' # Downsample to target spacing
+#' vol_down2 <- downsample(vol, spacing = c(4, 4, 4))
+#' 
+#' # Downsample to target dimensions
+#' vol_down3 <- downsample(vol, outdim = c(32, 32, 16))
+#'
+#' @export
+setMethod(f="downsample", signature=signature("DenseNeuroVol"),
+          def=function(x, spacing=NULL, factor=NULL, outdim=NULL, method="box") {
+            
+            # Validate method parameter
+            if (method != "box") {
+              stop("Only 'box' method is currently supported")
+            }
+            
+            # Validate input is 3D
+            if (length(dim(x)) != 3) {
+              stop("Input must be a 3D DenseNeuroVol object")
+            }
+            
+            if (sum(!is.null(spacing), !is.null(factor), !is.null(outdim)) != 1) {
+              stop("Exactly one of 'spacing', 'factor', or 'outdim' must be specified")
+            }
+            
+            # Get current dimensions and spacing
+            current_dims <- dim(x)
+            current_space <- space(x)
+            current_spacing <- current_space@spacing[1:3]  # Take only spatial spacing
+            
+            # Calculate new dimensions
+            new_dims <- calculate_downsample_dims_3d(current_dims, current_spacing,
+                                                    spacing, factor, outdim)
+            
+            # Perform downsampling using C++ function
+            downsampled_data <- downsample_3d_cpp(as.array(x), 
+                                                 as.integer(new_dims),
+                                                 as.integer(current_dims))
+            
+            # Calculate new spacing
+            spatial_scale_factors <- current_dims / new_dims
+            new_spacing <- current_spacing * spatial_scale_factors
+            
+            # Create new NeuroSpace with updated dimensions and spacing
+            new_space <- NeuroSpace(dim = new_dims,
+                                  spacing = new_spacing,
+                                  origin = current_space@origin,
+                                  axes = current_space@axes,
+                                  trans = current_space@trans)
+            
+            # Return new DenseNeuroVol
+            DenseNeuroVol(downsampled_data, new_space, label=x@label)
+          })
+
+#' Downsample a NeuroVol
+#'
+#' @rdname downsample-methods
+#' @export
+setMethod(f="downsample", signature=signature("NeuroVol"),
+          def=function(x, spacing=NULL, factor=NULL, outdim=NULL, method="box") {
+            # For generic NeuroVol, try to convert to DenseNeuroVol first
+            if (is(x, "SparseNeuroVol")) {
+              stop("Downsampling of SparseNeuroVol not yet implemented. Convert to DenseNeuroVol first.")
+            }
+            callGeneric(x, spacing, factor, outdim, method)
+          })

@@ -13,6 +13,10 @@ bilateral_filter_4d_cpp_par <- function(arr, mask_idx, spatial_window, temporal_
     .Call(`_neuroim2_bilateral_filter_4d_cpp_par`, arr, mask_idx, spatial_window, temporal_window, spatial_sigma, intensity_sigma, temporal_sigma, spacing)
 }
 
+downsample_3d_cpp <- function(arr, new_dims, old_dims) {
+    .Call(`_neuroim2_downsample_3d_cpp`, arr, new_dims, old_dims)
+}
+
 downsample_4d_cpp <- function(arr, new_dims, old_dims) {
     .Call(`_neuroim2_downsample_4d_cpp`, arr, new_dims, old_dims)
 }
