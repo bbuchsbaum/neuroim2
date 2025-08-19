@@ -57,6 +57,7 @@ Collate:
     'resample.R'
     'roi.R'
     'searchlight.R'
+    'simulate.R'
     'sparse_neurovec.R'
     'spat_filter.R'
     'zzz.R'
