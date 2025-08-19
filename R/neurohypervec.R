@@ -39,7 +39,7 @@
 #' \code{\linkS4class{NeuroVec}}, \code{\linkS4class{LogicalNeuroVol}}, \code{\linkS4class{NeuroSpace}}
 #'
 #' @examples
-#' 
+#'
 #' # Create a simple 5D dataset (10x10x10 spatial, 5 trials, 3 features)
 #' dims <- c(10, 10, 10)
 #' space <- NeuroSpace(c(dims, 5, 3))
@@ -61,7 +61,7 @@
 #'
 #' # Extract a 3D volume for specific trial and feature
 #' hvec[,,,2,1]
-#' 
+#'
 #'
 #' @name NeuroHyperVec-class
 #' @rdname NeuroHyperVec-class
@@ -121,24 +121,24 @@ setClass(
 #' @return A new \code{\linkS4class{NeuroHyperVec}} object.
 #'
 #' @seealso \code{\linkS4class{NeuroSpace}}, \code{\linkS4class{LogicalNeuroVol}}
-#' 
-#' @examples 
+#'
+#' @examples
 #' # Create a 5D space (10x10x10 spatial, 2 trials, 2 features)
 #' space <- NeuroSpace(c(10,10,10,2,2))
-#' 
+#'
 #' # Create a mask for the spatial dimensions
 #' space3d <- NeuroSpace(c(10,10,10))
 #' mask_data <- array(TRUE, dim=c(10,10,10))  # All voxels active
 #' mask <- LogicalNeuroVol(mask_data, space3d)
-#' 
+#'
 #' # Create data in the format expected by NeuroHyperVec:
 #' # 3D array with dimensions [features x trials x voxels]
 #' n_features <- 2
 #' n_trials <- 2
 #' n_voxels <- sum(mask_data)  # 1000 voxels
-#' data_array <- array(rnorm(n_features * n_trials * n_voxels), 
+#' data_array <- array(rnorm(n_features * n_trials * n_voxels),
 #'                    dim = c(n_features, n_trials, n_voxels))
-#' 
+#'
 #' # Create the NeuroHyperVec object
 #' hvec <- NeuroHyperVec(data_array, space, mask)
 #'
@@ -431,17 +431,9 @@ setMethod("[", signature(x = "NeuroHyperVec"),
   }
 )
 
-#' Display NeuroHyperVec Object
-#'
-#' @title Show NeuroHyperVec Object
-#' @description Displays a formatted summary of a NeuroHyperVec object, including dimensions,
-#' sparsity information, and memory usage.
-#' @param object A NeuroHyperVec object to display.
-#' @importFrom crayon bold blue green red yellow silver
-#' @importFrom utils object.size
-#' @export
+
 #' @rdname show-methods
-#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
+#' @export
 setMethod("show", signature(object="NeuroHyperVec"),
           def=function(object) {
             cat("\n", crayon::bold(crayon::blue("NeuroHyperVec Object")), "\n")
@@ -508,4 +500,11 @@ setMethod("show", signature(object="NeuroHyperVec"),
             cat(" ", crayon::silver("."), " Get Timeseries: ",
                 crayon::blue("series(object, 10, 20, 30)"),
                 crayon::silver(" # at xyz=(10,20,30)"), "\n\n")
+          })
+
+#' @rdname mask-methods
+#' @export
+setMethod("mask", "NeuroHyperVec",
+          function(x) {
+            x@mask
           })

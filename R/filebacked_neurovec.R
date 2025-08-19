@@ -212,3 +212,16 @@ setMethod(
     values
   }
 )
+
+#' @rdname mask-methods
+#' @export
+setMethod("mask", "FileBackedNeuroVec",
+          function(x) {
+            # FileBackedNeuroVec represents complete 4D data
+            # Return a filled mask for the 3D spatial dimensions
+            spatial_dims <- dim(x)[1:3]
+            LogicalNeuroVol(array(TRUE, spatial_dims),
+                           NeuroSpace(spatial_dims,
+                                     spacing(x)[1:3],
+                                     origin(x)[1:3]))
+          })

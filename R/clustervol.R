@@ -87,7 +87,7 @@ ClusteredNeuroVol <- function(mask, clusters, label_map=NULL, label="") {
 #' @param from A \code{\linkS4class{ClusteredNeuroVol}} object to be converted
 #' @return A \code{\linkS4class{DenseNeuroVol}} object
 #' @examples
-#' 
+#'
 #' # Create a clustered volume
 #' mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #' clusters <- rep(1:5, length.out=sum(mask))
@@ -95,7 +95,7 @@ ClusteredNeuroVol <- function(mask, clusters, label_map=NULL, label="") {
 #'
 #' # Convert to DenseNeuroVol
 #' dvol <- as(cvol, "DenseNeuroVol")
-#' 
+#'
 #' @seealso \code{\linkS4class{ClusteredNeuroVol}}, \code{\linkS4class{DenseNeuroVol}}
 setAs(from="ClusteredNeuroVol", to="DenseNeuroVol",
     def=function(from) {
@@ -110,11 +110,9 @@ setAs(from="ClusteredNeuroVol", to="DenseNeuroVol",
         DenseNeuroVol(data, space(from), indices=indices)
     })
 
-#' Display ClusteredNeuroVol Information
-#'
-#' @param object A \linkS4class{ClusteredNeuroVol} object
+
 #' @export
-#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
+#' @rdname show-methods
 setMethod(f="show", signature=signature("ClusteredNeuroVol"),
     def=function(object) {
       sp <- space(object)
@@ -410,4 +408,11 @@ setMethod(f="num_clusters", signature=signature(x="ClusteredNeuroVol"),
 setMethod("as.dense", signature(x="ClusteredNeuroVol"),
           function(x) {
             NeuroVol(as.vector(x@data), space(x@mask))
+          })
+
+#' @rdname mask-methods
+#' @export
+setMethod("mask", "ClusteredNeuroVol",
+          function(x) {
+            x@mask
           })

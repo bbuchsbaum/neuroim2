@@ -123,12 +123,12 @@ prep_sparsenvec <- function(data, space, mask) {
 #' @rdname SparseNeuroVec-class
 SparseNeuroVec <- function(data, space, mask, label = "") {
 	stopifnot(inherits(space, "NeuroSpace"))
-  
+
   # Ensure space has 4 dimensions
   if (ndim(space) != 4) {
     stop("The 'space' argument must have exactly 4 dimensions")
   }
-  
+
   p <- prep_sparsenvec(data, space, mask)
 
 	new("SparseNeuroVec", space=p$space, mask=p$mask,
@@ -172,7 +172,7 @@ setMethod(f="load_data", signature=c("SparseNeuroVecSource"),
 
 
 #' @rdname indices-methods
-#' @keywords internal
+#' @export
 setMethod(f="indices", signature=signature(x="AbstractSparseNeuroVec"),
           def=function(x) {
             indices(x@map)
@@ -365,7 +365,7 @@ setMethod(f="concat", signature=signature(x="SparseNeuroVec", y="SparseNeuroVec"
 
 
 #' @rdname lookup-methods
-#' @keywords internal
+#' @export
 setMethod(f="lookup", signature=signature(x="AbstractSparseNeuroVec", i="numeric"),
          def=function(x,i) {
             lookup(x@map, i)
@@ -421,24 +421,24 @@ setMethod(f="as.dense", signature=signature(x="SparseNeuroVec"),
           def=function(x) {
             # Get dimensions from space
             dims <- dim(x@space)
-            
-            # Create empty array with proper dimensions 
+
+            # Create empty array with proper dimensions
             arr <- array(0, dim=dims)
-            
+
             # Get mask indices
             mask_idx <- which(x@mask == TRUE)
-            
+
             # The data matrix is [timepoints x voxels]
             # Transpose to get [voxels x timepoints]
             data_t <- t(x@data)
-            
+
             # Fill array by assigning each voxel's timeseries
             for (i in seq_along(mask_idx)) {
               vox_idx <- mask_idx[i]
               arr_idx <- arrayInd(vox_idx, dims[1:3])
               arr[arr_idx[1], arr_idx[2], arr_idx[3], ] <- data_t[i,]
             }
-            
+
             # Create DenseNeuroVec with array data and same space as input
             DenseNeuroVec(arr, x@space)
           })
@@ -615,7 +615,7 @@ setMethod(
 #' @param drop Logical indicating whether to drop dimensions of length one (default: TRUE)
 #'
 #' @return An array containing the extracted subset
-#' 
+#'
 #' @export
 setMethod(f="[", signature=signature(x = "AbstractSparseNeuroVec", i = "numeric", j = "numeric"),
           def = function (x, i, j, k, m, ..., drop = TRUE) {
@@ -668,16 +668,16 @@ setMethod(f="[", signature=signature(x = "AbstractSparseNeuroVec", i = "numeric"
 setMethod(f="sub_vector", signature=signature(x="SparseNeuroVec", i="numeric"),
           def=function(x, i) {
             assertthat::assert_that(max(i) <= dim(x)[4])
-            
+
             # Get the subset of data for the requested timepoints
             res <- x@data[i,, drop=FALSE]
-            
+
             # Create new space with updated dimensions
             xs <- space(x)
             newdim <- c(dim(x)[1:3], length(i))
-            bspace <- NeuroSpace(newdim, spacing=spacing(xs), origin=origin(xs), 
+            bspace <- NeuroSpace(newdim, spacing=spacing(xs), origin=origin(xs),
                                axes(xs), trans(xs))
-            
+
             # Create new SparseNeuroVec with subset of data
             new("SparseNeuroVec", space=bspace, mask=x@mask,
                 map=x@map, data=res, label=x@label)
@@ -688,6 +688,7 @@ setMethod(f="sub_vector", signature=signature(x="SparseNeuroVec", i="numeric"),
 #' @rdname SparseNeuroVec-methods
 #' @param x the object
 #' @param i the volume index
+#' @return a SparseNeuroVol object
 #' @export
 setMethod(f="[[", signature=signature(x="SparseNeuroVec", i="numeric"),
           def = function(x, i) {
@@ -746,11 +747,10 @@ setMethod(f="as.list", signature=signature(x = "SparseNeuroVec"), def=function(x
 
 })
 
-#' show a \code{SparseNeuroVec}
-#' @param object the object
+
 #' @importFrom crayon bold blue green red yellow silver
 #' @export
-#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
+#' @rdname show-methods
 setMethod("show",
           signature=signature(object="SparseNeuroVec"),
           def=function(object) {
@@ -792,4 +792,18 @@ setMethod("show",
             cat(crayon::bold("\n+= Memory Usage "), crayon::silver("--------------------------"), "\n", sep = "")
             cat("  ", crayon::yellow("Size"), "          : ", size_str, "\n", sep = "")
             cat("\n")
+          })
+
+#' @rdname mask-methods
+#' @export
+setMethod("mask", "AbstractSparseNeuroVec",
+          function(x) {
+            x@mask
+          })
+
+#' @rdname mask-methods
+#' @export
+setMethod("mask", "SparseNeuroVecSource",
+          function(x) {
+            x@mask
           })

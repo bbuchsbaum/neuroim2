@@ -221,18 +221,9 @@ setMethod(f = "linear_access",
             x@filemap[idx]
           })
 
-#' Show Method for MappedNeuroVec Objects
-#'
-#' @description
-#' Displays a formatted summary of a MappedNeuroVec object.
-#'
-#' @param object A MappedNeuroVec object
-#'
-#' @importFrom crayon bold red green blue yellow silver
-#' @importFrom utils object.size
-#'
+
 #' @export
-#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
+#' @rdname show-methods
 setMethod("show", "MappedNeuroVec",
           function(object) {
             # Header
@@ -282,3 +273,10 @@ setMethod("as.matrix", "MappedNeuroVec",
     matrix(vals, d123, d4)
   }
 )
+
+#' @rdname mask-methods
+#' @export
+setMethod("mask", "MappedNeuroVec",
+          function(x) {
+            x@mask
+          })

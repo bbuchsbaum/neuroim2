@@ -1583,3 +1583,40 @@ setGeneric(name="read_meta_info", def=function(x, file_name) standardGeneric("re
 #' max(values(embedded_kern_scaled)) == 2 * max(values(embedded_kern))
 #'
 setGeneric("embed_kernel", def=function(x, sp, center_voxel, ...) standardGeneric("embed_kernel"))
+
+#' Extract Mask from Neuroimaging Object
+#' 
+#' @description
+#' Generic function to extract or generate a mask from neuroimaging objects.
+#' For sparse objects with a \code{@mask} slot, returns the stored mask.
+#' For dense objects, returns a filled mask (all TRUE values) indicating
+#' all voxels contain valid data.
+#' 
+#' @param x A neuroimaging object (NeuroVol, NeuroVec, or derived classes)
+#' @return A \code{\linkS4class{LogicalNeuroVol}} object representing the mask
+#' 
+#' @details
+#' The behavior depends on the class of the input object:
+#' \itemize{
+#'   \item For sparse objects (SparseNeuroVec, ClusteredNeuroVol, etc.): 
+#'         Returns the stored \code{@mask} slot
+#'   \item For dense objects (DenseNeuroVol, DenseNeuroVec, etc.): 
+#'         Returns a LogicalNeuroVol with all TRUE values
+#'   \item For ROI objects: Not implemented (use \code{coords()} instead)
+#' }
+#' 
+#' @export
+#' @rdname mask-methods
+#' @examples
+#' # Create a dense volume
+#' vol <- NeuroVol(array(rnorm(64^3), c(64,64,64)), NeuroSpace(c(64,64,64)))
+#' m <- mask(vol)  # Returns all TRUE mask
+#' 
+#' # Create a sparse vector with explicit mask
+#' mask_array <- array(runif(64^3) > 0.5, c(64,64,64))
+#' mask_vol <- LogicalNeuroVol(mask_array, NeuroSpace(c(64,64,64)))
+#' sparse_data <- rnorm(sum(mask_array))
+#' svec <- SparseNeuroVec(sparse_data, NeuroSpace(c(64,64,64,10)), mask_vol)
+#' m2 <- mask(svec)  # Returns the stored mask
+#' 
+setGeneric("mask", def=function(x) standardGeneric("mask"))

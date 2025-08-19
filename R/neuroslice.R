@@ -13,7 +13,7 @@
 #' individual slices from volumetric neuroimaging data or for visualizing 2D cross-sections.
 #'
 #' @param data A vector or matrix containing the slice data values.
-#' @param space An object of class \code{\linkS4class{NeuroSpace}} defining the spatial 
+#' @param space An object of class \code{\linkS4class{NeuroSpace}} defining the spatial
 #'   properties (dimensions, spacing, origin) of the slice.
 #' @param indices Optional integer vector. When \code{data} is provided as a 1D vector,
 #'   \code{indices} specifies the linear indices where the data values should be placed
@@ -62,7 +62,7 @@
 #' sparse_indices <- sample(1:(64*64), n_points)
 #' sparse_slice <- NeuroSlice(sparse_data, slice_space, indices = sparse_indices)
 #'
-#' @seealso 
+#' @seealso
 #' \code{\linkS4class{NeuroSpace}} for defining spatial properties,
 #' \code{\linkS4class{NeuroVol}} for 3D volumetric data,
 #' \code{\link{plot}} for visualization methods
@@ -71,7 +71,7 @@
 NeuroSlice <- function(data, space, indices = NULL) {
   assert_that(ndim(space) == 2,
               msg = "Space must be 2-dimensional for NeuroSlice")
-  
+
   if (is.null(indices)) {
     if (length(dim(data)) != 2) {
       assert_that(length(data) == prod(dim(space)[1:2]),
@@ -119,7 +119,7 @@ NeuroSlice <- function(data, space, indices = NULL) {
 #' @seealso \code{\link{index_to_grid}} for the inverse operation
 #'
 #' @export
-setMethod(f="grid_to_index", 
+setMethod(f="grid_to_index",
           signature=signature(x = "NeuroSlice", coords="matrix"),
           def=function(x, coords) {
             callGeneric(x@space, coords)
@@ -127,7 +127,7 @@ setMethod(f="grid_to_index",
 
 #' @rdname grid_to_index-methods
 #' @export
-setMethod(f="grid_to_index", 
+setMethod(f="grid_to_index",
           signature=signature(x = "NeuroSlice", coords="numeric"),
           def=function(x, coords) {
             callGeneric(x@space, coords)
@@ -171,6 +171,8 @@ setMethod(f="index_to_grid",
 #' @param cmap Color map to use for plotting, defaults to grayscale
 #' @param irange Intensity range for scaling the plot values, defaults to the data range
 #' @param legend Logical indicating whether to display the color legend. Defaults to TRUE.
+#'
+#' @return a ggplot2 object
 #'
 #' @details
 #' The plot method uses \code{ggplot2} to create a raster visualization of the slice data.
@@ -218,72 +220,55 @@ setMethod("plot",
 
           })
 
-#' Display NeuroSlice Information
-#'
-#' @title Print NeuroSlice Object Details
-#' @description
-#' Displays a formatted summary of a \code{NeuroSlice} object's properties using
-#' color-coded output for improved readability.
-#'
-#' @param object A \code{NeuroSlice} object
-#'
-#'
-#'
-#' @examples
-#' slice <- NeuroSlice(matrix(1:100, 10, 10), NeuroSpace(c(10, 10)))
-#' show(slice)
-#'
-#' @importFrom crayon bold blue green red yellow silver
-#' @importFrom utils object.size
+
 #' @rdname show-methods
 #' @export
-#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
-setMethod(f="show", 
+setMethod(f="show",
           signature=signature("NeuroSlice"),
           def=function(object) {
             # Get space information
             sp <- space(object)
-            
+
             # Calculate statistics
             val_range <- range(object, na.rm=TRUE)
             n_na <- sum(is.na(object))
             mem_size <- format(object.size(object), units="auto")
-            
+
             # Header
             cat("\n")
             cat(bold(blue("=== NeuroSlice Object ===")), "\n\n")
-            
+
             # Type and Dimensions
             cat(bold(yellow("* Basic Information")), "\n")
             cat("  ", silver("Type:"), " ", class(object), "\n", sep="")
-            cat("  ", silver("Dimensions:"), " ", 
-                paste(dim(object), collapse=" x "), 
+            cat("  ", silver("Dimensions:"), " ",
+                paste(dim(object), collapse=" x "),
                 " (", green(mem_size), ")", "\n", sep="")
-            
+
             # Value Range and Stats
             cat("\n", bold(yellow("* Data Properties")), "\n", sep="")
-            cat("  ", silver("Value Range:"), " [", 
-                blue(sprintf("%.2f", val_range[1])), ", ", 
+            cat("  ", silver("Value Range:"), " [",
+                blue(sprintf("%.2f", val_range[1])), ", ",
                 blue(sprintf("%.2f", val_range[2])), "]", "\n", sep="")
             if (n_na > 0) {
-                cat("  ", silver("Missing Values:"), " ", 
-                    red(n_na), " (", 
-                    sprintf("%.1f%%", 100*n_na/length(object)), ")", 
+                cat("  ", silver("Missing Values:"), " ",
+                    red(n_na), " (",
+                    sprintf("%.1f%%", 100*n_na/length(object)), ")",
                     "\n", sep="")
             }
-            
+
             # Spatial Properties
             cat("\n", bold(yellow("* Spatial Properties")), "\n", sep="")
-            cat("  ", silver("Spacing:"), " ", 
-                paste(sprintf("%.2f", sp@spacing), collapse=" x "), 
+            cat("  ", silver("Spacing:"), " ",
+                paste(sprintf("%.2f", sp@spacing), collapse=" x "),
                 "\n", sep="")
-            cat("  ", silver("Origin:"), "  ", 
-                paste(sprintf("%.2f", sp@origin), collapse=" x "), 
+            cat("  ", silver("Origin:"), "  ",
+                paste(sprintf("%.2f", sp@origin), collapse=" x "),
                 "\n", sep="")
-            cat("  ", silver("Axes:"), "    ", 
-                green(sp@axes@i@axis), " x ", 
+            cat("  ", silver("Axes:"), "    ",
+                green(sp@axes@i@axis), " x ",
                 green(sp@axes@j@axis), "\n", sep="")
-            
+
             # Footer
             cat("\n", blue("=" = 28), "\n", sep="")
           })
@@ -327,3 +312,24 @@ mapToColors <- function (imslice, col = heat.colors(128, alpha = 1), zero_col = 
     imcols
   }
 }
+
+#' @rdname mask-methods
+#' @export
+setMethod("mask", "NeuroSlice",
+          function(x) {
+            # Create a 3D mask with the slice dimension expanded to 1
+            dims <- dim(x)
+            
+            # NeuroSlice is always 2D, expand to 3D for mask
+            if (length(dims) == 2) {
+              # Add a third dimension of size 1
+              mask_dims <- c(dims[1], dims[2], 1)
+              # Use default spacing and origin since NeuroSlice doesn't have these
+              LogicalNeuroVol(array(TRUE, mask_dims),
+                            NeuroSpace(mask_dims))
+            } else {
+              # Shouldn't happen for NeuroSlice, but handle gracefully
+              LogicalNeuroVol(array(TRUE, dims), 
+                            NeuroSpace(dims))
+            }
+          })

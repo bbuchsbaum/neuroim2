@@ -255,16 +255,11 @@ setAs(from="NeuroVol", to="LogicalNeuroVol", def=function(from) {
 #' @export
 setAs(from="NeuroVol", to="array", def=function(from) from[,,])
 
-#' Display NeuroVol Object
-#'
-#' @description Displays a formatted summary of a \code{NeuroVol} object.
-#'
-#' @param object A \code{NeuroVol} object.
-#' @return Invisibly returns NULL after printing object information to the console.
 #'
 #' @importFrom crayon bold blue green red yellow silver
 #' @importFrom utils object.size
 #' @export
+#' @rdname show-methods
 setMethod(f="show", signature=signature("NeuroVol"),
           def=function(object) {
             # Get space information and calculate stats
@@ -323,12 +318,11 @@ setMethod(f="show", signature=signature("NeuroVol"),
                 crayon::silver(" # shows multiple slices"), "\n\n")
           })
 
-#' show a \code{SparseNeuroVol}
-#' @param object the object
-#' @return Invisibly returns NULL after printing object information to the console.
+
 #' @importFrom crayon bold blue green red yellow silver
 #' @importFrom utils object.size
 #' @importFrom Matrix which
+#' @rdname show-methods
 #' @export
 setMethod(f="show", signature=signature("SparseNeuroVol"),
           def=function(object) {
@@ -1072,7 +1066,7 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 
 
 
-#' plot an NeuroVol as a series of 2D slices
+#' plot a NeuroVol
 #'
 #' @rdname plot-methods
 #' @param x the object to display
@@ -1147,6 +1141,22 @@ setMethod("plot", signature=signature(x="NeuroVol"),
               )
 
             p
+          })
+
+#' @rdname mask-methods
+#' @export
+setMethod("mask", "DenseNeuroVol",
+          function(x) {
+            LogicalNeuroVol(array(TRUE, dim(x)), space(x))
+          })
+
+#' @rdname mask-methods
+#' @export
+setMethod("mask", "LogicalNeuroVol",
+          function(x) {
+            # When a LogicalNeuroVol is used as data (not as a mask),
+            # return a filled mask indicating all voxels are valid
+            LogicalNeuroVol(array(TRUE, dim(x)), space(x))
           })
 
 

@@ -1466,3 +1466,15 @@ setMethod("as.matrix", "DenseNeuroVec",
   }
 )
 
+#' @rdname mask-methods
+#' @export
+setMethod("mask", "DenseNeuroVec",
+          function(x) {
+            # Extract 3D spatial dimensions for the mask
+            spatial_dims <- dim(x)[1:3]
+            LogicalNeuroVol(array(TRUE, spatial_dims), 
+                           NeuroSpace(spatial_dims, 
+                                     spacing(x)[1:3],
+                                     origin(x)[1:3]))
+          })
+
