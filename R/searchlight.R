@@ -393,3 +393,128 @@ clustered_searchlight <- function(mask, cvol=NULL, csize=NULL) {
   deflist::deflist(f, csize)
 
 }
+
+#' Cluster-centroid searchlight over cluster time-series
+#'
+#' @description
+#' Iterate over clusters by their centroids and, for each seed cluster, return the
+#' time-series of the K nearest clusters (or those within a radius). This enables
+#' searchlight analysis at the cluster level rather than individual voxels.
+#'
+#' @param x A `ClusteredNeuroVec` object or a `NeuroVec` plus `cvol`
+#' @param cvol A `ClusteredNeuroVol` (required if `x` is a `NeuroVec`)
+#' @param k Integer, number of nearest clusters including the seed (default: 10).
+#'   Will be capped at the total number of clusters if specified value exceeds it.
+#' @param radius Numeric distance in mm. If given, use all clusters within this radius
+#'   instead of k-nearest neighbors. Cannot be used together with \code{k}.
+#' @param label Optional character label for the returned windows
+#'
+#' @return A list of \code{ROIVec} objects, one per cluster, where each ROIVec contains:
+#' \describe{
+#'   \item{values}{A T×N matrix where T is the number of timepoints and N is the number
+#'     of neighboring clusters (including the seed itself)}
+#'   \item{coords}{The centroid coordinates of the neighboring clusters}
+#' }
+#' The seed cluster's time-series is always the first column in each ROIVec.
+#'
+#' @details
+#' The function creates a searchlight around each cluster's centroid, selecting either:
+#' \itemize{
+#'   \item The k nearest clusters (when \code{k} is specified)
+#'   \item All clusters within a given radius (when \code{radius} is specified)
+#' }
+#' 
+#' This is particularly useful for cluster-level connectivity analyses or when
+#' working with parcellated data where voxel-level searchlights would be redundant.
+#'
+#' @seealso 
+#' \code{\link{ClusteredNeuroVec}} for creating clustered neuroimaging vectors,
+#' \code{\link{searchlight}} for voxel-level searchlight analysis,
+#' \code{\link{ROIVec}} for the structure of returned windows
+#'
+#' @export
+#' @examples
+#' # Create synthetic 4D data (8x8x8 volume, 10 timepoints)
+#' sp4 <- NeuroSpace(c(8,8,8,10), c(1,1,1))
+#' arr <- array(rnorm(8*8*8*10), dim=c(8,8,8,10))
+#' vec <- NeuroVec(arr, sp4)
+#' 
+#' # Create a mask covering most of the volume
+#' sp3 <- NeuroSpace(c(8,8,8), c(1,1,1))
+#' mask_arr <- array(FALSE, dim=c(8,8,8))
+#' mask_arr[2:7, 2:7, 2:7] <- TRUE
+#' mask <- LogicalNeuroVol(mask_arr, sp3)
+#' 
+#' # Assign voxels to 10 clusters
+#' n_voxels <- sum(mask_arr)
+#' clusters <- sample(1:10, n_voxels, replace=TRUE)
+#' cvol <- ClusteredNeuroVol(mask, clusters)
+#' 
+#' # Create clustered representation
+#' cv <- ClusteredNeuroVec(vec, cvol)
+#' 
+#' # Get cluster searchlight with 3 nearest neighbors
+#' windows <- cluster_searchlight_series(cv, k = 3)
+#' length(windows)  # 10 windows (one per cluster)
+#' 
+#' # Check first window
+#' roi1 <- windows[[1]]
+#' dim(values(roi1))  # 10 x 3 (timepoints x neighbors)
+#' 
+#' # Use radius-based neighborhoods (5mm radius)
+#' windows_radius <- cluster_searchlight_series(cv, radius = 5)
+#' # Each window may have different number of neighbors
+cluster_searchlight_series <- function(x, cvol = NULL, k = 10L, radius = NULL, label = "") {
+  if (inherits(x, "NeuroVec")) {
+    stopifnot(!is.null(cvol), inherits(cvol, "ClusteredNeuroVol"))
+    x <- ClusteredNeuroVec(x, cvol, label = label)
+  } else {
+    stopifnot(inherits(x, "ClusteredNeuroVec"))
+    cvol <- x@cvol
+  }
+  
+  # Get cluster centroids
+  ctr <- centroids(cvol)  # K x 3 matrix
+  K <- nrow(ctr)
+  
+  # Default to k=10 if neither k nor radius specified
+  if (is.null(k) && is.null(radius)) {
+    k <- min(10L, K)
+  }
+  
+  # Get time-series matrix and add column names
+  TS <- x@ts  # T x K
+  colnames(TS) <- if (!is.null(cvol@label_map) && length(cvol@label_map) == ncol(TS)) {
+    names(cvol@label_map)
+  } else {
+    paste0("Cluster_", seq_len(ncol(TS)))
+  }
+  
+  # Calculate pairwise distances between centroids
+  dmat <- as.matrix(dist(ctr))  # K x K
+  
+  # Function to create one ROIVec window
+  make_one <- function(seed) {
+    # Select neighbors based on radius or k-NN
+    neigh <- if (!is.null(radius)) {
+      which(dmat[seed, ] <= radius)
+    } else {
+      head(order(dmat[seed, ]), k)
+    }
+    
+    # ROIVec expects: coords = N x 3, data = T x N
+    coords <- ctr[neigh, , drop = FALSE]  # N x 3
+    mat <- TS[, neigh, drop = FALSE]      # T x N
+    
+    # Create ROIVec using constructor function
+    sp4 <- space(x)
+    ROIVec(sp4, coords, mat)
+  }
+  
+  # Create list of ROIVec windows
+  out <- lapply(seq_len(K), make_one)
+  names(out) <- colnames(TS)
+  
+  # Return as regular list (deflist can be added later if needed)
+  out
+}

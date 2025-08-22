@@ -1458,3 +1458,33 @@ setClass("ColumnReader", representation=
           representation(nrow="integer", ncol="integer", reader="function"))
           #contains=c("function")
 
+#' ClusteredNeuroVec Class
+#'
+#' @description
+#' A class representing a 4D neuroimaging dataset where voxels are grouped into clusters.
+#' Each cluster has a single time-series that is shared by all voxels within that cluster.
+#'
+#' @slot cvol A \code{\linkS4class{ClusteredNeuroVol}} object defining cluster assignments
+#' @slot ts A numeric matrix of dimensions T x K (time points x clusters)
+#' @slot cl_map An integer vector mapping each voxel to its cluster ID (0 for outside mask)
+#' @slot label A character string label for the object
+#'
+#' @name ClusteredNeuroVec-class
+#' @export
+setClass("ClusteredNeuroVec",
+         slots = c(
+           cvol = "ClusteredNeuroVol",
+           ts = "matrix",
+           cl_map = "integer",
+           label = "character"
+         ),
+         contains = c("NeuroObj", "ArrayLike4D"),
+         validity = function(object) {
+           sp3 <- space(object@cvol)
+           ok <- is.matrix(object@ts) &&
+                 is.integer(object@cl_map) &&
+                 length(object@cl_map) == prod(dim(sp3))
+           if (!ok) return("Invalid ts/cl_map dimensions.")
+           TRUE
+         })
+
