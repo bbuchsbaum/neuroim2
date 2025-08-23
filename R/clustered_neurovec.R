@@ -124,11 +124,24 @@ ClusteredNeuroVec <- function(x, cvol, FUN = mean, weights = NULL, label = "") {
     stop("x must be a NeuroVec or numeric matrix")
   }
   
+  # Create a 4D space with time dimension
+  # Use the 3D space from cvol and add the time dimension
+  dims_3d <- dim(sp3)
+  dims_4d <- c(dims_3d, nrow(ts))
+  
+  # Create a 4D NeuroSpace with the same spatial properties as sp3
+  space_4d <- NeuroSpace(dims_4d, 
+                        spacing = spacing(sp3),
+                        origin = origin(sp3),
+                        axes = sp3@axes,
+                        trans = sp3@trans)
+  
   new("ClusteredNeuroVec",
       cvol = cvol,
       ts = ts,
       cl_map = as.integer(cl_map),
-      label = as.character(label))
+      label = as.character(label),
+      space = space_4d)
 }
 
 #' @inheritParams series
