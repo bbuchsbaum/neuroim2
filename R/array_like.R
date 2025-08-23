@@ -273,8 +273,44 @@ setMethod(f="[", signature=signature(x = "ArrayLike3D", i = "missing", j = "nume
           }
 )
 
-
-
-
-
+#' Array extraction for ClusteredNeuroVec
+#'
+#' @description
+#' Provides array-like access to ClusteredNeuroVec objects, supporting 
+#' extraction patterns like x[,,,t] to get 3D volumes at specific time points.
+#'
+#' @rdname extractor4d
+#' @export
+setMethod("[",
+  signature(x = "ClusteredNeuroVec", i = "missing", j = "missing"),
+  function(x, i, j, k, m, ..., drop = TRUE) {
+    # Handle case where only time index is provided (x[,,,t])
+    if (!missing(m) && is.numeric(m)) {
+      sp3 <- dim(space(x@cvol))
+      nsp <- prod(sp3)
+      
+      m <- as.integer(m)
+      stopifnot(all(m >= 1L & m <= nrow(x@ts)))
+      
+      # For each selected timepoint, fill a 3D array with cluster values
+      out <- lapply(m, function(ti) {
+        buf <- rep.int(NA_real_, nsp)
+        active <- which(x@cl_map > 0L)
+        cid <- x@cl_map[active]
+        buf[active] <- x@ts[ti, cid]
+        array(buf, dim = sp3)
+      })
+      
+      if (length(out) == 1 && drop) {
+        out[[1]]
+      } else {
+        arr <- array(unlist(out, use.names = FALSE), dim = c(sp3, length(m)))
+        if (drop) drop(arr) else arr
+      }
+    } else {
+      # Delegate to generic method for other indexing patterns
+      callNextMethod()
+    }
+  }
+)
 

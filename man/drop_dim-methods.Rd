@@ -3,6 +3,9 @@
 \name{drop_dim}
 \alias{drop_dim}
 \alias{drop_dim,AxisSet2D,numeric-method}
+\alias{drop_dim,AxisSet2D,missing-method}
+\alias{drop_dim,AxisSet3D,numeric-method}
+\alias{drop_dim,AxisSet3D,missing-method}
 \alias{drop_dim,NeuroSpace,numeric-method}
 \alias{drop_dim,NeuroSpace,missing-method}
 \title{Drop a Dimension from an Object}
@@ -11,19 +14,23 @@ drop_dim(x, dimnum)
 
 \S4method{drop_dim}{AxisSet2D,numeric}(x, dimnum)
 
+\S4method{drop_dim}{AxisSet2D,missing}(x, dimnum)
+
+\S4method{drop_dim}{AxisSet3D,numeric}(x, dimnum)
+
+\S4method{drop_dim}{AxisSet3D,missing}(x, dimnum)
+
 \S4method{drop_dim}{NeuroSpace,numeric}(x, dimnum)
 
 \S4method{drop_dim}{NeuroSpace,missing}(x)
 }
 \arguments{
-\item{x}{The NeuroSpace object}
+\item{x}{An AxisSet3D object}
 
-\item{dimnum}{The dimension number to drop (if missing, drops the last dimension)}
+\item{dimnum}{Numeric index of dimension to drop (optional)}
 }
 \value{
 An object of the same class as \code{x} with the specified dimension removed.
-
-An object of the same class as the input with the specified dimension removed.
 }
 \description{
 This function removes a specified dimension from a given object, such as a matrix or an array.

@@ -238,7 +238,7 @@ setMethod(f="coords", signature=signature(x = "ROIVol"),
 
 
 #' @export
-#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
+#' @rdname show-methods
 setMethod(f="show", signature=signature(object = "ROIVol"),
           def=function(object) {
             cat("\n", crayon::bold(crayon::blue("ROIVol Object")), "\n\n")
@@ -256,11 +256,7 @@ setMethod(f="show", signature=signature(object = "ROIVol"),
           })
 
 
-#' Show method for ROICoords objects
-#' @name show
 #' @rdname show-methods
-#' @aliases show,ROICoords-method
-#' @return Invisibly returns NULL after printing the object summary.
 #' @export
 setMethod(f="show", signature=signature(object = "ROICoords"),
           def=function(object) {
@@ -904,10 +900,9 @@ setMethod("[", signature=signature(x="ROIVol", i="logical", j="missing", drop="A
           })
 
 
-#' show an \code{\linkS4class{ROIVol}}
-#' @param object the object
+
 #' @export
-#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
+#' @rdname show-methods
 setMethod("show", signature=signature(object = "ROIVol"),
 		  function (object) {
 			  cat("\n", crayon::bold(crayon::blue("ROIVol Object")), "\n\n")
@@ -925,11 +920,10 @@ setMethod("show", signature=signature(object = "ROIVol"),
 		  })
 
 
-#' show an \code{\linkS4class{ROIVec}}
-#' @param object the object
+
 #' @importFrom crayon bold blue green red yellow silver
 #' @export
-#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
+#' @rdname show-methods
 setMethod("show", signature=signature(object = "ROIVec"),
           function (object) {
             # Calculate statistics

@@ -11,6 +11,9 @@
 
 \item{i}{the volume index}
 }
+\value{
+a SparseNeuroVol object
+}
 \description{
 [[
 }

@@ -8,7 +8,8 @@
 \S4method{plot}{NeuroSlice}(
   x,
   cmap = gray(seq(0, 1, length.out = 255)),
-  irange = range(x, na.rm = TRUE)
+  irange = range(x, na.rm = TRUE),
+  legend = TRUE
 )
 
 \S4method{plot}{NeuroVol}(
@@ -19,7 +20,8 @@
   thresh = c(0, 0),
   alpha = 1,
   bgvol = NULL,
-  bgcmap = gray(seq(0, 1, length.out = 255))
+  bgcmap = gray(seq(0, 1, length.out = 255)),
+  legend = TRUE
 )
 }
 \arguments{
@@ -28,6 +30,8 @@
 \item{cmap}{a color map consisting of a vector of colors in hex format (e.g. \code{gray(n=255)})}
 
 \item{irange}{the intensity range indicating the low and high values of the color scale.}
+
+\item{legend}{Logical indicating whether to display the color legend. Defaults to TRUE.}
 
 \item{zlevels}{the series of slice indices to display.}
 
@@ -39,10 +43,13 @@
 
 \item{bgcmap}{a color map for backround layer consisting of a vector of colors in hex format (e.g. \code{gray(n=255)})}
 }
+\value{
+a ggplot2 object
+}
 \description{
 Plot a NeuroSlice
 
-plot an NeuroVol as a series of 2D slices
+plot a NeuroVol
 }
 \details{
 The plot method uses \code{ggplot2} to create a raster visualization of the slice data.

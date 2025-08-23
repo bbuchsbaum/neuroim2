@@ -33,7 +33,7 @@ mask <- LogicalNeuroVol(mask_data, space3d)
 n_features <- 2
 n_trials <- 2
 n_voxels <- sum(mask_data)  # 1000 voxels
-data_array <- array(rnorm(n_features * n_trials * n_voxels), 
+data_array <- array(rnorm(n_features * n_trials * n_voxels),
                    dim = c(n_features, n_trials, n_voxels))
 
 # Create the NeuroHyperVec object

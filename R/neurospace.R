@@ -161,7 +161,6 @@ NeuroSpace <- function(dim, spacing = NULL, origin = NULL, axes = NULL, trans = 
 #' @importFrom utils object.size
 #' @rdname show-methods
 #' @export
-#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 setMethod(f="show",
           signature=signature("NeuroSpace"),
           def=function(object) {
@@ -291,9 +290,7 @@ setMethod(f="add_dim", signature=signature(x = "NeuroSpace", n="numeric"),
 		})
 
 
-#' Drop a dimension from a NeuroSpace object
-#' @param x The NeuroSpace object
-#' @param dimnum The dimension number to drop (if missing, drops the last dimension)
+
 #' @export
 #' @rdname drop_dim-methods
 setMethod(f="drop_dim", signature=signature(x="NeuroSpace", dimnum="numeric"),
@@ -340,10 +337,9 @@ setMethod(f="drop_dim", signature=signature(x = "NeuroSpace", dimnum="missing"),
       }
 		})
 
-#' dim
-#'
+
 #' @export
-#' @param x the object
+#' @rdname dim-methods
 setMethod(f="dim", signature=signature(x = "NeuroSpace"),
 		def=function(x) x@dim)
 

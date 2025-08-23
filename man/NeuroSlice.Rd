@@ -9,7 +9,7 @@ NeuroSlice(data, space, indices = NULL)
 \arguments{
 \item{data}{A vector or matrix containing the slice data values.}
 
-\item{space}{An object of class \code{\linkS4class{NeuroSpace}} defining the spatial 
+\item{space}{An object of class \code{\linkS4class{NeuroSpace}} defining the spatial
 properties (dimensions, spacing, origin) of the slice.}
 
 \item{indices}{Optional integer vector. When \code{data} is provided as a 1D vector,

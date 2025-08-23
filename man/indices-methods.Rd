@@ -20,6 +20,9 @@
 \arguments{
 \item{x}{An \code{\linkS4class{IndexLookupVol}} object}
 }
+\value{
+the indices of the lookup volume
+}
 \description{
 Retrieves the vector of indices that are included in the lookup volume.
 }
@@ -31,4 +34,3 @@ idx <- indices(ilv)  # Get included indices
 
 
 }
-\keyword{internal}

@@ -23,6 +23,9 @@
 
 \item{na.rm}{Logical indicating whether to remove NA values before computation}
 }
+\value{
+the summary of the SparseNeuroVec object
+}
 \description{
 Summary method for Neuroimaging objects
 }

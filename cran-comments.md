@@ -18,7 +18,9 @@
 
 * removed acronyms in title description ("fMRI" is used only after earlier definition)
 
-* After hunting for "print/cat" statements, we found 1 and deleted it. Many print statements remain in S4 "show" methods and in @examples.
+* After hunting for "print/cat" statements in non-display code, we found 1 and deleted it. 
+
+* Many print statements remain in S4 "show" methods and in @examples. We have left these in place.
 
 * We have added @return tags for all remaining functions that we could find.
 

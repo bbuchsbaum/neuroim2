@@ -362,6 +362,7 @@ setMethod(f="Arith", signature=signature(e1="NeuroVol", e2="NeuroVec"),
 #' @param x A SparseNeuroVec object
 #' @param ... Additional arguments passed to methods
 #' @param na.rm Logical indicating whether to remove NA values before computation
+#' @return the summary of the SparseNeuroVec object
 setMethod(f="Summary", signature=signature(x="SparseNeuroVec"),
 		def=function(x, ..., na.rm = FALSE) {
 			callGeneric(x@data, ..., na.rm = na.rm)

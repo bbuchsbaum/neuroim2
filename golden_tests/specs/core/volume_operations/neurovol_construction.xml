@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<golden_test xmlns="http://golden-tests.org/schema">
+  <metadata>
+    <id>neurovol_basic_construction</id>
+    <version>1.0</version>
+    <description>Test basic NeuroVol construction from numeric arrays</description>
+    <tags>
+      <tag>volume_operations</tag>
+      <tag>construction</tag>
+      <tag>core</tag>
+    </tags>
+  </metadata>
+  
+  <semantic_description>
+    <purpose>
+      Validate NeuroVol construction from 3D numeric arrays with different data types,
+      ensuring proper dimension handling, data storage, and basic property access.
+    </purpose>
+    <algorithm>
+      1. Create a 4x4x4 NeuroVol from a numeric array with known pattern
+      2. Fill array with values: array[i,j,k] = i + j*10 + k*100
+      3. Verify dimensions are preserved correctly
+      4. Test data access at specific coordinates
+      5. Validate min/max values and data type preservation
+      6. Test construction with both integer and double values
+    </algorithm>
+  </semantic_description>
+  
+  <inputs>
+    <array>
+      <name>test_array</name>
+      <dimensions>4 4 4</dimensions>
+      <values>
+        0 1 2 3 10 11 12 13 20 21 22 23 30 31 32 33
+        100 101 102 103 110 111 112 113 120 121 122 123 130 131 132 133
+        200 201 202 203 210 211 212 213 220 221 222 223 230 231 232 233
+        300 301 302 303 310 311 312 313 320 321 322 323 330 331 332 333
+      </values>
+    </array>
+    <parameters>
+      <parameter>
+        <name>spacing</name>
+        <value>1 1 1</value>
+      </parameter>
+      <parameter>
+        <name>origin</name>
+        <value>0 0 0</value>
+      </parameter>
+    </parameters>
+  </inputs>
+  
+  <expected_outputs>
+    <numeric_checks>
+      <!-- Check dimensions -->
+      <check>
+        <type>dimension</type>
+        <name>volume_dimensions</name>
+        <location>vol.dim</location>
+        <expected>4 4 4</expected>
+      </check>
+      
+      <!-- Check specific voxel values -->
+      <check>
+        <type>exact_value</type>
+        <name>voxel_1_1_1</name>
+        <location>vol[1,1,1]</location>
+        <expected>0</expected>
+        <tolerance>1e-10</tolerance>
+      </check>
+      
+      <check>
+        <type>exact_value</type>
+        <name>voxel_2_3_1</name>
+        <location>vol[2,3,1]</location>
+        <expected>21</expected>
+        <tolerance>1e-10</tolerance>
+      </check>
+      
+      <check>
+        <type>exact_value</type>
+        <name>voxel_4_4_4</name>
+        <location>vol[4,4,4]</location>
+        <expected>333</expected>
+        <tolerance>1e-10</tolerance>
+      </check>
+      
+      <!-- Check min/max values -->
+      <check>
+        <type>exact_value</type>
+        <name>min_value</name>
+        <location>min(vol)</location>
+        <expected>0</expected>
+        <tolerance>1e-10</tolerance>
+      </check>
+      
+      <check>
+        <type>exact_value</type>
+        <name>max_value</name>
+        <location>max(vol)</location>
+        <expected>333</expected>
+        <tolerance>1e-10</tolerance>
+      </check>
+      
+      <!-- Check mean value -->
+      <check>
+        <type>relative</type>
+        <name>mean_value</name>
+        <location>mean(vol)</location>
+        <expected>166.5</expected>
+        <tolerance>1e-10</tolerance>
+      </check>
+      
+      <!-- Check number of voxels -->
+      <check>
+        <type>exact_value</type>
+        <name>num_voxels</name>
+        <location>length(vol)</location>
+        <expected>64</expected>
+      </check>
+      
+      <!-- Check spacing from space -->
+      <check>
+        <type>exact_value</type>
+        <name>spacing_from_space</name>
+        <location>spacing(space(vol))</location>
+        <expected>1 1 1</expected>
+        <tolerance>1e-10</tolerance>
+      </check>
+    </numeric_checks>
+  </expected_outputs>
+  
+  <implementations>
+    <R><![CDATA[
+library(neuroim2)
+
+# Create test array with pattern: array[i,j,k] = i + j*10 + k*100
+test_data <- array(0, dim = c(4, 4, 4))
+for (i in 1:4) {
+  for (j in 1:4) {
+    for (k in 1:4) {
+      test_data[i, j, k] <- (i-1) + (j-1)*10 + (k-1)*100
+    }
+  }
+}
+
+# Create NeuroVol
+space <- NeuroSpace(dim = c(4, 4, 4), 
+                    spacing = c(1, 1, 1), 
+                    origin = c(0, 0, 0))
+vol <- NeuroVol(test_data, space)
+
+# Access specific voxels for testing
+voxel_1_1_1 <- vol[1, 1, 1]
+voxel_2_3_1 <- vol[2, 3, 1]
+voxel_4_4_4 <- vol[4, 4, 4]
+
+# Get dimensions
+vol.dim <- dim(vol)
+
+# Calculate statistics
+min_val <- min(vol)
+max_val <- max(vol)
+mean_val <- mean(vol)
+num_voxels <- length(vol)
+
+# Get spacing from the volume's space
+spacing_vals <- spacing(space(vol))
+]]></R>
+  </implementations>
+  
+  <propagation_status>
+    <implementation lang="R" status="complete" date="2025-01-06"/>
+    <implementation lang="Python" status="pending"/>
+    <implementation lang="Rust" status="pending"/>
+  </propagation_status>
+</golden_test>

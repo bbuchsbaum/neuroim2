@@ -120,6 +120,7 @@ setMethod(f = "initialize",
 #'
 #'
 #' @export
+#' @return the indices of the lookup volume
 #' @rdname indices-methods
 setMethod(f = "indices",
           signature = signature(x = "IndexLookupVol"),
@@ -134,6 +135,8 @@ setMethod(f = "indices",
 #'
 #' @param x An \code{\linkS4class{IndexLookupVol}} object
 #' @param i A numeric vector of indices to look up
+#'
+#' @return the values of the lookup volume
 #'
 #'
 #' @examples
@@ -227,7 +230,6 @@ setMethod(f = "coords",
 
 #' @export
 #' @rdname show-methods
-#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 setMethod("show", signature(object = "IndexLookupVol"),
           def = function(object) {
             # Calculate summary statistics

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<golden_test xmlns="http://golden-tests.org/schema">
+  <metadata>
+    <id>neurospace_construction_3d</id>
+    <version>1.0</version>
+    <description>Test 3D NeuroSpace construction and coordinate transformations</description>
+    <tags>
+      <tag>spatial_reference</tag>
+      <tag>coordinate_transformation</tag>
+      <tag>core</tag>
+    </tags>
+  </metadata>
+  
+  <semantic_description>
+    <purpose>
+      Validate NeuroSpace construction with specified dimensions, spacing, and origin,
+      and test coordinate transformations between voxel and world coordinate systems.
+    </purpose>
+    <algorithm>
+      1. Create a 3D NeuroSpace with dimensions (4, 4, 4), spacing (2, 2, 2), and origin (-3, -3, -3)
+      2. Test voxel-to-world transformation for voxel (1, 2, 3) (1-based indexing):
+         world_coord = origin + (voxel - 1) * spacing
+         world_x = -3 + (1 - 1) * 2 = -3
+         world_y = -3 + (2 - 1) * 2 = -1
+         world_z = -3 + (3 - 1) * 2 = 1
+      3. Test world-to-voxel transformation for world coordinates (3, 5, 7):
+         voxel = (world_coord - origin) / spacing + 1
+         voxel_i = (3 - (-3)) / 2 + 1 = 4
+         voxel_j = (5 - (-3)) / 2 + 1 = 5
+         voxel_k = (7 - (-3)) / 2 + 1 = 6
+      4. Validate bounds checking and transformation matrix
+    </algorithm>
+  </semantic_description>
+  
+  <inputs>
+    <parameters>
+      <parameter>
+        <name>dim</name>
+        <value>4 4 4</value>
+      </parameter>
+      <parameter>
+        <name>spacing</name>
+        <value>2 2 2</value>
+      </parameter>
+      <parameter>
+        <name>origin</name>
+        <value>-3 -3 -3</value>
+      </parameter>
+    </parameters>
+    <vector>
+      <name>test_voxel</name>
+      <length>3</length>
+      <values>1 2 3</values>
+    </vector>
+    <vector>
+      <name>test_world</name>
+      <length>3</length>
+      <values>3 5 7</values>
+    </vector>
+  </inputs>
+  
+  <expected_outputs>
+    <numeric_checks>
+      <!-- Check dimensions -->
+      <check>
+        <type>dimension</type>
+        <name>space_dimensions</name>
+        <location>dim(space)</location>
+        <expected>4 4 4</expected>
+      </check>
+      
+      <!-- Check spacing -->
+      <check>
+        <type>exact_value</type>
+        <name>spacing_values</name>
+        <location>spacing(space)</location>
+        <expected>2 2 2</expected>
+        <tolerance>1e-10</tolerance>
+      </check>
+      
+      <!-- Check origin -->
+      <check>
+        <type>exact_value</type>
+        <name>origin_values</name>
+        <location>origin(space)</location>
+        <expected>-3 -3 -3</expected>
+        <tolerance>1e-10</tolerance>
+      </check>
+      
+      <!-- Check voxel-to-world transformation -->
+      <check>
+        <type>exact_value</type>
+        <name>voxel_to_world_result</name>
+        <location>world_coords</location>
+        <expected>-3 -1 1</expected>
+        <tolerance>1e-10</tolerance>
+      </check>
+      
+      <!-- Check world-to-voxel transformation -->
+      <check>
+        <type>exact_value</type>
+        <name>world_to_voxel_result</name>
+        <location>voxel_coords</location>
+        <expected>4 5 6</expected>
+        <tolerance>1e-10</tolerance>
+      </check>
+      
+      <!-- Check transformation matrix diagonal -->
+      <check>
+        <type>exact_value</type>
+        <name>trans_matrix_diagonal</name>
+        <location>trans_diag</location>
+        <expected>2 2 2 1</expected>
+        <tolerance>1e-10</tolerance>
+      </check>
+      
+      <!-- Check bounds -->
+      <check>
+        <type>exact_value</type>
+        <name>bounds_min</name>
+        <location>bounds_result[,1]</location>
+        <expected>-3 -3 -3</expected>
+        <tolerance>1e-10</tolerance>
+      </check>
+      
+      <check>
+        <type>exact_value</type>
+        <name>bounds_max</name>
+        <location>bounds_result[,2]</location>
+        <expected>3 3 3</expected>
+        <tolerance>1e-10</tolerance>
+      </check>
+    </numeric_checks>
+  </expected_outputs>
+  
+  <implementations>
+    <R><![CDATA[
+library(neuroim2)
+
+# Create NeuroSpace
+space <- NeuroSpace(dim = c(4, 4, 4), 
+                    spacing = c(2, 2, 2), 
+                    origin = c(-3, -3, -3))
+
+# Test voxel-to-world transformation
+voxel_in <- c(1, 2, 3)
+world_coords <- grid_to_coord(space, voxel_in)
+
+# Test world-to-voxel transformation  
+world_in <- c(3, 5, 7)
+voxel_coords <- coord_to_grid(space, world_in)
+
+# Get transformation matrix diagonal
+trans_mat <- trans(space)
+trans_diag <- diag(trans_mat)
+
+# Get bounds
+bounds_result <- bounds(space)
+]]></R>
+  </implementations>
+  
+  <propagation_status>
+    <implementation lang="R" status="complete" date="2025-01-06"/>
+    <implementation lang="Python" status="pending"/>
+    <implementation lang="Rust" status="pending"/>
+  </propagation_status>
+</golden_test>

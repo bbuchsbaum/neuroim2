@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://golden-tests.org/schema"
+           xmlns="http://golden-tests.org/schema"
+           elementFormDefault="qualified">
+
+  <!-- Root element -->
+  <xs:element name="golden_test" type="GoldenTestType"/>
+
+  <!-- Main test structure -->
+  <xs:complexType name="GoldenTestType">
+    <xs:sequence>
+      <xs:element name="metadata" type="MetadataType"/>
+      <xs:element name="semantic_description" type="SemanticDescriptionType"/>
+      <xs:element name="inputs" type="InputsType"/>
+      <xs:element name="expected_outputs" type="ExpectedOutputsType"/>
+      <xs:element name="implementations" type="ImplementationsType" minOccurs="0"/>
+      <xs:element name="propagation_status" type="PropagationStatusType"/>
+      <xs:element name="implementation_notes" type="ImplementationNotesType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Metadata -->
+  <xs:complexType name="MetadataType">
+    <xs:sequence>
+      <xs:element name="id" type="xs:string"/>
+      <xs:element name="version" type="xs:string"/>
+      <xs:element name="description" type="xs:string"/>
+      <xs:element name="tags" type="TagsType"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="TagsType">
+    <xs:sequence>
+      <xs:element name="tag" type="xs:string" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Semantic description -->
+  <xs:complexType name="SemanticDescriptionType">
+    <xs:sequence>
+      <xs:element name="purpose" type="xs:string"/>
+      <xs:element name="algorithm" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Inputs -->
+  <xs:complexType name="InputsType">
+    <xs:choice maxOccurs="unbounded">
+      <xs:element name="matrix" type="MatrixType"/>
+      <xs:element name="array" type="ArrayType"/>
+      <xs:element name="scalar" type="ScalarType"/>
+      <xs:element name="vector" type="VectorType"/>
+      <xs:element name="parameters" type="ParametersType"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="MatrixType">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="dimensions" type="xs:string"/>
+      <xs:element name="values" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ArrayType">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="dimensions" type="xs:string"/>
+      <xs:element name="values" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ScalarType">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="value" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="VectorType">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="length" type="xs:integer"/>
+      <xs:element name="values" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ParametersType">
+    <xs:sequence>
+      <xs:element name="parameter" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="name" type="xs:string"/>
+            <xs:element name="value" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Expected outputs -->
+  <xs:complexType name="ExpectedOutputsType">
+    <xs:sequence>
+      <xs:element name="numeric_checks" type="NumericChecksType"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="NumericChecksType">
+    <xs:sequence>
+      <xs:element name="check" type="CheckType" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="CheckType">
+    <xs:sequence>
+      <xs:element name="type">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="exact_value"/>
+            <xs:enumeration value="range"/>
+            <xs:enumeration value="relative"/>
+            <xs:enumeration value="statistical"/>
+            <xs:enumeration value="dimension"/>
+            <xs:enumeration value="structural"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="location" type="xs:string"/>
+      <xs:element name="expected" type="xs:string"/>
+      <xs:element name="tolerance" type="xs:string" minOccurs="0"/>
+      <xs:element name="min" type="xs:string" minOccurs="0"/>
+      <xs:element name="max" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Implementations -->
+  <xs:complexType name="ImplementationsType">
+    <xs:sequence>
+      <xs:element name="R" type="xs:string" minOccurs="0"/>
+      <xs:element name="Python" type="xs:string" minOccurs="0"/>
+      <xs:element name="Rust" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Propagation status -->
+  <xs:complexType name="PropagationStatusType">
+    <xs:sequence>
+      <xs:element name="implementation" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:attribute name="lang" type="xs:string" use="required"/>
+          <xs:attribute name="status" use="required">
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="complete"/>
+                <xs:enumeration value="pending"/>
+                <xs:enumeration value="in_progress"/>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+          <xs:attribute name="date" type="xs:date"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Implementation notes -->
+  <xs:complexType name="ImplementationNotesType">
+    <xs:sequence>
+      <xs:element name="note" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:string">
+              <xs:attribute name="lang" type="xs:string" use="required"/>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

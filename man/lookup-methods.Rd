@@ -14,6 +14,9 @@
 
 \item{i}{A numeric vector of indices to look up}
 }
+\value{
+the values of the lookup volume
+}
 \description{
 Performs a lookup operation on an IndexLookupVol object.
 }
@@ -25,4 +28,3 @@ lookup(ilv, c(1, 2, 3))  # Look up values for indices 1, 2, and 3
 
 
 }
-\keyword{internal}

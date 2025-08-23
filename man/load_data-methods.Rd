@@ -19,6 +19,9 @@
 \arguments{
 \item{x}{The NeuroVecSource object containing the image metadata and file information.}
 }
+\value{
+a DenseNeuroVec object
+}
 \description{
 This function loads the image data from a NeuroVecSource object, handling various
 dimensionalities and applying any necessary transformations.

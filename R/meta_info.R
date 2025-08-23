@@ -479,10 +479,9 @@ setAs(from="MetaInfo", to="NIFTIMetaInfo", def=function(from) {
 
 })
 
-#' show a \code{FileMetaInfo}
-#' @param object the object
+
 #' @export
-#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
+#' @rdname show-methods
 setMethod(f="show", signature=signature("FileMetaInfo"),
   def=function(object) {
     cat("an instance of class",  class(object), "\n\n")

@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<golden_test xmlns="http://golden-tests.org/schema">
+  <metadata>
+    <id>basic_io_read_write_cycle</id>
+    <version>1.0</version>
+    <description>Test basic binary IO read/write cycle with metadata preservation</description>
+    <tags>
+      <tag>io_operations</tag>
+      <tag>binary_io</tag>
+      <tag>persistence</tag>
+      <tag>core</tag>
+    </tags>
+  </metadata>
+  
+  <semantic_description>
+    <purpose>
+      Validate writing a NeuroVol to binary format and reading it back,
+      ensuring data integrity and metadata preservation through the IO cycle.
+    </purpose>
+    <algorithm>
+      1. Create a 3x3x3 NeuroVol with specific values and metadata
+      2. Write volume to binary format (header + data)
+      3. Read volume back from binary format
+      4. Verify all voxel values are preserved exactly
+      5. Verify spatial metadata (dimensions, spacing, origin) preserved
+      6. Test with both integer and floating-point data
+      7. Verify file format markers and endianness handling
+    </algorithm>
+  </semantic_description>
+  
+  <inputs>
+    <array>
+      <name>test_data</name>
+      <dimensions>3 3 3</dimensions>
+      <values>
+        1.5 2.5 3.5 4.5 5.5 6.5 7.5 8.5 9.5
+        10.5 11.5 12.5 13.5 14.5 15.5 16.5 17.5 18.5
+        19.5 20.5 21.5 22.5 23.5 24.5 25.5 26.5 27.5
+      </values>
+    </array>
+    <parameters>
+      <parameter>
+        <name>spacing</name>
+        <value>2.0 2.0 2.0</value>
+      </parameter>
+      <parameter>
+        <name>origin</name>
+        <value>-10.0 -10.0 -10.0</value>
+      </parameter>
+      <parameter>
+        <name>temp_file</name>
+        <value>test_neurovol_io.dat</value>
+      </parameter>
+    </parameters>
+  </inputs>
+  
+  <expected_outputs>
+    <numeric_checks>
+      <!-- Check dimensions preserved -->
+      <check>
+        <type>dimension</type>
+        <name>dims_preserved</name>
+        <location>dim(vol_read)</location>
+        <expected>3 3 3</expected>
+      </check>
+      
+      <!-- Check specific values preserved -->
+      <check>
+        <type>exact_value</type>
+        <name>value_1_1_1</name>
+        <location>vol_read[1,1,1]</location>
+        <expected>1.5</expected>
+        <tolerance>1e-10</tolerance>
+      </check>
+      
+      <check>
+        <type>exact_value</type>
+        <name>value_2_2_2</name>
+        <location>vol_read[2,2,2]</location>
+        <expected>14.5</expected>
+        <tolerance>1e-10</tolerance>
+      </check>
+      
+      <check>
+        <type>exact_value</type>
+        <name>value_3_3_3</name>
+        <location>vol_read[3,3,3]</location>
+        <expected>27.5</expected>
+        <tolerance>1e-10</tolerance>
+      </check>
+      
+      <!-- Check sum preserved -->
+      <check>
+        <type>exact_value</type>
+        <name>sum_preserved</name>
+        <location>sum(vol_read)</location>
+        <expected>391.5</expected>
+        <tolerance>1e-10</tolerance>
+      </check>
+      
+      <!-- Check spacing preserved -->
+      <check>
+        <type>exact_value</type>
+        <name>spacing_preserved</name>
+        <location>spacing(space(vol_read))</location>
+        <expected>2 2 2</expected>
+        <tolerance>1e-10</tolerance>
+      </check>
+      
+      <!-- Check origin preserved -->
+      <check>
+        <type>exact_value</type>
+        <name>origin_preserved</name>
+        <location>origin(space(vol_read))</location>
+        <expected>-10 -10 -10</expected>
+        <tolerance>1e-10</tolerance>
+      </check>
+      
+      <!-- Check all values match -->
+      <check>
+        <type>exact_value</type>
+        <name>all_values_match</name>
+        <location>sum(abs(vol_read - vol_orig) &lt; 1e-10)</location>
+        <expected>27</expected>
+      </check>
+      
+      <!-- Check min/max preserved -->
+      <check>
+        <type>exact_value</type>
+        <name>min_preserved</name>
+        <location>min(vol_read)</location>
+        <expected>1.5</expected>
+        <tolerance>1e-10</tolerance>
+      </check>
+      
+      <check>
+        <type>exact_value</type>
+        <name>max_preserved</name>
+        <location>max(vol_read)</location>
+        <expected>27.5</expected>
+        <tolerance>1e-10</tolerance>
+      </check>
+    </numeric_checks>
+  </expected_outputs>
+  
+  <implementations>
+    <R><![CDATA[
+library(neuroim2)
+
+# Create test volume with floating point data
+space <- NeuroSpace(dim = c(3, 3, 3), 
+                    spacing = c(2, 2, 2), 
+                    origin = c(-10, -10, -10))
+
+test_data <- array(seq(1.5, 27.5, by = 1), dim = c(3, 3, 3))
+vol_orig <- NeuroVol(test_data, space)
+
+# Create temporary file path
+temp_file <- tempfile(pattern = "test_neurovol_io", fileext = ".nii")
+
+# Write volume to binary format
+write_vol(vol_orig, temp_file)
+
+# Read volume back
+vol_read <- read_vol(temp_file)
+
+# Extract values for comparison
+val_1_1_1 <- vol_read[1, 1, 1]
+val_2_2_2 <- vol_read[2, 2, 2]
+val_3_3_3 <- vol_read[3, 3, 3]
+
+# Get metadata
+dims_read <- dim(vol_read)
+spacing_read <- spacing(space(vol_read))
+origin_read <- origin(space(vol_read))
+
+# Calculate statistics
+sum_read <- sum(vol_read)
+min_read <- min(vol_read)
+max_read <- max(vol_read)
+
+# Count matching values
+matches <- sum(abs(vol_read - vol_orig) < 1e-10)
+
+# Clean up
+unlink(temp_file)
+]]></R>
+  </implementations>
+  
+  <propagation_status>
+    <implementation lang="R" status="complete" date="2025-01-06"/>
+    <implementation lang="Python" status="pending"/>
+    <implementation lang="Rust" status="pending"/>
+  </propagation_status>
+  
+  <implementation_notes>
+    <note lang="R">
+      Uses tempfile() for platform-independent temporary file creation.
+      Binary format includes header with metadata followed by data array.
+    </note>
+  </implementation_notes>
+</golden_test>

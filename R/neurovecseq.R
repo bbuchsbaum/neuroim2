@@ -58,7 +58,7 @@ NULL
 #'
 #' # Extract a subsequence
 #' sub_seq <- sub_vector(vs, 1:5)
-#' 
+#'
 #'
 #' @seealso
 #' \code{\linkS4class{NeuroVec}} for the base vector class,
@@ -101,7 +101,7 @@ NULL
 #' # Combine into sequence
 #' vs <- NeuroVecSeq(v1, v2)
 #' print(vs)
-#' 
+#'
 #'
 #' @export
 NeuroVecSeq <- function(...) {
@@ -377,7 +377,6 @@ setMethod("vectors", signature(x="NeuroVecSeq", subset="logical"),
 
 #' @export
 #' @rdname show-methods
-#' @return Invisibly returns \code{NULL}, called for its side effect of displaying the object.
 setMethod("show", "NeuroVecSeq",
           def=function(object) {
             cat("\n", crayon::bold(crayon::blue("NeuroVecSeq")), " ",

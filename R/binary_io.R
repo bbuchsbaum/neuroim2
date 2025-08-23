@@ -334,13 +334,7 @@ setMethod(f="read_elements", signature=signature(x= "BinaryReader", num_elements
 			readBin(x@input, what=x@data_type, size=x@bytes_per_element, n=num_elements, endian=x@endian, signed=x@signed)
 		})
 
-#' Write Elements to Binary Writer
-#'
-#' Write elements to a \linkS4class{BinaryWriter} object.
-#'
-#' @param x Object of class \linkS4class{BinaryWriter}
-#' @param els Numeric vector of elements to write
-#' @return Invisibly returns \code{NULL}, called for its side effect of writing elements to the binary writer.
+
 #' @examples
 #' \donttest{
 #' # Create a temporary binary file for writing
@@ -355,6 +349,7 @@ setMethod(f="read_elements", signature=signature(x= "BinaryReader", num_elements
 #' unlink(tmp)
 #' }
 #' @export
+#' @rdname write_elements-methods
 setMethod(f="write_elements", signature=signature(x= "BinaryWriter", els="numeric"),
 		def=function(x, els) {
 			if (.getRStorage(x@data_type) == "integer") {
