@@ -508,7 +508,11 @@ setMethod(f="[", signature=signature(x = "NeuroVol", i = "ROICoords", j = "missi
 #' @export
 setMethod(f="concat", signature=signature(x="DenseNeuroVol", y="missing"),
           def=function(x,y,...) {
-            x
+            # Convert single 3D volume to 4D NeuroVec with 1 time point
+            # This ensures consistent behavior - concat always returns 4D
+            mat <- as.matrix(x)
+            new_space <- add_dim(space(x), 1)
+            DenseNeuroVec(mat, new_space)
           })
 
 
