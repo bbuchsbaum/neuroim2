@@ -1,7 +1,7 @@
 Package: neuroim2
 Type: Package
 Title: Data Structures for Brain Imaging Data
-Version: 0.8.1
+Version: 0.8.2
 LinkingTo: 
   Rcpp,
   RcppArmadillo,
@@ -26,9 +26,10 @@ Depends:
     Matrix
 Collate:
     'RcppExports.R'
-    'afni_io.R'
     'all_generic.R'
     'all_class.R'
+    'SparseNeuroVec-validity.R'
+    'afni_io.R'
     'array_like.R'
     'axis.R'
     'big_neurovec.R'
@@ -56,6 +57,7 @@ Collate:
     'niml_io.R'
     'ops.R'
     'resample.R'
+    'resample_to.R'
     'roi.R'
     'searchlight.R'
     'simulate.R'

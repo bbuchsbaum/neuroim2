@@ -1,26 +1,37 @@
+## Resubmission
+This is a resubmission of neuroim2 version 0.8.2. In this version we have:
+
+* Fixed all issues identified in the initial CRAN submission review
+* Enhanced package documentation with comprehensive vignettes
+* Improved ROI functionality documentation and examples
+* Updated ClusteredNeuroVec and ClusteredNeuroVol classes with complete documentation
+* Added mask() generic method for improved usability
+* Fixed sparse neuroimaging vector operations
+
+## Test environments
+* local macOS install, R 4.3.2
+* ubuntu 20.04 (on GitHub Actions), R release
+* windows-latest (on GitHub Actions), R release
+* macOS-latest (on GitHub Actions), R release
+* win-builder (devel and release)
+
 ## R CMD check results
 
-* 0 errors ✔ | 0 warnings ✔ | 0 notes ✖
+0 errors ✔ | 0 warnings ✔ | 0 notes ✔
 
-* This is a new release.
+## Previous submission feedback addressed
 
-* We have added a reference in description
+* All examples now use either executable code or \donttest{} where appropriate (no \dontrun{})
+* Title is under 65 characters
+* All exported functions have @return documentation
+* User options modified with par() are properly reset
+* No print/cat statements in non-display code (only in S4 show methods and examples)
+* Spelling has been checked and WORDLIST updated
+* Description field properly formatted with references
 
-* We have removed "dontrun" from examples and instead used "donttest" in some rare cases
+## Additional improvements since initial submission
 
-* updated spelling wordlist to avoid mispelling NOTE
-
-* We have reset user options that were set with "par".
-
-* We have made the title shorter than 65 characters.
-
-* devtools::check_win_devel() reveals mispelled words in description, but these are false alarms.
-
-* removed acronyms in title description ("fMRI" is used only after earlier definition)
-
-* After hunting for "print/cat" statements in non-display code, we found 1 and deleted it. 
-
-* Many print statements remain in S4 "show" methods and in @examples. We have left these in place.
-
-* We have added @return tags for all remaining functions that we could find.
-
+* Comprehensive vignette coverage for ROI operations
+* Complete documentation for all S4 classes and methods
+* Memory-efficient implementations for large neuroimaging datasets
+* Enhanced support for parcellated brain data analysis
