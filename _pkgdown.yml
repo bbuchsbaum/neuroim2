@@ -25,6 +25,8 @@ reference:
     - BinaryWriter
     - BinaryWriter-class
     - ClusteredNeuroVol
+    - ClusteredNeuroVec
+    - ClusteredNeuroVec-class
     - DenseNeuroVec
     - DenseNeuroVol
     - FileBackedNeuroVec
@@ -89,6 +91,7 @@ reference:
     - concat
     - mapf
     - vols
+    - vec_from_vols
     - neuroim2
     - data_file
     - data_file_matches
@@ -99,6 +102,7 @@ reference:
     - linear_access
     - image
     - scale
+    - simulate_fmri
 
   - title: "Coordinate and Dimension Operations"
     desc: >
@@ -173,6 +177,7 @@ reference:
     - bilateral_filter
     - reorient
     - clustered_searchlight
+    - cluster_searchlight_series
     - spatial-filter
     - searchlight-methods
     - laplace_enhance
@@ -201,6 +206,8 @@ reference:
     contents:
     - scale_series
     - resample
+    - resample_to
+    - neuro-downsample
     - starts_with("split_")
 
   
