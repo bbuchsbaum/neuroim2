@@ -145,18 +145,19 @@ cat("Voxel", voxel_coords, "-> Linear index", idx, "\n")
 For data with many zero values (e.g., masks, ROIs):
 
 ```{r}
-# Create a sparse mask
-mask_data <- array(0, dim(img))
-mask_data[20:40, 20:40, 15:25] <- 1
-mask_vol <- LogicalNeuroVol(mask_data > 0, space(img))
+# Create a regular volume with sparse data
+vol_data <- array(0, dim(img))
+vol_data[20:40, 20:40, 15:25] <- rnorm(21*21*11)
+regular_vol <- NeuroVol(vol_data, space(img))
 
-# Convert to sparse representation
-sparse_mask <- as.sparse(mask_vol)
-cat("Dense size:", object.size(mask_vol), "bytes\n")
-cat("Sparse size:", object.size(sparse_mask), "bytes\n")
-cat("Compression ratio:", 
-    round(as.numeric(object.size(mask_vol)) / as.numeric(object.size(sparse_mask)), 1), 
-    "x\n")
+# Create a mask for the non-zero region
+mask_vol <- LogicalNeuroVol(vol_data != 0, space(img))
+
+# Convert to sparse representation using the mask
+sparse_vol <- as.sparse(regular_vol, mask_vol)
+cat("Dense size:", format(object.size(regular_vol), units = "auto"), "\n")
+cat("Sparse size:", format(object.size(sparse_vol), units = "auto"), "\n")
+cat("Non-zero voxels:", sum(mask_vol), "out of", prod(dim(mask_vol)), "\n")
 ```
 
 ## File-Backed Arrays
