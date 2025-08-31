@@ -20,9 +20,18 @@ options(mc.cores=1)
 
 The `neuroim2` package contains data structures and functions for reading, accessing, and processing 4-dimensional neuroimaging data. 
 
+In this vignette, we’ll introduce `NeuroVec` (4D images) and related helpers you’ll use most often:
+
+- Read/write on-disk images (`read_vec`, `write_vec`)
+- Spatial metadata via `NeuroSpace` (dimensions, spacing, origin)
+- Voxel- and ROI-based access (`series`, `series_roi`, `coords`)
+- Common transforms (z-scoring with `scale_series`, concatenation with `concat`)
+- Dense vs. sparse representations (`DenseNeuroVec`, `SparseNeuroVec`, `as.sparse`)
+
 ### Reading a four-dimensional NifTI image with read_vec
 
-Here we read in a 4D image consisting of 5 time points,
+Here we read in an example image. This file is 3D (single timepoint) in the
+package data; the interface is the same for 4D images.
 
 ```{r}
       library(purrr)
@@ -33,24 +42,32 @@ Here we read in a 4D image consisting of 5 time points,
       vec
 ```
 
-Now imagine we have a set of 4d images. We can read them in with `read_vec`. (Here we are just using three versions of the same file for the example).
+Now imagine we have a set of images. We can read multiple files with `read_vec`.
+Passing multiple paths returns a `NeuroVecSeq` (a sequence of vectors) rather than a
+single concatenated 4D vector.
 
 
 ```{r}
     
       file_name <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
-      vec <- read_vec(c(file_name, file_name, file_name))
-      dim(vec)
+      vec_multi <- read_vec(c(file_name, file_name, file_name))
+      dim(vec_multi)
       
       vec2 <- read_vec(rep(file_name, 10))
       vec2
 ```
 
-To extract a subset of volumes we can use the `sub_vector` function:
+To extract a subset of volumes from a 4D vector, we’ll first create a small
+time series by concatenating a 3D volume:
 
 ```{r}
-    
-      vec_1_6 <- sub_vector(vec, 1:6)
+      
+      # Build a 4D vector with 10 timepoints by concatenation
+      vol <- read_vol(file_name)
+      vec_t <- concat(vol, vol, vol, vol, vol, vol, vol, vol, vol, vol)
+      
+      # Extract a subset of volumes
+      vec_1_6 <- sub_vector(vec_t, 1:6)
       dim(vec_1_6)
       vec_1_6
 ```
@@ -121,8 +138,125 @@ r4
 ```
 
 
+### Inspecting spatial metadata with NeuroSpace
 
+Every `NeuroVec` carries a `NeuroSpace` describing its geometry.
 
+```{r}
+sp <- space(vec_t)
+sp                   # dimensions, spacing, origin, axes
+dim(vec_t)           # 4D dims: X × Y × Z × T
+spacing(vec_t)       # voxel spacing (mm)
+origin(vec_t)        # image origin
+ndim(vec_t)          # == 4 for time series
+```
+
+The default mask for dense vectors is “all voxels are valid”:
+
+```{r}
+m <- mask(vec_t)
+m
+```
+
+### Creating a NeuroVec from an in-memory array
+
+You can build a `NeuroVec` directly from arrays or matrices:
+
+```{r}
+set.seed(1)
+dims <- c(24, 24, 24, 5)
+arr  <- array(rnorm(prod(dims)), dims)
+sp4  <- NeuroSpace(dims, spacing = c(2,2,2))
+dvec <- NeuroVec(arr, sp4)
+dim(dvec)
+```
+
+You can also start from a matrix (voxels × time or time × voxels) using `DenseNeuroVec`:
+
+```{r}
+mat  <- matrix(rnorm(prod(dims)), nrow = prod(dims[1:3]), ncol = dims[4])
+dvec2 <- DenseNeuroVec(mat, sp4)
+all.equal(dim(dvec), dim(dvec2))
+```
+
+### Time-series transforms: z-scoring and summary volumes
+
+Z-score each voxel’s time-series (center and scale across time):
+
+```{r}
+vec_z <- scale_series(dvec, center = TRUE, scale = TRUE)
+dim(vec_z)
+```
+
+Compute a mean volume across time and return a 3D `NeuroVol`:
+
+```{r}
+M      <- as.matrix(dvec)              # voxels × time
+vmean  <- rowMeans(M)                  # per-voxel mean
+mean3d <- NeuroVol(vmean, drop_dim(space(dvec)))
+mean3d
+```
+
+### Concatenating along time
+
+Append time points by concatenating vectors or volumes:
+
+```{r}
+dvec_more <- concat(dvec, dvec)        # doubles the time dimension
+dim(dvec_more)
+```
+
+### Dense ↔ sparse workflows
+
+Sparse representations store only voxels within a mask. This is handy for large ROIs or brain masks.
+
+```{r}
+# Build a random mask and convert a dense vec to sparse
+mask_arr <- array(runif(prod(dims[1:3])) > 0.7, dims[1:3])
+mask_vol <- LogicalNeuroVol(mask_arr, drop_dim(sp4))
+
+svec <- as.sparse(dvec, mask_vol)     # SparseNeuroVec with explicit mask
+svec                                 # note the stored mask and cardinality
+
+# Convert back to dense if needed
+dense_again <- as.dense(svec)
+all.equal(dim(dense_again), dim(dvec))
+```
+
+Tip: For file-backed or memory-mapped vectors, convert to `DenseNeuroVec` via a matrix if you need dense-only operations:
+
+```{r}
+dv_dense <- DenseNeuroVec(as.matrix(vec), space(vec))
+```
+
+### Writing vectors to disk
+
+You can write `NeuroVec` and `NeuroVol` objects as NIfTI files:
+
+```{r}
+tmp_vec <- tempfile(fileext = ".nii.gz")
+write_vec(vec_1_6, tmp_vec)
+file.exists(tmp_vec)
+unlink(tmp_vec)
+```
+
+### Putting it together with an ROI
+
+Combine ROI extraction with time-series transforms:
+
+```{r}
+vol3d <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
+roi   <- spherical_roi(vol3d, c(12,12,12), radius = 6)
+rts   <- series_roi(vec, roi)          # ROIVec (T × N with coords)
+
+# z-score each column (voxel) across time, then average within ROI
+mat_roi  <- values(rts)                # T × N
+mat_z    <- base::scale(mat_roi, center=TRUE, scale=TRUE)
+roi_mean <- rowMeans(mat_z)
+length(roi_mean)                       # matches time dimension
+```
+
+That’s the core workflow for 4D data in `neuroim2`: load or create a `NeuroVec`, inspect its `NeuroSpace`, access time-series via voxels or ROIs, apply simple transforms, and optionally move between dense and sparse representations.
 
 
 
