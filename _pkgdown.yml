@@ -203,12 +203,7 @@ reference:
     - resample
     - starts_with("split_")
 
-  - title: "Visualization and Rendering"
-    desc: >
-      Methods for visualizing and rendering neuroimaging data
-    contents:
-    - render
-    - render_slice
+  
 
   - title: "IO"
     desc: >
@@ -246,6 +241,3 @@ reference:
       - starts_with("Compare")
       - ends_with("-method")
       - None
-
-
-
