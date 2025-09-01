@@ -31,33 +31,31 @@ plot_overlay <- function(
   build_panel <- function(z) {
     sl_bg <- slice(bgvol, z, along = along)
     sl_ov <- slice(overlay, z, along = along)
-    mbg <- slice_to_matrix(sl_bg)
-    mov <- slice_to_matrix(sl_ov)
+
+    # Background data in world (mm) coordinates
+    vals_bg <- as.numeric(sl_bg)
+    cds_bg  <- index_to_coord(space(sl_bg), seq_len(length(sl_bg)))
+    df_bg   <- data.frame(x = cds_bg[,1], y = cds_bg[,2], value = vals_bg)
 
     # Compute limits per layer
-    bg_lim <- compute_limits(as.numeric(mbg), mode = bg_range, probs = probs)
+    bg_lim <- compute_limits(df_bg$value, mode = bg_range, probs = probs)
+
+    # Overlay data; apply threshold then convert to grob for independent palette
+    mov <- slice_to_matrix(sl_ov)
+    if (isTRUE(ov_thresh > 0)) mov[abs(mov) < ov_thresh] <- NA_real_
     ov_lim <- compute_limits(as.numeric(mov), mode = ov_range, probs = probs)
-
-    # Threshold overlay
-    if (isTRUE(ov_thresh > 0)) {
-      mov[abs(mov) < ov_thresh] <- NA_real_
-    }
-
-    # Build grobs
-    g_bg <- matrix_to_raster_grob(mbg, cmap = bg_cmap, limits = bg_lim, alpha = 1)
     g_ov <- matrix_to_raster_grob(mov, cmap = ov_cmap, limits = ov_lim, alpha = ov_alpha)
 
-    nr <- nrow(mbg); nc <- ncol(mbg)
-    df_stub <- data.frame(x = c(1, nc), y = c(1, nr), value = c(0, 1))
+    xr <- range(df_bg$x, na.rm = TRUE)
+    yr <- range(df_bg$y, na.rm = TRUE)
 
-    # Compose using annotation_custom with explicit extents
-    p <- ggplot2::ggplot(df_stub, ggplot2::aes(x, y)) +
-      ggplot2::geom_blank() +
-      ggplot2::annotation_custom(g_bg, xmin = .5, xmax = nc + .5, ymin = .5, ymax = nr + .5) +
-      ggplot2::annotation_custom(g_ov, xmin = .5, xmax = nc + .5, ymin = .5, ymax = nr + .5) +
-      coord_neuro_fixed() +
+    p <- ggplot2::ggplot(df_bg, ggplot2::aes(x, y, fill = value)) +
+      ggplot2::geom_raster(interpolate = FALSE) +
+      scale_fill_neuro(cmap = bg_cmap, limits = bg_lim) +
+      ggplot2::coord_fixed() +
       theme_neuro() +
-      ggplot2::labs(title = paste0("z = ", z))
+      ggplot2::labs(title = paste0("z = ", z)) +
+      ggplot2::annotation_custom(g_ov, xmin = xr[1], xmax = xr[2], ymin = yr[1], ymax = yr[2])
 
     p
   }
@@ -78,4 +76,3 @@ plot_overlay <- function(
   grid::upViewport(0)
   invisible(plots)
 }
-
