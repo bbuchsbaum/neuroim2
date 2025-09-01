@@ -145,19 +145,19 @@ cat("Voxel", voxel_coords, "-> Linear index", idx, "\n")
 For data with many zero values (e.g., masks, ROIs):
 
 ```{r}
-# Create a regular volume with sparse data
-vol_data <- array(0, dim(img))
-vol_data[20:40, 20:40, 15:25] <- rnorm(21*21*11)
-regular_vol <- NeuroVol(vol_data, space(img))
+# Create a sparse representation directly from an ROI
+roi <- spherical_roi(img, c(30, 30, 20), radius = 8, fill = 1)
 
-# Create a mask for the non-zero region
-mask_vol <- LogicalNeuroVol(vol_data != 0, space(img))
+# Convert ROI to sparse volume
+sparse_roi <- as.sparse(roi)
 
-# Convert to sparse representation using the mask
-sparse_vol <- as.sparse(regular_vol, mask_vol)
-cat("Dense size:", format(object.size(regular_vol), units = "auto"), "\n")
-cat("Sparse size:", format(object.size(sparse_vol), units = "auto"), "\n")
-cat("Non-zero voxels:", sum(mask_vol), "out of", prod(dim(mask_vol)), "\n")
+# Compare memory usage (convert original ROI to dense for baseline)
+dense_vol <- as.dense(roi)
+cat("Dense size:", format(object.size(dense_vol), units = "auto"), "\n")
+cat("Sparse size:", format(object.size(sparse_roi), units = "auto"), "\n")
+cat("Non-zero voxels:", length(roi), "out of", prod(dim(img)), "total\n")
+cat("Space savings:", round((1 - as.numeric(object.size(sparse_roi)) / 
+                              as.numeric(object.size(dense_vol))) * 100, 1), "%\n")
 ```
 
 ## File-Backed Arrays
@@ -181,8 +181,8 @@ subset <- big_vec[45, 55, 45, 1:10]  # Load only what you need
 ## Smoothing Operations
 
 ```{r}
-# Gaussian smoothing
-img_smooth <- gaussian_blur(img, sigma = c(2, 2, 2))
+# Gaussian smoothing with single sigma value (pass mask explicitly)
+img_smooth <- gaussian_blur(img, img, sigma = 2)
 
 # Compare original vs smoothed
 orig_vals <- img[30:32, 30:32, 20]
@@ -248,7 +248,8 @@ files <- c("scan1.nii", "scan2.nii", "scan3.nii")
 vols <- read_vec(files)  # Creates a NeuroVecSeq
 
 # Or read as a single concatenated 4D volume
-vec_concat <- read_vec(files, concatenate = TRUE)
+vols_list <- lapply(files, read_vol)
+vec_concat <- vec_from_vols(vols_list)
 ```
 
 # Practical Example: ROI-Based Time-Series Analysis
@@ -274,7 +275,7 @@ cat("ROI time-series matrix:", dim(roi_mat), "\n")
 mean_ts <- rowMeans(roi_mat)
 
 # Z-score the mean time-series
-z_ts <- scale(mean_ts)
+z_ts <- as.numeric(base::scale(mean_ts))
 cat("Mean time-series - Mean:", round(mean(z_ts), 4), 
     "SD:", round(sd(z_ts), 4), "\n")
 
