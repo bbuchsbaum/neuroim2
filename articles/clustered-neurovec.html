@@ -106,120 +106,25 @@ operations.</p>
 <span><span class="co"># Create ClusteredNeuroVec</span></span>
 <span><span class="va">cv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ClusteredNeuroVec.html">ClusteredNeuroVec</a></span><span class="op">(</span><span class="va">vec</span>, <span class="va">cvol</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cv</span><span class="op">)</span></span>
-<span><span class="co">#&gt; An object of class "ClusteredNeuroVec"</span></span>
-<span><span class="co">#&gt; Slot "cvol":</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">ClusteredNeuroVol</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">============================================================</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">ClusteredNeuroVec</span> </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;"> &gt; Type:          </span> <span style="color: #BBBBBB;">Clustered Volume</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;"> &gt; Dimensions:    </span> <span style="color: #BBBBBB;">10 x 10 x 10</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;"> &gt; Spacing:       </span> <span style="color: #BBBBBB;">2 x 2 x 2</span>   <span style="color: #555555;">mm</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;"> &gt; Origin:        </span> <span style="color: #BBBBBB;">0 x 0 x 0</span>   <span style="color: #555555;">mm</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;"> &gt; Orientation:   </span> <span style="color: #BBBBBB;">Left-to-Right Posterior-to-Anterior Inferior-to-Superior</span> </span></span>
+<span><span class="co"><span style="font-weight: bold;">#&gt; += Spatial Info </span><span style="color: #555555;">---------------------------</span></span></span>
+<span><span class="co">#&gt; | <span style="color: #BBBB00;">Dimensions</span>    : 10 x 10 x 10</span></span>
+<span><span class="co">#&gt; | <span style="color: #BBBB00;">Spacing</span>       : 2 x 2 x 2</span></span>
+<span><span class="co">#&gt; | <span style="color: #BBBB00;">Origin</span>        : 0 x 0 x 0</span></span>
+<span><span class="co">#&gt; | <span style="color: #BBBB00;">Orientation</span>   : Left-to-Right Posterior-to-Anterior Inferior-to-Superior</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  <span style="color: #00BBBB; font-weight: bold;">Cluster Information</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">----------------------------------------</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;"> &gt; Total Clusters:</span> <span style="color: #BBBBBB;">5</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;"> &gt; Active Voxels: </span> <span style="color: #BBBBBB;">973</span>   <span style="color: #555555;">(97.3% of volume)</span> </span></span>
+<span><span class="co"><span style="font-weight: bold;">#&gt; += Clustering Info </span><span style="color: #555555;">------------------------</span></span></span>
+<span><span class="co">#&gt; | <span style="color: #BBBB00;">Clusters</span>      : <span style="color: #00BB00;">5</span></span></span>
+<span><span class="co">#&gt; | <span style="color: #BBBB00;">Cluster Sizes</span> : min=180, med=199, max=202</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  <span style="color: #BB00BB; font-weight: bold;">Region Labels</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">----------------------------------------</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;"> &gt; </span> <span style="color: #BBBBBB;">Clus_1              </span> <span style="color: #555555;">[1]</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;"> &gt; </span> <span style="color: #BBBBBB;">Clus_2              </span> <span style="color: #555555;">[2]</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;"> &gt; </span> <span style="color: #BBBBBB;">Clus_3              </span> <span style="color: #555555;">[3]</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;"> &gt; </span> <span style="color: #BBBBBB;">Clus_4              </span> <span style="color: #555555;">[4]</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;"> &gt; </span> <span style="color: #BBBBBB;">Clus_5              </span> <span style="color: #555555;">[5]</span> </span></span>
+<span><span class="co"><span style="font-weight: bold;">#&gt; += Temporal Info </span><span style="color: #555555;">--------------------------</span></span></span>
+<span><span class="co">#&gt; | <span style="color: #BBBB00;">Time Points</span>   : <span style="color: #00BB00;">20</span></span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Slot "ts":</span></span>
-<span><span class="co">#&gt;                [,1]         [,2]         [,3]         [,4]        [,5]</span></span>
-<span><span class="co">#&gt;  [1,]  0.0644168463 -0.084301352 -0.046590564  0.111690839 -0.07521255</span></span>
-<span><span class="co">#&gt;  [2,] -0.0279864215 -0.021818397 -0.044582569 -0.007525164  0.01309414</span></span>
-<span><span class="co">#&gt;  [3,]  0.0262631528 -0.035196733  0.159554421 -0.048727571 -0.04858583</span></span>
-<span><span class="co">#&gt;  [4,]  0.0378993324 -0.080978924 -0.034763381 -0.060349853 -0.06646839</span></span>
-<span><span class="co">#&gt;  [5,] -0.0319708019  0.109558719 -0.176797544 -0.009897723  0.10655063</span></span>
-<span><span class="co">#&gt;  [6,] -0.0002046695 -0.035705472 -0.036876107 -0.040146304  0.05236358</span></span>
-<span><span class="co">#&gt;  [7,]  0.0240752324 -0.027871858 -0.033004354 -0.107316036 -0.07315611</span></span>
-<span><span class="co">#&gt;  [8,] -0.0687286683  0.072565018 -0.095327890 -0.007923692  0.17143235</span></span>
-<span><span class="co">#&gt;  [9,]  0.0206792888 -0.100405135  0.009336791 -0.061652350 -0.07817391</span></span>
-<span><span class="co">#&gt; [10,]  0.0499251924  0.003524242  0.020157267 -0.103992274 -0.17973242</span></span>
-<span><span class="co">#&gt; [11,]  0.0267051382  0.117807342 -0.028831174  0.026822052  0.13054961</span></span>
-<span><span class="co">#&gt; [12,]  0.0469960240 -0.055354028 -0.033206209 -0.029400233  0.11017711</span></span>
-<span><span class="co">#&gt; [13,] -0.0477317147 -0.080405021  0.058810076  0.026747244 -0.08707542</span></span>
-<span><span class="co">#&gt; [14,] -0.1547026324 -0.022603680 -0.100271675 -0.098391231 -0.01533914</span></span>
-<span><span class="co">#&gt; [15,]  0.0109751452 -0.110499389  0.124109837 -0.046273345 -0.04269959</span></span>
-<span><span class="co">#&gt; [16,] -0.0069828699 -0.001077092  0.124818062 -0.031282976 -0.02555654</span></span>
-<span><span class="co">#&gt; [17,] -0.0931860378 -0.021331039  0.045485539  0.021581931 -0.08791139</span></span>
-<span><span class="co">#&gt; [18,] -0.0508247004 -0.097068831  0.021921207 -0.056050307 -0.07664986</span></span>
-<span><span class="co">#&gt; [19,]  0.0617674592  0.095976977  0.024912108  0.109905432  0.01513277</span></span>
-<span><span class="co">#&gt; [20,]  0.1178075236  0.042013013  0.018799022 -0.096943955  0.02009452</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Slot "cl_map":</span></span>
-<span><span class="co">#&gt;    [1] 0 0 0 3 3 2 2 3 5 4 0 0 0 1 2 3 5 3 3 1 0 0 0 4 1 1 5 3 2 2 1 3 4 1 3 5 4</span></span>
-<span><span class="co">#&gt;   [38] 2 5 1 1 2 3 4 5 5 3 1 2 5 5 4 5 2 1 1 3 1 5 1 2 4 4 3 1 2 1 2 4 5 5 3 1 4</span></span>
-<span><span class="co">#&gt;   [75] 1 1 3 4 1 3 5 3 2 5 5 3 2 2 2 4 2 2 4 4 1 3 3 1 3 5 0 0 0 2 3 2 5 5 3 4 0</span></span>
-<span><span class="co">#&gt;  [112] 0 0 4 4 5 3 1 2 1 0 0 0 2 5 3 4 4 1 4 1 3 4 3 5 4 4 4 1 2 3 4 3 1 5 5 2 3</span></span>
-<span><span class="co">#&gt;  [149] 5 1 4 2 4 5 5 5 5 1 2 1 2 5 5 1 2 5 4 2 2 3 1 1 5 5 3 2 5 5 3 3 1 4 2 1 2</span></span>
-<span><span class="co">#&gt;  [186] 4 5 1 1 1 5 3 1 2 2 1 2 1 5 2 0 0 0 3 5 4 5 2 1 4 0 0 0 2 5 1 5 1 4 3 0 0</span></span>
-<span><span class="co">#&gt;  [223] 0 1 1 2 4 2 1 5 5 1 1 5 5 2 2 5 1 1 5 5 4 5 5 4 2 5 1 1 2 1 2 5 1 3 2 2 5</span></span>
-<span><span class="co">#&gt;  [260] 4 1 5 2 5 2 2 4 3 4 3 3 3 5 3 2 3 1 5 1 4 2 2 4 1 4 5 5 3 5 5 3 1 3 4 2 5</span></span>
-<span><span class="co">#&gt;  [297] 1 4 3 1 2 3 3 1 2 1 2 2 2 5 4 4 5 4 1 2 1 2 3 2 3 1 4 2 3 5 5 3 2 5 4 2 1</span></span>
-<span><span class="co">#&gt;  [334] 4 1 4 5 4 2 2 4 3 5 2 3 3 3 1 1 3 4 4 5 2 2 4 2 1 4 3 1 5 3 4 2 5 5 2 2 2</span></span>
-<span><span class="co">#&gt;  [371] 1 3 4 3 3 3 4 4 3 4 2 3 4 2 1 3 4 1 1 4 4 5 1 4 5 3 2 5 4 4 1 3 3 3 5 2 5</span></span>
-<span><span class="co">#&gt;  [408] 2 1 4 2 2 3 5 1 3 3 2 5 1 4 4 1 3 4 4 1 5 3 4 2 3 2 3 3 1 5 4 4 5 3 2 4 5</span></span>
-<span><span class="co">#&gt;  [445] 2 3 3 1 3 2 3 3 1 2 2 2 4 1 5 5 3 3 5 1 4 2 5 4 5 1 2 3 1 1 3 2 4 5 3 4 5</span></span>
-<span><span class="co">#&gt;  [482] 3 1 5 2 4 2 1 5 2 5 1 1 2 4 2 1 1 1 4 1 3 2 1 1 5 5 4 4 4 5 4 1 3 5 4 2 1</span></span>
-<span><span class="co">#&gt;  [519] 4 1 3 1 3 3 2 3 4 2 1 5 3 4 5 5 4 1 1 4 3 5 2 1 4 4 4 3 2 2 3 5 4 3 3 1 5</span></span>
-<span><span class="co">#&gt;  [556] 5 1 1 1 5 5 4 2 2 4 2 1 3 5 3 1 2 4 4 1 5 1 4 3 4 5 5 4 3 3 2 5 5 1 3 2 3</span></span>
-<span><span class="co">#&gt;  [593] 4 2 5 3 3 2 2 4 2 1 4 1 5 2 5 2 2 3 2 3 3 1 1 5 1 5 1 2 1 3 3 4 2 4 3 1 3</span></span>
-<span><span class="co">#&gt;  [630] 4 2 5 2 1 2 3 3 2 2 4 5 2 3 1 5 3 2 1 4 4 3 1 2 3 1 1 2 2 4 3 2 2 5 1 3 2</span></span>
-<span><span class="co">#&gt;  [667] 2 4 4 4 5 5 4 4 2 5 2 2 4 5 3 3 2 2 1 3 5 3 5 1 2 4 3 5 5 5 4 3 3 2 2 2 2</span></span>
-<span><span class="co">#&gt;  [704] 2 3 1 1 1 1 3 1 2 3 4 4 3 4 2 3 4 3 4 5 1 5 4 5 1 1 1 2 2 4 1 2 1 3 3 1 4</span></span>
-<span><span class="co">#&gt;  [741] 3 5 2 4 2 2 1 1 3 5 5 1 4 2 3 3 2 5 4 1 4 3 5 5 4 5 1 5 4 5 5 5 3 4 5 5 4</span></span>
-<span><span class="co">#&gt;  [778] 4 3 3 4 1 4 2 2 4 1 1 2 4 5 3 1 3 3 2 4 1 3 5 5 5 2 5 5 1 5 1 2 1 1 2 4 5</span></span>
-<span><span class="co">#&gt;  [815] 2 2 2 4 5 2 3 1 4 3 3 3 2 4 4 2 3 1 4 1 1 4 3 5 2 5 2 4 2 2 4 4 1 3 1 3 3</span></span>
-<span><span class="co">#&gt;  [852] 3 5 2 1 5 3 3 3 3 1 3 3 2 5 5 2 5 2 3 1 3 3 5 5 2 4 3 5 1 1 5 3 2 5 4 1 5</span></span>
-<span><span class="co">#&gt;  [889] 5 1 1 5 4 5 4 5 5 1 2 5 1 5 4 3 4 3 1 1 1 5 1 4 5 2 1 4 5 3 1 4 4 1 1 3 4</span></span>
-<span><span class="co">#&gt;  [926] 5 1 1 5 3 4 3 2 2 4 3 2 4 4 5 5 1 5 3 2 1 1 3 2 2 3 5 5 5 4 1 2 4 5 2 4 1</span></span>
-<span><span class="co">#&gt;  [963] 5 4 5 2 5 4 1 2 2 2 5 5 3 2 2 3 3 3 4 1 5 2 1 1 1 5 1 2 4 2 5 2 2 5 4 3 5</span></span>
-<span><span class="co">#&gt; [1000] 3</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Slot "label":</span></span>
-<span><span class="co">#&gt; [1] ""</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Slot "space":</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #BBBBBB; background-color: #0000BB; font-weight: bold;"> NeuroSpace Object </span></span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  <span style="color: #BBBB00; font-weight: bold;">&gt;&gt; Dimensions</span> </span></span>
-<span><span class="co">#&gt;   <span style="color: #555555;">Grid Size:</span> <span style="color: #00BB00;">10 x 10 x 10 x 20</span></span></span>
-<span><span class="co">#&gt;   <span style="color: #555555;">Memory:</span>   <span style="color: #00BB00;">5.9 KB</span></span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  <span style="color: #BBBB00; font-weight: bold;">&gt;&gt; Spatial Properties</span> </span></span>
-<span><span class="co">#&gt;   <span style="color: #555555;">Spacing:</span>   <span style="color: #0000BB;">2.00 x 2.00 x 2.00</span> <span style="color: #555555;">mm</span></span></span>
-<span><span class="co">#&gt;   <span style="color: #555555;">Origin:</span>    <span style="color: #0000BB;">0.00 x 0.00 x 0.00</span> <span style="color: #555555;">mm</span></span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  <span style="color: #BBBB00; font-weight: bold;">&gt;&gt; Anatomical Orientation</span> </span></span>
-<span><span class="co">#&gt;   X: <span style="color: #00BB00;">Left-to-Right</span>  |  Y: <span style="color: #00BB00;">Posterior-to-Anterior</span>  |  Z: <span style="color: #00BB00;">Inferior-to-Superior</span> </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  <span style="color: #BBBB00; font-weight: bold;">&gt;&gt; World Transformation</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">  Forward (Voxel to World):</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">    2.000  0.000  0.000  0.000</span></span></span>
-<span><span class="co"><span style="color: #0000BB;">#&gt; 0.000  2.000  0.000  0.000</span></span></span>
-<span><span class="co"><span style="color: #0000BB;">#&gt; 0.000  0.000  2.000  0.000</span></span></span>
-<span><span class="co"><span style="color: #0000BB;">#&gt; 0.000  0.000  0.000  1.000</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #555555;">  Inverse (World to Voxel):</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">    0.500  0.000  0.000  0.000</span></span></span>
-<span><span class="co"><span style="color: #0000BB;">#&gt; 0.000  0.500  0.000  0.000</span></span></span>
-<span><span class="co"><span style="color: #0000BB;">#&gt; 0.000  0.000  0.500  0.000</span></span></span>
-<span><span class="co"><span style="color: #0000BB;">#&gt; 0.000  0.000  0.000  1.000</span> </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  <span style="color: #BBBB00; font-weight: bold;">&gt;&gt; Bounding Box</span> </span></span>
-<span><span class="co">#&gt;   <span style="color: #555555;">Min Corner:</span> <span style="color: #00BB00;">0.0, 0.0, 0.0</span> mm</span></span>
-<span><span class="co">#&gt;   <span style="color: #555555;">Max Corner:</span> <span style="color: #00BB00;">18.0, 18.0, 18.0</span> mm</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #BBBBBB; background-color: #0000BB; font-weight: bold;">==================================================</span></span></span></code></pre></div>
+<span><span class="co"><span style="font-weight: bold;">#&gt; += Memory Info </span><span style="color: #555555;">----------------------------</span></span></span>
+<span><span class="co">#&gt; | <span style="color: #BBBB00;">Matrix Size</span>   : 0 bytes MB (20 x 5)</span></span>
+<span><span class="co">#&gt; | <span style="color: #BBBB00;">Active Voxels</span> : 973</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="key-properties">Key properties<a class="anchor" aria-label="anchor" href="#key-properties"></a>
