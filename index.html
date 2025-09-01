@@ -32,17 +32,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
-<li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/clustered-neurovec.html">ClusteredNeuroVec: Parcel-aware 4D neuroimaging analysis</a></li>
-    <li><a class="dropdown-item" href="articles/ImageVolumes.html">Working with Image Volumes</a></li>
-    <li><a class="dropdown-item" href="articles/NeuroVector.html">Four dimensional neuroimaging data</a></li>
-    <li><a class="dropdown-item" href="articles/Overview.html">Overview: Getting Started with neuroim2</a></li>
-    <li><a class="dropdown-item" href="articles/pipelines.html">Pipelines</a></li>
-    <li><a class="dropdown-item" href="articles/regionOfInterest.html">Regions of Interest</a></li>
-  </ul>
-</li>
+<li class="nav-item"><a class="nav-link" href="articles/index.html">Articles</a></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -57,46 +47,72 @@
   </div>
 </nav><div class="container template-home">
 <div class="row">
-  <main id="main" class="col-md-9">
-<p>The <code>neuroim2</code> package is currently in development. The goal of the project is to to provide basic functionality for working with neuroimaging data in R. <code>neuroim2</code> It is an effort to modify and upgrade the <code>neuroim</code> package (<a href="https://github.com/bbuchsbaum/neuroim" class="external-link uri">https://github.com/bbuchsbaum/neuroim</a>).</p>
+  <main id="main" class="col-md-9"><div class="section level1">
+<div class="page-header"><h1 id="neuroim2-">neuroim2 <img src="https://raw.githubusercontent.com/bbuchsbaum/neuroim2/master/docs/hex-neuroim2.png" align="right" width="120"><a class="anchor" aria-label="anchor" href="#neuroim2-"></a>
+</h1></div>
+<!-- badges: start -->
+
+<p>Data structures and I/O for volumetric brain imaging with a focus on fMRI. This is the successor to <a href="https://github.com/bbuchsbaum/neuroim" class="external-link"><code>neuroim</code></a> with improved S4 classes, sparse/dense 3D–4D representations, and fast resampling/filtering.</p>
+<p><strong>Website:</strong> <a href="https://bbuchsbaum.github.io/neuroim2/" class="uri">https://bbuchsbaum.github.io/neuroim2/</a><br><strong>CRAN:</strong> <a href="https://cran.r-project.org/package=neuroim2" class="external-link uri">https://cran.r-project.org/package=neuroim2</a><br><strong>Cheatsheet:</strong> <a href="neuroim2_cheatsheet.html">neuroim2_cheatsheet.md</a></p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of <code>neuroim2</code> (v. <code>0.1.0</code>) from Github with:</p>
+<div class="section level3">
+<h3 id="cran">CRAN<a class="anchor" aria-label="anchor" href="#cran"></a>
+</h3>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"bbuchsbaum/neuroim2"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"neuroim2"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="r-universe-daily-builds">R-universe (daily builds)<a class="anchor" aria-label="anchor" href="#r-universe-daily-builds"></a>
+</h3>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"neuroim2"</span>,</span>
+<span>  repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"https://bbuchsbaum.r-universe.dev"</span>, <span class="st">"https://cloud.r-project.org"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="development-version-github">Development version (GitHub)<a class="anchor" aria-label="anchor" href="#development-version-github"></a>
+</h3>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"bbuchsbaum/neuroim2"</span><span class="op">)</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
 </h2>
-<p>To read in a volumetric NIFTI formatted image, use the <code>read_vol</code> function:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bbuchsbaum/neuroim2" class="external-link">neuroim2</a></span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="do">## Loading required package: Matrix</span></span></code></pre></div>
+<p>Read a NIFTI image and perform simple operations:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bbuchsbaum/neuroim2" class="external-link">neuroim2</a></span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="do">## Loading required package: Matrix</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="do">## Attaching package: 'neuroim2'</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="do">## The following object is masked from 'package:base':</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="do">##     scale</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fname</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask_v4.nii"</span>, package<span class="op">=</span><span class="st">"neuroim2"</span><span class="op">)</span></span>
-<span><span class="va">vol</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">fname</span><span class="op">)</span></span></code></pre></div>
-<p>Now, <code>vol</code> can be treated as a three-dimensional array:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">v1</span> <span class="op">&lt;-</span> <span class="va">vol</span><span class="op">[</span><span class="fl">1</span>,<span class="fl">1</span>,<span class="fl">1</span><span class="op">]</span></span>
+<span><span class="va">vol</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">fname</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">v1</span> <span class="op">&lt;-</span> <span class="va">vol</span><span class="op">[</span><span class="fl">1</span>,<span class="fl">1</span>,<span class="fl">1</span><span class="op">]</span></span>
 <span><span class="va">vol2</span> <span class="op">&lt;-</span> <span class="va">vol</span> <span class="op">+</span> <span class="va">vol</span></span>
-<span><span class="va">vol3</span> <span class="op">&lt;-</span> <span class="va">vol2</span> <span class="op">-</span> <span class="va">vol</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="va">vol</span> <span class="op">==</span> <span class="va">vol3</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb6"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="do">## [1] TRUE</span></span></code></pre></div>
-<p>We can create a 4D image, by concatenating several 3D volumes:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">vec</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/concat-methods.html">concat</a></span><span class="op">(</span><span class="va">vol</span>, <span class="va">vol</span>, <span class="va">vol2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="va">vol</span> <span class="op">==</span> <span class="op">(</span><span class="va">vol2</span> <span class="op">-</span> <span class="va">vol</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="do">## [1] TRUE</span></span></code></pre></div>
+<p>Create a 4D image from volumes:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">vec</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/vec_from_vols.html">vec_from_vols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">vol</span>, <span class="va">vol</span>, <span class="va">vol2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">series1</span> <span class="op">&lt;-</span> <span class="va">vec</span><span class="op">[</span><span class="fl">1</span>,<span class="fl">1</span>,<span class="fl">1</span>,<span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">series1</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb8"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="do">## [1] 3</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="do">## [1] 3</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="vignettes">Vignettes<a class="anchor" aria-label="anchor" href="#vignettes"></a>
 </h2>
 <p>See examples of use of <code>neuroim2</code> in the <a href="https://bbuchsbaum.github.io/neuroim2/articles/index.html">vignettes</a>.</p>
 </div>
-
+</div>
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
@@ -132,7 +148,12 @@
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
+<li><a href="https://cran.r-project.org/package=neuroim2" class="external-link"><img src="https://www.r-pkg.org/badges/version/neuroim2" alt="CRAN status"></a></li>
+<li><a href="https://cran.r-project.org/package=neuroim2" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/grand-total/neuroim2" alt="CRAN downloads"></a></li>
 <li><a href="https://github.com/bbuchsbaum/neuroim2/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/bbuchsbaum/neuroim2/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://bbuchsbaum.github.io/neuroim2/"><img src="https://github.com/bbuchsbaum/neuroim2/actions/workflows/pkgdown.yaml/badge.svg" alt="pkgdown"></a></li>
+<li><a href="https://app.codecov.io/gh/bbuchsbaum/neuroim2" class="external-link"><img src="https://codecov.io/gh/bbuchsbaum/neuroim2/branch/master/graph/badge.svg" alt="codecov"></a></li>
+<li><a href="LICENSE.html"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a></li>
 </ul>
 </div>
 

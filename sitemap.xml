@@ -6,12 +6,12 @@
 <url><loc>https://bbuchsbaum.github.io/neuroim2/articles/NeuroVector.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/articles/Overview.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/articles/clustered-neurovec.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/neuroim2/articles/elegant-slice-visualization.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/articles/index.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/articles/pipelines.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/articles/regionOfInterest.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/authors.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/index.html</loc></url>
-<url><loc>https://bbuchsbaum.github.io/neuroim2/neuroim2_cheatsheet.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/news/index.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/AFNIMetaInfo.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/AbstractSparseNeuroVec-class.html</loc></url>
@@ -99,6 +99,7 @@
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/TimeAxis.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/add_dim-methods.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/anatomical_axes.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/neuroim2/reference/annotate_orientation.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/as-ClusteredNeuroVol-DenseNeuroVol.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/as-DenseNeuroVol-array.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/as.dense-methods.html</loc></url>
@@ -193,6 +194,9 @@
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/perm_mat-AxisSet3D-method.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/perm_mat-methods.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/plot-methods.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/neuroim2/reference/plot_montage.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/neuroim2/reference/plot_ortho.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/quaternToMatrix.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/random_searchlight.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/read_columns-methods.html</loc></url>
@@ -206,7 +210,9 @@
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/reorient-methods.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/resample-methods.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/resample_to.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/neuroim2/reference/resolve_cmap.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/scale.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/neuroim2/reference/scale_fill_neuro.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/scale_series-methods.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/searchlight-methods.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/searchlight.html</loc></url>
@@ -233,6 +239,7 @@
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/sub-AbstractSparseNeuroVec-numeric-numeric-ANY-method.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/sub-sub-NeuroVec-numeric-method.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/sub_vector-methods.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/neuroim2/reference/theme_neuro.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/trans-methods.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/values-methods.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/vec_from_vols.html</loc></url>

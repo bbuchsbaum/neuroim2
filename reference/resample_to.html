@@ -20,15 +20,7 @@ argument and (eventually) switches engines."></head><body>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/clustered-neurovec.html">ClusteredNeuroVec: Parcel-aware 4D neuroimaging analysis</a></li>
-    <li><a class="dropdown-item" href="../articles/ImageVolumes.html">Working with Image Volumes</a></li>
-    <li><a class="dropdown-item" href="../articles/NeuroVector.html">Four dimensional neuroimaging data</a></li>
-    <li><a class="dropdown-item" href="../articles/Overview.html">Overview: Getting Started with neuroim2</a></li>
-    <li><a class="dropdown-item" href="../articles/pipelines.html">Pipelines</a></li>
-    <li><a class="dropdown-item" href="../articles/regionOfInterest.html">Regions of Interest</a></li>
-  </ul></li>
+<li class="nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -92,7 +84,6 @@ argument and (eventually) switches engines.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">img</span> <span class="op">&lt;-</span> <span class="fu"><a href="read_vol.html">read_vol</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,<span class="st">"global_mask_v4.nii"</span>, package<span class="op">=</span><span class="st">"neuroim2"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">sp</span>  <span class="op">&lt;-</span> <span class="fu"><a href="space-methods.html">space</a></span><span class="op">(</span><span class="va">img</span><span class="op">)</span>; <span class="va">sp2</span> <span class="op">&lt;-</span> <span class="fu"><a href="NeuroSpace.html">NeuroSpace</a></span><span class="op">(</span><span class="va">sp</span><span class="op">@</span><span class="va">dim</span><span class="op">*</span><span class="fl">2</span>, <span class="va">sp</span><span class="op">@</span><span class="va">spacing</span><span class="op">/</span><span class="fl">2</span>, origin<span class="op">=</span><span class="va">sp</span><span class="op">@</span><span class="va">origin</span>, trans<span class="op">=</span><span class="fu"><a href="trans-methods.html">trans</a></span><span class="op">(</span><span class="va">img</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">r1</span>  <span class="op">&lt;-</span> <span class="fu">resample_to</span><span class="op">(</span><span class="va">img</span>, <span class="va">sp2</span>, method <span class="op">=</span> <span class="st">"linear"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in resample_to(img, sp2, method = "linear"):</span> could not find function "resample_to"</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
