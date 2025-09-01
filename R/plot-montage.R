@@ -20,35 +20,66 @@ plot_montage <- function(
   title = NULL, subtitle = NULL, caption = NULL
 ) {
   range <- match.arg(range)
-  make_slice <- function(z) {
-    sl <- slice(x, z, along = along)
-    df <- slice_df(sl, downsample = downsample)
-    df$z <- z
-    df
-  }
-
-  # Support either a list of slices or a volume with zlevels
-  if (is.list(x) && is.null(zlevels)) {
-    dfl <- Map(function(sl, idx) { df <- slice_df(sl, downsample); df$z <- idx; df },
-               x, seq_along(x))
-  } else {
+  if (inherits(x, "NeuroVol")) {
+    # World-coordinate aware path (respects anatomical orientation)
     if (is.null(zlevels)) {
       zlevels <- unique(round(seq(1, dim(x)[along], length.out = 12)))
     }
-    dfl <- lapply(zlevels, make_slice)
+    dfl <- lapply(zlevels, function(z) {
+      sl <- slice(x, z, along = along)
+      vals <- as.numeric(sl)
+      # Optional downsample by grid decimation
+      if (downsample > 1L) {
+        nr <- dim(sl)[1]; nc <- dim(sl)[2]
+        rr <- seq(1L, nr, by = downsample)
+        cc <- seq(1L, nc, by = downsample)
+        grid <- as.matrix(expand.grid(i = rr, j = cc))
+        cds  <- grid_to_coord(space(sl), grid)
+        idx  <- grid_to_index(space(sl), grid)
+        data.frame(x = cds[,1], y = cds[,2], z = z, value = vals[idx])
+      } else {
+        cds <- index_to_coord(space(sl), seq_len(length(sl)))
+        data.frame(x = cds[,1], y = cds[,2], z = z, value = vals)
+      }
+    })
+    df <- do.call(rbind, dfl)
+    lim <- compute_limits(df$value, mode = range, probs = probs)
+
+    p <- ggplot2::ggplot(df, ggplot2::aes(x, y, fill = value)) +
+      ggplot2::geom_raster(interpolate = FALSE) +
+      ggplot2::facet_wrap(~ z, ncol = ncol, scales = "fixed") +
+      scale_fill_neuro(cmap = cmap, limits = lim) +
+      ggplot2::coord_fixed() +
+      theme_neuro() +
+      ggplot2::labs(title = title, subtitle = subtitle, caption = caption)
+  } else {
+    # Fallback for lists of slices / plain matrices (pixel grid)
+    make_slice <- function(z) {
+      sl <- slice(x, z, along = along)
+      df <- slice_df(sl, downsample = downsample)
+      df$z <- z
+      df
+    }
+    if (is.list(x) && is.null(zlevels)) {
+      dfl <- Map(function(sl, idx) { df <- slice_df(sl, downsample); df$z <- idx; df },
+                 x, seq_along(x))
+    } else {
+      if (is.null(zlevels)) {
+        zlevels <- unique(round(seq(1, dim(x)[along], length.out = 12)))
+      }
+      dfl <- lapply(zlevels, make_slice)
+    }
+    df <- do.call(rbind, dfl)
+    lim <- compute_limits(df$value, mode = range, probs = probs)
+
+    p <- ggplot2::ggplot(df, ggplot2::aes(x, y, fill = value)) +
+      ggplot2::geom_raster(interpolate = FALSE) +
+      ggplot2::facet_wrap(~ z, ncol = ncol, scales = "fixed") +
+      scale_fill_neuro(cmap = cmap, limits = lim) +
+      coord_neuro_fixed() +
+      theme_neuro() +
+      ggplot2::labs(title = title, subtitle = subtitle, caption = caption)
   }
-  df <- do.call(rbind, dfl)
-
-  # Compute limits (robust/data) once for the whole montage
-  lim <- compute_limits(df$value, mode = range, probs = probs)
-
-  p <- ggplot2::ggplot(df, ggplot2::aes(x, y, fill = value)) +
-    ggplot2::geom_raster(interpolate = FALSE) +
-    ggplot2::facet_wrap(~ z, ncol = ncol, scales = "fixed") +
-    scale_fill_neuro(cmap = cmap, limits = lim) +
-    coord_neuro_fixed() +
-    theme_neuro() +
-    ggplot2::labs(title = title, subtitle = subtitle, caption = caption)
 
   p
 }
