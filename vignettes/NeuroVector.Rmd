@@ -30,8 +30,9 @@ In this vignette, we’ll introduce `NeuroVec` (4D images) and related helpers y
 
 ### Reading a four-dimensional NifTI image with read_vec
 
-Here we read in an example image. This file is 3D (single timepoint) in the
-package data; the interface is the same for 4D images.
+Here we read in an example image. This file is 4D in the
+package data (64×64×25×4), so `read_vec()` returns a `NeuroVec` with four
+volumes (timepoints).
 
 ```{r}
       library(purrr)
@@ -57,19 +58,13 @@ single concatenated 4D vector.
       vec2
 ```
 
-To extract a subset of volumes from a 4D vector, we’ll first create a small
-time series by concatenating a 3D volume:
+To extract a subset of volumes from a 4D vector, use `sub_vector` directly:
 
 ```{r}
-      
-      # Build a 4D vector with 10 timepoints by concatenation
-      vol <- read_vol(file_name)
-      vec_t <- concat(vol, vol, vol, vol, vol, vol, vol, vol, vol, vol)
-      
-      # Extract a subset of volumes
-      vec_1_6 <- sub_vector(vec_t, 1:6)
-      dim(vec_1_6)
-      vec_1_6
+      # Extract a subset of volumes (first 3 timepoints)
+      vec_1_3 <- sub_vector(vec, 1:3)
+      dim(vec_1_3)
+      vec_1_3
 ```
 
 ### Extracting time-series data using the `series` and `series_roi` functions
@@ -78,7 +73,7 @@ To get the time-series at voxel (1,1,1) we can use the `series` function:
 
 ```{r}
       
-      series(vec_1_6, 1,1,1)
+      series(vec_1_3, 1,1,1)
 ```
 
 We can extract a 4d region of interest with the `series_roi` as follows:
@@ -143,18 +138,18 @@ r4
 Every `NeuroVec` carries a `NeuroSpace` describing its geometry.
 
 ```{r}
-sp <- space(vec_t)
+sp <- space(vec)
 sp                   # dimensions, spacing, origin, axes
-dim(vec_t)           # 4D dims: X × Y × Z × T
-spacing(vec_t)       # voxel spacing (mm)
-origin(vec_t)        # image origin
-ndim(vec_t)          # == 4 for time series
+dim(vec)             # 4D dims: X × Y × Z × T
+spacing(vec)         # voxel spacing (mm)
+origin(vec)          # image origin
+ndim(vec)            # == 4 for time series
 ```
 
 The default mask for dense vectors is “all voxels are valid”:
 
 ```{r}
-m <- mask(vec_t)
+m <- mask(vec)
 m
 ```
 
@@ -235,7 +230,7 @@ You can write `NeuroVec` and `NeuroVol` objects as NIfTI files:
 
 ```{r}
 tmp_vec <- tempfile(fileext = ".nii.gz")
-write_vec(vec_1_6, tmp_vec)
+write_vec(vec_1_3, tmp_vec)
 file.exists(tmp_vec)
 unlink(tmp_vec)
 ```
@@ -257,4 +252,3 @@ length(roi_mean)                       # matches time dimension
 ```
 
 That’s the core workflow for 4D data in `neuroim2`: load or create a `NeuroVec`, inspect its `NeuroSpace`, access time-series via voxels or ROIs, apply simple transforms, and optionally move between dense and sparse representations.
-
