@@ -578,6 +578,9 @@ make_spherical_grid <- function(bvol, centroid, radius, use_cpp=TRUE) {
 #' @param nonzero if \code{TRUE}, keep only nonzero elements from \code{bvol}
 #' @param use_cpp whether to use compiled c++ code
 #' @return an instance of class \code{ROIVol}
+#' @seealso [spherical_roi_set()] for efficiently creating many spherical ROIs,
+#'   [series_roi()] and [coords()] for extracting time series and coordinates from ROIs,
+#'   and the vignette: \code{vignette("regionOfInterest", package = "neuroim2")}.
 #' @examples
 #'  sp1 <- NeuroSpace(c(10,10,10), c(1,2,3))
 #'  # create an ROI centered around the integer-valued positive voxel coordinate: i=5, j=5, k=5
@@ -587,6 +590,17 @@ make_spherical_grid <- function(bvol, centroid, radius, use_cpp=TRUE) {
 #'  ## fill in ROI with value of 6
 #'  cube1 <- spherical_roi(sp1, c(5,5,5), 3.5, fill=6)
 #'  all(cube1 == 6)
+#'
+#'  ## Create multiple spherical ROIs at once (preferred):
+#'  centers <- rbind(c(5,5,5), c(3,3,3), c(7,7,7))
+#'  vols <- spherical_roi_set(bvol = sp1,
+#'                           centroids = centers, radius = 3.5, fill = 1)
+#'  length(vols)  # 3
+#'
+#'  ## Equivalent, less efficient lapply variant:
+#'  vols2 <- lapply(seq_len(nrow(centers)), function(i) {
+#'    spherical_roi(sp1, centers[i,], radius = 3.5, fill = 1)
+#'  })
 #'
 #'  # create an ROI centered around the real-valued coordinates: x=5, y=5, z=5
 #'  vox <- coord_to_grid(sp1, c(5, 5, 5))

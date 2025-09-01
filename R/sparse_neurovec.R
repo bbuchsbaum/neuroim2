@@ -732,8 +732,25 @@ setAs(from="SparseNeuroVec", to="DenseNeuroVec",
 #' @rdname as.matrix-methods
 #' @export
 setMethod(f="as.matrix", signature=signature(x = "SparseNeuroVec"), def=function(x,...) {
-			  as(x, "matrix")
-		  })
+            dsp  <- dim(x)
+            nvox <- prod(dsp[1:3])
+            nt   <- dsp[4L]
+            out  <- matrix(0, nrow = nvox, ncol = nt)
+            idx  <- indices(x)
+            # Fill each timepoint column using the sparse data rows
+            # Chunk to reduce overhead on very long time series
+            chunk <- 64L
+            groups <- split(seq_len(nt), ceiling(seq_len(nt)/chunk))
+            for (g in groups) {
+              cols <- lapply(g, function(j) {
+                col <- numeric(nvox)
+                col[idx] <- x@data[j, ]
+                col
+              })
+              out[, g] <- do.call(cbind, cols)
+            }
+            out
+          })
 
 #' as.list
 #'

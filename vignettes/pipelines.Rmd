@@ -1,15 +1,15 @@
 ---
-title: "Pipelines"
+title: "Pipelines: Split, Map, and Reduce"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Pipelines}
+  %\VignetteIndexEntry{Pipelines: Split, Map, and Reduce}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, echo = FALSE, message = FALSE}
-knitr::opts_chunk$set(collapse = T, comment = "#>")
+knitr::opts_chunk$set(collapse = T, comment = "#>", fig.alt = 'Plot output')
 library(purrr)
 library(assertthat)
 library(neuroim2)

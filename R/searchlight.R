@@ -432,6 +432,7 @@ clustered_searchlight <- function(mask, cvol=NULL, csize=NULL) {
 #' \code{\link{searchlight}} for voxel-level searchlight analysis,
 #' \code{\link{ROIVec}} for the structure of returned windows
 #'
+#' @importFrom stats dist
 #' @export
 #' @examples
 #' # Create synthetic 4D data (8x8x8 volume, 10 timepoints)
@@ -491,7 +492,7 @@ cluster_searchlight_series <- function(x, cvol = NULL, k = 10L, radius = NULL, l
   }
   
   # Calculate pairwise distances between centroids
-  dmat <- as.matrix(dist(ctr))  # K x K
+  dmat <- as.matrix(stats::dist(ctr))  # K x K
   
   # Function to create one ROIVec window
   make_one <- function(seed) {

@@ -2,7 +2,32 @@ url: https://bbuchsbaum.github.io/neuroim2/
 template:
   bootstrap: 5
 
+articles:
+  - title: "Visualization"
+    desc: "Lightweight, publication-ready plotting helpers and workflows"
+    contents:
+      - elegant-slice-visualization
+      - ImageVolumes
+      - NeuroVector
+  - title: "Core Topics"
+    desc: "Core concepts and how-tos"
+    contents:
+      - Overview
+      - regionOfInterest
+      - clustered-neurovec
+      - pipelines
+
 reference:
+  - title: "Visualization Helpers"
+    desc: "Plotting utilities for slices, montages, overlays, and palettes"
+    contents:
+      - theme_neuro
+      - resolve_cmap
+      - scale_fill_neuro
+      - annotate_orientation
+      - plot_montage
+      - plot_ortho
+      - plot_overlay
   - title: "Constructors"
     desc: >
       Constructors for creating and initializing various

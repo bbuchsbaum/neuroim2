@@ -1,9 +1,9 @@
 ---
-title: "Working with Image Volumes"
+title: "Working with 3D Image Volumes"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Working with Image Volumes}
+  %\VignetteIndexEntry{Working with 3D Image Volumes}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -61,6 +61,28 @@ Arithmetic can be performed on images as if they were ordinary `array`s:
     all(vol3 == 0)
 ```
 
+## Inspecting geometry and spatial metadata
+
+Each `NeuroVol` has an associated `NeuroSpace` describing its geometry (dimensions, spacing, origin, axes/orientation).
+
+```{r}
+    sp <- space(vol)
+    sp                 # human-readable summary
+    dim(vol)           # spatial dimensions (x, y, z)
+    spacing(vol)       # voxel size in mm
+    origin(vol)        # image origin
+```
+
+You can convert between indices, voxel grid coordinates, and real-world coordinates:
+
+```{r}
+    idx <- 1:5
+    g   <- index_to_grid(vol, idx)     # 1D index -> (i,j,k)
+    w   <- index_to_coord(vol, idx)    # 1D index -> world coords
+    idx2 <- coord_to_index(vol, w)     # back to indices
+    all.equal(idx, idx2)
+```
+
 A numeric image volume can be converted to a binary image as follows:
 
 ```{r}
@@ -68,6 +90,25 @@ A numeric image volume can be converted to a binary image as follows:
     vol2 <- as.logical(vol)
     class(vol2)
     print(vol2[1,1,1])
+```
+
+## Masks and LogicalNeuroVol
+
+Create a mask from a threshold or an explicit set of indices. Masks are `LogicalNeuroVol` and align with the 3D space.
+
+```{r}
+    # Threshold-based mask
+    mask1 <- as.mask(vol > 0.5)
+    mask1
+
+    # Index-based mask
+    idx_hi <- which(vol > 0.8)
+    mask2 <- as.mask(vol, idx_hi)
+    sum(mask2) == length(idx_hi)
+
+    # Use a mask to compute a summary
+    mean_in_mask <- mean(vol[mask1@.Data])
+    mean_in_mask
 ```
 
 We can also create a `NeuroVol` instance from an `array` or `numeric` vector. First we consruct a standard R `array`:
@@ -92,7 +133,55 @@ We do not usually have to create `NeuroSpace` objects, because geometric informa
     vol2 <- NeuroVol((vol+1)*25, space(vol))
     max(vol2)
     space(vol2)
-  
+```
+
+## Slicing and quick visualization
+
+Extract a single 2D slice for display using standard array indexing:
+
+```{r slice_mid, fig.alt='Mid-slice of example volume (grayscale image).', fig.cap='Mid-slice of example volume'}
+    z <- ceiling(dim(vol)[3] / 2)
+    image(vol[,,z], main = paste("Slice z=", z))
+```
+
+## Reorienting and resampling
+
+You can change an image’s orientation and voxel spacing. Use `reorient()` to remap axes (e.g., to RAS) and `resample_to()` to match a target space.
+
+```{r}
+    # Reorient the space (LPI -> RAS) and compare coordinate mappings
+    sp_lpi <- space(vol)
+    sp_ras <- reorient(sp_lpi, c("R","A","S"))
+    g     <- t(matrix(c(10, 10, 10)))
+    world_lpi <- grid_to_coord(sp_lpi, g)
+    world_ras <- grid_to_coord(sp_ras, g)
+    # world_lpi and world_ras differ due to axis remapping
+```
+
+Resample to a new spacing or match a target `NeuroSpace`:
+
+```{r eval=FALSE}
+    # Create a target space with 2x finer resolution
+    sp  <- space(vol)
+    sp2 <- NeuroSpace(sp@dim * c(2,2,2), sp@spacing/2, origin=sp@origin, trans=trans(vol))
+
+    # Resample (trilinear)
+    vol_resamp <- resample_to(vol, sp2, method = "linear")
+    dim(vol_resamp)
+```
+
+## Downsampling
+
+Reduce spatial resolution to speed up downstream operations.
+
+```{r}
+    # Downsample by target spacing
+    vol_ds1 <- downsample(vol, spacing = spacing(vol)[1:3] * 2)
+    dim(vol_ds1)
+
+    # Or by factor
+    vol_ds2 <- downsample(vol, factor = 0.5)
+    dim(vol_ds2)
 ```
 
 ## Writing a NIFTI formatted image volume
@@ -107,4 +196,11 @@ When we're ready to write an image volume to disk, we use `write_vol`
 ```
 
 
+You can also write to a temporary file during workflows:
 
+```{r}
+    tmp <- tempfile(fileext = ".nii.gz")
+    write_vol(vol2, tmp)
+    file.exists(tmp)
+    unlink(tmp)
+```

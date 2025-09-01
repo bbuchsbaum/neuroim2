@@ -1,0 +1,186 @@
+---
+title: "Elegant slice visualization with neuroim2"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Elegant slice visualization with neuroim2}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE, echo = TRUE, message = FALSE, warning = FALSE,
+  fig.width = 7, fig.height = 5, dpi = 120, fig.alt = 'Plot output'
+)
+suppressPackageStartupMessages({
+  library(ggplot2)
+  library(neuroim2)
+})
+```
+
+## Why these helpers?
+
+Neuroimaging images are large, orientation‑sensitive rasters. The goal of these helpers is to make good defaults the shortest path: perceptually uniform palettes, robust scaling, fixed aspect ratios, and clean legends—without new heavy dependencies or any JavaScript.
+
+This vignette shows how to:
+
+- Build publication‑ready montages
+- Create a compact orthogonal (three‑plane) view with crosshairs
+- Overlay a statistical map on a structural background (threshold + alpha)
+
+The helpers used here are:
+
+- `resolve_cmap()`, `scale_fill_neuro()`, `theme_neuro()`
+- `plot_montage()`, `plot_ortho()`, `plot_overlay()`
+- `annotate_orientation()`
+
+---
+
+## Getting a demo volume
+
+The examples below try to read a sample NIfTI included with the package. If that is not available, they create a small synthetic 3D volume and wrap it in `NeuroVol`. Either way, the rest of the code is identical.
+
+```{r}
+set.seed(1)
+
+make_synthetic_vol <- function(dims = c(96, 96, 72), vox = c(2, 2, 2)) {
+  i <- array(rep(seq_len(dims[1]), times = dims[2]*dims[3]), dims)
+  j <- array(rep(rep(seq_len(dims[2]), each = dims[1]), times = dims[3]), dims)
+  k <- array(rep(seq_len(dims[3]), each = dims[1]*dims[2]), dims)
+
+  c0 <- dims / 2
+  g1 <- exp(-((i - c0[1])^2 + (j - c0[2])^2 + (k - c0[3])^2) / (2*(min(dims)/4)^2))
+  g2 <- 0.5 * exp(-((i - (c0[1] + 15))^2 + (j - (c0[2] - 10))^2 + (k - (c0[3] + 8))^2) / (2*(min(dims)/6)^2))
+  x  <- g1 + g2 + 0.05 * array(stats::rnorm(prod(dims)), dims)
+
+  sp <- NeuroSpace(dims, spacing = vox)
+  NeuroVol(x, sp)
+}
+
+# Prefer an included demo file. Use a real example from inst/extdata.
+demo_path <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
+
+t1 <- if (nzchar(demo_path)) {
+  read_vol(demo_path)
+} else {
+  make_synthetic_vol()
+}
+
+dims <- dim(t1)
+
+# Build a synthetic "z-statistic" overlay matched to t1's dims
+mk_blob <- function(mu, sigma = 8) {
+  i <- array(rep(seq_len(dims[1]), times = dims[2]*dims[3]), dims)
+  j <- array(rep(rep(seq_len(dims[2]), each = dims[1]), times = dims[3]), dims)
+  k <- array(rep(seq_len(dims[3]), each = dims[1]*dims[2]), dims)
+  exp(-((i - mu[1])^2 + (j - mu[2])^2 + (k - mu[3])^2) / (2*sigma^2))
+}
+ov_arr <- 3.5 * mk_blob(mu = round(dims * c(.60, .45, .55)), sigma = 7) -
+          3.2 * mk_blob(mu = round(dims * c(.35, .72, .40)), sigma = 6) +
+          0.3 * array(stats::rnorm(prod(dims)), dims)
+
+overlay <- NeuroVol(ov_arr, space(t1))
+```
+
+---
+
+## 1) Montages that read well at a glance
+
+The montage helper facettes a single ggplot object—so you get a shared colorbar, clean panel labels, and proper aspect ratio.
+
+```{r}
+# Choose a sensible set of axial slices
+zlevels <- unique(round(seq( round(dims[3]*.25), round(dims[3]*.85), length.out = 12 )))
+
+p <- plot_montage(
+  t1, zlevels = zlevels, along = 3,
+  cmap = "grays", range = "robust", probs = c(.02, .98),
+  ncol = 6, title = "Axial montage (robust scaling)"
+)
+p + theme_neuro()
+```
+
+Notes
+
+- `range = "robust"` uses quantiles (default 2–98%) to ignore outliers.
+- `coord_fixed()` + reversed y are handled internally to preserve geometry and radiological convention.
+- Use `downsample = 2` (or higher) when plotting huge volumes interactively.
+
+```{r}
+plot_montage(
+  t1, zlevels = zlevels, along = 3,
+  cmap = "grays", range = "robust", ncol = 6, downsample = 2,
+  title = "Downsampled montage (for speed)"
+)
+```
+
+---
+
+## 2) Orthogonal three‑plane view (with crosshairs)
+
+`plot_ortho()` produces aligned sagittal, coronal, and axial slices with a shared scale, optional crosshairs, and compact orientation glyphs.
+
+```{r}
+center_voxel <- round(dim(t1) / 2)
+plot_ortho(
+  t1, coord = center_voxel, unit = "index",
+  cmap = "grays", range = "robust",
+  crosshair = TRUE, annotate = TRUE
+)
+```
+
+Tip: If you have MNI/world coordinates, pass `unit = "mm"` and a length‑3 numeric; internally it will convert using `coord_to_grid(space(vol), …)` if available.
+
+---
+
+## 3) Overlaying an activation map on a structural background
+
+The overlay compositor colorizes each layer independently (so each can use its own limits and palette) and stacks them as rasters. No extra packages required.
+
+```{r}
+plot_overlay(
+  bgvol = t1, overlay = overlay,
+  zlevels = zlevels[seq(2, length(zlevels), by = 2)],  # fewer panels for the vignette
+  bg_cmap = "grays", ov_cmap = "inferno",
+  bg_range = "robust", ov_range = "robust", probs = c(.02, .98),
+  ov_thresh = 2.5,   # make weaker signal transparent
+  ov_alpha  = 0.65,
+  ncol = 3, title = "Statistical overlay (threshold 2.5, alpha 0.65)"
+)
+```
+
+---
+
+## 4) Palettes and aesthetics
+
+All examples above use neuro‑friendly defaults:
+
+- Palettes: `resolve_cmap()` wraps base R’s `hcl.colors()` with aliases like "grays", "viridis", "inferno"—and safe fallbacks.
+- Theme: `theme_neuro()` keeps panels quiet and legends slim.
+- Legend: one shared colorbar for facetted montages via `scale_fill_neuro()`.
+
+You can switch palettes easily:
+
+```{r}
+plot_montage(
+  t1, zlevels = zlevels[1:6], along = 3,
+  cmap = "viridis", range = "robust", ncol = 6,
+  title = "Same data, Viridis palette"
+)
+```
+
+---
+
+## 5) Practical tips
+
+- Choose slices with meaning. Use mm positions (if you have an affine) or meaningful indices; label strips are handled for you by the helper.
+- Speed vs. fidelity. Use `downsample` for exploration; keep `downsample = 1` for final figures.
+- Consistent limits. For side‑by‑side comparisons, compute limits on a combined set of values (the helpers do this for orthogonal panels automatically).
+
+---
+
+## Reproducibility
+
+```{r}
+sessionInfo()
+```

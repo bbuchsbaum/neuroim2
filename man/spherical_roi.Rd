@@ -42,7 +42,23 @@ Creates a Spherical ROI based on a centroid.
  cube1 <- spherical_roi(sp1, c(5,5,5), 3.5, fill=6)
  all(cube1 == 6)
 
+ ## Create multiple spherical ROIs at once (preferred):
+ centers <- rbind(c(5,5,5), c(3,3,3), c(7,7,7))
+ vols <- spherical_roi_set(bvol = sp1,
+                          centroids = centers, radius = 3.5, fill = 1)
+ length(vols)  # 3
+
+ ## Equivalent, less efficient lapply variant:
+ vols2 <- lapply(seq_len(nrow(centers)), function(i) {
+   spherical_roi(sp1, centers[i,], radius = 3.5, fill = 1)
+ })
+
  # create an ROI centered around the real-valued coordinates: x=5, y=5, z=5
  vox <- coord_to_grid(sp1, c(5, 5, 5))
  cube <- spherical_roi(sp1, vox, 3.5)
+}
+\seealso{
+[spherical_roi_set()] for efficiently creating many spherical ROIs,
+  [series_roi()] and [coords()] for extracting time series and coordinates from ROIs,
+  and the vignette: \code{vignette("regionOfInterest", package = "neuroim2")}.
 }

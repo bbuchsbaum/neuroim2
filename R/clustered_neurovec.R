@@ -144,7 +144,6 @@ ClusteredNeuroVec <- function(x, cvol, FUN = mean, weights = NULL, label = "") {
       space = space_4d)
 }
 
-#' @inheritParams series
 #' @rdname series-methods
 #' @export
 setMethod("series", 
@@ -195,6 +194,9 @@ setMethod("length", signature(x = "ClusteredNeuroVec"), function(x) {
   nrow(x@ts)
 })
 
+#' Get Labels from ClusteredNeuroVec
+#' 
+#' @param object A ClusteredNeuroVec object
 #' @rdname labels-methods
 #' @export
 setMethod("labels", "ClusteredNeuroVec", function(object) object@label)
@@ -204,8 +206,11 @@ setMethod("labels", "ClusteredNeuroVec", function(object) object@label)
 setMethod("num_clusters", "ClusteredNeuroVec", function(x) ncol(x@ts))
 
 #' @rdname as.matrix-methods
+#' @param by For ClusteredNeuroVec: controls the conversion target.
+#' Defaults to "cluster" to return a T×K matrix of cluster time-series.
+#' "voxel" is reserved for future use.
 #' @export
-setMethod("as.matrix", signature(x = "ClusteredNeuroVec"), 
+setMethod("as.matrix", signature(x = "ClusteredNeuroVec"),
           function(x, by = c("cluster", "voxel")) {
             by <- match.arg(by)
             if (by == "cluster") {

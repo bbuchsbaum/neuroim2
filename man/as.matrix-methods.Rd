@@ -27,6 +27,10 @@
 \arguments{
 \item{x}{The object to convert to a matrix}
 
+\item{by}{For ClusteredNeuroVec: controls the conversion target.
+Defaults to "cluster" to return a T×K matrix of cluster time-series.
+"voxel" is reserved for future use.}
+
 \item{...}{Additional arguments}
 }
 \value{

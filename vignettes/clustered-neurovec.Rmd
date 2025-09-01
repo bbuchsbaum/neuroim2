@@ -1,8 +1,8 @@
 ---
-title: "ClusteredNeuroVec: Parcel-aware 4D neuroimaging analysis"
+title: "ClusteredNeuroVec: Parcel-based 4D Analysis"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{ClusteredNeuroVec: Parcel-aware 4D neuroimaging analysis}
+  %\VignetteIndexEntry{ClusteredNeuroVec: Parcel-based 4D Analysis}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

@@ -1615,7 +1615,8 @@ setGeneric("embed_kernel", def=function(x, sp, center_voxel, ...) standardGeneri
 #' # Create a sparse vector with explicit mask
 #' mask_array <- array(runif(64^3) > 0.5, c(64,64,64))
 #' mask_vol <- LogicalNeuroVol(mask_array, NeuroSpace(c(64,64,64)))
-#' sparse_data <- rnorm(sum(mask_array))
+#' # Data must be a matrix (time x masked voxels)
+#' sparse_data <- matrix(rnorm(sum(mask_array) * 10), nrow = 10, ncol = sum(mask_array))
 #' svec <- SparseNeuroVec(sparse_data, NeuroSpace(c(64,64,64,10)), mask_vol)
 #' m2 <- mask(svec)  # Returns the stored mask
 #' 

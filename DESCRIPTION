@@ -56,6 +56,11 @@ Collate:
     'nifti_io.R'
     'niml_io.R'
     'ops.R'
+    'palettes.R'
+    'plot-helpers.R'
+    'plot-montage.R'
+    'plot-ortho.R'
+    'plot-overlay.R'
     'resample.R'
     'resample_to.R'
     'roi.R'
@@ -63,6 +68,7 @@ Collate:
     'simulate.R'
     'sparse_neurovec.R'
     'spat_filter.R'
+    'theme.R'
     'zzz.R'
 RoxygenNote: 7.3.2.9000
 Imports: 
@@ -81,7 +87,8 @@ Imports:
   deflist,
   crayon,
   ggplot2,
-  magrittr
+  magrittr,
+  grid
 Suggests: 
     testthat,
     covr,

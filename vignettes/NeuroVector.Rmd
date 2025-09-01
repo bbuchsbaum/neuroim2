@@ -1,9 +1,9 @@
 ---
-title: "Four dimensional neuroimaging data"
+title: "Working with 4D NeuroVectors (NeuroVec)"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Four dimensional neuroimaging data}
+  %\VignetteIndexEntry{Working with 4D NeuroVectors (NeuroVec)}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -257,6 +257,4 @@ length(roi_mean)                       # matches time dimension
 ```
 
 That’s the core workflow for 4D data in `neuroim2`: load or create a `NeuroVec`, inspect its `NeuroSpace`, access time-series via voxels or ROIs, apply simple transforms, and optionally move between dense and sparse representations.
-
-
 

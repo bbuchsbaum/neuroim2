@@ -27,4 +27,7 @@ raw_data
 .vscode
 experimental
 codecov.yml
-
+^.Rcache
+^.claude
+golden_tests
+test_series_bug.R

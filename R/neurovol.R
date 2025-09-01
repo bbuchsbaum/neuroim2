@@ -1038,6 +1038,29 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVol", mask="numeric"),
           })
 
 
+#' Coerce SparseNeuroVol to DenseNeuroVol
+#'
+#' Convert a sparse volumetric image to a dense representation with the same
+#' spatial geometry. Non-zero values stored in the sparse vector are placed at
+#' their corresponding linear indices in the dense array; all other voxels are 0.
+#'
+#' @rdname as.dense-methods
+#' @param x A SparseNeuroVol to densify
+#' @return A DenseNeuroVol with identical spatial dimensions and values expanded
+#'   from the sparse representation.
+#' @export
+setMethod(f = "as.dense", signature = signature(x = "SparseNeuroVol"),
+          def = function(x) {
+            d <- dim(x)
+            arr <- array(0, d)
+            idx <- x@data@i
+            if (length(idx) > 0) {
+              arr[idx] <- x@data@x
+            }
+            DenseNeuroVol(arr, space(x))
+          })
+
+
 
 
 #' @rdname linear_access-methods
@@ -1162,5 +1185,4 @@ setMethod("mask", "LogicalNeuroVol",
             # return a filled mask indicating all voxels are valid
             LogicalNeuroVol(array(TRUE, dim(x)), space(x))
           })
-
 
