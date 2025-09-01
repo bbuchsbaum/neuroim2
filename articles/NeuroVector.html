@@ -84,8 +84,9 @@ concatenation with <code>concat</code>)</li>
 <div class="section level3">
 <h3 id="reading-a-four-dimensional-nifti-image-with-read_vec">Reading a four-dimensional NifTI image with read_vec<a class="anchor" aria-label="anchor" href="#reading-a-four-dimensional-nifti-image-with-read_vec"></a>
 </h3>
-<p>Here we read in an example image. This file is 3D (single timepoint)
-in the package data; the interface is the same for 4D images.</p>
+<p>Here we read in an example image. This file is 4D in the package data
+(64×64×25×4), so <code><a href="../reference/read_vec.html">read_vec()</a></code> returns a <code>NeuroVec</code>
+with four volumes (timepoints).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>      <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
 <span>      <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
@@ -147,24 +148,19 @@ concatenated 4D vector.</p>
 <span><span class="co">#&gt;   <span style="color: #00BB00;">8.</span> <span style="color: #00BBBB;">DenseNeuroVec</span> <span style="color: #555555;">(4 timepoints)</span></span></span>
 <span><span class="co">#&gt;   <span style="color: #00BB00;">9.</span> <span style="color: #00BBBB;">DenseNeuroVec</span> <span style="color: #555555;">(4 timepoints)</span></span></span>
 <span><span class="co">#&gt;   <span style="color: #00BB00;">10.</span> <span style="color: #00BBBB;">DenseNeuroVec</span> <span style="color: #555555;">(4 timepoints)</span></span></span></code></pre></div>
-<p>To extract a subset of volumes from a 4D vector, we’ll first create a
-small time series by concatenating a 3D volume:</p>
+<p>To extract a subset of volumes from a 4D vector, use
+<code>sub_vector</code> directly:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>      </span>
-<span>      <span class="co"># Build a 4D vector with 10 timepoints by concatenation</span></span>
-<span>      <span class="va">vol</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">file_name</span><span class="op">)</span></span>
-<span>      <span class="va">vec_t</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/concat-methods.html">concat</a></span><span class="op">(</span><span class="va">vol</span>, <span class="va">vol</span>, <span class="va">vol</span>, <span class="va">vol</span>, <span class="va">vol</span>, <span class="va">vol</span>, <span class="va">vol</span>, <span class="va">vol</span>, <span class="va">vol</span>, <span class="va">vol</span><span class="op">)</span></span>
-<span>      </span>
-<span>      <span class="co"># Extract a subset of volumes</span></span>
-<span>      <span class="va">vec_1_6</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sub_vector-methods.html">sub_vector</a></span><span class="op">(</span><span class="va">vec_t</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span></span>
-<span>      <span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">vec_1_6</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 64 64 25  6</span></span>
-<span>      <span class="va">vec_1_6</span></span>
+<code class="sourceCode R"><span>      <span class="co"># Extract a subset of volumes (first 3 timepoints)</span></span>
+<span>      <span class="va">vec_1_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sub_vector-methods.html">sub_vector</a></span><span class="op">(</span><span class="va">vec</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span></span>
+<span>      <span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">vec_1_3</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 64 64 25  3</span></span>
+<span>      <span class="va">vec_1_3</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">DenseNeuroVec</span> <span style="color: #555555;">(4.69 bytes MB)</span></span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">DenseNeuroVec</span> <span style="color: #555555;">(2.35 bytes MB)</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co"><span style="font-weight: bold;">#&gt; - Spatial Info</span><span style="color: #555555;"> ---------------------------</span></span></span>
-<span><span class="co">#&gt; | <span style="color: #BBBB00;">Dimensions</span>    : 64 x 64 x 25<span style="color: #555555;"> (</span>6 timepoints<span style="color: #555555;">)</span></span></span>
+<span><span class="co">#&gt; | <span style="color: #BBBB00;">Dimensions</span>    : 64 x 64 x 25<span style="color: #555555;"> (</span>3 timepoints<span style="color: #555555;">)</span></span></span>
 <span><span class="co">#&gt; | <span style="color: #BBBB00;">Total Voxels</span>  : 102,400</span></span>
 <span><span class="co">#&gt; | <span style="color: #BBBB00;">Spacing</span>       : 3.5 x 3.5 x 3.7</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -185,8 +181,8 @@ small time series by concatenating a 3D volume:</p>
 <code>series</code> function:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>      </span>
-<span>      <span class="fu"><a href="../reference/series-methods.html">series</a></span><span class="op">(</span><span class="va">vec_1_6</span>, <span class="fl">1</span>,<span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0 0 0 0 0 0</span></span></code></pre></div>
+<span>      <span class="fu"><a href="../reference/series-methods.html">series</a></span><span class="op">(</span><span class="va">vec_1_3</span>, <span class="fl">1</span>,<span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0 0 0</span></span></code></pre></div>
 <p>We can extract a 4d region of interest with the
 <code>series_roi</code> as follows:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -301,13 +297,13 @@ the specified locations:</p>
 <p>Every <code>NeuroVec</code> carries a <code>NeuroSpace</code>
 describing its geometry.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">vec_t</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">sp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">vec</span><span class="op">)</span></span>
 <span><span class="va">sp</span>                   <span class="co"># dimensions, spacing, origin, axes</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #BBBBBB; background-color: #0000BB; font-weight: bold;"> NeuroSpace Object </span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  <span style="color: #BBBB00; font-weight: bold;">&gt;&gt; Dimensions</span> </span></span>
-<span><span class="co">#&gt;   <span style="color: #555555;">Grid Size:</span> <span style="color: #00BB00;">64 x 64 x 25 x 10</span></span></span>
+<span><span class="co">#&gt;   <span style="color: #555555;">Grid Size:</span> <span style="color: #00BB00;">64 x 64 x 25 x 4</span></span></span>
 <span><span class="co">#&gt;   <span style="color: #555555;">Memory:</span>   <span style="color: #00BB00;">5.9 KB</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  <span style="color: #BBBB00; font-weight: bold;">&gt;&gt; Spatial Properties</span> </span></span>
@@ -334,17 +330,17 @@ describing its geometry.</p>
 <span><span class="co">#&gt;   <span style="color: #555555;">Max Corner:</span> <span style="color: #00BB00;">112.0, 112.5, 42.6</span> mm</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #BBBBBB; background-color: #0000BB; font-weight: bold;">==================================================</span></span></span>
-<span><span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">vec_t</span><span class="op">)</span>           <span class="co"># 4D dims: X × Y × Z × T</span></span>
-<span><span class="co">#&gt; [1] 64 64 25 10</span></span>
-<span><span class="fu"><a href="../reference/spacing-methods.html">spacing</a></span><span class="op">(</span><span class="va">vec_t</span><span class="op">)</span>       <span class="co"># voxel spacing (mm)</span></span>
+<span><span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">vec</span><span class="op">)</span>             <span class="co"># 4D dims: X × Y × Z × T</span></span>
+<span><span class="co">#&gt; [1] 64 64 25  4</span></span>
+<span><span class="fu"><a href="../reference/spacing-methods.html">spacing</a></span><span class="op">(</span><span class="va">vec</span><span class="op">)</span>         <span class="co"># voxel spacing (mm)</span></span>
 <span><span class="co">#&gt; [1] 3.5 3.5 3.7</span></span>
-<span><span class="fu"><a href="../reference/origin-methods.html">origin</a></span><span class="op">(</span><span class="va">vec_t</span><span class="op">)</span>        <span class="co"># image origin</span></span>
+<span><span class="fu"><a href="../reference/origin-methods.html">origin</a></span><span class="op">(</span><span class="va">vec</span><span class="op">)</span>          <span class="co"># image origin</span></span>
 <span><span class="co">#&gt; [1]  112.0 -108.0  -46.2</span></span>
-<span><span class="fu"><a href="../reference/ndim-methods.html">ndim</a></span><span class="op">(</span><span class="va">vec_t</span><span class="op">)</span>          <span class="co"># == 4 for time series</span></span>
+<span><span class="fu"><a href="../reference/ndim-methods.html">ndim</a></span><span class="op">(</span><span class="va">vec</span><span class="op">)</span>            <span class="co"># == 4 for time series</span></span>
 <span><span class="co">#&gt; [1] 4</span></span></code></pre></div>
 <p>The default mask for dense vectors is “all voxels are valid”:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mask-methods.html">mask</a></span><span class="op">(</span><span class="va">vec_t</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mask-methods.html">mask</a></span><span class="op">(</span><span class="va">vec</span><span class="op">)</span></span>
 <span><span class="va">m</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  <span style="color: #0000BB; font-weight: bold;">=== NeuroVol Object ===</span> </span></span>
@@ -481,7 +477,7 @@ operations:</p>
 as NIfTI files:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tmp_vec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".nii.gz"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/write_vec-methods.html">write_vec</a></span><span class="op">(</span><span class="va">vec_1_6</span>, <span class="va">tmp_vec</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/write_vec-methods.html">write_vec</a></span><span class="op">(</span><span class="va">vec_1_3</span>, <span class="va">tmp_vec</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">tmp_vec</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">tmp_vec</span><span class="op">)</span></span></code></pre></div>
