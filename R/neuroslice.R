@@ -168,6 +168,7 @@ setMethod(f="index_to_grid",
 #' Plot a NeuroSlice
 #'
 #' @name plot,NeuroSlice-method
+#' @aliases plot,NeuroSlice,ANY-method
 #' @param cmap Color map to use for plotting, defaults to grayscale
 #' @param irange Intensity range for scaling the plot values, defaults to the data range
 #' @param legend Logical indicating whether to display the color legend. Defaults to TRUE.
