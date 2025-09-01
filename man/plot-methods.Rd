@@ -3,17 +3,18 @@
 \name{plot,NeuroSlice-method}
 \alias{plot,NeuroSlice-method}
 \alias{plot,NeuroSlice,ANY-method}
+\alias{plot,NeuroVol-method}
 \alias{plot,NeuroVol,ANY-method}
 \title{Plot a NeuroSlice}
 \usage{
-\S4method{plot}{NeuroSlice,ANY}(
+\S4method{plot}{NeuroSlice}(
   x,
   cmap = gray(seq(0, 1, length.out = 255)),
   irange = range(x, na.rm = TRUE),
   legend = TRUE
 )
 
-\S4method{plot}{NeuroVol,ANY}(
+\S4method{plot}{NeuroVol}(
   x,
   cmap = gray(seq(0, 1, length.out = 255)),
   zlevels = unique(round(seq(1, dim(x)[3], length.out = 6))),

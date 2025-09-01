@@ -1095,6 +1095,8 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 
 #' plot a NeuroVol
 #'
+#' @name plot,NeuroVol-method
+#' @aliases plot,NeuroVol,ANY-method
 #' @rdname plot-methods
 #' @param x the object to display
 #' @param cmap a color map consisting of a vector of colors in hex format (e.g. \code{gray(n=255)})
