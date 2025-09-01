@@ -58,7 +58,7 @@ make_synthetic_vol <- function(dims = c(96, 96, 72), vox = c(2, 2, 2)) {
 }
 
 # Prefer an included demo file. Use a real example from inst/extdata.
-demo_path <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
+demo_path <- system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2")
 
 t1 <- if (nzchar(demo_path)) {
   read_vol(demo_path)
