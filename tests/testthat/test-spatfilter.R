@@ -26,3 +26,13 @@ test_that("guided_filter works correctly", {
   expect_s4_class(filtered_vol, "NeuroVol")
   expect_equal(dim(filtered_vol), dim(vol))
 })
+
+test_that("bilateral_filter handles missing mask", {
+  vol <- NeuroVol(array(rnorm(20^3), c(20, 20, 20)), NeuroSpace(c(20, 20, 20)))
+
+  filtered_vol <- bilateral_filter(vol, spatial_sigma = 2, intensity_sigma = 1, window = 1)
+
+  expect_s4_class(filtered_vol, "NeuroVol")
+  expect_equal(dim(filtered_vol), dim(vol))
+  expect_identical(space(filtered_vol), space(vol))
+})

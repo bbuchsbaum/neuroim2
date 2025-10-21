@@ -169,19 +169,6 @@ test_that("downsample handles NaN and Inf values", {
   expect_true(any(is.finite(result)))
 })
 
-test_that("downsample validates input dimensions", {
-  # Try with a 3D array (should fail)
-  data_3d <- array(1, dim = c(4, 4, 4))
-  space_3d <- NeuroSpace(dim = c(4, 4, 4), 
-                         origin = c(0, 0, 0),
-                         spacing = c(1, 1, 1))
-  nvec_3d <- NeuroVol(data_3d, space_3d)
-  
-  # This should error because it's not 4D
-  # Note: we can't test this directly with NeuroVol as input
-  # since it's not a DenseNeuroVec
-})
-
 test_that("downsample validates spacing values", {
   data <- array(1, dim = c(8, 8, 8, 2))
   space <- NeuroSpace(dim = c(8, 8, 8, 2), 

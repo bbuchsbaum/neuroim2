@@ -65,15 +65,17 @@ gaussian_blur <- function(vol, mask, sigma = 2, window = 1) {
   }
 
   if (missing(mask)) {
-    mask.idx <- 1:prod(dim(vol))
+    mask.idx <- seq_len(prod(dim(vol)))
+    target_space <- space(vol)
   } else {
     mask.idx <- which(mask != 0)
+    target_space <- space(mask)
   }
 
   arr <- as.array(vol)
   farr <- gaussian_blur_cpp(arr, as.integer(mask.idx), as.integer(window), sigma, spacing(vol))
 
-  out <- NeuroVol(farr, space(mask))
+  out <- NeuroVol(farr, target_space)
   out
 }
 
@@ -173,17 +175,23 @@ bilateral_filter <- function(vol, mask, spatial_sigma=2, intensity_sigma=1, wind
   assert_that(window >= 1)
   assert_that(spatial_sigma > 0)
   assert_that(intensity_sigma > 0)
+  if (!missing(mask)) {
+    assert_that(inherits(mask, "NeuroVol"),
+                msg = "mask must be a NeuroVol object")
+  }
 
   if (missing(mask)) {
-    mask.idx <- 1:prod(dim(vol))
+    mask.idx <- seq_len(prod(dim(vol)))
+    target_space <- space(vol)
   } else {
     mask.idx <- which(mask!=0)
+    target_space <- space(mask)
   }
 
   arr <- as.array(vol)
   farr <- bilateral_filter_cpp(arr, as.integer(mask.idx), as.integer(window), spatial_sigma, intensity_sigma, spacing(vol))
 
-  out <- NeuroVol(farr, space(mask))
+  out <- NeuroVol(farr, target_space)
   out
 }
 
@@ -210,15 +218,20 @@ bilateral_filter_vec <- function(vec, mask, spatial_sigma=2, intensity_sigma=1, 
   assert_that(intensity_sigma > 0)
 
   if (missing(mask)) {
-    mask.idx <- 1:prod(dim(mask))
+    mask.idx <- seq_len(prod(dim(vec)[1:3]))
+    target_space <- space(vec[[1]])
   } else {
+    assert_that(inherits(mask, "NeuroVol"),
+                msg = "mask must be a NeuroVol object")
     mask.idx <- which(mask!=0)
+    target_space <- space(mask)
   }
 
-  res<- lapply(1:dim(vec)[4], function(i) {
-    arr <- as.array(vec[[i]])
+  res<- lapply(seq_len(dim(vec)[4]), function(i) {
+    vol_i <- vec[[i]]
+    arr <- as.array(vol_i)
     farr <- bilateral_filter_cpp(arr, as.integer(mask.idx), as.integer(window), spatial_sigma, intensity_sigma, spacing(vec)[1:3])
-    NeuroVol(farr, space(mask))
+    NeuroVol(farr, target_space)
   })
 
   do.call(concat,res)
@@ -277,5 +290,3 @@ laplace_enhance <- function(vol, mask, k = 2, patch_size = 3, search_radius = 2,
   out <- NeuroVol(farr, space(vol))
   out
 }
-
-

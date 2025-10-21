@@ -70,7 +70,7 @@ Collate:
     'spat_filter.R'
     'theme.R'
     'zzz.R'
-RoxygenNote: 7.3.2.9000
+RoxygenNote: 7.3.3
 Imports: 
   purrr,
   assertthat,
