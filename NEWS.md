@@ -1,4 +1,9 @@
-# neuroim2 0.8.2 (development)
+# neuroim2 0.8.3 (development)
+
+* 4D bilateral filter now measures intensity variance across all timepoints in the mask and skips non-finite neighbours, eliminating spurious NaNs on constant or noisy inputs.
+* Added regression tests covering the zero-window identity and constant-volume stability for the parallel 4D bilateral filter backend.
+
+# neuroim2 0.8.2
 
 * README refreshed: CRAN/R-universe install, CI/coverage badges, website & cheatsheet links.
 * Docs: `spherical_roi()` now cross-links to `spherical_roi_set()`; ROI vignette shows multi-ROI creation.

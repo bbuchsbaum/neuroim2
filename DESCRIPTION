@@ -1,7 +1,7 @@
 Package: neuroim2
 Type: Package
 Title: Data Structures for Brain Imaging Data
-Version: 0.8.2
+Version: 0.8.3
 LinkingTo: 
   Rcpp,
   RcppArmadillo,

@@ -32,13 +32,41 @@ NumericVector bilateral_filter_4d_cpp_par(
   NumericVector output(nvox);
   std::copy(arr.begin(), arr.end(), output.begin());
 
-  // Explicitly use the namespace
-  double intensity_sd = indexfuns::masked_sd(arr, mask_idx);
+  int slicedim_xy = nx * ny;
+  int slicedim_xyz = slicedim_xy * nz;
+  double* arr_ptr = &arr[0];
+  double* out_ptr = &output[0];
+
+  // Compute intensity SD across all time points for masked voxels (robust to non-finite)
+  long double sum = 0.0L;
+  long double sumsq = 0.0L;
+  size_t count = 0;
+  for (int m = 0; m < mask_idx.size(); ++m) {
+    int spatial_linear_idx = mask_idx[m] - 1; // zero-based
+    for (int t = 0; t < nt; ++t) {
+      double v = arr_ptr[spatial_linear_idx + t * slicedim_xyz];
+      if (R_finite(v)) {
+        sum += v;
+        sumsq += static_cast<long double>(v) * static_cast<long double>(v);
+        ++count;
+      }
+    }
+  }
+  double intensity_sd = 0.0;
+  if (count > 1) {
+    long double mean = sum / static_cast<long double>(count);
+    long double var = (sumsq / static_cast<long double>(count)) - mean * mean;
+    intensity_sd = (var > 0.0L) ? std::sqrt(static_cast<double>(var)) : 0.0;
+  }
 
   // Precompute constants
   double spatial_var = 2.0 * spatial_sigma * spatial_sigma;
   double temporal_var = 2.0 * temporal_sigma * temporal_sigma;
   double intensity_var = 2.0 * intensity_sigma * intensity_sigma * intensity_sd * intensity_sd;
+  const double min_intensity_var = 1e-12;
+  if (!std::isfinite(intensity_var) || intensity_var < min_intensity_var) {
+    intensity_var = min_intensity_var;
+  }
 
   int sw = (spatial_window * 2) + 1;
   int tw = (temporal_window * 2) + 1;
@@ -68,8 +96,6 @@ NumericVector bilateral_filter_4d_cpp_par(
   }
 
   // Precompute neighbor offsets
-  int slicedim_xy = nx * ny;
-  int slicedim_xyz = nx * ny * nz;
   std::vector<int> neighbor_offsets(total_elements);
   {
     int idx = 0;
@@ -86,10 +112,6 @@ NumericVector bilateral_filter_4d_cpp_par(
       }
     }
   }
-
-  // Raw pointers for arr and output
-  double* arr_ptr = &arr[0];
-  double* out_ptr = &output[0];
 
   // A parallel worker
   struct BilateralFilter4DWorker : public Worker {
@@ -127,6 +149,9 @@ NumericVector bilateral_filter_4d_cpp_par(
         for (int t = 0; t < nt; t++) {
           int center_idx = x + y*nx + z*slicedim_xy + t*slicedim_xyz;
           double center_val = arr_ptr[center_idx];
+          if (!R_finite(center_val)) {
+            continue;
+          }
 
           double val_sum = 0.0;
           double w_sum = 0.0;
@@ -151,6 +176,9 @@ NumericVector bilateral_filter_4d_cpp_par(
 
             int neighbor_idx = neighbor_x + neighbor_y*nx + neighbor_z*slicedim_xy + neighbor_t*slicedim_xyz;
             double neighbor_val = arr_ptr[neighbor_idx];
+            if (!R_finite(neighbor_val)) {
+              continue;
+            }
             double diff = (center_val - neighbor_val);
             double intensity_weight = std::exp(-(diff*diff) / intensity_var);
 
@@ -161,6 +189,8 @@ NumericVector bilateral_filter_4d_cpp_par(
 
           if (w_sum > 0.0) {
             out_ptr[center_idx] = val_sum / w_sum;
+          } else {
+            out_ptr[center_idx] = center_val;
           }
         }
       }
