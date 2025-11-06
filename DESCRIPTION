@@ -45,6 +45,7 @@ Collate:
     'index_vol.R'
     'mapped_neurovec.R'
     'meta_info.R'
+    'meta_info_api.R'
     'neuro_obj.R'
     'neurohypervec.R'
     'neuroim.R'

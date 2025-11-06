@@ -1,7 +1,8 @@
-# neuroim2 0.8.3 (development)
+# neuroim2 0.8.3
 
 * 4D bilateral filter now measures intensity variance across all timepoints in the mask and skips non-finite neighbours, eliminating spurious NaNs on constant or noisy inputs.
 * Added regression tests covering the zero-window identity and constant-volume stability for the parallel 4D bilateral filter backend.
+* New `meta_info()` helper returns a normalized list of basic header metadata from a filename or `FileMetaInfo` (dim, spacing, origin, trans, path, etc.), making 3D/4D image introspection simpler for new users.
 
 # neuroim2 0.8.2
 

@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">neuroim2</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,7 +53,7 @@
 
       <h1>Pipelines: Split, Map, and Reduce</h1>
             
-            <h4 data-toc-skip class="date">2025-08-31</h4>
+            <h4 data-toc-skip class="date">2025-10-31</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/neuroim2/blob/HEAD/vignettes/pipelines.Rmd" class="external-link"><code>vignettes/pipelines.Rmd</code></a></small>
       <div class="d-none name"><code>pipelines.Rmd</code></div>
@@ -61,8 +61,6 @@
 
     
     
-<pre><code><span><span class="co">## Warning: package 'purrr' was built under R version 4.3.3</span></span></code></pre>
-<pre><code><span><span class="co">## Warning: package 'assertthat' was built under R version 4.3.3</span></span></code></pre>
 <div class="section level2">
 <h2 id="pipelining-operations-using-a-functional-approach">Pipelining operations using a functional approach<a class="anchor" aria-label="anchor" href="#pipelining-operations-using-a-functional-approach"></a>
 </h2>
@@ -75,10 +73,9 @@ easily parallelize certain operations.</p>
 </h3>
 <p>First we load in an example volume, assign it random values, and find
 its connected components with a threshold of .9</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>      <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
 <span>      <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: package 'ggplot2' was built under R version 4.3.3</span></span>
 <span>      <span class="va">file_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask_v4.nii"</span>, package<span class="op">=</span><span class="st">"neuroim2"</span><span class="op">)</span></span>
 <span>      <span class="va">vol</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">file_name</span><span class="op">)</span></span>
 <span>      <span class="va">mask.idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">vol</span><span class="op">&gt;</span><span class="fl">0</span><span class="op">)</span></span>
@@ -95,13 +92,13 @@ components using the <code>split_clusters</code> function. Since
 containing the cluster indices, we use that to split the original volume
 into a list of <code>ROIVol</code>s and compute the mean over each
 one.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mvals</span> <span class="op">&lt;-</span> <span class="va">vol2</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="../reference/split_clusters-methods.html">split_clusters</a></span><span class="op">(</span><span class="va">comp</span><span class="op">$</span><span class="va">index</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map_dbl</a></span><span class="op">(</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Suppose we want to compute the local standard deviation within a 4mm
 radius of each voxel. We can use the <code>searchlight</code> function
 to construct a list of spherical ROIs centered on every voxel in the
 input set.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sdvol</span> <span class="op">&lt;-</span> <span class="va">vol</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="../reference/searchlight.html">searchlight</a></span><span class="op">(</span>radius<span class="op">=</span><span class="fl">5</span>, eager<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map_dbl</a></span><span class="op">(</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="fu"><a href="../reference/values-methods.html">values</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> </span>
 <span><span class="va">sdvol</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NeuroVol.html">NeuroVol</a></span><span class="op">(</span><span class="va">sdvol</span>, space<span class="op">=</span><span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span>, indices<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">vol</span><span class="op">!=</span><span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sdvol</span>, cmap<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">rainbow</a></span><span class="op">(</span><span class="fl">255</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -109,7 +106,7 @@ input set.</p>
 <p>Another thing we might to is compute the k nearest neighbors in each
 searchlight and replace the center voxel with the average intensity of
 its neighbors:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">k</span> <span class="op">&lt;-</span> <span class="fl">12</span></span>
 <span><span class="va">knnfvol</span> <span class="op">&lt;-</span> <span class="va">vol2</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="../reference/searchlight.html">searchlight</a></span><span class="op">(</span>radius<span class="op">=</span><span class="fl">6</span>, eager<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map_dbl</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="co"># Just compute mean of all values in the searchlight</span></span>
@@ -121,7 +118,7 @@ its neighbors:</p>
 space), we can use the <code>searchlight_coords</code> function. Here,
 we simply replace the center voxel with the average of its neighbors in
 searchlight space:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">avgvol</span> <span class="op">&lt;-</span> <span class="va">vol</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="../reference/searchlight_coords.html">searchlight_coords</a></span><span class="op">(</span>radius<span class="op">=</span><span class="fl">12</span>, nonzero<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map_dbl</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">vals</span> <span class="op">&lt;-</span> <span class="va">vol</span><span class="op">[</span><span class="va">x</span><span class="op">]</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">vals</span><span class="op">[</span><span class="va">vals</span><span class="op">!=</span><span class="fl">0</span><span class="op">]</span><span class="op">)</span></span>
@@ -135,7 +132,7 @@ searchlight space:</p>
 <p>Suppose we want to split up an image volume by slice and apply a
 function to each slice. We can use the <code>slices</code> function to
 achieve this as follows:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">slice_means</span> <span class="op">&lt;-</span> <span class="va">vol</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="va">slices</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map_dbl</a></span><span class="op">(</span><span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">slice_means</span>, type<span class="op">=</span><span class="st">'l'</span>, ylab<span class="op">=</span><span class="st">"mean intensity"</span>, xlab<span class="op">=</span><span class="st">"slice number"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="pipelines_files/figure-html/unnamed-chunk-7-1.png" alt="Plot output" width="700"></p>
@@ -144,7 +141,7 @@ achieve this as follows:</p>
 <h3 id="mapping-a-function-over-each-volume-of-a-neurovec-object">Mapping a function over each volume of a <code>NeuroVec</code>
 object<a class="anchor" aria-label="anchor" href="#mapping-a-function-over-each-volume-of-a-neurovec-object"></a>
 </h3>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">vec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/concat-methods.html">concat</a></span><span class="op">(</span><span class="va">vol</span>,<span class="va">vol</span>,<span class="va">vol</span>,<span class="va">vol</span>,<span class="va">vol</span><span class="op">)</span></span>
 <span><span class="va">vec</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -174,7 +171,7 @@ object<a class="anchor" aria-label="anchor" href="#mapping-a-function-over-each-
 <h3 id="mapping-a-function-over-each-vector-of-a-neurovec-object">Mapping a function over each vector of a <code>NeuroVec</code>
 object<a class="anchor" aria-label="anchor" href="#mapping-a-function-over-each-vector-of-a-neurovec-object"></a>
 </h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">vec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/concat-methods.html">concat</a></span><span class="op">(</span><span class="va">vol</span>,<span class="va">vol</span>,<span class="va">vol</span>,<span class="va">vol</span>,<span class="va">vol</span><span class="op">)</span></span>
 <span><span class="va">vec</span></span>
 <span><span class="co">#&gt; </span></span>
