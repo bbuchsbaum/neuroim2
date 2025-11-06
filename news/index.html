@@ -34,9 +34,10 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.8.3" id="neuroim2-083-development">neuroim2 0.8.3 (development)<a class="anchor" aria-label="anchor" href="#neuroim2-083-development"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.8.3" id="neuroim2-083">neuroim2 0.8.3<a class="anchor" aria-label="anchor" href="#neuroim2-083"></a></h2>
 <ul><li>4D bilateral filter now measures intensity variance across all timepoints in the mask and skips non-finite neighbours, eliminating spurious NaNs on constant or noisy inputs.</li>
 <li>Added regression tests covering the zero-window identity and constant-volume stability for the parallel 4D bilateral filter backend.</li>
+<li>New <code>meta_info()</code> helper returns a normalized list of basic header metadata from a filename or <code>FileMetaInfo</code> (dim, spacing, origin, trans, path, etc.), making 3D/4D image introspection simpler for new users.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.8.2" id="neuroim2-082">neuroim2 0.8.2<a class="anchor" aria-label="anchor" href="#neuroim2-082"></a></h2>
