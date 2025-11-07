@@ -1,4 +1,5 @@
 {
     "r.lsp.diagnostics": false,
-    "r.lint.enabled": false
+    "r.lint.enabled": false,
+    "r.lsp.promptToInstall": false
 }

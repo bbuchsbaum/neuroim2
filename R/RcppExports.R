@@ -13,6 +13,18 @@ bilateral_filter_4d_cpp_par <- function(arr, mask_idx, spatial_window, temporal_
     .Call(`_neuroim2_bilateral_filter_4d_cpp_par`, arr, mask_idx, spatial_window, temporal_window, spatial_sigma, intensity_sigma, temporal_sigma, spacing)
 }
 
+build_cgb_graph_cpp <- function(arr, mask_idx, run_ends, window, spatial_sigma, spacing, corr_mode, corr_param, topk, leave_out_run, run_weights, add_self) {
+    .Call(`_neuroim2_build_cgb_graph_cpp`, arr, mask_idx, run_ends, window, spatial_sigma, spacing, corr_mode, corr_param, topk, leave_out_run, run_weights, add_self)
+}
+
+build_cgb_graph_nuis_cpp <- function(arr, mask_idx, run_ends, window, spatial_sigma, spacing, corr_mode, corr_param, topk, leave_out_run, run_weights, Q_list, sqrtw_list, add_self) {
+    .Call(`_neuroim2_build_cgb_graph_nuis_cpp`, arr, mask_idx, run_ends, window, spatial_sigma, spacing, corr_mode, corr_param, topk, leave_out_run, run_weights, Q_list, sqrtw_list, add_self)
+}
+
+apply_cgb_graph_cpp <- function(arr, row_ptr, col_ind, val, mask_idx, passes = 1L, lambda = 1.0) {
+    .Call(`_neuroim2_apply_cgb_graph_cpp`, arr, row_ptr, col_ind, val, mask_idx, passes, lambda)
+}
+
 downsample_3d_cpp <- function(arr, new_dims, old_dims) {
     .Call(`_neuroim2_downsample_3d_cpp`, arr, new_dims, old_dims)
 }

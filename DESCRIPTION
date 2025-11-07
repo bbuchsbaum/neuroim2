@@ -36,6 +36,8 @@ Collate:
     'binary_io.R'
     'clustered_neurovec.R'
     'clustervol.R'
+    'cgb_nuisance.R'
+    'cgb.R'
     'common.R'
     'conncomp.R'
     'downsample.R'

@@ -60,6 +60,69 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// build_cgb_graph_cpp
+List build_cgb_graph_cpp(NumericVector arr, IntegerVector mask_idx, IntegerVector run_ends, int window, double spatial_sigma, NumericVector spacing, int corr_mode, double corr_param, int topk, int leave_out_run, NumericVector run_weights, bool add_self);
+RcppExport SEXP _neuroim2_build_cgb_graph_cpp(SEXP arrSEXP, SEXP mask_idxSEXP, SEXP run_endsSEXP, SEXP windowSEXP, SEXP spatial_sigmaSEXP, SEXP spacingSEXP, SEXP corr_modeSEXP, SEXP corr_paramSEXP, SEXP topkSEXP, SEXP leave_out_runSEXP, SEXP run_weightsSEXP, SEXP add_selfSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type arr(arrSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type mask_idx(mask_idxSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type run_ends(run_endsSEXP);
+    Rcpp::traits::input_parameter< int >::type window(windowSEXP);
+    Rcpp::traits::input_parameter< double >::type spatial_sigma(spatial_sigmaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type spacing(spacingSEXP);
+    Rcpp::traits::input_parameter< int >::type corr_mode(corr_modeSEXP);
+    Rcpp::traits::input_parameter< double >::type corr_param(corr_paramSEXP);
+    Rcpp::traits::input_parameter< int >::type topk(topkSEXP);
+    Rcpp::traits::input_parameter< int >::type leave_out_run(leave_out_runSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type run_weights(run_weightsSEXP);
+    Rcpp::traits::input_parameter< bool >::type add_self(add_selfSEXP);
+    rcpp_result_gen = Rcpp::wrap(build_cgb_graph_cpp(arr, mask_idx, run_ends, window, spatial_sigma, spacing, corr_mode, corr_param, topk, leave_out_run, run_weights, add_self));
+    return rcpp_result_gen;
+END_RCPP
+}
+// build_cgb_graph_nuis_cpp
+List build_cgb_graph_nuis_cpp(NumericVector arr, IntegerVector mask_idx, IntegerVector run_ends, int window, double spatial_sigma, NumericVector spacing, int corr_mode, double corr_param, int topk, int leave_out_run, NumericVector run_weights, List Q_list, List sqrtw_list, bool add_self);
+RcppExport SEXP _neuroim2_build_cgb_graph_nuis_cpp(SEXP arrSEXP, SEXP mask_idxSEXP, SEXP run_endsSEXP, SEXP windowSEXP, SEXP spatial_sigmaSEXP, SEXP spacingSEXP, SEXP corr_modeSEXP, SEXP corr_paramSEXP, SEXP topkSEXP, SEXP leave_out_runSEXP, SEXP run_weightsSEXP, SEXP Q_listSEXP, SEXP sqrtw_listSEXP, SEXP add_selfSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type arr(arrSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type mask_idx(mask_idxSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type run_ends(run_endsSEXP);
+    Rcpp::traits::input_parameter< int >::type window(windowSEXP);
+    Rcpp::traits::input_parameter< double >::type spatial_sigma(spatial_sigmaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type spacing(spacingSEXP);
+    Rcpp::traits::input_parameter< int >::type corr_mode(corr_modeSEXP);
+    Rcpp::traits::input_parameter< double >::type corr_param(corr_paramSEXP);
+    Rcpp::traits::input_parameter< int >::type topk(topkSEXP);
+    Rcpp::traits::input_parameter< int >::type leave_out_run(leave_out_runSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type run_weights(run_weightsSEXP);
+    Rcpp::traits::input_parameter< List >::type Q_list(Q_listSEXP);
+    Rcpp::traits::input_parameter< List >::type sqrtw_list(sqrtw_listSEXP);
+    Rcpp::traits::input_parameter< bool >::type add_self(add_selfSEXP);
+    rcpp_result_gen = Rcpp::wrap(build_cgb_graph_nuis_cpp(arr, mask_idx, run_ends, window, spatial_sigma, spacing, corr_mode, corr_param, topk, leave_out_run, run_weights, Q_list, sqrtw_list, add_self));
+    return rcpp_result_gen;
+END_RCPP
+}
+// apply_cgb_graph_cpp
+NumericVector apply_cgb_graph_cpp(NumericVector arr, IntegerVector row_ptr, IntegerVector col_ind, NumericVector val, IntegerVector mask_idx, int passes, double lambda);
+RcppExport SEXP _neuroim2_apply_cgb_graph_cpp(SEXP arrSEXP, SEXP row_ptrSEXP, SEXP col_indSEXP, SEXP valSEXP, SEXP mask_idxSEXP, SEXP passesSEXP, SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type arr(arrSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type row_ptr(row_ptrSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type col_ind(col_indSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type val(valSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type mask_idx(mask_idxSEXP);
+    Rcpp::traits::input_parameter< int >::type passes(passesSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(apply_cgb_graph_cpp(arr, row_ptr, col_ind, val, mask_idx, passes, lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
 // downsample_3d_cpp
 NumericVector downsample_3d_cpp(NumericVector arr, IntegerVector new_dims, IntegerVector old_dims);
 RcppExport SEXP _neuroim2_downsample_3d_cpp(SEXP arrSEXP, SEXP new_dimsSEXP, SEXP old_dimsSEXP) {
@@ -321,6 +384,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_neuroim2_bilateral_weights", (DL_FUNC) &_neuroim2_bilateral_weights, 5},
     {"_neuroim2_bilateral_filter_cpp", (DL_FUNC) &_neuroim2_bilateral_filter_cpp, 6},
     {"_neuroim2_bilateral_filter_4d_cpp_par", (DL_FUNC) &_neuroim2_bilateral_filter_4d_cpp_par, 8},
+    {"_neuroim2_build_cgb_graph_cpp", (DL_FUNC) &_neuroim2_build_cgb_graph_cpp, 12},
+    {"_neuroim2_build_cgb_graph_nuis_cpp", (DL_FUNC) &_neuroim2_build_cgb_graph_nuis_cpp, 14},
+    {"_neuroim2_apply_cgb_graph_cpp", (DL_FUNC) &_neuroim2_apply_cgb_graph_cpp, 7},
     {"_neuroim2_downsample_3d_cpp", (DL_FUNC) &_neuroim2_downsample_3d_cpp, 3},
     {"_neuroim2_downsample_4d_cpp", (DL_FUNC) &_neuroim2_downsample_4d_cpp, 3},
     {"_neuroim2_fast_multilayer_laplacian_enhancement_masked", (DL_FUNC) &_neuroim2_fast_multilayer_laplacian_enhancement_masked, 8},

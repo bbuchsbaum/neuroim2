@@ -238,6 +238,126 @@ bilateral_filter_vec <- function(vec, mask, spatial_sigma=2, intensity_sigma=1, 
 
 }
 
+#' Apply a 4D bilateral filter to a NeuroVec
+#'
+#' This function applies a full 4D bilateral filter to a \code{NeuroVec},
+#' smoothing jointly across space (x, y, z) and time (t). The filter uses
+#' spatial, temporal, and intensity kernels to preserve edges while reducing
+#' noise, leveraging a parallel C++ backend for performance.
+#'
+#' @param vec A \code{\linkS4class{NeuroVec}} object (4D image).
+#' @param mask An optional \code{\linkS4class{LogicalNeuroVol}} or \code{\linkS4class{NeuroVol}}
+#'   specifying the spatial region to process. If omitted, the entire spatial
+#'   extent is processed.
+#' @param spatial_sigma Numeric; standard deviation of the spatial Gaussian (default 2).
+#' @param intensity_sigma Numeric; standard deviation of the intensity Gaussian (default 1).
+#' @param temporal_sigma Numeric; standard deviation of the temporal Gaussian (default 1).
+#' @param spatial_window Integer; half-width of the spatial window in voxels (default 1),
+#'   e.g., 1 => 3x3x3 spatial neighborhood.
+#' @param temporal_window Integer; half-width of the temporal window in frames (default 1),
+#'   e.g., 1 => 3 timepoints (t-1, t, t+1).
+#' @param temporal_spacing Numeric; spacing of the temporal dimension (e.g., TR in seconds).
+#'   Default is 1. This sets the temporal scale used for the temporal kernel.
+#'
+#' @details
+#' Parameter guidance and units:
+#' - spatial_sigma: Measured in physical units (millimeters). Distances are
+#'   computed using \code{spacing(vec)[1:3]}, so choose \code{spatial_sigma}
+#'   relative to voxel size. As a rule of thumb, set it to about 1–2 voxel sizes
+#'   (e.g., 2–4 mm for 2 mm isotropic data) for moderate smoothing.
+#' - intensity_sigma: Dimensionless multiplier of the global intensity standard
+#'   deviation. Internally, the filter uses exp(-(ΔI)^2 / (2 (intensity_sigma · σ_I)^2)),
+#'   where σ_I is the standard deviation of all finite voxel intensities within
+#'   the mask across time. Start with 1.0 for moderate smoothing; use 0.5–0.8 to
+#'   preserve more edges, or 1.5–2.0 for stronger smoothing.
+#' - temporal_sigma: Measured in \code{temporal_spacing} units (e.g., seconds).
+#'   Typical values are 0.5–2 × TR. Larger values blend more across time.
+#'
+#' Choosing the neighborhood window sizes:
+#' - spatial_window controls the discrete spatial support. A common choice is
+#'   \code{ceiling(2 * spatial_sigma / min(spacing(vec)[1:3]))}, which covers
+#'   ~95% of a Gaussian's mass.
+#' - temporal_window similarly can be set to \code{ceiling(2 * temporal_sigma / temporal_spacing)}.
+#'
+#' Quick presets (typical fMRI with 2–3 mm voxels and TR≈2s):
+#' - Light: spatial_sigma = 1 × min(spacing), intensity_sigma = 0.8,
+#'   temporal_sigma = 0.5 × TR, windows = 1
+#' - Moderate (default-ish): spatial_sigma = 1.5 × min(spacing), intensity_sigma = 1.0,
+#'   temporal_sigma = 1 × TR, windows = 1–2
+#' - Strong: spatial_sigma = 2 × min(spacing), intensity_sigma = 1.5,
+#'   temporal_sigma = 1.5 × TR, windows = 2
+#'
+#' Tip: If your time axis has known TR, pass it via \code{temporal_spacing}.
+#' For NIfTI inputs, you can get TR via:
+#' \preformatted{
+#'   hdr <- read_header(nifti_path)
+#'   tr  <- hdr@header$pixdim[5]
+#'   out <- bilateral_filter_4d(vec, mask, temporal_spacing = tr)
+#' }
+#'
+#' @return A \code{\linkS4class{NeuroVec}} with filtered data.
+#'
+#' @examples
+#' \donttest{
+#' vec <- read_vec(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
+#' mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
+#' out  <- bilateral_filter_4d(vec, mask,
+#'                             spatial_sigma = 2, intensity_sigma = 1,
+#'                             temporal_sigma = 1, spatial_window = 1,
+#'                             temporal_window = 1, temporal_spacing = 1)
+#' }
+#'
+#' @seealso \code{\link{bilateral_filter}}, \code{\link{NeuroVec-class}}, \code{\link{NeuroVol-class}}
+#' @export
+bilateral_filter_4d <- function(vec,
+                                mask,
+                                spatial_sigma = 2,
+                                intensity_sigma = 1,
+                                temporal_sigma = 1,
+                                spatial_window = 1,
+                                temporal_window = 1,
+                                temporal_spacing = 1) {
+
+  assert_that(inherits(vec, "NeuroVec"), msg = "vec must be a NeuroVec object")
+  assert_that(is.numeric(spatial_window) && spatial_window >= 1)
+  assert_that(is.numeric(temporal_window) && temporal_window >= 0)
+  assert_that(spatial_sigma > 0)
+  assert_that(intensity_sigma > 0)
+  assert_that(temporal_sigma > 0)
+  assert_that(temporal_spacing > 0)
+
+  # Determine mask and target space
+  if (missing(mask)) {
+    mask.idx <- seq_len(prod(dim(vec)[1:3]))
+    target_space <- space(vec)
+  } else {
+    assert_that(inherits(mask, "NeuroVol") || inherits(mask, "LogicalNeuroVol"),
+                msg = "mask must be a NeuroVol/LogicalNeuroVol")
+    assert_that(all(dim(mask) == dim(vec)[1:3]),
+                msg = "mask must match spatial dims of vec")
+    assert_that(all(spacing(mask) == spacing(vec)[1:3]),
+                msg = "mask and vec must have identical spatial spacing")
+    mask.idx <- which(mask != 0)
+    # Keep original 4D space
+    target_space <- space(vec)
+  }
+
+  # Assemble spacing with temporal component for the 4D kernel
+  sp4 <- c(spacing(vec)[1:3], temporal_spacing)
+
+  arr <- as.array(vec)
+  farr <- bilateral_filter_4d_cpp_par(arr,
+                                       as.integer(mask.idx),
+                                       as.integer(spatial_window),
+                                       as.integer(temporal_window),
+                                       spatial_sigma,
+                                       intensity_sigma,
+                                       temporal_sigma,
+                                       sp4)
+
+  DenseNeuroVec(farr, target_space)
+}
+
 #' Laplacian Enhancement Filter for Volumetric Images
 #'
 #' @description
