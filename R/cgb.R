@@ -6,6 +6,52 @@
 #' nuisance regression via weighted QR projectors, leave-one-run-out graph
 #' construction, and robust down-weighting of high-DVARS volumes.
 #'
+#' @details
+#' Graph construction overview:
+#' - Neighborhood: For each in-mask voxel i, consider a cubic spatial window of
+#'   half-width \code{window} (i.e., (2*window+1)^3 candidates). Candidates
+#'   outside the mask or bounds are ignored.
+#' - Spatial kernel: For a candidate j at physical distance d_ij (mm), assign a
+#'   spatial weight w_s = exp(-d_ij^2 / (2 * spatial_sigma^2)). Distances use
+#'   \code{spacing(spatial_space)}.
+#' - Correlation pooling: Compute Pearson correlation r_k(i,j) within each run k
+#'   (optionally after nuisance projection/weights), transform to Fisher-z,
+#'   pool across runs with weights \eqn{\omega_k} (default \eqn{n_k - 3}), then
+#'   back-transform to r_pool via tanh.
+#' - Correlation-to-affinity mapping (\code{corr_map}):
+#'   * \code{"power"} (mode=0): a(r) = r^gamma for r>0 else 0. Parameter = gamma.
+#'   * \code{"exp"} (mode=1): a(r) = exp(- (1 - r)^2 / (2 * tau^2)). Parameter = tau.
+#'   * \code{"soft"} (mode=2): a(r) = max(r - r0, 0). Parameter = r0.
+#' - Combined weight: w_ij = w_s(i,j) * a(r_pool(i,j)). If \code{topk > 0}, keep
+#'   the strongest \code{topk} neighbors. Optionally inject a small self-edge
+#'   when \code{add_self=TRUE}. Finally, row-normalize to obtain a stochastic W.
+#'
+#' Parameter guidance:
+#' - \code{spatial_sigma} is in mm. A typical choice is 1–2× the voxel size
+#'   (e.g., 2–4 mm for 2 mm isotropic). Larger values increase spatial mixing.
+#' - \code{window} controls support; a good rule is
+#'   \code{ceiling(2 * spatial_sigma / min(spacing))}.
+#' - \code{corr_map}: use \code{"power"} with \code{corr_param = 2} for robust
+#'   smoothing; \code{"exp"} with \code{tau ~ 0.5–1.5} retains sign information;
+#'   \code{"soft"} with \code{r0 ~ 0.1–0.3} thresholds weak correlations.
+#' - \code{topk}: 8–32 is a practical range; higher values densify the graph and
+#'   increase compute/memory.
+#' - \code{leave_one_out}: for multi-run inputs, enabling this prevents a run
+#'   from using its own correlations when building its graph (mitigates leakage).
+#'
+#' Nuisance/time weights/robust options:
+#' - If \code{confounds}/\code{time_weights} specified (or \code{robust != "none"}),
+#'   per-run weighted QR projectors are used; correlations are computed on the
+#'   projected, weighted series. Robust options add DVARS-like down-weighting.
+#' - If the only request is an implicit intercept (no actual confounds, no time
+#'   weights, no robust), the baseline builder is used for identical results.
+#'
+#' Output and usage:
+#' - Returns CSR arrays (\code{row_ptr}, \code{col_ind}, \code{val}) that define
+#'   a row-stochastic matrix W over masked voxels. Apply with \code{cgb_smooth}.
+#' - Complexity scales with number of masked voxels times neighborhood size
+#'   (limited by \code{topk}). Memory proportional to number of retained edges.
+#'
 #' @param runs A \code{\linkS4class{NeuroVec}} or a list of \code{NeuroVec}
 #'   objects (typically one per run).
 #' @param mask Optional \code{\linkS4class{LogicalNeuroVol}}/\code{NeuroVol} or
@@ -37,6 +83,16 @@
 #' @return A list containing \code{row_ptr}, \code{col_ind}, \code{val},
 #'   \code{dims3d}, and \code{mask_idx}, or (if \code{leave_one_out=TRUE})
 #'   a list of such graphs.
+#'
+#' @examples
+#' \donttest{
+#' vec <- read_vec(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
+#' mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
+#' # Build a graph with spatial sigma in mm and keep 16 neighbors
+#' G <- cgb_make_graph(vec, mask, spatial_sigma = 3, window = 2, topk = 16)
+#' # Smooth with one pass (pure diffusion)
+#' sm <- cgb_smooth(vec, G, passes = 1, lambda = 1)
+#' }
 #' @export
 cgb_make_graph <- function(runs,
                            mask = NULL,
@@ -292,6 +348,16 @@ cgb_smooth_loro <- function(runs, graphs, passes = 1L, lambda = 1) {
 #' High-level interface that builds a correlation-guided bilateral (CGB) graph
 #' with sensible defaults (similar to the bilateral filter interface) and
 #' immediately applies it to smooth the data.
+#'
+#' @details
+#' This is a convenience front-end to \code{cgb_make_graph} and
+#' \code{cgb_smooth} with a bilateral-like interface:
+#' - If \code{window} is \code{NULL}, it is chosen as
+#'   \code{ceiling(2 * spatial_sigma / min(spacing))} (at least 1).
+#' - Defaults target moderate smoothing: \code{corr_map = "power"},
+#'   \code{corr_param = 2}, \code{topk = 16}, one pass with \code{lambda = 1}.
+#' - Set \code{leave_one_out = TRUE} for multi-run inputs to avoid leakage.
+#' - Use \code{return_graph = TRUE} to inspect or reuse the constructed graph(s).
 #'
 #' @param runs A \code{\linkS4class{NeuroVec}} or a list of \code{NeuroVec}.
 #' @param mask Optional \code{\linkS4class{LogicalNeuroVol}}/\code{NeuroVol} or
