@@ -81,11 +81,41 @@ immediately applies it to smooth the data.
 This is a convenience front-end to \code{cgb_make_graph} and
 \code{cgb_smooth} with a bilateral-like interface:
 - If \code{window} is \code{NULL}, it is chosen as
-  \code{ceiling(2 * spatial_sigma / min(spacing))} (at least 1).
-- Defaults target moderate smoothing: \code{corr_map = "power"},
-  \code{corr_param = 2}, \code{topk = 16}, one pass with \code{lambda = 1}.
-- Set \code{leave_one_out = TRUE} for multi-run inputs to avoid leakage.
-- Use \code{return_graph = TRUE} to inspect or reuse the constructed graph(s).
+  \code{ceiling(2 * spatial_sigma / min(spacing))} (at least 1). Larger
+  windows allow correlations over more distant neighbors, at the cost of
+  extra compute and memory.
+- \code{spatial_sigma} (in mm) controls how quickly spatial weights fall
+  with distance. Small values emphasize very local structure; larger values
+  mix information over a wider spatial footprint.
+- \code{corr_map} and \code{corr_param} set how pooled correlations are
+  turned into edge weights:
+  * \code{"power"}: \code{a(r) = r^gamma} for \code{r > 0}. Larger
+    \code{gamma} (e.g., 3–4) strongly emphasizes high correlations and
+    produces more edge-preserving, patchy smoothing; smaller values (e.g., 1–2)
+    behave more like standard correlation-weighted smoothing.
+  * \code{"exp"}: Gaussian on \code{1 - r} with scale \code{tau}. Small
+    \code{tau} keeps only very similar time-series; larger \code{tau} makes
+    the filter closer to a spatial Gaussian while still respecting sign.
+  * \code{"soft"}: \code{a(r) = max(r - r0, 0)}. Increasing \code{r0}
+    discards more weak correlations and tends to sharpen edges but can make
+    the result more piecewise-constant.
+- \code{topk} limits each voxel to at most \code{k} strongest neighbors.
+  Smaller \code{topk} yields sparser, more anisotropic graphs (cheaper but
+  sometimes less smooth); larger \code{topk} increases mixing and memory.
+- \code{passes} and \code{lambda} control diffusion strength. With
+  \code{lambda = 1}, each pass applies pure graph diffusion; multiple passes
+  compound smoothing. Choosing \code{lambda < 1} blends each pass with the
+  identity and can prevent over-smoothing when using more passes.
+- Setting \code{leave_one_out = TRUE} for multi-run inputs builds a separate
+  graph for each run that excludes its own correlations, which reduces
+  information leakage in cross-validation or decoding workflows.
+- \code{time_weights}, \code{confounds}, and \code{robust}/\code{robust_c}
+  adjust how time-points contribute to the correlation estimates. Down-
+  weighting high-motion/high-DVARS frames (via \code{make_time_weights} and
+  \code{robust != "none"}) will typically yield smoother, less noisy graphs
+  but can also reduce effective temporal degrees of freedom.
+- Use \code{return_graph = TRUE} when you plan to reuse the constructed
+  graph(s) with \code{cgb_smooth} or inspect their sparsity pattern.
 }
 \examples{
 \donttest{
