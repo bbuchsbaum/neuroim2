@@ -96,10 +96,9 @@ setMethod(
     dims <- dim(x)
     dim_names <- c("i", "j", "k", "m")
 
-    # Validate each column of the matrix
-    for (col in 1:4) {
-      validate_indices(dims, list(indices = i[, col]), dim_names[col])
-    }
+    # Validate all columns of the matrix against corresponding dimensions
+    idx_list <- list(i = i[, 1], j = i[, 2], k = i[, 3], m = i[, 4])
+    validate_indices(dims, idx_list, dim_names)
 
     # Translate multi-dimensional indices to linear indices
     ind <- grid_to_index(space(x), i)
@@ -313,4 +312,3 @@ setMethod("[",
     }
   }
 )
-

@@ -1,15 +1,16 @@
 pandoc: 3.7.0.2
-pkgdown: 2.1.3
+pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   clustered-neurovec: clustered-neurovec.html
+  Cookbook: Cookbook.html
   elegant-slice-visualization: elegant-slice-visualization.html
   ImageVolumes: ImageVolumes.html
   NeuroVector: NeuroVector.html
   Overview: Overview.html
   pipelines: pipelines.html
   regionOfInterest: regionOfInterest.html
-last_built: 2025-10-31T12:12Z
+last_built: 2025-11-18T03:56Z
 urls:
   reference: https://bbuchsbaum.github.io/neuroim2/reference
   article: https://bbuchsbaum.github.io/neuroim2/articles

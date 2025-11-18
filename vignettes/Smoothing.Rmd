@@ -1,0 +1,205 @@
+---
+title: Smoothing and filtering with neuroim2
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Smoothing and filtering with neuroim2}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, echo = FALSE, message = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(neuroim2)
+```
+
+This vignette gives a practical overview of the main spatial and
+spatio‑temporal smoothing tools in neuroim2:
+
+- 3D spatial filters on `NeuroVol`:
+  - `gaussian_blur()` — isotropic Gaussian smoothing
+  - `guided_filter()` — edge‑preserving smoothing
+  - `bilateral_filter()` — intensity‑aware spatial smoothing
+  - `laplace_enhance()` — multi‑scale detail enhancement
+- 4D filters on `NeuroVec`:
+  - `bilateral_filter_4d()` — joint spatial + temporal bilateral filter
+  - `cgb_filter()` — correlation‑guided bilateral smoothing based on a
+    graph
+
+We’ll work with the demo volume used elsewhere in the package. All code
+assumes this setup:
+
+```{r}
+set.seed(1)
+
+demo_path <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
+vol3d <- read_vol(demo_path)          # 3D volume
+vec4d <- read_vec(demo_path)          # 4D NeuroVec (same file)
+
+sp3  <- space(vol3d)
+dims <- dim(vol3d)
+```
+
+## 1. Gaussian smoothing with `gaussian_blur()`
+
+`gaussian_blur()` applies an isotropic Gaussian kernel within an
+optional mask. It is useful as a simple, fast baseline smoother.
+
+- `sigma` (mm) controls how quickly weights decay with distance.
+- `window` (voxels) sets the discrete kernel support (window = 1 →
+  3×3×3).
+
+```{r}
+blur_light <- gaussian_blur(vol3d, vol3d, sigma = 2, window = 1)
+blur_strong <- gaussian_blur(vol3d, vol3d, sigma = 4, window = 2)
+
+dim(blur_light)
+```
+
+Use smaller `sigma` and `window` for gentle smoothing; larger values
+blur more but can wash out small structures.
+
+## 2. Edge‑preserving guided filter with `guided_filter()`
+
+`guided_filter()` smooths while preserving edges by fitting local linear
+models between the input and output.
+
+- `radius` controls neighborhood size (in voxels).
+- `epsilon` controls how strongly the filter smooths vs. preserves
+  contrast.
+
+```{r}
+gf_vol <- guided_filter(vol3d, radius = 4, epsilon = 0.7^2)
+gf_vol
+```
+
+Compared to Gaussian smoothing, guided filtering tends to retain sharp
+boundaries between tissues while denoising within regions.
+
+## 3. Bilateral spatial filter with `bilateral_filter()`
+
+`bilateral_filter()` combines spatial distance and intensity similarity,
+reducing noise while respecting edges.
+
+```{r}
+bf_vol <- bilateral_filter(
+  vol3d,
+  spatial_sigma   = 2,
+  intensity_sigma = 1,
+  spatial_window  = 1
+)
+bf_vol
+```
+
+Key parameters:
+
+- `spatial_sigma`: spatial scale (in mm).
+- `intensity_sigma`: intensity scale (relative to global σ\_I).
+- `spatial_window`: discrete support (see `?bilateral_filter`).
+
+Smaller `intensity_sigma` better preserves edges; larger values behave
+more like pure Gaussian smoothing.
+
+## 4. Laplacian enhancement with `laplace_enhance()`
+
+`laplace_enhance()` is designed for *sharpening* rather than smoothing.
+It uses a multi‑layer, non‑local Laplacian scheme to enhance details.
+
+```{r}
+sharp_vol <- laplace_enhance(vol3d, k = 2, patch_size = 3,
+                             search_radius = 2, h = 0.7)
+sharp_vol
+```
+
+Use higher `h` or more layers `k` for stronger enhancement, but be
+cautious about amplifying noise.
+
+## 5. 4D bilateral smoothing with `bilateral_filter_4d()`
+
+For 4D time‑series data (`NeuroVec`), `bilateral_filter_4d()` extends
+the bilateral idea across space and time:
+
+- `spatial_sigma`, `spatial_window` — as above.
+- `intensity_sigma` — intensity similarity.
+- `temporal_sigma`, `temporal_window` — temporal smoothing scale.
+- `temporal_spacing` — units of the time axis (e.g., TR in seconds).
+
+```{r}
+mask3d <- read_vol(system.file("extdata", "global_mask_v4.nii",
+                               package = "neuroim2"))
+
+bf4d <- bilateral_filter_4d(
+  vec4d, mask3d,
+  spatial_sigma   = 2,
+  intensity_sigma = 1,
+  temporal_sigma  = 1,
+  spatial_window  = 1,
+  temporal_window = 1,
+  temporal_spacing = 1
+)
+
+dim(bf4d)
+```
+
+This is useful when you want joint spatial + temporal denoising that
+still respects intensity boundaries (e.g. fMRI or 4D structural
+sequences).
+
+## 6. Correlation‑guided bilateral filtering with `cgb_filter()`
+
+`cgb_filter()` implements correlation‑guided bilateral (CGB) smoothing:
+it builds a sparse graph based on spatial distance and time‑series
+correlations, then diffuses data over that graph.
+
+Basic usage mirrors the bilateral interface:
+
+```{r}
+cgf <- cgb_filter(
+  vec4d,
+  mask          = mask3d,
+  spatial_sigma = 3,
+  window        = NULL,      # auto from spatial_sigma and spacing
+  corr_map      = "power",
+  corr_param    = 2,
+  topk          = 16,
+  passes        = 1,
+  lambda        = 1
+)
+
+dim(cgf)
+```
+
+Parameter intuition:
+
+- `spatial_sigma` / `window`: spatial kernel scale and support (similar
+  to Gaussian/bilateral).
+- `corr_map`, `corr_param`: map pooled correlations to affinities; see
+  `?cgb_make_graph` for details.
+- `topk`: max neighbors per voxel (sparsity vs. mixing).
+- `passes`, `lambda`: diffusion strength (multiple passes or λ < 1
+  increase/temper smoothing).
+
+Internally this calls `cgb_make_graph()` to build the graph and then
+`cgb_smooth()` to diffuse over it. Use `return_graph = TRUE` to keep the
+graph for reuse.
+
+```{r}
+cg_out <- cgb_filter(vec4d, mask3d,
+                     spatial_sigma = 3, window = NULL,
+                     topk = 16, return_graph = TRUE)
+
+str(cg_out$graph)
+```
+
+## Choosing a smoother
+
+- Use `gaussian_blur()` for simple, fast baseline smoothing.
+- Use `bilateral_filter()` / `bilateral_filter_4d()` when you want
+  intensity‑aware, edge‑respecting smoothing.
+- Use `guided_filter()` when you need edge preservation but want a
+  simpler parameterization than full bilateral filters.
+- Use `laplace_enhance()` when you want to *sharpen* structures rather
+  than blur them.
+- Use `cgb_filter()` when similarity should be driven by *correlation of
+  time‑series* (e.g., fMRI connectivity‑style smoothing) rather than raw
+  intensity alone.
+

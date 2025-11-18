@@ -864,6 +864,28 @@ setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character",
 		})
 
 
+#' @export
+setMethod("as_mmap", signature(x = "NeuroVec"),
+          function(x, file = NULL, data_type = "FLOAT", overwrite = FALSE, ...) {
+            if (inherits(x, "MappedNeuroVec")) {
+              return(x)
+            }
+
+            if (is.null(file)) {
+              file <- tempfile(fileext = ".nii")
+            } else if (file.exists(file) && !overwrite) {
+              stop("as_mmap: file already exists; set overwrite = TRUE or choose a different path.")
+            }
+
+            if (endsWith(file, ".gz")) {
+              stop("as_mmap: use an uncompressed .nii file for memory mapping.")
+            }
+
+            write_vec(x, file, data_type = data_type)
+            MappedNeuroVec(file)
+          })
+
+
 
 #' @export
 #' @rdname show-methods
@@ -1477,4 +1499,3 @@ setMethod("mask", "DenseNeuroVec",
                                      spacing(x)[1:3],
                                      origin(x)[1:3]))
           })
-

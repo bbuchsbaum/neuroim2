@@ -532,7 +532,11 @@ make_spherical_grid <- function(bvol, centroid, radius, use_cpp=TRUE) {
   centroid <- as.integer(centroid)
 
   out <- if (use_cpp) {
-    local_sphere(centroid[1], centroid[2], centroid[3], radius, vspacing, vdim)
+    # local_sphere expects 0-based voxel indices; convert from 1-based
+    local_sphere(centroid[1] - 1L,
+                 centroid[2] - 1L,
+                 centroid[3] - 1L,
+                 radius, vspacing, vdim)
   } else {
     deltas <- map_dbl(vspacing, function(x) round(radius/x))
 

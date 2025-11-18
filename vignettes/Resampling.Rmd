@@ -1,0 +1,147 @@
+---
+title: Resampling, downsampling, and reorientation
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Resampling, downsampling, and reorientation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, echo = FALSE, message = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(neuroim2)
+```
+
+This vignette shows how to:
+
+- Resample an image into a new grid (`resample_to()` / `resample()`).
+- Downsample 3D/4D data to coarser resolution (`downsample()`).
+- Change orientation while keeping physical coordinates consistent (`reorient()`).
+
+We’ll use the example NIfTI that ships with the package:
+
+```{r}
+demo_path <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
+vol  <- read_vol(demo_path)  # 3D NeuroVol
+vec4 <- read_vec(demo_path)  # 4D NeuroVec
+
+sp   <- space(vol)
+dim(vol)
+spacing(vol)
+```
+
+## 1. Resampling to a new space
+
+`resample_to()` is a convenience wrapper around the S4 `resample()`
+methods that accepts human‑readable interpolation names.
+
+You specify a *target* grid (`NeuroSpace` or `NeuroVol`) and choose
+`"nearest"`, `"linear"`, or `"cubic"` interpolation:
+
+```{r}
+# Create a target space with 2× smaller voxels in each dimension
+sp_fine <- NeuroSpace(
+  dim    = sp@dim * 2L,
+  spacing = sp@spacing / 2,
+  origin  = sp@origin,
+  trans   = trans(vol)
+)
+
+vol_fine_lin <- resample_to(vol, sp_fine, method = "linear")
+dim(vol_fine_lin)
+spacing(vol_fine_lin)
+```
+
+Typical patterns:
+
+- Use `"nearest"` when resampling label or mask images.
+- Use `"linear"` or `"cubic"` for continuous data (e.g. intensities,
+  statistics).
+
+You can also call `resample(source, target, interpolation = 0/1/3)`
+directly if you prefer numeric codes.
+
+## 2. Downsampling to coarser resolution
+
+When you want fewer voxels (e.g. to speed up analysis or plotting) but
+don’t need arbitrarily defined target grids, use `downsample()` on a
+`NeuroVec` or `NeuroVol`.
+
+### 2.1 Downsample a 4D NeuroVec
+
+```{r}
+# Downsample by a factor of 0.5 in each spatial dimension
+vec_down_factor <- downsample(vec4, factor = 0.5)
+
+dim(vec4)
+dim(vec_down_factor)
+spacing(vec4)
+spacing(vec_down_factor)
+```
+
+You can also specify a target spacing or output dimensions:
+
+```{r}
+# Target spacing (mm)
+vec_down_spacing <- downsample(vec4, spacing = c(4, 4, 4))
+
+# Target spatial dimensions
+vec_down_outdim  <- downsample(vec4, outdim = c(32, 32, 16))
+```
+
+Exactly one of `factor`, `spacing`, or `outdim` must be supplied. The
+current implementation uses a simple box‑averaging scheme in space.
+
+### 2.2 Downsample a 3D NeuroVol
+
+The same interface applies to volumes:
+
+```{r}
+vol_down_factor <- downsample(as(vec4, "NeuroVol"), factor = 0.5)
+
+dim(vol)
+dim(vol_down_factor)
+```
+
+This is useful for coarse previews or multi‑scale workflows.
+
+## 3. Reorienting images
+
+`reorient()` updates the mapping between voxel indices and physical
+coordinates without changing the raw data array. This is helpful when
+you want a canonical orientation (e.g. RAS) or need to match another
+dataset’s axis directions.
+
+For `NeuroSpace`, you supply three axis codes:
+
+```{r}
+sp_lpi <- sp                      # assume input is LPI‑like
+sp_ras <- reorient(sp_lpi, c("R", "A", "S"))
+
+sp_lpi
+sp_ras
+```
+
+For `NeuroVol` / `NeuroVec`, you typically reorient via their space:
+
+```{r}
+vol_ras <- NeuroVol(as.array(vol), sp_ras)
+dim(vol_ras)
+spacing(vol_ras)
+```
+
+Note that `reorient()` preserves physical positions; it only changes how
+grid indices are interpreted in space. Coordinate transforms (`coord_to_grid`,
+`grid_to_coord`) automatically respect the new orientation.
+
+## 4. Putting it together
+
+Common combinations:
+
+- Use `resample_to()` when you need to match a specific template grid
+  (e.g. MNI space or another subject’s image).
+- Use `downsample()` when you just want fewer voxels while preserving
+  overall FOV and orientation.
+- Use `reorient()` when you want a consistent anatomical convention
+  (RAS/LPI) across images without resampling.
+

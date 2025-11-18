@@ -87,3 +87,7 @@ length(series1)
 
 See examples of use of `neuroim2` in the
 [vignettes](https://bbuchsbaum.github.io/neuroim2/articles/index.html).
+
+
+## Albers theme
+This package uses the albersdown theme. Vignettes are styled with `vignettes/albers.css` and a local `vignettes/albers.js`; the palette family is provided via `params$family` (default 'red'). The pkgdown site uses `template: { package: albersdown }`.

@@ -1,13 +1,23 @@
 ---
-title: "Elegant slice visualization with neuroim2"
+title: Slice visualization with neuroim2
 output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Elegant slice visualization with neuroim2}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+vignette: '%\VignetteIndexEntry{Slice visualization with neuroim2} %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}'
+params:
+  family: red
+css: albers.css
+resource_files:
+- albers.css
+- albers.js
+includes:
+  in_header: |-
+    <script src="albers.js"></script>
+    <script>document.addEventListener('DOMContentLoaded',()=>document.body.classList.add('palette-red'));</script>
+
 ---
 
 ```{r setup, include=FALSE}
+if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("albersdown", quietly = TRUE)) ggplot2::theme_set(albersdown::theme_albers(params$family))
 knitr::opts_chunk$set(
   collapse = TRUE, echo = TRUE, message = FALSE, warning = FALSE,
   fig.width = 7, fig.height = 5, dpi = 120, fig.alt = 'Plot output'
@@ -20,7 +30,7 @@ suppressPackageStartupMessages({
 
 ## Why these helpers?
 
-Neuroimaging images are large, orientation‑sensitive rasters. The goal of these helpers is to make good defaults the shortest path: perceptually uniform palettes, robust scaling, fixed aspect ratios, and clean legends—without new heavy dependencies or any JavaScript.
+Neuroimaging images are large, orientation‑sensitive rasters. The goal of these helpers is to make reasonable defaults easy to use: perceptually uniform palettes, robust scaling, fixed aspect ratios, and clean legends—without extra heavy dependencies or any JavaScript.
 
 This vignette shows how to:
 

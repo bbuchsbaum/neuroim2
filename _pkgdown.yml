@@ -1,275 +1,274 @@
 url: https://bbuchsbaum.github.io/neuroim2/
 template:
   bootstrap: 5
-
+  package: albersdown
 articles:
-  - title: "Visualization"
-    desc: "Lightweight, publication-ready plotting helpers and workflows"
-    contents:
-      - elegant-slice-visualization
-      - ImageVolumes
-      - NeuroVector
-  - title: "Core Topics"
-    desc: "Core concepts and how-tos"
-    contents:
-      - Overview
-      - regionOfInterest
-      - clustered-neurovec
-      - pipelines
-
+- title: Visualization
+  desc: Lightweight, publication-ready plotting helpers and workflows
+  contents:
+  - elegant-slice-visualization
+  - ImageVolumes
+  - NeuroVector
+- title: Core Topics
+  desc: Core concepts and how-tos
+  contents:
+  - Overview
+  - regionOfInterest
+  - clustered-neurovec
+  - pipelines
+  - Smoothing
+  - Resampling
+- title: Cookbook
+  desc: Small, task-oriented examples and recipes
+  contents:
+  - Cookbook
 reference:
-  - title: "Visualization Helpers"
-    desc: "Plotting utilities for slices, montages, overlays, and palettes"
-    contents:
-      - theme_neuro
-      - resolve_cmap
-      - scale_fill_neuro
-      - annotate_orientation
-      - plot_montage
-      - plot_ortho
-      - plot_overlay
-  - title: "Constructors"
-    desc: >
-      Constructors for creating and initializing various
-      neuroimaging objects
-    contents:
-    - AbstractSparseNeuroVec-class
-    - AFNIMetaInfo
-    - ArrayLike3D-class
-    - ArrayLike4D-class
-    - ArrayLike5D-class
-    - AxisSet-class
-    - AxisSet1D-class
-    - AxisSet2D-class
-    - AxisSet3D-class
-    - AxisSet4D-class
-    - AxisSet5D-class
-    - BigNeuroVec-class
-    - BigNeuroVec
-    - BinaryReader
-    - BinaryWriter
-    - BinaryWriter-class
-    - ClusteredNeuroVol
-    - ClusteredNeuroVec
-    - ClusteredNeuroVec-class
-    - DenseNeuroVec
-    - DenseNeuroVol
-    - FileBackedNeuroVec
-    - IndexLookupVol
-    - LogicalNeuroVol
-    - MappedNeuroVec
-    - MetaInfo-class
-    - MetaInfo
-    - NeuroBucket-class
-    - NeuroHyperVec-class
-    - NeuroHyperVec
-    - NeuroObj-class
-    - NeuroSlice
-    - NeuroSpace
-    - NeuroVec
-    - NeuroVecSeq
-    - NeuroVecSource
-    - NeuroVecSource-class
-    - NeuroVolSource
-    - NeuroVol
-    - NIFTIMetaInfo
-    - ROICoords-class
-    - ROICoords
-    - ROIVec
-    - ROIVol
-    - SparseNeuroVec
-    - SparseNeuroVol
-    - TimeAxis
-    - NullAxis
-    - numericOrMatrix-class
-
-  - title: "S4 Classes"
-    desc: >
-      S4 classes for various neuroimaging objects
-    contents:
-    - BinaryReader-class
-    - ColumnReader-class
-    - FileBackedNeuroVec-class
-    - FileFormat-class
-    - FileFormat-operations
-    - FileMetaInfo-class
-    - FileSource-class
-    - MappedNeuroVecSource-class
-    - NamedAxis-class
-    - NeuroSlice-class
-    - NeuroSpace-class
-    - NeuroVecSeq-class
-    - NeuroVol-class
-    - ROI-class
-    - ROIVec-class
-    - ROIVecWindow-class
-    - ROIVol-class
-    - ROIVolWindow-class
-    - SparseNeuroVecSource-class
-    - OrientationList2D
-    - OrientationList3D
-
-  - title: "Data Loading and Manipulation"
-    desc: >
-      Methods for loading and manipulating neuroimaging data
-    contents:
-    - concat
-    - mapf
-    - vols
-    - vec_from_vols
-    - neuroim2
-    - data_file
-    - data_file_matches
-    - data_reader
-    - file_matches
-    - read_elements
-    - createNIfTIHeader
-    - linear_access
-    - image
-    - scale
-    - simulate_fmri
-
-  - title: "Coordinate and Dimension Operations"
-    desc: >
-      Methods for operating on coordinates and dimensions
-    contents:
-    - space
-    - axes
-    - spacing
-    - bounds
-    - centroid
-    - coord_to_grid
-    - coord_to_index
-    - grid_to_coord
-    - grid_to_index
-    - grid_to_grid
-    - index_to_coord
-    - index_to_grid
-    - dim_of
-    - drop_dim
-    - add_dim
-    - ndim
-    - voxels
-    - which_dim
-    - trans
-    - inverse_trans
-    - origin
-    - perm_mat
-    - strip_extension
-    - anatomical_axes
-    - TIME
-    - findAnatomy3D
-    - matrixToQuatern
-    - quaternToMatrix
-
-  - title: "ROI and Clustering"
-    desc: >
-      Methods for working with regions of interest and clustering
-    contents:
-    - partition
-    - patch_set
-    - split_clusters
-    - centroids
-    - conn_comp
-    - conn_comp_3D
-    - coords
-    - cuboid_roi
-    - num_clusters
-    - slices
-    - slice
-    - vectors
-    - values
-    - spherical_roi_set
-
-  - title: "Kernel and Extraction"
-    desc: >
-      Methods for kernel operations and feature extraction
-    contents:
-    - Kernel
-    - Kernel-class
-    - embed_kernel
-    - extractor3d
-    - extractor4d
-    - spherical_roi
-    - square_roi
-    - searchlight
-    - searchlight_coords
-    - random_searchlight
-    - bootstrap_searchlight
-    - series_roi
-    - gaussian_blur
-    - guided_filter
-    - bilateral_filter
-    - reorient
-    - clustered_searchlight
-    - cluster_searchlight_series
-    - spatial-filter
-    - searchlight-methods
-    - laplace_enhance
-
-  - title: "Lookup and Mapping"
-    desc: >
-      Methods for looking up and mapping neuroimaging data
-    contents:
-    - lookup
-    - map_values
-    - resample
-    - neuro-resample
-
-  - title: "Data Access and Indexing"
-    desc: >
-      Methods for accessing and indexing neuroimaging data
-    contents:
-    - sub_vector
-    - indices
-    - length,NeuroVec-method
-    - neuro-ops
-
-  - title: "Scaling and Resampling"
-    desc: >
-      Methods for splitting, scaling, processing, and resampling neuroimaging data
-    contents:
-    - scale_series
-    - resample
-    - resample_to
-    - neuro-downsample
-    - starts_with("split_")
-
-  
-
-  - title: "IO"
-    desc: >
-      Methods for input-output operations
-    contents:
-    - read_vec
-    - read_vol
-    - write_elements
-    - write_vec
-    - write_vol
-    - close,BinaryReader-method
-    - ColumnReader
-    - header_file
-    - header_file_matches
-    - read_columns
-    - read_header
-    - read_meta_info
-    - read_vol_list
-
-  - title: "Miscellaneous"
-    desc: >
-      Miscellaneous methods and functions
-    contents:
-      - starts_with("\\[")
-      - starts_with("dim")
-      - starts_with("drop")
-      - starts_with("length")
-      - starts_with("show")
-      - starts_with("print")
-      - starts_with("_print")
-      - starts_with("as")
-      - starts_with("close")
-      - starts_with("plot")
-      - starts_with("Arith")
-      - starts_with("Compare")
-      - ends_with("-method")
-      - None
+- title: Visualization Helpers
+  desc: Plotting utilities for slices, montages, overlays, and palettes
+  contents:
+  - theme_neuro
+  - resolve_cmap
+  - scale_fill_neuro
+  - annotate_orientation
+  - plot_montage
+  - plot_ortho
+  - plot_overlay
+- title: Constructors
+  desc: |
+    Constructors for creating and initializing various neuroimaging objects
+  contents:
+  - AbstractSparseNeuroVec-class
+  - AFNIMetaInfo
+  - ArrayLike3D-class
+  - ArrayLike4D-class
+  - ArrayLike5D-class
+  - AxisSet-class
+  - AxisSet1D-class
+  - AxisSet2D-class
+  - AxisSet3D-class
+  - AxisSet4D-class
+  - AxisSet5D-class
+  - BigNeuroVec-class
+  - BigNeuroVec
+  - BinaryReader
+  - BinaryWriter
+  - BinaryWriter-class
+  - ClusteredNeuroVol
+  - ClusteredNeuroVec
+  - ClusteredNeuroVec-class
+  - DenseNeuroVec
+  - DenseNeuroVol
+  - FileBackedNeuroVec
+  - IndexLookupVol
+  - LogicalNeuroVol
+  - MappedNeuroVec
+  - MetaInfo-class
+  - MetaInfo
+  - NeuroBucket-class
+  - NeuroHyperVec-class
+  - NeuroHyperVec
+  - NeuroObj-class
+  - NeuroSlice
+  - NeuroSpace
+  - NeuroVec
+  - NeuroVecSeq
+  - NeuroVecSource
+  - NeuroVecSource-class
+  - NeuroVolSource
+  - NeuroVol
+  - NIFTIMetaInfo
+  - ROICoords-class
+  - ROICoords
+  - ROIVec
+  - ROIVol
+  - SparseNeuroVec
+  - SparseNeuroVol
+  - TimeAxis
+  - NullAxis
+  - numericOrMatrix-class
+- title: S4 Classes
+  desc: |
+    S4 classes for various neuroimaging objects
+  contents:
+  - BinaryReader-class
+  - ColumnReader-class
+  - FileBackedNeuroVec-class
+  - FileFormat-class
+  - FileFormat-operations
+  - FileMetaInfo-class
+  - FileSource-class
+  - MappedNeuroVecSource-class
+  - NamedAxis-class
+  - NeuroSlice-class
+  - NeuroSpace-class
+  - NeuroVecSeq-class
+  - NeuroVol-class
+  - ROI-class
+  - ROIVec-class
+  - ROIVecWindow-class
+  - ROIVol-class
+  - ROIVolWindow-class
+  - SparseNeuroVecSource-class
+  - OrientationList2D
+  - OrientationList3D
+- title: Data Loading and Manipulation
+  desc: |
+    Methods for loading and manipulating neuroimaging data
+  contents:
+  - concat
+  - mapf
+  - vols
+  - vec_from_vols
+  - neuroim2
+  - data_file
+  - data_file_matches
+  - data_reader
+  - file_matches
+  - read_elements
+  - createNIfTIHeader
+  - linear_access
+  - image
+  - scale
+  - simulate_fmri
+- title: Coordinate and Dimension Operations
+  desc: |
+    Methods for operating on coordinates and dimensions
+  contents:
+  - space
+  - axes
+  - spacing
+  - bounds
+  - centroid
+  - coord_to_grid
+  - coord_to_index
+  - grid_to_coord
+  - grid_to_index
+  - grid_to_grid
+  - index_to_coord
+  - index_to_grid
+  - dim_of
+  - drop_dim
+  - add_dim
+  - ndim
+  - voxels
+  - which_dim
+  - trans
+  - inverse_trans
+  - origin
+  - perm_mat
+  - strip_extension
+  - anatomical_axes
+  - TIME
+  - findAnatomy3D
+  - matrixToQuatern
+  - quaternToMatrix
+- title: ROI and Clustering
+  desc: |
+    Methods for working with regions of interest and clustering
+  contents:
+  - partition
+  - patch_set
+  - split_clusters
+  - centroids
+  - conn_comp
+  - conn_comp_3D
+  - coords
+  - cuboid_roi
+  - num_clusters
+  - slices
+  - slice
+  - vectors
+  - values
+  - spherical_roi_set
+- title: Kernel and Extraction
+  desc: |
+    Methods for kernel operations and feature extraction
+  contents:
+  - Kernel
+  - Kernel-class
+  - embed_kernel
+  - extractor3d
+  - extractor4d
+  - spherical_roi
+  - square_roi
+  - searchlight
+  - searchlight_coords
+  - random_searchlight
+  - bootstrap_searchlight
+  - series_roi
+  - gaussian_blur
+  - guided_filter
+  - bilateral_filter
+  - bilateral_filter_4d
+  - cgb_filter
+  - cgb_make_graph
+  - cgb_smooth
+  - cgb_smooth_loro
+  - reorient
+  - clustered_searchlight
+  - cluster_searchlight_series
+  - spatial-filter
+  - searchlight-methods
+  - laplace_enhance
+- title: Lookup and Mapping
+  desc: |
+    Methods for looking up and mapping neuroimaging data
+  contents:
+  - lookup
+  - map_values
+  - resample
+  - neuro-resample
+- title: Data Access and Indexing
+  desc: |
+    Methods for accessing and indexing neuroimaging data
+  contents:
+  - sub_vector
+  - indices
+  - length,NeuroVec-method
+  - neuro-ops
+- title: Scaling and Resampling
+  desc: |
+    Methods for splitting, scaling, processing, and resampling neuroimaging data
+  contents:
+  - scale_series
+  - make_time_weights
+  - prepare_confounds
+  - resample
+  - resample_to
+  - neuro-downsample
+  - starts_with("split_")
+- title: IO
+  desc: |
+    Methods for input-output operations
+  contents:
+  - read_vec
+  - read_vol
+  - write_elements
+  - write_vec
+  - write_vol
+  - close,BinaryReader-method
+  - ColumnReader
+  - header_file
+  - header_file_matches
+  - read_columns
+  - read_header
+  - read_meta_info
+  - read_vol_list
+- title: Miscellaneous
+  desc: |
+    Miscellaneous methods and functions
+  contents:
+  - starts_with("\\[")
+  - starts_with("dim")
+  - starts_with("drop")
+  - starts_with("length")
+  - starts_with("show")
+  - starts_with("print")
+  - starts_with("_print")
+  - starts_with("as")
+  - starts_with("close")
+  - starts_with("plot")
+  - starts_with("Arith")
+  - starts_with("Compare")
+  - ends_with("-method")
+  - None

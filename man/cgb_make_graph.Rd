@@ -29,7 +29,7 @@ objects (typically one per run).}
 logical array defining in-mask voxels. Defaults to all in-mask voxels.}
 
 \item{window}{Integer half-width of the cubic spatial neighborhood
-(e.g., \code{1} yields a \(3\times3\times3\) window).}
+(e.g., \code{1} yields a 3x3x3 window).}
 
 \item{spatial_sigma}{Spatial Gaussian sigma in mm.}
 

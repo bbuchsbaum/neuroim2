@@ -265,7 +265,8 @@ setGeneric(name="vectors", def=function(x, subset, ...) standardGeneric("vectors
 #' blocks <- split_blocks(vec, block_indices)
 #'
 #' @rdname split_blocks-methods
-split_blocks <- function(x, indices, ...) standardGeneric("split_blocks")
+setGeneric(name="split_blocks",
+           def=function(x, indices, ...) standardGeneric("split_blocks"))
 
 #' Partition an image into a set of disjoint clusters
 #'
@@ -820,6 +821,24 @@ setGeneric(name="write_vol",  def=function(x, file_name, format, data_type) stan
 #' }
 #' @rdname write_vec-methods
 setGeneric(name="write_vec",  def=function(x, file_name, format, data_type, ...) standardGeneric("write_vec"))
+
+
+#' Convert a NeuroVec to a memory-mapped representation
+#'
+#' @description
+#' Generic for converting neuroimaging vectors to a memory-mapped
+#' \code{\linkS4class{MappedNeuroVec}} on disk (when possible).
+#'
+#' @param x A \code{\linkS4class{NeuroVec}}-like object.
+#' @param file Optional output file name for the backing image. If \code{NULL},
+#'   a temporary \code{.nii} file is created.
+#' @param ... Additional arguments passed to methods (e.g., \code{data_type},
+#'   \code{overwrite}).
+#'
+#' @return A \code{\linkS4class{MappedNeuroVec}} (or \code{x} itself if already
+#'   memory-mapped).
+#' @export
+setGeneric("as_mmap", function(x, file = NULL, ...) standardGeneric("as_mmap"))
 
 
 

@@ -722,6 +722,14 @@ setAs(from="SparseNeuroVec", to="DenseNeuroVec",
       })
 
 
+#' @export
+setMethod("as_mmap", signature(x = "SparseNeuroVec"),
+          function(x, file = NULL, data_type = "FLOAT", overwrite = FALSE, ...) {
+            dense <- as(x, "DenseNeuroVec")
+            as_mmap(dense, file = file, data_type = data_type, overwrite = overwrite, ...)
+          })
+
+
 #' Convert to Matrix
 #'
 #' @aliases as.matrix,SparseNeuroVec-method

@@ -280,3 +280,37 @@ setMethod("mask", "MappedNeuroVec",
           function(x) {
             x@mask
           })
+
+
+#' Convert to memory-mapped NeuroVec
+#'
+#' @description
+#' Methods for the \code{\link{as_mmap}} generic, which convert various
+#' neuroimaging vector types to a \code{\linkS4class{MappedNeuroVec}} backed
+#' by an on-disk NIfTI file.
+#'
+#' @param x A neuroimaging vector (\code{NeuroVec}, \code{MappedNeuroVec},
+#'   or \code{FileBackedNeuroVec}).
+#' @param file Optional output file name. If \code{NULL}, a temporary file
+#'   with extension \code{.nii} is created.
+#' @param ... Additional arguments passed to methods (e.g. \code{data_type},
+#'   \code{overwrite}).
+#'
+#' @return A \code{\linkS4class{MappedNeuroVec}} (or \code{x} itself if it is
+#'   already memory-mapped).
+#'
+#' @export
+setMethod("as_mmap", signature(x = "MappedNeuroVec"),
+          function(x, file = NULL, ...) {
+            x
+          })
+
+#' @export
+setMethod("as_mmap", signature(x = "FileBackedNeuroVec"),
+          function(x, file = NULL, ...) {
+            fn <- x@meta@data_file
+            if (endsWith(fn, ".gz")) {
+              stop("as_mmap: cannot memory-map gzipped file; re-save as uncompressed NIfTI with write_vec().")
+            }
+            MappedNeuroVec(fn)
+          })
