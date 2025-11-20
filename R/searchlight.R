@@ -182,31 +182,45 @@ random_searchlight <- function(mask, radius) {
 #   slist
 # }
 
-#' Create a resampled spherical searchlight iterator
+#' Create a resampled searchlight iterator
 #'
 #' @description
-#' This function generates a spherical searchlight iterator by sampling regions
-#' from within a brain mask. It creates searchlight spheres around randomly
-#' selected center voxels (with replacement), allowing the same center and
-#' surrounding voxels to appear in multiple samples. Each searchlight can also
-#' draw its radius from a user-specified set of radii.
+#' This function generates a resampled searchlight iterator by sampling regions
+#' from within a brain mask. By default it builds spherical searchlights, but
+#' users can provide a custom \code{shape_fun} to return ellipsoids, cubes, or
+#' arbitrary irregular searchlight shapes. Centers are drawn with replacement,
+#' so the same voxel (and its neighborhood) may appear multiple times. Each
+#' searchlight can also draw its radius from a user-specified set of radii.
 #'
 #' @param mask A \code{\linkS4class{NeuroVol}} object representing the brain mask.
 #' @param radius A numeric scalar or vector specifying candidate radii (in voxel
 #'   units) for the searchlight sphere. If a vector is supplied, a radius is
 #'   sampled uniformly (with replacement) for each searchlight. All radii must
 #'   be positive. Default is 8.
-#' @param iter An integer specifying the total number of searchlights to sample.
-#'   Default is 100.
+#' @param iter An integer specifying the total number of searchlights to sample
+#'   (with replacement). Default is 100.
+#' @param shape_fun Either \code{NULL} (default spherical kernel), a character
+#'   keyword (\code{"sphere"}, \code{"ellipsoid"}, \code{"cube"}, \code{"blobby"}),
+#'   or a custom function. Custom functions are called as
+#'   \code{shape_fun(mask, center, radius, iter, nonzero)} and must return either
+#'   a \code{\linkS4class{ROIVolWindow}} or an \code{n x 3} integer matrix of
+#'   voxel coordinates. This enables anisotropic or irregular searchlights.
+#' @param nonzero Logical; if \code{TRUE} (default), the generated searchlight is
+#'   intersected with the non-zero voxels of \code{mask}. Applies to both the
+#'   default sphere and any \code{shape_fun} that returns coordinates.
 #'
 #' @return A \code{deferred_list} object containing \code{\linkS4class{ROIVolWindow}}
-#'   objects, each representing a spherical searchlight region sampled from within the mask.
+#'   objects, each representing a sampled searchlight region drawn from within the mask.
 #'
 #' @details
 #' Searchlight centers are sampled with replacement, so the same center (and its
 #' surrounding voxels) can be selected multiple times. When multiple radii are
 #' provided, each searchlight independently samples one radius from the supplied
-#' values.
+#' values. Supplying \code{shape_fun} lets you draw non-spherical searchlights
+#' (e.g., ellipsoids, cubes, blobby deformations, or task-specific kernels).
+#' Built-in shortcuts are available via \code{shape_fun = "ellipsoid"},
+#' \code{"cube"}, and \code{"blobby"}; \code{"sphere"} or \code{NULL} uses the
+#' default spherical kernel.
 #'
 #' @examples
 #' # Load an example brain mask
@@ -214,19 +228,46 @@ random_searchlight <- function(mask, radius) {
 #'
 #' # Generate a resampled searchlight iterator with radii drawn from {4,6,8}
 #' searchlights <- resampled_searchlight(mask, radius = c(4, 6, 8))
+#'
+#' # Use a custom shape: random ellipsoid scaled along each axis
+#' ellipsoid_fun <- function(mask, center, radius, iter, nonzero) {
+#'   scales <- runif(3, 0.5, 1.5)        # axis-wise stretch/compress
+#'   vox <- spherical_roi(mask, center, radius, nonzero = FALSE)@coords
+#'   ctr_mat <- matrix(center, nrow(vox), 3, byrow = TRUE)
+#'   keep <- rowSums(((vox - ctr_mat) * scales)^2) <= radius^2
+#'   vox[keep, , drop = FALSE]
+#' }
+#' ellip_searchlights <- resampled_searchlight(mask, radius = c(4, 6),
+#'                                             iter = 50, shape_fun = ellipsoid_fun)
+#'
+#' # Or use built-in named shapes
+#' ellip_builtin <- resampled_searchlight(mask, radius = 6, shape_fun = "ellipsoid")
+#' cube_builtin  <- resampled_searchlight(mask, radius = 6, shape_fun = "cube")
 #' 
 #'
 #' @name resampled_searchlight
 #' @aliases resampled_searchlight bootstrap_searchlight
 #' @rdname resampled_searchlight
 #' @export
-resampled_searchlight <- function(mask, radius=8, iter=100) {
+resampled_searchlight <- function(mask,
+                                  radius = 8,
+                                  iter = 100,
+                                  shape_fun = NULL,
+                                  nonzero = TRUE) {
   assert_that(inherits(mask, "NeuroVol"),
               msg = "mask must be a NeuroVol object")
   assert_that(is.numeric(radius), length(radius) > 0, all(radius > 0),
               msg = "radius must be positive numeric")
   assert_that(length(iter) == 1, is.finite(iter), iter > 0,
               msg = "iter must be a positive number")
+  assert_that(
+    is.null(shape_fun) ||
+      is.function(shape_fun) ||
+      (is.character(shape_fun) && length(shape_fun) == 1),
+    msg = "shape_fun must be NULL, a function, or one of the built-in shape names"
+  )
+  assert_that(is.logical(nonzero), length(nonzero) == 1,
+              msg = "nonzero must be TRUE or FALSE")
 
   iter <- as.integer(iter)
 
@@ -242,8 +283,102 @@ resampled_searchlight <- function(mask, radius=8, iter=100) {
   # Sample radius per iteration when a vector is supplied
   radii <- if (length(radius) == 1L) rep(radius, iter) else sample(radius, iter, replace = TRUE)
 
+  # Resolve built-in shape keywords to concrete functions
+  if (is.character(shape_fun)) {
+    shape_fun <- match.arg(shape_fun, c("sphere", "ellipsoid", "cube", "blobby"))
+    shape_fun <- switch(shape_fun,
+                        sphere    = NULL,
+                        ellipsoid = ellipsoid_shape(),
+                        cube      = cube_shape(),
+                        blobby    = blobby_shape())
+  }
+
   force(mask)
-  f <- function(i) spherical_roi(mask, grid[center_idx[i],], radii[i], nonzero=TRUE)
+  # helper to coerce arbitrary shape output into a ROIVolWindow
+  to_roi_window <- function(obj, center_coord) {
+    center_vec <- drop(center_coord)
+    parent_index <- grid_to_index(mask, center_vec)
+
+    # User supplied a ROIVolWindow already; optionally filter nonzero voxels
+    if (inherits(obj, "ROIVolWindow")) {
+      coords <- obj@coords
+      vals   <- obj@.Data
+
+      if (nonzero) {
+        keep <- mask[coords] != 0
+        coords <- coords[keep, , drop = FALSE]
+        vals   <- vals[keep]
+      }
+
+      # recompute center row in case filtering changed indexing
+      center_row <- if (nrow(coords) == 0) {
+        NA_integer_
+      } else {
+        which(rowSums(coords == matrix(center_vec, nrow(coords), 3, byrow = TRUE)) == 3)
+      }
+      center_row <- if (length(center_row) == 0) NA_integer_ else center_row[1]
+
+      return(new("ROIVolWindow",
+                 vals,
+                 space = space(mask),
+                 coords = coords,
+                 center_index = as.integer(center_row),
+                 parent_index = as.integer(parent_index)))
+    }
+
+    # Allow a bare matrix of voxel coordinates (integer, 3 cols)
+    if (is.matrix(obj) && ncol(obj) == 3) {
+      coords <- obj
+
+      # keep in-bounds coordinates
+      vdim <- dim(mask)
+      in_bounds <- coords[,1] >= 1 & coords[,1] <= vdim[1] &
+                   coords[,2] >= 1 & coords[,2] <= vdim[2] &
+                   coords[,3] >= 1 & coords[,3] <= vdim[3]
+      coords <- coords[in_bounds, , drop = FALSE]
+
+      # apply mask filtering if requested
+      if (nonzero && nrow(coords) > 0) {
+        keep <- mask[coords] != 0
+        coords <- coords[keep, , drop = FALSE]
+      }
+
+      if (nrow(coords) == 0) {
+        return(new("ROIVolWindow",
+                   numeric(0),
+                   space = space(mask),
+                   coords = matrix(ncol = 3, nrow = 0),
+                   center_index = as.integer(NA),
+                   parent_index = as.integer(parent_index)))
+      }
+
+      # identify where (if anywhere) the sampled center lives in coords
+      center_row <- which(rowSums(coords == matrix(center_coord, nrow(coords), 3, byrow = TRUE)) == 3)
+      center_row <- if (length(center_row) == 0) NA_integer_ else center_row[1]
+
+      return(new("ROIVolWindow",
+                 rep(1, nrow(coords)),
+                 space = space(mask),
+                 coords = coords,
+                 center_index = as.integer(center_row),
+                 parent_index = as.integer(parent_index)))
+    }
+
+    stop("shape_fun must return a ROIVolWindow or an n x 3 matrix of voxel coordinates")
+  }
+
+  f <- function(i) {
+    ctr <- grid[center_idx[i], , drop = FALSE]
+    rad <- radii[i]
+
+    roi_obj <- if (is.null(shape_fun)) {
+      spherical_roi(mask, ctr, rad, nonzero = nonzero)
+    } else {
+      shape_fun(mask = mask, center = ctr, radius = rad, iter = i, nonzero = nonzero)
+    }
+
+    to_roi_window(roi_obj, center_coord = ctr)
+  }
 
   deflist::deflist(f, iter)
 }
@@ -253,6 +388,114 @@ resampled_searchlight <- function(mask, radius=8, iter=100) {
 bootstrap_searchlight <- function(mask, radius=8, iter=100) {
   .Deprecated("resampled_searchlight", package = "neuroim2")
   resampled_searchlight(mask, radius=radius, iter=iter)
+}
+
+#' Convenience shape generators for \code{resampled_searchlight()}
+#'
+#' Helpers that return ready-to-use \code{shape_fun} callbacks for
+#' \code{resampled_searchlight()}, covering a few sensible non-spherical
+#' defaults.
+#'
+#' Each returned function has signature \code{function(mask, center, radius, iter, nonzero)}
+#' and should return an \eqn{n \times 3} integer coordinate matrix. The
+#' coordinates are later converted to a \code{ROIVolWindow} internally.
+#'
+#' @param scales Length-3 positive numeric vector scaling the x/y/z axes relative
+#'   to a sphere (for \code{ellipsoid_shape}). Values >1 stretch; <1 compress.
+#' @param jitter Non-negative numeric; standard deviation of multiplicative
+#'   Gaussian noise applied to \code{scales} each draw (ellipsoid).
+#' @param drop Numeric in [0,1]; probability of dropping a voxel (blobby).
+#' @param edge_fraction Numeric in (0,1]; fraction of farthest voxels (by
+#'   Euclidean distance from the center, in voxel units) considered "edge" and
+#'   eligible for random dropping (blobby).
+#'
+#' @return A function suitable for the \code{shape_fun} argument of
+#'   \code{resampled_searchlight()}.
+#'
+#' @examples
+#' mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
+#'
+#' # Ellipsoid stretched along z with modest per-iteration jitter
+#' sl_ellip <- resampled_searchlight(mask, radius = 6,
+#'                                    shape_fun = ellipsoid_shape(scales = c(1, 1, 1.4),
+#'                                                               jitter = 0.1))
+#'
+#' # Simple axis-aligned cube (Chebyshev ball)
+#' sl_cube <- resampled_searchlight(mask, radius = 5, shape_fun = "cube")
+#'
+#' # Blobby sphere with 40% dropout on boundary voxels
+#' sl_blob <- resampled_searchlight(mask, radius = 6,
+#'                                  shape_fun = blobby_shape(drop = 0.4, edge_fraction = 0.6))
+#'
+#' @name searchlight_shape_functions
+NULL
+
+#' @rdname searchlight_shape_functions
+#' @export
+ellipsoid_shape <- function(scales = c(1, 1, 1), jitter = 0) {
+  assert_that(is.numeric(scales), length(scales) == 3, all(scales > 0))
+  assert_that(is.numeric(jitter), length(jitter) == 1, jitter >= 0)
+
+  function(mask, center, radius, iter, nonzero) {
+    vox <- spherical_roi(mask, center, radius, nonzero = FALSE)@coords
+    if (nrow(vox) == 0) {
+      return(matrix(ncol = 3, nrow = 0))
+    }
+
+    # Optionally jitter axis scales per draw
+    sc <- scales
+    if (jitter > 0) {
+      sc <- pmax(scales * (1 + stats::rnorm(3, 0, jitter)), .Machine$double.eps)
+    }
+
+    ctr_mat <- matrix(center, nrow(vox), 3, byrow = TRUE)
+    keep <- rowSums(((vox - ctr_mat) * sc)^2) <= radius^2
+    vox[keep, , drop = FALSE]
+  }
+}
+
+#' @rdname searchlight_shape_functions
+#' @export
+cube_shape <- function() {
+  function(mask, center, radius, iter, nonzero) {
+    spc <- spacing(mask)
+    half_width <- ceiling(radius / spc)
+
+    coords <- as.matrix(expand.grid(
+      seq.int(center[1] - half_width[1], center[1] + half_width[1]),
+      seq.int(center[2] - half_width[2], center[2] + half_width[2]),
+      seq.int(center[3] - half_width[3], center[3] + half_width[3])
+    ))
+
+    coords
+  }
+}
+
+#' @rdname searchlight_shape_functions
+#' @export
+blobby_shape <- function(drop = 0.3, edge_fraction = 0.7) {
+  assert_that(is.numeric(drop), length(drop) == 1, drop >= 0, drop <= 1)
+  assert_that(is.numeric(edge_fraction), length(edge_fraction) == 1,
+              edge_fraction > 0, edge_fraction <= 1)
+
+  function(mask, center, radius, iter, nonzero) {
+    roi <- spherical_roi(mask, center, radius, nonzero = FALSE)
+    coords <- roi@coords
+    if (nrow(coords) == 0) {
+      return(coords)
+    }
+
+    ctr_mat <- matrix(center, nrow(coords), 3, byrow = TRUE)
+    dist <- sqrt(rowSums((coords - ctr_mat)^2))
+
+    # Identify edge voxels; drop a fraction of them at random
+    threshold <- stats::quantile(dist, probs = edge_fraction)
+    edge_idx <- dist >= threshold
+    drop_mask <- edge_idx & stats::runif(length(dist)) < drop
+    keep <- !drop_mask
+
+    coords[keep, , drop = FALSE]
+  }
 }
 
 
