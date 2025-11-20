@@ -97,12 +97,21 @@ random_searchlight <- function(mask, radius) {
 
     kept_vox <- vox[keep_mask, , drop=FALSE]
 
+    # Row position of the center voxel inside the kept ROI coordinates
+    center_row <- which(idx[keep_mask] == center_idx)
+    if (length(center_row) == 0) {
+      center_row <- NA_integer_  # fallback; should not happen
+    }
+
     search2 <- new("ROIVolWindow",
-                   rep(1, sum(keep_mask)),
+                   rep(1, nrow(kept_vox)),
                    space=space(mask),
                    coords=kept_vox,
                    center_index=as.integer(center_idx),
                    parent_index=as.integer(search@parent_index))
+
+    # Expose row index within the ROI coordinates for downstream consumers
+    attr(search2, "center_row_index") <- as.integer(center_row[1])
 
     # Mark chosen voxels as used
     remaining[idx[keep_mask]] <- FALSE
