@@ -182,16 +182,20 @@ random_searchlight <- function(mask, radius) {
 #   slist
 # }
 
-#' Create a bootstrap spherical searchlight iterator
+#' Create a resampled spherical searchlight iterator
 #'
 #' @description
 #' This function generates a spherical searchlight iterator by sampling regions
-#' from within a brain mask. It creates searchlight spheres around random center
-#' voxels, allowing the same surrounding voxel to belong to multiple searchlight samples.
+#' from within a brain mask. It creates searchlight spheres around randomly
+#' selected center voxels (with replacement), allowing the same center and
+#' surrounding voxels to appear in multiple samples. Each searchlight can also
+#' draw its radius from a user-specified set of radii.
 #'
 #' @param mask A \code{\linkS4class{NeuroVol}} object representing the brain mask.
-#' @param radius A numeric value specifying the radius of the searchlight sphere
-#'   in voxel units. Default is 8.
+#' @param radius A numeric scalar or vector specifying candidate radii (in voxel
+#'   units) for the searchlight sphere. If a vector is supplied, a radius is
+#'   sampled uniformly (with replacement) for each searchlight. All radii must
+#'   be positive. Default is 8.
 #' @param iter An integer specifying the total number of searchlights to sample.
 #'   Default is 100.
 #'
@@ -199,31 +203,56 @@ random_searchlight <- function(mask, radius) {
 #'   objects, each representing a spherical searchlight region sampled from within the mask.
 #'
 #' @details
-#' Searchlight centers are sampled without replacement, but the same surrounding
-#' voxel can belong to multiple searchlight samples.
+#' Searchlight centers are sampled with replacement, so the same center (and its
+#' surrounding voxels) can be selected multiple times. When multiple radii are
+#' provided, each searchlight independently samples one radius from the supplied
+#' values.
 #'
 #' @examples
 #' # Load an example brain mask
 #' mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #'
-#' # Generate a bootstrap searchlight iterator with a radius of 6 voxels
-#' 
-#' searchlights <- bootstrap_searchlight(mask, radius = 6)
+#' # Generate a resampled searchlight iterator with radii drawn from {4,6,8}
+#' searchlights <- resampled_searchlight(mask, radius = c(4, 6, 8))
 #' 
 #'
+#' @name resampled_searchlight
+#' @aliases resampled_searchlight bootstrap_searchlight
+#' @rdname resampled_searchlight
 #' @export
-#' @rdname bootstrap_searchlight
-bootstrap_searchlight <- function(mask, radius=8, iter=100) {
+resampled_searchlight <- function(mask, radius=8, iter=100) {
+  assert_that(inherits(mask, "NeuroVol"),
+              msg = "mask must be a NeuroVol object")
+  assert_that(is.numeric(radius), length(radius) > 0, all(radius > 0),
+              msg = "radius must be positive numeric")
+  assert_that(length(iter) == 1, is.finite(iter), iter > 0,
+              msg = "iter must be a positive number")
+
+  iter <- as.integer(iter)
+
   mask.idx <- which(mask != 0)
+  assert_that(length(mask.idx) > 0,
+              msg = "mask contains no nonzero voxels to sample")
+
   grid <- index_to_grid(mask, mask.idx)
 
-  sample.idx <- sample(1:nrow(grid), iter)
+  # Sample centers with replacement; allows iter > nrow(grid)
+  center_idx <- sample.int(nrow(grid), iter, replace = TRUE)
+
+  # Sample radius per iteration when a vector is supplied
+  radii <- if (length(radius) == 1L) rep(radius, iter) else sample(radius, iter, replace = TRUE)
 
   force(mask)
-  f <- function(i) spherical_roi(mask, grid[sample.idx[i],], radius, nonzero=TRUE)
+  f <- function(i) spherical_roi(mask, grid[center_idx[i],], radii[i], nonzero=TRUE)
 
-  #dlis <- deferred_list(lapply(1:iter, function(i) f))
   deflist::deflist(f, iter)
+}
+
+#' @rdname resampled_searchlight
+#' @export
+bootstrap_searchlight <- function(mask, radius=8, iter=100) {
+  .Deprecated("resampled_searchlight", package = "neuroim2")
+  resampled_searchlight(mask, radius=radius, iter=iter)
 }
 
 

@@ -35,10 +35,10 @@ test_that("random_searchlight works as expected", {
   expect_true(!is.null(random_sl), info = "random_searchlight failed to create an iterator")
 })
 
-test_that("bootstrap_searchlight works as expected", {
+test_that("resampled_searchlight works as expected", {
   mask <- read_vol(gmask)
-  bootstrap_sl <- bootstrap_searchlight(mask, radius = 8, iter = 100)
-  expect_true(!is.null(bootstrap_sl), info = "bootstrap_searchlight failed to create an iterator")
+  resampled_sl <- resampled_searchlight(mask, radius = 8, iter = 100)
+  expect_true(!is.null(resampled_sl), info = "resampled_searchlight failed to create an iterator")
 })
 
 test_that("searchlight_coords works as expected", {
@@ -58,6 +58,5 @@ test_that("clustered_searchlight works as expected", {
   clustered_sl <- clustered_searchlight(mask, csize = 5)
   expect_true(!is.null(clustered_sl), info = "clustered_searchlight failed to create an iterator")
 })
-
 
 

@@ -194,7 +194,7 @@ reference:
   - searchlight
   - searchlight_coords
   - random_searchlight
-  - bootstrap_searchlight
+  - resampled_searchlight
   - series_roi
   - gaussian_blur
   - guided_filter
