@@ -6,6 +6,7 @@
 \title{Create a resampled spherical searchlight iterator}
 \usage{
 resampled_searchlight(mask, radius = 8, iter = 100)
+
 bootstrap_searchlight(mask, radius = 8, iter = 100)
 }
 \arguments{
