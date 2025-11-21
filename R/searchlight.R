@@ -108,19 +108,21 @@ random_searchlight <- function(mask, radius, nonzero = TRUE) {
 
     # Row position of the center voxel inside the kept ROI coordinates
     center_row <- which(rowSums(kept_vox == matrix(center_coord, nrow(kept_vox), 3, byrow = TRUE)) == 3)
-    if (length(center_row) == 0) {
-      center_row <- NA_integer_  # fallback; should not happen
-    }
+    center_row <- if (length(center_row) == 0) NA_integer_ else center_row[1]
+
+    parent_idx <- grid_to_index(mask, center_coord)
 
     search2 <- new("ROIVolWindow",
                    rep(1, nrow(kept_vox)),
                    space=space(mask),
                    coords=kept_vox,
-                   center_index=as.integer(center_idx),
-                   parent_index=as.integer(search@parent_index))
+                   center_index=as.integer(center_row),
+                   parent_index=as.integer(parent_idx))
 
     # Expose row index within the ROI coordinates for downstream consumers
-    attr(search2, "center_row_index") <- as.integer(center_row[1])
+    attr(search2, "center_row_index") <- as.integer(center_row)
+    # Index of the center voxel within the mask's nonzero ordering
+    attr(search2, "mask_index") <- as.integer(center_idx)
 
     # Mark chosen voxels (that are in the mask) as used
     idx_keep <- idx_lookup[mask_hits & active_mask]
@@ -387,7 +389,9 @@ resampled_searchlight <- function(mask,
       shape_fun(mask = mask, center = ctr, radius = rad, iter = i, nonzero = nonzero)
     }
 
-    to_roi_window(roi_obj, center_coord = ctr)
+    out <- to_roi_window(roi_obj, center_coord = ctr)
+    attr(out, "mask_index") <- as.integer(center_idx[i])
+    out
   }
 
   deflist::deflist(f, iter)
@@ -610,7 +614,11 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
   if (!eager) {
     force(mask)
     force(radius)
-    f <- function(i) { spherical_roi(mask, grid[i,], radius, nonzero=nonzero) }
+    f <- function(i) { 
+      roi <- spherical_roi(mask, grid[i,], radius, nonzero=nonzero)
+      attr(roi, "mask_index") <- as.integer(i)
+      roi
+    }
     deflist::deflist(f, nrow(grid))
   } else {
     # Use spherical_roi_set to get all ROIs at once
@@ -620,6 +628,10 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
       radius = radius,
       nonzero = nonzero
     )
+
+    for (i in seq_along(result_list)) {
+      attr(result_list[[i]], "mask_index") <- as.integer(i)
+    }
 
     result_list
   }
