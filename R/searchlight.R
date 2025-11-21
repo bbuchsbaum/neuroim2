@@ -25,6 +25,8 @@ NULL
 #'
 #' @param mask A \code{\linkS4class{NeuroVol}} object representing the brain mask.
 #' @param radius A numeric value specifying the radius of the searchlight sphere in voxel units.
+#' @param nonzero Logical; if \code{TRUE} (default) discard zero-valued voxels in
+#'   the mask when forming each searchlight.
 #'
 #' @return A list of \code{\linkS4class{ROIVolWindow}} objects, each representing
 #'   a spherical searchlight region.
@@ -41,11 +43,13 @@ NULL
 #' }
 #'
 #' @export
-random_searchlight <- function(mask, radius) {
+random_searchlight <- function(mask, radius, nonzero = TRUE) {
   assert_that(inherits(mask, "NeuroVol"),
               msg = "mask must be a NeuroVol object")
   assert_that(radius > 0,
               msg = "radius must be positive")
+  assert_that(is.logical(nonzero), length(nonzero) == 1,
+              msg = "nonzero must be TRUE or FALSE")
 
   mask.idx <- which(mask != 0)
   grid <- index_to_grid(mask, mask.idx)
@@ -71,7 +75,7 @@ random_searchlight <- function(mask, radius) {
     center_coord <- grid[center_idx, , drop=FALSE]
 
     # Compute spherical ROI
-    search <- spherical_roi(mask, center_coord, radius, nonzero=TRUE)
+    search <- spherical_roi(mask, center_coord, radius, nonzero = nonzero)
     vox <- coords(search)
 
     # If no voxels in ROI, remove center_idx to avoid infinite loop
@@ -84,21 +88,26 @@ random_searchlight <- function(mask, radius) {
     }
 
     # Lookup voxel indices
-    idx <- lookup[vox]
-    keep_mask <- remaining[idx]
+    idx_lookup <- lookup[vox]
+    mask_hits <- idx_lookup > 0
 
-    # If no voxels kept, remove at least the center_idx
-    # to ensure progress
-    if (!any(keep_mask)) {
+    active_mask <- rep(FALSE, nrow(vox))
+    active_mask[mask_hits] <- remaining[idx_lookup[mask_hits]]
+
+    # If none of the masked voxels are available, drop current center and move on
+    if (!any(active_mask)) {
       remaining[center_idx] <- FALSE
       remain_indices <- remain_indices[remaining[remain_indices]]
       next
     }
 
-    kept_vox <- vox[keep_mask, , drop=FALSE]
+    # Keep masked voxels that are still available;
+    # optionally keep out-of-mask voxels when nonzero = FALSE
+    kept <- active_mask | (!mask_hits & !nonzero)
+    kept_vox <- vox[kept, , drop = FALSE]
 
     # Row position of the center voxel inside the kept ROI coordinates
-    center_row <- which(idx[keep_mask] == center_idx)
+    center_row <- which(rowSums(kept_vox == matrix(center_coord, nrow(kept_vox), 3, byrow = TRUE)) == 3)
     if (length(center_row) == 0) {
       center_row <- NA_integer_  # fallback; should not happen
     }
@@ -113,8 +122,9 @@ random_searchlight <- function(mask, radius) {
     # Expose row index within the ROI coordinates for downstream consumers
     attr(search2, "center_row_index") <- as.integer(center_row[1])
 
-    # Mark chosen voxels as used
-    remaining[idx[keep_mask]] <- FALSE
+    # Mark chosen voxels (that are in the mask) as used
+    idx_keep <- idx_lookup[mask_hits & active_mask]
+    remaining[idx_keep] <- FALSE
 
     # Update remain_indices to reflect removed voxels
     remain_indices <- remain_indices[remaining[remain_indices]]
