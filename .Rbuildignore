@@ -31,3 +31,8 @@ codecov.yml
 ^.claude
 golden_tests
 test_series_bug.R
+^\.Rlib$
+^neuroim2\.Rcheck$
+^neuroim2_.*\.tar\.gz$
+^\.\.Rcheck$
+^\.omc$

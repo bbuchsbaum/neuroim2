@@ -4,6 +4,7 @@
 \name{as.dense,ClusteredNeuroVol-method}
 \alias{as.dense,ClusteredNeuroVol-method}
 \alias{as.dense,SparseNeuroVol-method}
+\alias{as.dense,DenseNeuroVol-method}
 \alias{as.dense,ROIVol-method}
 \alias{as.dense,SparseNeuroVec-method}
 \title{Coerce SparseNeuroVol to DenseNeuroVol}
@@ -11,6 +12,8 @@
 \S4method{as.dense}{ClusteredNeuroVol}(x)
 
 \S4method{as.dense}{SparseNeuroVol}(x)
+
+\S4method{as.dense}{DenseNeuroVol}(x)
 
 \S4method{as.dense}{ROIVol}(x)
 
@@ -31,6 +34,9 @@ A \code{DenseNeuroVol} object obtained by coercing the \code{ROIVol} object.
 Convert a sparse volumetric image to a dense representation with the same
 spatial geometry. Non-zero values stored in the sparse vector are placed at
 their corresponding linear indices in the dense array; all other voxels are 0.
+
+Identity method: returns a \code{DenseNeuroVol} (or subclass such
+  as \code{LogicalNeuroVol}) unchanged.
 
 This function provides a method to coerce an object of class \code{ROIVol} to a \code{DenseNeuroVol} using the \code{as.dense} method.
 }
