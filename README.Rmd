@@ -76,7 +76,7 @@ See examples of use of `neuroim2` in the [vignettes](https://bbuchsbaum.github.i
 
 ### Visualization
 
-- Elegant slice visualization vignette: https://bbuchsbaum.github.io/neuroim2/articles/elegant-slice-visualization.html
+- Slice visualization vignette: https://bbuchsbaum.github.io/neuroim2/articles/slice-visualization.html
 
 Quick montage example (robust scaling and shared colorbar):
 

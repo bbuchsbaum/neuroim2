@@ -6,7 +6,7 @@ articles:
 - title: Visualization
   desc: Lightweight, publication-ready plotting helpers and workflows
   contents:
-  - elegant-slice-visualization
+  - slice-visualization
   - ImageVolumes
   - NeuroVector
 - title: Core Topics
@@ -20,8 +20,7 @@ articles:
   - Resampling
 - title: Cookbook
   desc: Small, task-oriented examples and recipes
-  contents:
-  - Cookbook
+  contents: Cookbook
 reference:
 - title: Visualization Helpers
   desc: Plotting utilities for slices, montages, overlays, and palettes
