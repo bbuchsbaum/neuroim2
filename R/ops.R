@@ -21,27 +21,57 @@ checkDim <- function(e1,e2) {
 #' Comparison Operations
 #'
 #' @name Compare-methods
-#' @aliases Compare,SparseNeuroVol,numeric-method
+#' @aliases Compare,DenseNeuroVol,DenseNeuroVol-method
+#'          Compare,DenseNeuroVol,numeric-method
+#'          Compare,numeric,DenseNeuroVol-method
+#'          Compare,SparseNeuroVol,numeric-method
 #'          Compare,numeric,SparseNeuroVol-method
 #'          Compare,NeuroVec,NeuroVec-method
-#' @description Methods for comparing neuroimaging objects
+#' @description Methods for comparing neuroimaging objects.
+#'   All volume comparisons return \code{\linkS4class{LogicalNeuroVol}} objects
+#'   that preserve spatial metadata.
 #'
-#' @param e1 A SparseNeuroVol object containing the data to be compared.
-#' @param e2 A numeric value to compare with the data of the SparseNeuroVol object.
-#' @return The result of the comparison between the SparseNeuroVol object's data and the numeric value.
+#' @param e1,e2 Neuroimaging objects or numeric values.
+#' @return A \code{\linkS4class{LogicalNeuroVol}} for volume comparisons.
+#' @rdname Compare-methods
+#' @export
+setMethod(f="Compare", signature=signature(e1="DenseNeuroVol", e2="DenseNeuroVol"),
+          def=function(e1, e2) {
+            checkDim(e1, e2)
+            ret <- callGeneric(e1@.Data, e2@.Data)
+            LogicalNeuroVol(ret, space(e1))
+          })
+
+#' @rdname Compare-methods
+#' @export
+setMethod(f="Compare", signature=signature(e1="DenseNeuroVol", e2="numeric"),
+          def=function(e1, e2) {
+            ret <- callGeneric(e1@.Data, e2)
+            LogicalNeuroVol(ret, space(e1))
+          })
+
+#' @rdname Compare-methods
+#' @export
+setMethod(f="Compare", signature=signature(e1="numeric", e2="DenseNeuroVol"),
+          def=function(e1, e2) {
+            ret <- callGeneric(e1, e2@.Data)
+            LogicalNeuroVol(ret, space(e2))
+          })
+
 #' @rdname Compare-methods
 #' @export
 setMethod(f="Compare", signature=signature(e1="SparseNeuroVol", e2="numeric"),
           def=function(e1, e2) {
-            ret <- callGeneric(e1@data,e2)
+            ret <- callGeneric(as.vector(e1@data), e2)
+            LogicalNeuroVol(array(ret, dim(e1)), space(e1))
           })
-
 
 #' @rdname Compare-methods
 #' @export
 setMethod(f="Compare", signature=signature(e1="numeric", e2="SparseNeuroVol"),
           def=function(e1, e2) {
-            callGeneric(e1, e2@data)
+            ret <- callGeneric(e1, as.vector(e2@data))
+            LogicalNeuroVol(array(ret, dim(e2)), space(e2))
           })
 
 
