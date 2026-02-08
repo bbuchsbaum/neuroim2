@@ -256,12 +256,12 @@ setMethod("series", signature(x="NeuroVecSeq", i="integer"),
               # i is a vector of linear voxel indices
 
               ts_list <- lapply(x@vecs, function(v) {
-                m <- series(v, i, drop=FALSE)  # This might be [voxels × time]
+                m <- series(v, i, drop=FALSE)  # This might be [voxels x time]
 
-                # If we want [time × voxels], transpose if needed
+                # If we want [time x voxels], transpose if needed
                 # (assuming length(i) = # of voxels, and dim(v)[4] = # of timepoints)
                 if (nrow(m) == length(i) && ncol(m) == dim(v)[4]) {
-                  m <- t(m)  # now [time × voxels]
+                  m <- t(m)  # now [time x voxels]
                 }
                 m
               })
@@ -278,7 +278,7 @@ setMethod("series", signature(x="NeuroVecSeq", i="integer"),
             } else {
               # i,j,k provided => single 3D coordinate or sets of them
               # the logic is the same: just ensure each sub-vec's series()
-              # ends up as [time × coordinate], then rbind
+              # ends up as [time x coordinate], then rbind
               if (length(i) == 1 && length(j) == 1 && length(k) == 1) {
 
                 ts_list <- lapply(x@vecs, function(v) {

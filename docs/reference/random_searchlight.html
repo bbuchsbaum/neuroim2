@@ -43,7 +43,7 @@ local neighborhoods of voxels within a given radius in a brain mask.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">random_searchlight</span><span class="op">(</span><span class="va">mask</span>, <span class="va">radius</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">random_searchlight</span><span class="op">(</span><span class="va">mask</span>, <span class="va">radius</span>, nonzero <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -56,6 +56,11 @@ local neighborhoods of voxels within a given radius in a brain mask.</p>
 
 <dt id="arg-radius">radius<a class="anchor" aria-label="anchor" href="#arg-radius"></a></dt>
 <dd><p>A numeric value specifying the radius of the searchlight sphere in voxel units.</p></dd>
+
+
+<dt id="arg-nonzero">nonzero<a class="anchor" aria-label="anchor" href="#arg-nonzero"></a></dt>
+<dd><p>Logical; if <code>TRUE</code> (default) discard zero-valued voxels in
+the mask when forming each searchlight.</p></dd>
 
 </dl></div>
     <div class="section level2">

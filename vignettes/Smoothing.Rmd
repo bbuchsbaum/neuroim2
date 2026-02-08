@@ -85,7 +85,7 @@ bf_vol <- bilateral_filter(
   vol3d,
   spatial_sigma   = 2,
   intensity_sigma = 1,
-  spatial_window  = 1
+  window          = 1
 )
 bf_vol
 ```
@@ -94,7 +94,7 @@ Key parameters:
 
 - `spatial_sigma`: spatial scale (in mm).
 - `intensity_sigma`: intensity scale (relative to global σ\_I).
-- `spatial_window`: discrete support (see `?bilateral_filter`).
+- `window`: discrete support (see `?bilateral_filter`).
 
 Smaller `intensity_sigma` better preserves edges; larger values behave
 more like pure Gaussian smoothing.

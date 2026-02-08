@@ -2,6 +2,7 @@ library(testthat)
 library(neuroim2)
 
 test_that("downsample with factor works correctly", {
+  skip_on_cran()
   # Create a test 4D image
   data <- array(rnorm(64 * 64 * 32 * 10), dim = c(64, 64, 32, 10))
   space <- NeuroSpace(dim = c(64, 64, 32, 10), 
@@ -19,6 +20,7 @@ test_that("downsample with factor works correctly", {
 })
 
 test_that("downsample with spacing works correctly", {
+  skip_on_cran()
   data <- array(rnorm(60 * 60 * 30 * 8), dim = c(60, 60, 30, 8))
   space <- NeuroSpace(dim = c(60, 60, 30, 8), 
                       origin = c(0, 0, 0),
@@ -38,6 +40,7 @@ test_that("downsample with spacing works correctly", {
 })
 
 test_that("downsample with outdim works correctly", {
+  skip_on_cran()
   data <- array(rnorm(64 * 64 * 32 * 5), dim = c(64, 64, 32, 5))
   space <- NeuroSpace(dim = c(64, 64, 32, 5), 
                       origin = c(0, 0, 0),
@@ -53,6 +56,7 @@ test_that("downsample with outdim works correctly", {
 })
 
 test_that("downsample preserves aspect ratio warning", {
+  skip_on_cran()
   data <- array(rnorm(64 * 64 * 32 * 5), dim = c(64, 64, 32, 5))
   space <- NeuroSpace(dim = c(64, 64, 32, 5), 
                       origin = c(0, 0, 0),
@@ -79,6 +83,7 @@ test_that("downsample with factor = 1 returns same dimensions", {
 })
 
 test_that("downsample with different factors per dimension", {
+  skip_on_cran()
   data <- array(rnorm(64 * 64 * 32 * 6), dim = c(64, 64, 32, 6))
   space <- NeuroSpace(dim = c(64, 64, 32, 6), 
                       origin = c(0, 0, 0),
@@ -200,6 +205,7 @@ test_that("downsample validates method parameter", {
 
 # Tests for 3D DenseNeuroVol downsampling
 test_that("downsample 3D vol with factor works correctly", {
+  skip_on_cran()
   # Create a test 3D volume
   data <- array(rnorm(64 * 64 * 32), dim = c(64, 64, 32))
   space <- NeuroSpace(dim = c(64, 64, 32), 
@@ -216,6 +222,7 @@ test_that("downsample 3D vol with factor works correctly", {
 })
 
 test_that("downsample 3D vol with spacing works correctly", {
+  skip_on_cran()
   data <- array(rnorm(60 * 60 * 30), dim = c(60, 60, 30))
   space <- NeuroSpace(dim = c(60, 60, 30), 
                       origin = c(0, 0, 0),
@@ -234,6 +241,7 @@ test_that("downsample 3D vol with spacing works correctly", {
 })
 
 test_that("downsample 3D vol with outdim works correctly", {
+  skip_on_cran()
   data <- array(rnorm(64 * 64 * 32), dim = c(64, 64, 32))
   space <- NeuroSpace(dim = c(64, 64, 32), 
                       origin = c(0, 0, 0),
@@ -248,6 +256,7 @@ test_that("downsample 3D vol with outdim works correctly", {
 })
 
 test_that("downsample 3D vol preserves aspect ratio warning", {
+  skip_on_cran()
   data <- array(rnorm(64 * 64 * 32), dim = c(64, 64, 32))
   space <- NeuroSpace(dim = c(64, 64, 32), 
                       origin = c(0, 0, 0),
@@ -274,6 +283,7 @@ test_that("downsample 3D vol with factor = 1 returns same dimensions", {
 })
 
 test_that("downsample 3D vol with different factors per dimension", {
+  skip_on_cran()
   data <- array(rnorm(64 * 64 * 32), dim = c(64, 64, 32))
   space <- NeuroSpace(dim = c(64, 64, 32), 
                       origin = c(0, 0, 0),

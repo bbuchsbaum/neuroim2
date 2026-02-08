@@ -90,8 +90,8 @@ This is a convenience front-end to \code{cgb_make_graph} and
 - \code{corr_map} and \code{corr_param} set how pooled correlations are
   turned into edge weights:
   * \code{"power"}: \code{a(r) = r^gamma} for \code{r > 0}. Larger
-    \code{gamma} (e.g., 3–4) strongly emphasizes high correlations and
-    produces more edge-preserving, patchy smoothing; smaller values (e.g., 1–2)
+    \code{gamma} (e.g., 3-4) strongly emphasizes high correlations and
+    produces more edge-preserving, patchy smoothing; smaller values (e.g., 1-2)
     behave more like standard correlation-weighted smoothing.
   * \code{"exp"}: Gaussian on \code{1 - r} with scale \code{tau}. Small
     \code{tau} keeps only very similar time-series; larger \code{tau} makes

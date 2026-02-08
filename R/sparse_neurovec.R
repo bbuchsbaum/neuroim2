@@ -138,37 +138,56 @@ SparseNeuroVec <- function(data, space, mask, label = "") {
 #' @rdname load_data-methods
 #' @export
 setMethod(f="load_data", signature=c("SparseNeuroVecSource"),
-		def=function(x) {
+			def=function(x) {
 
-			meta <- x@meta_info
-			nels <- prod(dim(meta)[1:3])
+				meta <- x@meta_info
+				nels <- prod(dim(meta)[1:3])
 
-			ind <- x@indices
-			M <- x@mask > 0
-			reader <- data_reader(meta, offset=0)
-			dat4D <- read_elements(reader, prod(dim(meta)[1:4]))
-			close(reader)
+				ind <- as.integer(x@indices)
+				M <- x@mask > 0
+				mask_idx <- which(M)
 
-			datlist <- lapply(1:length(ind), function(i) {
-				offset <- (nels * (ind[i]-1))
-				dat4D[(offset+1):(offset + nels)][M]
+				is_gzip <- identical(meta@descriptor@data_encoding, "gzip") || endsWith(meta@data_file, ".gz")
+				mmap_ok <- !is_gzip && identical(.Platform$endian, meta@endian)
+
+				arr <- if (mmap_ok) {
+				  # Read only masked voxels for requested volumes via mmap.
+				  idx_set <- unlist(lapply(ind, function(v) mask_idx + (as.integer(v) - 1L) * nels), use.names = FALSE)
+				  ret <- .read_mmap(meta, idx_set)
+				  # Keep [voxels x time] to avoid ambiguity when n_time == n_voxels.
+				  mat <- matrix(ret, nrow = length(mask_idx), ncol = length(ind))
+				  for (j in seq_along(ind)) {
+				    pars <- .data_scale_params(meta, index = ind[[j]])
+				    mat[, j] <- as.numeric(mat[, j]) * pars$slope + pars$intercept
+				  }
+				  mat
+				} else {
+				  # Stream volumes sequentially (works for gzipped inputs too).
+				  reader <- data_reader(meta, offset = 0)
+				  on.exit(close(reader), add = TRUE)
+
+				  pos <- split(seq_along(ind), ind)
+				  out <- matrix(0, nrow = length(mask_idx), ncol = length(ind))
+				  max_vol <- max(ind)
+
+				  for (t in seq_len(max_vol)) {
+				    vol_dat <- read_elements(reader, nels)
+				    rows <- pos[[as.character(t)]]
+				    if (!is.null(rows)) {
+				      pars <- .data_scale_params(meta, index = t)
+				      scaled <- as.numeric(vol_dat[mask_idx]) * pars$slope + pars$intercept
+				      out[, rows] <- matrix(scaled, nrow = length(mask_idx), ncol = length(rows))
+				    }
+				  }
+				  out
+				}
+
+				bspace <- NeuroSpace(c(dim(meta)[1:3], length(ind)), meta@spacing,
+				                     meta@origin, meta@spatial_axes, trans=trans(meta))
+
+				SparseNeuroVec(arr, bspace, x@mask)
+
 			})
-
-			#close(reader)
-			arr <- do.call(rbind, datlist)
-
-			if (.hasSlot(meta, "slope")) {
-			  if (meta@slope != 0) {
-			    arr <- arr*meta@slope
-			  }
-			}
-
-			bspace <- NeuroSpace(c(dim(meta)[1:3], length(ind)), meta@spacing,
-			                     meta@origin, meta@spatial_axes, trans=trans(meta))
-
-			SparseNeuroVec(arr, bspace, x@mask)
-
-		})
 
 
 #' @rdname indices-methods
@@ -422,24 +441,17 @@ setMethod(f="as.dense", signature=signature(x="SparseNeuroVec"),
             # Get dimensions from space
             dims <- dim(x@space)
 
-            # Create empty array with proper dimensions
-            arr <- array(0, dim=dims)
+            # Initialize matrix (voxels x time)
+            nvox <- prod(dims[1:3])
+            nt   <- dims[4]
+            mat  <- matrix(0, nrow = nvox, ncol = nt)
 
-            # Get mask indices
+            # Fill only masked voxels
             mask_idx <- which(x@mask == TRUE)
+            mat[mask_idx, ] <- t(x@data)
 
-            # The data matrix is [timepoints x voxels]
-            # Transpose to get [voxels x timepoints]
-            data_t <- t(x@data)
-
-            # Fill array by assigning each voxel's timeseries
-            for (i in seq_along(mask_idx)) {
-              vox_idx <- mask_idx[i]
-              arr_idx <- arrayInd(vox_idx, dims[1:3])
-              arr[arr_idx[1], arr_idx[2], arr_idx[3], ] <- data_t[i,]
-            }
-
-            # Create DenseNeuroVec with array data and same space as input
+            # Reshape back to 4D array and construct DenseNeuroVec
+            arr <- array(mat, dim = dims)
             DenseNeuroVec(arr, x@space)
           })
 
@@ -640,22 +652,23 @@ setMethod(f="[", signature=signature(x = "AbstractSparseNeuroVec", i = "numeric"
               }
             }
 
-
-            egrid <- expand.grid(mapped[keep], m)
-            indmat <- cbind(egrid[,2], egrid[,1])
-
-            oval <- numeric(prod(dimout))
-
-            ## TODO assumes x has @data member ...
-            ##oval[rep(keep, length(m))] <- x@data[indmat]
-            oval[rep(keep, length(m))] <- matricized_access(x, indmat)
-
-            dim(oval) <- c(length(i),length(j),length(k),length(m))
+            out <- array(0, dimout)
+            nz_idx <- which(keep)
+            if (length(nz_idx) > 0) {
+              vals <- x@data[m, mapped[nz_idx], drop = FALSE]  # dims: length(m) x length(nz)
+              coords <- vmat[nz_idx, , drop = FALSE]
+              for (col in seq_along(nz_idx)) {
+                ii <- match(coords[col,1], i)
+                jj <- match(coords[col,2], j)
+                kk <- match(coords[col,3], k)
+                out[ii, jj, kk, ] <- vals[, col]
+              }
+            }
 
             if (drop) {
-              drop(oval)
+              base::drop(out)
             } else {
-              oval
+              out
             }
 })
 
@@ -723,6 +736,7 @@ setAs(from="SparseNeuroVec", to="DenseNeuroVec",
 
 
 #' @export
+#' @rdname as_mmap
 setMethod("as_mmap", signature(x = "SparseNeuroVec"),
           function(x, file = NULL, data_type = "FLOAT", overwrite = FALSE, ...) {
             dense <- as(x, "DenseNeuroVec")

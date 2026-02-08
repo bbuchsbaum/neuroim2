@@ -118,6 +118,7 @@ test_that("can split a NeuroVec into a set of subvectors", {
 })
 
 test_that("can split a NeuroVec into a set of clustered ROIs", {
+  skip_on_cran()
   bv1 <- gen_dat(10,10,10, d4=20, rand=TRUE)
   blstruc <- rep(1:4, length.out=20)
 

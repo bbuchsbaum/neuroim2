@@ -6,9 +6,8 @@
 \alias{dim,FileMetaInfo-method}
 \alias{dim,NeuroObj-method}
 \alias{dim,NeuroSpace-method}
-\alias{dim,ROICoords-method}
-\alias{dim}
 \alias{dim,ROIVol-method}
+\alias{dim,ROICoords-method}
 \title{Get Dimensions of FileMetaInfo Object}
 \usage{
 \S4method{dim}{ClusteredNeuroVec}(x)
@@ -18,8 +17,6 @@
 \S4method{dim}{NeuroObj}(x)
 
 \S4method{dim}{NeuroSpace}(x)
-
-\S4method{dim}{ROICoords}(x)
 
 \S4method{dim}{ROIVol}(x)
 
@@ -35,6 +32,4 @@ A numeric vector of length 2 containing the dimensions of the ROICoords object.
 Get Dimensions of FileMetaInfo Object
 
 dim of \code{NeuroObj} object
-
-Get dimensions of an object
 }

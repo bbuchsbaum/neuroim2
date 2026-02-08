@@ -13,8 +13,6 @@
 
 \S4method{coords}{ROICoords}(x, real = FALSE)
 
-\S4method{coords}{ROICoords}(x, real = FALSE)
-
 \S4method{coords}{AbstractSparseNeuroVec}(x, i)
 }
 \arguments{

@@ -16,7 +16,7 @@ test_that("findAnatomy3D returns the expected orientation", {
 
 test_that("findAnatomy recovers orientation from identity matrix", {
   pmat <- diag(3)
-  orient <- findAnatomy(pmat)
+  orient <- neuroim2:::findAnatomy(pmat)
   expect_identical(orient@i, LEFT_RIGHT)
   expect_identical(orient@j, POST_ANT)
   expect_identical(orient@k, INF_SUP)

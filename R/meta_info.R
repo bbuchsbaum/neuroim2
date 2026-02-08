@@ -61,22 +61,28 @@ setMethod("data_reader", "NIFTIMetaInfo",
 
     total_offset <- x@data_offset + offset
 
+    cleanup <- FALSE
+    con <- NULL
     if (x@descriptor@data_encoding == "gzip") {
       con <- tryCatch({
         gzfile(x@data_file, "rb")
       }, error = function(e) {
         stop("Failed to open gzipped file: ", x@data_file, "\n", e$message)
       })
+      cleanup <- TRUE
+      on.exit(if (cleanup) close(con), add = TRUE)
     } else {
       con <- x@data_file
     }
 
-    BinaryReader(con,
-                total_offset,
-                .getRStorage(x@data_type),
-                x@bytes_per_element,
-                x@endian,
-                .isSigned(x@data_type))
+    reader <- BinaryReader(con,
+                           total_offset,
+                           .getRStorage(x@data_type),
+                           x@bytes_per_element,
+                           x@endian,
+                           .isSigned(x@data_type))
+    cleanup <- FALSE
+    reader
   })
 
 #' Create Data Reader for AFNI Format
@@ -92,22 +98,28 @@ setMethod("data_reader", "AFNIMetaInfo",
 
     total_offset <- x@data_offset + offset
 
+    cleanup <- FALSE
+    con <- NULL
     if (x@descriptor@data_encoding == "gzip") {
       con <- tryCatch({
         gzfile(x@data_file, "rb")
       }, error = function(e) {
         stop("Failed to open gzipped file: ", x@data_file, "\n", e$message)
       })
+      cleanup <- TRUE
+      on.exit(if (cleanup) close(con), add = TRUE)
     } else {
       con <- x@data_file
     }
 
-    BinaryReader(con,
-                total_offset,
-                .getRStorage(x@data_type),
-                x@bytes_per_element,
-                x@endian,
-                .isSigned(x@data_type))
+    reader <- BinaryReader(con,
+                           total_offset,
+                           .getRStorage(x@data_type),
+                           x@bytes_per_element,
+                           x@endian,
+                           .isSigned(x@data_type))
+    cleanup <- FALSE
+    reader
   })
 
 #' Get transformation matrix

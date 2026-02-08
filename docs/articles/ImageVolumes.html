@@ -54,7 +54,7 @@
 
       <h1>Working with 3D Image Volumes</h1>
             
-            <h4 data-toc-skip class="date">2025-11-17</h4>
+            <h4 data-toc-skip class="date">2026-01-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/neuroim2/blob/HEAD/vignettes/ImageVolumes.Rmd" class="external-link"><code>vignettes/ImageVolumes.Rmd</code></a></small>
       <div class="d-none name"><code>ImageVolumes.Rmd</code></div>
@@ -89,7 +89,7 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">* Basic Information</span> </span></span>
 <span><span class="co">#&gt;   <span style="color: #555555;">Type:</span>      DenseNeuroVol</span></span>
-<span><span class="co">#&gt;   <span style="color: #555555;">Dimensions:</span> 64 x 64 x 25 (<span style="color: #00BB00;">406.6 Kb</span>)</span></span>
+<span><span class="co">#&gt;   <span style="color: #555555;">Dimensions:</span> 64 x 64 x 25 (<span style="color: #00BB00;">806.6 Kb</span>)</span></span>
 <span><span class="co">#&gt;   <span style="color: #555555;">Total Voxels:</span> 102,400</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">* Data Properties</span></span></span>
@@ -118,7 +118,7 @@ has 3 dimensions (x,y,z).</p>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/array.html" class="external-link">is.array</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span>
 <span>    </span>
-<span>    <span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 64 64 25</span></span>
 <span>    </span>
 <span>    <span class="va">vol</span><span class="op">[</span><span class="fl">1</span>,<span class="fl">1</span>,<span class="fl">1</span><span class="op">]</span></span>
@@ -178,7 +178,7 @@ axes/orientation).</p>
 <span><span class="co">#&gt;   <span style="color: #555555;">Max Corner:</span> <span style="color: #00BB00;">112.0, 112.0, 42.6</span> mm</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #BBBBBB; background-color: #0000BB; font-weight: bold;">==================================================</span></span></span>
-<span>    <span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span>           <span class="co"># spatial dimensions (x, y, z)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span>           <span class="co"># spatial dimensions (x, y, z)</span></span>
 <span><span class="co">#&gt; [1] 64 64 25</span></span>
 <span>    <span class="fu"><a href="../reference/spacing-methods.html">spacing</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span>       <span class="co"># voxel size in mm</span></span>
 <span><span class="co">#&gt; [1] 3.5 3.5 3.7</span></span>
@@ -329,7 +329,7 @@ using the <code>space</code> extractor function when needed:</p>
 <p>Extract a single 2D slice for display using standard array
 indexing:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>    <span class="va">z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">ceiling</a></span><span class="op">(</span><span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span> <span class="op">/</span> <span class="fl">2</span><span class="op">)</span></span>
+<code class="sourceCode R"><span>    <span class="va">z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">ceiling</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span> <span class="op">/</span> <span class="fl">2</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="../reference/image.html">image</a></span><span class="op">(</span><span class="va">vol</span><span class="op">[</span>,,<span class="va">z</span><span class="op">]</span>, main <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Slice z="</span>, <span class="va">z</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <img src="ImageVolumes_files/figure-html/slice_mid-1.png" class="r-plt" alt="Mid-slice of example volume (grayscale image)." width="700"><p class="caption">
@@ -360,7 +360,7 @@ Mid-slice of example volume
 <span></span>
 <span>    <span class="co"># Resample (trilinear)</span></span>
 <span>    <span class="va">vol_resamp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/resample_to.html">resample_to</a></span><span class="op">(</span><span class="va">vol</span>, <span class="va">sp2</span>, method <span class="op">=</span> <span class="st">"linear"</span><span class="op">)</span></span>
-<span>    <span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">vol_resamp</span><span class="op">)</span></span></code></pre></div>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">vol_resamp</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="downsampling">Downsampling<a class="anchor" aria-label="anchor" href="#downsampling"></a>
@@ -369,12 +369,12 @@ Mid-slice of example volume
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>    <span class="co"># Downsample by target spacing</span></span>
 <span>    <span class="va">vol_ds1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/downsample-methods.html">downsample</a></span><span class="op">(</span><span class="va">vol</span>, spacing <span class="op">=</span> <span class="fu"><a href="../reference/spacing-methods.html">spacing</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="op">*</span> <span class="fl">2</span><span class="op">)</span></span>
-<span>    <span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">vol_ds1</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">vol_ds1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 32 32 32</span></span>
 <span></span>
 <span>    <span class="co"># Or by factor</span></span>
 <span>    <span class="va">vol_ds2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/downsample-methods.html">downsample</a></span><span class="op">(</span><span class="va">vol</span>, factor <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
-<span>    <span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">vol_ds2</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">vol_ds2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 32 32 32</span></span></code></pre></div>
 </div>
 <div class="section level2">

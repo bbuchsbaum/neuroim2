@@ -22,7 +22,10 @@ ensure_reader_seekable <- function(con, byte_offset, bytes_per_element, data_typ
       stop("Input connection must be seekable for Binary I/O.")
   } else {
     n <- as.integer(byte_offset / bytes_per_element)
-    readBin(con, what = data_type, size = bytes_per_element, endian = endian, n = n)
+    skipped <- readBin(con, what = data_type, size = bytes_per_element, endian = endian, n = n)
+    if (length(skipped) != n) {
+      stop("Unable to advance gzipped input to requested offset; file may be truncated")
+    }
   }
   invisible(NULL)
 }
@@ -330,9 +333,21 @@ setMethod(f="initialize", signature=signature(.Object="BinaryWriter"),
 #' }
 #' @export
 setMethod(f="read_elements", signature=signature(x= "BinaryReader", num_elements="numeric"),
-		def=function(x, num_elements) {
-			readBin(x@input, what=x@data_type, size=x@bytes_per_element, n=num_elements, endian=x@endian, signed=x@signed)
-		})
+			def=function(x, num_elements) {
+			  n <- as.integer(num_elements)
+			  if (length(n) != 1L || is.na(n) || n < 0L) {
+			    stop("'num_elements' must be a single non-negative integer")
+			  }
+			  out <- readBin(x@input, what=.getRStorage(x@data_type), size=x@bytes_per_element, n=n, endian=x@endian, signed=x@signed)
+			  if (length(out) != n) {
+			    desc <- tryCatch(summary(x@input)$description, error = function(e) "<unknown>")
+			    stop(sprintf(
+			      "Unexpected EOF while reading binary data from %s (requested %d elements, got %d). File may be truncated.",
+			      desc, n, length(out)
+			    ))
+			  }
+			  out
+			})
 
 
 #' @examples

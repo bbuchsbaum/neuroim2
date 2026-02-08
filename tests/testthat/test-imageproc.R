@@ -2,6 +2,7 @@ context("image processing")
 
 
 test_that("can gaussian blur an image volume", {
+  skip_on_cran()
   gmask <- system.file("extdata", "global_mask2.nii.gz", package="neuroim2")
   gmask <- read_vol(gmask)
   g1 <- neuroim2::gaussian_blur(gmask, gmask, sigma=2)
@@ -15,6 +16,7 @@ test_that("can gaussian blur an image volume", {
 })
 
 test_that("can apply guided filter image volume", {
+  skip_on_cran()
   gmask <- system.file("extdata", "global_mask2.nii.gz", package="neuroim2")
   gmask <- read_vol(gmask)
   g1 <- neuroim2::guided_filter(gmask, 4)

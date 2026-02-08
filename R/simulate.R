@@ -200,6 +200,10 @@ simulate_fmri <- function(mask,
       m_vol <- NeuroVol(m_array, space(mask))
       m_smooth <- gaussian_blur(m_vol, mask_vol, sigma = factor_sigma, window = factor_window)
       v <- as.array(m_smooth)[mask_idx]
+      if (length(v) != n_vox) {
+        warning(sprintf("factor map length (%d) differs from mask voxels (%d); regenerating unsmoothed factor", length(v), n_vox))
+        v <- rnorm(n_vox)
+      }
       v <- v / sqrt(sum(v^2) + 1e-12)  # L2 normalize
       F_maps[, k] <- v
     }

@@ -95,14 +95,14 @@ Graph construction overview:
   when \code{add_self=TRUE}. Finally, row-normalize to obtain a stochastic W.
 
 Parameter guidance:
-- \code{spatial_sigma} is in mm. A typical choice is 1–2× the voxel size
-  (e.g., 2–4 mm for 2 mm isotropic). Larger values increase spatial mixing.
+- \code{spatial_sigma} is in mm. A typical choice is 1-2x the voxel size
+  (e.g., 2-4 mm for 2 mm isotropic). Larger values increase spatial mixing.
 - \code{window} controls support; a good rule is
   \code{ceiling(2 * spatial_sigma / min(spacing))}.
 - \code{corr_map}: use \code{"power"} with \code{corr_param = 2} for robust
-  smoothing; \code{"exp"} with \code{tau ~ 0.5–1.5} retains sign information;
-  \code{"soft"} with \code{r0 ~ 0.1–0.3} thresholds weak correlations.
-- \code{topk}: 8–32 is a practical range; higher values densify the graph and
+  smoothing; \code{"exp"} with \code{tau ~ 0.5-1.5} retains sign information;
+  \code{"soft"} with \code{r0 ~ 0.1-0.3} thresholds weak correlations.
+- \code{topk}: 8-32 is a practical range; higher values densify the graph and
   increase compute/memory.
 - \code{leave_one_out}: for multi-run inputs, enabling this prevents a run
   from using its own correlations when building its graph (mitigates leakage).

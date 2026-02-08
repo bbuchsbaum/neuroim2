@@ -76,8 +76,6 @@
 
 \S4method{show}{ROICoords}(object)
 
-\S4method{show}{ROIVol}(object)
-
 \S4method{show}{ROIVec}(object)
 
 \S4method{show}{SparseNeuroVec}(object)

@@ -4,6 +4,8 @@
 \alias{resample}
 \alias{resample,NeuroVol,NeuroVol-method}
 \alias{resample,NeuroVol,NeuroSpace-method}
+\alias{resample,ClusteredNeuroVol,NeuroSpace-method}
+\alias{resample,ClusteredNeuroVol,NeuroVol-method}
 \title{Resample an Image to Match the Space of Another Image}
 \usage{
 resample(source, target, ...)
@@ -11,6 +13,10 @@ resample(source, target, ...)
 \S4method{resample}{NeuroVol,NeuroVol}(source, target, interpolation = 3L)
 
 \S4method{resample}{NeuroVol,NeuroSpace}(source, target, interpolation = 3L)
+
+\S4method{resample}{ClusteredNeuroVol,NeuroSpace}(source, target, interpolation = 0L)
+
+\S4method{resample}{ClusteredNeuroVol,NeuroVol}(source, target, interpolation = 0L)
 }
 \arguments{
 \item{source}{A NeuroVol object representing the source volume to be resampled.}
@@ -28,6 +34,9 @@ An object representing the resampled \code{source} image, with the same spatial 
 This function resamples a source image to match the spatial properties (dimensions, resolution, and orientation) of a target image.
 
 This method resamples a NeuroVol object (\code{source}) to match the dimensions and orientation of a NeuroSpace object (\code{target}).
+
+This method preserves discrete cluster labels and label mappings when
+resampling clustered volumes to a new space.
 }
 \examples{
 

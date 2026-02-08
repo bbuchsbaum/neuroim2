@@ -11,9 +11,12 @@
 #' @param ... Reserved for future options
 #' @return A `NeuroVol` in the target space
 #' @examples
+#' \donttest{
 #' img <- read_vol(system.file("extdata","global_mask_v4.nii", package="neuroim2"))
-#' sp  <- space(img); sp2 <- NeuroSpace(sp@dim*2, sp@spacing/2, origin=sp@origin, trans=trans(img))
+#' sp  <- space(img)
+#' sp2 <- NeuroSpace(sp@dim*2, sp@spacing/2, origin=sp@origin, trans=trans(img))
 #' r1  <- resample_to(img, sp2, method = "linear")
+#' }
 #' @export
 resample_to <- function(source, target,
                         method = c("nearest","linear","cubic"),

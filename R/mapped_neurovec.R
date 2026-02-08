@@ -299,13 +299,20 @@ setMethod("mask", "MappedNeuroVec",
 #' @return A \code{\linkS4class{MappedNeuroVec}} (or \code{x} itself if it is
 #'   already memory-mapped).
 #'
+#' @name as_mmap-methods
+#' @aliases as_mmap,MappedNeuroVec-method
+#'          as_mmap,FileBackedNeuroVec-method
+#'          as_mmap,NeuroVec-method
+#'          as_mmap,SparseNeuroVec-method
 #' @export
+#' @rdname as_mmap
 setMethod("as_mmap", signature(x = "MappedNeuroVec"),
           function(x, file = NULL, ...) {
             x
           })
 
 #' @export
+#' @rdname as_mmap
 setMethod("as_mmap", signature(x = "FileBackedNeuroVec"),
           function(x, file = NULL, ...) {
             fn <- x@meta@data_file

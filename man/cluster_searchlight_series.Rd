@@ -22,7 +22,7 @@ instead of k-nearest neighbors. Cannot be used together with \code{k}.}
 \value{
 A list of \code{ROIVec} objects, one per cluster, where each ROIVec contains:
 \describe{
-  \item{values}{A T×N matrix where T is the number of timepoints and N is the number
+  \item{values}{A TxN matrix where T is the number of timepoints and N is the number
     of neighboring clusters (including the seed itself)}
   \item{coords}{The centroid coordinates of the neighboring clusters}
 }

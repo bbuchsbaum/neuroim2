@@ -15,6 +15,7 @@ test_that("simulate_fmri creates correct dimensions", {
 })
 
 test_that("simulate_fmri works with binary mask", {
+  skip_on_cran()
   # Create a spherical mask
   dims <- c(20, 20, 12)
   mask_array <- array(FALSE, dims)
@@ -48,10 +49,11 @@ test_that("simulate_fmri works with binary mask", {
 })
 
 test_that("simulate_fmri produces temporal autocorrelation", {
+  skip_on_cran()
   dims <- c(10, 10, 8)
   mask_array <- array(TRUE, dims)
   mask <- NeuroVol(mask_array, NeuroSpace(dims))
-  
+
   n_time <- 100
   sim_data <- simulate_fmri(
     mask, 

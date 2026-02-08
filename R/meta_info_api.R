@@ -97,6 +97,69 @@ setGeneric("meta_info", function(x) standardGeneric("meta_info"))
   )
 }
 
+## -------------------------------------------------------------------------
+## Internal helpers: data scaling (slope/intercept)
+##
+## Neuroimaging formats commonly store raw integer data along with per-volume
+## scale factors (slope, intercept). We normalize those here so I/O code can
+## apply scaling consistently across readers.
+##
+## NIfTI convention: scl_slope == 0 implies "no scaling" (treat as 1).
+## -------------------------------------------------------------------------
+
+.data_scale_params <- function(mi, index = 1L) {
+  index <- as.integer(index)
+  if (length(index) != 1L || is.na(index) || index < 1L) {
+    stop("'index' must be a single positive integer")
+  }
+
+  slope <- if (.hasSlot(mi, "slope")) mi@slope else 1
+  intercept <- if (.hasSlot(mi, "intercept")) mi@intercept else 0
+
+  if (length(slope) == 0L) slope <- 1
+  if (length(intercept) == 0L) intercept <- 0
+
+  slope_i <- if (length(slope) >= index) slope[[index]] else slope[[1]]
+  intercept_i <- if (length(intercept) >= index) intercept[[index]] else intercept[[1]]
+
+  if (is.na(slope_i) || is.infinite(slope_i)) {
+    stop(sprintf("Invalid scale slope for volume %d: %s", index, slope_i))
+  }
+  if (is.na(intercept_i) || is.infinite(intercept_i)) {
+    stop(sprintf("Invalid scale intercept for volume %d: %s", index, intercept_i))
+  }
+
+  # NIfTI spec: slope==0 means "no scaling" (identity)
+  if (slope_i == 0) slope_i <- 1
+
+  list(
+    slope = as.numeric(slope_i),
+    intercept = as.numeric(intercept_i)
+  )
+}
+
+.apply_data_scaling <- function(x, mi, index = 1L) {
+  pars <- .data_scale_params(mi, index = index)
+  # Ensure numeric to avoid overflow when scaling integer storage.
+  as.numeric(x) * pars$slope + pars$intercept
+}
+
+.apply_data_scaling_matrix <- function(mat, mi, indices) {
+  indices <- as.integer(indices)
+  if (!is.matrix(mat)) {
+    stop("'mat' must be a matrix")
+  }
+  if (nrow(mat) != length(indices)) {
+    stop("Scaling: nrow(mat) must equal length(indices)")
+  }
+  out <- mat
+  for (i in seq_along(indices)) {
+    pars <- .data_scale_params(mi, index = indices[[i]])
+    out[i, ] <- as.numeric(out[i, ]) * pars$slope + pars$intercept
+  }
+  out
+}
+
 
 #' @rdname meta_info
 #' @export

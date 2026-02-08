@@ -5,8 +5,13 @@
 src/*.o
 src/*.so
 src/*.dll
+/neuroim2.Rcheck/
+/neuroim2_*.tar.gz
+/..Rcheck/
 /doc/
 /Meta/
 docs
 .aider*
-
+/docs/reference
+.aider*
+docs/reference

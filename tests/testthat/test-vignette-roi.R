@@ -3,6 +3,7 @@ context("vignette roi")
 library(purrr)
 
 test_that("test_searchlight works correctly", {
+  skip_on_cran()
   # Load example volume
   file_name <- system.file("extdata", "global_mask2.nii.gz", package="neuroim2")
   vol <- read_vol(file_name)

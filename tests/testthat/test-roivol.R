@@ -89,4 +89,38 @@ test_that("can convert ROIVec to matrix", {
 })
 
 
+test_that("square_roi keeps center voxel when nonzero=TRUE even if center is zero", {
+  sp <- NeuroSpace(c(3,3,3), c(1,1,1))
+  arr <- array(0, dim=c(3,3,3))
+  arr[1,1,1] <- 5  # one nonzero voxel
+  vol <- NeuroVol(arr, sp)
+  centroid <- c(2,2,2)
+
+  roi <- square_roi(vol, centroid, surround=1, nonzero=TRUE)
+
+  # center voxel is retained
+  expect_true(any(apply(coords(roi), 1, function(r) all(r == centroid))))
+  expect_length(roi@center_index, 1)
+  expect_false(is.na(roi@center_index))
+  expect_equal(roi@parent_index, grid_to_index(vol, matrix(centroid, ncol=3)))
+  # zero-valued center should remain despite nonzero filter
+  expect_true(any(values(roi) == 0))
+})
+
+test_that("cuboid_roi keeps center voxel when nonzero=TRUE even if center is zero", {
+  sp <- NeuroSpace(c(3,3,3), c(1,1,1))
+  arr <- array(0, dim=c(3,3,3))
+  arr[1,1,1] <- 5  # one nonzero voxel
+  vol <- NeuroVol(arr, sp)
+  centroid <- c(2,2,2)
+
+  roi <- cuboid_roi(vol, centroid, surround=1, nonzero=TRUE)
+
+  expect_true(any(apply(coords(roi), 1, function(r) all(r == centroid))))
+  expect_length(roi@center_index, 1)
+  expect_false(is.na(roi@center_index))
+  expect_equal(roi@parent_index, grid_to_index(vol, matrix(centroid, ncol=3)))
+  expect_true(any(values(roi) == 0))
+})
+
 

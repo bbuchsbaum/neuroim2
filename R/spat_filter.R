@@ -263,15 +263,15 @@ bilateral_filter_vec <- function(vec, mask, spatial_sigma=2, intensity_sigma=1, 
 #' Parameter guidance and units:
 #' - spatial_sigma: Measured in physical units (millimeters). Distances are
 #'   computed using \code{spacing(vec)[1:3]}, so choose \code{spatial_sigma}
-#'   relative to voxel size. As a rule of thumb, set it to about 1–2 voxel sizes
-#'   (e.g., 2–4 mm for 2 mm isotropic data) for moderate smoothing.
+#'   relative to voxel size. As a rule of thumb, set it to about 1-2 voxel sizes
+#'   (e.g., 2-4 mm for 2 mm isotropic data) for moderate smoothing.
 #' - intensity_sigma: Dimensionless multiplier of the global intensity standard
-#'   deviation. Internally, the filter uses exp(-(ΔI)^2 / (2 (intensity_sigma · σ_I)^2)),
-#'   where σ_I is the standard deviation of all finite voxel intensities within
-#'   the mask across time. Start with 1.0 for moderate smoothing; use 0.5–0.8 to
-#'   preserve more edges, or 1.5–2.0 for stronger smoothing.
+#'   deviation. Internally, the filter uses exp(-(dI)^2 / (2 * (intensity_sigma * sigma_I)^2)),
+#'   where sigma_I is the standard deviation of all finite voxel intensities within
+#'   the mask across time. Start with 1.0 for moderate smoothing; use 0.5-0.8 to
+#'   preserve more edges, or 1.5-2.0 for stronger smoothing.
 #' - temporal_sigma: Measured in \code{temporal_spacing} units (e.g., seconds).
-#'   Typical values are 0.5–2 × TR. Larger values blend more across time.
+#'   Typical values are 0.5-2 x TR. Larger values blend more across time.
 #'
 #' Choosing the neighborhood window sizes:
 #' - spatial_window controls the discrete spatial support. A common choice is
@@ -279,13 +279,13 @@ bilateral_filter_vec <- function(vec, mask, spatial_sigma=2, intensity_sigma=1, 
 #'   ~95% of a Gaussian's mass.
 #' - temporal_window similarly can be set to \code{ceiling(2 * temporal_sigma / temporal_spacing)}.
 #'
-#' Quick presets (typical fMRI with 2–3 mm voxels and TR≈2s):
-#' - Light: spatial_sigma = 1 × min(spacing), intensity_sigma = 0.8,
-#'   temporal_sigma = 0.5 × TR, windows = 1
-#' - Moderate (default-ish): spatial_sigma = 1.5 × min(spacing), intensity_sigma = 1.0,
-#'   temporal_sigma = 1 × TR, windows = 1–2
-#' - Strong: spatial_sigma = 2 × min(spacing), intensity_sigma = 1.5,
-#'   temporal_sigma = 1.5 × TR, windows = 2
+#' Quick presets (typical fMRI with 2-3 mm voxels and TR~2s):
+#' - Light: spatial_sigma = 1 x min(spacing), intensity_sigma = 0.8,
+#'   temporal_sigma = 0.5 x TR, windows = 1
+#' - Moderate (default-ish): spatial_sigma = 1.5 x min(spacing), intensity_sigma = 1.0,
+#'   temporal_sigma = 1 x TR, windows = 1-2
+#' - Strong: spatial_sigma = 2 x min(spacing), intensity_sigma = 1.5,
+#'   temporal_sigma = 1.5 x TR, windows = 2
 #'
 #' Tip: If your time axis has known TR, pass it via \code{temporal_spacing}.
 #' For NIfTI inputs, you can get TR via:

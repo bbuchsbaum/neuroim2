@@ -222,14 +222,13 @@ setMethod(f="[", signature=signature(x = "ArrayLike4D", i = "missing", j = "nume
 #' @export
 setMethod(f="[", signature=signature(x = "ArrayLike3D", i = "numeric", j = "missing", drop="ANY"),
           def=function (x, i, j, k, ..., drop=TRUE) {
-            if (missing(k) && nargs() == 4) {
-              linear_access(x,i)
-            } else {
-              if (missing(k)) {
-                k <- 1:(dim(x)[3])
-              }
-              callGeneric(x, i=i,  j=seq(1,dim(x)[2]), k, drop)
-            }
+            if (missing(k)) k <- 1:(dim(x)[3])
+            j_full <- seq_len(dim(x)[2])
+            grid <- expand.grid(i=i, j=j_full, k=k)
+            lin <- grid_to_index(space(x), as.matrix(grid))
+            vals <- linear_access(x, lin)
+            arr <- array(vals, dim = c(length(i), length(j_full), length(k)))
+            if (drop) base::drop(arr) else arr
           }
 )
 
@@ -238,7 +237,11 @@ setMethod(f="[", signature=signature(x = "ArrayLike3D", i = "numeric", j = "miss
 #' @export
 setMethod(f="[", signature=signature(x = "ArrayLike3D", i = "matrix", j="missing", drop="ANY"),
           def=function (x, i, j, k, ..., drop=TRUE) {
-            ind <- grid_to_index(x,i)
+            if (ncol(i) != 3) stop("matrix i must have 3 columns (i,j,k)")
+            dims <- dim(x)
+            dim_names <- c("i","j","k")
+            validate_indices(dims, list(i[,1], i[,2], i[,3]), dim_names)
+            ind <- grid_to_index(space(x), i)
             linear_access(x, ind)
           }
 )
@@ -268,9 +271,95 @@ setMethod(f="[", signature=signature(x = "ArrayLike3D", i = "missing", j = "nume
             if (missing(k)) {
               k <- seq(1, dim(x)[3])
             }
-            callGeneric(x, i=seq(1, dim(x)[1]), j, k, drop=drop, ...)
+            callGeneric(x, i=seq(1, dim(x)[1]), j=j, k=k, drop=drop, ...)
           }
 )
+
+# Ensure DenseNeuroVol respects drop handling (inherits ArrayLike3D but may dispatch to base array)
+#' @rdname linear_access-methods
+#' @export
+setMethod("linear_access", signature(x="DenseNeuroVol", i="numeric"),
+          function(x, i) {
+            x@.Data[as.numeric(i)]
+          })
+
+#' @rdname linear_access-methods
+#' @export
+setMethod("linear_access", signature(x="DenseNeuroVec", i="numeric"),
+          function(x, i) {
+            as.vector(x@.Data)[as.numeric(i)]
+          })
+
+#' @rdname linear_access-methods
+#' @export
+setMethod("linear_access", signature(x="DenseNeuroVol", i="integer"),
+          function(x, i) {
+            x@.Data[as.numeric(i)]
+          })
+
+#' @rdname linear_access-methods
+#' @export
+setMethod("linear_access", signature(x="DenseNeuroVec", i="integer"),
+          function(x, i) {
+            as.vector(x@.Data)[as.numeric(i)]
+          })
+
+# DenseNeuroVol explicit extractor to ensure S4 dispatch respects drop
+#' @rdname extract-methods
+#' @export
+setMethod(f="[", signature=signature(x = "DenseNeuroVol", i = "numeric", j = "missing"),
+          def=function (x, i, j, k, ..., drop=TRUE) {
+            if (missing(k)) {
+              # decide between first-dimension slicing and linear indexing
+              if (all(i >= 1 & i <= dim(x)[1])) {
+                k <- 1:(dim(x)[3])
+                j_full <- seq_len(dim(x)[2])
+                grid <- expand.grid(i=i, j=j_full, k=k)
+                lin <- grid_to_index(space(x), as.matrix(grid))
+                vals <- linear_access(x, lin)
+                arr <- array(vals, dim = c(length(i), length(j_full), length(k)))
+                if (drop) base::drop(arr) else arr
+              } else {
+                # treat as linear indices when out-of-range for first dimension
+                return(linear_access(x, i))
+              }
+            } else {
+              j_full <- seq_len(dim(x)[2])
+              grid <- expand.grid(i=i, j=j_full, k=k)
+              lin <- grid_to_index(space(x), as.matrix(grid))
+              vals <- linear_access(x, lin)
+              arr <- array(vals, dim = c(length(i), length(j_full), length(k)))
+              if (drop) base::drop(arr) else arr
+            }
+          })
+
+# integer index dispatch to numeric path
+#' @rdname extract-methods
+#' @export
+setMethod(f="[", signature=signature(x = "DenseNeuroVol", i = "integer", j = "missing"),
+          def=function (x, i, j, k, ..., drop=TRUE) {
+            i <- as.numeric(i)
+            if (missing(k)) {
+              if (all(i >= 1 & i <= dim(x)[1])) {
+                k <- 1:(dim(x)[3])
+                j_full <- seq_len(dim(x)[2])
+                grid <- expand.grid(i=i, j=j_full, k=k)
+                lin <- grid_to_index(space(x), as.matrix(grid))
+                vals <- linear_access(x, lin)
+                arr <- array(vals, dim = c(length(i), length(j_full), length(k)))
+                if (drop) base::drop(arr) else arr
+              } else {
+                return(linear_access(x, i))
+              }
+            } else {
+              j_full <- seq_len(dim(x)[2])
+              grid <- expand.grid(i=i, j=j_full, k=k)
+              lin <- grid_to_index(space(x), as.matrix(grid))
+              vals <- linear_access(x, lin)
+              arr <- array(vals, dim = c(length(i), length(j_full), length(k)))
+              if (drop) base::drop(arr) else arr
+            }
+          })
 
 #' Array extraction for ClusteredNeuroVec
 #'

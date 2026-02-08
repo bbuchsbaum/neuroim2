@@ -2,6 +2,8 @@
 {}
 #' @include binary_io.R
 {}
+#' @include nifti_extensions.R
+{}
 #' @importFrom assertthat assert_that
 
 #' @keywords internal
@@ -69,9 +71,9 @@ write_nifti_volume <- function(vol, file_name, data_type="FLOAT") {
 #' @details
 #' This is a convenience function that calls \code{\link{createNIfTIHeader}}
 #' first, then updates the fields (dimensions, \code{pixdim}, orientation, etc.)
-#' based on the \code{vol} argument. The voxel offset is set to 352 bytes, and
-#' the quaternion is derived from the transform matrix via
-#' \code{\link{matrixToQuatern}}.
+#' based on the \code{vol} argument. The voxel offset is set to 352 bytes (or
+#' larger if extensions are provided), and the quaternion is derived from the
+#' transform matrix via \code{\link{matrixToQuatern}}.
 #'
 #' Note: This function primarily sets up a minimal header suitable for writing
 #' standard single-file NIfTI-1. If you need a more comprehensive or advanced
@@ -86,21 +88,24 @@ write_nifti_volume <- function(vol, file_name, data_type="FLOAT") {
 #'   \code{"ni1"} (header+image).
 #' @param data_type Character specifying the data representation, e.g. \code{"FLOAT"},
 #'   \code{"DOUBLE"}. The internal code picks an integer NIfTI code.
+#' @param extensions Optional \code{\link{NiftiExtensionList-class}} object or list
+#'   of \code{\link{NiftiExtension-class}} objects to include in the header.
 #'
 #' @return A \code{list} representing the NIfTI-1 header fields, containing
 #'   elements like \code{dimensions}, \code{pixdim}, \code{datatype}, \code{qform},
-#'   \code{quaternion}, \code{qfac}, etc. This can be passed to other
-#'   functions that write or manipulate the header.
+#'   \code{quaternion}, \code{qfac}, \code{extensions}, etc. This can be passed to
+#'   other functions that write or manipulate the header.
 #'
 #' @seealso
 #' \code{\link{createNIfTIHeader}} for the base constructor of an empty NIfTI header.
+#' \code{\link{NiftiExtension}} for creating extensions.
 #'
 #' @export
-as_nifti_header <- function(vol, file_name, oneFile=TRUE, data_type="FLOAT") {
+as_nifti_header <- function(vol, file_name, oneFile=TRUE, data_type="FLOAT",
+                           extensions = NULL) {
 		hd <- createNIfTIHeader(oneFile=oneFile, file_name=file_name)
 		hd$file_name <- file_name
 		hd$endian <- .Platform$endian
-		hd$vox_offset <- 352
 		hd$datatype <- .getDataCode(data_type)
 		hd$data_storage <- .getDataStorage(hd$datatype)
 		hd$bitpix <- .getDataSize(data_type) * 8
@@ -125,6 +130,22 @@ as_nifti_header <- function(vol, file_name, oneFile=TRUE, data_type="FLOAT") {
 		hd$quaternion <- quat1$quaternion
 		hd$qfac <- quat1$qfac
 		hd$pixdim[1] <- hd$qfac
+
+		# Handle extensions
+		if (!is.null(extensions)) {
+		  if (is.list(extensions) && !is(extensions, "NiftiExtensionList")) {
+		    # Convert list of NiftiExtension objects to NiftiExtensionList
+		    extensions <- new("NiftiExtensionList", extensions)
+		  }
+		  hd$extensions <- extensions
+		} else {
+		  hd$extensions <- new("NiftiExtensionList")
+		}
+
+		# Calculate vox_offset: 348 (header) + extension bytes
+		# total_extension_size includes the 4-byte extender field
+		hd$vox_offset <- 348 + total_extension_size(hd$extensions)
+
 		hd
 
 }
@@ -231,9 +252,26 @@ createNIfTIHeader <- function(oneFile=TRUE, file_name=NULL) {
 }
 
 
+#' Read NIfTI Header
+#'
+#' @description
+#' Reads a NIfTI-1 header from file, including any extensions present.
+#'
+#' @param fname Character string specifying the path to the NIfTI file
+#'   (.nii, .nii.gz, or .hdr).
+#' @param read_extensions Logical; if TRUE (default), reads any extensions
+#'   present in the file. Set to FALSE to skip extension reading.
+#'
+#' @return A list containing header fields including:
+#'   \itemize{
+#'     \item Standard NIfTI header fields (dimensions, pixdim, transforms, etc.)
+#'     \item \code{extensions}: A \code{\link{NiftiExtensionList-class}} object
+#'       containing any extensions found (empty if none present or read_extensions=FALSE)
+#'   }
+#'
 #' @keywords internal
 #' @noRd
-read_nifti_header <- function(fname) {
+read_nifti_header <- function(fname, read_extensions = TRUE) {
 	header <- list()
 	header$file_type <- "NIfTI"
 	header$encoding <- "binary"
@@ -250,6 +288,8 @@ read_nifti_header <- function(fname) {
 		stop(paste("illegal NIFTI header name", fname))
 	}
 
+	# Ensure connection is closed on exit
+	on.exit(close(conn), add = TRUE)
 
 	endian <- .getEndian(conn)
 
@@ -257,8 +297,6 @@ read_nifti_header <- function(fname) {
 	header$endian <- endian
 
 	readBin(conn, what=integer(), n=10+18+4+2+1, size=1)
-
-	#browser()
 
 	header$diminfo <- readBin(conn, what=integer(), n=1, size=1)
 	header$dimensions <- readBin(conn, integer(), n=8, size=2, endian=endian)
@@ -334,13 +372,36 @@ read_nifti_header <- function(fname) {
 
 	header$version <- substr(header$magic,3,3)
 
-	close(conn)
+	# Read extensions if requested and if this is a single-file NIfTI
+	# Extensions are only valid in single-file format (.nii) and when vox_offset > 352
+	if (read_extensions && header$onefile && header$vox_offset > 352) {
+		# Connection is at byte 348 after reading magic (344) + 4 bytes
+		header$extensions <- read_nifti_extensions(conn, header$vox_offset, endian)
+	} else {
+		header$extensions <- new("NiftiExtensionList")
+	}
 
 	header
 
 }
 
 
+#' Write NIfTI Header
+#'
+#' @description
+#' Writes a NIfTI-1 header to a connection, including any extensions.
+#'
+#' @param niftiInfo A list containing NIfTI header fields.
+#' @param conn An open binary connection to write to.
+#' @param close Logical; if TRUE (default), close the connection after writing.
+#'
+#' @return The connection (invisibly).
+#'
+#' @details
+#' The function writes the 348-byte standard header, then extensions (if present),
+#' then pads to vox_offset. The vox_offset in niftiInfo should already account
+#' for extension size.
+#'
 #' @keywords internal
 #' @noRd
 write_nifti_header <- function(niftiInfo, conn, close=TRUE) {
@@ -388,19 +449,23 @@ write_nifti_header <- function(niftiInfo, conn, close=TRUE) {
 	writeBin(as.integer(niftiInfo$intent_name), conn, 1, endian)    #intent_name
 	writeChar(niftiInfo$magic, conn)                               #magic
 
+	# We're now at byte 348
+	# Write extensions if present
+	extensions <- niftiInfo$extensions
+	write_nifti_extensions(conn, extensions, endian)
+
+	# Pad remaining bytes to vox_offset if needed
 	loc <- seek(conn)
 	offset <- niftiInfo$vox_offset
 
-	nbytes <- offset-loc
-
-	## doesn't support extensions yet
+	nbytes <- offset - loc
 	if (nbytes > 0) {
-		writeBin(integer(nbytes), conn, size=1, endian)
+		writeBin(raw(nbytes), conn)
 	}
 
 	if (close) {
 		close(conn)
 	}
 
-	conn
+	invisible(conn)
 }

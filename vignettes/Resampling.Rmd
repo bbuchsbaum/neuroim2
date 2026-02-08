@@ -97,7 +97,7 @@ current implementation uses a simple box‑averaging scheme in space.
 The same interface applies to volumes:
 
 ```{r}
-vol_down_factor <- downsample(as(vec4, "NeuroVol"), factor = 0.5)
+vol_down_factor <- downsample(vol, factor = 0.5)
 
 dim(vol)
 dim(vol_down_factor)
@@ -144,4 +144,3 @@ Common combinations:
   overall FOV and orientation.
 - Use `reorient()` when you want a consistent anatomical convention
   (RAS/LPI) across images without resampling.
-

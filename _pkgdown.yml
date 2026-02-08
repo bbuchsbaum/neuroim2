@@ -33,6 +33,7 @@ reference:
   - plot_montage
   - plot_ortho
   - plot_overlay
+  - mapToColors
 - title: Constructors
   desc: |
     Constructors for creating and initializing various neuroimaging objects
@@ -195,6 +196,7 @@ reference:
   - searchlight_coords
   - random_searchlight
   - resampled_searchlight
+  - searchlight_shape_functions
   - series_roi
   - gaussian_blur
   - guided_filter
@@ -243,6 +245,7 @@ reference:
   contents:
   - read_vec
   - read_vol
+  - read_image
   - write_elements
   - write_vec
   - write_vol
@@ -254,6 +257,18 @@ reference:
   - read_header
   - read_meta_info
   - read_vol_list
+- title: NIfTI Extensions
+  desc: |
+    Classes and functions for working with NIfTI header extensions
+  contents:
+  - NiftiExtension
+  - NiftiExtensionCodes
+  - ecode_name
+  - extensions
+  - parse_extension
+  - parse_afni_extension
+  - get_afni_attribute
+  - list_afni_attributes
 - title: Miscellaneous
   desc: |
     Miscellaneous methods and functions

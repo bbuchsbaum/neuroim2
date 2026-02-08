@@ -17,6 +17,7 @@ test_that("can extract searchlight object from a 3d volume", {
 })
 
 test_that("can extract clustered searchlight object from a 3d volume", {
+  skip_on_cran()
   vol <- read_vol(gmask)
   s1 <- clustered_searchlight(vol, csize=100)
   expect_equal(length(s1), 100)
@@ -36,6 +37,7 @@ test_that("random_searchlight works as expected", {
 })
 
 test_that("resampled_searchlight works as expected", {
+  skip_on_cran()
   mask <- read_vol(gmask)
   resampled_sl <- resampled_searchlight(mask, radius = 8, iter = 100)
   expect_true(!is.null(resampled_sl), info = "resampled_searchlight failed to create an iterator")

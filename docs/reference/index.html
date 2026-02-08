@@ -90,6 +90,13 @@
 
         </dt>
         <dd>Composite an overlay map on a structural background</dd>
+
+        <dt>
+
+          <code><a href="mapToColors.html">mapToColors()</a></code>
+
+        </dt>
+        <dd>Map intensity values to colors</dd>
       </dl></div><div class="section level2">
       <h2 id="constructors">Constructors<a class="anchor" aria-label="anchor" href="#constructors"></a></h2>
 
@@ -1106,10 +1113,17 @@
 
         <dt>
 
-          <code><a href="bootstrap_searchlight.html">bootstrap_searchlight()</a></code>
+          <code><a href="resampled_searchlight.html">resampled_searchlight()</a></code> <code><a href="resampled_searchlight.html">bootstrap_searchlight()</a></code>
 
         </dt>
-        <dd>Create a bootstrap spherical searchlight iterator</dd>
+        <dd>Create a resampled searchlight iterator</dd>
+
+        <dt>
+
+          <code><a href="searchlight_shape_functions.html">ellipsoid_shape()</a></code> <code><a href="searchlight_shape_functions.html">cube_shape()</a></code> <code><a href="searchlight_shape_functions.html">blobby_shape()</a></code>
+
+        </dt>
+        <dd>Convenience shape generators for <code><a href="../reference/resampled_searchlight.html">resampled_searchlight()</a></code></dd>
 
         <dt>
 
@@ -1401,6 +1415,13 @@
 
         <dt>
 
+          <code><a href="read_image.html">read_image()</a></code>
+
+        </dt>
+        <dd>read_image</dd>
+
+        <dt>
+
           <code><a href="write_elements-methods.html">write_elements()</a></code>
 
         </dt>
@@ -1476,6 +1497,71 @@
         </dt>
         <dd>read_vol_list</dd>
       </dl></div><div class="section level2">
+      <h2 id="nifti-extensions">NIfTI Extensions<a class="anchor" aria-label="anchor" href="#nifti-extensions"></a></h2>
+
+      <div class="section-desc"><p>Classes and functions for working with NIfTI header extensions</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="NiftiExtension.html">NiftiExtension()</a></code>
+
+        </dt>
+        <dd>Create a NIfTI Extension</dd>
+
+        <dt>
+
+          <code><a href="NiftiExtensionCodes.html">NiftiExtensionCodes</a></code>
+
+        </dt>
+        <dd>Known NIfTI Extension Codes</dd>
+
+        <dt>
+
+          <code><a href="ecode_name.html">ecode_name()</a></code>
+
+        </dt>
+        <dd>Get Extension Code Name</dd>
+
+        <dt>
+
+          <code><a href="extensions.html">extensions()</a></code>
+
+        </dt>
+        <dd>Get Extensions from an Object</dd>
+
+        <dt>
+
+          <code><a href="parse_extension.html">parse_extension()</a></code>
+
+        </dt>
+        <dd>Parse NIfTI Extension Data</dd>
+
+        <dt>
+
+          <code><a href="parse_afni_extension.html">parse_afni_extension()</a></code>
+
+        </dt>
+        <dd>Parse AFNI Extension</dd>
+
+        <dt>
+
+          <code><a href="get_afni_attribute.html">get_afni_attribute()</a></code>
+
+        </dt>
+        <dd>Get AFNI Attribute from Extension</dd>
+
+        <dt>
+
+          <code><a href="list_afni_attributes.html">list_afni_attributes()</a></code>
+
+        </dt>
+        <dd>List AFNI Attributes in Extension</dd>
+      </dl></div><div class="section level2">
       <h2 id="miscellaneous">Miscellaneous<a class="anchor" aria-label="anchor" href="#miscellaneous"></a></h2>
 
       <div class="section-desc"><p>Miscellaneous methods and functions</p></div>
@@ -1508,7 +1594,7 @@
 
         <dt>
 
-          <code><a href="extract-methods.html">`[`(<i>&lt;ROIVol&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="extract-methods.html">`[`(<i>&lt;ROIVol&gt;</i>,<i>&lt;logical&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code>
+          <code><a href="extract-methods.html">`[`(<i>&lt;DenseNeuroVol&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="extract-methods.html">`[`(<i>&lt;DenseNeuroVol&gt;</i>,<i>&lt;integer&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="extract-methods.html">`[`(<i>&lt;NeuroVol&gt;</i>,<i>&lt;ROIVol&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="extract-methods.html">`[`(<i>&lt;DenseNeuroVol&gt;</i>,<i>&lt;ROIVol&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="extract-methods.html">`[`(<i>&lt;ROIVol&gt;</i>,<i>&lt;numeric&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="extract-methods.html">`[`(<i>&lt;ROIVol&gt;</i>,<i>&lt;logical&gt;</i>,<i>&lt;missing&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code>
 
         </dt>
         <dd>Extract or replace parts of an object</dd>
@@ -1543,7 +1629,7 @@
 
         <dt>
 
-          <code><a href="dim-methods.html">dim(<i>&lt;ClusteredNeuroVec&gt;</i>)</a></code> <code><a href="dim-methods.html">dim(<i>&lt;FileMetaInfo&gt;</i>)</a></code> <code><a href="dim-methods.html">dim(<i>&lt;NeuroObj&gt;</i>)</a></code> <code><a href="dim-methods.html">dim(<i>&lt;NeuroSpace&gt;</i>)</a></code> <code><a href="dim-methods.html">dim(<i>&lt;ROICoords&gt;</i>)</a></code> <code><a href="dim-methods.html">dim(<i>&lt;ROIVol&gt;</i>)</a></code>
+          <code><a href="dim-methods.html">dim(<i>&lt;ClusteredNeuroVec&gt;</i>)</a></code> <code><a href="dim-methods.html">dim(<i>&lt;FileMetaInfo&gt;</i>)</a></code> <code><a href="dim-methods.html">dim(<i>&lt;NeuroObj&gt;</i>)</a></code> <code><a href="dim-methods.html">dim(<i>&lt;NeuroSpace&gt;</i>)</a></code> <code><a href="dim-methods.html">dim(<i>&lt;ROIVol&gt;</i>)</a></code> <code><a href="dim-methods.html">dim(<i>&lt;ROICoords&gt;</i>)</a></code>
 
         </dt>
         <dd>Get Dimensions of FileMetaInfo Object</dd>
@@ -1585,6 +1671,20 @@
 
         <dt>
 
+          <code><a href="NiftiExtension-class.html">show(<i>&lt;NiftiExtension&gt;</i>)</a></code>
+
+        </dt>
+        <dd>NiftiExtension Class</dd>
+
+        <dt>
+
+          <code><a href="NiftiExtensionList-class.html">show(<i>&lt;NiftiExtensionList&gt;</i>)</a></code>
+
+        </dt>
+        <dd>NiftiExtensionList Class</dd>
+
+        <dt>
+
           <code><a href="show-methods.html">show(<i>&lt;NamedAxis&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;AxisSet1D&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;AxisSet2D&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;AxisSet3D&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;AxisSet4D&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;ClusteredNeuroVec&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;ClusteredNeuroVol&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;IndexLookupVol&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;MappedNeuroVec&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;FileMetaInfo&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;NeuroHyperVec&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;NeuroSlice&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;NeuroSpace&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;NeuroVecSource&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;NeuroVec&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;DenseNeuroVec&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;NeuroVecSeq&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;NeuroVol&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;SparseNeuroVol&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;Kernel&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;ROIVol&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;ROICoords&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;ROIVec&gt;</i>)</a></code> <code><a href="show-methods.html">show(<i>&lt;SparseNeuroVec&gt;</i>)</a></code>
 
         </dt>
@@ -1603,6 +1703,27 @@
 
         </dt>
         <dd>conversion from <code>NeuroVol</code> to <code>LogicalNeuroVol</code></dd>
+
+        <dt>
+
+          <code><a href="as.array-ClusteredNeuroVol-method.html">as.array(<i>&lt;ClusteredNeuroVol&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Convert ClusteredNeuroVol to a base array</dd>
+
+        <dt>
+
+          <code><a href="as.array-SparseNeuroVol-method.html">as.array(<i>&lt;SparseNeuroVol&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Convert SparseNeuroVol to a base array</dd>
+
+        <dt>
+
+          <code><a href="as.array.html">as.array()</a></code>
+
+        </dt>
+        <dd>Generic as.array Method</dd>
 
         <dt>
 
@@ -1690,6 +1811,20 @@
 
         <dt>
 
+          <code><a href="as.vector-SparseNeuroVol-method.html">as.vector(<i>&lt;SparseNeuroVol&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Convert SparseNeuroVol to a base vector</dd>
+
+        <dt>
+
+          <code><a href="as_mmap.html">as_mmap()</a></code>
+
+        </dt>
+        <dd>Convert a NeuroVec to a memory-mapped representation</dd>
+
+        <dt>
+
           <code><a href="as_nifti_header.html">as_nifti_header()</a></code>
 
         </dt>
@@ -1753,7 +1888,7 @@
 
         <dt>
 
-          <code><a href="Arith-methods.html">Arith(<i>&lt;SparseNeuroVol&gt;</i>,<i>&lt;SparseNeuroVol&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;DenseNeuroVol&gt;</i>,<i>&lt;DenseNeuroVol&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;DenseNeuroVec&gt;</i>,<i>&lt;DenseNeuroVec&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;SparseNeuroVol&gt;</i>,<i>&lt;NeuroVol&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;NeuroVol&gt;</i>,<i>&lt;SparseNeuroVol&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;NeuroVec&gt;</i>,<i>&lt;NeuroVec&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;SparseNeuroVec&gt;</i>,<i>&lt;SparseNeuroVec&gt;</i>)</a></code>
+          <code><a href="Arith-methods.html">Arith(<i>&lt;SparseNeuroVol&gt;</i>,<i>&lt;SparseNeuroVol&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;DenseNeuroVol&gt;</i>,<i>&lt;DenseNeuroVol&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;DenseNeuroVec&gt;</i>,<i>&lt;DenseNeuroVec&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;SparseNeuroVol&gt;</i>,<i>&lt;NeuroVol&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;NeuroVol&gt;</i>,<i>&lt;SparseNeuroVol&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;SparseNeuroVec&gt;</i>,<i>&lt;SparseNeuroVec&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;NeuroVec&gt;</i>,<i>&lt;NeuroVec&gt;</i>)</a></code>
 
         </dt>
         <dd>Arithmetic Operations</dd>
@@ -1770,7 +1905,7 @@
           <code><a href="Summary-methods.html">Summary(<i>&lt;SparseNeuroVec&gt;</i>)</a></code> <code><a href="Summary-methods.html">Summary(<i>&lt;SparseNeuroVol&gt;</i>)</a></code> <code><a href="Summary-methods.html">Summary(<i>&lt;DenseNeuroVol&gt;</i>)</a></code>
 
         </dt>
-        <dd>Summary method for Neuroimaging objects</dd>
+        <dd>Summary Methods for Neuroimaging Objects</dd>
 
         <dt>
 
@@ -1879,6 +2014,13 @@
 
         <dt>
 
+          <code><a href="extension.html">extension()</a></code>
+
+        </dt>
+        <dd>Get Extension by Code</dd>
+
+        <dt>
+
           <code><a href="file_matches-methods.html">file_matches()</a></code>
 
         </dt>
@@ -1904,6 +2046,13 @@
 
         </dt>
         <dd>Generic function to convert N-dimensional grid coordinates to 1D indices</dd>
+
+        <dt>
+
+          <code><a href="has_extensions.html">has_extensions()</a></code>
+
+        </dt>
+        <dd>Check if Extensions are Present</dd>
 
         <dt>
 
@@ -1956,7 +2105,7 @@
 
         <dt>
 
-          <code><a href="linear_access-methods.html">linear_access(<i>&lt;FileBackedNeuroVec&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="linear_access-methods.html">linear_access(<i>&lt;MappedNeuroVec&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="linear_access-methods.html">linear_access(<i>&lt;NeuroHyperVec&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="linear_access-methods.html">linear_access(<i>&lt;NeuroVecSeq&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="linear_access-methods.html">linear_access(<i>&lt;SparseNeuroVol&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="linear_access-methods.html">linear_access(<i>&lt;AbstractSparseNeuroVec&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code>
+          <code><a href="linear_access-methods.html">linear_access(<i>&lt;DenseNeuroVol&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="linear_access-methods.html">linear_access(<i>&lt;DenseNeuroVec&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="linear_access-methods.html">linear_access(<i>&lt;DenseNeuroVol&gt;</i>,<i>&lt;integer&gt;</i>)</a></code> <code><a href="linear_access-methods.html">linear_access(<i>&lt;DenseNeuroVec&gt;</i>,<i>&lt;integer&gt;</i>)</a></code> <code><a href="linear_access-methods.html">linear_access(<i>&lt;FileBackedNeuroVec&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="linear_access-methods.html">linear_access(<i>&lt;MappedNeuroVec&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="linear_access-methods.html">linear_access(<i>&lt;NeuroHyperVec&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="linear_access-methods.html">linear_access(<i>&lt;NeuroVecSeq&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="linear_access-methods.html">linear_access(<i>&lt;SparseNeuroVol&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="linear_access-methods.html">linear_access(<i>&lt;AbstractSparseNeuroVec&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code>
 
         </dt>
         <dd>Linear Access Method for FileBackedNeuroVec</dd>

@@ -390,12 +390,7 @@ setMethod("[", signature(x = "NeuroHyperVec"),
     # Get lookup indices
     lookup_indices <- x@lookup_map[spatial_linear_idx]
 
-    # Initialize output array with correct dimensions
-    out_dims <- if (drop) {
-      c(length(i), length(j), length(k))
-    } else {
-      c(length(i), length(j), length(k), length(l), length(m))
-    }
+    out_dims <- c(length(i), length(j), length(k), length(l), length(m))
     out_array <- array(0, dim = out_dims)
 
     # Fill non-zero entries
@@ -417,17 +412,18 @@ setMethod("[", signature(x = "NeuroHyperVec"),
         kk <- array_indices[idx, 3]
 
         # Get the data for this voxel
-        voxel_data <- x@data[m, l, voxel_indices[idx], drop = FALSE]
+        voxel_data <- x@data[m, l, voxel_indices[idx], drop = FALSE]  # dims: features x trials x 1
+        voxel_data <- aperm(voxel_data, c(2,1,3))[,,1,drop=FALSE]       # trials x features
 
-        if (drop) {
-          out_array[ii, jj, kk] <- voxel_data[1, 1, 1]
-        } else {
-          out_array[ii, jj, kk, , ] <- voxel_data[, , 1]
-        }
+        out_array[ii, jj, kk, , ] <- voxel_data
       }
     }
 
-    out_array
+    if (isTRUE(drop)) {
+      base::drop(out_array)
+    } else {
+      out_array
+    }
   }
 )
 

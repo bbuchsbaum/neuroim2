@@ -4,7 +4,7 @@
 \alias{ROIVec}
 \title{Create an instance of class \code{\linkS4class{ROIVec}}}
 \usage{
-ROIVec(vspace, coords, data = rep(nrow(coords), 1))
+ROIVec(vspace, coords, data = matrix(1, nrow = 1, ncol = nrow(coords)))
 }
 \arguments{
 \item{vspace}{An instance of class \code{NeuroSpace} with four dimensions,

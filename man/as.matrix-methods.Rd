@@ -16,8 +16,6 @@
 
 \S4method{as.matrix}{NeuroVec}(x)
 
-\S4method{as.matrix}{NeuroVec}(x)
-
 \S4method{as.matrix}{DenseNeuroVec}(x)
 
 \S4method{as.matrix}{ROIVec}(x)
@@ -28,7 +26,7 @@
 \item{x}{The object to convert to a matrix}
 
 \item{by}{For ClusteredNeuroVec: controls the conversion target.
-Defaults to "cluster" to return a T×K matrix of cluster time-series.
+Defaults to "cluster" to return a TxK matrix of cluster time-series.
 "voxel" is reserved for future use.}
 
 \item{...}{Additional arguments}

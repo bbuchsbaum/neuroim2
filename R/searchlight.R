@@ -714,7 +714,7 @@ clustered_searchlight <- function(mask, cvol=NULL, csize=NULL) {
 #'
 #' @return A list of \code{ROIVec} objects, one per cluster, where each ROIVec contains:
 #' \describe{
-#'   \item{values}{A T×N matrix where T is the number of timepoints and N is the number
+#'   \item{values}{A TxN matrix where T is the number of timepoints and N is the number
 #'     of neighboring clusters (including the seed itself)}
 #'   \item{coords}{The centroid coordinates of the neighboring clusters}
 #' }

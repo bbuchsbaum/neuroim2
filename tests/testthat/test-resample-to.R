@@ -1,4 +1,5 @@
 test_that("resample_to maps methods to interpolation integers", {
+  skip_on_cran()
   img <- NeuroVol(array(rnorm(32*32*32), c(32,32,32)), NeuroSpace(c(32,32,32)))
   sp  <- NeuroSpace(c(24,24,24))
   expect_s4_class(resample_to(img, sp, method="nearest"), "NeuroVol")

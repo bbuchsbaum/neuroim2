@@ -27,14 +27,14 @@
 #'   when \code{add_self=TRUE}. Finally, row-normalize to obtain a stochastic W.
 #'
 #' Parameter guidance:
-#' - \code{spatial_sigma} is in mm. A typical choice is 1–2× the voxel size
-#'   (e.g., 2–4 mm for 2 mm isotropic). Larger values increase spatial mixing.
+#' - \code{spatial_sigma} is in mm. A typical choice is 1-2x the voxel size
+#'   (e.g., 2-4 mm for 2 mm isotropic). Larger values increase spatial mixing.
 #' - \code{window} controls support; a good rule is
 #'   \code{ceiling(2 * spatial_sigma / min(spacing))}.
 #' - \code{corr_map}: use \code{"power"} with \code{corr_param = 2} for robust
-#'   smoothing; \code{"exp"} with \code{tau ~ 0.5–1.5} retains sign information;
-#'   \code{"soft"} with \code{r0 ~ 0.1–0.3} thresholds weak correlations.
-#' - \code{topk}: 8–32 is a practical range; higher values densify the graph and
+#'   smoothing; \code{"exp"} with \code{tau ~ 0.5-1.5} retains sign information;
+#'   \code{"soft"} with \code{r0 ~ 0.1-0.3} thresholds weak correlations.
+#' - \code{topk}: 8-32 is a practical range; higher values densify the graph and
 #'   increase compute/memory.
 #' - \code{leave_one_out}: for multi-run inputs, enabling this prevents a run
 #'   from using its own correlations when building its graph (mitigates leakage).
@@ -362,8 +362,8 @@ cgb_smooth_loro <- function(runs, graphs, passes = 1L, lambda = 1) {
 #' - \code{corr_map} and \code{corr_param} set how pooled correlations are
 #'   turned into edge weights:
 #'   * \code{"power"}: \code{a(r) = r^gamma} for \code{r > 0}. Larger
-#'     \code{gamma} (e.g., 3–4) strongly emphasizes high correlations and
-#'     produces more edge-preserving, patchy smoothing; smaller values (e.g., 1–2)
+#'     \code{gamma} (e.g., 3-4) strongly emphasizes high correlations and
+#'     produces more edge-preserving, patchy smoothing; smaller values (e.g., 1-2)
 #'     behave more like standard correlation-weighted smoothing.
 #'   * \code{"exp"}: Gaussian on \code{1 - r} with scale \code{tau}. Small
 #'     \code{tau} keeps only very similar time-series; larger \code{tau} makes

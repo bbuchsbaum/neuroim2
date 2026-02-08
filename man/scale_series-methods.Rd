@@ -3,6 +3,8 @@
 \name{scale_series}
 \alias{scale_series}
 \alias{scale_series,NeuroVec,logical,missing-method}
+\alias{scale_series,DenseNeuroVec,logical,logical-method}
+\alias{scale_series,SparseNeuroVec,logical,logical-method}
 \alias{scale_series,NeuroVec,logical,logical-method}
 \alias{scale_series,NeuroVec,missing,logical-method}
 \alias{scale_series,NeuroVec,missing,missing-method}
@@ -12,6 +14,10 @@ That is, if the 4th dimension is 'time' each series is a 1D time series.}
 scale_series(x, center, scale)
 
 \S4method{scale_series}{NeuroVec,logical,missing}(x, center, scale)
+
+\S4method{scale_series}{DenseNeuroVec,logical,logical}(x, center, scale)
+
+\S4method{scale_series}{SparseNeuroVec,logical,logical}(x, center, scale)
 
 \S4method{scale_series}{NeuroVec,logical,logical}(x, center, scale)
 

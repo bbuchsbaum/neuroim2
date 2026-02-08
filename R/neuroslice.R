@@ -274,10 +274,25 @@ setMethod(f="show",
             cat("\n", blue("=" = 28), "\n", sep="")
           })
 
+#' Map intensity values to colors
+#'
+#' Convert intensity values (e.g., a 2D slice) into a color representation for
+#' plotting and overlays.
+#'
+#' @param imslice A numeric vector or array of intensities.
+#' @param col A vector of colors used as a lookup table.
+#' @param zero_col Color used for exactly-zero intensities (defaults to transparent).
+#' @param alpha Global alpha multiplier applied to all colors when \code{alpha < 1}.
+#' @param irange Intensity range used to normalize values before mapping to \code{col}.
+#' @param threshold Optional length-2 numeric vector. If \code{diff(threshold) > 0},
+#' values within \code{[threshold[1], threshold[2]]} are set to transparent.
+#'
+#' @return If \code{alpha == 1}, returns a character vector/array of colors.
+#' If \code{alpha < 1}, returns an array with an added RGBA channel (last dimension length 4).
+#'
 #' @import assertthat
-#' @keywords internal
 #' @importFrom grDevices col2rgb gray heat.colors
-#' @noRd
+#' @export
 mapToColors <- function (imslice, col = heat.colors(128, alpha = 1), zero_col = "#00000000",
                          alpha = 1, irange = range(imslice), threshold = c(0, 0)) {
 

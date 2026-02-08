@@ -65,6 +65,7 @@ ROIVol <- function(space, coords, data) {
 #'          [,ROICoords,numeric,missing,ANY-method
 #'          [,ROIVol,ROICoords,missing,ANY-method
 #'          [,ROIVol,ROICoords,numeric,ANY-method
+#'          [,ROIVol,logical,missing,ANY-method
 #'          [,ROIVol,logical,numeric,ANY-method
 #'          [,ROIVol,matrix,missing,ANY-method
 #'          [,ROIVol,matrix,numeric,ANY-method
@@ -73,9 +74,14 @@ ROIVol <- function(space, coords, data) {
 #'          [,ROIVol,numeric,numeric,ANY-method
 #'          [,SparseNeuroVol,numeric,numeric,ANY-method
 #'          [,ROIVol,numeric,missing,ANY-method
+#'          [,NeuroVol,ROIVol,missing,ANY-method
+#'          [,DenseNeuroVol,ROIVol,missing,ANY-method
+#'          [,DenseNeuroVol,integer,missing,ANY-method
+#'          [,DenseNeuroVol,numeric,missing,ANY-method
 #' @param x The object to extract from
 #' @param i Index specifying elements to extract
 #' @param j Second index (if applicable)
+#' @param k Third index for 3D objects (if applicable)
 #' @param ... Additional arguments passed to methods
 #' @param drop Whether to drop dimensions of length 1
 #' @return A subset of the input object, with dimensions depending on the indexing and the `drop` parameter.
@@ -88,6 +94,7 @@ setMethod(f="[", signature=signature(x = "ROIVol", i = "numeric", j = "missing")
 
 
 #' @export
+#' @rdname extract-methods
 setMethod(f="[", signature=signature(x = "ROIVol", i = "logical", j = "missing"),
           def=function (x, i, j, k, ..., drop=TRUE) {
             ROIVol(space(x), x@coords[i,,drop=FALSE], x@.Data[i])
@@ -166,6 +173,7 @@ setMethod(f="[", signature=signature(x = "ROIVol", i = "matrix", j = "numeric"),
 
 
 #' @export
+#' @rdname dim-methods
 setMethod(f="dim", signature=signature(x = "ROIVol"),
           def=function(x) {
             c(nrow(x@coords), ncol(x@coords))
@@ -284,14 +292,6 @@ setMethod(f="length", signature=signature(x = "ROICoords"),
 
 
 #' @export
-#' @rdname coords-methods
-setMethod(f="coords", signature=signature(x = "ROICoords"),
-          def=function(x) {
-            x@coords
-          })
-
-
-#' @export
 setMethod("[", signature(x="ROICoords", i="numeric", j="missing", drop="ANY"),
           function(x, i, j, ..., drop) {
             new("ROICoords", coords=x@coords[i,,drop=FALSE])
@@ -334,8 +334,15 @@ setMethod("[", signature(x="ROIVol", i="numeric", j="missing", drop="ANY"),
 #' roi_vec <- ROIVec(vspace, coords, data)
 #' @rdname ROIVec
 #' @export
-ROIVec <- function(vspace, coords, data=rep(nrow(coords),1)) {
-  new("ROIVec", space=vspace, coords=coords, data)
+ROIVec <- function(vspace, coords, data = matrix(1, nrow = 1, ncol = nrow(coords))) {
+  # Accept vector input and reshape to 1 x ncoords; otherwise ensure columns match coords
+  if (is.vector(data)) {
+    data <- matrix(data, nrow = 1)
+  }
+  if (ncol(data) != nrow(coords)) {
+    stop("ROIVec: number of columns in 'data' must equal number of rows in 'coords'")
+  }
+  new("ROIVec", space = vspace, coords = coords, data)
 }
 
 #' convert a \code{\linkS4class{ROIVec}} to a matrix
@@ -446,18 +453,35 @@ square_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE, fixdi
     as.numeric(bvol[grid])
   }
 
-  keep <- if (nonzero) {
-    vals != 0
-  } else {
-    TRUE
+  center_match <- rowSums(grid == matrix(centroid, nrow(grid), 3, byrow = TRUE)) == 3
+
+  keep <- if (nonzero) vals != 0 else rep(TRUE, length(vals))
+  # Ensure centroid remains so parent_index can be computed
+  keep[center_match] <- TRUE
+
+  grid <- grid[keep, , drop = FALSE]
+  vals <- vals[keep]
+
+  if (nrow(grid) == 0) {
+    return(new("ROIVolWindow",
+               numeric(0),
+               space = space(bvol),
+               coords = matrix(ncol = 3, nrow = 0),
+               center_index = integer(0),
+               parent_index = as.integer(NA)))
   }
 
-  grid <- grid[keep,,drop=FALSE]
+  center_index <- which(center_match[keep])
+  if (length(center_index) == 0) center_index <- as.integer(NA)
 
-  center_index <- which(colSums(apply(grid, 1, "==", centroid)) == 3)
-  parent_index <- grid_to_index(bvol, grid[center_index,])
+  parent_index <- grid_to_index(bvol, matrix(centroid, ncol = 3))
   ### add central voxel
-  new("ROIVolWindow", space=space(bvol), coords = grid, center_index=center_index, parent_index=as.integer(parent_index),vals[keep])
+  new("ROIVolWindow",
+      space = space(bvol),
+      coords = grid,
+      center_index = as.integer(center_index),
+      parent_index = as.integer(parent_index),
+      vals)
 
 }
 
@@ -503,17 +527,34 @@ cuboid_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE) {
     as.numeric(bvol[grid])
   }
 
-  keep <- if (nonzero) {
-    vals != 0
-  } else {
-    TRUE
+  center_match <- rowSums(grid == matrix(centroid, nrow(grid), 3, byrow = TRUE)) == 3
+
+  keep <- if (nonzero) vals != 0 else rep(TRUE, length(vals))
+  keep[center_match] <- TRUE
+
+  grid <- grid[keep, , drop = FALSE]
+  vals <- vals[keep]
+
+  if (nrow(grid) == 0) {
+    return(new("ROIVolWindow",
+               numeric(0),
+               space = space(bvol),
+               coords = matrix(ncol = 3, nrow = 0),
+               center_index = integer(0),
+               parent_index = as.integer(NA)))
   }
 
-  grid <- grid[keep,,drop=FALSE]
-  center_index <- which(colSums(apply(grid, 1, "==", centroid)) == 3)
-  parent_index <- grid_to_index(bvol, grid[center_index,])
+  center_index <- which(center_match[keep])
+  if (length(center_index) == 0) center_index <- as.integer(NA)
 
-  new("ROIVolWindow", vals[keep], space=space(bvol), coords = grid, center_index=center_index, parent_index=as.integer(parent_index))
+  parent_index <- grid_to_index(bvol, matrix(centroid, ncol = 3))
+
+  new("ROIVolWindow",
+      vals,
+      space = space(bvol),
+      coords = grid,
+      center_index = as.integer(center_index),
+      parent_index = as.integer(parent_index))
 
 }
 
@@ -888,54 +929,7 @@ setMethod(f="coords", signature=signature(x="ROICoords"),
 
 
 
-#' @export
-#' @rdname length-methods
-setMethod(f="length", signature=signature(x="ROIVol"),
-          function(x) {
-            nrow(x@coords)
-          })
-
-
-
-#' subset an \code{ROIVol}
-#' @export
-#' @param x the object
-#' @param i first index
-#' @param j second index
-#' @param ... additional arguments
-#' @param drop drop dimension
-#' @rdname extract-methods
-setMethod("[", signature=signature(x = "ROIVol", i = "numeric", j = "missing", drop = "ANY"),
-          function (x, i, j, ..., drop) {
-            ROIVol(x@space, x@coords[i,,drop=FALSE], x@.Data[i])
-          })
-
-#' @rdname extract-methods
-#' @export
-setMethod("[", signature=signature(x="ROIVol", i="logical", j="missing", drop="ANY"),
-          function(x, i, j, ..., drop) {
-            ROIVol(x@space, x@coords[i,,drop=FALSE], x@.Data[i])
-          })
-
-
-
-#' @export
-#' @rdname show-methods
-setMethod("show", signature=signature(object = "ROIVol"),
-		  function (object) {
-			  cat("\n", crayon::bold(crayon::blue("ROIVol Object")), "\n\n")
-			  cat(crayon::bold(crayon::yellow("Properties:")), "\n")
-			  cat("  ", crayon::silver("Dimensions:"), " ",
-				  paste(dim(object), collapse=" x "), "\n", sep="")
-			  cat("  ", crayon::silver("ROI Points:"), " ",
-				  crayon::green(format(length(object), big.mark=",")), "\n", sep="")
-
-			  # Value range
-			  val_range <- range(object, na.rm=TRUE)
-			  cat("  ", crayon::silver("Value Range:"), " [",
-				  crayon::blue(sprintf("%.2f", val_range[1])), ", ",
-				  crayon::blue(sprintf("%.2f", val_range[2])), "]\n", sep="")
-		  })
+ 
 
 
 
@@ -945,8 +939,8 @@ setMethod("show", signature=signature(object = "ROIVol"),
 setMethod("show", signature=signature(object = "ROIVec"),
           function (object) {
             # Calculate statistics
-            n_points <- nrow(object)
-            n_features <- ncol(object)
+            n_points <- ncol(object@.Data)   # voxels
+            n_features <- nrow(object@.Data) # features/time
             total_elements <- n_points * n_features
             mem_size <- format(object.size(object), units="auto")
             centroid <- colMeans(coords(object))
@@ -1252,35 +1246,4 @@ setMethod("[", signature(x="NeuroVol", i="ROICoords", j="missing", drop="ANY"),
             callGeneric(x, i@coords, drop=drop)
           })
 
-#' Get dimensions of an object
-#' @name dim
-#' @rdname dim-methods
-#' @aliases dim,ROICoords-method dim,ROIVol-method
-#' @export
-setMethod(f="dim", signature=signature(x = "ROIVol"),
-          def=function(x) {
-            c(nrow(x@coords), ncol(x@coords))
-          })
-
-#' @rdname dim-methods
-#' @export
-setMethod(f="dim", signature=signature(x = "ROICoords"),
-          def=function(x) {
-            dim(x@coords)
-          })
-
-
-#' @export
-#' @rdname length-methods
-setMethod(f="length", signature=signature(x = "ROICoords"),
-          def=function(x) {
-            nrow(x@coords)
-          })
-
-
-#' @export
-#' @rdname length-methods
-setMethod(f="length", signature=signature(x="ROIVol"),
-          def=function(x) {
-            nrow(x@coords)
-          })
+ 

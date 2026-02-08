@@ -5,8 +5,6 @@
 \title{Drop a dimension}
 \usage{
 \S4method{drop}{NeuroVec}(x)
-
-\S4method{drop}{NeuroVec}(x)
 }
 \arguments{
 \item{x}{the object to drop a dimension from}

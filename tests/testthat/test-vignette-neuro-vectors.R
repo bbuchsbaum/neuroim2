@@ -1,6 +1,7 @@
 context("vignette neuro vectors")
 
 test_that("test_create_neurovec works correctly", {
+  skip_on_cran()
   # Load example data
   file_name <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
   

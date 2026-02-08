@@ -77,7 +77,6 @@ This should be called when you're done with the reader/writer to free system res
 <span class="r-in"><span><span class="va">reader</span> <span class="op">&lt;-</span> <span class="fu"><a href="BinaryReader.html">BinaryReader</a></span><span class="op">(</span><span class="va">tmp</span>, byte_offset <span class="op">=</span> <span class="fl">0L</span>,</span></span>
 <span class="r-in"><span>                      data_type <span class="op">=</span> <span class="st">"DOUBLE"</span>, bytes_per_element <span class="op">=</span> <span class="fl">8L</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="read_elements-methods.html">read_elements</a></span><span class="op">(</span><span class="va">reader</span>, <span class="fl">100</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>incomplete string at end of file has been discarded</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/connections.html" class="external-link">close</a></span><span class="op">(</span><span class="va">reader</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Clean up</span></span></span>

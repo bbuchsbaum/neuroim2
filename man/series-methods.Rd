@@ -49,13 +49,7 @@ series(x, i, ...)
 
 \S4method{series}{NeuroVec,numeric}(x, i, j, k, drop = TRUE)
 
-\S4method{series_roi}{NeuroVec,numeric}(x, i, j, k)
-
-\S4method{series_roi}{NeuroVec,numeric}(x, i, j, k)
-
-\S4method{series_roi}{NeuroVec,matrix}(x, i)
-
-\S4method{series_roi}{NeuroVec,LogicalNeuroVol}(x, i)
+\S4method{series_roi}{NeuroVec,numeric}(x, i, j, k, drop = TRUE)
 
 \S4method{series}{NeuroVecSeq,integer}(x, i, j, k, drop = TRUE)
 

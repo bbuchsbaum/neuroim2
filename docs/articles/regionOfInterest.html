@@ -54,7 +54,7 @@
 
       <h1>Regions of Interest (ROI)</h1>
             
-            <h4 data-toc-skip class="date">2025-11-17</h4>
+            <h4 data-toc-skip class="date">2026-01-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/neuroim2/blob/HEAD/vignettes/regionOfInterest.Rmd" class="external-link"><code>vignettes/regionOfInterest.Rmd</code></a></small>
       <div class="d-none name"><code>regionOfInterest.Rmd</code></div>
@@ -178,7 +178,7 @@ connectivity studies.</p>
 <span><span class="co"># Examine the ROI</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Number of voxels in ROI:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">sphere</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Number of voxels in ROI: 11</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"ROI dimensions:"</span>, <span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">sphere</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"ROI dimensions:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">sphere</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ROI dimensions: 11 3</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"All values are 100:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="va">sphere</span> <span class="op">==</span> <span class="fl">100</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; All values are 100: TRUE</span></span></code></pre></div>
@@ -235,7 +235,7 @@ published studies) rather than voxel indices.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bbuchsbaum/neuroim2" class="external-link">neuroim2</a></span><span class="op">)</span></span>
 <span><span class="va">vol</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask_v4.nii"</span>, package <span class="op">=</span> <span class="st">"neuroim2"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span></span>
+<span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Define multiple ROI centers</span></span>
 <span><span class="va">centers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
@@ -328,7 +328,7 @@ non-zero values:</p>
 <span><span class="co"># Verify properties</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Sum of values match:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">sparsevol</span><span class="op">)</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">sphere</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Sum of values match: TRUE</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Dimensions match:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">sparsevol</span><span class="op">)</span> <span class="op">==</span> <span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Dimensions match:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">sparsevol</span><span class="op">)</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Dimensions match: TRUE</span></span>
 <span></span>
 <span><span class="co"># Memory comparison</span></span>
@@ -347,7 +347,7 @@ functional data:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load a 4D dataset (using mask file as example - normally this would be fMRI data)</span></span>
 <span><span class="va">vec4d</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vec.html">read_vec</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask_v4.nii"</span>, package <span class="op">=</span> <span class="st">"neuroim2"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"4D data dimensions:"</span>, <span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">vec4d</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"4D data dimensions:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">vec4d</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 4D data dimensions: 64 64 25 4</span></span>
 <span></span>
 <span><span class="co"># Create an ROI</span></span>
@@ -355,7 +355,7 @@ functional data:</p>
 <span></span>
 <span><span class="co"># Extract time-series from the ROI</span></span>
 <span><span class="va">roi_series</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/series_roi.html">series_roi</a></span><span class="op">(</span><span class="va">vec4d</span>, <span class="va">roi</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"ROI time-series dimensions:"</span>, <span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">roi_series</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"ROI time-series dimensions:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">roi_series</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ROI time-series dimensions: 19 3</span></span>
 <span></span>
 <span><span class="co"># Get mean time-series across ROI (average across voxels)</span></span>
@@ -390,7 +390,7 @@ ROI data:</p>
 <span></span>
 <span><span class="co"># Access as matrix of values (T x N)</span></span>
 <span><span class="va">roi_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/values-methods.html">values</a></span><span class="op">(</span><span class="va">roi_vec</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Matrix dimensions (T x N):"</span>, <span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">roi_matrix</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Matrix dimensions (T x N):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">roi_matrix</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Matrix dimensions (T x N): 20 4</span></span></code></pre></div>
 <hr>
 </div>
@@ -538,10 +538,10 @@ regions:</p>
 <span></span>
 <span><span class="co"># Access cluster time-series efficiently</span></span>
 <span><span class="va">cluster_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as.matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">cv</span><span class="op">)</span>  <span class="co"># T x K matrix</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Cluster matrix dimensions:"</span>, <span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">cluster_matrix</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Cluster matrix dimensions:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">cluster_matrix</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Cluster matrix dimensions: 20 5</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"("</span>, <span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">cluster_matrix</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">"timepoints x"</span>, </span>
-<span>    <span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">cluster_matrix</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, <span class="st">"clusters)\n"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"("</span>, <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">cluster_matrix</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">"timepoints x"</span>, </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">cluster_matrix</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, <span class="st">"clusters)\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ( 20 timepoints x 5 clusters)</span></span></code></pre></div>
 </div>
 <div class="section level3">

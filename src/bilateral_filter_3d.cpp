@@ -1,5 +1,12 @@
 // [[Rcpp::depends(Rcpp)]]
+#if defined(__clang__)
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wunknown-warning-option"
+#endif
 #include <Rcpp.h>
+#if defined(__clang__)
+#  pragma clang diagnostic pop
+#endif
 #include "indexFuns.h"
 using namespace Rcpp;
 
@@ -112,7 +119,6 @@ NumericVector bilateral_filter_cpp(NumericVector arr, IntegerVector mask_idx, in
   out.attr("dim") = dims;
   return out;
 }
-
 
 
 

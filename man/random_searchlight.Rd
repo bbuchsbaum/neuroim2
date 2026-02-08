@@ -4,12 +4,15 @@
 \alias{random_searchlight}
 \title{Create a spherical random searchlight iterator}
 \usage{
-random_searchlight(mask, radius)
+random_searchlight(mask, radius, nonzero = TRUE)
 }
 \arguments{
 \item{mask}{A \code{\linkS4class{NeuroVol}} object representing the brain mask.}
 
 \item{radius}{A numeric value specifying the radius of the searchlight sphere in voxel units.}
+
+\item{nonzero}{Logical; if \code{TRUE} (default) discard zero-valued voxels in
+the mask when forming each searchlight.}
 }
 \value{
 A list of \code{\linkS4class{ROIVolWindow}} objects, each representing

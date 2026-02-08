@@ -18,12 +18,6 @@
 \S4method{length}{ROIVol}(x)
 
 \S4method{length}{ROICoords}(x)
-
-\S4method{length}{ROIVol}(x)
-
-\S4method{length}{ROICoords}(x)
-
-\S4method{length}{ROIVol}(x)
 }
 \arguments{
 \item{x}{A NeuroVecSeq object}

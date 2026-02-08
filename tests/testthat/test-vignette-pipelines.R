@@ -3,6 +3,7 @@ context("vignette pipelines")
 library(purrr)
 
 test_that("test_searchlight_statistics works correctly", {
+  skip_on_cran()
   # Load example volume
   file_name <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
   vol <- read_vol(file_name)
@@ -23,6 +24,7 @@ test_that("test_searchlight_statistics works correctly", {
 })
 
 test_that("test_4d_processing works correctly", {
+  skip_on_cran()
   # Load example volume and create a 4D NeuroVec
   file_name <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
   vol <- read_vol(file_name)
@@ -47,6 +49,7 @@ test_that("test_4d_processing works correctly", {
 })
 
 test_that("test_knn_smoothing works correctly", {
+  skip_on_cran()
   # Load example volume
   file_name <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
   vol <- read_vol(file_name)

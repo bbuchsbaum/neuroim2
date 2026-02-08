@@ -47,6 +47,7 @@ test_that("can map over first 50 vectors in a FileBackedNeuroVec", {
 })
 
 test_that("can split a FileBackedNeuroVec into a set of clustered ROIs", {
+  skip_on_cran()
   grid <- index_to_coord(space(gvec), as.numeric(1:prod(dim(gvec)[1:3])))
   kres <- kmeans(grid, centers=50, iter.max=150)
   res <- gvec %>% split_clusters(kres$cluster) %>% map_dbl(~ mean(.))
@@ -112,6 +113,7 @@ test_that("FileBackedNeuroVec can be indexed like a DenseNeuroVec", {
 })
 
 test_that("can map a searchlight over a FileBackedNeuroVec", {
+  skip_on_cran()
   mask <- drop(gvec[[1]])
 
   slight <- searchlight_coords(mask, radius=8, nonzero=TRUE)[1:100]

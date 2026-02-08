@@ -4,7 +4,13 @@
 \alias{as_nifti_header}
 \title{Construct a Minimal NIfTI-1 Header from a NeuroVol}
 \usage{
-as_nifti_header(vol, file_name, oneFile = TRUE, data_type = "FLOAT")
+as_nifti_header(
+  vol,
+  file_name,
+  oneFile = TRUE,
+  data_type = "FLOAT",
+  extensions = NULL
+)
 }
 \arguments{
 \item{vol}{A \code{\link[neuroim2]{NeuroVol}} (or 3D array-like) specifying
@@ -19,12 +25,15 @@ implying a single-file format (\code{.nii}). If \code{FALSE}, uses
 
 \item{data_type}{Character specifying the data representation, e.g. \code{"FLOAT"},
 \code{"DOUBLE"}. The internal code picks an integer NIfTI code.}
+
+\item{extensions}{Optional \code{\link{NiftiExtensionList-class}} object or list
+of \code{\link{NiftiExtension-class}} objects to include in the header.}
 }
 \value{
 A \code{list} representing the NIfTI-1 header fields, containing
   elements like \code{dimensions}, \code{pixdim}, \code{datatype}, \code{qform},
-  \code{quaternion}, \code{qfac}, etc. This can be passed to other
-  functions that write or manipulate the header.
+  \code{quaternion}, \code{qfac}, \code{extensions}, etc. This can be passed to
+  other functions that write or manipulate the header.
 }
 \description{
 Given a \code{\link[neuroim2]{NeuroVol}} object (or similar), this function
@@ -35,9 +44,9 @@ quaternion parameters.
 \details{
 This is a convenience function that calls \code{\link{createNIfTIHeader}}
 first, then updates the fields (dimensions, \code{pixdim}, orientation, etc.)
-based on the \code{vol} argument. The voxel offset is set to 352 bytes, and
-the quaternion is derived from the transform matrix via
-\code{\link{matrixToQuatern}}.
+based on the \code{vol} argument. The voxel offset is set to 352 bytes (or
+larger if extensions are provided), and the quaternion is derived from the
+transform matrix via \code{\link{matrixToQuatern}}.
 
 Note: This function primarily sets up a minimal header suitable for writing
 standard single-file NIfTI-1. If you need a more comprehensive or advanced
@@ -45,4 +54,5 @@ usage, consider manually editing the returned list.
 }
 \seealso{
 \code{\link{createNIfTIHeader}} for the base constructor of an empty NIfTI header.
+\code{\link{NiftiExtension}} for creating extensions.
 }

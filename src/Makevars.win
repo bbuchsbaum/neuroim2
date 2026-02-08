@@ -1,0 +1,15 @@
+## Use OpenMP flags and set 64-bit Armadillo
+PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) -DARMA_64BIT_WORD
+
+## Link to TBB from RcppParallel on Windows
+## Note: RcppParallelLibs() may return -lRcppParallel which doesn't exist,
+## so we explicitly link only to TBB libraries
+RCPPPARALLEL_LIBS = $(shell "${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" \
+    -e "cat(gsub('-lRcppParallel', '', RcppParallel::RcppParallelLibs()))")
+
+PKG_LIBS = \
+    $(SHLIB_OPENMP_CXXFLAGS) \
+    $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) \
+    $(RCPPPARALLEL_LIBS)
+
+CXX_STD = CXX17
