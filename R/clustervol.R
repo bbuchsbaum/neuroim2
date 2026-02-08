@@ -111,6 +111,19 @@ setAs(from="ClusteredNeuroVol", to="DenseNeuroVol",
     })
 
 
+#' Convert ClusteredNeuroVol to a base array
+#'
+#' Ensures that clustered volumes dispatch through the `as.array` S4 generic and
+#' return dense arrays of cluster labels aligned to the underlying space.
+#'
+#' @param x A `ClusteredNeuroVol` instance.
+#' @param ... Additional arguments (currently ignored).
+#' @return A dense array of cluster ids.
+#' @export
+setMethod("as.array", signature(x="ClusteredNeuroVol"), function(x, ...) {
+  as(x, "array")
+})
+
 #' @export
 #' @rdname show-methods
 setMethod(f="show", signature=signature("ClusteredNeuroVol"),
@@ -272,12 +285,12 @@ setMethod(f="centroids", signature=signature(x="ClusteredNeuroVol"),
 #' @rdname split_clusters-methods
 setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="ClusteredNeuroVol"),
           def = function(x, clusters) {
-            f <- function(i) {
-              idx <- clusters@cluster_map[[as.character(i)]]
-              ROIVec(space(x), index_to_grid(x, as.numeric(idx)), x[idx])
-            }
-
-            deflist::deflist(f, num_clusters(clusters))
+            # reuse integer path to ensure ordering matches integer split
+            assert_that(prod(dim(x)[1:3]) == length(clusters@mask))
+            clus_vec <- integer(length(clusters@mask))
+            active_idx <- which(clusters@mask > 0)
+            clus_vec[active_idx] <- clusters@clusters
+            split_clusters(x, clus_vec)
           })
 
 #' @export
@@ -286,11 +299,11 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="intege
           def = function(x, clusters) {
             assert_that(length(clusters) == prod(dim(x)[1:3]))
 
-            unique_clusters <- sort(unique(clusters))
-            unique_clusters <- unique_clusters[unique_clusters != 0]
+            unique_clusters <- sort(unique(clusters[clusters != 0]))
 
             f <- function(i) {
-              idx <- which(clusters == i)
+              id <- unique_clusters[i]
+              idx <- which(clusters == id)
               ROIVec(space(x), index_to_grid(x, idx), x[idx])
             }
 
@@ -342,12 +355,21 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="intege
 #' print(all.equal(sort(cluster_means), sort(cluster_means2)))
 setMethod(f="split_clusters", signature=signature(x="NeuroVol", clusters="ClusteredNeuroVol"),
           def = function(x,clusters) {
+            ids <- sort(unique(clusters@clusters))
+
             f <- function(i) {
-              idx <- clusters@cluster_map[[as.character(i)]]
-              ROIVol(space(x), index_to_grid(x,as.numeric(idx)), x[idx])
+              id <- ids[i]
+              idx <- clusters@cluster_map[[as.character(id)]]
+              if (is.null(idx)) {
+                # fallback: derive from clusters slot
+                idx <- which(clusters@clusters == id)
+                idx <- which(clusters@mask@.Data)[idx]
+              }
+              dat <- linear_access(x, as.numeric(idx))
+              ROIVol(space(x), index_to_grid(x,as.numeric(idx)), dat)
             }
 
-            dlis <- deflist::deflist(f, num_clusters(clusters))
+            dlis <- deflist::deflist(f, length(ids))
 
           })
 
@@ -363,7 +385,8 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVol", clusters="intege
 
             f <- function(i) {
               idx <- clist[[i]]
-              ROIVol(space(x), index_to_grid(x,as.numeric(idx)), x[idx])
+              dat <- linear_access(x, as.numeric(idx))
+              ROIVol(space(x), index_to_grid(x,as.numeric(idx)), dat)
             }
 
 
@@ -381,7 +404,14 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVol", clusters="numeri
 #' @rdname split_clusters-methods
 setMethod(f="split_clusters", signature=signature(x="ClusteredNeuroVol", clusters="missing"),
           def = function(x,clusters) {
-            callGeneric(x,as.vector(x@data))
+            ids <- ls(envir = x@cluster_map)
+            f <- function(i) {
+              id <- ids[i]
+              idx <- x@cluster_map[[id]]
+              coords <- index_to_grid(x@mask, as.numeric(idx))
+              ROIVol(space(x@mask), coords, rep(as.integer(id), length(idx)))
+            }
+            deflist::deflist(f, length(ids))
           })
 
 
@@ -415,4 +445,45 @@ setMethod("as.dense", signature(x="ClusteredNeuroVol"),
 setMethod("mask", "ClusteredNeuroVol",
           function(x) {
             x@mask
+          })
+
+
+# ---- sub_clusters for ClusteredNeuroVol ------------------------------------
+
+#' @rdname sub_clusters-methods
+#' @export
+setMethod("sub_clusters", signature(x = "ClusteredNeuroVol", ids = "integer"),
+          function(x, ids, ...) {
+            valid_ids <- sort(unique(x@clusters))
+            bad <- setdiff(ids, valid_ids)
+            if (length(bad) > 0) {
+              stop("cluster ids not found: ", paste(bad, collapse = ", "))
+            }
+            keep <- x@clusters %in% ids
+            mask_indices <- which(x@mask@.Data)
+            new_mask_data <- array(FALSE, dim(x@mask))
+            new_mask_data[mask_indices[keep]] <- TRUE
+            new_mask <- LogicalNeuroVol(new_mask_data, space(x@mask))
+            new_clusters <- x@clusters[keep]
+            new_label_map <- x@label_map[vapply(x@label_map,
+                                                function(v) v %in% ids, logical(1))]
+            ClusteredNeuroVol(new_mask, new_clusters, label_map = new_label_map)
+          })
+
+#' @rdname sub_clusters-methods
+#' @export
+setMethod("sub_clusters", signature(x = "ClusteredNeuroVol", ids = "numeric"),
+          function(x, ids, ...) sub_clusters(x, as.integer(ids)))
+
+#' @rdname sub_clusters-methods
+#' @export
+setMethod("sub_clusters", signature(x = "ClusteredNeuroVol", ids = "character"),
+          function(x, ids, ...) {
+            lm <- x@label_map
+            found <- ids %in% names(lm)
+            if (!all(found)) {
+              stop("cluster names not found: ", paste(ids[!found], collapse = ", "))
+            }
+            int_ids <- as.integer(unlist(lm[ids]))
+            sub_clusters(x, int_ids)
           })

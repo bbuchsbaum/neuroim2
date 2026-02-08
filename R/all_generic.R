@@ -1656,3 +1656,31 @@ setGeneric("embed_kernel", def=function(x, sp, center_voxel, ...) standardGeneri
 #' m2 <- mask(svec)  # Returns the stored mask
 #' 
 setGeneric("mask", def=function(x) standardGeneric("mask"))
+
+
+#' Select a Subset of Clusters
+#'
+#' Return a new object containing only the requested clusters. Clusters can
+#' be identified by integer ID or by name (matched against the label map).
+#'
+#' @param x A clustered neuroimaging object.
+#' @param ids Integer cluster IDs, numeric (coerced to integer), or character
+#'   cluster names to retain.
+#' @param ... Additional arguments (currently unused).
+#' @return An object of the same class as \code{x} containing only the
+#'   selected clusters.
+#'
+#' @examples
+#' sp <- NeuroSpace(c(10L, 10L, 10L), c(1, 1, 1))
+#' mask <- LogicalNeuroVol(array(c(rep(TRUE, 500), rep(FALSE, 500)),
+#'                               c(10, 10, 10)), sp)
+#' clusters <- rep(1:5, length.out = 500)
+#' cvol <- ClusteredNeuroVol(mask, clusters,
+#'           label_map = list(A = 1, B = 2, C = 3, D = 4, E = 5))
+#' # By integer ID
+#' sub <- sub_clusters(cvol, c(1L, 3L))
+#' # By name
+#' sub2 <- sub_clusters(cvol, c("A", "C"))
+#'
+#' @export
+setGeneric("sub_clusters", function(x, ids, ...) standardGeneric("sub_clusters"))

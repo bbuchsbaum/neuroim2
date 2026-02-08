@@ -17,21 +17,21 @@
 #' @return A \code{ClusteredNeuroVec} object containing:
 #' \describe{
 #'   \item{cvol}{The input ClusteredNeuroVol defining cluster structure}
-#'   \item{ts}{A T×K matrix of cluster time-series (T=timepoints, K=clusters)}
+#'   \item{ts}{A TxK matrix of cluster time-series (T=timepoints, K=clusters)}
 #'   \item{cl_map}{Integer vector mapping linear voxel indices to cluster IDs}
 #'   \item{label}{Character label for the object}
 #' }
 #'
 #' @details
-#' This class implements array-like 4D access while storing data efficiently as a T×K matrix
-#' instead of the full voxel×time representation. Each cluster's time-series is computed by
+#' This class implements array-like 4D access while storing data efficiently as a TxK matrix
+#' instead of the full voxel x time representation. Each cluster's time-series is computed by
 #' applying the aggregation function (\code{FUN}) to all voxels within that cluster.
 #' 
 #' The object supports standard NeuroVec operations:
 #' \itemize{
 #'   \item Indexing: \code{x[,,,t]} to extract 3D volumes at time t
 #'   \item Series extraction: \code{series(x, i, j, k)} for time-series at voxel (i,j,k)
-#'   \item Matrix conversion: \code{as.matrix(x)} to get the T×K cluster matrix
+#'   \item Matrix conversion: \code{as.matrix(x)} to get the TxK cluster matrix
 #' }
 #' 
 #' Single-voxel clusters are handled efficiently without aggregation overhead.
@@ -207,7 +207,7 @@ setMethod("num_clusters", "ClusteredNeuroVec", function(x) ncol(x@ts))
 
 #' @rdname as.matrix-methods
 #' @param by For ClusteredNeuroVec: controls the conversion target.
-#' Defaults to "cluster" to return a T×K matrix of cluster time-series.
+#' Defaults to "cluster" to return a TxK matrix of cluster time-series.
 #' "voxel" is reserved for future use.
 #' @export
 setMethod("as.matrix", signature(x = "ClusteredNeuroVec"),
@@ -343,4 +343,51 @@ setMethod("show", signature(object = "ClusteredNeuroVec"),
             cat("| ", crayon::yellow("Active Voxels"), " : ", format(total_voxels, big.mark = ","), "\n", sep = "")
             
             invisible(NULL)
+          })
+
+
+# ---- sub_clusters for ClusteredNeuroVec ------------------------------------
+
+#' @rdname sub_clusters-methods
+#' @export
+setMethod("sub_clusters", signature(x = "ClusteredNeuroVec", ids = "integer"),
+          function(x, ids, ...) {
+            new_cvol <- sub_clusters(x@cvol, ids)
+
+            # Map selected IDs to their old column positions in x@ts
+            old_ids <- sort(unique(x@cvol@clusters))
+            col_indices <- match(sort(ids), old_ids)
+            new_ts <- x@ts[, col_indices, drop = FALSE]
+
+            # Build cl_map with contiguous column indices (1:K_new)
+            new_ids_sorted <- sort(ids)
+            new_cl_map <- integer(length(x@cl_map))
+            for (ci in seq_along(new_ids_sorted)) {
+              new_cl_map[x@cl_map == old_ids[col_indices[ci]]] <- ci
+            }
+
+            new("ClusteredNeuroVec",
+                cvol = new_cvol,
+                ts = new_ts,
+                cl_map = new_cl_map,
+                label = x@label,
+                space = x@space)
+          })
+
+#' @rdname sub_clusters-methods
+#' @export
+setMethod("sub_clusters", signature(x = "ClusteredNeuroVec", ids = "numeric"),
+          function(x, ids, ...) sub_clusters(x, as.integer(ids)))
+
+#' @rdname sub_clusters-methods
+#' @export
+setMethod("sub_clusters", signature(x = "ClusteredNeuroVec", ids = "character"),
+          function(x, ids, ...) {
+            lm <- x@cvol@label_map
+            found <- ids %in% names(lm)
+            if (!all(found)) {
+              stop("cluster names not found: ", paste(ids[!found], collapse = ", "))
+            }
+            int_ids <- as.integer(unlist(lm[ids]))
+            sub_clusters(x, int_ids)
           })
