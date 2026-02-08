@@ -1168,20 +1168,34 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 
 
 
-#' plot a NeuroVol
+#' Plot a NeuroVol
+#'
+#' Display axial slices of a \code{\linkS4class{NeuroVol}} as a faceted
+#' montage.
+#'
+#' When a second volume \code{y} is supplied it is treated as an overlay
+#' (e.g.\ a statistical map) composited on top of \code{x} with
+#' adjustable transparency.  This delegates to \code{\link{plot_overlay}}.
 #'
 #' @name plot,NeuroVol-method
-#' @aliases plot,NeuroVol,ANY-method
+#' @aliases plot,NeuroVol,missing-method plot,NeuroVol,NeuroVol-method
 #' @rdname plot-methods
-#' @param x the object to display
-#' @param cmap a color map consisting of a vector of colors in hex format (e.g. \code{gray(n=255)})
-#' @param zlevels the series of slice indices to display.
-#' @param irange the intensity range indicating the low and high values of the color scale.
-#' @param thresh a 2-element vector indicating the lower and upper transparency thresholds.
-#' @param alpha the level of alpha transparency
-#' @param bgvol a background volume that serves as an image underlay (currently ignored).
-#' @param bgcmap a color map for backround layer consisting of a vector of colors in hex format (e.g. \code{gray(n=255)})
-#' @param legend Logical indicating whether to display the color legend. Defaults to TRUE.
+#' @param x the background volume to display.
+#' @param y optional overlay volume (same dimensions as \code{x}).
+#'   When supplied, the plot is rendered as a background + overlay composite.
+#' @param cmap palette name or hex-color vector for the background
+#'   (default \code{"grays"}).  See \code{\link{resolve_cmap}}.
+#' @param zlevels integer slice indices to display.
+#'   Default: 9 evenly-spaced slices (3 \eqn{\times}{x} 3 grid).
+#' @param irange numeric length-2 intensity range for the color scale.
+#' @param thresh a 2-element vector indicating the lower and upper
+#'   transparency thresholds.
+#' @param alpha opacity for the background layer (0--1).
+#' @param ov_cmap overlay palette name (default \code{"inferno"}).
+#' @param ov_alpha overlay opacity (default 0.5).
+#' @param ov_thresh overlay threshold; values with
+#'   \eqn{|v| < } \code{ov_thresh} become transparent (default 0).
+#' @param legend logical; show the colour bar?
 #' @export
 #' @importFrom graphics plot
 #' @examples
@@ -1191,28 +1205,23 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 #' \donttest{
 #' plot(slice)
 #' }
-setMethod("plot", signature=signature(x="NeuroVol"),
-          def=function(x,
-                       cmap=gray(seq(0,1,length.out=255)),
-                       zlevels=unique(round(seq(1, dim(x)[3], length.out=6))),
+#' @export
+setMethod("plot", signature=signature(x="NeuroVol", y="missing"),
+          def=function(x, y,
+                       cmap="grays",
+                       zlevels=unique(round(seq(1, dim(x)[3], length.out=9))),
                        irange=range(x, na.rm=TRUE),
                        thresh=c(0,0),
-                      alpha=1,
-                      bgvol=NULL,
-                      bgcmap=gray(seq(0,1,length.out=255)),
-                      legend=TRUE) {
+                       alpha=1,
+                       legend=TRUE) {
 
             if (!requireNamespace("ggplot2", quietly = TRUE)) {
               stop("Package \"ggplot2\" needed for this function to work. Please install it.",
                    call. = FALSE)
             }
 
-            if (!is.null(bgvol)) {
-              assert_that(all(dim(x) == dim(bgvol)))
-              assert_that(all(spacing(x) == spacing(bgvol)))
-            }
+            colors <- resolve_cmap(cmap)
 
-            # Create a data frame of all the slices specified in zlevels
             df1 <- do.call(rbind, purrr::map(zlevels, function(i) {
               imslice <- slice(x, zlevel = i, along = 3)
               vals <- as.numeric(imslice)
@@ -1225,26 +1234,37 @@ setMethod("plot", signature=signature(x="NeuroVol"),
               data.frame(x = cds[,1], y = cds[,2], z = i, value = vals)
             }))
 
-            {y = value = NULL} # to appease R CMD check
+            {y_coord = value = NULL} # to appease R CMD check
 
             p <- ggplot2::ggplot(df1, ggplot2::aes(x = x, y = y, fill = value)) +
               ggplot2::coord_fixed() +
               ggplot2::geom_raster(alpha = alpha) +
-              ggplot2::scale_fill_gradientn(colours = cmap,
+              ggplot2::scale_fill_gradientn(colours = colors,
                                            limits = irange,
                                            guide = if (legend) "colourbar" else "none",
                                            na.value = "transparent") +
-              ggplot2::facet_wrap(~ z, labeller = ggplot2::labeller(z = function(z) paste("Slice:", z))) +
-              ggplot2::ggtitle("Brain Slices") +
-              ggplot2::theme_void() +
-              ggplot2::theme(
-                strip.background = ggplot2::element_blank(),
-                strip.text = ggplot2::element_text(face="bold", size=10),
-                plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
-                plot.margin = grid::unit(c(0.5, 0.5, 0.5, 0.5), "cm")
-              )
+              ggplot2::facet_wrap(~ z, ncol = 3L,
+                                 labeller = ggplot2::labeller(
+                                   z = function(z) paste("z =", z))) +
+              theme_neuro()
 
             p
+          })
+
+#' @rdname plot-methods
+#' @export
+setMethod("plot", signature=signature(x="NeuroVol", y="NeuroVol"),
+          def=function(x, y,
+                       cmap="grays",
+                       zlevels=unique(round(seq(1, dim(x)[3], length.out=9))),
+                       ov_cmap="inferno",
+                       ov_alpha=0.5,
+                       ov_thresh=0) {
+            plot_overlay(bgvol = x, overlay = y,
+                         zlevels = zlevels, along = 3L,
+                         bg_cmap = cmap, ov_cmap = ov_cmap,
+                         ov_alpha = ov_alpha, ov_thresh = ov_thresh,
+                         ncol = 3L)
           })
 
 #' @rdname mask-methods

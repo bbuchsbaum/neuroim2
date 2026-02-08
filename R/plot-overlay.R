@@ -26,7 +26,7 @@ plot_overlay <- function(
   stopifnot(all(dim(bgvol) == dim(overlay)))
   bg_range <- match.arg(bg_range); ov_range <- match.arg(ov_range)
 
-  if (is.null(zlevels)) zlevels <- unique(round(seq(1, dim(bgvol)[along], length.out = 6)))
+  if (is.null(zlevels)) zlevels <- unique(round(seq(1, dim(bgvol)[along], length.out = 9)))
 
   build_panel <- function(z) {
     sl_bg <- slice(bgvol, z, along = along)

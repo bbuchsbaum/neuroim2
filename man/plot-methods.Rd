@@ -4,54 +4,72 @@
 \alias{plot,NeuroSlice-method}
 \alias{plot,NeuroSlice,ANY-method}
 \alias{plot,NeuroVol-method}
-\alias{plot,NeuroVol,ANY-method}
+\alias{plot,NeuroVol,missing-method}
+\alias{plot,NeuroVol,NeuroVol-method}
 \title{Plot a NeuroSlice}
 \usage{
-\S4method{plot}{NeuroSlice}(
+\S4method{plot}{NeuroSlice,ANY}(
   x,
   cmap = gray(seq(0, 1, length.out = 255)),
   irange = range(x, na.rm = TRUE),
   legend = TRUE
 )
 
-\S4method{plot}{NeuroVol}(
+\S4method{plot}{NeuroVol,missing}(
   x,
-  cmap = gray(seq(0, 1, length.out = 255)),
-  zlevels = unique(round(seq(1, dim(x)[3], length.out = 6))),
+  y,
+  cmap = "grays",
+  zlevels = unique(round(seq(1, dim(x)[3], length.out = 9))),
   irange = range(x, na.rm = TRUE),
   thresh = c(0, 0),
   alpha = 1,
-  bgvol = NULL,
-  bgcmap = gray(seq(0, 1, length.out = 255)),
   legend = TRUE
+)
+
+\S4method{plot}{NeuroVol,NeuroVol}(
+  x,
+  y,
+  cmap = "grays",
+  zlevels = unique(round(seq(1, dim(x)[3], length.out = 9))),
+  ov_cmap = "inferno",
+  ov_alpha = 0.5,
+  ov_thresh = 0
 )
 }
 \arguments{
-\item{x}{the object to display}
+\item{x}{the background volume to display.}
 
-\item{cmap}{a color map consisting of a vector of colors in hex format (e.g. \code{gray(n=255)})}
+\item{cmap}{palette name or hex-color vector for the background
+(default \code{"grays"}).  See \code{\link{resolve_cmap}}.}
 
-\item{irange}{the intensity range indicating the low and high values of the color scale.}
+\item{irange}{numeric length-2 intensity range for the color scale.}
 
-\item{legend}{Logical indicating whether to display the color legend. Defaults to TRUE.}
+\item{legend}{logical; show the colour bar?}
 
-\item{zlevels}{the series of slice indices to display.}
+\item{y}{optional overlay volume (same dimensions as \code{x}).
+When supplied, the plot is rendered as a background + overlay composite.}
 
-\item{thresh}{a 2-element vector indicating the lower and upper transparency thresholds.}
+\item{zlevels}{integer slice indices to display.
+Default: 9 evenly-spaced slices (3 \eqn{\times}{x} 3 grid).}
 
-\item{alpha}{the level of alpha transparency}
+\item{thresh}{a 2-element vector indicating the lower and upper
+transparency thresholds.}
 
-\item{bgvol}{a background volume that serves as an image underlay (currently ignored).}
+\item{alpha}{opacity for the background layer (0--1).}
 
-\item{bgcmap}{a color map for backround layer consisting of a vector of colors in hex format (e.g. \code{gray(n=255)})}
+\item{ov_cmap}{overlay palette name (default \code{"inferno"}).}
+
+\item{ov_alpha}{overlay opacity (default 0.5).}
+
+\item{ov_thresh}{overlay threshold; values with
+\eqn{|v| < } \code{ov_thresh} become transparent (default 0).}
 }
 \value{
 a ggplot2 object
 }
 \description{
-Plot a NeuroSlice
-
-plot a NeuroVol
+Display axial slices of a \code{\linkS4class{NeuroVol}} as a faceted
+montage.
 }
 \details{
 The plot method uses \code{ggplot2} to create a raster visualization of the slice data.
@@ -59,6 +77,10 @@ The intensity values are mapped to colors using the specified colormap and range
 
 when `x` is a NeuroSlice object, the plot method returns a \code{ggplot2} object containing the raster visualization of the slice data.
         The plot can be further customized using standard ggplot2 functions.
+
+When a second volume \code{y} is supplied it is treated as an overlay
+(e.g.\ a statistical map) composited on top of \code{x} with
+adjustable transparency.  This delegates to \code{\link{plot_overlay}}.
 }
 \examples{
 # Create example slice
