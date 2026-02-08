@@ -450,23 +450,7 @@ setMethod("mask", "ClusteredNeuroVol",
 
 # ---- sub_clusters for ClusteredNeuroVol ------------------------------------
 
-#' Select a Subset of Clusters
-#'
-#' @name sub_clusters-methods
-#' @aliases sub_clusters,ClusteredNeuroVol,integer-method
-#'          sub_clusters,ClusteredNeuroVol,numeric-method
-#'          sub_clusters,ClusteredNeuroVol,character-method
-#'          sub_clusters,ClusteredNeuroVec,integer-method
-#'          sub_clusters,ClusteredNeuroVec,numeric-method
-#'          sub_clusters,ClusteredNeuroVec,character-method
-#' @param x A \code{\linkS4class{ClusteredNeuroVol}} or
-#'   \code{\linkS4class{ClusteredNeuroVec}} object.
-#' @param ids Integer cluster IDs, numeric (coerced to integer), or character
-#'   cluster names (looked up in the label map) identifying the clusters to
-#'   retain.
-#' @param ... Additional arguments (currently unused).
-#' @return An object of the same class as \code{x} containing only the
-#'   selected clusters.
+#' @rdname sub_clusters
 #' @export
 setMethod("sub_clusters", signature(x = "ClusteredNeuroVol", ids = "integer"),
           function(x, ids, ...) {
@@ -486,12 +470,12 @@ setMethod("sub_clusters", signature(x = "ClusteredNeuroVol", ids = "integer"),
             ClusteredNeuroVol(new_mask, new_clusters, label_map = new_label_map)
           })
 
-#' @rdname sub_clusters-methods
+#' @rdname sub_clusters
 #' @export
 setMethod("sub_clusters", signature(x = "ClusteredNeuroVol", ids = "numeric"),
           function(x, ids, ...) sub_clusters(x, as.integer(ids)))
 
-#' @rdname sub_clusters-methods
+#' @rdname sub_clusters
 #' @export
 setMethod("sub_clusters", signature(x = "ClusteredNeuroVol", ids = "character"),
           function(x, ids, ...) {

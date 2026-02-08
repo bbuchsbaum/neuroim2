@@ -430,14 +430,6 @@ setMethod(f="Summary", signature=signature(x="DenseNeuroVol", na.rm="ANY"),
       callGeneric(x@.Data, ..., na.rm=na.rm)
     })
 
-#' Compare two NeuroVec objects
-#'
-#' This method compares two NeuroVec objects (\code{e1} and \code{e2}) using a generic comparison function.
-#' The dimensions of both objects are checked for compatibility before performing the comparison.
-#'
-#' @param e1 A NeuroVec object to be compared.
-#' @param e2 A NeuroVec object to be compared.
-#' @return The result of the comparison between \code{e1} and \code{e2}.
 #' @rdname Compare-methods
 #' @export
 setMethod(f="Compare", signature=signature(e1="NeuroVec", e2="NeuroVec"),

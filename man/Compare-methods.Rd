@@ -2,11 +2,20 @@
 % Please edit documentation in R/ops.R
 \name{Compare-methods}
 \alias{Compare-methods}
+\alias{Compare,DenseNeuroVol,DenseNeuroVol-method}
+\alias{Compare,DenseNeuroVol,numeric-method}
+\alias{Compare,numeric,DenseNeuroVol-method}
 \alias{Compare,SparseNeuroVol,numeric-method}
 \alias{Compare,numeric,SparseNeuroVol-method}
 \alias{Compare,NeuroVec,NeuroVec-method}
 \title{Comparison Operations}
 \usage{
+\S4method{Compare}{DenseNeuroVol,DenseNeuroVol}(e1, e2)
+
+\S4method{Compare}{DenseNeuroVol,numeric}(e1, e2)
+
+\S4method{Compare}{numeric,DenseNeuroVol}(e1, e2)
+
 \S4method{Compare}{SparseNeuroVol,numeric}(e1, e2)
 
 \S4method{Compare}{numeric,SparseNeuroVol}(e1, e2)
@@ -14,18 +23,13 @@
 \S4method{Compare}{NeuroVec,NeuroVec}(e1, e2)
 }
 \arguments{
-\item{e1}{A NeuroVec object to be compared.}
-
-\item{e2}{A NeuroVec object to be compared.}
+\item{e1, e2}{Neuroimaging objects or numeric values.}
 }
 \value{
-The result of the comparison between the SparseNeuroVol object's data and the numeric value.
-
-The result of the comparison between \code{e1} and \code{e2}.
+A \code{\linkS4class{LogicalNeuroVol}} for volume comparisons.
 }
 \description{
-Methods for comparing neuroimaging objects
-
-This method compares two NeuroVec objects (\code{e1} and \code{e2}) using a generic comparison function.
-The dimensions of both objects are checked for compatibility before performing the comparison.
+Methods for comparing neuroimaging objects.
+  All volume comparisons return \code{\linkS4class{LogicalNeuroVol}} objects
+  that preserve spatial metadata.
 }

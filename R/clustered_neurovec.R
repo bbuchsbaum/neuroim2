@@ -348,7 +348,7 @@ setMethod("show", signature(object = "ClusteredNeuroVec"),
 
 # ---- sub_clusters for ClusteredNeuroVec ------------------------------------
 
-#' @rdname sub_clusters-methods
+#' @rdname sub_clusters
 #' @export
 setMethod("sub_clusters", signature(x = "ClusteredNeuroVec", ids = "integer"),
           function(x, ids, ...) {
@@ -374,12 +374,12 @@ setMethod("sub_clusters", signature(x = "ClusteredNeuroVec", ids = "integer"),
                 space = x@space)
           })
 
-#' @rdname sub_clusters-methods
+#' @rdname sub_clusters
 #' @export
 setMethod("sub_clusters", signature(x = "ClusteredNeuroVec", ids = "numeric"),
           function(x, ids, ...) sub_clusters(x, as.integer(ids)))
 
-#' @rdname sub_clusters-methods
+#' @rdname sub_clusters
 #' @export
 setMethod("sub_clusters", signature(x = "ClusteredNeuroVec", ids = "character"),
           function(x, ids, ...) {
