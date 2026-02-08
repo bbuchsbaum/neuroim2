@@ -1,11 +1,12 @@
 Package: neuroim2
 Type: Package
 Title: Data Structures for Brain Imaging Data
-Version: 0.8.3
+Version: 0.8.6
 LinkingTo: 
   Rcpp,
   RcppArmadillo,
   RcppParallel
+Author: Bradley R Buchsbaum [aut, cre, cph]
 Authors@R: c(
     person(c("Bradley", "R"), "Buchsbaum", role = c("aut", "cre", "cph"), email = "brad.buchsbaum@gmail.com"))
 Maintainer: Bradley R Buchsbaum <brad.buchsbaum@gmail.com>
@@ -56,6 +57,7 @@ Collate:
     'neurovec.R'
     'neurovecseq.R'
     'neurovol.R'
+    'nifti_extensions.R'
     'nifti_io.R'
     'niml_io.R'
     'ops.R'
@@ -64,6 +66,7 @@ Collate:
     'plot-montage.R'
     'plot-ortho.R'
     'plot-overlay.R'
+    'read_image.R'
     'resample.R'
     'resample_to.R'
     'roi.R'
@@ -92,7 +95,7 @@ Imports:
   ggplot2,
   magrittr,
   grid
-Suggests: 
+Suggests:
     testthat,
     covr,
     knitr,
@@ -100,9 +103,9 @@ Suggests:
     rmarkdown,
     Gmedian,
     R.utils,
-    spelling
+    spelling,
+    xml2
 URL: https://github.com/bbuchsbaum/neuroim2,
     https://bbuchsbaum.github.io/neuroim2/
 BugReports: https://github.com/bbuchsbaum/neuroim2/issues
 Language: en-US
-Config/Needs/website: albersdown

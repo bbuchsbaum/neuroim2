@@ -168,6 +168,27 @@ setMethod(f="split_scale", signature=signature(x = "DenseNeuroVec", f="factor", 
 
 #' @export
 #' @rdname scale_series-methods
+setMethod(f="scale_series", signature=signature(x="DenseNeuroVec", center="logical", scale="logical"),
+          def=function(x, center, scale) {
+            d <- dim(x)
+            nv <- prod(d[1:3])
+            nt <- d[4]
+            # Reshape directly to voxels x time — no transpose needed
+            M <- matrix(x@.Data, nrow = nv, ncol = nt)
+            if (center) {
+              M <- M - rowMeans(M)
+            }
+            if (scale) {
+              rsd <- sqrt(rowSums(M * M) / (nt - 1L))
+              rsd[rsd == 0] <- 1
+              M <- M / rsd
+            }
+            dim(M) <- d
+            new("DenseNeuroVec", .Data = M, space = space(x))
+          })
+
+#' @export
+#' @rdname scale_series-methods
 setMethod(f="scale_series", signature=signature(x="NeuroVec", center="logical", scale="logical"),
           def=function(x, center, scale) {
             M <- as.matrix(x)
@@ -295,9 +316,10 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 #' @keywords internal
 #' @noRd
 .getRStorage <- function(data_type) {
-  if (any(toupper(data_type) == c("BINARY", "BYTE", "UBYTE", "SHORT", "INTEGER", "INT", "LONG"))) {
+  dtype_upper <- toupper(data_type)
+  if (any(dtype_upper == c("BINARY", "BYTE", "UBYTE", "SHORT", "INTEGER", "INT", "LONG"))) {
     "integer"
-  } else if (any(data_type == c("FLOAT", "DOUBLE"))) {
+  } else if (any(dtype_upper == c("FLOAT", "DOUBLE"))) {
     "double"
   } else {
 	  stop(paste("unrecognized data type", data_type))
