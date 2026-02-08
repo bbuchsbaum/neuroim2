@@ -2,8 +2,10 @@
 title: neuroim2 Cookbook
 date: '`r Sys.Date()`'
 output: rmarkdown::html_vignette
-vignette: '%\VignetteIndexEntry{neuroim2 Cookbook} %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}'
+vignette: >
+  %\VignetteIndexEntry{neuroim2 Cookbook}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 params:
   family: red
 css: albers.css
@@ -66,7 +68,7 @@ single value (e.g. `median`, a trimmed mean, robust summaries, etc.).
 
 If you have a single concatenated `NeuroVec` with multiple logical
 blocks along the time dimension (e.g., runs or sessions), you can
-“un‑concatenate” it into one `NeuroVec` per block using
+"unconcatenate" it into one `NeuroVec` per block using
 `split_blocks()`.
 
 Create an index vector of length `dim(vec)[4]` indicating which block
