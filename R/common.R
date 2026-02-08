@@ -189,6 +189,25 @@ setMethod(f="scale_series", signature=signature(x="DenseNeuroVec", center="logic
 
 #' @export
 #' @rdname scale_series-methods
+setMethod(f="scale_series", signature=signature(x="SparseNeuroVec", center="logical", scale="logical"),
+          def=function(x, center, scale) {
+            # x@data is T x K (time x masked_voxels)
+            M <- x@data
+            if (center) {
+              M <- base::scale(M, center = TRUE, scale = FALSE)
+            }
+            if (scale) {
+              sds <- apply(M, 2, sd)
+              sds[sds == 0] <- 1
+              M <- sweep(M, 2, sds, "/")
+            }
+            # Strip attributes left by base::scale
+            M <- unname(as.matrix(M))
+            SparseNeuroVec(M, space(x), mask(x))
+          })
+
+#' @export
+#' @rdname scale_series-methods
 setMethod(f="scale_series", signature=signature(x="NeuroVec", center="logical", scale="logical"),
           def=function(x, center, scale) {
             M <- as.matrix(x)
