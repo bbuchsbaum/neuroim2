@@ -7,6 +7,188 @@ setOldClass(c("file", "connection"))
 setOldClass(c("gzfile", "connection"))
 setOldClass("environment")
 setOldClass("mmap")
+
+# ============================================================================
+# NIfTI Extension Classes
+# ============================================================================
+
+#' Known NIfTI Extension Codes
+#'
+#' A named integer vector of registered NIfTI extension codes.
+#' These codes identify the format/type of extension data.
+#'
+#' @format Named integer vector where names describe the extension type:
+#' \describe{
+#'   \item{ignore}{0 - Unknown/private format (not recommended)}
+#'   \item{DICOM}{2 - DICOM format (attribute tags and values)}
+#'   \item{AFNI}{4 - AFNI group (ASCII XML attributes)}
+#'   \item{comment}{6 - Plain text comment}
+#'   \item{XCEDE}{8 - XCEDE format}
+#'   \item{jimdiminfo}{10 - JIM dimension info}
+#'   \item{workflow_fwds}{12 - Workflow forwards}
+#'   \item{FreeSurfer}{14 - FreeSurfer format}
+#'   \item{pypickle}{16 - Python pickle}
+#'   \item{MiND_ident}{18 - MiND identifier}
+#'   \item{b_value}{20 - B-value (diffusion)}
+#'   \item{spherical_direction}{22 - Spherical direction}
+#'   \item{DT_component}{24 - DT component}
+#'   \item{SHC_degreeorder}{26 - SHC degree order}
+#'   \item{voxbo}{28 - VoxBo format}
+#'   \item{Caret}{30 - Caret format}
+#'   \item{CIFTI}{32 - CIFTI format}
+#'   \item{variable_frame_timing}{34 - Variable frame timing}
+#'   \item{eval}{38 - Eval}
+#'   \item{MATLAB}{40 - MATLAB format}
+#'   \item{Quantiphyse}{42 - Quantiphyse}
+#'   \item{MRS}{44 - MRS NIfTI}
+#' }
+#'
+#' @examples
+#' # Get the code for AFNI extensions
+#' NiftiExtensionCodes["AFNI"]  # Returns 4
+#'
+#' # Get the name for a code
+#' names(NiftiExtensionCodes)[NiftiExtensionCodes == 4]  # Returns "AFNI"
+#'
+#' @export
+NiftiExtensionCodes <- c(
+  ignore = 0L,
+  DICOM = 2L,
+  AFNI = 4L,
+
+  comment = 6L,
+  XCEDE = 8L,
+  jimdiminfo = 10L,
+  workflow_fwds = 12L,
+  FreeSurfer = 14L,
+  pypickle = 16L,
+  MiND_ident = 18L,
+  b_value = 20L,
+  spherical_direction = 22L,
+
+  DT_component = 24L,
+  SHC_degreeorder = 26L,
+  voxbo = 28L,
+  Caret = 30L,
+  CIFTI = 32L,
+  variable_frame_timing = 34L,
+  eval = 38L,
+  MATLAB = 40L,
+
+  Quantiphyse = 42L,
+  MRS = 44L
+)
+
+
+#' NiftiExtension Class
+#'
+#' @description
+#' Represents a single NIfTI header extension block. NIfTI extensions allow
+#' additional metadata to be stored with the image file.
+#'
+#' @slot ecode An \code{integer} extension code identifying the type of extension.
+#'   See \code{\link{NiftiExtensionCodes}} for known codes.
+#' @slot esize An \code{integer} giving the total size of the extension in bytes,
+#'   including the 8-byte header (esize + ecode). Must be a multiple of 16.
+#' @slot edata A \code{raw} vector containing the extension data (length = esize - 8).
+#'
+#' @details
+#' NIfTI-1.1 extensions follow this structure:
+#' \itemize{
+#'   \item Bytes 0-3: esize (int32) - total extension size, must be multiple of 16
+#'   \item Bytes 4-7: ecode (int32) - extension code identifying format
+#'   \item Bytes 8-(esize-1): edata - the actual extension data
+#' }
+#'
+#' Extensions are chained sequentially after the NIfTI header (byte 352) until
+#' the vox_offset is reached.
+#'
+#' @seealso
+#' \code{\link{NiftiExtensionCodes}} for registered extension codes.
+#' \code{\link{NiftiExtensionList-class}} for a collection of extensions.
+#' \code{\link{parse_extension}} for parsing extension data.
+#'
+#' @examples
+#' # Create a simple comment extension
+#' comment_text <- "This is a test comment"
+#' ext <- NiftiExtension(ecode = 6L, data = comment_text)
+#'
+#' # Access the extension code
+#' ext@@ecode
+#'
+#' @export
+#' @rdname NiftiExtension-class
+setClass("NiftiExtension",
+         slots = c(
+           ecode = "integer",
+           esize = "integer",
+           edata = "raw"
+         ),
+         prototype = list(
+           ecode = 0L,
+           esize = 16L,
+           edata = raw(8)
+         ),
+         validity = function(object) {
+           if (length(object@ecode) != 1 || is.na(object@ecode)) {
+             return("ecode must be a single integer value")
+           }
+           if (length(object@esize) != 1 || is.na(object@esize)) {
+             return("esize must be a single integer value")
+           }
+           if (object@esize < 16) {
+             return("esize must be at least 16 bytes")
+           }
+           if (object@esize %% 16 != 0) {
+             return("esize must be a multiple of 16")
+           }
+           if (length(object@edata) != object@esize - 8L) {
+             return(sprintf("edata length (%d) must equal esize - 8 (%d)",
+                          length(object@edata), object@esize - 8L))
+           }
+           TRUE
+         })
+
+
+#' NiftiExtensionList Class
+#'
+#' @description
+#' A validated list containing zero or more \code{\link{NiftiExtension-class}} objects.
+#' This class ensures type safety when working with collections of NIfTI extensions.
+#'
+#' @details
+#' The class extends \code{list} and enforces that all elements must be
+#' \code{NiftiExtension} objects. This provides a clean container for
+#' managing multiple extensions attached to a NIfTI file.
+#'
+#' @seealso
+#' \code{\link{NiftiExtension-class}} for individual extension objects.
+#' \code{\link{extensions}} for accessing extensions from image objects.
+#'
+#' @examples
+#' # Create an empty extension list
+#' ext_list <- new("NiftiExtensionList")
+#'
+#' # Create a list with extensions
+#' ext1 <- NiftiExtension(ecode = 6L, data = "Comment 1")
+#' ext2 <- NiftiExtension(ecode = 6L, data = "Comment 2")
+#' ext_list <- new("NiftiExtensionList", list(ext1, ext2))
+#'
+#' @export
+#' @rdname NiftiExtensionList-class
+setClass("NiftiExtensionList",
+         contains = "list",
+         validity = function(object) {
+           if (length(object) == 0) {
+             return(TRUE)
+           }
+           all_valid <- vapply(object, function(x) is(x, "NiftiExtension"),
+                              FUN.VALUE = logical(1))
+           if (!all(all_valid)) {
+             return("All elements must be NiftiExtension objects")
+           }
+           TRUE
+         })
 #setOldClass("FBM")
 
 #' ArrayLike5D Class

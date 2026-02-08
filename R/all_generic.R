@@ -11,6 +11,18 @@ setGeneric("plot", function(x, y, ...) standardGeneric("plot"))
 #' @export
 setGeneric("drop", function(x) standardGeneric("drop"))
 
+#' Generic as.array Method
+#'
+#' Coerces an object to a base array using S4 dispatch when available.
+#'
+#' @param x An object to be coerced to an array.
+#' @param ... Additional arguments passed to methods.
+#' @return An \code{array} representation of the input \code{x}.
+#'
+#' @export
+setGeneric("as.array", function(x, ...) standardGeneric("as.array"),
+           useAsDefault = base::as.array)
+
 #' Generic as.matrix Method
 #'
 #' Coerces an object to a matrix.
@@ -832,8 +844,12 @@ setGeneric(name="write_vec",  def=function(x, file_name, format, data_type, ...)
 #' @param x A \code{\linkS4class{NeuroVec}}-like object.
 #' @param file Optional output file name for the backing image. If \code{NULL},
 #'   a temporary \code{.nii} file is created.
-#' @param ... Additional arguments passed to methods (e.g., \code{data_type},
-#'   \code{overwrite}).
+#' @param data_type Character string specifying the output data type for the
+#'   NIfTI file. Should be one of: "BINARY", "UBYTE", "SHORT", "INT", "FLOAT",
+#'   "DOUBLE". Default is "FLOAT".
+#' @param overwrite Logical; if \code{TRUE}, overwrite an existing file at the
+#'   specified path. Default is \code{FALSE}.
+#' @param ... Additional arguments passed to methods.
 #'
 #' @return A \code{\linkS4class{MappedNeuroVec}} (or \code{x} itself if already
 #'   memory-mapped).
