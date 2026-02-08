@@ -1,10 +1,8 @@
 ---
 title: Slice visualization with neuroim2
 output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Slice visualization with neuroim2}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+vignette: |
+  %\VignetteIndexEntry{Slice visualization with neuroim2} %\VignetteEngine{knitr::rmarkdown} %\VignetteEncoding{UTF-8}
 params:
   family: red
 css: albers.css
@@ -14,11 +12,12 @@ resource_files:
 includes:
   in_header: |-
     <script src="albers.js"></script>
-    <script>document.addEventListener('DOMContentLoaded',()=>document.body.classList.add('palette-red'));</script>
+    <script>document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('palette-red');});</script>
 
 ---
 
 ```{r setup, include=FALSE}
+if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("albersdown", quietly = TRUE)) ggplot2::theme_set(albersdown::theme_albers(params$family))
 if (requireNamespace("ggplot2", quietly = TRUE)) ggplot2::theme_set(neuroim2::theme_neuro(base_family = params$family))
 knitr::opts_chunk$set(
   collapse = TRUE, echo = TRUE, message = FALSE, warning = FALSE,
@@ -30,14 +29,30 @@ suppressPackageStartupMessages({
 })
 ```
 
+## Quick start: `plot()`
+
+The simplest way to visualize a volume is the S4 `plot()` method. It shows a
+3 x 3 montage of evenly-spaced axial slices with a perceptually uniform
+grayscale palette and clean theme.
+
+```{r eval=FALSE}
+plot(vol)                       # 3x3 montage, grayscale
+plot(vol, cmap = "viridis")     # different palette
+plot(vol, overlay)              # overlay with inferno palette, alpha = 0.5
+plot(vol, overlay, ov_alpha = 0.7, ov_thresh = 2)
+```
+
+For more control — coronal/sagittal planes, downsampling, custom facet
+layouts — the dedicated helpers below give full flexibility.
+
 ## Why these helpers?
 
-Neuroimaging images are large, orientation‑sensitive rasters. The goal of these helpers is to make reasonable defaults easy to use: perceptually uniform palettes, robust scaling, fixed aspect ratios, and clean legends—without extra heavy dependencies or any JavaScript.
+Neuroimaging images are large, orientation-sensitive rasters. The goal of these helpers is to make reasonable defaults easy to use: perceptually uniform palettes, robust scaling, fixed aspect ratios, and clean legends — without extra heavy dependencies or any JavaScript.
 
 This vignette shows how to:
 
-- Build publication‑ready montages
-- Create a compact orthogonal (three‑plane) view with crosshairs
+- Build publication-ready montages
+- Create a compact orthogonal (three-plane) view with crosshairs
 - Overlay a statistical map on a structural background (threshold + alpha)
 
 The helpers used here are:

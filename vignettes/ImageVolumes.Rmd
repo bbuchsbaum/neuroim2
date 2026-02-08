@@ -2,10 +2,8 @@
 title: Working with 3D Image Volumes
 date: '`r Sys.Date()`'
 output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Working with 3D Image Volumes}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+vignette: |
+  %\VignetteIndexEntry{Working with 3D Image Volumes} %\VignetteEngine{knitr::rmarkdown} %\VignetteEncoding{UTF-8}
 params:
   family: red
 css: albers.css
@@ -15,7 +13,7 @@ resource_files:
 includes:
   in_header: |-
     <script src="albers.js"></script>
-    <script>document.addEventListener('DOMContentLoaded',()=>document.body.classList.add('palette-red'));</script>
+    <script>document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('palette-red');});</script>
 
 ---
 
@@ -148,7 +146,14 @@ We do not usually have to create `NeuroSpace` objects, because geometric informa
 
 ## Slicing and quick visualization
 
-Extract a single 2D slice for display using standard array indexing:
+The easiest way to view a volume is with `plot()`, which shows a 3 x 3 montage
+of evenly-spaced axial slices:
+
+```{r plot_montage, fig.alt='3x3 montage of axial slices.', fig.cap='Default plot() montage', fig.width=7, fig.height=7}
+plot(vol)
+```
+
+You can also extract a single 2D slice for display using standard array indexing:
 
 ```{r slice_mid, fig.alt='Mid-slice of example volume (grayscale image).', fig.cap='Mid-slice of example volume'}
     z <- ceiling(dim(vol)[3] / 2)
