@@ -131,9 +131,11 @@ NeuroSpace <- function(dim, spacing = NULL, origin = NULL, axes = NULL, trans = 
     stop("transformation matrix must be invertible")
   })
 
-  # Round to avoid numerical issues
-  trans <- signif(trans, 6)
-  inverse <- signif(inverse, 6)
+
+  # Round to float32-level precision to avoid numerical issues
+  # while preserving NIfTI-compatible accuracy (float32 ~ 7 digits)
+  trans <- signif(trans, 7)
+  inverse <- signif(inverse, 7)
 
   # Set up axes
   if (is.null(axes)) {
@@ -713,8 +715,8 @@ setMethod(f="grid_to_index", signature=signature(x="NeuroVol", coords="numeric")
 setMethod(f="reorient", signature=signature(x = "NeuroSpace", orient="character"),
           def=function(x, orient) {
 
+            stopifnot(length(orient) == 3)
             anat <- findAnatomy3D(orient[1], orient[2], orient[3])
-            pmat_orig <- perm_mat(x)
             pmat_new <- perm_mat(anat)
 
 
@@ -722,7 +724,7 @@ setMethod(f="reorient", signature=signature(x = "NeuroSpace", orient="character"
             tx <- rbind(tx,c(rep(0, ndim(x)),1))
             #itx <- zapsmall(MASS::ginv(tx))
 
-            NeuroSpace(dim(x), spacing=spacing(x), axes=x@axes, trans=tx,
+            NeuroSpace(dim(x), spacing=spacing(x), axes=anat, trans=tx,
                           origin=tx[1:(ndim(x)) ,ndim(x)+1])
 
         }

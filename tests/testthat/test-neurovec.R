@@ -376,6 +376,33 @@ test_that("can write and read back an image vector as a filebacked neurovec", {
 
 })
 
+test_that("write_vec round-trip preserves affine transform", {
+  # Build a non-trivial affine (15-degree rotation about z + translation)
+  theta <- 15 * pi / 180
+  rot <- matrix(c(cos(theta), sin(theta), 0,
+                  -sin(theta), cos(theta), 0,
+                  0,           0,          1), 3, 3, byrow = TRUE)
+  sp_dim <- c(2, 2, 2)          # voxel sizes
+  origin <- c(-90.5, -126.25, -72.0)
+  tmat <- diag(4)
+  tmat[1:3, 1:3] <- rot %*% diag(sp_dim)
+  tmat[1:3, 4]   <- origin
+
+  spc <- NeuroSpace(c(10, 10, 10, 5), spacing = sp_dim,
+                    origin = origin, trans = tmat)
+  dat <- array(rnorm(10 * 10 * 10 * 5), c(10, 10, 10, 5))
+  vec <- DenseNeuroVec(dat, spc)
+
+  fname <- paste0(tempfile(), ".nii")
+  write_vec(vec, fname)
+  vec2 <- read_vec(fname)
+
+  # sform should survive the round-trip within float32 tolerance
+  expect_equal(trans(vec2), trans(vec), tolerance = 1e-5)
+  expect_equal(origin(vec2), origin(vec), tolerance = 1e-5)
+  expect_equal(spacing(vec2), spacing(vec), tolerance = 1e-5)
+})
+
 test_that("can extract ROI from NeuroVec", {
   mask <- read_vol(gmask)
   maskvec <- concat(mask,mask,mask,mask)

@@ -117,11 +117,14 @@ as_nifti_header <- function(vol, file_name, oneFile=TRUE, data_type="FLOAT",
 		### only encodes pixdim for three dimensions
 		hd$pixdim <- c(0, spacing(vol), rep(0,4))
 
-		hd$qoffset <- origin(space(vol))
 		hd$scl_intercept <- 0
 		hd$scl_slope <- 1
 
 		tmat <- trans(vol)
+
+		# Derive qoffset from the transform matrix translation column
+		# to guarantee consistency between qoffset and sform
+		hd$qoffset <- tmat[1:3, 4]
 
 		hd$qform <- tmat
 		hd$sform <- tmat

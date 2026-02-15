@@ -137,12 +137,24 @@ setMethod("trans", "MetaInfo",
 
 #' Get NIFTI Transformation Matrix
 #'
+#' Prefers the sform (direct affine) over the qform (quaternion-derived)
+#' when \code{sform_code > 0}, matching the convention used by FSL,
+#' FreeSurfer, and ANTs. Falls back to qform otherwise.
+#'
 #' @param x NIFTIMetaInfo object
 #' @return 4x4 transformation matrix
 #' @keywords internal
 #' @noRd
 setMethod("trans", "NIFTIMetaInfo",
-  function(x) x@header$qform)
+  function(x) {
+    hdr <- x@header
+    if (!is.null(hdr$sform_code) && hdr$sform_code > 0 &&
+        is.matrix(hdr$sform) && nrow(hdr$sform) == 4 && ncol(hdr$sform) == 4) {
+      hdr$sform
+    } else {
+      hdr$qform
+    }
+  })
 
 #' Extract NIFTI Dimensions
 #'
@@ -315,10 +327,30 @@ NIFTIMetaInfo <- function(descriptor, nifti_header) {
     stop("Invalid dimensions in NIFTI header")
   }
 
-  # Validate transformation
-  if (!is.matrix(nifti_header$qform) || nrow(nifti_header$qform) != 4 ||
-      ncol(nifti_header$qform) != 4) {
-    stop("Invalid qform matrix in NIFTI header")
+  # Validate transformation — need at least one valid transform
+  use_sform <- !is.null(nifti_header$sform_code) &&
+    nifti_header$sform_code > 0 &&
+    is.matrix(nifti_header$sform) &&
+    nrow(nifti_header$sform) == 4 && ncol(nifti_header$sform) == 4
+
+  if (!use_sform) {
+    if (!is.matrix(nifti_header$qform) || nrow(nifti_header$qform) != 4 ||
+        ncol(nifti_header$qform) != 4) {
+      stop("Invalid qform matrix in NIFTI header")
+    }
+  }
+
+  # Prefer sform (direct affine) over qform (quaternion-derived) when available,
+
+  # matching the convention used by FSL, FreeSurfer, and ANTs.
+  if (use_sform) {
+    ref_xform <- nifti_header$sform
+    ref_origin <- nifti_header$sform[1:3, 4]
+    ref_spacing <- sqrt(colSums(nifti_header$sform[1:3, 1:3, drop = FALSE]^2))
+  } else {
+    ref_xform <- nifti_header$qform
+    ref_origin <- nifti_header$qoffset
+    ref_spacing <- nifti_header$pixdim[2:4]
   }
 
   # Create object with validation
@@ -332,10 +364,10 @@ NIFTIMetaInfo <- function(descriptor, nifti_header) {
         data_type = nifti_header$data_storage,
         bytes_per_element = as.integer(.getDataSize(nifti_header$data_storage)),
         dims = dims,
-        spatial_axes = .nearestAnatomy(nifti_header$qform),
+        spatial_axes = .nearestAnatomy(ref_xform),
         additional_axes = NullAxis,
-        spacing = nifti_header$pixdim[2:4],
-        origin = nifti_header$qoffset,
+        spacing = ref_spacing,
+        origin = ref_origin,
         label = strip_extension(descriptor, basename(nifti_header$file_name)),
         intercept = nifti_header$scl_intercept,
         slope = nifti_header$scl_slope,
