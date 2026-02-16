@@ -1,7 +1,8 @@
 context("neurovec regressions")
 
 library(neuroim2)
-library(RNifti)
+## RNifti is used only via RNifti:: prefix below; avoid library() to prevent
+## masking neuroim2's extension/extensions/ndim/origin generics.
 
 test_that("DenseNeuroVec preserves array input shape", {
   arr <- array(1:16, dim = c(2,2,2,2))
