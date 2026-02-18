@@ -6,7 +6,7 @@
 \usage{
 read_image(
   file_name,
-  type = c("auto", "vol", "vec"),
+  type = c("auto", "vol", "vec", "hyper"),
   index = 1,
   indices = NULL,
   mask = NULL,
@@ -16,24 +16,27 @@ read_image(
 \arguments{
 \item{file_name}{Character vector of file paths.}
 
-\item{type}{One of \code{"auto"}, \code{"vol"}, or \code{"vec"} to override dispatch.}
+\item{type}{One of \code{"auto"}, \code{"vol"}, \code{"vec"}, or \code{"hyper"}
+to override dispatch.}
 
 \item{index}{Volume index to use when returning a \code{\linkS4class{NeuroVol}} or
 when you want to load a subset of volumes while still returning a \code{NeuroVec}.}
 
 \item{indices}{Optional vector of indices passed through to \code{\link{read_vec}}.}
 
-\item{mask}{Optional mask passed to \code{\link{read_vec}}.}
+\item{mask}{Optional spatial mask passed through to vector/hyper-vector readers.}
 
 \item{mode}{IO mode forwarded to \code{\link{read_vec}}.}
 }
 \value{
 A \code{\linkS4class{NeuroVol}} when the input is effectively 3D (or when
-  \code{type = "vol"}), otherwise a \code{\linkS4class{NeuroVec}}/\code{\linkS4class{NeuroVecSeq}}.
+  \code{type = "vol"}), a \code{\linkS4class{NeuroVec}}/\code{\linkS4class{NeuroVecSeq}}
+  for 4D input, or a \code{\linkS4class{NeuroHyperVec}} for 5D input.
 }
 \description{
 Convenience wrapper that inspects the file metadata and dispatches to
-\code{\link{read_vol}} for 3D data or \code{\link{read_vec}} for 4D data.
+\code{\link{read_vol}} for 3D data, \code{\link{read_vec}} for 4D data,
+or \code{\link{read_hyper_vec}} for 5D data.
 }
 \examples{
 vol <- read_image(system.file("extdata", "global_mask2.nii.gz", package = "neuroim2"))

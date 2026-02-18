@@ -828,6 +828,32 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVec", mask="numeric"),
 
 #' @export
 #' @rdname write_vec-methods
+setMethod(f="write_vec", signature=signature(x="NeuroHyperVec", file_name="character", format="missing", data_type="missing"),
+          def=function(x, file_name) {
+            write_nifti_hyper_vector(x, file_name)
+          })
+
+#' @export
+#' @rdname write_vec-methods
+setMethod(f="write_vec", signature=signature(x="NeuroHyperVec", file_name="character", format="character", data_type="missing"),
+          def=function(x, file_name, format, ...) {
+            if (toupper(format) == "NIFTI" || toupper(format) == "NIFTI1" || toupper(format) == "NIFTI-1") {
+              write_nifti_hyper_vector(x, file_name)
+            } else {
+              stop(paste("format ", format, "not supported for NeuroHyperVec."))
+            }
+          })
+
+#' @export write_vec
+#' @rdname write_vec-methods
+#' @aliases write_vec,NeuroHyperVec,character,missing,character,ANY-method
+setMethod(f="write_vec", signature=signature(x="NeuroHyperVec", file_name="character", format="missing", data_type="character"),
+          def=function(x, file_name, data_type) {
+            write_nifti_hyper_vector(x, file_name, data_type)
+          })
+
+#' @export
+#' @rdname write_vec-methods
 setMethod(f="write_vec",signature=signature(x="ROIVec", file_name="character", format="missing", data_type="missing"),
           def=function(x, file_name) {
             callGeneric(as(x, "SparseNeuroVec"), file_name)

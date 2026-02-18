@@ -260,6 +260,54 @@ NeuroHyperVec <- function(data, space, mask) {
       lookup_map = lookup_map)
 }
 
+#' @export
+#' @rdname dim-methods
+setMethod("dim", signature(x = "NeuroHyperVec"), function(x) dim(x@space))
+
+#' @export
+#' @rdname ndim-methods
+setMethod("ndim", signature(x = "NeuroHyperVec"), function(x) length(dim(x@space)))
+
+#' @export
+#' @rdname space-methods
+setMethod("space", signature(x = "NeuroHyperVec"), function(x) x@space)
+
+#' @export
+#' @rdname spacing-methods
+setMethod("spacing", signature(x = "NeuroHyperVec"), function(x) spacing(x@space))
+
+#' @export
+#' @rdname origin-methods
+setMethod("origin", signature(x = "NeuroHyperVec"), function(x) origin(x@space))
+
+#' @export
+#' @rdname trans-methods
+setMethod("trans", signature(x = "NeuroHyperVec"), function(x) trans(x@space))
+
+#' @keywords internal
+#' @noRd
+dense_array_5d <- function(x) {
+  stopifnot(inherits(x, "NeuroHyperVec"))
+  dims <- dim(x)
+  spatial_dims <- dims[1:3]
+  ntrials <- dims[4]
+  nfeatures <- dims[5]
+
+  dense <- array(0, dim = dims)
+  mask_idx <- which(x@mask@.Data)
+  nels <- prod(spatial_dims)
+
+  for (f in seq_len(nfeatures)) {
+    for (t in seq_len(ntrials)) {
+      vol <- numeric(nels)
+      vol[mask_idx] <- x@data[f, t, ]
+      dense[, , , t, f] <- array(vol, dim = spatial_dims)
+    }
+  }
+
+  dense
+}
+
 #' Series method for NeuroHyperVec
 #'
 #' @param x The NeuroHyperVec object

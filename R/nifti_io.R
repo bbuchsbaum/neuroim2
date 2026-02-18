@@ -41,6 +41,53 @@ write_nifti_vector <- function(vec, file_name, data_type="FLOAT") {
 
 #' @keywords internal
 #' @noRd
+write_nifti_hyper_vector <- function(vec, file_name, data_type="FLOAT") {
+	assert_that(inherits(vec, "NeuroHyperVec"),
+				msg = "Input must be a NeuroHyperVec")
+	assert_that(length(dim(vec)) == 5,
+				msg = "Input hyper-vector must be 5-dimensional")
+
+	hdr <- createNIfTIHeader(oneFile=TRUE, file_name=file_name)
+	hdr$file_name <- file_name
+	hdr$endian <- .Platform$endian
+	hdr$datatype <- .getDataCode(data_type)
+	hdr$data_storage <- .getDataStorage(hdr$datatype)
+	hdr$bitpix <- .getDataSize(data_type) * 8
+	hdr$dimensions <- c(length(dim(vec)), dim(vec))
+	N <- 8 - length(hdr$dimensions)
+	hdr$dimensions <- c(hdr$dimensions, rep(1, N))
+	hdr$num_dimensions <- length(dim(vec))
+
+	hdr$pixdim <- c(0, spacing(vec), rep(1, 4))
+	hdr$scl_intercept <- 0
+	hdr$scl_slope <- 1
+
+	tmat <- trans(vec)
+	hdr$qoffset <- tmat[1:3, 4]
+	hdr$qform <- tmat
+	hdr$sform <- tmat
+	quat1 <- matrixToQuatern(tmat)
+	hdr$quaternion <- quat1$quaternion
+	hdr$qfac <- quat1$qfac
+	hdr$pixdim[1] <- hdr$qfac
+
+	hdr$extensions <- new("NiftiExtensionList")
+	hdr$vox_offset <- 348 + total_extension_size(hdr$extensions)
+
+	conn <- if (substr(file_name, nchar(file_name)-2, nchar(file_name)) == ".gz") {
+		gzfile(file_name, open="wb")
+	} else {
+		file(file_name, open="wb")
+	}
+
+	write_nifti_header(hdr, conn, close=FALSE)
+	writer <- BinaryWriter(conn, hdr$vox_offset, data_type, hdr$bitpix/8, .Platform$endian)
+	write_elements(writer, as.numeric(dense_array_5d(vec)))
+	close(writer)
+}
+
+#' @keywords internal
+#' @noRd
 write_nifti_volume <- function(vol, file_name, data_type="FLOAT") {
 	assert_that(length(dim(vol)) == 3,
 				msg = "Input volume must be 3-dimensional")
