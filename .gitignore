@@ -2,6 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
+.Rlib/
+.omc/
+.rcmdcheck_result.rds
 src/*.o
 src/*.so
 src/*.dll
@@ -11,7 +14,8 @@ src/*.dll
 /doc/
 /Meta/
 docs
-.aider*
-/docs/reference
-.aider*
 docs/reference
+.aider*
+inst/doc
+vignettes/*.html
+vignettes/*.md

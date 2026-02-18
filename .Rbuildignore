@@ -36,3 +36,4 @@ test_series_bug.R
 ^neuroim2_.*\.tar\.gz$
 ^\.\.Rcheck$
 ^\.omc$
+^\.rcmdcheck_result\.rds$
