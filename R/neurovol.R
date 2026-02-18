@@ -1241,7 +1241,7 @@ setMethod("plot", signature=signature(x="NeuroVol", y="missing"),
               ggplot2::geom_raster(alpha = alpha) +
               ggplot2::scale_fill_gradientn(colours = colors,
                                            limits = irange,
-                                           guide = if (legend) "colourbar" else "none",
+                                           guide = if (legend) ggplot2::guide_colourbar(barheight = grid::unit(3, "cm")) else "none",
                                            na.value = "transparent") +
               ggplot2::facet_wrap(~ z, ncol = 3L,
                                  labeller = ggplot2::labeller(

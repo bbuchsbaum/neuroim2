@@ -127,6 +127,7 @@ cmap
 codecov
 colorbar
 colormap
+colour
 consistting
 consruct
 convolutional
@@ -173,6 +174,7 @@ kmeans
 lv
 medoid
 minum
+mistyped
 mmap
 nbit
 ncol
@@ -222,3 +224,5 @@ vox
 voxel's
 voxelwise
 wikipedia
+λ
+σ

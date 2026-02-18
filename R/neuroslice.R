@@ -215,7 +215,7 @@ setMethod("plot",
               ggplot2::geom_raster() +
               ggplot2::scale_fill_gradientn(colours = cmap,
                                            limits = irange,
-                                           guide = if (legend) "colourbar" else "none") +
+                                           guide = if (legend) ggplot2::guide_colourbar(barheight = grid::unit(3, "cm")) else "none") +
               ggplot2::xlab("") + ggplot2::ylab("") +
               ggplot2::theme_bw()
 

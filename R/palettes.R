@@ -57,6 +57,7 @@ resolve_cmap <- function(name = "grays", n = 256) {
 #' @param na.value Color for NA.
 #' @param guide Legend guide (default "colorbar").
 #' @return A ggplot2 scale object.
+#' @importFrom grid unit
 #' @export
 scale_fill_neuro <- function(
   cmap   = "grays",
@@ -68,6 +69,9 @@ scale_fill_neuro <- function(
 ) {
   range <- match.arg(range)
   pal <- resolve_cmap(cmap, 256)
+  if (identical(guide, "colorbar") || identical(guide, "colourbar")) {
+    guide <- ggplot2::guide_colourbar(barheight = grid::unit(3, "cm"))
+  }
   ggplot2::scale_fill_gradientn(colours = pal, limits = limits,
                                 na.value = na.value, guide = guide)
 }
