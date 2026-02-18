@@ -1,11 +1,22 @@
 ---
-title: "Overview: Getting Started with neuroim2"
-date: "`r Sys.Date()`"
+title: 'Overview: Getting Started with neuroim2'
+date: '`r Sys.Date()`'
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Overview: Getting Started with neuroim2}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+params:
+  family: red
+css: albers.css
+resource_files:
+- albers.css
+- albers.js
+includes:
+  in_header: |-
+    <script src="albers.js"></script>
+    <script>document.addEventListener('DOMContentLoaded',()=>document.body.classList.add('palette-red'));</script>
+
 ---
 
 ```{r, echo = FALSE, message = FALSE}

@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">neuroim2</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,7 +54,7 @@
 
       <h1>Regions of Interest (ROI)</h1>
             
-            <h4 data-toc-skip class="date">2026-01-13</h4>
+            <h4 data-toc-skip class="date">2026-02-08</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/neuroim2/blob/HEAD/vignettes/regionOfInterest.Rmd" class="external-link"><code>vignettes/regionOfInterest.Rmd</code></a></small>
       <div class="d-none name"><code>regionOfInterest.Rmd</code></div>
@@ -62,6 +62,7 @@
 
     
     
+<pre><code><span><span class="co">## Warning: package 'purrr' was built under R version 4.5.2</span></span></code></pre>
 <div class="section level2">
 <h2 id="introduction-to-regions-of-interest">Introduction to Regions of Interest<a class="anchor" aria-label="anchor" href="#introduction-to-regions-of-interest"></a>
 </h2>
@@ -142,7 +143,7 @@ for creating and manipulating ROIs:</p>
 <div class="section level3">
 <h3 id="quick-start">Quick Start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h3>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load the package</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bbuchsbaum/neuroim2" class="external-link">neuroim2</a></span><span class="op">)</span></span>
 <span></span>
@@ -166,7 +167,7 @@ for creating and manipulating ROIs:</p>
 <p>Spherical ROIs are the most commonly used type in neuroimaging.
 They’re particularly useful for searchlight analyses and seed-based
 connectivity studies.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load an example brain volume</span></span>
 <span><span class="va">file_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask2.nii.gz"</span>, package<span class="op">=</span><span class="st">"neuroim2"</span><span class="op">)</span></span>
 <span><span class="va">vol</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">file_name</span><span class="op">)</span></span>
@@ -185,7 +186,7 @@ connectivity studies.</p>
 <div class="section level4">
 <h4 id="performance-note-c-vs-pure-r-implementation">Performance Note: C++ vs Pure R Implementation<a class="anchor" aria-label="anchor" href="#performance-note-c-vs-pure-r-implementation"></a>
 </h4>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># The spherical_roi function can use either C++ (fast) or pure R (slower)</span></span>
 <span><span class="co"># C++ is the default and recommended for performance</span></span>
 <span><span class="va">sphere_cpp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spherical_roi.html">spherical_roi</a></span><span class="op">(</span><span class="va">vol</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">20</span>, <span class="fl">20</span><span class="op">)</span>, radius <span class="op">=</span> <span class="fl">5</span>, use_cpp <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -205,7 +206,7 @@ connectivity studies.</p>
 </h3>
 <p>Often, you’ll have coordinates in millimeter space (e.g., from
 published studies) rather than voxel indices.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Define a real-world coordinate in mm</span></span>
 <span><span class="va">rpoint</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">34</span>, <span class="op">-</span><span class="fl">28</span>, <span class="fl">10</span><span class="op">)</span></span>
 <span></span>
@@ -232,7 +233,7 @@ published studies) rather than voxel indices.</p>
 </h3>
 <p>When creating many ROIs, use the vectorized
 <code><a href="../reference/spherical_roi_set.html">spherical_roi_set()</a></code> function for better performance:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bbuchsbaum/neuroim2" class="external-link">neuroim2</a></span><span class="op">)</span></span>
 <span><span class="va">vol</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask_v4.nii"</span>, package <span class="op">=</span> <span class="st">"neuroim2"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span></span>
@@ -262,7 +263,7 @@ published studies) rather than voxel indices.</p>
 <div class="section level4">
 <h4 id="cuboid-rois-3d-boxes">Cuboid ROIs (3D boxes)<a class="anchor" aria-label="anchor" href="#cuboid-rois-3d-boxes"></a>
 </h4>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a cuboid ROI - a 3D rectangular box</span></span>
 <span><span class="va">sp1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NeuroSpace.html">NeuroSpace</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">20</span>, <span class="fl">20</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -287,7 +288,7 @@ published studies) rather than voxel indices.</p>
 <div class="section level4">
 <h4 id="square-rois-2d-in-3d-space">Square ROIs (2D in 3D space)<a class="anchor" aria-label="anchor" href="#square-rois-2d-in-3d-space"></a>
 </h4>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a square ROI - a 2D square fixed in one dimension</span></span>
 <span><span class="va">sp1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NeuroSpace.html">NeuroSpace</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">20</span>, <span class="fl">20</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -315,7 +316,7 @@ published studies) rather than voxel indices.</p>
 </h3>
 <p>Sparse volumes are memory-efficient representations that only store
 non-zero values:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a spherical ROI</span></span>
 <span><span class="va">sphere</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spherical_roi.html">spherical_roi</a></span><span class="op">(</span><span class="va">vol</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span>, radius <span class="op">=</span> <span class="fl">10</span>, fill <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"ROI contains"</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">sphere</span><span class="op">)</span>, <span class="st">"voxels\n"</span><span class="op">)</span></span>
@@ -344,7 +345,7 @@ non-zero values:</p>
 </h3>
 <p>ROIs are particularly useful for extracting time-series from 4D
 functional data:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load a 4D dataset (using mask file as example - normally this would be fMRI data)</span></span>
 <span><span class="va">vec4d</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vec.html">read_vec</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask_v4.nii"</span>, package <span class="op">=</span> <span class="st">"neuroim2"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"4D data dimensions:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">vec4d</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
@@ -369,7 +370,7 @@ functional data:</p>
 </h3>
 <p>The <code>ROIVec</code> class is designed for efficient storage of 4D
 ROI data:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a 4D NeuroSpace</span></span>
 <span><span class="va">vspace</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NeuroSpace.html">NeuroSpace</a></span><span class="op">(</span>dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">10</span>, <span class="fl">10</span>, <span class="fl">20</span><span class="op">)</span>, spacing <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -403,7 +404,7 @@ analysis that examines local neighborhoods throughout the brain.</p>
 <div class="section level3">
 <h3 id="basic-searchlight">Basic Searchlight<a class="anchor" aria-label="anchor" href="#basic-searchlight"></a>
 </h3>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Generate exhaustive searchlight covering all voxels</span></span>
@@ -425,7 +426,7 @@ analysis that examines local neighborhoods throughout the brain.</p>
 </h3>
 <p>Randomized searchlight samples voxels without replacement, ensuring
 coverage while reducing redundancy:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Randomized searchlight - each voxel appears in at least one searchlight</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span>  <span class="co"># For reproducibility</span></span>
 <span><span class="va">random_lights</span> <span class="op">&lt;-</span> <span class="va">vol</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
@@ -439,7 +440,7 @@ coverage while reducing redundancy:</p>
 <h3 id="clustered-searchlight">Clustered Searchlight<a class="anchor" aria-label="anchor" href="#clustered-searchlight"></a>
 </h3>
 <p>Use anatomical or functional parcellations to define ROIs:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a clustering over the voxel space</span></span>
 <span><span class="va">grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/index_to_coord-methods.html">index_to_coord</a></span><span class="op">(</span><span class="va">vol</span>, <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">vol</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
@@ -465,7 +466,7 @@ coverage while reducing redundancy:</p>
 </h2>
 <p>Patches are regular, fixed-size regions that tile the image space,
 useful for convolutional approaches:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create 3x3x1 patches covering the volume</span></span>
 <span><span class="va">pset</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/patch_set.html">patch_set</a></span><span class="op">(</span><span class="va">vol</span>, dims <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Number of patches:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">pset</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
@@ -496,7 +497,7 @@ useful for convolutional approaches:</p>
 <h3 id="custom-weighted-rois-with-kernels">Custom Weighted ROIs with Kernels<a class="anchor" aria-label="anchor" href="#custom-weighted-rois-with-kernels"></a>
 </h3>
 <p>Create Gaussian-weighted or other custom-shaped ROIs:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a Gaussian kernel for weighted ROI</span></span>
 <span><span class="va">kern_dim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span>  <span class="co"># 5x5x5 kernel</span></span>
 <span><span class="va">voxel_dim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>  <span class="co"># 1mm isotropic voxels</span></span>
@@ -516,7 +517,7 @@ useful for convolutional approaches:</p>
 </h3>
 <p>Efficiently handle parcellated 4D data where voxels are grouped into
 regions:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create synthetic 4D data</span></span>
 <span><span class="va">sp4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NeuroSpace.html">NeuroSpace</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">10</span>, <span class="fl">10</span>, <span class="fl">20</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">arr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/array.html" class="external-link">array</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">10</span><span class="op">*</span><span class="fl">10</span><span class="op">*</span><span class="fl">10</span><span class="op">*</span><span class="fl">20</span><span class="op">)</span>, dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">10</span>, <span class="fl">10</span>, <span class="fl">20</span><span class="op">)</span><span class="op">)</span></span>
@@ -548,7 +549,7 @@ regions:</p>
 <h3 id="roi-set-operations">ROI Set Operations<a class="anchor" aria-label="anchor" href="#roi-set-operations"></a>
 </h3>
 <p>Combine and manipulate multiple ROIs:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create two overlapping spherical ROIs</span></span>
 <span><span class="va">roi1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spherical_roi.html">spherical_roi</a></span><span class="op">(</span><span class="va">vol</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">20</span>, <span class="fl">20</span><span class="op">)</span>, radius <span class="op">=</span> <span class="fl">6</span>, fill <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">roi2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spherical_roi.html">spherical_roi</a></span><span class="op">(</span><span class="va">vol</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">23</span>, <span class="fl">20</span>, <span class="fl">20</span><span class="op">)</span>, radius <span class="op">=</span> <span class="fl">6</span>, fill <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
@@ -586,7 +587,7 @@ regions:</p>
 <h3 id="memory-management">Memory Management<a class="anchor" aria-label="anchor" href="#memory-management"></a>
 </h3>
 <p>When working with many ROIs, consider memory usage:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compare memory usage of different ROI storage methods</span></span>
 <span><span class="va">n_rois</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
 <span><span class="va">centers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="va">n_rois</span> <span class="op">*</span> <span class="fl">3</span>, <span class="fl">5</span>, <span class="fl">15</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
@@ -628,7 +629,7 @@ regions:</p>
 <h3 id="choosing-roi-sizes">Choosing ROI Sizes<a class="anchor" aria-label="anchor" href="#choosing-roi-sizes"></a>
 </h3>
 <p>Guidelines for selecting appropriate ROI sizes:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Demonstrate effect of ROI size on coverage and overlap</span></span>
 <span><span class="va">radii</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">8</span>, <span class="fl">10</span>, <span class="fl">12</span><span class="op">)</span></span>
 <span><span class="va">coverage_stats</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -662,7 +663,7 @@ regions:</p>
 <h3 id="parallel-processing-tips">Parallel Processing Tips<a class="anchor" aria-label="anchor" href="#parallel-processing-tips"></a>
 </h3>
 <p>For large-scale ROI analyses, consider parallel processing:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Example of parallel searchlight analysis (not run in vignette)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">parallel</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/RevolutionAnalytics/foreach" class="external-link">foreach</a></span><span class="op">)</span></span>
@@ -694,7 +695,7 @@ regions:</p>
 <div class="section level4">
 <h4 id="issue-roi-extends-outside-brain-mask">Issue: ROI extends outside brain mask<a class="anchor" aria-label="anchor" href="#issue-roi-extends-outside-brain-mask"></a>
 </h4>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Problem: ROI at edge of brain</span></span>
 <span><span class="va">edge_vox</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>  <span class="co"># Near edge of volume</span></span>
 <span></span>
@@ -712,7 +713,7 @@ regions:</p>
 <div class="section level4">
 <h4 id="issue-different-coordinate-systems">Issue: Different coordinate systems<a class="anchor" aria-label="anchor" href="#issue-different-coordinate-systems"></a>
 </h4>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Always verify your coordinate system</span></span>
 <span><span class="va">test_coord_mm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">34</span>, <span class="op">-</span><span class="fl">28</span>, <span class="fl">10</span><span class="op">)</span>  <span class="co"># MNI coordinates</span></span>
 <span><span class="va">test_coord_vox</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/coord_to_grid-methods.html">coord_to_grid</a></span><span class="op">(</span><span class="va">vol</span>, <span class="va">test_coord_mm</span><span class="op">)</span></span>
@@ -754,7 +755,7 @@ representations</li>
 extraction</li>
 </ul>
 <p>For the complete list of ROI-related functions:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/help.html" class="external-link">help</a></span><span class="op">(</span>package <span class="op">=</span> <span class="st">"neuroim2"</span>, topic <span class="op">=</span> <span class="st">"roi"</span><span class="op">)</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

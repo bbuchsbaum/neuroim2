@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">neuroim2</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,7 +54,7 @@
 
       <h1>Working with 3D Image Volumes</h1>
             
-            <h4 data-toc-skip class="date">2026-01-13</h4>
+            <h4 data-toc-skip class="date">2026-02-08</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/neuroim2/blob/HEAD/vignettes/ImageVolumes.Rmd" class="external-link"><code>vignettes/ImageVolumes.Rmd</code></a></small>
       <div class="d-none name"><code>ImageVolumes.Rmd</code></div>
@@ -326,9 +326,18 @@ using the <code>space</code> extractor function when needed:</p>
 <div class="section level2">
 <h2 id="slicing-and-quick-visualization">Slicing and quick visualization<a class="anchor" aria-label="anchor" href="#slicing-and-quick-visualization"></a>
 </h2>
-<p>Extract a single 2D slice for display using standard array
-indexing:</p>
+<p>The easiest way to view a volume is with <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>, which
+shows a 3 x 3 montage of evenly-spaced axial slices:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="ImageVolumes_files/figure-html/plot_montage-1.png" class="r-plt" alt="3x3 montage of axial slices." width="672"><p class="caption">
+Default plot() montage
+</p>
+</div>
+<p>You can also extract a single 2D slice for display using standard
+array indexing:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>    <span class="va">z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">ceiling</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span> <span class="op">/</span> <span class="fl">2</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="../reference/image.html">image</a></span><span class="op">(</span><span class="va">vol</span><span class="op">[</span>,,<span class="va">z</span><span class="op">]</span>, main <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Slice z="</span>, <span class="va">z</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
@@ -343,7 +352,7 @@ Mid-slice of example volume
 <p>You can change an image’s orientation and voxel spacing. Use
 <code><a href="../reference/reorient-methods.html">reorient()</a></code> to remap axes (e.g., to RAS) and
 <code><a href="../reference/resample_to.html">resample_to()</a></code> to match a target space.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>    <span class="co"># Reorient the space (LPI -&gt; RAS) and compare coordinate mappings</span></span>
 <span>    <span class="va">sp_lpi</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span></span>
 <span>    <span class="va">sp_ras</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reorient-methods.html">reorient</a></span><span class="op">(</span><span class="va">sp_lpi</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"R"</span>,<span class="st">"A"</span>,<span class="st">"S"</span><span class="op">)</span><span class="op">)</span></span>
@@ -353,7 +362,7 @@ Mid-slice of example volume
 <span>    <span class="co"># world_lpi and world_ras differ due to axis remapping</span></span></code></pre></div>
 <p>Resample to a new spacing or match a target
 <code>NeuroSpace</code>:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>    <span class="co"># Create a target space with 2x finer resolution</span></span>
 <span>    <span class="va">sp</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span></span>
 <span>    <span class="va">sp2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NeuroSpace.html">NeuroSpace</a></span><span class="op">(</span><span class="va">sp</span><span class="op">@</span><span class="va">dim</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">2</span>,<span class="fl">2</span><span class="op">)</span>, <span class="va">sp</span><span class="op">@</span><span class="va">spacing</span><span class="op">/</span><span class="fl">2</span>, origin<span class="op">=</span><span class="va">sp</span><span class="op">@</span><span class="va">origin</span>, trans<span class="op">=</span><span class="fu"><a href="../reference/trans-methods.html">trans</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span><span class="op">)</span></span>
@@ -366,7 +375,7 @@ Mid-slice of example volume
 <h2 id="downsampling">Downsampling<a class="anchor" aria-label="anchor" href="#downsampling"></a>
 </h2>
 <p>Reduce spatial resolution to speed up downstream operations.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>    <span class="co"># Downsample by target spacing</span></span>
 <span>    <span class="va">vol_ds1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/downsample-methods.html">downsample</a></span><span class="op">(</span><span class="va">vol</span>, spacing <span class="op">=</span> <span class="fu"><a href="../reference/spacing-methods.html">spacing</a></span><span class="op">(</span><span class="va">vol</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="op">*</span> <span class="fl">2</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">vol_ds1</span><span class="op">)</span></span>
@@ -382,13 +391,13 @@ Mid-slice of example volume
 </h2>
 <p>When we’re ready to write an image volume to disk, we use
 <code>write_vol</code></p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>    <span class="fu"><a href="../reference/write_vol-methods.html">write_vol</a></span><span class="op">(</span><span class="va">vol2</span>, <span class="st">"output.nii"</span><span class="op">)</span></span>
 <span>    </span>
 <span>    <span class="co">## adding a '.gz' extension results ina gzipped file.</span></span>
 <span>    <span class="fu"><a href="../reference/write_vol-methods.html">write_vol</a></span><span class="op">(</span><span class="va">vol2</span>, <span class="st">"output.nii.gz"</span><span class="op">)</span></span></code></pre></div>
 <p>You can also write to a temporary file during workflows:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>    <span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".nii.gz"</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="../reference/write_vol-methods.html">write_vol</a></span><span class="op">(</span><span class="va">vol2</span>, <span class="va">tmp</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span>

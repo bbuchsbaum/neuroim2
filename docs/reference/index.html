@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">neuroim2</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -1727,7 +1727,7 @@
 
         <dt>
 
-          <code><a href="as.dense-methods.html">as.dense(<i>&lt;ClusteredNeuroVol&gt;</i>)</a></code> <code><a href="as.dense-methods.html">as.dense(<i>&lt;SparseNeuroVol&gt;</i>)</a></code> <code><a href="as.dense-methods.html">as.dense(<i>&lt;ROIVol&gt;</i>)</a></code> <code><a href="as.dense-methods.html">as.dense(<i>&lt;SparseNeuroVec&gt;</i>)</a></code>
+          <code><a href="as.dense-methods.html">as.dense(<i>&lt;ClusteredNeuroVol&gt;</i>)</a></code> <code><a href="as.dense-methods.html">as.dense(<i>&lt;SparseNeuroVol&gt;</i>)</a></code> <code><a href="as.dense-methods.html">as.dense(<i>&lt;DenseNeuroVol&gt;</i>)</a></code> <code><a href="as.dense-methods.html">as.dense(<i>&lt;ROIVol&gt;</i>)</a></code> <code><a href="as.dense-methods.html">as.dense(<i>&lt;SparseNeuroVec&gt;</i>)</a></code>
 
         </dt>
         <dd>Coerce SparseNeuroVol to DenseNeuroVol</dd>
@@ -1839,7 +1839,7 @@
 
         <dt>
 
-          <code><a href="plot-methods.html">plot(<i>&lt;NeuroSlice&gt;</i>)</a></code> <code><a href="plot-methods.html">plot(<i>&lt;NeuroVol&gt;</i>)</a></code>
+          <code><a href="plot-methods.html">plot(<i>&lt;NeuroSlice&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="plot-methods.html">plot(<i>&lt;NeuroVol&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="plot-methods.html">plot(<i>&lt;NeuroVol&gt;</i>,<i>&lt;NeuroVol&gt;</i>)</a></code>
 
         </dt>
         <dd>Plot a NeuroSlice</dd>
@@ -1888,17 +1888,24 @@
 
         <dt>
 
-          <code><a href="Arith-methods.html">Arith(<i>&lt;SparseNeuroVol&gt;</i>,<i>&lt;SparseNeuroVol&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;DenseNeuroVol&gt;</i>,<i>&lt;DenseNeuroVol&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;DenseNeuroVec&gt;</i>,<i>&lt;DenseNeuroVec&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;SparseNeuroVol&gt;</i>,<i>&lt;NeuroVol&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;NeuroVol&gt;</i>,<i>&lt;SparseNeuroVol&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;SparseNeuroVec&gt;</i>,<i>&lt;SparseNeuroVec&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;NeuroVec&gt;</i>,<i>&lt;NeuroVec&gt;</i>)</a></code>
+          <code><a href="Arith-methods.html">Arith(<i>&lt;SparseNeuroVol&gt;</i>,<i>&lt;SparseNeuroVol&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;DenseNeuroVol&gt;</i>,<i>&lt;DenseNeuroVol&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;DenseNeuroVec&gt;</i>,<i>&lt;DenseNeuroVec&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;SparseNeuroVol&gt;</i>,<i>&lt;NeuroVol&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;NeuroVol&gt;</i>,<i>&lt;SparseNeuroVol&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;SparseNeuroVec&gt;</i>,<i>&lt;SparseNeuroVec&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;NeuroVec&gt;</i>,<i>&lt;NeuroVec&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;DenseNeuroVol&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;numeric&gt;</i>,<i>&lt;DenseNeuroVol&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;SparseNeuroVol&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;numeric&gt;</i>,<i>&lt;SparseNeuroVol&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;ClusteredNeuroVol&gt;</i>,<i>&lt;ClusteredNeuroVol&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;ClusteredNeuroVol&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;numeric&gt;</i>,<i>&lt;ClusteredNeuroVol&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;ClusteredNeuroVol&gt;</i>,<i>&lt;NeuroVol&gt;</i>)</a></code> <code><a href="Arith-methods.html">Arith(<i>&lt;NeuroVol&gt;</i>,<i>&lt;ClusteredNeuroVol&gt;</i>)</a></code>
 
         </dt>
         <dd>Arithmetic Operations</dd>
 
         <dt>
 
-          <code><a href="Compare-methods.html">Compare(<i>&lt;SparseNeuroVol&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="Compare-methods.html">Compare(<i>&lt;numeric&gt;</i>,<i>&lt;SparseNeuroVol&gt;</i>)</a></code> <code><a href="Compare-methods.html">Compare(<i>&lt;NeuroVec&gt;</i>,<i>&lt;NeuroVec&gt;</i>)</a></code>
+          <code><a href="Compare-methods.html">Compare(<i>&lt;DenseNeuroVol&gt;</i>,<i>&lt;DenseNeuroVol&gt;</i>)</a></code> <code><a href="Compare-methods.html">Compare(<i>&lt;DenseNeuroVol&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="Compare-methods.html">Compare(<i>&lt;numeric&gt;</i>,<i>&lt;DenseNeuroVol&gt;</i>)</a></code> <code><a href="Compare-methods.html">Compare(<i>&lt;SparseNeuroVol&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="Compare-methods.html">Compare(<i>&lt;numeric&gt;</i>,<i>&lt;SparseNeuroVol&gt;</i>)</a></code> <code><a href="Compare-methods.html">Compare(<i>&lt;NeuroVec&gt;</i>,<i>&lt;NeuroVec&gt;</i>)</a></code>
 
         </dt>
         <dd>Comparison Operations</dd>
+
+        <dt>
+
+          <code><a href="Logic-methods.html">Logic(<i>&lt;DenseNeuroVol&gt;</i>,<i>&lt;DenseNeuroVol&gt;</i>)</a></code> <code><a href="Logic-methods.html">Logic(<i>&lt;SparseNeuroVol&gt;</i>,<i>&lt;SparseNeuroVol&gt;</i>)</a></code> <code><a href="Logic-methods.html">Logic(<i>&lt;SparseNeuroVol&gt;</i>,<i>&lt;NeuroVol&gt;</i>)</a></code> <code><a href="Logic-methods.html">Logic(<i>&lt;NeuroVol&gt;</i>,<i>&lt;SparseNeuroVol&gt;</i>)</a></code> <code><a href="Logic-methods.html">Logic(<i>&lt;NeuroVol&gt;</i>,<i>&lt;logical&gt;</i>)</a></code> <code><a href="Logic-methods.html">Logic(<i>&lt;logical&gt;</i>,<i>&lt;NeuroVol&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Logic Operations for Neuroimaging Volumes</dd>
 
         <dt>
 
@@ -2175,6 +2182,13 @@
 
         <dt>
 
+          <code><a href="not-methods.html">`!`(<i>&lt;DenseNeuroVol&gt;</i>)</a></code> <code><a href="not-methods.html">`!`(<i>&lt;SparseNeuroVol&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Logical Negation for Neuroimaging Volumes</dd>
+
+        <dt>
+
           <code><a href="num_clusters-methods.html">num_clusters()</a></code>
 
         </dt>
@@ -2340,6 +2354,13 @@
 
         </dt>
         <dd>Generic function to strip extension from file name, given a <code>FileFormat</code> instance.</dd>
+
+        <dt>
+
+          <code><a href="sub_clusters.html">sub_clusters()</a></code>
+
+        </dt>
+        <dd>Select a Subset of Clusters</dd>
 
         <dt>
 

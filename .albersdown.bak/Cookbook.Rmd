@@ -1,11 +1,22 @@
 ---
-title: "neuroim2 Cookbook"
-date: "`r Sys.Date()`"
+title: neuroim2 Cookbook
+date: '`r Sys.Date()`'
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{neuroim2 Cookbook}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+params:
+  family: red
+css: albers.css
+resource_files:
+- albers.css
+- albers.js
+includes:
+  in_header: |-
+    <script src="albers.js"></script>
+    <script>document.addEventListener('DOMContentLoaded',()=>document.body.classList.add('palette-red'));</script>
+
 ---
 
 ```{r, echo = FALSE, message = FALSE}
@@ -57,11 +68,13 @@ single value (e.g. `median`, a trimmed mean, robust summaries, etc.).
 
 If you have a single concatenated `NeuroVec` with multiple logical
 blocks along the time dimension (e.g., runs or sessions), you can
-“un‑concatenate” it into one `NeuroVec` per block using
+"unconcatenate" it into one `NeuroVec` per block using
 `split_blocks()`.
 
 Create an index vector of length `dim(vec)[4]` indicating which block
-each timepoint belongs to, then call `split_blocks()`:
+each timepoint belongs to, then split the time index and convert each
+subset to a sub-vector (this is what \code{split_blocks()} does
+internally):
 
 ```{r}
 space4 <- NeuroSpace(c(10, 10, 10, 9), c(1, 1, 1))
@@ -74,7 +87,8 @@ block_idx <- c(1, 1, 1,
                2, 2, 2,
                3, 3, 3)
 
-blocks <- split_blocks(vec4d, block_idx)
+idx_list <- split(seq_len(dim(vec4d)[4]), block_idx)
+blocks <- lapply(idx_list, function(ii) sub_vector(vec4d, ii))
 
 length(blocks)        # 3 blocks
 dim(blocks[[1]])      # first block: 10×10×10×3
@@ -82,9 +96,10 @@ dim(blocks[[2]])      # second block: 10×10×10×3
 dim(blocks[[3]])      # third block: 10×10×10×3
 ```
 
-The result is a deferred list (`deflist`) of `NeuroVec` objects; access
-elements with `blocks[[i]]` to materialize a concrete `NeuroVec` for
-block `i`. This is effectively the inverse of concatenation by time.
+The result is a list of `NeuroVec` objects; access elements with
+`blocks[[i]]` for block `i`. This is effectively the inverse of
+concatenation by time. The helper \code{split_blocks()} exposes this
+pattern with method dispatch for `NeuroVec`.
 
 
 ## Converting a NeuroVec to a memory‑mapped MappedNeuroVec
@@ -162,3 +177,108 @@ dim(values(roi_list[[1]]))     # time × voxels in that cluster
 
 This is useful when you want to work directly with voxel‑level ROIs per
 cluster rather than first building a `ClusteredNeuroVec`.
+
+
+## Group‑wise voxel reduction with `split_reduce`
+
+When you have a voxel‑wise grouping (e.g. tissue classes, parcels, or
+custom regions), `split_reduce()` can compute one summary time‑series
+per group directly from a `NeuroVec`.
+
+```{r}
+file_name <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
+vec <- read_vec(file_name)
+
+n_vox <- prod(dim(vec)[1:3])
+
+# Assign each voxel to one of three arbitrary groups
+fac <- factor(sample(1:3, n_vox, replace = TRUE))
+
+# Default: mean over voxels in each group (per timepoint)
+group_ts <- split_reduce(vec, fac)
+
+dim(group_ts)         # groups × timepoints
+rownames(group_ts)    # "1", "2", "3"
+```
+
+Here each row of `group_ts` is the mean time‑series of all voxels in
+that group; you can supply any function `FUN` that maps a numeric vector
+to a scalar (e.g. `median`, robust summaries, etc.).
+
+
+## Concatenating NeuroVols into a NeuroVec
+
+To build a 4D `NeuroVec` from multiple 3D `NeuroVol` objects that share
+the same space, use `concat()` along the time dimension.
+
+```{r}
+sp3  <- NeuroSpace(c(10, 10, 10), c(1, 1, 1))
+vol1 <- NeuroVol(array(rnorm(10 * 10 * 10), c(10, 10, 10)), sp3)
+vol2 <- NeuroVol(array(rnorm(10 * 10 * 10), c(10, 10, 10)), sp3)
+vol3 <- NeuroVol(array(rnorm(10 * 10 * 10), c(10, 10, 10)), sp3)
+
+# Concatenate volumes into a 4D NeuroVec (time dimension length 3)
+vec_3 <- concat(vol1, vol2, vol3)
+
+dim(vec_3)   # 10 × 10 × 10 × 3
+space(vec_3) # inherits spatial metadata from inputs
+```
+
+All input volumes must have identical spatial dimensions and `NeuroSpace`;
+otherwise `concat()` will error.
+
+
+## Concatenating NeuroVecs along the time dimension
+
+You can also concatenate multiple `NeuroVec` objects (e.g. runs or
+sessions) into a longer 4D vector, again with `concat()`.
+
+```{r}
+file_name <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
+
+run1 <- read_vec(file_name)          # 4D NeuroVec
+run2 <- read_vec(file_name)          # same space and shape
+
+# Concatenate timepoints: result has dim(...)[4] = dim(run1)[4] + dim(run2)[4]
+run12 <- concat(run1, run2)
+
+dim(run1)
+dim(run2)
+dim(run12)
+```
+
+This is the natural inverse of splitting by blocks: you can break a long
+`NeuroVec` into segments with `split_blocks()` and then reconstruct a
+longer series again with `concat()`.
+
+
+## Connected components in a 3D mask
+
+To identify spatially contiguous clusters in a 3D volume or mask, use
+`conn_comp()` on a `NeuroVol`. This is handy for summarizing thresholded
+statistical maps or cleaning up binary masks.
+
+```{r}
+sp  <- NeuroSpace(c(10, 10, 10), c(1, 1, 1))
+arr <- array(0, c(10, 10, 10))
+
+# Two small 2×2×2 clusters in opposite corners
+arr[1:2, 1:2, 1:2] <- 1
+arr[8:9, 8:9, 8:9] <- 1
+
+vol <- NeuroVol(arr, sp)
+
+# Find connected components above threshold 0 (26-connectivity by default)
+cc <- conn_comp(vol, threshold = 0)
+
+max(cc$index)      # number of clusters (should be 2)
+cc$size[cc$size > 0]  # cluster sizes in voxels
+```
+
+You can also request a `cluster_table` of summary statistics or
+`local_maxima` for peak finding:
+
+```{r}
+cc2 <- conn_comp(vol, threshold = 0, cluster_table = TRUE)
+head(cc2$cluster_table)
+```

@@ -4,15 +4,15 @@ pkgdown_sha: ~
 articles:
   clustered-neurovec: clustered-neurovec.html
   Cookbook: Cookbook.html
-  elegant-slice-visualization: elegant-slice-visualization.html
   ImageVolumes: ImageVolumes.html
   NeuroVector: NeuroVector.html
   Overview: Overview.html
   pipelines: pipelines.html
   regionOfInterest: regionOfInterest.html
   Resampling: Resampling.html
+  slice-visualization: slice-visualization.html
   Smoothing: Smoothing.html
-last_built: 2026-01-14T03:59Z
+last_built: 2026-02-08T19:21Z
 urls:
   reference: https://bbuchsbaum.github.io/neuroim2/reference
   article: https://bbuchsbaum.github.io/neuroim2/articles
