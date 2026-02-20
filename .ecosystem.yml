@@ -1,0 +1,16 @@
+ecosystem: eco-oracle
+package: neuroim2
+language: R
+role: neuroimaging
+tags:
+  - neuroimaging
+  - fMRI
+  - nifti
+  - sparse
+  - S4
+entrypoints:
+  - neuroim2::read_vec
+  - neuroim2::read_vol
+  - neuroim2::NeuroVec
+  - neuroim2::NeuroVol
+  - neuroim2::ClusteredNeuroVec
