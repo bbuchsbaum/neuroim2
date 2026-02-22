@@ -16,6 +16,7 @@ plot_overlay(
   probs = c(0.02, 0.98),
   ov_thresh = 0,
   ov_alpha = 0.7,
+  ov_alpha_mode = c("binary", "proportional"),
   ncol = 3L,
   title = NULL,
   subtitle = NULL,
@@ -42,6 +43,10 @@ plot_overlay(
 \item{ov_thresh}{Numeric threshold; values with |v| < thresh become transparent.}
 
 \item{ov_alpha}{Global alpha for overlay (0..1).}
+
+\item{ov_alpha_mode}{Either \code{"binary"} (thresholded full-alpha overlay) or
+\code{"proportional"} (per-pixel alpha scaled by absolute overlay magnitude,
+multiplied by \code{ov_alpha}).}
 
 \item{ncol}{Number of columns in the facet layout.}
 

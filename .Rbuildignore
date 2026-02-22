@@ -37,3 +37,6 @@ test_series_bug.R
 ^\.\.Rcheck$
 ^\.omc$
 ^\.rcmdcheck_result\.rds$
+^atlas-pack\.tgz$
+^atlas$
+^tools$

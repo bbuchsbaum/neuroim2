@@ -13,6 +13,10 @@
 #' @param probs Quantiles for robust scaling.
 #' @param ov_thresh Numeric threshold; values with |v| < thresh become transparent.
 #' @param ov_alpha Global alpha for overlay (0..1).
+#' @param ov_alpha_mode Either \code{"binary"} (default, current behavior: pixels
+#'   above threshold get full \code{ov_alpha}, others are transparent) or
+#'   \code{"proportional"} (per-pixel alpha scaled by absolute value of the
+#'   overlay, multiplied by \code{ov_alpha}).
 #' @param ncol Number of columns in the facet layout.
 #' @param title,subtitle,caption Optional labels.
 #' @export
@@ -21,10 +25,12 @@ plot_overlay <- function(
   bg_cmap = "grays", ov_cmap = "inferno",
   bg_range = c("robust","data"), ov_range = c("robust","data"),
   probs = c(.02,.98), ov_thresh = 0, ov_alpha = .7,
+  ov_alpha_mode = c("binary", "proportional"),
   ncol = 3L, title = NULL, subtitle = NULL, caption = NULL
 ) {
   stopifnot(all(dim(bgvol) == dim(overlay)))
   bg_range <- match.arg(bg_range); ov_range <- match.arg(ov_range)
+  ov_alpha_mode <- match.arg(ov_alpha_mode)
 
   if (is.null(zlevels)) zlevels <- unique(round(seq(1, dim(bgvol)[along], length.out = 9)))
 
@@ -42,9 +48,26 @@ plot_overlay <- function(
 
     # Overlay data; apply threshold then convert to grob for independent palette
     mov <- slice_to_matrix(sl_ov)
-    if (isTRUE(ov_thresh > 0)) mov[abs(mov) < ov_thresh] <- NA_real_
-    ov_lim <- compute_limits(as.numeric(mov), mode = ov_range, probs = probs)
-    g_ov <- matrix_to_raster_grob(mov, cmap = ov_cmap, limits = ov_lim, alpha = ov_alpha)
+    if (ov_alpha_mode == "proportional") {
+      abs_mov <- abs(mov)
+      max_abs <- max(abs_mov, na.rm = TRUE)
+      if (is.finite(max_abs) && max_abs > 0) {
+        amap <- abs_mov / max_abs
+      } else {
+        amap <- matrix(0, nrow = nrow(mov), ncol = ncol(mov))
+      }
+      if (isTRUE(ov_thresh > 0)) {
+        amap[abs_mov < ov_thresh] <- 0
+      }
+      amap[is.na(amap)] <- 0
+      ov_lim <- compute_limits(as.numeric(mov[is.finite(mov)]), mode = ov_range, probs = probs)
+      g_ov <- matrix_to_raster_grob(mov, cmap = ov_cmap, limits = ov_lim,
+                                     alpha = ov_alpha, alpha_map = amap)
+    } else {
+      if (isTRUE(ov_thresh > 0)) mov[abs(mov) < ov_thresh] <- NA_real_
+      ov_lim <- compute_limits(as.numeric(mov), mode = ov_range, probs = probs)
+      g_ov <- matrix_to_raster_grob(mov, cmap = ov_cmap, limits = ov_lim, alpha = ov_alpha)
+    }
 
     xr <- range(df_bg$x, na.rm = TRUE)
     yr <- range(df_bg$y, na.rm = TRUE)

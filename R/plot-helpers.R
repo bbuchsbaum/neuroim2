@@ -72,9 +72,18 @@ rescale01 <- function(x, from) {
 }
 
 #' Map numeric matrix to RGBA colors
+#' @param mat Numeric matrix.
+#' @param cmap Palette name.
+#' @param limits Numeric length-2 vector of display limits.
+#' @param alpha Global alpha scalar (0..1).
+#' @param alpha_map Optional numeric matrix (same dims as \code{mat}, values in
+#'   \code{[0,1]}) providing per-pixel alpha. Effective alpha per pixel is
+#'   \code{alpha_map[i] * alpha}. When \code{NULL} the scalar \code{alpha} is
+#'   applied to all pixels.
 #' @keywords internal
 #' @noRd
-matrix_to_colors <- function(mat, cmap = "grays", limits = NULL, alpha = 1) {
+matrix_to_colors <- function(mat, cmap = "grays", limits = NULL, alpha = 1,
+                              alpha_map = NULL) {
   cols <- resolve_cmap(cmap, 256)
   if (is.null(limits)) limits <- range(mat[is.finite(mat)])
   s <- rescale01(as.numeric(mat), limits)
@@ -82,19 +91,74 @@ matrix_to_colors <- function(mat, cmap = "grays", limits = NULL, alpha = 1) {
   # index into palette
   idx <- 1 + floor(s * (length(cols) - 1))
   col <- cols[pmax(1, pmin(length(cols), idx))]
-  # apply global alpha
-  grDevices::adjustcolor(col, alpha.f = alpha)
+  # apply alpha
+  if (is.null(alpha_map)) {
+    grDevices::adjustcolor(col, alpha.f = alpha)
+  } else {
+    eff <- as.numeric(alpha_map) * alpha
+    mapply(function(c, a) grDevices::adjustcolor(c, alpha.f = a),
+           col, eff, USE.NAMES = FALSE)
+  }
+}
+
+#' Build a numeric RGBA array for a matrix
+#' @param mat Numeric matrix.
+#' @param cmap Palette name.
+#' @param limits Numeric length-2 display limits.
+#' @param alpha Global alpha scalar (0..1).
+#' @param alpha_map Optional per-pixel alpha matrix (same dims as \code{mat},
+#'   values in \code{[0,1]}). Effective alpha is \code{alpha_map * alpha}.
+#' @keywords internal
+#' @noRd
+matrix_to_rgba <- function(mat, cmap = "grays", limits = NULL, alpha = 1,
+                           alpha_map = NULL) {
+  cols <- resolve_cmap(cmap, 256)
+  if (is.null(limits)) limits <- range(mat[is.finite(mat)])
+
+  s <- rescale01(as.numeric(mat), limits)
+  idx <- 1 + floor(s * (length(cols) - 1))
+  idx[!is.finite(idx)] <- 1L
+  idx <- pmax(1L, pmin(length(cols), idx))
+
+  rgb <- grDevices::col2rgb(cols[idx], alpha = TRUE) / 255
+
+  if (is.null(alpha_map)) {
+    eff_alpha <- rep(alpha, length(s))
+  } else {
+    eff_alpha <- as.numeric(alpha_map) * alpha
+  }
+  eff_alpha[!is.finite(eff_alpha)] <- 0
+  eff_alpha <- pmax(0, pmin(1, eff_alpha))
+  eff_alpha[!is.finite(s)] <- 0
+
+  rgba <- array(0, dim = c(nrow(mat), ncol(mat), 4L))
+  rgba[, , 1] <- matrix(rgb[1, ], nrow = nrow(mat), ncol = ncol(mat))
+  rgba[, , 2] <- matrix(rgb[2, ], nrow = nrow(mat), ncol = ncol(mat))
+  rgba[, , 3] <- matrix(rgb[3, ], nrow = nrow(mat), ncol = ncol(mat))
+  rgba[, , 4] <- matrix(eff_alpha, nrow = nrow(mat), ncol = ncol(mat))
+
+  rgba
 }
 
 #' Create a rasterGrob from a numeric matrix using a palette
+#' @param mat Numeric matrix.
+#' @param cmap Palette name.
+#' @param limits Numeric length-2 display limits.
+#' @param alpha Global alpha scalar (0..1).
+#' @param alpha_map Optional per-pixel alpha matrix (same dims as \code{mat},
+#'   values in \code{[0,1]}). Effective alpha is \code{alpha_map * alpha}.
 #' @keywords internal
 #' @noRd
-matrix_to_raster_grob <- function(mat, cmap = "grays", limits = NULL, alpha = 1) {
-  col <- matrix_to_colors(mat, cmap = cmap, limits = limits, alpha = alpha)
-  # as.raster expects a matrix of color strings with same dims
-  r <- structure(col, dim = dim(mat))
-  gr <- grid::rasterGrob(r, interpolate = FALSE)
-  gr
+matrix_to_raster_grob <- function(mat, cmap = "grays", limits = NULL, alpha = 1,
+                                   alpha_map = NULL) {
+  rgba <- matrix_to_rgba(
+    mat = mat,
+    cmap = cmap,
+    limits = limits,
+    alpha = alpha,
+    alpha_map = alpha_map
+  )
+  grid::rasterGrob(rgba, interpolate = FALSE)
 }
 
 #' Coordinate helper: fixed aspect and reversed y for radiological convention
@@ -132,4 +196,3 @@ annotate_orientation <- function(plane = c("axial","coronal","sagittal"),
   )
   layers
 }
-
