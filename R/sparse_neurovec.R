@@ -774,6 +774,19 @@ setMethod(f="as.matrix", signature=signature(x = "SparseNeuroVec"), def=function
             out
           })
 
+#' Convert SparseNeuroVec to an array
+#'
+#' @param x A SparseNeuroVec object.
+#' @param ... Additional arguments (currently ignored).
+#' @return A dense 4D array with sparse values inserted at mask indices and
+#'   zeros elsewhere.
+#' @export
+setMethod("as.array", signature(x = "SparseNeuroVec"), function(x, ...) {
+  d <- dim(x)
+  out <- as.matrix(x)
+  array(out, dim = d)
+})
+
 #' as.list
 #'
 #' convert SparseNeuroVec to list of \code{\linkS4class{DenseNeuroVol}}
