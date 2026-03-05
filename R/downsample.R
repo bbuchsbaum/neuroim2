@@ -139,6 +139,12 @@ setMethod(f="downsample", signature=signature("DenseNeuroVec"),
             # Calculate new spacing
             spatial_scale_factors <- current_dims[1:3] / new_dims[1:3]
             new_spacing <- current_spacing[1:3] * spatial_scale_factors
+            new_trans <- rescale_affine(
+              current_space@trans,
+              shape = current_dims[1:3],
+              zooms = new_spacing,
+              new_shape = new_dims[1:3]
+            )
             
             # Add back the time spacing if 4D
             if (length(current_spacing) == 4) {
@@ -148,9 +154,9 @@ setMethod(f="downsample", signature=signature("DenseNeuroVec"),
             # Create new NeuroSpace with updated dimensions and spacing
             new_space <- NeuroSpace(dim = new_dims,
                                   spacing = new_spacing,
-                                  origin = current_space@origin,
+                                  origin = new_trans[1:3, 4],
                                   axes = current_space@axes,
-                                  trans = current_space@trans)
+                                  trans = new_trans)
             
             # Return new DenseNeuroVec
             DenseNeuroVec(downsampled_data, new_space, label=x@label)
@@ -300,13 +306,19 @@ setMethod(f="downsample", signature=signature("DenseNeuroVol"),
             # Calculate new spacing
             spatial_scale_factors <- current_dims / new_dims
             new_spacing <- current_spacing * spatial_scale_factors
+            new_trans <- rescale_affine(
+              current_space@trans,
+              shape = current_dims,
+              zooms = new_spacing,
+              new_shape = new_dims
+            )
             
             # Create new NeuroSpace with updated dimensions and spacing
             new_space <- NeuroSpace(dim = new_dims,
                                   spacing = new_spacing,
-                                  origin = current_space@origin,
+                                  origin = new_trans[1:3, 4],
                                   axes = current_space@axes,
-                                  trans = current_space@trans)
+                                  trans = new_trans)
             
             # Return new DenseNeuroVol
             DenseNeuroVol(downsampled_data, new_space, label=x@label)

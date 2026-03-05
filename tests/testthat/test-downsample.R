@@ -39,6 +39,26 @@ test_that("downsample with spacing works correctly", {
   expect_true(all(abs(new_spacing - c(6, 6, 6)) < 0.1))
 })
 
+test_that("downsample updates 4D affine consistently with new spacing", {
+  data <- array(rnorm(20 * 30 * 40 * 2), dim = c(20, 30, 40, 2))
+  affine <- matrix(c(
+    0, 2, 0, -20,
+    -2, 0, 0, 10,
+    0, 0, 2, 30,
+    0, 0, 0, 1
+  ), nrow = 4, byrow = TRUE)
+  nvec <- DenseNeuroVec(
+    data,
+    NeuroSpace(dim = c(20, 30, 40, 2), spacing = c(2, 2, 2), trans = affine)
+  )
+
+  nvec_down <- downsample(nvec, spacing = c(4, 4, 4))
+  expected_trans <- rescale_affine(affine, c(20, 30, 40), c(4, 4, 4), c(10, 15, 20))
+
+  expect_equal(trans(nvec_down), expected_trans, tolerance = 1e-6)
+  expect_equal(voxel_sizes(trans(nvec_down)), c(4, 4, 4), tolerance = 1e-6)
+})
+
 test_that("downsample with outdim works correctly", {
   skip_on_cran()
   data <- array(rnorm(64 * 64 * 32 * 5), dim = c(64, 64, 32, 5))
@@ -238,6 +258,26 @@ test_that("downsample 3D vol with spacing works correctly", {
   # Check that new spacing is approximately what we requested
   new_spacing <- spacing(vol_down)
   expect_true(all(abs(new_spacing - c(6, 6, 6)) < 0.1))
+})
+
+test_that("downsample updates 3D affine consistently with new spacing", {
+  data <- array(rnorm(20 * 30 * 40), dim = c(20, 30, 40))
+  affine <- matrix(c(
+    0, 0, 1.5, -40,
+    0, -1.5, 0, 25,
+    1.5, 0, 0, 5,
+    0, 0, 0, 1
+  ), nrow = 4, byrow = TRUE)
+  vol <- DenseNeuroVol(
+    data,
+    NeuroSpace(dim = c(20, 30, 40), spacing = c(1.5, 1.5, 1.5), trans = affine)
+  )
+
+  vol_down <- downsample(vol, spacing = c(3, 3, 3))
+  expected_trans <- rescale_affine(affine, c(20, 30, 40), c(3, 3, 3), c(10, 15, 20))
+
+  expect_equal(trans(vol_down), expected_trans, tolerance = 1e-6)
+  expect_equal(voxel_sizes(trans(vol_down)), c(3, 3, 3), tolerance = 1e-6)
 })
 
 test_that("downsample 3D vol with outdim works correctly", {

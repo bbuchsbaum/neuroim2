@@ -1,3 +1,7 @@
+# neuroim2 0.10.0
+
+* Fixed `downsample()` for `DenseNeuroVol` and `DenseNeuroVec` so output `NeuroSpace` objects now carry a correctly rescaled affine transform. Previously, voxel dimensions could change while `trans()` still reflected the pre-downsample grid.
+
 # neuroim2 0.9.1
 
 * `plot_overlay()` gains an `ov_alpha_mode` argument: `"binary"` (default, existing behaviour) applies a uniform alpha to thresholded pixels, while `"proportional"` scales per-pixel alpha by the absolute overlay value for smoother blending. Internal helpers `matrix_to_colors()`, `matrix_to_rgba()`, and `matrix_to_raster_grob()` now accept an `alpha_map` argument to support this.
