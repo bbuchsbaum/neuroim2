@@ -208,8 +208,10 @@ setMethod("plot",
 
             {y = value = NULL}
 
-            cds <- index_to_coord(space(x), 1:length(x))
-            df1 <- data.frame(x = cds[,1], y = cds[,2], value = as.vector(x))
+            # Use pixel-grid coordinates so geom_raster stays memory-safe even
+            # for oblique/sheared affine spaces where world coordinates are not
+            # axis-aligned on a regular raster grid.
+            df1 <- slice_df(x)
 
             ggplot2::ggplot(df1, ggplot2::aes(x = x, y = y, fill = value)) +
               ggplot2::geom_raster() +
@@ -217,6 +219,7 @@ setMethod("plot",
                                            limits = irange,
                                            guide = if (legend) ggplot2::guide_colourbar(barheight = grid::unit(3, "cm")) else "none") +
               ggplot2::xlab("") + ggplot2::ylab("") +
+              coord_neuro_fixed() +
               ggplot2::theme_bw()
 
           })

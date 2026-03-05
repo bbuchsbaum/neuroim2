@@ -1,3 +1,14 @@
+# neuroim2 0.9.1
+
+* `plot_overlay()` gains an `ov_alpha_mode` argument: `"binary"` (default, existing behaviour) applies a uniform alpha to thresholded pixels, while `"proportional"` scales per-pixel alpha by the absolute overlay value for smoother blending. Internal helpers `matrix_to_colors()`, `matrix_to_rgba()`, and `matrix_to_raster_grob()` now accept an `alpha_map` argument to support this.
+* Refactored orientation internals in `R/axis.R`: new helpers `.default_axcode_labels()`, `.validate_ornt()`, `ornt_transform()`, `inv_ornt_aff()`, `apply_orientation()`, `flip_axis()`, `io_orientation()`, `axcodes2ornt()`, and `ornt2axcodes()` provide a comprehensive NiBabel-compatible orientation API.
+* Plot colorbar guides improved with better default labelling.
+* Fixed dimension comments in the `ClusteredNeuroVec` vignette: searchlight `values()` dimensions were documented as N x T but are actually T x N (time points x neighbors).
+* Removed stale `albersdown` dependency from vignette setup chunks; all vignettes now use `neuroim2::theme_neuro()` exclusively.
+* Added `.ecosystem.yml` to `.Rbuildignore` to silence hidden-file NOTE.
+* Added AFNI-style `deoblique()` for `NeuroSpace`/`NeuroVol`, with `gridset`/`newgrid` controls and default isotropic grid spacing equal to the minimum input voxel size. `NeuroVol` inputs are resampled to an axis-aligned deobliqued target space.
+* Fixed `plot(NeuroVol)` and `plot(NeuroSlice)` memory blowups for oblique/sheared affines by rasterizing on pixel-grid coordinates instead of world-coordinate grids; added regression tests for oblique affine plotting.
+
 # neuroim2 0.9.0
 
 * Added 5D NIfTI support for hyper-vectors: new `read_hyper_vec()` reader returns `NeuroHyperVec`; `read_image(type = "auto")` now dispatches to `NeuroHyperVec` for 5D inputs (with optional spatial masking); and `write_vec()` now supports `NeuroHyperVec` so 5D NIfTI read/write round-trips are supported.

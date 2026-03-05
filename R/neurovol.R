@@ -1224,20 +1224,18 @@ setMethod("plot", signature=signature(x="NeuroVol", y="missing"),
 
             df1 <- do.call(rbind, purrr::map(zlevels, function(i) {
               imslice <- slice(x, zlevel = i, along = 3)
-              vals <- as.numeric(imslice)
+              df <- slice_df(imslice)
 
               if (diff(thresh) > 0) {
-                vals[vals >= thresh[1] & vals <= thresh[2]] <- NA
+                df$value[df$value >= thresh[1] & df$value <= thresh[2]] <- NA_real_
               }
-
-              cds <- index_to_coord(space(imslice), 1:length(imslice))
-              data.frame(x = cds[,1], y = cds[,2], z = i, value = vals)
+              df$z <- i
+              df
             }))
 
             {y_coord = value = NULL} # to appease R CMD check
 
             p <- ggplot2::ggplot(df1, ggplot2::aes(x = x, y = y, fill = value)) +
-              ggplot2::coord_fixed() +
               ggplot2::geom_raster(alpha = alpha) +
               ggplot2::scale_fill_gradientn(colours = colors,
                                            limits = irange,
@@ -1246,6 +1244,7 @@ setMethod("plot", signature=signature(x="NeuroVol", y="missing"),
               ggplot2::facet_wrap(~ z, ncol = 3L,
                                  labeller = ggplot2::labeller(
                                    z = function(z) paste("z =", z))) +
+              coord_neuro_fixed() +
               theme_neuro()
 
             p
