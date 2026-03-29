@@ -8,6 +8,8 @@
 src/*.o
 src/*.so
 src/*.dll
+src/*.gcno
+src/*.gcda
 /neuroim2.Rcheck/
 /neuroim2_*.tar.gz
 /..Rcheck/
@@ -19,3 +21,5 @@ docs/reference
 inst/doc
 vignettes/*.html
 vignettes/*.md
+man/neuroim2.Rcheck/
+*.Rcheck/
