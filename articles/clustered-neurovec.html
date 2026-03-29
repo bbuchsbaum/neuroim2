@@ -10,7 +10,8 @@
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="ClusteredNeuroVec: Parcel-based 4D Analysis">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<script src="../extra.js"></script><meta property="og:title" content="ClusteredNeuroVec: Parcel-based 4D Analysis">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -20,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">neuroim2</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.11.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -106,32 +107,22 @@ operations.</p>
 <span><span class="co"># Create ClusteredNeuroVec</span></span>
 <span><span class="va">cv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ClusteredNeuroVec.html">ClusteredNeuroVec</a></span><span class="op">(</span><span class="va">vec</span>, <span class="va">cvol</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cv</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB; font-weight: bold;">ClusteredNeuroVec</span> </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co"><span style="font-weight: bold;">#&gt; += Spatial Info </span><span style="color: #555555;">---------------------------</span></span></span>
-<span><span class="co">#&gt; | <span style="color: #BBBB00;">Dimensions</span>    : 10 x 10 x 10</span></span>
-<span><span class="co">#&gt; | <span style="color: #BBBB00;">Spacing</span>       : 2 x 2 x 2</span></span>
-<span><span class="co">#&gt; | <span style="color: #BBBB00;">Origin</span>        : 0 x 0 x 0</span></span>
-<span><span class="co">#&gt; | <span style="color: #BBBB00;">Orientation</span>   : Left-to-Right Posterior-to-Anterior Inferior-to-Superior</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co"><span style="font-weight: bold;">#&gt; += Clustering Info </span><span style="color: #555555;">------------------------</span></span></span>
-<span><span class="co">#&gt; | <span style="color: #BBBB00;">Clusters</span>      : <span style="color: #00BB00;">5</span></span></span>
-<span><span class="co">#&gt; | <span style="color: #BBBB00;">Cluster Sizes</span> : min=180, med=199, max=202</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co"><span style="font-weight: bold;">#&gt; += Temporal Info </span><span style="color: #555555;">--------------------------</span></span></span>
-<span><span class="co">#&gt; | <span style="color: #BBBB00;">Time Points</span>   : <span style="color: #00BB00;">20</span></span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co"><span style="font-weight: bold;">#&gt; += Memory Info </span><span style="color: #555555;">----------------------------</span></span></span>
-<span><span class="co">#&gt; | <span style="color: #BBBB00;">Matrix Size</span>   : 0 bytes MB (20 x 5)</span></span>
-<span><span class="co">#&gt; | <span style="color: #BBBB00;">Active Voxels</span> : 973</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;ClusteredNeuroVec&gt;</span> [5 clusters x 20 timepoints] </span></span>
+<span><span class="co">#&gt; ── Spatial ───────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;   Dimensions    : 10 x 10 x 10</span></span>
+<span><span class="co">#&gt;   Spacing       : 2 x 2 x 2 mm</span></span>
+<span><span class="co">#&gt; ── Cluster Data ──────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;   Clusters      : 5</span></span>
+<span><span class="co">#&gt;   Time Points   : 20</span></span>
+<span><span class="co">#&gt;   Cluster Sizes : min=180, median=199, max=202</span></span>
+<span><span class="co">#&gt;   Size          : 42.9 Kb</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="key-properties">Key properties<a class="anchor" aria-label="anchor" href="#key-properties"></a>
 </h3>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Dimensions: still 4D (x, y, z, time)</span></span>
-<span><span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">cv</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">cv</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 10 10 10 20</span></span>
 <span></span>
 <span><span class="co"># Number of clusters</span></span>
@@ -140,7 +131,7 @@ operations.</p>
 <span></span>
 <span><span class="co"># Access cluster time-series matrix (T x K)</span></span>
 <span><span class="va">ts_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as.matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">cv</span>, by <span class="op">=</span> <span class="st">"cluster"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">ts_matrix</span><span class="op">)</span>  <span class="co"># 20 time points x 5 clusters</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">ts_matrix</span><span class="op">)</span>  <span class="co"># 20 time points x 5 clusters</span></span>
 <span><span class="co">#&gt; [1] 20  5</span></span></code></pre></div>
 </div>
 </div>
@@ -151,7 +142,7 @@ operations.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Extract 3D volume at time point 1</span></span>
 <span><span class="va">vol_t1</span> <span class="op">&lt;-</span> <span class="va">cv</span><span class="op">[</span>,,,<span class="fl">1</span><span class="op">]</span></span>
-<span><span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">vol_t1</span><span class="op">)</span>  <span class="co"># 10 x 10 x 10</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">vol_t1</span><span class="op">)</span>  <span class="co"># 10 x 10 x 10</span></span>
 <span><span class="co">#&gt; [1] 10 10 10</span></span>
 <span></span>
 <span><span class="co"># All voxels in the same cluster have the same value</span></span>
@@ -168,15 +159,15 @@ operations.</p>
 <p>Perform searchlight analysis at the cluster level using centroid
 distances:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># K-nearest neighbor searchlight (10 nearest clusters)</span></span>
-<span><span class="va">windows_knn</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cluster_searchlight_series.html">cluster_searchlight_series</a></span><span class="op">(</span><span class="va">cv</span>, k <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># K-nearest neighbor searchlight (3 nearest clusters)</span></span>
+<span><span class="va">windows_knn</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cluster_searchlight_series.html">cluster_searchlight_series</a></span><span class="op">(</span><span class="va">cv</span>, k <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">windows_knn</span><span class="op">)</span>  <span class="co"># One window per cluster</span></span>
 <span><span class="co">#&gt; [1] 5</span></span>
 <span></span>
 <span><span class="co"># Look at first window</span></span>
 <span><span class="va">win1</span> <span class="op">&lt;-</span> <span class="va">windows_knn</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
-<span><span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="fu"><a href="../reference/values-methods.html">values</a></span><span class="op">(</span><span class="va">win1</span><span class="op">)</span><span class="op">)</span>  <span class="co"># 10 neighbors x 20 time points</span></span>
-<span><span class="co">#&gt; [1] 20  5</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu"><a href="../reference/values-methods.html">values</a></span><span class="op">(</span><span class="va">win1</span><span class="op">)</span><span class="op">)</span>  <span class="co"># 20 time points x 3 neighbors</span></span>
+<span><span class="co">#&gt; [1] 20  3</span></span>
 <span></span>
 <span><span class="co"># Radius-based searchlight (e.g., 15mm radius)</span></span>
 <span><span class="va">windows_radius</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cluster_searchlight_series.html">cluster_searchlight_series</a></span><span class="op">(</span><span class="va">cv</span>, radius <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span></code></pre></div>
@@ -200,11 +191,11 @@ distances:</p>
 <span></span>
 <span><span class="co"># Now you have 400 time-series (one per parcel) instead of ~200,000 voxels</span></span>
 <span><span class="va">parcels</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as.matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">cv</span>, by <span class="op">=</span> <span class="st">"cluster"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">parcels</span><span class="op">)</span>  <span class="co"># T x 400</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">parcels</span><span class="op">)</span>  <span class="co"># T x 400</span></span>
 <span></span>
 <span><span class="co"># Perform connectivity analysis at parcel level</span></span>
 <span><span class="va">cor_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">parcels</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/dim-methods.html">dim</a></span><span class="op">(</span><span class="va">cor_matrix</span><span class="op">)</span>  <span class="co"># 400 x 400</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">cor_matrix</span><span class="op">)</span>  <span class="co"># 400 x 400</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="integration-with-existing-workflows">Integration with existing workflows<a class="anchor" aria-label="anchor" href="#integration-with-existing-workflows"></a>
@@ -261,7 +252,7 @@ regions</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

@@ -1,0 +1,1376 @@
+# neuroim2 ![neuroim2 hex logo](https://raw.githubusercontent.com/bbuchsbaum/neuroim2/master/docs/hex-neuroim2.png)
+
+Data structures and I/O for volumetric brain imaging with a focus on
+fMRI. This is the successor to
+[`neuroim`](https://github.com/bbuchsbaum/neuroim) with improved S4
+classes, sparse/dense 3D–4D representations, and fast
+resampling/filtering.
+
+**Website:** <https://bbuchsbaum.github.io/neuroim2/> **CRAN:**
+<https://cran.r-project.org/package=neuroim2>
+
+## Key Features
+
+- **NIfTI / AFNI support** — read and write `.nii`, `.nii.gz`, and AFNI
+  `.BRIK`/`.HEAD` files
+- **S4 class hierarchy** — `NeuroVol` (3D volumes) and `NeuroVec` (4D
+  time-series) with dense, sparse, memory-mapped, and clustered variants
+- **Coordinate systems** — full affine-aware transforms between voxel,
+  grid, and world coordinates
+- **Searchlights & ROIs** — spherical, cuboid, and random searchlight
+  iterators plus flexible ROI construction
+- **Spatial filtering** — Gaussian blur, guided filter, bilateral
+  filter, and connected-component labelling
+- **Resampling** — volume-to-volume resampling with configurable
+  interpolation
+- **Visualization** — slice montages, orthographic views, and overlay
+  plotting via ggplot2
+
+## Installation
+
+### CRAN
+
+``` r
+install.packages("neuroim2")
+```
+
+### R-universe (daily builds)
+
+``` r
+install.packages("neuroim2",
+  repos = c("https://bbuchsbaum.r-universe.dev", "https://cloud.r-project.org"))
+```
+
+### Development version (GitHub)
+
+``` r
+# install.packages("remotes")
+remotes::install_github("bbuchsbaum/neuroim2")
+```
+
+## Usage
+
+Read a NIFTI image and perform simple operations:
+
+``` r
+library(neuroim2)
+fname <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
+vol <- read_vol(fname)
+
+v1 <- vol[1,1,1]
+vol2 <- vol + vol
+all(vol == (vol2 - vol))
+```
+
+``` R
+## [1] TRUE
+```
+
+Create a 4D image from volumes:
+
+``` r
+vec <- vec_from_vols(list(vol, vol, vol2))
+series1 <- vec[1,1,1,]
+length(series1)
+```
+
+``` R
+## [1] 3
+```
+
+## Vignettes
+
+Browse the full set of
+[articles](https://bbuchsbaum.github.io/neuroim2/articles/index.html) on
+the pkgdown site:
+
+| Getting Started                                                                              | Analysis Workflows                                                                             | Advanced                                                                                     |
+|----------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------|
+| [Overview](https://bbuchsbaum.github.io/neuroim2/articles/Overview.html)                     | [Analysis Workflows](https://bbuchsbaum.github.io/neuroim2/articles/AnalysisWorkflows.html)    | [Image Volumes](https://bbuchsbaum.github.io/neuroim2/articles/ImageVolumes.html)            |
+| [Choosing Backends](https://bbuchsbaum.github.io/neuroim2/articles/ChoosingBackends.html)    | [Slice Visualization](https://bbuchsbaum.github.io/neuroim2/articles/slice-visualization.html) | [NeuroVector](https://bbuchsbaum.github.io/neuroim2/articles/NeuroVector.html)               |
+| [Coordinate Systems](https://bbuchsbaum.github.io/neuroim2/articles/coordinate-systems.html) | [Cookbook](https://bbuchsbaum.github.io/neuroim2/articles/Cookbook.html)                       | [Regions of Interest](https://bbuchsbaum.github.io/neuroim2/articles/regionOfInterest.html)  |
+| [Volumes & Vectors](https://bbuchsbaum.github.io/neuroim2/articles/VolumesAndVectors.html)   | [Smoothing](https://bbuchsbaum.github.io/neuroim2/articles/Smoothing.html)                     | [Clustered NeuroVec](https://bbuchsbaum.github.io/neuroim2/articles/clustered-neurovec.html) |
+| [Resampling](https://bbuchsbaum.github.io/neuroim2/articles/Resampling.html)                 |                                                                                                | [Pipelines](https://bbuchsbaum.github.io/neuroim2/articles/pipelines.html)                   |
+
+# Package index
+
+## Visualization Helpers
+
+Plotting utilities for slices, montages, overlays, and palettes
+
+- [`theme_neuro()`](https://bbuchsbaum.github.io/neuroim2/reference/theme_neuro.md)
+  : A minimal, publication-friendly theme for image slices
+- [`resolve_cmap()`](https://bbuchsbaum.github.io/neuroim2/reference/resolve_cmap.md)
+  : Neuroimaging color palettes and helpers
+- [`scale_fill_neuro()`](https://bbuchsbaum.github.io/neuroim2/reference/scale_fill_neuro.md)
+  : A ggplot2 fill scale with neuroimaging-friendly defaults
+- [`annotate_orientation()`](https://bbuchsbaum.github.io/neuroim2/reference/annotate_orientation.md)
+  : Add L/R and A/P/S/I annotations (optional)
+- [`plot_montage()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_montage.md)
+  : Plot a montage of axial (or any-plane) slices using facetting
+- [`plot_ortho()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_ortho.md)
+  : Orthogonal three-plane view with optional crosshairs
+- [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
+  : Composite an overlay map on a structural background
+- [`mapToColors()`](https://bbuchsbaum.github.io/neuroim2/reference/mapToColors.md)
+  : Map intensity values to colors
+
+## Constructors
+
+Constructors for creating and initializing various neuroimaging objects
+
+- [`AbstractSparseNeuroVec-class`](https://bbuchsbaum.github.io/neuroim2/reference/AbstractSparseNeuroVec-class.md)
+  : AbstractSparseNeuroVec Class
+
+- [`AFNIMetaInfo()`](https://bbuchsbaum.github.io/neuroim2/reference/AFNIMetaInfo.md)
+  : Create AFNI Format Metadata Object
+
+- [`ArrayLike3D-class`](https://bbuchsbaum.github.io/neuroim2/reference/ArrayLike3D-class.md)
+  : ArrayLike3D Class
+
+- [`ArrayLike4D-class`](https://bbuchsbaum.github.io/neuroim2/reference/ArrayLike4D-class.md)
+  : ArrayLike4D Class
+
+- [`ArrayLike5D-class`](https://bbuchsbaum.github.io/neuroim2/reference/ArrayLike5D-class.md)
+  : ArrayLike5D Class
+
+- [`AxisSet-class`](https://bbuchsbaum.github.io/neuroim2/reference/AxisSet-class.md)
+  : AxisSet
+
+- [`AxisSet1D-class`](https://bbuchsbaum.github.io/neuroim2/reference/AxisSet1D-class.md)
+  : AxisSet1D
+
+- [`AxisSet2D-class`](https://bbuchsbaum.github.io/neuroim2/reference/AxisSet2D-class.md)
+  : AxisSet2D
+
+- [`AxisSet3D-class`](https://bbuchsbaum.github.io/neuroim2/reference/AxisSet3D-class.md)
+  : AxisSet3D Class
+
+- [`AxisSet4D-class`](https://bbuchsbaum.github.io/neuroim2/reference/AxisSet4D-class.md)
+  : AxisSet4D Class
+
+- [`AxisSet5D-class`](https://bbuchsbaum.github.io/neuroim2/reference/AxisSet5D-class.md)
+  : AxisSet5D Class
+
+- [`BigNeuroVec-class`](https://bbuchsbaum.github.io/neuroim2/reference/BigNeuroVec-class.md)
+  : BigNeuroVec Class
+
+- [`BigNeuroVec()`](https://bbuchsbaum.github.io/neuroim2/reference/BigNeuroVec-methods.md)
+  : Create a Memory-Mapped Neuroimaging Vector
+
+- [`BinaryReader()`](https://bbuchsbaum.github.io/neuroim2/reference/BinaryReader.md)
+  : Create Binary Reader Object
+
+- [`BinaryWriter()`](https://bbuchsbaum.github.io/neuroim2/reference/BinaryWriter.md)
+  : Create Binary Writer Object
+
+- [`BinaryWriter-class`](https://bbuchsbaum.github.io/neuroim2/reference/BinaryWriter-class.md)
+  : BinaryWriter Class
+
+- [`ClusteredNeuroVol()`](https://bbuchsbaum.github.io/neuroim2/reference/ClusteredNeuroVol-class.md)
+  : ClusteredNeuroVol Class
+
+- [`ClusteredNeuroVec()`](https://bbuchsbaum.github.io/neuroim2/reference/ClusteredNeuroVec.md)
+  : ClusteredNeuroVec: Cluster-aware 4D neuroimaging data
+
+- [`ClusteredNeuroVec-class`](https://bbuchsbaum.github.io/neuroim2/reference/ClusteredNeuroVec-class.md)
+  : ClusteredNeuroVec Class
+
+- [`DenseNeuroVec()`](https://bbuchsbaum.github.io/neuroim2/reference/DenseNeuroVec-class.md)
+  : DenseNeuroVec Class
+
+- [`DenseNeuroVol()`](https://bbuchsbaum.github.io/neuroim2/reference/DenseNeuroVol-class.md)
+  : DenseNeuroVol Class
+
+- [`FileBackedNeuroVec()`](https://bbuchsbaum.github.io/neuroim2/reference/FileBackedNeuroVec.md)
+  : Create a File-Backed Neuroimaging Vector
+
+- [`IndexLookupVol()`](https://bbuchsbaum.github.io/neuroim2/reference/IndexLookupVol-class.md)
+  : IndexLookupVol Class
+
+- [`LogicalNeuroVol()`](https://bbuchsbaum.github.io/neuroim2/reference/LogicalNeuroVol-class.md)
+  : LogicalNeuroVol Class
+
+- [`MappedNeuroVec()`](https://bbuchsbaum.github.io/neuroim2/reference/MappedNeuroVec-class.md)
+  : MappedNeuroVec Class
+
+- [`MetaInfo-class`](https://bbuchsbaum.github.io/neuroim2/reference/MetaInfo-class.md)
+  : MetaInfo Class
+
+- [`MetaInfo()`](https://bbuchsbaum.github.io/neuroim2/reference/MetaInfo.md)
+  : Create Neuroimaging Metadata Object
+
+- [`NeuroBucket-class`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroBucket-class.md)
+  : NeuroBucket
+
+- [`` `[`( ``*`<NeuroHyperVec>`*`,`*`<ANY>`*`,`*`<ANY>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroHyperVec-class.md)
+  : NeuroHyperVec Class
+
+- [`NeuroHyperVec()`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroHyperVec.md)
+  : Constructor for NeuroHyperVec class
+
+- [`NeuroObj-class`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroObj-class.md)
+  : NeuroObj Class
+
+- [`NeuroSlice()`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroSlice.md)
+  : NeuroSlice: 2D Neuroimaging Data Container
+
+- [`NeuroSpace()`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroSpace.md)
+  : NeuroSpace: Spatial Reference System for Neuroimaging Data
+
+- [`NeuroVec()`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroVec-class.md)
+  : NeuroVec Class
+
+- [`NeuroVecSeq()`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroVecSeq.md)
+  : NeuroVecSeq: A Container for Sequential NeuroVec Objects
+
+- [`NeuroVecSource()`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroVecSource.md)
+  : NeuroVecSource
+
+- [`NeuroVecSource-class`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroVecSource-class.md)
+  : NeuroVecSource Class
+
+- [`NeuroVolSource()`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroVolSource-class.md)
+  : Constructor for NeuroVolSource
+
+- [`NeuroVol()`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroVol.md)
+  : NeuroVol: 3D Neuroimaging Volume Class
+
+- [`NIFTIMetaInfo()`](https://bbuchsbaum.github.io/neuroim2/reference/NIFTIMetaInfo.md)
+  : Create NIFTI Format Metadata Object
+
+- [`ROICoords-class`](https://bbuchsbaum.github.io/neuroim2/reference/ROICoords-class.md)
+  : ROICoords
+
+- [`ROICoords()`](https://bbuchsbaum.github.io/neuroim2/reference/ROICoords.md)
+  : Create ROI Coordinates Object
+
+- [`ROIVec()`](https://bbuchsbaum.github.io/neuroim2/reference/ROIVec.md)
+  :
+
+  Create an instance of class `ROIVec`
+
+- [`ROIVol()`](https://bbuchsbaum.github.io/neuroim2/reference/ROIVol.md)
+  : Create ROI Volume Object
+
+- [`SparseNeuroVec()`](https://bbuchsbaum.github.io/neuroim2/reference/SparseNeuroVec-class.md)
+  : SparseNeuroVec Class
+
+- [`SparseNeuroVol()`](https://bbuchsbaum.github.io/neuroim2/reference/SparseNeuroVol-class.md)
+  : SparseNeuroVol Class
+
+- [`TimeAxis`](https://bbuchsbaum.github.io/neuroim2/reference/TimeAxis.md)
+  : Time axis set
+
+- [`NullAxis`](https://bbuchsbaum.github.io/neuroim2/reference/NullAxis.md)
+  : Pre-defined null axis set
+
+- [`numericOrMatrix-class`](https://bbuchsbaum.github.io/neuroim2/reference/numericOrMatrix-class.md)
+  : numericOrMatrix Union
+
+## S4 Classes
+
+S4 classes for various neuroimaging objects
+
+- [`BinaryReader-class`](https://bbuchsbaum.github.io/neuroim2/reference/BinaryReader-class.md)
+  : BinaryReader Class
+- [`ColumnReader-class`](https://bbuchsbaum.github.io/neuroim2/reference/ColumnReader-class.md)
+  : ColumnReader
+- [`FileBackedNeuroVec-class`](https://bbuchsbaum.github.io/neuroim2/reference/FileBackedNeuroVec-class.md)
+  : FileBackedNeuroVec Class
+- [`FileFormat-class`](https://bbuchsbaum.github.io/neuroim2/reference/FileFormat-class.md)
+  : FileFormat Class
+- [`FileFormat-operations`](https://bbuchsbaum.github.io/neuroim2/reference/FileFormat-operations.md)
+  : File Format Operations for Neuroimaging Data
+- [`FileMetaInfo-class`](https://bbuchsbaum.github.io/neuroim2/reference/FileMetaInfo-class.md)
+  [`NIFTIMetaInfo-class`](https://bbuchsbaum.github.io/neuroim2/reference/FileMetaInfo-class.md)
+  [`AFNIMetaInfo-class`](https://bbuchsbaum.github.io/neuroim2/reference/FileMetaInfo-class.md)
+  : FileMetaInfo Class
+- [`FileSource-class`](https://bbuchsbaum.github.io/neuroim2/reference/FileSource-class.md)
+  : FileSource Class
+- [`MappedNeuroVecSource()`](https://bbuchsbaum.github.io/neuroim2/reference/MappedNeuroVecSource-class.md)
+  : MappedNeuroVecSource Class
+- [`NamedAxis-class`](https://bbuchsbaum.github.io/neuroim2/reference/NamedAxis-class.md)
+  : NamedAxis
+- [`NeuroSlice-class`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroSlice-class.md)
+  : NeuroSlice Class
+- [`NeuroSpace-class`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroSpace-class.md)
+  : NeuroSpace Class
+- [`NeuroVecSeq-class`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroVecSeq-class.md)
+  : NeuroVecSeq Class
+- [`NeuroVol-class`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroVol-class.md)
+  : NeuroVol Class
+- [`ROI-class`](https://bbuchsbaum.github.io/neuroim2/reference/ROI-class.md)
+  : ROI
+- [`ROIVec-class`](https://bbuchsbaum.github.io/neuroim2/reference/ROIVec-class.md)
+  : ROIVec
+- [`ROIVecWindow-class`](https://bbuchsbaum.github.io/neuroim2/reference/ROIVecWindow-class.md)
+  : ROIVecWindow
+- [`ROIVol-class`](https://bbuchsbaum.github.io/neuroim2/reference/ROIVol-class.md)
+  : ROIVol
+- [`ROIVolWindow-class`](https://bbuchsbaum.github.io/neuroim2/reference/ROIVolWindow-class.md)
+  : ROIVolWindow
+- [`SparseNeuroVecSource-class`](https://bbuchsbaum.github.io/neuroim2/reference/SparseNeuroVecSource-class.md)
+  : SparseNeuroVecSource Class
+- [`OrientationList2D`](https://bbuchsbaum.github.io/neuroim2/reference/OrientationList2D.md)
+  : Pre-defined 2D orientation configurations
+- [`OrientationList3D`](https://bbuchsbaum.github.io/neuroim2/reference/OrientationList3D.md)
+  : Pre-defined 3D orientation configurations
+
+## Data Loading and Manipulation
+
+Methods for loading and manipulating neuroimaging data
+
+- [`concat()`](https://bbuchsbaum.github.io/neuroim2/reference/concat-methods.md)
+  : Concatenate two objects in the time dimension
+
+- [`mapf()`](https://bbuchsbaum.github.io/neuroim2/reference/map-methods.md)
+  : Apply a function to an object.
+
+- [`vols()`](https://bbuchsbaum.github.io/neuroim2/reference/vols-methods.md)
+  : Extract an ordered series of 3D volumes.
+
+- [`vec_from_vols()`](https://bbuchsbaum.github.io/neuroim2/reference/vec_from_vols.md)
+  : Create NeuroVec from list of NeuroVol objects
+
+- [`neuroim2-package`](https://bbuchsbaum.github.io/neuroim2/reference/neuroim2-package.md)
+  [`neuroim2`](https://bbuchsbaum.github.io/neuroim2/reference/neuroim2-package.md)
+  : neuroim2: neuroimaging data structures for analysis
+
+- [`data_file()`](https://bbuchsbaum.github.io/neuroim2/reference/data_file-methods.md)
+  :
+
+  Generic function to get the name of the data file, given a file name
+  and a `FileFormat` instance.
+
+- [`data_file_matches()`](https://bbuchsbaum.github.io/neuroim2/reference/data_file_matches-methods.md)
+  :
+
+  Generic function to test whether a file name conforms to the given a
+  `FileFormat` instance. Will test for match to data file only
+
+- [`data_reader()`](https://bbuchsbaum.github.io/neuroim2/reference/data_reader.md)
+  : Create a Data Reader
+
+- [`file_matches()`](https://bbuchsbaum.github.io/neuroim2/reference/file_matches-methods.md)
+  :
+
+  Generic function to test whether a file name conforms to the given
+  `FileFormat` instance. Will test for match to either header file or
+  data file
+
+- [`read_elements()`](https://bbuchsbaum.github.io/neuroim2/reference/read_elements-methods.md)
+  : Read a sequence of elements from an input source
+
+- [`createNIfTIHeader()`](https://bbuchsbaum.github.io/neuroim2/reference/createNIfTIHeader.md)
+  : Create an Empty NIfTI-1 Header List
+
+- [`linear_access()`](https://bbuchsbaum.github.io/neuroim2/reference/linear_access.md)
+  : Extract values from an array-like object using linear indexing.
+
+- [`image`](https://bbuchsbaum.github.io/neuroim2/reference/image.md) :
+  Generic Image Method for Creating Visual Representations
+
+- [`scale()`](https://bbuchsbaum.github.io/neuroim2/reference/scale.md)
+  : Generic Scale Method
+
+- [`simulate_fmri()`](https://bbuchsbaum.github.io/neuroim2/reference/simulate_fmri.md)
+  : Simulate fMRI Data
+
+## Coordinate and Dimension Operations
+
+Methods for operating on coordinates and dimensions
+
+- [`space()`](https://bbuchsbaum.github.io/neuroim2/reference/space-methods.md)
+  : Extract Geometric Properties of an Image
+
+- [`axes()`](https://bbuchsbaum.github.io/neuroim2/reference/axes-methods.md)
+  : Extract Image Axes
+
+- [`spacing()`](https://bbuchsbaum.github.io/neuroim2/reference/spacing-methods.md)
+  : Extract Voxel Dimensions of an Image
+
+- [`bounds()`](https://bbuchsbaum.github.io/neuroim2/reference/bounds-methods.md)
+  : Extract Spatial Bounds of an Image
+
+- [`centroid()`](https://bbuchsbaum.github.io/neuroim2/reference/centroid-methods.md)
+  : return the centroid of an object
+
+- [`coord_to_grid()`](https://bbuchsbaum.github.io/neuroim2/reference/coord_to_grid-methods.md)
+  : convert n-dimensional real world coordinates to grid coordinates
+
+- [`coord_to_index()`](https://bbuchsbaum.github.io/neuroim2/reference/coord_to_index-methods.md)
+  : convert n-dimensional real world coordinates to 1D indices
+
+- [`grid_to_coord()`](https://bbuchsbaum.github.io/neuroim2/reference/grid_to_coord-methods.md)
+  : Generic function to convert N-dimensional grid coordinates to real
+  world coordinates
+
+- [`grid_to_index()`](https://bbuchsbaum.github.io/neuroim2/reference/grid_to_index-methods.md)
+  : Generic function to convert N-dimensional grid coordinates to 1D
+  indices
+
+- [`grid_to_grid()`](https://bbuchsbaum.github.io/neuroim2/reference/grid_to_grid-methods.md)
+  : Generic function to convert voxel coordinates in the reference space
+  (LPI) to native array space.
+
+- [`index_to_coord()`](https://bbuchsbaum.github.io/neuroim2/reference/index_to_coord-methods.md)
+  : convert 1d indices to n-dimensional real world coordinates
+
+- [`index_to_grid()`](https://bbuchsbaum.github.io/neuroim2/reference/index_to_grid-methods.md)
+  : Convert 1d indices to n-dimensional grid coordinates
+
+- [`dim_of()`](https://bbuchsbaum.github.io/neuroim2/reference/dim_of-methods.md)
+  : Get the length of a given dimension of an object
+
+- [`drop_dim()`](https://bbuchsbaum.github.io/neuroim2/reference/drop_dim-methods.md)
+  : Drop a Dimension from an Object
+
+- [`add_dim()`](https://bbuchsbaum.github.io/neuroim2/reference/add_dim-methods.md)
+  : Add a Dimension to an Object
+
+- [`ndim()`](https://bbuchsbaum.github.io/neuroim2/reference/ndim-methods.md)
+  : Extract the number of dimensions of an object
+
+- [`voxels()`](https://bbuchsbaum.github.io/neuroim2/reference/voxels-methods.md)
+  : extract voxel coordinates
+
+- [`which_dim()`](https://bbuchsbaum.github.io/neuroim2/reference/which_dim-methods.md)
+  : Find Dimensions of a Given Axis
+
+- [`trans()`](https://bbuchsbaum.github.io/neuroim2/reference/trans-methods.md)
+  : Extract image coordinate transformation
+
+- [`inverse_trans()`](https://bbuchsbaum.github.io/neuroim2/reference/inverse_trans-methods.md)
+  : Extract inverse image coordinate transformation
+
+- [`origin()`](https://bbuchsbaum.github.io/neuroim2/reference/origin-methods.md)
+  : Extract Image Origin
+
+- [`perm_mat()`](https://bbuchsbaum.github.io/neuroim2/reference/perm_mat-methods.md)
+  : Extract permutation matrix associated with an image
+
+- [`strip_extension()`](https://bbuchsbaum.github.io/neuroim2/reference/strip_extension-methods.md)
+  :
+
+  Generic function to strip extension from file name, given a
+  `FileFormat` instance.
+
+- [`deoblique()`](https://bbuchsbaum.github.io/neuroim2/reference/deoblique.md)
+  : Deoblique a Neuroimaging Space or Volume
+
+- [`LEFT_RIGHT`](https://bbuchsbaum.github.io/neuroim2/reference/anatomical_axes.md)
+  [`RIGHT_LEFT`](https://bbuchsbaum.github.io/neuroim2/reference/anatomical_axes.md)
+  [`ANT_POST`](https://bbuchsbaum.github.io/neuroim2/reference/anatomical_axes.md)
+  [`POST_ANT`](https://bbuchsbaum.github.io/neuroim2/reference/anatomical_axes.md)
+  [`INF_SUP`](https://bbuchsbaum.github.io/neuroim2/reference/anatomical_axes.md)
+  [`SUP_INF`](https://bbuchsbaum.github.io/neuroim2/reference/anatomical_axes.md)
+  : Pre-defined anatomical axes
+
+- [`TIME`](https://bbuchsbaum.github.io/neuroim2/reference/TIME.md) :
+  Time axis
+
+- [`findAnatomy3D()`](https://bbuchsbaum.github.io/neuroim2/reference/findAnatomy3D.md)
+  : Find 3D anatomical orientation from axis abbreviations
+
+- [`matrixToQuatern()`](https://bbuchsbaum.github.io/neuroim2/reference/matrixToQuatern.md)
+  : Convert a Transformation Matrix to a Quaternion Representation
+
+- [`quaternToMatrix()`](https://bbuchsbaum.github.io/neuroim2/reference/quaternToMatrix.md)
+  : Convert Quaternion Parameters to a Transformation Matrix
+
+- [`apply_affine()`](https://bbuchsbaum.github.io/neuroim2/reference/affine_utils.md)
+  [`to_matvec()`](https://bbuchsbaum.github.io/neuroim2/reference/affine_utils.md)
+  [`from_matvec()`](https://bbuchsbaum.github.io/neuroim2/reference/affine_utils.md)
+  [`append_diag()`](https://bbuchsbaum.github.io/neuroim2/reference/affine_utils.md)
+  [`dot_reduce()`](https://bbuchsbaum.github.io/neuroim2/reference/affine_utils.md)
+  [`voxel_sizes()`](https://bbuchsbaum.github.io/neuroim2/reference/affine_utils.md)
+  [`obliquity()`](https://bbuchsbaum.github.io/neuroim2/reference/affine_utils.md)
+  [`rescale_affine()`](https://bbuchsbaum.github.io/neuroim2/reference/affine_utils.md)
+  : Affine utility functions
+
+- [`affine_to_orientation()`](https://bbuchsbaum.github.io/neuroim2/reference/orientation_utils.md)
+  [`orientation_transform()`](https://bbuchsbaum.github.io/neuroim2/reference/orientation_utils.md)
+  [`apply_orientation()`](https://bbuchsbaum.github.io/neuroim2/reference/orientation_utils.md)
+  [`orientation_inverse_affine()`](https://bbuchsbaum.github.io/neuroim2/reference/orientation_utils.md)
+  [`orientation_to_axcodes()`](https://bbuchsbaum.github.io/neuroim2/reference/orientation_utils.md)
+  [`axcodes_to_orientation()`](https://bbuchsbaum.github.io/neuroim2/reference/orientation_utils.md)
+  [`affine_to_axcodes()`](https://bbuchsbaum.github.io/neuroim2/reference/orientation_utils.md)
+  : Orientation utility functions
+
+- [`output_aligned_space()`](https://bbuchsbaum.github.io/neuroim2/reference/space_utils.md)
+  [`vox2out_vox()`](https://bbuchsbaum.github.io/neuroim2/reference/space_utils.md)
+  [`slice_to_volume_affine()`](https://bbuchsbaum.github.io/neuroim2/reference/space_utils.md)
+  [`slice2volume()`](https://bbuchsbaum.github.io/neuroim2/reference/space_utils.md)
+  : Space utility functions
+
+## ROI and Clustering
+
+Methods for working with regions of interest and clustering
+
+- [`partition()`](https://bbuchsbaum.github.io/neuroim2/reference/partition-methods.md)
+  : Partition an image into a set of disjoint clusters
+- [`patch_set()`](https://bbuchsbaum.github.io/neuroim2/reference/patch_set.md)
+  : Generate a set of coordinate "patches" of fixed size from an image
+  object.
+- [`split_clusters()`](https://bbuchsbaum.github.io/neuroim2/reference/split_clusters-methods.md)
+  : Cut an object into a list of spatial or spatiotemporal clusters
+- [`centroids()`](https://bbuchsbaum.github.io/neuroim2/reference/centroids-methods.md)
+  : Return a matrix of centroids of an object
+- [`conn_comp()`](https://bbuchsbaum.github.io/neuroim2/reference/conn_comp-methods.md)
+  : Connected components
+- [`conn_comp_3D()`](https://bbuchsbaum.github.io/neuroim2/reference/conn_comp_3D.md)
+  : Extract Connected Components from a 3D Binary Mask
+- [`coords()`](https://bbuchsbaum.github.io/neuroim2/reference/coords.md)
+  : Extract coordinates from an object
+- [`cuboid_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/cuboid_roi.md)
+  : Create A Cuboid Region of Interest
+- [`num_clusters()`](https://bbuchsbaum.github.io/neuroim2/reference/num_clusters-methods.md)
+  : Number of Clusters
+- [`slices()`](https://bbuchsbaum.github.io/neuroim2/reference/slices-methods.md)
+  : Extract an ordered series of 2D slices from a 3D or 4D object
+- [`slice()`](https://bbuchsbaum.github.io/neuroim2/reference/slice-methods.md)
+  : Extract image slice
+- [`vectors()`](https://bbuchsbaum.github.io/neuroim2/reference/vectors-methods.md)
+  : Extract an ordered list of 1D vectors.
+- [`values()`](https://bbuchsbaum.github.io/neuroim2/reference/values-methods.md)
+  : Extract Data Values of an Object
+- [`spherical_roi_set()`](https://bbuchsbaum.github.io/neuroim2/reference/spherical_roi_set.md)
+  : Create Multiple Spherical Regions of Interest
+
+## Kernel and Extraction
+
+Methods for kernel operations and feature extraction
+
+- [`Kernel()`](https://bbuchsbaum.github.io/neuroim2/reference/Kernel.md)
+  : Create a Kernel object from a function of distance from kernel
+  center
+
+- [`Kernel-class`](https://bbuchsbaum.github.io/neuroim2/reference/Kernel-class.md)
+  : Kernel
+
+- [`embed_kernel()`](https://bbuchsbaum.github.io/neuroim2/reference/embed_kernel-methods.md)
+  : Generic function to position kernel in a position in image space
+
+- [`` `[`( ``*`<ArrayLike3D>`*`,`*`<numeric>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor3d.md)
+  [`` `[`( ``*`<ArrayLike3D>`*`,`*`<matrix>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor3d.md)
+  [`` `[`( ``*`<ArrayLike3D>`*`,`*`<missing>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor3d.md)
+  [`` `[`( ``*`<ArrayLike3D>`*`,`*`<missing>`*`,`*`<numeric>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor3d.md)
+  : Array-like access for 3-dimensional data structures
+
+- [`` `[`( ``*`<ArrayLike4D>`*`,`*`<matrix>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor4d.md)
+  [`` `[`( ``*`<ArrayLike4D>`*`,`*`<numeric>`*`,`*`<numeric>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor4d.md)
+  [`` `[`( ``*`<ArrayLike4D>`*`,`*`<numeric>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor4d.md)
+  [`` `[`( ``*`<ArrayLike4D>`*`,`*`<integer>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor4d.md)
+  [`` `[`( ``*`<ArrayLike4D>`*`,`*`<missing>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor4d.md)
+  [`` `[`( ``*`<ArrayLike4D>`*`,`*`<missing>`*`,`*`<numeric>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor4d.md)
+  [`` `[`( ``*`<ClusteredNeuroVec>`*`,`*`<missing>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor4d.md)
+  [`` `[`( ``*`<ClusteredNeuroVec>`*`,`*`<numeric>`*`,`*`<numeric>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor4d.md)
+  : Array-like access for 4-dimensional data structures
+
+- [`spherical_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/spherical_roi.md)
+  : Create a Spherical Region of Interest
+
+- [`square_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/square_roi.md)
+  : Create a square region of interest
+
+- [`searchlight()`](https://bbuchsbaum.github.io/neuroim2/reference/searchlight.md)
+  : Create an exhaustive searchlight iterator
+
+- [`searchlight_coords()`](https://bbuchsbaum.github.io/neuroim2/reference/searchlight_coords.md)
+  : Create an exhaustive searchlight iterator for voxel coordinates
+  using spherical_roi
+
+- [`random_searchlight()`](https://bbuchsbaum.github.io/neuroim2/reference/random_searchlight.md)
+  : Create a spherical random searchlight iterator
+
+- [`resampled_searchlight()`](https://bbuchsbaum.github.io/neuroim2/reference/resampled_searchlight.md)
+  [`bootstrap_searchlight()`](https://bbuchsbaum.github.io/neuroim2/reference/resampled_searchlight.md)
+  : Create a resampled searchlight iterator
+
+- [`ellipsoid_shape()`](https://bbuchsbaum.github.io/neuroim2/reference/searchlight_shape_functions.md)
+  [`cube_shape()`](https://bbuchsbaum.github.io/neuroim2/reference/searchlight_shape_functions.md)
+  [`blobby_shape()`](https://bbuchsbaum.github.io/neuroim2/reference/searchlight_shape_functions.md)
+  :
+
+  Convenience shape generators for
+  [`resampled_searchlight()`](https://bbuchsbaum.github.io/neuroim2/reference/resampled_searchlight.md)
+
+- [`series_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/series_roi.md)
+  : Extract time series from specific voxel coordinates and return as
+  ROI object
+
+- [`gaussian_blur()`](https://bbuchsbaum.github.io/neuroim2/reference/gaussian_blur.md)
+  : Gaussian Blur for Volumetric Images
+
+- [`guided_filter()`](https://bbuchsbaum.github.io/neuroim2/reference/guided_filter.md)
+  : Edge-Preserving Guided Filter for Volumetric Images
+
+- [`bilateral_filter()`](https://bbuchsbaum.github.io/neuroim2/reference/bilateral_filter.md)
+  : Apply a bilateral filter to a volumetric image
+
+- [`bilateral_filter_4d()`](https://bbuchsbaum.github.io/neuroim2/reference/bilateral_filter_4d.md)
+  : Apply a 4D bilateral filter to a NeuroVec
+
+- [`cgb_filter()`](https://bbuchsbaum.github.io/neuroim2/reference/cgb_filter.md)
+  : Correlation-guided bilateral filtering (convenience wrapper)
+
+- [`cgb_make_graph()`](https://bbuchsbaum.github.io/neuroim2/reference/cgb_make_graph.md)
+  : Build a correlation-guided bilateral (CGB) graph
+
+- [`cgb_smooth()`](https://bbuchsbaum.github.io/neuroim2/reference/cgb_smooth.md)
+  : Apply a precomputed CGB graph to volumetric data
+
+- [`cgb_smooth_loro()`](https://bbuchsbaum.github.io/neuroim2/reference/cgb_smooth_loro.md)
+  : Leave-one-run-out smoothing helper
+
+- [`reorient()`](https://bbuchsbaum.github.io/neuroim2/reference/reorient-methods.md)
+  : Remap the grid-to-world coordinates mapping of an image.
+
+- [`clustered_searchlight()`](https://bbuchsbaum.github.io/neuroim2/reference/clustered_searchlight.md)
+  : Create a clustered searchlight iterator
+
+- [`cluster_searchlight_series()`](https://bbuchsbaum.github.io/neuroim2/reference/cluster_searchlight_series.md)
+  : Cluster-centroid searchlight over cluster time-series
+
+- [`spatial-filter`](https://bbuchsbaum.github.io/neuroim2/reference/spatial-filter.md)
+  : Spatial Filtering Methods for Neuroimaging Data
+
+- [`searchlight-methods`](https://bbuchsbaum.github.io/neuroim2/reference/searchlight-methods.md)
+  : Searchlight Analysis Methods
+
+- [`laplace_enhance()`](https://bbuchsbaum.github.io/neuroim2/reference/laplace_enhance.md)
+  : Laplacian Enhancement Filter for Volumetric Images
+
+## Lookup and Mapping
+
+Methods for looking up and mapping neuroimaging data
+
+- [`lookup()`](https://bbuchsbaum.github.io/neuroim2/reference/lookup.md)
+  : Index Lookup operation
+- [`map_values()`](https://bbuchsbaum.github.io/neuroim2/reference/map_values-methods.md)
+  : Map Values from One Set to Another Using a User-supplied Lookup
+  Table
+- [`resample()`](https://bbuchsbaum.github.io/neuroim2/reference/resample-methods.md)
+  : Resample an Image to Match the Space of Another Image
+- [`neuro-resample`](https://bbuchsbaum.github.io/neuroim2/reference/neuro-resample.md)
+  : Resampling Methods for Neuroimaging Objects
+
+## Data Access and Indexing
+
+Methods for accessing and indexing neuroimaging data
+
+- [`sub_vector()`](https://bbuchsbaum.github.io/neuroim2/reference/sub_vector-methods.md)
+  :
+
+  Generic function to extract a sub-vector from a `NeuroVec` object.
+
+- [`indices()`](https://bbuchsbaum.github.io/neuroim2/reference/indices.md)
+  : Extract indices
+
+- [`length(`*`<ClusteredNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/length-methods.md)
+  [`length(`*`<NeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/length-methods.md)
+  [`length(`*`<NeuroVecSeq>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/length-methods.md)
+  [`length(`*`<ROIVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/length-methods.md)
+  [`length(`*`<ROICoords>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/length-methods.md)
+  : Get length of NeuroVec object
+
+- [`neuro-ops`](https://bbuchsbaum.github.io/neuroim2/reference/neuro-ops.md)
+  : Arithmetic and Comparison Operations for Neuroimaging Objects
+
+## Scaling and Resampling
+
+Methods for splitting, scaling, processing, and resampling neuroimaging
+data
+
+- [`scale_series()`](https://bbuchsbaum.github.io/neuroim2/reference/scale_series-methods.md)
+  : Generic functions to scale (center and/or normalize by standard
+  deviation) each series of a 4D image That is, if the 4th dimension is
+  'time' each series is a 1D time series.
+- [`make_time_weights()`](https://bbuchsbaum.github.io/neuroim2/reference/make_time_weights.md)
+  : Build smooth time weights from motion/outlier metrics
+- [`prepare_confounds()`](https://bbuchsbaum.github.io/neuroim2/reference/prepare_confounds.md)
+  : Prepare weighted nuisance projectors for each run
+- [`resample()`](https://bbuchsbaum.github.io/neuroim2/reference/resample-methods.md)
+  : Resample an Image to Match the Space of Another Image
+- [`resample_to()`](https://bbuchsbaum.github.io/neuroim2/reference/resample_to.md)
+  : Resample an image with readable method names
+- [`neuro-downsample`](https://bbuchsbaum.github.io/neuroim2/reference/neuro-downsample.md)
+  : Downsampling Methods for Neuroimaging Objects
+- [`split_blocks()`](https://bbuchsbaum.github.io/neuroim2/reference/split_blocks-methods.md)
+  : Cut a vector-valued object into a list of sub-blocks
+- [`split_clusters()`](https://bbuchsbaum.github.io/neuroim2/reference/split_clusters-methods.md)
+  : Cut an object into a list of spatial or spatiotemporal clusters
+- [`split_fill()`](https://bbuchsbaum.github.io/neuroim2/reference/split_fill-methods.md)
+  : Fill Disjoint Sets of Values with the Output of a Function
+- [`split_reduce()`](https://bbuchsbaum.github.io/neuroim2/reference/split_reduce-methods.md)
+  : Summarize Subsets of an Object by Splitting by Row and Applying a
+  Summary Function
+- [`split_scale()`](https://bbuchsbaum.github.io/neuroim2/reference/split_scale-methods.md)
+  : Center and/or Scale Row-subsets of a Matrix or Matrix-like Object
+
+## IO
+
+Methods for input-output operations
+
+- [`read_vec()`](https://bbuchsbaum.github.io/neuroim2/reference/read_vec.md)
+  : read_vec
+
+- [`read_vol()`](https://bbuchsbaum.github.io/neuroim2/reference/read_vol.md)
+  : Load an image volume from a file
+
+- [`read_image()`](https://bbuchsbaum.github.io/neuroim2/reference/read_image.md)
+  : read_image
+
+- [`write_elements()`](https://bbuchsbaum.github.io/neuroim2/reference/write_elements-methods.md)
+  : Write a sequence of elements from an input source
+
+- [`write_vec()`](https://bbuchsbaum.github.io/neuroim2/reference/write_vec-methods.md)
+  : Write a 4d image vector to disk
+
+- [`write_vol()`](https://bbuchsbaum.github.io/neuroim2/reference/write_vol-methods.md)
+  : Write a 3d image volume to disk
+
+- [`close(`*`<BinaryReader>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/close-methods.md)
+  [`close(`*`<BinaryWriter>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/close-methods.md)
+  : Close a BinaryReader or BinaryWriter
+
+- [`ColumnReader()`](https://bbuchsbaum.github.io/neuroim2/reference/ColumnReader.md)
+  : Create Column Reader Object
+
+- [`header_file()`](https://bbuchsbaum.github.io/neuroim2/reference/header_file-methods.md)
+  :
+
+  Generic function to get the name of the header file, given a file name
+  and a `FileFormat` instance.
+
+- [`header_file_matches()`](https://bbuchsbaum.github.io/neuroim2/reference/header_file_matches-methods.md)
+  :
+
+  Generic function to test whether a file name conforms to the given
+  `FileFormat` instance. Will test for match to header file only
+
+- [`read_columns()`](https://bbuchsbaum.github.io/neuroim2/reference/read_columns-methods.md)
+  :
+
+  Read a set of column vector from an input source (e.g. `ColumnReader`)
+
+- [`read_header()`](https://bbuchsbaum.github.io/neuroim2/reference/read_header.md)
+  : read header information of an image file
+
+- [`read_meta_info()`](https://bbuchsbaum.github.io/neuroim2/reference/read_meta_info-methods.md)
+  : Generic function to read image meta info given a file
+
+- [`read_vol_list()`](https://bbuchsbaum.github.io/neuroim2/reference/read_vol_list.md)
+  : read_vol_list
+
+- [`read_hyper_vec()`](https://bbuchsbaum.github.io/neuroim2/reference/read_hyper_vec.md)
+  : Read a 5D image as a NeuroHyperVec
+
+## NIfTI Extensions
+
+Classes and functions for working with NIfTI header extensions
+
+- [`NiftiExtension()`](https://bbuchsbaum.github.io/neuroim2/reference/NiftiExtension.md)
+  : Create a NIfTI Extension
+- [`NiftiExtensionCodes`](https://bbuchsbaum.github.io/neuroim2/reference/NiftiExtensionCodes.md)
+  : Known NIfTI Extension Codes
+- [`ecode_name()`](https://bbuchsbaum.github.io/neuroim2/reference/ecode_name.md)
+  : Get Extension Code Name
+- [`extensions()`](https://bbuchsbaum.github.io/neuroim2/reference/extensions.md)
+  : Get Extensions from an Object
+- [`parse_extension()`](https://bbuchsbaum.github.io/neuroim2/reference/parse_extension.md)
+  : Parse NIfTI Extension Data
+- [`parse_afni_extension()`](https://bbuchsbaum.github.io/neuroim2/reference/parse_afni_extension.md)
+  : Parse AFNI Extension
+- [`get_afni_attribute()`](https://bbuchsbaum.github.io/neuroim2/reference/get_afni_attribute.md)
+  : Get AFNI Attribute from Extension
+- [`list_afni_attributes()`](https://bbuchsbaum.github.io/neuroim2/reference/list_afni_attributes.md)
+  : List AFNI Attributes in Extension
+
+## Miscellaneous
+
+Miscellaneous methods and functions
+
+- [`` `[`( ``*`<NeuroHyperVec>`*`,`*`<ANY>`*`,`*`<ANY>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroHyperVec-class.md)
+  : NeuroHyperVec Class
+
+- [`` `[[`( ``*`<NeuroVecSeq>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroVecSeq-methods.md)
+  : Extract Element from NeuroVecSeq
+
+- [`` `[[`( ``*`<AbstractSparseNeuroVec>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/SparseNeuroVec-methods.md)
+  : \[\[
+
+- [`` `[`( ``*`<DenseNeuroVol>`*`,`*`<numeric>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+  [`` `[`( ``*`<DenseNeuroVol>`*`,`*`<integer>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+  [`` `[[`( ``*`<NeuroVec>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+  [`` `[`( ``*`<NeuroVol>`*`,`*`<ROICoords>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+  [`` `[`( ``*`<NeuroVol>`*`,`*`<ROIVol>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+  [`` `[`( ``*`<DenseNeuroVol>`*`,`*`<ROIVol>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+  [`` `[`( ``*`<SparseNeuroVol>`*`,`*`<numeric>`*`,`*`<numeric>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+  [`` `[`( ``*`<ROIVol>`*`,`*`<numeric>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+  [`` `[`( ``*`<ROIVol>`*`,`*`<logical>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+  [`` `[`( ``*`<ROIVol>`*`,`*`<ROICoords>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+  [`` `[`( ``*`<ROIVol>`*`,`*`<matrix>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+  [`` `[`( ``*`<ROIVol>`*`,`*`<missing>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+  [`` `[`( ``*`<ROIVol>`*`,`*`<missing>`*`,`*`<numeric>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+  [`` `[`( ``*`<ROIVol>`*`,`*`<numeric>`*`,`*`<numeric>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+  [`` `[`( ``*`<ROIVol>`*`,`*`<logical>`*`,`*`<numeric>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+  [`` `[`( ``*`<ROIVol>`*`,`*`<ROICoords>`*`,`*`<numeric>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+  [`` `[`( ``*`<ROIVol>`*`,`*`<matrix>`*`,`*`<numeric>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+  [`` `[`( ``*`<ROICoords>`*`,`*`<numeric>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+  [`` `[`( ``*`<AbstractSparseNeuroVec>`*`,`*`<numeric>`*`,`*`<numeric>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+  : \[\[
+
+- [`` `[`( ``*`<ArrayLike3D>`*`,`*`<numeric>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor3d.md)
+  [`` `[`( ``*`<ArrayLike3D>`*`,`*`<matrix>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor3d.md)
+  [`` `[`( ``*`<ArrayLike3D>`*`,`*`<missing>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor3d.md)
+  [`` `[`( ``*`<ArrayLike3D>`*`,`*`<missing>`*`,`*`<numeric>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor3d.md)
+  : Array-like access for 3-dimensional data structures
+
+- [`` `[`( ``*`<ArrayLike4D>`*`,`*`<matrix>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor4d.md)
+  [`` `[`( ``*`<ArrayLike4D>`*`,`*`<numeric>`*`,`*`<numeric>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor4d.md)
+  [`` `[`( ``*`<ArrayLike4D>`*`,`*`<numeric>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor4d.md)
+  [`` `[`( ``*`<ArrayLike4D>`*`,`*`<integer>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor4d.md)
+  [`` `[`( ``*`<ArrayLike4D>`*`,`*`<missing>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor4d.md)
+  [`` `[`( ``*`<ArrayLike4D>`*`,`*`<missing>`*`,`*`<numeric>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor4d.md)
+  [`` `[`( ``*`<ClusteredNeuroVec>`*`,`*`<missing>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor4d.md)
+  [`` `[`( ``*`<ClusteredNeuroVec>`*`,`*`<numeric>`*`,`*`<numeric>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extractor4d.md)
+  : Array-like access for 4-dimensional data structures
+
+- [`dim(`*`<ClusteredNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/dim-methods.md)
+  [`dim(`*`<FileMetaInfo>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/dim-methods.md)
+  [`dim(`*`<NeuroObj>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/dim-methods.md)
+  [`dim(`*`<NeuroHyperVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/dim-methods.md)
+  [`dim(`*`<NeuroSpace>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/dim-methods.md)
+  [`dim(`*`<ROIVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/dim-methods.md)
+  [`dim(`*`<ROICoords>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/dim-methods.md)
+  : Get Dimensions of FileMetaInfo Object
+
+- [`dim_of()`](https://bbuchsbaum.github.io/neuroim2/reference/dim_of-methods.md)
+  : Get the length of a given dimension of an object
+
+- [`drop(`*`<NeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/drop-methods.md)
+  : Drop a dimension
+
+- [`drop()`](https://bbuchsbaum.github.io/neuroim2/reference/drop.md) :
+  Generic Drop Method
+
+- [`drop_dim()`](https://bbuchsbaum.github.io/neuroim2/reference/drop_dim-methods.md)
+  : Drop a Dimension from an Object
+
+- [`length(`*`<ClusteredNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/length-methods.md)
+  [`length(`*`<NeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/length-methods.md)
+  [`length(`*`<NeuroVecSeq>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/length-methods.md)
+  [`length(`*`<ROIVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/length-methods.md)
+  [`length(`*`<ROICoords>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/length-methods.md)
+  : Get length of NeuroVec object
+
+- [`show(`*`<NiftiExtension>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/NiftiExtension-class.md)
+  : NiftiExtension Class
+
+- [`show(`*`<NiftiExtensionList>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/NiftiExtensionList-class.md)
+  : NiftiExtensionList Class
+
+- [`show(`*`<NamedAxis>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<AxisSet1D>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<AxisSet2D>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<AxisSet3D>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<AxisSet4D>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<ClusteredNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<ClusteredNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<IndexLookupVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<MappedNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<FileMetaInfo>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<NeuroHyperVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<NeuroSlice>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<NeuroSpace>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<NeuroVecSource>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<NeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<DenseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<NeuroVecSeq>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<DenseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<NeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<SparseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<Kernel>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<ROIVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<ROICoords>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<ROIVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  [`show(`*`<SparseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
+  : Show method for NamedAxis objects
+
+- [`as-ClusteredNeuroVol-DenseNeuroVol`](https://bbuchsbaum.github.io/neuroim2/reference/as-ClusteredNeuroVol-DenseNeuroVol.md)
+  [`coerce,ClusteredNeuroVol,DenseNeuroVol-method`](https://bbuchsbaum.github.io/neuroim2/reference/as-ClusteredNeuroVol-DenseNeuroVol.md)
+  : Convert ClusteredNeuroVol to DenseNeuroVol
+
+- [`as.array(`*`<ClusteredNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.array-methods.md)
+  [`as.array(`*`<SparseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.array-methods.md)
+  [`as.array(`*`<SparseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.array-methods.md)
+  : Convert ClusteredNeuroVol to a base array
+
+- [`as.array()`](https://bbuchsbaum.github.io/neuroim2/reference/as.array.md)
+  : Generic as.array Method
+
+- [`as.dense(`*`<ClusteredNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.dense-methods.md)
+  [`as.dense(`*`<SparseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.dense-methods.md)
+  [`as.dense(`*`<DenseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.dense-methods.md)
+  [`as.dense(`*`<ROIVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.dense-methods.md)
+  [`as.dense(`*`<SparseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.dense-methods.md)
+  : Coerce SparseNeuroVol to DenseNeuroVol
+
+- [`as.dense()`](https://bbuchsbaum.github.io/neuroim2/reference/as.dense.md)
+  : Convert to dense representation
+
+- [`as.list(`*`<FileBackedNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.list-methods.md)
+  [`as.list(`*`<NeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.list-methods.md)
+  [`as.list(`*`<SparseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.list-methods.md)
+  : Convert FileBackedNeuroVec to List
+
+- [`as.logical(`*`<NeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.logical-methods.md)
+  [`as.logical(`*`<ROIVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.logical-methods.md)
+  : as.logical
+
+- [`as.mask(`*`<NeuroVol>`*`,`*`<missing>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.mask-methods.md)
+  [`as.mask(`*`<NeuroVol>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.mask-methods.md)
+  : Convert NeuroVol to a mask
+
+- [`as.mask()`](https://bbuchsbaum.github.io/neuroim2/reference/as.mask.md)
+  : Convert to a LogicalNeuroVol
+
+- [`as.matrix(`*`<ClusteredNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.matrix-methods.md)
+  [`as.matrix(`*`<MappedNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.matrix-methods.md)
+  [`as.matrix(`*`<NeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.matrix-methods.md)
+  [`as.matrix(`*`<DenseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.matrix-methods.md)
+  [`as.matrix(`*`<ROIVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.matrix-methods.md)
+  [`as.matrix(`*`<AbstractSparseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.matrix-methods.md)
+  :
+
+  convert a `NeuroVec` to a matrix
+
+- [`as.matrix()`](https://bbuchsbaum.github.io/neuroim2/reference/as.matrix.md)
+  : Generic as.matrix Method
+
+- [`as.numeric(`*`<SparseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.numeric-methods.md)
+  [`as.numeric(`*`<ROIVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.numeric-methods.md)
+  : Convert SparseNeuroVol to numeric
+
+- [`as.raster`](https://bbuchsbaum.github.io/neuroim2/reference/as.raster.md)
+  : Generic Method for Converting Objects to Raster Format
+
+- [`as.sparse(`*`<DenseNeuroVec>`*`,`*`<LogicalNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.sparse-methods.md)
+  [`as.sparse(`*`<DenseNeuroVec>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.sparse-methods.md)
+  [`as.sparse(`*`<DenseNeuroVol>`*`,`*`<LogicalNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.sparse-methods.md)
+  [`as.sparse(`*`<DenseNeuroVol>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.sparse-methods.md)
+  [`as.sparse(`*`<ROIVol>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.sparse-methods.md)
+  : Convert DenseNeuroVec to sparse representation using mask
+
+- [`as.sparse()`](https://bbuchsbaum.github.io/neuroim2/reference/as.sparse.md)
+  : Convert to from dense to sparse representation
+
+- [`as.vector(`*`<SparseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.vector-methods.md)
+  : Convert SparseNeuroVol to a base vector
+
+- [`as_canonical()`](https://bbuchsbaum.github.io/neuroim2/reference/as_canonical.md)
+  : Reorient Image to Canonical (RAS+) Orientation
+
+- [`as_mmap()`](https://bbuchsbaum.github.io/neuroim2/reference/as_mmap.md)
+  : Convert a NeuroVec to a memory-mapped representation
+
+- [`as_nifti_header()`](https://bbuchsbaum.github.io/neuroim2/reference/as_nifti_header.md)
+  : Construct a Minimal NIfTI-1 Header from a NeuroVol
+
+- [`close(`*`<BinaryReader>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/close-methods.md)
+  [`close(`*`<BinaryWriter>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/close-methods.md)
+  : Close a BinaryReader or BinaryWriter
+
+- [`plot(`*`<NeuroSlice>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/plot-methods.md)
+  [`plot(`*`<NeuroVol>`*`,`*`<missing>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/plot-methods.md)
+  [`plot(`*`<NeuroVol>`*`,`*`<NeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/plot-methods.md)
+  : Plot a NeuroSlice
+
+- [`plot_montage()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_montage.md)
+  : Plot a montage of axial (or any-plane) slices using facetting
+
+- [`plot_ortho()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_ortho.md)
+  : Orthogonal three-plane view with optional crosshairs
+
+- [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
+  : Composite an overlay map on a structural background
+
+- [`Arith(`*`<SparseNeuroVol>`*`,`*`<SparseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Arith-methods.md)
+  [`Arith(`*`<ROIVol>`*`,`*`<ROIVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Arith-methods.md)
+  [`Arith(`*`<DenseNeuroVol>`*`,`*`<DenseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Arith-methods.md)
+  [`Arith(`*`<DenseNeuroVec>`*`,`*`<DenseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Arith-methods.md)
+  [`Arith(`*`<SparseNeuroVol>`*`,`*`<NeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Arith-methods.md)
+  [`Arith(`*`<NeuroVol>`*`,`*`<SparseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Arith-methods.md)
+  [`Arith(`*`<SparseNeuroVec>`*`,`*`<SparseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Arith-methods.md)
+  [`Arith(`*`<NeuroVec>`*`,`*`<NeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Arith-methods.md)
+  [`Arith(`*`<NeuroVec>`*`,`*`<NeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Arith-methods.md)
+  [`Arith(`*`<NeuroVol>`*`,`*`<NeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Arith-methods.md)
+  [`Arith(`*`<DenseNeuroVol>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Arith-methods.md)
+  [`Arith(`*`<numeric>`*`,`*`<DenseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Arith-methods.md)
+  [`Arith(`*`<SparseNeuroVol>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Arith-methods.md)
+  [`Arith(`*`<numeric>`*`,`*`<SparseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Arith-methods.md)
+  [`Arith(`*`<ClusteredNeuroVol>`*`,`*`<ClusteredNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Arith-methods.md)
+  [`Arith(`*`<ClusteredNeuroVol>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Arith-methods.md)
+  [`Arith(`*`<numeric>`*`,`*`<ClusteredNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Arith-methods.md)
+  [`Arith(`*`<ClusteredNeuroVol>`*`,`*`<NeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Arith-methods.md)
+  [`Arith(`*`<NeuroVol>`*`,`*`<ClusteredNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Arith-methods.md)
+  : Arithmetic Operations
+
+- [`Compare(`*`<DenseNeuroVol>`*`,`*`<DenseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Compare-methods.md)
+  [`Compare(`*`<DenseNeuroVol>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Compare-methods.md)
+  [`Compare(`*`<numeric>`*`,`*`<DenseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Compare-methods.md)
+  [`Compare(`*`<SparseNeuroVol>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Compare-methods.md)
+  [`Compare(`*`<numeric>`*`,`*`<SparseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Compare-methods.md)
+  [`Compare(`*`<NeuroVec>`*`,`*`<NeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Compare-methods.md)
+  : Comparison Operations
+
+- [`Logic(`*`<DenseNeuroVol>`*`,`*`<DenseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Logic-methods.md)
+  [`Logic(`*`<SparseNeuroVol>`*`,`*`<SparseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Logic-methods.md)
+  [`Logic(`*`<SparseNeuroVol>`*`,`*`<NeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Logic-methods.md)
+  [`Logic(`*`<NeuroVol>`*`,`*`<SparseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Logic-methods.md)
+  [`Logic(`*`<NeuroVol>`*`,`*`<logical>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Logic-methods.md)
+  [`Logic(`*`<logical>`*`,`*`<NeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Logic-methods.md)
+  : Logic Operations for Neuroimaging Volumes
+
+- [`Summary(`*`<SparseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Summary-methods.md)
+  [`Summary(`*`<SparseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Summary-methods.md)
+  [`Summary(`*`<DenseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Summary-methods.md)
+  : Summary Methods for Neuroimaging Objects
+
+- [`add_dim()`](https://bbuchsbaum.github.io/neuroim2/reference/add_dim-methods.md)
+  : Add a Dimension to an Object
+
+- [`axcodes()`](https://bbuchsbaum.github.io/neuroim2/reference/axcodes-methods.md)
+  : Get Orientation Axis Codes
+
+- [`axes()`](https://bbuchsbaum.github.io/neuroim2/reference/axes-methods.md)
+  : Extract Image Axes
+
+- [`bounds()`](https://bbuchsbaum.github.io/neuroim2/reference/bounds-methods.md)
+  : Extract Spatial Bounds of an Image
+
+- [`centroid()`](https://bbuchsbaum.github.io/neuroim2/reference/centroid-methods.md)
+  : return the centroid of an object
+
+- [`centroids()`](https://bbuchsbaum.github.io/neuroim2/reference/centroids-methods.md)
+  : Return a matrix of centroids of an object
+
+- [`concat()`](https://bbuchsbaum.github.io/neuroim2/reference/concat-methods.md)
+  : Concatenate two objects in the time dimension
+
+- [`conn_comp()`](https://bbuchsbaum.github.io/neuroim2/reference/conn_comp-methods.md)
+  : Connected components
+
+- [`coord_to_grid()`](https://bbuchsbaum.github.io/neuroim2/reference/coord_to_grid-methods.md)
+  : convert n-dimensional real world coordinates to grid coordinates
+
+- [`coord_to_index()`](https://bbuchsbaum.github.io/neuroim2/reference/coord_to_index-methods.md)
+  : convert n-dimensional real world coordinates to 1D indices
+
+- [`coords(`*`<IndexLookupVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/coords-methods.md)
+  [`coords(`*`<ROIVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/coords-methods.md)
+  [`coords(`*`<ROICoords>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/coords-methods.md)
+  [`coords(`*`<AbstractSparseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/coords-methods.md)
+  : Extract Coordinates from an IndexLookupVol Object
+
+- [`data_file()`](https://bbuchsbaum.github.io/neuroim2/reference/data_file-methods.md)
+  :
+
+  Generic function to get the name of the data file, given a file name
+  and a `FileFormat` instance.
+
+- [`data_file_matches()`](https://bbuchsbaum.github.io/neuroim2/reference/data_file_matches-methods.md)
+  :
+
+  Generic function to test whether a file name conforms to the given a
+  `FileFormat` instance. Will test for match to data file only
+
+- [`data_reader(`*`<NIFTIMetaInfo>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/data_reader-methods.md)
+  [`data_reader(`*`<AFNIMetaInfo>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/data_reader-methods.md)
+  : Create Data Reader for AFNI Format
+
+- [`downsample()`](https://bbuchsbaum.github.io/neuroim2/reference/downsample-methods.md)
+  : Downsample an Image
+
+- [`embed_kernel()`](https://bbuchsbaum.github.io/neuroim2/reference/embed_kernel-methods.md)
+  : Generic function to position kernel in a position in image space
+
+- [`extension()`](https://bbuchsbaum.github.io/neuroim2/reference/extension.md)
+  : Get Extension by Code
+
+- [`file_matches()`](https://bbuchsbaum.github.io/neuroim2/reference/file_matches-methods.md)
+  :
+
+  Generic function to test whether a file name conforms to the given
+  `FileFormat` instance. Will test for match to either header file or
+  data file
+
+- [`grid_to_coord()`](https://bbuchsbaum.github.io/neuroim2/reference/grid_to_coord-methods.md)
+  : Generic function to convert N-dimensional grid coordinates to real
+  world coordinates
+
+- [`grid_to_grid()`](https://bbuchsbaum.github.io/neuroim2/reference/grid_to_grid-methods.md)
+  : Generic function to convert voxel coordinates in the reference space
+  (LPI) to native array space.
+
+- [`grid_to_index()`](https://bbuchsbaum.github.io/neuroim2/reference/grid_to_index-methods.md)
+  : Generic function to convert N-dimensional grid coordinates to 1D
+  indices
+
+- [`has_extensions()`](https://bbuchsbaum.github.io/neuroim2/reference/has_extensions.md)
+  : Check if Extensions are Present
+
+- [`header()`](https://bbuchsbaum.github.io/neuroim2/reference/header-methods.md)
+  : Access NIfTI Header Information
+
+- [`header_file()`](https://bbuchsbaum.github.io/neuroim2/reference/header_file-methods.md)
+  :
+
+  Generic function to get the name of the header file, given a file name
+  and a `FileFormat` instance.
+
+- [`header_file_matches()`](https://bbuchsbaum.github.io/neuroim2/reference/header_file_matches-methods.md)
+  :
+
+  Generic function to test whether a file name conforms to the given
+  `FileFormat` instance. Will test for match to header file only
+
+- [`index_to_coord()`](https://bbuchsbaum.github.io/neuroim2/reference/index_to_coord-methods.md)
+  : convert 1d indices to n-dimensional real world coordinates
+
+- [`index_to_grid()`](https://bbuchsbaum.github.io/neuroim2/reference/index_to_grid-methods.md)
+  : Convert 1d indices to n-dimensional grid coordinates
+
+- [`indices(`*`<IndexLookupVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/indices-methods.md)
+  [`indices(`*`<ROIVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/indices-methods.md)
+  [`indices(`*`<ROIVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/indices-methods.md)
+  [`indices(`*`<AbstractSparseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/indices-methods.md)
+  : Get Indices from an IndexLookupVol Object
+
+- [`inverse_trans()`](https://bbuchsbaum.github.io/neuroim2/reference/inverse_trans-methods.md)
+  : Extract inverse image coordinate transformation
+
+- [`labels(`*`<ClusteredNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/labels-methods.md)
+  : Get Labels from ClusteredNeuroVec
+
+- [`linear_access(`*`<DenseNeuroVol>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/linear_access-methods.md)
+  [`linear_access(`*`<DenseNeuroVec>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/linear_access-methods.md)
+  [`linear_access(`*`<DenseNeuroVol>`*`,`*`<integer>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/linear_access-methods.md)
+  [`linear_access(`*`<DenseNeuroVec>`*`,`*`<integer>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/linear_access-methods.md)
+  [`linear_access(`*`<FileBackedNeuroVec>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/linear_access-methods.md)
+  [`linear_access(`*`<MappedNeuroVec>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/linear_access-methods.md)
+  [`linear_access(`*`<NeuroHyperVec>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/linear_access-methods.md)
+  [`linear_access(`*`<NeuroVecSeq>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/linear_access-methods.md)
+  [`linear_access(`*`<SparseNeuroVol>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/linear_access-methods.md)
+  [`linear_access(`*`<AbstractSparseNeuroVec>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/linear_access-methods.md)
+  : Linear Access Method for FileBackedNeuroVec
+
+- [`load_data(`*`<MappedNeuroVecSource>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/load_data-methods.md)
+  [`load_data(`*`<NeuroVecSource>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/load_data-methods.md)
+  [`load_data(`*`<NeuroVolSource>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/load_data-methods.md)
+  [`load_data(`*`<SparseNeuroVecSource>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/load_data-methods.md)
+  : Load image data from a NeuroVecSource object
+
+- [`lookup(`*`<IndexLookupVol>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/lookup-methods.md)
+  [`lookup(`*`<AbstractSparseNeuroVec>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/lookup-methods.md)
+  : Lookup Values in an IndexLookupVol Object
+
+- [`mapf()`](https://bbuchsbaum.github.io/neuroim2/reference/map-methods.md)
+  : Apply a function to an object.
+
+- [`map_values()`](https://bbuchsbaum.github.io/neuroim2/reference/map_values-methods.md)
+  : Map Values from One Set to Another Using a User-supplied Lookup
+  Table
+
+- [`mask()`](https://bbuchsbaum.github.io/neuroim2/reference/mask-methods.md)
+  : Extract Mask from Neuroimaging Object
+
+- [`matricized_access()`](https://bbuchsbaum.github.io/neuroim2/reference/matricized_access-methods.md)
+  : Extract values from a 4D tensor using a matrix of time-space
+  indices.
+
+- [`mean(`*`<DenseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/mean-methods.md)
+  [`mean(`*`<SparseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/mean-methods.md)
+  [`mean(`*`<NeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/mean-methods.md)
+  : Temporal Mean of a NeuroVec
+
+- [`meta_info()`](https://bbuchsbaum.github.io/neuroim2/reference/meta_info.md)
+  : Lightweight metadata for neuroimaging files
+
+- [`ndim()`](https://bbuchsbaum.github.io/neuroim2/reference/ndim-methods.md)
+  : Extract the number of dimensions of an object
+
+- [`` `!`( ``*`<DenseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/not-methods.md)
+  [`` `!`( ``*`<SparseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/not-methods.md)
+  : Logical Negation for Neuroimaging Volumes
+
+- [`num_clusters()`](https://bbuchsbaum.github.io/neuroim2/reference/num_clusters-methods.md)
+  : Number of Clusters
+
+- [`origin()`](https://bbuchsbaum.github.io/neuroim2/reference/origin-methods.md)
+  : Extract Image Origin
+
+- [`partition()`](https://bbuchsbaum.github.io/neuroim2/reference/partition-methods.md)
+  : Partition an image into a set of disjoint clusters
+
+- [`patch_set(`*`<NeuroVol>`*`,`*`<numeric>`*`,`*`<missing>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/patch_set-methods.md)
+  [`patch_set(`*`<NeuroVol>`*`,`*`<numeric>`*`,`*`<LogicalNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/patch_set-methods.md)
+  : Create a patch set from a NeuroVol object
+
+- [`perm_mat()`](https://bbuchsbaum.github.io/neuroim2/reference/perm_mat-methods.md)
+  : Extract permutation matrix associated with an image
+
+- [`read_meta_info()`](https://bbuchsbaum.github.io/neuroim2/reference/read_meta_info-methods.md)
+  : Generic function to read image meta info given a file
+
+- [`reorient()`](https://bbuchsbaum.github.io/neuroim2/reference/reorient-methods.md)
+  : Remap the grid-to-world coordinates mapping of an image.
+
+- [`resample()`](https://bbuchsbaum.github.io/neuroim2/reference/resample-methods.md)
+  : Resample an Image to Match the Space of Another Image
+
+- [`scale_series()`](https://bbuchsbaum.github.io/neuroim2/reference/scale_series-methods.md)
+  : Generic functions to scale (center and/or normalize by standard
+  deviation) each series of a 4D image That is, if the 4th dimension is
+  'time' each series is a 1D time series.
+
+- [`series()`](https://bbuchsbaum.github.io/neuroim2/reference/series-methods.md)
+  [`series_roi(`*`<NeuroVec>`*`,`*`<matrix>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/series-methods.md)
+  [`series_roi(`*`<NeuroVec>`*`,`*`<ROICoords>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/series-methods.md)
+  [`series_roi(`*`<NeuroVec>`*`,`*`<LogicalNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/series-methods.md)
+  [`series_roi(`*`<NeuroVec>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/series-methods.md)
+  [`series_roi(`*`<NeuroVecSeq>`*`,`*`<matrix>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/series-methods.md)
+  : Extract one or more series from object
+
+- [`slice()`](https://bbuchsbaum.github.io/neuroim2/reference/slice-methods.md)
+  : Extract image slice
+
+- [`slices()`](https://bbuchsbaum.github.io/neuroim2/reference/slices-methods.md)
+  : Extract an ordered series of 2D slices from a 3D or 4D object
+
+- [`space()`](https://bbuchsbaum.github.io/neuroim2/reference/space-methods.md)
+  : Extract Geometric Properties of an Image
+
+- [`spacing()`](https://bbuchsbaum.github.io/neuroim2/reference/spacing-methods.md)
+  : Extract Voxel Dimensions of an Image
+
+- [`split_blocks()`](https://bbuchsbaum.github.io/neuroim2/reference/split_blocks-methods.md)
+  : Cut a vector-valued object into a list of sub-blocks
+
+- [`split_clusters()`](https://bbuchsbaum.github.io/neuroim2/reference/split_clusters-methods.md)
+  : Cut an object into a list of spatial or spatiotemporal clusters
+
+- [`split_fill()`](https://bbuchsbaum.github.io/neuroim2/reference/split_fill-methods.md)
+  : Fill Disjoint Sets of Values with the Output of a Function
+
+- [`split_reduce()`](https://bbuchsbaum.github.io/neuroim2/reference/split_reduce-methods.md)
+  : Summarize Subsets of an Object by Splitting by Row and Applying a
+  Summary Function
+
+- [`split_scale()`](https://bbuchsbaum.github.io/neuroim2/reference/split_scale-methods.md)
+  : Center and/or Scale Row-subsets of a Matrix or Matrix-like Object
+
+- [`strip_extension()`](https://bbuchsbaum.github.io/neuroim2/reference/strip_extension-methods.md)
+  :
+
+  Generic function to strip extension from file name, given a
+  `FileFormat` instance.
+
+- [`sub_clusters()`](https://bbuchsbaum.github.io/neuroim2/reference/sub_clusters.md)
+  : Select a Subset of Clusters
+
+- [`sub_vector()`](https://bbuchsbaum.github.io/neuroim2/reference/sub_vector-methods.md)
+  :
+
+  Generic function to extract a sub-vector from a `NeuroVec` object.
+
+- [`summary(`*`<NeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/summary-neuro-methods.md)
+  [`summary(`*`<DenseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/summary-neuro-methods.md)
+  [`summary(`*`<SparseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/summary-neuro-methods.md)
+  : Summary of Neuroimaging Objects
+
+- [`temporal_access()`](https://bbuchsbaum.github.io/neuroim2/reference/temporal_access-methods.md)
+  : Extract full sparse rows across time.
+
+- [`trans()`](https://bbuchsbaum.github.io/neuroim2/reference/trans-methods.md)
+  : Extract image coordinate transformation
+
+- [`values()`](https://bbuchsbaum.github.io/neuroim2/reference/values-methods.md)
+  : Extract Data Values of an Object
+
+- [`vectors()`](https://bbuchsbaum.github.io/neuroim2/reference/vectors-methods.md)
+  : Extract an ordered list of 1D vectors.
+
+- [`vols()`](https://bbuchsbaum.github.io/neuroim2/reference/vols-methods.md)
+  : Extract an ordered series of 3D volumes.
+
+- [`voxels()`](https://bbuchsbaum.github.io/neuroim2/reference/voxels-methods.md)
+  : extract voxel coordinates
+
+- [`which_dim()`](https://bbuchsbaum.github.io/neuroim2/reference/which_dim-methods.md)
+  : Find Dimensions of a Given Axis
+
+- [`write_elements()`](https://bbuchsbaum.github.io/neuroim2/reference/write_elements-methods.md)
+  : Write a sequence of elements from an input source
+
+- [`write_vec()`](https://bbuchsbaum.github.io/neuroim2/reference/write_vec-methods.md)
+  : Write a 4d image vector to disk
+
+- [`write_vol()`](https://bbuchsbaum.github.io/neuroim2/reference/write_vol-methods.md)
+  : Write a 3d image volume to disk
+
+- [`None`](https://bbuchsbaum.github.io/neuroim2/reference/None.md) :
+  Pre-defined null axis
+
+# Articles
+
+### Start Here
+
+Core orientation and backend choice before task-specific workflows
+
+- [Overview: Getting Started with
+  neuroim2](https://bbuchsbaum.github.io/neuroim2/articles/Overview.md):
+- [Coordinate Systems and Spatial
+  Transforms](https://bbuchsbaum.github.io/neuroim2/articles/coordinate-systems.md):
+- [Choosing a
+  Backend](https://bbuchsbaum.github.io/neuroim2/articles/ChoosingBackends.md):
+- [Working with 4D NeuroVectors
+  (NeuroVec)](https://bbuchsbaum.github.io/neuroim2/articles/NeuroVector.md):
+
+### Spatial Workflows
+
+Reading, transforming, and resampling volumetric data
+
+- [Working with 3D Image
+  Volumes](https://bbuchsbaum.github.io/neuroim2/articles/ImageVolumes.md):
+- [Resampling, downsampling, and
+  reorientation](https://bbuchsbaum.github.io/neuroim2/articles/Resampling.md):
+- [Smoothing and filtering with
+  neuroim2](https://bbuchsbaum.github.io/neuroim2/articles/Smoothing.md):
+
+### Regions and Searchlights
+
+ROI construction, clustered representations, and searchlight analysis
+
+- [Regions of Interest
+  (ROI)](https://bbuchsbaum.github.io/neuroim2/articles/regionOfInterest.md):
+- [ClusteredNeuroVec: Parcel-based 4D
+  Analysis](https://bbuchsbaum.github.io/neuroim2/articles/clustered-neurovec.md):
+- [Pipelines: Split, Map, and
+  Reduce](https://bbuchsbaum.github.io/neuroim2/articles/pipelines.md):
+
+### Visualization
+
+Slice and montage visualization workflows
+
+- [Slice visualization with
+  neuroim2](https://bbuchsbaum.github.io/neuroim2/articles/slice-visualization.md):
+
+### Cookbook
+
+Small, task-oriented examples and recipes
+
+- [neuroim2
+  Cookbook](https://bbuchsbaum.github.io/neuroim2/articles/Cookbook.md):

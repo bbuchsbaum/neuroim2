@@ -10,7 +10,8 @@
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Data Structures for Brain Imaging Data">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><link href="extra.css" rel="stylesheet">
+<script src="extra.js"></script><meta property="og:title" content="Data Structures for Brain Imaging Data">
 <meta name="description" content='A collection of data structures and methods for handling volumetric brain imaging data, with a focus on functional magnetic resonance imaging (fMRI). Provides efficient representations for three-dimensional and four-dimensional neuroimaging data through sparse and dense array implementations, memory-mapped file access for large datasets, and spatial transformation capabilities. Implements methods for image resampling, spatial filtering, region of interest analysis, and connected component labeling. General introduction to fMRI analysis can be found in Poldrack et al. (2024, "Handbook of functional MRI data analysis", &lt;ISBN:9781108795760&gt;).'>
 <meta property="og:description" content='A collection of data structures and methods for handling volumetric brain imaging data, with a focus on functional magnetic resonance imaging (fMRI). Provides efficient representations for three-dimensional and four-dimensional neuroimaging data through sparse and dense array implementations, memory-mapped file access for large datasets, and spatial transformation capabilities. Implements methods for image resampling, spatial filtering, region of interest analysis, and connected component labeling. General introduction to fMRI analysis can be found in Poldrack et al. (2024, "Handbook of functional MRI data analysis", &lt;ISBN:9781108795760&gt;).'>
 </head>
@@ -22,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="index.html">neuroim2</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.11.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,12 +49,32 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="neuroim2-">neuroim2 <img src="https://raw.githubusercontent.com/bbuchsbaum/neuroim2/master/docs/hex-neuroim2.png" align="right" width="120"><a class="anchor" aria-label="anchor" href="#neuroim2-"></a>
+<div class="page-header"><h1 id="neuroim2-">neuroim2 <img src="https://raw.githubusercontent.com/bbuchsbaum/neuroim2/master/docs/hex-neuroim2.png" alt="neuroim2 hex logo" align="right" width="120"><a class="anchor" aria-label="anchor" href="#neuroim2-"></a>
 </h1></div>
 <!-- badges: start -->
 
 <p>Data structures and I/O for volumetric brain imaging with a focus on fMRI. This is the successor to <a href="https://github.com/bbuchsbaum/neuroim" class="external-link"><code>neuroim</code></a> with improved S4 classes, sparse/dense 3D–4D representations, and fast resampling/filtering.</p>
-<p><strong>Website:</strong> <a href="https://bbuchsbaum.github.io/neuroim2/" class="uri">https://bbuchsbaum.github.io/neuroim2/</a><br><strong>CRAN:</strong> <a href="https://cran.r-project.org/package=neuroim2" class="external-link uri">https://cran.r-project.org/package=neuroim2</a><br><strong>Cheatsheet:</strong> <a href="neuroim2_cheatsheet.html">neuroim2_cheatsheet.md</a></p>
+<p><strong>Website:</strong> <a href="https://bbuchsbaum.github.io/neuroim2/" class="uri">https://bbuchsbaum.github.io/neuroim2/</a> <strong>CRAN:</strong> <a href="https://cran.r-project.org/package=neuroim2" class="external-link uri">https://cran.r-project.org/package=neuroim2</a></p>
+<div class="section level2">
+<h2 id="key-features">Key Features<a class="anchor" aria-label="anchor" href="#key-features"></a>
+</h2>
+<ul>
+<li>
+<strong>NIfTI / AFNI support</strong> — read and write <code>.nii</code>, <code>.nii.gz</code>, and AFNI <code>.BRIK</code>/<code>.HEAD</code> files</li>
+<li>
+<strong>S4 class hierarchy</strong> — <code>NeuroVol</code> (3D volumes) and <code>NeuroVec</code> (4D time-series) with dense, sparse, memory-mapped, and clustered variants</li>
+<li>
+<strong>Coordinate systems</strong> — full affine-aware transforms between voxel, grid, and world coordinates</li>
+<li>
+<strong>Searchlights &amp; ROIs</strong> — spherical, cuboid, and random searchlight iterators plus flexible ROI construction</li>
+<li>
+<strong>Spatial filtering</strong> — Gaussian blur, guided filter, bilateral filter, and connected-component labelling</li>
+<li>
+<strong>Resampling</strong> — volume-to-volume resampling with configurable interpolation</li>
+<li>
+<strong>Visualization</strong> — slice montages, orthographic views, and overlay plotting via ggplot2</li>
+</ul>
+</div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -83,34 +104,64 @@
 </h2>
 <p>Read a NIFTI image and perform simple operations:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bbuchsbaum/neuroim2" class="external-link">neuroim2</a></span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb5"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="do">## Loading required package: Matrix</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="do">## Attaching package: 'neuroim2'</span></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="do">## The following object is masked from 'package:base':</span></span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="do">## </span></span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="do">##     scale</span></span></code></pre></div>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fname</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask_v4.nii"</span>, package<span class="op">=</span><span class="st">"neuroim2"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bbuchsbaum/neuroim2" class="external-link">neuroim2</a></span><span class="op">)</span></span>
+<span><span class="va">fname</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask_v4.nii"</span>, package<span class="op">=</span><span class="st">"neuroim2"</span><span class="op">)</span></span>
 <span><span class="va">vol</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">fname</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">v1</span> <span class="op">&lt;-</span> <span class="va">vol</span><span class="op">[</span><span class="fl">1</span>,<span class="fl">1</span>,<span class="fl">1</span><span class="op">]</span></span>
 <span><span class="va">vol2</span> <span class="op">&lt;-</span> <span class="va">vol</span> <span class="op">+</span> <span class="va">vol</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="va">vol</span> <span class="op">==</span> <span class="op">(</span><span class="va">vol2</span> <span class="op">-</span> <span class="va">vol</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb7"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="do">## [1] TRUE</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="do">## [1] TRUE</span></span></code></pre></div>
 <p>Create a 4D image from volumes:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">vec</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/vec_from_vols.html">vec_from_vols</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">vol</span>, <span class="va">vol</span>, <span class="va">vol2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">series1</span> <span class="op">&lt;-</span> <span class="va">vec</span><span class="op">[</span><span class="fl">1</span>,<span class="fl">1</span>,<span class="fl">1</span>,<span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">series1</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb9"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="do">## [1] 3</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="do">## [1] 3</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="vignettes">Vignettes<a class="anchor" aria-label="anchor" href="#vignettes"></a>
 </h2>
-<p>See examples of use of <code>neuroim2</code> in the <a href="https://bbuchsbaum.github.io/neuroim2/articles/index.html">vignettes</a>.</p>
+<p>Browse the full set of <a href="https://bbuchsbaum.github.io/neuroim2/articles/index.html">articles</a> on the pkgdown site:</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Getting Started</th>
+<th>Analysis Workflows</th>
+<th>Advanced</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><a href="https://bbuchsbaum.github.io/neuroim2/articles/Overview.html">Overview</a></td>
+<td><a href="https://bbuchsbaum.github.io/neuroim2/articles/AnalysisWorkflows.html">Analysis Workflows</a></td>
+<td><a href="https://bbuchsbaum.github.io/neuroim2/articles/ImageVolumes.html">Image Volumes</a></td>
+</tr>
+<tr class="even">
+<td><a href="https://bbuchsbaum.github.io/neuroim2/articles/ChoosingBackends.html">Choosing Backends</a></td>
+<td><a href="https://bbuchsbaum.github.io/neuroim2/articles/slice-visualization.html">Slice Visualization</a></td>
+<td><a href="https://bbuchsbaum.github.io/neuroim2/articles/NeuroVector.html">NeuroVector</a></td>
+</tr>
+<tr class="odd">
+<td><a href="https://bbuchsbaum.github.io/neuroim2/articles/coordinate-systems.html">Coordinate Systems</a></td>
+<td><a href="https://bbuchsbaum.github.io/neuroim2/articles/Cookbook.html">Cookbook</a></td>
+<td><a href="https://bbuchsbaum.github.io/neuroim2/articles/regionOfInterest.html">Regions of Interest</a></td>
+</tr>
+<tr class="even">
+<td><a href="https://bbuchsbaum.github.io/neuroim2/articles/VolumesAndVectors.html">Volumes &amp; Vectors</a></td>
+<td><a href="https://bbuchsbaum.github.io/neuroim2/articles/Smoothing.html">Smoothing</a></td>
+<td><a href="https://bbuchsbaum.github.io/neuroim2/articles/clustered-neurovec.html">Clustered NeuroVec</a></td>
+</tr>
+<tr class="odd">
+<td><a href="https://bbuchsbaum.github.io/neuroim2/articles/Resampling.html">Resampling</a></td>
+<td></td>
+<td><a href="https://bbuchsbaum.github.io/neuroim2/articles/pipelines.html">Pipelines</a></td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -166,7 +217,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>
