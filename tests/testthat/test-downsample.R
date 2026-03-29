@@ -440,3 +440,203 @@ test_that("downsample 3D vol validates method parameter", {
   expect_error(downsample(vol, factor = 0.5, method = "lanczos"), 
                "Only 'box' method")
 })
+
+make_sparse_neurovec <- function(coords, values, dims = c(4, 4, 4), spacing = c(1, 1, 1),
+                                 trans = NULL, label = "") {
+  stopifnot(ncol(coords) == 3)
+  stopifnot(ncol(values) == nrow(coords))
+
+  full_dims <- c(dims, nrow(values))
+  if (is.null(trans)) {
+    sp <- NeuroSpace(dim = full_dims, spacing = spacing)
+  } else {
+    sp <- NeuroSpace(dim = full_dims, spacing = spacing, trans = trans)
+  }
+
+  mask_arr <- array(FALSE, dim = dims)
+  linear_idx <- 1L +
+    (coords[, 1] - 1L) +
+    (coords[, 2] - 1L) * dims[1] +
+    (coords[, 3] - 1L) * dims[1] * dims[2]
+  mask_arr[linear_idx] <- TRUE
+
+  SparseNeuroVec(values, sp, mask_arr, label = label)
+}
+
+downsample_sparse_reference <- function(x, new_dims) {
+  old_dims <- dim(x)[1:3]
+  input_coords <- arrayInd(indices(x), .dim = old_dims)
+  output_coords <- cbind(
+    floor((input_coords[, 1] - 1) * new_dims[1] / old_dims[1]) + 1L,
+    floor((input_coords[, 2] - 1) * new_dims[2] / old_dims[2]) + 1L,
+    floor((input_coords[, 3] - 1) * new_dims[3] / old_dims[3]) + 1L
+  )
+
+  output_keys <- do.call(paste, c(as.data.frame(output_coords), sep = ":"))
+  groups <- split(seq_len(nrow(output_coords)), output_keys)
+  first_members <- vapply(groups, `[`, integer(1), 1L)
+  kept_coords <- output_coords[first_members, , drop = FALSE]
+  linear_idx <- 1L +
+    (kept_coords[, 1] - 1L) +
+    (kept_coords[, 2] - 1L) * new_dims[1] +
+    (kept_coords[, 3] - 1L) * new_dims[1] * new_dims[2]
+  order_idx <- order(linear_idx)
+  groups <- groups[order_idx]
+
+  out_data <- vapply(groups, function(idx) {
+    rowMeans(x@data[, idx, drop = FALSE])
+  }, numeric(dim(x)[4]))
+
+  if (!is.matrix(out_data)) {
+    out_data <- matrix(out_data, nrow = dim(x)[4], ncol = 1L)
+  }
+
+  out_mask <- array(FALSE, dim = new_dims)
+  out_mask[linear_idx[order_idx]] <- TRUE
+
+  list(data = out_data, mask = out_mask)
+}
+
+test_that("downsample SparseNeuroVec with factor = 1 preserves values, mask, and label", {
+  coords <- rbind(
+    c(1, 1, 1),
+    c(2, 3, 1),
+    c(4, 4, 4)
+  )
+  values <- rbind(
+    c(1, 2, 3),
+    c(4, 5, 6)
+  )
+  svec <- make_sparse_neurovec(coords, values, label = "sparse-id")
+
+  out <- downsample(svec, factor = 1)
+
+  expect_s4_class(out, "SparseNeuroVec")
+  expect_equal(dim(out), dim(svec))
+  expect_equal(as.array(mask(out)), as.array(mask(svec)))
+  expect_equal(unname(out@data), unname(svec@data))
+  expect_equal(out@label, "sparse-id")
+})
+
+test_that("downsample SparseNeuroVec uses missing-aware box means", {
+  coords <- rbind(
+    c(1, 1, 1),
+    c(2, 2, 2),
+    c(4, 4, 4)
+  )
+  values <- rbind(
+    c(2, 4, 8),
+    c(6, 10, 14)
+  )
+  svec <- make_sparse_neurovec(coords, values)
+
+  out <- downsample(svec, factor = 0.5)
+
+  expect_equal(dim(out), c(2, 2, 2, 2))
+  expect_equal(sum(as.array(mask(out))), 2)
+  expect_true(as.array(mask(out))[1, 1, 1])
+  expect_true(as.array(mask(out))[2, 2, 2])
+  expect_equal(unname(out@data[, 1]), c(3, 8))
+  expect_equal(unname(out@data[, 2]), c(8, 14))
+})
+
+test_that("downsample SparseNeuroVec differs from dense zero-filled averaging", {
+  dims <- c(4, 4, 4, 1)
+  data <- array(0, dim = dims)
+  data[1, 1, 1, 1] <- 4
+  data[2, 2, 2, 1] <- 8
+
+  dense <- DenseNeuroVec(data, NeuroSpace(dim = dims, spacing = c(1, 1, 1)))
+  sparse <- make_sparse_neurovec(
+    coords = rbind(c(1, 1, 1), c(2, 2, 2)),
+    values = matrix(c(4, 8), nrow = 1)
+  )
+
+  dense_out <- downsample(dense, factor = 0.5)
+  sparse_out <- downsample(sparse, factor = 0.5)
+
+  expect_equal(as.array(dense_out)[1, 1, 1, 1], 1.5)
+  expect_equal(sparse_out@data[1, 1], 6)
+  expect_false(isTRUE(all.equal(as.array(dense_out)[1, 1, 1, 1], sparse_out@data[1, 1])))
+})
+
+test_that("downsample SparseNeuroVec matches grouped reference implementation", {
+  coords <- rbind(
+    c(1, 1, 1),
+    c(1, 2, 2),
+    c(2, 2, 2),
+    c(3, 3, 4),
+    c(4, 4, 3)
+  )
+  values <- rbind(
+    c(2, 4, 6, 8, 10),
+    c(1, 3, 5, 7, 9),
+    c(0, 2, 4, 6, 8)
+  )
+  svec <- make_sparse_neurovec(coords, values, dims = c(4, 4, 4), spacing = c(2, 2, 2))
+
+  out <- downsample(svec, factor = 0.5)
+  ref <- downsample_sparse_reference(svec, c(2, 2, 2))
+
+  expect_equal(unname(out@data), unname(ref$data))
+  expect_equal(dim(as.array(mask(out))), dim(ref$mask))
+  expect_equal(as.vector(as.array(mask(out))), as.vector(ref$mask))
+})
+
+test_that("downsample SparseNeuroVec updates affine and spacing consistently", {
+  affine <- matrix(c(
+    0, 2, 0, -20,
+    -2, 0, 0, 10,
+    0, 0, 2, 30,
+    0, 0, 0, 1
+  ), nrow = 4, byrow = TRUE)
+  coords <- rbind(
+    c(1, 1, 1),
+    c(2, 2, 2),
+    c(3, 3, 3),
+    c(4, 4, 4)
+  )
+  values <- rbind(
+    c(1, 2, 3, 4),
+    c(5, 6, 7, 8)
+  )
+  svec <- make_sparse_neurovec(coords, values, spacing = c(2, 2, 2), trans = affine)
+
+  out <- downsample(svec, spacing = c(4, 4, 4))
+  expected_trans <- rescale_affine(affine, c(4, 4, 4), c(4, 4, 4), c(2, 2, 2))
+
+  expect_equal(spacing(out), c(4, 4, 4))
+  expect_equal(trans(out), expected_trans, tolerance = 1e-6)
+})
+
+test_that("downsample SparseNeuroVec accepts equivalent factor, spacing, and outdim targets", {
+  coords <- rbind(
+    c(1, 1, 1),
+    c(2, 2, 2),
+    c(3, 3, 3),
+    c(4, 4, 4)
+  )
+  values <- rbind(
+    c(1, 2, 3, 4),
+    c(5, 6, 7, 8)
+  )
+  svec <- make_sparse_neurovec(coords, values, spacing = c(2, 2, 2))
+
+  by_factor <- downsample(svec, factor = 0.5)
+  by_spacing <- downsample(svec, spacing = c(4, 4, 4))
+  by_outdim <- downsample(svec, outdim = c(2, 2, 2))
+
+  expect_equal(by_factor@data, by_spacing@data)
+  expect_equal(by_factor@data, by_outdim@data)
+  expect_equal(as.array(mask(by_factor)), as.array(mask(by_spacing)))
+  expect_equal(as.array(mask(by_factor)), as.array(mask(by_outdim)))
+})
+
+test_that("downsample SparseNeuroVec validates method parameter", {
+  coords <- rbind(c(1, 1, 1), c(2, 2, 2))
+  values <- matrix(c(1, 2), nrow = 1)
+  svec <- make_sparse_neurovec(coords, values)
+
+  expect_error(downsample(svec, factor = 0.5, method = "lanczos"),
+               "Only 'box' method")
+})
