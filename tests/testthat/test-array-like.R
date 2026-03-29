@@ -45,4 +45,5 @@ test_that("linear_access works for dense objects", {
   expect_equal(linear_access(vol, 1:2), c(1,2))
   vec <- make_vec()
   expect_equal(linear_access(vec, 1:3), as.vector(array(1:16, dim=c(2,2,2,2)))[1:3])
+  expect_equal(linear_access(vec, c(1L, 5L, 9L)), c(1, 5, 9))
 })

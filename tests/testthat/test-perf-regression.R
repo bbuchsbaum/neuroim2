@@ -33,7 +33,7 @@ test_that("series(DenseNeuroVec, matrix) rejects invalid inputs", {
 test_that("series(DenseNeuroVec, integer) matches matrix path", {
   vec <- make_vec(c(8, 8, 8), ntime = 10)
   idx <- c(1L, 50L, 100L, 500L)
-  coords <- index_to_grid(space(vec), idx)
+  coords <- arrayInd(idx, dim(vec)[1:3])
 
   s_int <- series(vec, idx)
   s_mat <- series(vec, coords)

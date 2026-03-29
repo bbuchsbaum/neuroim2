@@ -32,3 +32,19 @@ test_that("[ on AbstractSparseNeuroVec matches dense values and drop behavior", 
   expect_equal(dim(s_nodrop), c(1,1,1,1))
   expect_equal(s_nodrop, d_nodrop)
 })
+
+test_that("[ on AbstractSparseNeuroVec preserves duplicate and reordered indices", {
+  svec <- make_sparse_vec2()
+  dvec <- as(svec, "DenseNeuroVec")
+
+  i <- c(2, 1, 2)
+  j <- c(2, 1)
+  k <- c(1, 2, 1)
+  m <- c(2, 1)
+
+  sub_s <- svec[i, j, k, m, drop = FALSE]
+  sub_d <- dvec[i, j, k, m, drop = FALSE]
+
+  expect_equal(dim(sub_s), c(length(i), length(j), length(k), length(m)))
+  expect_equal(sub_s, sub_d)
+})
