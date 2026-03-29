@@ -106,6 +106,7 @@ Suggests:
     testthat,
     covr,
     knitr,
+    pkgdown,
     roxygen2,
     rmarkdown,
     Gmedian,
@@ -117,4 +118,4 @@ URL: https://github.com/bbuchsbaum/neuroim2,
     https://bbuchsbaum.github.io/neuroim2/
 BugReports: https://github.com/bbuchsbaum/neuroim2/issues
 Language: en-US
-Config/Needs/website: albersdown
+Config/Needs/website: bbuchsbaum/albersdown
