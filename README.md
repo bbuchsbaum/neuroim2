@@ -1,7 +1,7 @@
 neuroim2
 ================
 
-# neuroim2 <img src="https://raw.githubusercontent.com/bbuchsbaum/neuroim2/master/docs/hex-neuroim2.png" alt="neuroim2 hex logo" align="right" width="120" />
+# neuroim2
 
 <!-- badges: start -->
 
