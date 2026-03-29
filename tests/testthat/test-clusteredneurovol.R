@@ -72,6 +72,7 @@ test_that("centroids works correctly", {
   clusvol <- ClusteredNeuroVol(mask, kres$cluster)
 
   centroids_com <- centroids(clusvol, type = "center_of_mass")
+  skip_if_not_installed("Gmedian")
   centroids_medoid <- centroids(clusvol, type = "medoid")
 
   expect_equal(ncol(centroids_com), 3)

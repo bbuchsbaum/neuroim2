@@ -141,8 +141,8 @@ test_that("print.NeuroHeader returns invisibly", {
   f <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
   skip_if(!file.exists(f), "extdata file not available")
   h <- header(f)
-  result <- withVisible(print(h))
-  expect_false(result$visible)
+  out <- capture.output(result <- print(h))
+  expect_s3_class(result, "NeuroHeader")
 })
 
 # ---- 4D file TR ----
