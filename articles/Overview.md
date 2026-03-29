@@ -259,7 +259,7 @@ if (nrow(coords) > k) {
 tmp_file <- tempfile(fileext = ".nii.gz")
 write_vol(img, tmp_file)
 cat("Wrote volume to:", tmp_file, "\n")
-#> Wrote volume to: /tmp/RtmpQhxgIw/file2c8b78ba9d49.nii.gz
+#> Wrote volume to: /tmp/RtmplqykYZ/file2c8a29ceeaac.nii.gz
 
 # Read it back
 img_read <- read_vol(tmp_file)

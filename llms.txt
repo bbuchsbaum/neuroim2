@@ -1,6 +1,6 @@
 # neuroim2
 
-# neuroim2 ![neuroim2 hex logo](https://raw.githubusercontent.com/bbuchsbaum/neuroim2/master/docs/hex-neuroim2.png)
+# neuroim2
 
 Data structures and I/O for volumetric brain imaging with a focus on
 fMRI. This is the successor to
