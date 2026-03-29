@@ -1,3 +1,6 @@
+neuroim2
+================
+
 # neuroim2 <img src="https://raw.githubusercontent.com/bbuchsbaum/neuroim2/master/docs/hex-neuroim2.png" alt="neuroim2 hex logo" align="right" width="120" />
 
 <!-- badges: start -->
@@ -19,18 +22,25 @@ fMRI. This is the successor to
 classes, sparse/dense 3D–4D representations, and fast
 resampling/filtering.
 
-**Website:** <https://bbuchsbaum.github.io/neuroim2/>
-**CRAN:** <https://cran.r-project.org/package=neuroim2>
+**Website:** <https://bbuchsbaum.github.io/neuroim2/> **CRAN:**
+<https://cran.r-project.org/package=neuroim2>
 
 ## Key Features
 
-- **NIfTI / AFNI support** — read and write `.nii`, `.nii.gz`, and AFNI `.BRIK`/`.HEAD` files
-- **S4 class hierarchy** — `NeuroVol` (3D volumes) and `NeuroVec` (4D time-series) with dense, sparse, memory-mapped, and clustered variants
-- **Coordinate systems** — full affine-aware transforms between voxel, grid, and world coordinates
-- **Searchlights & ROIs** — spherical, cuboid, and random searchlight iterators plus flexible ROI construction
-- **Spatial filtering** — Gaussian blur, guided filter, bilateral filter, and connected-component labelling
-- **Resampling** — volume-to-volume resampling with configurable interpolation
-- **Visualization** — slice montages, orthographic views, and overlay plotting via ggplot2
+- **NIfTI / AFNI support** — read and write `.nii`, `.nii.gz`, and AFNI
+  `.BRIK`/`.HEAD` files
+- **S4 class hierarchy** — `NeuroVol` (3D volumes) and `NeuroVec` (4D
+  time-series) with dense, sparse, memory-mapped, and clustered variants
+- **Coordinate systems** — full affine-aware transforms between voxel,
+  grid, and world coordinates
+- **Searchlights & ROIs** — spherical, cuboid, and random searchlight
+  iterators plus flexible ROI construction
+- **Spatial filtering** — Gaussian blur, guided filter, bilateral
+  filter, and connected-component labelling
+- **Resampling** — volume-to-volume resampling with configurable
+  interpolation
+- **Visualization** — slice montages, orthographic views, and overlay
+  plotting via ggplot2
 
 ## Installation
 
@@ -82,12 +92,14 @@ length(series1)
 
 ## Vignettes
 
-Browse the full set of [articles](https://bbuchsbaum.github.io/neuroim2/articles/index.html) on the pkgdown site:
+Browse the full set of
+[articles](https://bbuchsbaum.github.io/neuroim2/articles/index.html) on
+the pkgdown site:
 
 | Getting Started | Analysis Workflows | Advanced |
-|---|---|---|
+|----|----|----|
 | [Overview](https://bbuchsbaum.github.io/neuroim2/articles/Overview.html) | [Analysis Workflows](https://bbuchsbaum.github.io/neuroim2/articles/AnalysisWorkflows.html) | [Image Volumes](https://bbuchsbaum.github.io/neuroim2/articles/ImageVolumes.html) |
 | [Choosing Backends](https://bbuchsbaum.github.io/neuroim2/articles/ChoosingBackends.html) | [Slice Visualization](https://bbuchsbaum.github.io/neuroim2/articles/slice-visualization.html) | [NeuroVector](https://bbuchsbaum.github.io/neuroim2/articles/NeuroVector.html) |
 | [Coordinate Systems](https://bbuchsbaum.github.io/neuroim2/articles/coordinate-systems.html) | [Cookbook](https://bbuchsbaum.github.io/neuroim2/articles/Cookbook.html) | [Regions of Interest](https://bbuchsbaum.github.io/neuroim2/articles/regionOfInterest.html) |
 | [Volumes & Vectors](https://bbuchsbaum.github.io/neuroim2/articles/VolumesAndVectors.html) | [Smoothing](https://bbuchsbaum.github.io/neuroim2/articles/Smoothing.html) | [Clustered NeuroVec](https://bbuchsbaum.github.io/neuroim2/articles/clustered-neurovec.html) |
-| [Resampling](https://bbuchsbaum.github.io/neuroim2/articles/Resampling.html) | | [Pipelines](https://bbuchsbaum.github.io/neuroim2/articles/pipelines.html) |
+| [Resampling](https://bbuchsbaum.github.io/neuroim2/articles/Resampling.html) |  | [Pipelines](https://bbuchsbaum.github.io/neuroim2/articles/pipelines.html) |
