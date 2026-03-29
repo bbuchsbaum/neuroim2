@@ -654,46 +654,49 @@ setMethod(
 #' @export
 setMethod(f="[", signature=signature(x = "AbstractSparseNeuroVec", i = "numeric", j = "numeric"),
           def = function (x, i, j, k, m, ..., drop = TRUE) {
-            if (missing(k))
-              k = 1:(dim(x)[3])
+            dims <- dim(x)
+            if (missing(k)) {
+              k <- seq_len(dims[3])
+            }
             if (missing(m)) {
-              m <- 1:(dim(x)[4])
+              m <- seq_len(dims[4])
             }
 
-            vmat <- as.matrix(expand.grid(i,j,k))
-            ind <- .gridToIndex3D(dim(x)[1:3], vmat[,1:3,drop = FALSE])
+            validate_indices(dims, list(i = i, j = j, k = k, m = m), c("i", "j", "k", "m"))
 
-            mapped <- lookup(x, ind)
-            keep <- mapped > 0
-            dimout <- c(length(i),length(j),length(k),length(m))
+            i <- as.integer(i)
+            j <- as.integer(j)
+            k <- as.integer(k)
+            m <- as.integer(m)
 
-            if (sum(keep) == 0) {
-              if (drop) {
-                return(drop(array(0, dimout)))
-              } else {
-                return(array(0, dimout))
-              }
+            ni <- length(i)
+            nj <- length(j)
+            nk <- length(k)
+            nm <- length(m)
+            dimout <- c(ni, nj, nk, nm)
+
+            # Build spatial linear indices directly in array order:
+            # i varies fastest, then j, then k.
+            ii <- rep.int(i, times = nj * nk)
+            jj <- rep(rep.int(j, times = 1L), each = ni, times = nk)
+            kk <- rep(k, each = ni * nj)
+            spatial_idx <- ii + (jj - 1L) * dims[1] + (kk - 1L) * dims[1] * dims[2]
+
+            mapped <- lookup(x, spatial_idx)
+            nz_idx <- which(mapped > 0L)
+
+            if (length(nz_idx) == 0L) {
+              out0 <- array(0, dimout)
+              return(if (drop) base::drop(out0) else out0)
             }
 
-            out <- array(0, dimout)
-            nz_idx <- which(keep)
-            if (length(nz_idx) > 0) {
-              vals <- matricized_access(x, mapped[nz_idx])
-              vals <- vals[m, , drop = FALSE]
-              coords <- vmat[nz_idx, , drop = FALSE]
-              for (col in seq_along(nz_idx)) {
-                ii <- match(coords[col,1], i)
-                jj <- match(coords[col,2], j)
-                kk <- match(coords[col,3], k)
-                out[ii, jj, kk, ] <- vals[, col]
-              }
-            }
+            out_mat <- matrix(0, nrow = ni * nj * nk, ncol = nm)
+            vals <- matricized_access(x, mapped[nz_idx])
+            vals <- vals[m, , drop = FALSE]
+            out_mat[nz_idx, ] <- t(vals)
 
-            if (drop) {
-              base::drop(out)
-            } else {
-              out
-            }
+            dim(out_mat) <- dimout
+            if (drop) base::drop(out_mat) else out_mat
 })
 
 
@@ -788,13 +791,8 @@ setMethod(f="as.matrix", signature=signature(x = "AbstractSparseNeuroVec"), def=
             chunk <- 64L
             groups <- split(seq_len(nt), ceiling(seq_len(nt)/chunk))
             for (g in groups) {
-              dat <- temporal_access(x, g)
-              cols <- lapply(seq_along(g), function(ii) {
-                col <- numeric(nvox)
-                col[idx] <- dat[ii, ]
-                col
-              })
-              out[, g] <- do.call(cbind, cols)
+              dat <- temporal_access(x, g)  # |g| x K
+              out[idx, g] <- t(dat)         # K x |g|, direct assignment
             }
             out
           })

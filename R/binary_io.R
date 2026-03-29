@@ -92,7 +92,7 @@ read_mapped_series <- function(meta, idx) {
   nels <- prod(meta@dims[1:3])
 
   dtype <- .getRStorage(meta@data_type)
-  idx_set <- map(seq(1, meta@dims[4]), ~ idx + (nels*(.-1))) %>% flatten_dbl()
+  idx_set <- purrr::map(seq(1, meta@dims[4]), ~ idx + (nels*(.-1))) %>% purrr::flatten_dbl()
   ret <- .read_mmap(meta, idx_set)
   t(matrix(ret, length(idx), meta@dims[4]))
 }
@@ -143,7 +143,7 @@ read_mapped_vols <- function(meta, idx) {
     cli::cli_abort("{.arg idx} must be in range [1, {nimages}], got [{min(idx)}, {max(idx)}].")
   }
 
-  idx_set <- map(idx, ~ (.-1)*nels + seq(1,nels)) %>% flatten_dbl()
+  idx_set <- purrr::map(idx, ~ (.-1)*nels + seq(1,nels)) %>% purrr::flatten_dbl()
   ret <- .read_mmap(meta, idx_set)
   mat <- matrix(ret, nels, length(idx))
   t(mat)  # Transpose to get [time, voxels]

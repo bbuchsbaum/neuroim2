@@ -287,7 +287,7 @@ setMethod("linear_access", signature(x="DenseNeuroVol", i="numeric"),
 #' @export
 setMethod("linear_access", signature(x="DenseNeuroVec", i="numeric"),
           function(x, i) {
-            as.vector(x@.Data)[as.numeric(i)]
+            x@.Data[i]
           })
 
 #' @rdname linear_access-methods
@@ -301,7 +301,7 @@ setMethod("linear_access", signature(x="DenseNeuroVol", i="integer"),
 #' @export
 setMethod("linear_access", signature(x="DenseNeuroVec", i="integer"),
           function(x, i) {
-            as.vector(x@.Data)[as.numeric(i)]
+            x@.Data[i]
           })
 
 # DenseNeuroVol explicit extractor to ensure S4 dispatch respects drop

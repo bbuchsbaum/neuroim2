@@ -167,6 +167,25 @@ test_that("can extract multiple series from a NeuroVec", {
 	expect_equal(r1, r2)
 })
 
+test_that("DenseNeuroVec matrix series rejects invalid coordinates", {
+  bv1 <- gen_dat()
+
+  expect_error(
+    series(bv1, matrix(c(13, 1, 1), ncol = 3)),
+    "Index out of bounds|out-of-bounds"
+  )
+
+  expect_error(
+    series(bv1, matrix(c(1.5, 1, 1), ncol = 3)),
+    "whole-number|integer"
+  )
+
+  expect_error(
+    series(bv1, matrix(c(NA_real_, 1, 1), ncol = 3)),
+    "finite numeric"
+  )
+})
+
 test_that("can extract an ROIVec from a NeuroVec", {
   bv1 <- gen_dat()
   roi <- series_roi(bv1, 1:10)
@@ -470,5 +489,4 @@ test_that("NeuroVec constructor works correctly", {
 #   expect_equalNumeric(trans(bv2), trans(bv), tol=.0001)
 #
 # }
-
 

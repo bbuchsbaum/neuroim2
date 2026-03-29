@@ -637,7 +637,7 @@ setMethod(f="series", signature(x="NeuroVec", i="integer"),
             if (missing(j) && missing(k)) {
               nels <- prod(dim(x)[1:3])
               offsets <- seq(0, dim(x)[4]-1) * nels
-              idx <- map(i, ~ . + offsets) %>% flatten_dbl()
+              idx <- as.vector(outer(offsets, i, "+"))
               vals <- x[idx]
               ret <- matrix(vals, dim(x)[4], length(i))
               if (isTRUE(drop)) base::drop(ret) else ret
@@ -651,6 +651,33 @@ setMethod(f="series", signature(x="NeuroVec", i="integer"),
             }
           })
 
+
+#' @rdname series-methods
+#' @export
+setMethod("series", signature(x="DenseNeuroVec", i="matrix"),
+          def=function(x, i) {
+            if (ncol(i) != 3) {
+              cli::cli_abort("Coordinate matrix {.arg i} must have 3 columns, not {ncol(i)}.")
+            }
+            if (!is.numeric(i) || any(!is.finite(i))) {
+              cli::cli_abort("Coordinate matrix {.arg i} must contain only finite numeric values.")
+            }
+            if (any(i != as.integer(i))) {
+              cli::cli_abort("Coordinate matrix {.arg i} must contain whole-number voxel coordinates.")
+            }
+            d <- dim(x)
+            validate_indices(d[1:3], list(i[,1], i[,2], i[,3]), c("i", "j", "k"))
+            i <- matrix(as.integer(i), ncol = 3)
+            # Direct linear indexing into .Data — avoids S4 dispatch overhead
+            lin <- (i[,3] - 1L) * d[1] * d[2] + (i[,2] - 1L) * d[1] + i[,1]
+            nt <- d[4]
+            nels <- prod(d[1:3])
+            out <- matrix(0, nt, nrow(i))
+            for (t in seq_len(nt)) {
+              out[t, ] <- x@.Data[lin + (t - 1L) * nels]
+            }
+            out
+          })
 
 #' @export
 #' @param j second dimension index
