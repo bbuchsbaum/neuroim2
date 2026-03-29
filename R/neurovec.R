@@ -452,12 +452,10 @@ setMethod("drop", signature=(x="NeuroVec"),
           })
 
 
-#' @rdname as-methods
-#' @export
+# Coerce DenseNeuroVec to array.
 setAs("DenseNeuroVec", "array", function(from) from@.Data)
 
-#' @rdname as-methods
-#' @export
+# Coerce NeuroVec to array.
 setAs("NeuroVec", "array", function(from) {
   vals <- from[]
   dim(vals) <- dim(from)
@@ -744,8 +742,7 @@ setMethod("series_roi", signature(x="NeuroVec", i="numeric"),
 
 
 
-#' @rdname as.matrix-methods
-#' @export
+# Coerce NeuroVec to matrix.
 setAs(from="NeuroVec", to="matrix",
       function(from) {
         dm <- dim(from)
@@ -757,8 +754,7 @@ setAs(from="NeuroVec", to="matrix",
       })
 
 
-#' @rdname as.matrix-methods
-#' @export
+# Coerce DenseNeuroVec to matrix.
 setAs(from="DenseNeuroVec", to="matrix",
 		function(from) {
 			data <- from@.Data
@@ -798,8 +794,7 @@ setMethod(f="as.matrix", signature=signature(x = "NeuroVec"), def=function(x) {
 })
 
 
-#' @rdname as.sparse-methods
-#' @export
+# Coerce ROIVec to SparseNeuroVec.
 setAs(from="ROIVec", to="SparseNeuroVec",
       function(from) {
         dat <- from@.Data

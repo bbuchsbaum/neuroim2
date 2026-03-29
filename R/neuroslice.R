@@ -121,7 +121,6 @@ NeuroSlice <- function(data, space, indices = NULL) {
 #'
 #' @seealso \code{\link{index_to_grid}} for the inverse operation
 #'
-#' @rdname grid_to_index-methods
 #' @export
 setMethod(f="grid_to_index",
           signature=signature(x = "NeuroSlice", coords="matrix"),

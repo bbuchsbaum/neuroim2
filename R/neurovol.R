@@ -296,20 +296,16 @@ setMethod(f="as.numeric", signature=signature(x = "SparseNeuroVol"), def=functio
 
 
 
-#' conversion from \code{\linkS4class{NeuroVol}} to \code{\linkS4class{LogicalNeuroVol}}
-#'
-#' @rdname as-methods
-#' @export
+# conversion from NeuroVol to LogicalNeuroVol.
+# Coerce NeuroVol to LogicalNeuroVol.
 setAs(from="NeuroVol", to="LogicalNeuroVol", def=function(from) {
 	LogicalNeuroVol(as.array(from), space(from))
 })
 
 
 
-#' conversion from \code{\linkS4class{NeuroVol}} to \code{array}
-#'
-#' @rdname as-methods
-#' @export
+# conversion from NeuroVol to array.
+# Coerce NeuroVol to array.
 setAs(from="NeuroVol", to="array", def=function(from) from[,,])
 
 #'
@@ -1132,7 +1128,6 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 #' \donttest{
 #' plot(slice)
 #' }
-#' @rdname plot-methods
 #' @export
 setMethod("plot", signature=signature(x="NeuroVol", y="missing"),
           def=function(x, y,
@@ -1209,8 +1204,7 @@ setMethod("mask", "LogicalNeuroVol",
             # return a filled mask indicating all voxels are valid
             LogicalNeuroVol(array(TRUE, dim(x)), space(x))
           })
-#' @rdname as.matrix-methods
-#' @export
+# Coerce DenseNeuroVol to matrix.
 setAs(from="DenseNeuroVol", to="matrix", function(from) {
   arr <- from@.Data
   if (length(dim(arr)) != 3) {

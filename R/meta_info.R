@@ -519,8 +519,7 @@ read_header <- function(file_name) {
   read_meta_info(desc, file_name)
 }
 
-#' @rdname as-methods
-#' @export
+# Coerce MetaInfo to NIFTIMetaInfo.
 setAs(from="MetaInfo", to="NIFTIMetaInfo", def=function(from) {
   if (inherits(from, "NIFTIMetaInfo")) {
     from

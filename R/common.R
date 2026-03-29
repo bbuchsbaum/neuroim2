@@ -103,19 +103,17 @@ setMethod(f="split_reduce", signature=signature(x = "matrix", fac="factor", FUN=
 #' @rdname split_reduce-methods
 setMethod(f="split_reduce", signature=signature(x = "NeuroVec", fac="factor", FUN="function"),
           def=function(x, fac, FUN) {
-            if (length(fac) == prod(dim(x)[1:3])) {
-              split_by_voxel <- TRUE
+            split_by_voxel <- if (length(fac) == prod(dim(x)[1:3])) {
+              TRUE
             } else if (length(fac) == dim(x)[4]) {
-              split_by_row <- TRUE
+              FALSE
             } else {
-              stop(paste("length of 'fac' must be equal to number of voxels or to number of volumes"))
+              stop("length of 'fac' must be equal to number of voxels or to number of volumes")
             }
 
             if (split_by_voxel) {
-
               ind <- split(seq_along(fac), fac)
               out <- do.call(rbind, lapply(names(ind), function(lev) {
-                #idx <- which(fac == lev)
                 mat <- series(x, ind[[lev]])
                 apply(mat, 1, FUN)
               }))
@@ -133,16 +131,15 @@ setMethod(f="split_reduce", signature=signature(x = "NeuroVec", fac="factor", FU
 #' @rdname split_reduce-methods
 setMethod(f="split_reduce", signature=signature(x = "NeuroVec", fac="factor", FUN="missing"),
           def=function(x, fac, FUN) {
-            if (length(fac) == prod(dim(x)[1:3])) {
-              split_by_voxel <- TRUE
+            split_by_voxel <- if (length(fac) == prod(dim(x)[1:3])) {
+              TRUE
             } else if (length(fac) == dim(x)[4]) {
-              split_by_row <- TRUE
+              FALSE
             } else {
-              stop(paste("length of 'fac' must be equal to number of voxels or to number of volumes"))
+              stop("length of 'fac' must be equal to number of voxels or to number of volumes")
             }
 
             if (split_by_voxel) {
-
               ind <- split(seq_along(fac), fac)
               out <- do.call(rbind, lapply(names(ind), function(lev) {
                 rowMeans(series(x, ind[[lev]]))
@@ -253,14 +250,22 @@ setMethod(f="scale_series", signature=signature(x="SparseNeuroVec", center="logi
             # x@data is T x K (time x masked_voxels)
             M <- x@data
             if (center) {
-              M <- base::scale(M, center = TRUE, scale = FALSE)
+              means <- colMeans(M)
+              M <- sweep(M, 2, means, "-")
             }
             if (scale) {
-              sds <- apply(M, 2, sd)
-              sds[sds == 0] <- 1
+              if (nrow(M) <= 1L) {
+                sds <- rep(1, ncol(M))
+              } else if (center) {
+                sds <- sqrt(colSums(M * M) / (nrow(M) - 1L))
+              } else {
+                means <- colMeans(M)
+                centered <- M - rep(means, each = nrow(M))
+                sds <- sqrt(colSums(centered * centered) / (nrow(M) - 1L))
+              }
+              sds[!is.finite(sds) | sds == 0] <- 1
               M <- sweep(M, 2, sds, "/")
             }
-            # Strip attributes left by base::scale
             M <- unname(as.matrix(M))
             SparseNeuroVec(M, space(x), mask(x))
           })
@@ -366,7 +371,6 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 
 #' .gridToIndex
 #' @keywords internal
-#' @importFrom purrr map_dbl
 #' @noRd
 .gridToIndex <- function(dimensions, vmat) {
   vmat <- as.matrix(vmat)
@@ -374,15 +378,7 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
     cli::cli_abort("length(dimensions) not equal to ncol(vmat): {length(dimensions)} != {ncol(vmat)}.")
   }
 
-	# D <- Reduce("*", dimensions, accumulate=TRUE)
-	# apply(vmat, 1, function(vox) {
-	# 	sum(map_dbl(length(D):2, function(i) {
-	# 		D[i-1]*(vox[i]-1)
-	# 	})) + vox[1]
-	# })
-
   gridToIndexCpp(as.integer(dimensions), vmat)
-
 }
 
 #' .indexToGrid
@@ -452,77 +448,59 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 }
 
 
+# ---- Data-type lookup tables ------------------------------------------------
+
+#' Named vectors mapping between NIfTI data-type codes, names, and byte sizes.
+#' @keywords internal
+#' @noRd
+.DATA_CODE_TO_STORAGE <- c(
+  "0"  = "UNKNOWN", "1"  = "BINARY", "2"  = "UBYTE",
+  "4"  = "SHORT",   "8"  = "INT",    "16" = "FLOAT",
+  "64" = "DOUBLE"
+)
+
+.DATA_STORAGE_TO_CODE <- c(
+  UNKNOWN = 0L, BINARY = 1L, UBYTE = 2L, SHORT = 4L,
+  INT = 8L,     FLOAT = 16L, DOUBLE = 64L
+)
+
+.DATA_TYPE_SIZE <- c(
+  BINARY = 1L, BYTE = 1L, UBYTE = 1L, SHORT = 2L,
+  INTEGER = 4L, INT = 4L, FLOAT = 4L, DOUBLE = 8L, LONG = 8L
+)
+
 #' .getDataStorage
 #' @keywords internal
 #' @noRd
 .getDataStorage <- function(code) {
-  if (code == 0) {
-    return("UNKNOWN")
-  } else if (code == 1) {
-    return("BINARY")
-  } else if (code == 2) {
-    return("UBYTE")
-  } else if(code == 4) {
-    return("SHORT")
-  } else if(code == 8) {
-    return("INT")
-  } else if (code == 16) {
-    return("FLOAT")
-  } else if (code == 64) {
-    return("DOUBLE")
-  } else {
-    stop(paste("nifti(getDataStorage): unsupported data type: ", code))
+  key <- as.character(code)
+  res <- .DATA_CODE_TO_STORAGE[key]
+  if (is.na(res)) {
+    cli::cli_abort("Unsupported NIfTI data-type code: {.val {code}}.")
   }
+  unname(res)
 }
 
 #' .getDataCode
 #' @keywords internal
 #' @noRd
 .getDataCode <- function(data_type) {
-  if (data_type == "UNKNOWN") {
-    return(0)
-  }else if (data_type == "BINARY") {
-    return(1)
-  } else if (data_type == "UBYTE") {
-    return(2)
-  } else if(data_type == "SHORT") {
-    return(4)
-  } else if(data_type == "INT") {
-    return(8)
-  } else if (data_type == "FLOAT") {
-    return(16)
-  } else if (data_type == "DOUBLE") {
-    return(64)
-  } else {
-    stop(paste("getDataCode: unsupported data type: ", data_type))
+  res <- .DATA_STORAGE_TO_CODE[data_type]
+  if (is.na(res)) {
+    cli::cli_abort("Unsupported data type: {.val {data_type}}.")
   }
+  unname(res)
 }
 
 #' .getDataSize
 #' @keywords internal
 #' @noRd
 .getDataSize <- function(data_type) {
-  if (data_type == "BINARY") {
-    return(1)
-  } else if (data_type == "BYTE") {
-	  return(1)
-  } else if (data_type == "UBYTE") {
-    return(1)
-  } else if (data_type == "SHORT") {
-    return(2)
-  } else if (data_type == "INTEGER") {
-    return(4)
-  } else if (data_type == "INT") {
-    return(4)
-  } else if (data_type == "FLOAT") {
-    return(4)
-  } else if (data_type == "DOUBLE") {
-    return(8)
-  } else if (data_type == "LONG") {
-    return(8)
+  res <- .DATA_TYPE_SIZE[data_type]
+  if (is.na(res)) {
+    cli::cli_abort("Unrecognized data type: {.val {data_type}}.")
   }
-
-  stop(paste("unrecognized data type: ", data_type))
+  unname(res)
 }
 
 #' .getEndian
@@ -744,28 +722,3 @@ quaternToMatrix <- function(quat, origin, stepSize, qfac) {
 
   return(mat)
 }
-
-
-# @rdname internal-methods
-# @keywords internal
-# .makeMMap <- function(meta) {
-#   nels <- prod(meta@Dim[1:4])
-#
-#   if (.Platform$endian != meta@endian) {
-#     ## read raw bytes
-#     rawbytes <- mmap::mmap(meta@data_file, mode=mmap::char(), prot=mmap::mmapFlags("PROT_READ"))
-#     rawbytes <- rawbytes[(meta@data_offset+1):length(rawbytes)]
-#
-#     mmap::munmap(rawbytes)
-#     readBin(rawbytes, what=.getRStorage(meta@data_type), size=.getDataSize(meta@data_type), n=nels, endian=meta@endian)
-#   } else {
-#     #mmap::mmap(meta@data_file, mode=.getMMapMode(meta@data_type), off=meta@data_offset,prot=mmap::mmapFlags("PROT_READ"),flags=mmap::mmapFlags("MAP_PRIVATE"))
-#     ret <- mmap::mmap(meta@data_file, mode=.getMMapMode(meta@data_type), prot=mmap::mmapFlags("PROT_READ"))
-#     offset <- meta@data_offset/.getDataSize(meta@data_type) + 1
-#     vals <- ret[offset:nels]
-#     mmap::munmap(ret)
-#     vals
-#   }
-#
-#
-# }

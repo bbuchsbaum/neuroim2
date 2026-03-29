@@ -539,8 +539,19 @@ blobby_shape <- function(drop = 0.3, edge_fraction = 0.7) {
 }
 
 
+#' Internal helper for parallel searchlight evaluation
+#'
+#' @noRd
+.future_lapply_with_cores <- function(X, FUN, cores) {
+  old_plan <- future::plan()
+  on.exit(future::plan(old_plan), add = TRUE)
+  future::plan(future::multisession, workers = cores)
+  future.apply::future_lapply(X, FUN, future.seed = TRUE)
+}
+
 #' Create an exhaustive searchlight iterator for voxel coordinates using spherical_roi
 #'
+#' @name searchlight_coords
 #' @description
 #' This function generates an exhaustive searchlight iterator that returns voxel
 #' coordinates for each searchlight sphere within the provided mask, using
@@ -585,8 +596,12 @@ searchlight_coords <- function(mask, radius, nonzero=FALSE, cores=0) {
     coords(roi) # returns an Nx3 matrix of voxel coordinates
   }
 
-  # Create a deferred_list for lazy evaluation
-  deflist::deflist(f, length(mask.idx))
+  if (cores > 1) {
+    .future_lapply_with_cores(seq_len(length(mask.idx)), f, cores)
+  } else {
+    # Create a deferred_list for lazy evaluation
+    deflist::deflist(f, length(mask.idx))
+  }
 }
 
 
@@ -643,6 +658,14 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
   grid <- index_to_grid(mask, mask.idx)
 
   if (!eager) {
+    if (cores > 1) {
+      f <- function(i) {
+        roi <- spherical_roi(mask, grid[i, ], radius, nonzero = nonzero)
+        attr(roi, "mask_index") <- as.integer(i)
+        roi
+      }
+      return(.future_lapply_with_cores(seq_len(nrow(grid)), f, cores))
+    }
     force(mask)
     force(radius)
     f <- function(i) { 
@@ -652,24 +675,33 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
     }
     deflist::deflist(f, nrow(grid))
   } else {
-    # Use spherical_roi_set to get all ROIs at once
-    result_list <- spherical_roi_set(
-      bvol = mask,
-      centroids = grid,
-      radius = radius,
-      nonzero = nonzero
-    )
+    if (cores > 1) {
+      f <- function(i) {
+        roi <- spherical_roi(mask, grid[i, ], radius, nonzero = nonzero)
+        attr(roi, "mask_index") <- as.integer(i)
+        roi
+      }
+      result_list <- .future_lapply_with_cores(seq_len(nrow(grid)), f, cores)
+    } else {
+      # Use spherical_roi_set to get all ROIs at once
+      result_list <- spherical_roi_set(
+        bvol = mask,
+        centroids = grid,
+        radius = radius,
+        nonzero = nonzero
+      )
 
-    n_res <- length(result_list)
-    use_pb <- interactive() && n_res >= 100
-    if (use_pb) {
-      cli::cli_progress_bar("Searchlight (eager)", total = n_res,
-                            .auto_close = TRUE, .envir = environment())
-    }
-    for (i in seq_along(result_list)) {
-      attr(result_list[[i]], "mask_index") <- as.integer(i)
-      if (use_pb && i %% 100 == 0) {
-        cli::cli_progress_update(set = i, .envir = environment())
+      n_res <- length(result_list)
+      use_pb <- interactive() && n_res >= 100
+      if (use_pb) {
+        cli::cli_progress_bar("Searchlight (eager)", total = n_res,
+                              .auto_close = TRUE, .envir = environment())
+      }
+      for (i in seq_along(result_list)) {
+        attr(result_list[[i]], "mask_index") <- as.integer(i)
+        if (use_pb && i %% 100 == 0) {
+          cli::cli_progress_update(set = i, .envir = environment())
+        }
       }
     }
 

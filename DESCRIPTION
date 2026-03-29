@@ -47,6 +47,7 @@ Collate:
     'file_format.R'
     'filebacked_neurovec.R'
     'globals.R'
+    'header_api.R'
     'index_vol.R'
     'mapped_neurovec.R'
     'meta_info.R'
@@ -63,6 +64,7 @@ Collate:
     'nifti_io.R'
     'niml_io.R'
     'ops.R'
+    'orientation.R'
     'palettes.R'
     'plot-helpers.R'
     'plot-montage.R'
@@ -78,6 +80,7 @@ Collate:
     'space_utils.R'
     'sparse_neurovec.R'
     'spat_filter.R'
+    'summary_methods.R'
     'theme.R'
     'zzz.R'
 RoxygenNote: 7.3.3
@@ -92,6 +95,7 @@ Imports:
   methods,
   bigstatsr,
   RNiftyReg,
+  future,
   future.apply,
   deflist,
   cli,

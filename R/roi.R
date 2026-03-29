@@ -87,7 +87,6 @@ ROIVol <- function(space, coords, data) {
 #' @param ... Additional arguments passed to methods
 #' @param drop Whether to drop dimensions of length 1
 #' @return A subset of the input object, with dimensions depending on the indexing and the `drop` parameter.
-#' @rdname extract-methods
 #' @export
 setMethod(f="[", signature=signature(x = "ROIVol", i = "numeric", j = "missing"),
           def=function (x, i, j, k, ..., drop=TRUE) {
@@ -778,12 +777,7 @@ roi_surface_matrix <- function(mat, refspace, indices, coords) {
 
 
 
-#' Coerce ROIVec to matrix
-#'
-#' This function provides a method to coerce an object of class \code{ROIVec} to a \code{matrix}.
-#'
-#' @rdname as.matrix-methods
-#' @export
+# Coerce ROIVec to matrix.
 setAs(from="ROIVec", to="matrix", function(from) {
   ind <- indices(from)
   roi_vector_matrix(from@.Data, refspace=from@space, indices=ind,
@@ -792,12 +786,7 @@ setAs(from="ROIVec", to="matrix", function(from) {
 
 })
 
-#' Coerce ROIVol to DenseNeuroVol
-#'
-#' This function provides a method to coerce an object of class \code{ROIVol} to a \code{DenseNeuroVol}.
-#'
-#' @rdname as-methods
-#' @export
+# Coerce ROIVol to DenseNeuroVol.
 setAs(from="ROIVol", to="DenseNeuroVol", function(from) {
   NeuroVol(values(from), space(from), indices=indices(from))
   #dat <- array(0, dim(from@space))

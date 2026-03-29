@@ -55,10 +55,6 @@ prep_sparsenvec <- function(data, space, mask) {
 
   cardinality <- sum(mask)
 
-  if (!inherits(mask, "LogicalNeuroVol")) {
-    cli::cli_abort("{.arg mask} must be a {.cls LogicalNeuroVol} object.")
-  }
-
   if (is.matrix(data)) {
     Nind <- sum(mask == TRUE)
     if (nrow(data) == Nind) {
@@ -77,12 +73,12 @@ prep_sparsenvec <- function(data, space, mask) {
     D4 <- dim(data)[1]
   } else if (length(dim(data)) == 4) {
     dims <- dim(data)
-    data_mat <- matrix(0, nrow = dims[4], ncol = prod(dims[1:3]))
-    for (t in 1:dims[4]) {
-      vol_t <- data[,,,t]
-      data_mat[t,] <- as.vector(vol_t)
+    mask_idx <- which(mask@.Data)
+    data_mat <- matrix(0, nrow = dims[4], ncol = length(mask_idx))
+    for (t in seq_len(dims[4])) {
+      data_mat[t, ] <- as.vector(data[,,,t])[mask_idx]
     }
-    data <- data_mat[, mask@.Data, drop=FALSE]  # Only keep masked voxels
+    data <- data_mat
     D4 <- dims[4]
   } else {
     stop("Data must be either a matrix or a 4D array.")
@@ -745,16 +741,14 @@ setMethod(f="[[", signature=signature(x="AbstractSparseNeuroVec", i="numeric"),
 
 
 
-#' @rdname as.matrix-methods
-#' @export
+# Coerce AbstractSparseNeuroVec to matrix.
 setAs(from="AbstractSparseNeuroVec", to="matrix",
 		  function(from) {
 		    as.matrix(from)
 		  })
 
 
-#' @rdname as.dense-methods
-#' @export
+# Coerce SparseNeuroVec to DenseNeuroVec.
 setAs(from="SparseNeuroVec", to="DenseNeuroVec",
       function(from) {
         mat <- as(from, "matrix")

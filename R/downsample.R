@@ -196,7 +196,6 @@ calculate_downsample_dims <- function(current_dims, current_spacing,
 #' # Downsample to target dimensions
 #' nvec_down3 <- downsample(nvec, outdim = c(32, 32, 16))
 #'
-#' @rdname downsample-methods
 #' @export
 setMethod(f="downsample", signature=signature("DenseNeuroVec"),
           def=function(x, spacing=NULL, factor=NULL, outdim=NULL, method="box") {
@@ -395,7 +394,6 @@ calculate_downsample_dims_3d <- function(current_dims, current_spacing,
 #' # Downsample to target dimensions
 #' vol_down3 <- downsample(vol, outdim = c(32, 32, 16))
 #'
-#' @rdname downsample-methods
 #' @export
 setMethod(f="downsample", signature=signature("DenseNeuroVol"),
           def=function(x, spacing=NULL, factor=NULL, outdim=NULL, method="box") {

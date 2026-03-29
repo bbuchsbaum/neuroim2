@@ -153,44 +153,6 @@ setMethod(f="Arith", signature=signature(e1="DenseNeuroVol", e2="DenseNeuroVol")
           })
 
 
-
-# #' @export
-# #' @name Arith
-# #' @rdname Arith-methods
-# #' @param e1 A SparseNeuroVec object.
-# #' @param e2 A SparseNeuroVec object.
-# #' @return A SparseNeuroVec object representing the result of the arithmetic operation.
-# #' @description Perform an arithmetic operation between two SparseNeuroVec objects.
-# #' The input SparseNeuroVec objects must have the same dimensions and NeuroSpace objects.
-# #' The method computes the union of the masks and performs the arithmetic operation
-# #' on the non-zero values. The result is returned as a new SparseNeuroVec object.
-# setMethod(f="Arith", signature=signature(e1="SparseNeuroVec", e2="SparseNeuroVec"),
-#           def=function(e1, e2) {
-#             checkDim(e1, e2)
-#             if (!identical(space(e1), space(e2))) {
-#               stop("The NeuroSpace objects of e1 and e2 must be identical.")
-#             }
-#
-#             mask_union <- e1@mask | e2@mask
-#             indices_union <- which(mask_union)
-#             data_e1 <- matrix(0, nrow(e1@data), length(indices_union))
-#             data_e2 <- matrix(0, nrow(e2@data), length(indices_union))
-#
-#             # Fill the data matrices with their corresponding values
-#             indices_e1 <- indices(e1)
-#             indices_e2 <- indices(e2)
-#             data_e1[, indices_union %in% indices_e1] <- e1@data[, indices_e1 %in% indices_union]
-#             data_e2[, indices_union %in% indices_e2] <- e2@data[, indices_e2 %in% indices_union]
-#
-#             # Perform the arithmetic operation
-#             result_data <- callGeneric(data_e1, data_e2)
-#
-#             # Create the resulting SparseNeuroVec object
-#             result <- SparseNeuroVec(data=result_data, space=space(e1), mask=mask_union)
-#             return(result)
-#           })
-
-
 #' @export
 #' @rdname Arith-methods
 #' @param e1 A DenseNeuroVec object.
@@ -395,7 +357,8 @@ setMethod(f="Arith", signature=signature(e1="NeuroVol", e2="NeuroVec"),
 #' neuroimaging data objects.
 #'
 #' @name Summary-methods
-#' @aliases Summary,SparseNeuroVec-method
+#' @aliases Summary,SparseNeuroVec-method Summary,SparseNeuroVol-method
+#'   Summary,DenseNeuroVol-method
 #' @param x A neuroimaging object (SparseNeuroVec, SparseNeuroVol, or DenseNeuroVol)
 #' @param ... Additional arguments passed to methods
 #' @param na.rm Logical indicating whether to remove NA values before computation
@@ -435,6 +398,54 @@ setMethod(f="Summary", signature=signature(x="DenseNeuroVol", na.rm="ANY"),
     def=function(x, ..., na.rm) {
       callGeneric(x@.Data, ..., na.rm=na.rm)
     })
+
+
+# ---- Temporal Mean for NeuroVec types ----------------------------------------
+
+#' Temporal Mean of a NeuroVec
+#'
+#' Computes the voxel-wise mean across the 4th dimension (time), returning
+#' a 3D \code{\linkS4class{DenseNeuroVol}} or \code{\linkS4class{SparseNeuroVol}}.
+#'
+#' @param x A \code{\linkS4class{NeuroVec}} object.
+#' @param ... Ignored.
+#' @return A \code{\linkS4class{NeuroVol}} containing the temporal mean at
+#'   each voxel.
+#'
+#' @examples
+#' bspace <- NeuroSpace(c(10, 10, 10, 20), c(1, 1, 1))
+#' dat <- array(rnorm(10 * 10 * 10 * 20), c(10, 10, 10, 20))
+#' vec <- DenseNeuroVec(dat, bspace)
+#' mean_vol <- mean(vec)
+#' dim(mean_vol)  # 10 10 10
+#'
+#' @name mean-methods
+#' @rdname mean-methods
+#' @aliases mean,DenseNeuroVec-method mean,SparseNeuroVec-method
+#'   mean,NeuroVec-method
+#' @export
+setMethod("mean", signature(x = "DenseNeuroVec"), function(x, ...) {
+  d <- dim(x)
+  M <- matrix(x@.Data, nrow = prod(d[1:3]), ncol = d[4])
+  DenseNeuroVol(rowMeans(M), drop_dim(space(x)))
+})
+
+#' @rdname mean-methods
+#' @export
+setMethod("mean", signature(x = "SparseNeuroVec"), function(x, ...) {
+  vals <- colMeans(x@data)
+  idx  <- indices(x)
+  SparseNeuroVol(vals, drop_dim(space(x)), indices = idx)
+})
+
+#' @rdname mean-methods
+#' @export
+setMethod("mean", signature(x = "NeuroVec"), function(x, ...) {
+  d <- dim(x)
+  M <- as.matrix(x)  # voxels x time
+  DenseNeuroVol(rowMeans(M), drop_dim(space(x)))
+})
+
 
 #' @rdname Compare-methods
 #' @export
