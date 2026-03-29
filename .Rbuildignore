@@ -40,3 +40,9 @@ test_series_bug.R
 ^atlas-pack\.tgz$
 ^atlas$
 ^tools$
+^\.ecosystem\.yml$
+^vignettes/.*\.html$
+^vignettes/.*\.md$
+^man/\.omc$
+^src/.*\.gcno$
+^src/.*\.gcda$

@@ -1,0 +1,85 @@
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+name: docs-check
+
+permissions: read-all
+
+jobs:
+  readme:
+    runs-on: ubuntu-latest
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rmarkdown, local::.
+          needs: check
+
+      - name: Render README from source
+        run: |
+          rmarkdown::render(
+            "README.Rmd",
+            output_format = rmarkdown::md_document(variant = "gfm"),
+            output_file = "README.md",
+            quiet = TRUE
+          )
+        shell: Rscript {0}
+
+      - name: Fail on README drift
+        run: git diff --exit-code -- README.md
+        shell: bash
+
+  vignettes:
+    runs-on: ubuntu-latest
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rmarkdown, local::.
+          needs: check
+
+      - name: Fail on tracked rendered vignette artifacts
+        run: |
+          tracked="$(git ls-files 'vignettes/*.html' 'vignettes/*.md')"
+          test -z "$tracked" || { echo "$tracked"; exit 1; }
+        shell: bash
+
+      - name: Render authoritative vignette subset
+        run: |
+          files <- c(
+            "vignettes/Overview.Rmd",
+            "vignettes/ChoosingBackends.Rmd",
+            "vignettes/NeuroVector.Rmd",
+            "vignettes/Resampling.Rmd"
+          )
+          out_dir <- file.path(tempdir(), "docs-check")
+          dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+          for (f in files) {
+            rmarkdown::render(f, output_dir = out_dir, quiet = TRUE)
+          }
+        shell: Rscript {0}

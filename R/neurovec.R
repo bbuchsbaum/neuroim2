@@ -452,12 +452,10 @@ setMethod("drop", signature=(x="NeuroVec"),
           })
 
 
-#' @name as
 #' @rdname as-methods
 #' @export
 setAs("DenseNeuroVec", "array", function(from) from@.Data)
 
-#' @name as
 #' @rdname as-methods
 #' @export
 setAs("NeuroVec", "array", function(from) {
@@ -719,7 +717,6 @@ setMethod("series_roi", signature(x="NeuroVec", i="numeric"),
 
 
 
-#' @name as.matrix
 #' @rdname as.matrix-methods
 #' @export
 setAs(from="NeuroVec", to="matrix",
@@ -733,7 +730,6 @@ setAs(from="NeuroVec", to="matrix",
       })
 
 
-#' @name as.matrix
 #' @rdname as.matrix-methods
 #' @export
 setAs(from="DenseNeuroVec", to="matrix",
@@ -775,7 +771,6 @@ setMethod(f="as.matrix", signature=signature(x = "NeuroVec"), def=function(x) {
 })
 
 
-#' @name as.sparse
 #' @rdname as.sparse-methods
 #' @export
 setAs(from="ROIVec", to="SparseNeuroVec",

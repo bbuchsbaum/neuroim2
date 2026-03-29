@@ -106,8 +106,8 @@ test_that("can split a NeuroVec into a set of subvectors", {
   blstruc <- rep(1:4, length.out=20)
 
   blks <- split_blocks(bv1, blstruc)
-  assert_that(length(blks) == length(unique(blstruc)))
-  assert_that(dim(blks[[1]])[4] == sum(blstruc == 1))
+  expect_equal(length(blks), length(unique(blstruc)))
+  expect_equal(dim(blks[[1]])[4], sum(blstruc == 1))
 
   ## nested map
   ## first divide into blocks, then convert to vectors, then foreach block/vector compute mean

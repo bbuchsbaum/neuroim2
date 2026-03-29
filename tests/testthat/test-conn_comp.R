@@ -1,4 +1,3 @@
-library(assertthat)
 library(purrr)
 
 context("connected components")

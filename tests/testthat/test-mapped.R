@@ -1,6 +1,5 @@
 library(purrr)
 library(testthat)
-library(assertthat)
 
 context("mapped neurovec")
 

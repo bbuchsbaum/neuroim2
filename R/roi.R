@@ -782,9 +782,6 @@ roi_surface_matrix <- function(mat, refspace, indices, coords) {
 #'
 #' This function provides a method to coerce an object of class \code{ROIVec} to a \code{matrix}.
 #'
-#' @name as
-#' @param from An object of class \code{ROIVec} to be coerced to a \code{matrix}.
-#' @return A \code{matrix} obtained by coercing the \code{ROIVec} object.
 #' @rdname as.matrix-methods
 #' @export
 setAs(from="ROIVec", to="matrix", function(from) {
@@ -799,9 +796,8 @@ setAs(from="ROIVec", to="matrix", function(from) {
 #'
 #' This function provides a method to coerce an object of class \code{ROIVol} to a \code{DenseNeuroVol}.
 #'
-#' @name as
-#' @param from An object of class \code{ROIVol} to be coerced to a \code{DenseNeuroVol}.
-#' @return A \code{DenseNeuroVol} object obtained by coercing the \code{ROIVol} object.
+#' @rdname as-methods
+#' @export
 setAs(from="ROIVol", to="DenseNeuroVol", function(from) {
   NeuroVol(values(from), space(from), indices=indices(from))
   #dat <- array(0, dim(from@space))

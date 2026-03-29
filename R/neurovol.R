@@ -298,7 +298,6 @@ setMethod(f="as.numeric", signature=signature(x = "SparseNeuroVol"), def=functio
 
 #' conversion from \code{\linkS4class{NeuroVol}} to \code{\linkS4class{LogicalNeuroVol}}
 #'
-#' @name as
 #' @rdname as-methods
 #' @export
 setAs(from="NeuroVol", to="LogicalNeuroVol", def=function(from) {
@@ -309,7 +308,6 @@ setAs(from="NeuroVol", to="LogicalNeuroVol", def=function(from) {
 
 #' conversion from \code{\linkS4class{NeuroVol}} to \code{array}
 #'
-#' @name as
 #' @rdname as-methods
 #' @export
 setAs(from="NeuroVol", to="array", def=function(from) from[,,])
@@ -1211,7 +1209,6 @@ setMethod("mask", "LogicalNeuroVol",
             # return a filled mask indicating all voxels are valid
             LogicalNeuroVol(array(TRUE, dim(x)), space(x))
           })
-#' @name as.matrix
 #' @rdname as.matrix-methods
 #' @export
 setAs(from="DenseNeuroVol", to="matrix", function(from) {

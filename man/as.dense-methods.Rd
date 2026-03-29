@@ -7,7 +7,6 @@
 \alias{as.dense,DenseNeuroVol-method}
 \alias{as.dense,ROIVol-method}
 \alias{as.dense,SparseNeuroVec-method}
-\alias{as.dense}
 \title{Coerce SparseNeuroVol to DenseNeuroVol}
 \usage{
 \S4method{as.dense}{ClusteredNeuroVol}(x)

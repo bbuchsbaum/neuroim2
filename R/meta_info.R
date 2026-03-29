@@ -519,7 +519,6 @@ read_header <- function(file_name) {
   read_meta_info(desc, file_name)
 }
 
-#' @name as
 #' @rdname as-methods
 #' @export
 setAs(from="MetaInfo", to="NIFTIMetaInfo", def=function(from) {

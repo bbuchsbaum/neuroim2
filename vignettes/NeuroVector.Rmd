@@ -8,6 +8,7 @@ vignette: |
   %\VignetteEncoding{UTF-8}
 params:
   family: red
+  preset: homage
 css: albers.css
 resource_files:
 - albers.css
@@ -15,14 +16,13 @@ resource_files:
 includes:
   in_header: |-
     <script src="albers.js"></script>
-    <script>document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('palette-red');});</script>
+    <script>document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('palette-violet');});</script>
 
 ---
 
 ```{r, echo = FALSE, message = FALSE}
 knitr::opts_chunk$set(collapse = T, comment = "#>")
 library(purrr)
-library(assertthat)
 library(neuroim2)
 options(mc.cores=1)
 ```
@@ -101,8 +101,8 @@ We can extract a 4d region of interest with the `series_roi` as follows:
       rvec2
       
       ## we can extract the ROI values with the `values` method.
-      assertthat::assert_that(all(values(rvec1) == values(rvec2)))
-      assertthat::assert_that(all(coords(rvec1) == coords(rvec2)))
+      stopifnot(all(values(rvec1) == values(rvec2)))
+      stopifnot(all(coords(rvec1) == coords(rvec2)))
       
 ```
 

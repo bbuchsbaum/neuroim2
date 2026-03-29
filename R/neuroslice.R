@@ -246,8 +246,6 @@ setMethod(f="show",
             n_na <- sum(is.na(object))
             if (n_na > 0) show_field("NAs", format(n_na, big.mark = ","))
 
-            # Footer
-            cat("\n", blue("=" = 28), "\n", sep="")
           })
 
 #' Map intensity values to colors

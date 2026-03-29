@@ -1,6 +1,5 @@
 library(purrr)
 library(testthat)
-library(assertthat)
 
 gmask5 <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
 mask <- system.file("extdata", "global_mask2.nii.gz", package="neuroim2")
