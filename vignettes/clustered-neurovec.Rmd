@@ -7,6 +7,7 @@ vignette: |
   %\VignetteEncoding{UTF-8}
 params:
   family: red
+  preset: homage
 css: albers.css
 resource_files:
 - albers.css
@@ -14,7 +15,7 @@ resource_files:
 includes:
   in_header: |-
     <script src="albers.js"></script>
-    <script>document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('palette-red');});</script>
+    <script>document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('palette-violet');});</script>
 
 ---
 
@@ -103,13 +104,13 @@ length(ts)  # 20 time points
 Perform searchlight analysis at the cluster level using centroid distances:
 
 ```{r searchlight}
-# K-nearest neighbor searchlight (10 nearest clusters)
-windows_knn <- cluster_searchlight_series(cv, k = 10)
+# K-nearest neighbor searchlight (3 nearest clusters)
+windows_knn <- cluster_searchlight_series(cv, k = 3)
 length(windows_knn)  # One window per cluster
 
 # Look at first window
 win1 <- windows_knn[[1]]
-dim(values(win1))  # 10 neighbors x 20 time points
+dim(values(win1))  # 20 time points x 3 neighbors
 
 # Radius-based searchlight (e.g., 15mm radius)
 windows_radius <- cluster_searchlight_series(cv, radius = 15)

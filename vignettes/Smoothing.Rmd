@@ -7,6 +7,7 @@ vignette: |
   %\VignetteEncoding{UTF-8}
 params:
   family: red
+  preset: homage
 css: albers.css
 resource_files:
 - albers.css
@@ -14,13 +15,13 @@ resource_files:
 includes:
   in_header: |-
     <script src="albers.js"></script>
-    <script>document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('palette-red');});</script>
+    <script>document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('palette-violet');});</script>
 
 ---
 
 ```{r, echo = FALSE, message = FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
-library(neuroim2)
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE, warning = FALSE)
+suppressPackageStartupMessages(library(neuroim2))
 ```
 
 This vignette gives a practical overview of the main spatial and
@@ -213,4 +214,3 @@ str(cg_out$graph)
 - Use `cgb_filter()` when similarity should be driven by *correlation of
   time‑series* (e.g., fMRI connectivity‑style smoothing) rather than raw
   intensity alone.
-

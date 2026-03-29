@@ -8,6 +8,7 @@ vignette: |
   %\VignetteEncoding{UTF-8}
 params:
   family: red
+  preset: homage
 css: albers.css
 resource_files:
 - albers.css
@@ -15,13 +16,13 @@ resource_files:
 includes:
   in_header: |-
     <script src="albers.js"></script>
-    <script>document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('palette-red');});</script>
+    <script>document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('palette-violet');});</script>
 
 ---
 
 ```{r, echo = FALSE, message = FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
-library(neuroim2)
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE, warning = FALSE)
+suppressPackageStartupMessages(library(neuroim2))
 ```
 
 # Introduction
@@ -176,11 +177,10 @@ cat("Space savings:", round((1 - as.numeric(object.size(sparse_roi)) /
 For datasets too large to fit in memory:
 
 ```{r, eval=FALSE}
-# Create a file-backed 4D dataset (not run in vignette)
-big_vec <- FileBackedNeuroVec(
-  dims = c(91, 109, 91, 1000),  # Standard MNI space, 1000 volumes
-  dtype = "float32",
-  file_name = "big_data.dat"
+# Read an on-disk 4D NIfTI without materializing the full array
+big_vec <- read_vec(
+  system.file("extdata", "global_mask_v4.nii", package = "neuroim2"),
+  mode = "filebacked"
 )
 
 # Access works like regular arrays but data stays on disk
@@ -205,8 +205,8 @@ cat("Smoothed variance:", var(as.vector(smooth_vals)), "\n")
 ## Resampling
 
 ```{r}
-# Downsample by factor of 2
-img_down <- downsample(img, c(2, 2, 2))
+# Downsample to 2 mm isotropic voxels
+img_down <- downsample(img, spacing = c(2, 2, 2))
 cat("Original dimensions:", dim(img), "\n")
 cat("Downsampled dimensions:", dim(img_down), "\n")
 ```

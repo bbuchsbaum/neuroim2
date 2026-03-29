@@ -35,3 +35,13 @@ test_that("as.dense populates only masked voxels", {
   expect_true(all(m[-mask_idx, ] == 0))
   expect_true(any(m[mask_idx, ] != 0))
 })
+
+test_that("sparse extraction helpers stay aligned with dense behavior", {
+  svec <- make_sparse_vec()
+  dvec <- as(svec, "DenseNeuroVec")
+
+  expect_equal(series(svec, 1, 1, 1), series(dvec, 1, 1, 1))
+  expect_equal(as.vector(svec[[1]]), as.vector(dvec[[1]]))
+  expect_equal(as.matrix(sub_vector(svec, 1:2)), as.matrix(sub_vector(dvec, 1:2)))
+  expect_equal(as.matrix(svec), as.matrix(dvec))
+})
