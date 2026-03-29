@@ -2,14 +2,14 @@
 title: "neuroim2"
 output:
   md_document:
-    variant: markdown_github
+    variant: gfm
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
-# neuroim2 <img src="https://raw.githubusercontent.com/bbuchsbaum/neuroim2/master/docs/hex-neuroim2.png" align="right" width="120" />
+# neuroim2 <img src="https://raw.githubusercontent.com/bbuchsbaum/neuroim2/master/docs/hex-neuroim2.png" alt="neuroim2 hex logo" align="right" width="120" />
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/neuroim2)](https://cran.r-project.org/package=neuroim2)
 [![CRAN downloads](https://cranlogs.r-pkg.org/badges/grand-total/neuroim2)](https://cran.r-project.org/package=neuroim2)
@@ -19,12 +19,20 @@ knitr::opts_chunk$set(echo = TRUE)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
 <!-- badges: end -->
 
-Data structures and I/O for volumetric brain imaging with a focus on fMRI. This is the successor to [`neuroim`](https://github.com/bbuchsbaum/neuroim) with improved S4 classes, sparse/dense 3D–4D representations, and fast resampling/filtering.  
+Data structures and I/O for volumetric brain imaging with a focus on fMRI. This is the successor to [`neuroim`](https://github.com/bbuchsbaum/neuroim) with improved S4 classes, sparse/dense 3D–4D representations, and fast resampling/filtering.
 
-**Website:** https://bbuchsbaum.github.io/neuroim2/  
-**CRAN:** https://cran.r-project.org/package=neuroim2  
-**Cheatsheet:** [neuroim2_cheatsheet.md](neuroim2_cheatsheet.md)
+**Website:** https://bbuchsbaum.github.io/neuroim2/
+**CRAN:** https://cran.r-project.org/package=neuroim2
 
+## Key Features
+
+- **NIfTI / AFNI support** — read and write `.nii`, `.nii.gz`, and AFNI `.BRIK`/`.HEAD` files
+- **S4 class hierarchy** — `NeuroVol` (3D volumes) and `NeuroVec` (4D time-series) with dense, sparse, memory-mapped, and clustered variants
+- **Coordinate systems** — full affine-aware transforms between voxel, grid, and world coordinates
+- **Searchlights & ROIs** — spherical, cuboid, and random searchlight iterators plus flexible ROI construction
+- **Spatial filtering** — Gaussian blur, guided filter, bilateral filter, and connected-component labelling
+- **Resampling** — volume-to-volume resampling with configurable interpolation
+- **Visualization** — slice montages, orthographic views, and overlay plotting via ggplot2
 
 ## Installation
 
@@ -72,18 +80,12 @@ length(series1)
 
 ## Vignettes
 
-See examples of use of `neuroim2` in the [vignettes](https://bbuchsbaum.github.io/neuroim2/articles/index.html).
+Browse the full set of [articles](https://bbuchsbaum.github.io/neuroim2/articles/index.html) on the pkgdown site:
 
-### Visualization
-
-- Slice visualization vignette: https://bbuchsbaum.github.io/neuroim2/articles/slice-visualization.html
-
-Quick montage example (robust scaling and shared colorbar):
-
-```r
-# Not run in README
-# library(neuroim2)
-# vol <- read_vol(system.file("extdata","global_mask_v4.nii", package="neuroim2"))
-# z <- unique(round(seq(round(dim(vol)[3]*.25), round(dim(vol)[3]*.85), length.out = 12)))
-# plot_montage(vol, zlevels = z, along = 3, cmap = "grays", range = "robust", ncol = 6)
-```
+| Getting Started | Analysis Workflows | Advanced |
+|---|---|---|
+| [Overview](https://bbuchsbaum.github.io/neuroim2/articles/Overview.html) | [Analysis Workflows](https://bbuchsbaum.github.io/neuroim2/articles/AnalysisWorkflows.html) | [Image Volumes](https://bbuchsbaum.github.io/neuroim2/articles/ImageVolumes.html) |
+| [Choosing Backends](https://bbuchsbaum.github.io/neuroim2/articles/ChoosingBackends.html) | [Slice Visualization](https://bbuchsbaum.github.io/neuroim2/articles/slice-visualization.html) | [NeuroVector](https://bbuchsbaum.github.io/neuroim2/articles/NeuroVector.html) |
+| [Coordinate Systems](https://bbuchsbaum.github.io/neuroim2/articles/coordinate-systems.html) | [Cookbook](https://bbuchsbaum.github.io/neuroim2/articles/Cookbook.html) | [Regions of Interest](https://bbuchsbaum.github.io/neuroim2/articles/regionOfInterest.html) |
+| [Volumes & Vectors](https://bbuchsbaum.github.io/neuroim2/articles/VolumesAndVectors.html) | [Smoothing](https://bbuchsbaum.github.io/neuroim2/articles/Smoothing.html) | [Clustered NeuroVec](https://bbuchsbaum.github.io/neuroim2/articles/clustered-neurovec.html) |
+| [Resampling](https://bbuchsbaum.github.io/neuroim2/articles/Resampling.html) | | [Pipelines](https://bbuchsbaum.github.io/neuroim2/articles/pipelines.html) |
