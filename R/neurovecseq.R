@@ -3,7 +3,6 @@ NULL
 #' @include all_generic.R
 NULL
 #' @importFrom methods new
-#' @importFrom assertthat assert_that
 #' @importFrom purrr map map_lgl map_dbl reduce
 #' @importFrom deflist deflist
 
@@ -106,18 +105,18 @@ NULL
 #' @export
 NeuroVecSeq <- function(...) {
   vecs <- list(...)
-  assert_that(all(map_lgl(vecs, ~ inherits(., "NeuroVec"))),
-              msg = "All inputs must be NeuroVec objects")
+  if (!all(map_lgl(vecs, ~ inherits(., "NeuroVec")))) {
+    cli::cli_abort("All inputs must be {.cls NeuroVec} objects.")
+  }
 
   # Validate spatial compatibility
   sp <- space(vecs[[1]])
   base_dims <- dim(sp)[1:3]
-  assert_that(
-    all(map_lgl(vecs, function(x) {
-      all(dim(space(x))[1:3] == base_dims)
-    })),
-    msg = "All NeuroVec objects must have the same spatial dimensions"
-  )
+  if (!all(map_lgl(vecs, function(x) {
+    all(dim(space(x))[1:3] == base_dims)
+  }))) {
+    cli::cli_abort("All {.cls NeuroVec} objects must have the same spatial dimensions.")
+  }
 
   # Calculate lengths and create combined space
   lens <- map_dbl(vecs, function(x) dim(x)[4])
@@ -154,8 +153,9 @@ setMethod("length", signature=c("NeuroVecSeq"),
 #' @export
 setMethod(f="[[", signature=signature(x="NeuroVecSeq", i="numeric"),
           def = function(x, i) {
-            assert_that(length(i) == 1 && i > 0 && i <= dim(x)[4],
-                        msg = "Index must be a single positive integer within bounds")
+            if (length(i) != 1 || i <= 0 || i > dim(x)[4]) {
+              cli::cli_abort("{.arg i} must be a single positive integer within bounds [1, {dim(x)[4]}].")
+            }
 
             # Calculate cumulative offsets
             offsets <- cumsum(c(1, x@lens))[1:(length(x@lens))]
@@ -181,8 +181,9 @@ setMethod(f="[[", signature=signature(x="NeuroVecSeq", i="numeric"),
 #' @export
 setMethod(f="sub_vector", signature=signature(x="NeuroVecSeq", i="numeric"),
           def=function(x, i) {
-            assertthat::assert_that(max(i) <= dim(x)[4],
-                                  msg = "Indices must be within bounds")
+            if (max(i) > dim(x)[4]) {
+              cli::cli_abort("Max index {.val {max(i)}} exceeds 4th dimension size {.val {dim(x)[4]}}.")
+            }
 
             lens <- sapply(x@vecs, function(v) dim(v)[4])
             offset <- c(0, cumsum(lens)) + 1
@@ -215,8 +216,9 @@ setMethod(f="sub_vector", signature=signature(x="NeuroVecSeq", i="numeric"),
 setMethod(f = "linear_access",
           signature = signature(x = "NeuroVecSeq", i = "numeric"),
           def = function(x, i) {
-            assertthat::assert_that(is.numeric(i),
-                                  msg = "Index must be numeric")
+            if (!is.numeric(i)) {
+              cli::cli_abort("{.arg i} must be numeric.")
+            }
 
             # Calculate dimensions and offsets
             nels <- prod(dim(x)[1:3])
@@ -315,7 +317,9 @@ setMethod("series", signature(x="NeuroVecSeq", i="numeric"),
 #' @export
 setMethod("series", signature(x="NeuroVecSeq", i="matrix"),
           def=function(x, i) {
-            assertthat::assert_that(ncol(i) == 3, msg="Coordinate matrix must have 3 columns")
+            if (ncol(i) != 3) {
+              cli::cli_abort("Coordinate matrix {.arg i} must have 3 columns, not {ncol(i)}.")
+            }
             # More efficient to pre-allocate and bind
             do.call(rbind, purrr::map(x@vecs, ~ series(., i)))
           })
@@ -327,7 +331,9 @@ setMethod("series", signature(x="NeuroVecSeq", i="matrix"),
 #' @export
 setMethod("series_roi", signature(x="NeuroVecSeq", i="matrix"),
           def=function(x, i) {
-            assertthat::assert_that(ncol(i) == 3, msg="ROI coordinate matrix must have 3 columns")
+            if (ncol(i) != 3) {
+              cli::cli_abort("ROI coordinate matrix {.arg i} must have 3 columns, not {ncol(i)}.")
+            }
             # Get ROIs for each vector in sequence
             rois <- purrr::map(x@vecs, ~ series_roi(., i))
 
@@ -375,35 +381,6 @@ setMethod("vectors", signature(x="NeuroVecSeq", subset="logical"),
             deflist::deflist(f, length(ind))
           })
 
-#' @export
-#' @rdname show-methods
-setMethod("show", "NeuroVecSeq",
-          def=function(object) {
-            cat("\n", crayon::bold(crayon::blue("NeuroVecSeq")), " ",
-                crayon::silver(paste0("(", length(object@vecs), " vectors)")), "\n", sep="")
-
-            cat(crayon::bold("\n+= Sequence Info "), crayon::silver("---------------------------"), "\n", sep="")
-            cat("| ", crayon::yellow("Length"), "        : ", length(object@vecs), "\n", sep="")
-            cat("| ", crayon::yellow("Total Time"), "    : ", sum(object@lens), " points\n", sep="")
-
-            sp <- space(object@vecs[[1]])
-            cat(crayon::bold("\n+= Spatial Info "), crayon::silver("---------------------------"), "\n", sep="")
-            cat("| ", crayon::yellow("Dimensions"), "    : ", paste(dim(object@vecs[[1]])[1:3], collapse=" x "), "\n", sep="")
-            cat("| ", crayon::yellow("Spacing"), "       : ", paste(sp@spacing[1:3], collapse=" x "), "\n", sep="")
-            cat("| ", crayon::yellow("Origin"), "        : ", paste(round(sp@origin[1:3], 2), collapse=" x "), "\n", sep="")
-            cat("| ", crayon::yellow("Orientation"), "   : ", paste(sp@axes@i@axis, sp@axes@j@axis, sp@axes@k@axis), "\n", sep="")
-
-            cat(crayon::bold("\n+= Vector Details "), crayon::silver("--------------------------"), "\n", sep="")
-            for (i in seq_along(object@vecs)) {
-              v <- object@vecs[[i]]
-              vclass <- sub(".*:", "", class(v)[1])
-              cat("  ", crayon::green(paste0(i, ".")), " ",
-                  crayon::cyan(vclass), " ",
-                  crayon::silver(paste0("(", dim(v)[4], " timepoints)")),
-                  "\n", sep="")
-            }
-            cat("\n")
-          })
 
 #' @rdname NeuroVecSeq-methods
 #' @aliases length,NeuroVecSeq-method

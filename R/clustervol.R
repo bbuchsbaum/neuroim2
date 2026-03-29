@@ -119,86 +119,37 @@ setAs(from="ClusteredNeuroVol", to="DenseNeuroVol",
 #' @param x A `ClusteredNeuroVol` instance.
 #' @param ... Additional arguments (currently ignored).
 #' @return A dense array of cluster ids.
+#' @rdname as.array-methods
 #' @export
 setMethod("as.array", signature(x="ClusteredNeuroVol"), function(x, ...) {
   as(x, "array")
 })
 
+#' @importFrom stats median
 #' @export
 #' @rdname show-methods
-setMethod(f="show", signature=signature("ClusteredNeuroVol"),
-    def=function(object) {
-      sp <- space(object)
-      dims <- dim(object)
-      spacing <- sp@spacing
-      origin <- sp@origin
-      n_clusters <- num_clusters(object)
-      n_voxels <- sum(object@mask)
-
-      # Header
-      cat("\n")
-      cat(crayon::bold(crayon::blue("ClusteredNeuroVol")), "\n")
-      cat(crayon::silver(paste0(rep("=", 60), collapse="")), "\n\n")
-
-      # Type and basic info
-      cat(crayon::yellow(" > Type:          "),
-          crayon::white("Clustered Volume"), "\n")
-
-      # Dimensions section
-      cat(crayon::yellow(" > Dimensions:    "),
-          crayon::white(paste(dims, collapse=" x ")), "\n")
-
-      # Space information
-      cat(crayon::yellow(" > Spacing:       "),
-          crayon::white(paste(signif(spacing, 3), collapse=" x ")), " ",
-          crayon::silver("mm"), "\n")
-
-      cat(crayon::yellow(" > Origin:        "),
-          crayon::white(paste(signif(origin, 3), collapse=" x ")), " ",
-          crayon::silver("mm"), "\n")
-
-      # Anatomical orientation
-      cat(crayon::yellow(" > Orientation:   "),
-          crayon::white(paste(sp@axes@i@axis, sp@axes@j@axis, sp@axes@k@axis,
-                            collapse=" x ")), "\n")
-
-      # Cluster information
-      cat("\n", crayon::bold(crayon::cyan("Cluster Information")), "\n")
-      cat(crayon::silver(paste0(rep("-", 40), collapse="")), "\n")
-
-      cat(crayon::yellow(" > Total Clusters:"),
-          crayon::white(sprintf("%d", n_clusters)), "\n")
-
-      cat(crayon::yellow(" > Active Voxels: "),
-          crayon::white(sprintf("%d", n_voxels)), " ",
-          crayon::silver(sprintf("(%.1f%% of volume)",
-                               100 * n_voxels/prod(dims[1:3]))), "\n")
-
-      # Label information if available
-      if (!is.null(names(object@label_map))) {
-        cat("\n", crayon::bold(crayon::magenta("Region Labels")), "\n")
-        cat(crayon::silver(paste0(rep("-", 40), collapse="")), "\n")
-
-        # Show first few labels with ellipsis if there are more
-        n_show <- min(5, length(object@label_map))
-        label_sample <- head(names(object@label_map), n_show)
-
-        for (i in seq_along(label_sample)) {
-          cat(crayon::yellow(" > "),
-              crayon::white(sprintf("%-20s", label_sample[i])),
-              crayon::silver(sprintf("[%d]", unlist(object@label_map[label_sample[i]]))),
-              "\n")
-        }
-
-        if (length(object@label_map) > n_show) {
-          cat(crayon::silver(sprintf("   ... and %d more regions\n",
-                                   length(object@label_map) - n_show)))
-        }
-      }
-
-      cat("\n")
-    }
-)
+setMethod("show", "ClusteredNeuroVol", function(object) {
+  sp <- space(object)
+  d <- dim(object)
+  nc <- num_clusters(object)
+  show_header("ClusteredNeuroVol", paste(nc, "clusters"))
+  show_rule("Spatial")
+  show_field("Dimensions", paste(d, collapse = " x "))
+  show_field("Spacing", paste(round(sp@spacing, 3), collapse = " x "), " mm")
+  show_field("Orientation", safe_axcodes(sp))
+  show_rule("Clusters")
+  show_field("Count", nc)
+  sizes <- table(object@clusters)
+  show_field("Sizes", sprintf("min=%d, median=%d, max=%d",
+             min(sizes), as.integer(median(sizes)), max(sizes)))
+  if (length(object@label_map) > 0) {
+    nshow <- min(length(object@label_map), 6)
+    labs <- names(object@label_map)[seq_len(nshow)]
+    show_field("Labels", paste(labs, collapse = ", "),
+               if (length(object@label_map) > nshow) " ..." else "")
+  }
+  show_field("Size", format_mem(object))
+})
 
 
 #' @export
@@ -286,7 +237,9 @@ setMethod(f="centroids", signature=signature(x="ClusteredNeuroVol"),
 setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="ClusteredNeuroVol"),
           def = function(x, clusters) {
             # reuse integer path to ensure ordering matches integer split
-            assert_that(prod(dim(x)[1:3]) == length(clusters@mask))
+            if (prod(dim(x)[1:3]) != length(clusters@mask)) {
+              cli::cli_abort("Number of spatial voxels in {.arg x} ({prod(dim(x)[1:3])}) must equal length of {.arg clusters} mask ({length(clusters@mask)}).")
+            }
             clus_vec <- integer(length(clusters@mask))
             active_idx <- which(clusters@mask > 0)
             clus_vec[active_idx] <- clusters@clusters
@@ -297,7 +250,9 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="Cluste
 #' @rdname split_clusters-methods
 setMethod(f="split_clusters", signature=signature(x="NeuroVec", clusters="integer"),
           def = function(x, clusters) {
-            assert_that(length(clusters) == prod(dim(x)[1:3]))
+            if (length(clusters) != prod(dim(x)[1:3])) {
+              cli::cli_abort("{.arg clusters} length ({length(clusters)}) must equal number of spatial voxels ({prod(dim(x)[1:3])}).")
+            }
 
             unique_clusters <- sort(unique(clusters[clusters != 0]))
 
@@ -378,7 +333,9 @@ setMethod(f="split_clusters", signature=signature(x="NeuroVol", clusters="Cluste
 #' @rdname split_clusters-methods
 setMethod(f="split_clusters", signature=signature(x="NeuroVol", clusters="integer"),
           def = function(x,clusters) {
-            assert_that(length(clusters) == prod(dim(x)[1:3]))
+            if (length(clusters) != prod(dim(x)[1:3])) {
+              cli::cli_abort("{.arg clusters} length ({length(clusters)}) must equal number of spatial voxels ({prod(dim(x)[1:3])}).")
+            }
             ind <- which(clusters > 0)
             clusters <- clusters[ind]
             clist <- split(ind, clusters)

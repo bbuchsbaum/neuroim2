@@ -53,21 +53,23 @@ NULL
 #' \code{\linkS4class{NeuroSpace}} for space representation
 #'
 #' @importFrom methods new
-#' @importFrom assertthat assert_that
 #'
 #' @export
 #' @rdname IndexLookupVol-class
 IndexLookupVol <- function(space, indices) {
-  assert_that(inherits(space, "NeuroSpace"),
-              msg = "'space' must be a NeuroSpace object")
-  assert_that(is.numeric(indices) && all(is.finite(indices)),
-              msg = "'indices' must be a vector of finite numeric values")
+  if (!inherits(space, "NeuroSpace")) {
+    cli::cli_abort("{.arg space} must be a {.cls NeuroSpace} object.")
+  }
+  if (!is.numeric(indices) || !all(is.finite(indices))) {
+    cli::cli_abort("{.arg indices} must be a vector of finite numeric values.")
+  }
 
   # Convert to integer and validate range
   indices <- as.integer(indices)
   nels <- prod(dim(space)[1:3])
-  assert_that(all(indices >= 1) && all(indices <= nels),
-              msg = "'indices' must be within the range of the space dimensions")
+  if (!all(indices >= 1) || !all(indices <= nels)) {
+    cli::cli_abort("{.arg indices} must be within the range of the space dimensions [1, {nels}].")
+  }
 
   new("IndexLookupVol", space = space, indices = indices)
 }
@@ -151,14 +153,16 @@ setMethod(f = "indices",
 setMethod(f = "lookup",
           signature = signature(x = "IndexLookupVol", i = "numeric"),
           def = function(x, i) {
-            assert_that(is.numeric(i) && all(is.finite(i)),
-                       msg = "'i' must be a vector of finite numeric values")
+            if (!is.numeric(i) || !all(is.finite(i))) {
+              cli::cli_abort("{.arg i} must be a vector of finite numeric values.")
+            }
 
             # Convert to integer and validate range
             i <- as.integer(i)
             nels <- prod(dim(x@space)[1:3])
-            assert_that(all(i >= 1) && all(i <= nels),
-                       msg = "'i' must be within the range of the space dimensions")
+            if (!all(i >= 1) || !all(i <= nels)) {
+              cli::cli_abort("{.arg i} must be within the range of the space dimensions [1, {nels}].")
+            }
 
             x@map[i]
           })
@@ -230,34 +234,12 @@ setMethod(f = "coords",
 
 #' @export
 #' @rdname show-methods
-setMethod("show", signature(object = "IndexLookupVol"),
-          def = function(object) {
-            # Calculate summary statistics
-            n_indices <- length(object@indices)
-            n_nonzero <- sum(object@indices != 0)
-            n_map <- length(object@map)
-
-            cat("\n", crayon::bold(crayon::blue("IndexLookupVol")), "\n", sep="")
-
-            # Spatial information
-            cat(crayon::bold("\n- Spatial Info"), crayon::silver(" ---------------------------"), "\n", sep="")
-            cat("| ", crayon::yellow("Dimensions"), "    : ",
-                paste(dim(object@space)[1:3], collapse=" x "), "\n", sep="")
-            cat("| ", crayon::yellow("Total Voxels"), "  : ",
-                format(prod(dim(object@space)[1:3]), big.mark=","), "\n", sep="")
-
-            # Index information
-            cat(crayon::bold("\n- Index Info"), crayon::silver(" ----------------------------"), "\n", sep="")
-            cat("| ", crayon::yellow("Total Indices"), "  : ", format(n_indices, big.mark=","), "\n", sep="")
-            cat("| ", crayon::yellow("Non-zero"), "       : ", format(n_nonzero, big.mark=","),
-                " (", round(100*n_nonzero/n_indices, 1), "%)", "\n", sep="")
-            cat("| ", crayon::yellow("Map Length"), "     : ", format(n_map, big.mark=","), "\n", sep="")
-
-            # Range information
-            if(n_indices > 0) {
-              cat("| ", crayon::yellow("Index Range"), "    : [",
-                  min(object@indices), ", ", max(object@indices), "]\n", sep="")
-            }
-
-            cat("\n")
-          })
+setMethod("show", "IndexLookupVol", function(object) {
+  n <- length(object@indices)
+  nz <- sum(object@indices != 0)
+  show_header("IndexLookupVol", paste(nz, "/", n, "mapped"))
+  show_field("Total Indices", format(n, big.mark = ","))
+  show_field("Non-zero", paste0(format(nz, big.mark = ","),
+             " (", round(100 * nz / max(n, 1), 1), "%)"))
+  show_field("Map Entries", length(object@map))
+})

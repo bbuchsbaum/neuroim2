@@ -26,7 +26,6 @@ NULL
 #' }
 #'
 #' @importFrom methods new
-#' @importFrom assertthat assert_that
 #'
 NULL
 
@@ -83,10 +82,12 @@ NULL
 setMethod(f = "file_matches",
           signature = signature(x = "FileFormat", file_name = "character"),
           def = function(x, file_name) {
-            assert_that(is.character(file_name) && length(file_name) == 1,
-                       msg = "'file_name' must be a single character string")
-            assert_that(!is.na(file_name) && nchar(file_name) > 0,
-                       msg = "'file_name' cannot be NA or empty")
+            if (!is.character(file_name) || length(file_name) != 1) {
+              cli::cli_abort("{.arg file_name} must be a single character string.")
+            }
+            if (is.na(file_name) || nchar(file_name) == 0) {
+              cli::cli_abort("{.arg file_name} cannot be NA or empty.")
+            }
 
             # Check file existence and format matching
             if (header_file_matches(x, file_name)) {

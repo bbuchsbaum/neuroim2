@@ -69,18 +69,21 @@
 #'
 #' @export
 NeuroSlice <- function(data, space, indices = NULL) {
-  assert_that(ndim(space) == 2,
-              msg = "Space must be 2-dimensional for NeuroSlice")
+  if (ndim(space) != 2) {
+    cli::cli_abort("Space must be 2-dimensional for {.cls NeuroSlice}, not {ndim(space)}D.")
+  }
 
   if (is.null(indices)) {
     if (length(dim(data)) != 2) {
-      assert_that(length(data) == prod(dim(space)[1:2]),
-                  msg = "Data length must match space dimensions")
+      if (length(data) != prod(dim(space)[1:2])) {
+        cli::cli_abort("Data length ({length(data)}) must match space dimensions ({prod(dim(space)[1:2])}).")
+      }
       data <- matrix(data, dim(space)[1], dim(space)[2])
     }
 
-    assert_that(all(dim(data) == dim(space)),
-                msg = "Data dimensions must match space dimensions")
+    if (!all(dim(data) == dim(space))) {
+      cli::cli_abort("Data dimensions ({.val {dim(data)}}) must match space dimensions ({.val {dim(space)}}).")
+    }
     new("NeuroSlice", .Data=data, space=space)
 
   } else {
@@ -118,6 +121,7 @@ NeuroSlice <- function(data, space, indices = NULL) {
 #'
 #' @seealso \code{\link{index_to_grid}} for the inverse operation
 #'
+#' @rdname grid_to_index-methods
 #' @export
 setMethod(f="grid_to_index",
           signature=signature(x = "NeuroSlice", coords="matrix"),
@@ -230,48 +234,17 @@ setMethod("plot",
 setMethod(f="show",
           signature=signature("NeuroSlice"),
           def=function(object) {
-            # Get space information
             sp <- space(object)
-
-            # Calculate statistics
-            val_range <- range(object, na.rm=TRUE)
+            show_header("NeuroSlice", format_mem(object))
+            show_rule("Spatial")
+            show_field("Dimensions", paste(dim(object), collapse = " x "))
+            show_field("Spacing", paste(round(sp@spacing, 3), collapse = " x "))
+            show_field("Origin", paste(round(sp@origin, 2), collapse = ", "))
+            show_rule("Data")
+            rng <- range(object, na.rm = TRUE)
+            show_field("Range", sprintf("[%.3f, %.3f]", rng[1], rng[2]))
             n_na <- sum(is.na(object))
-            mem_size <- format(object.size(object), units="auto")
-
-            # Header
-            cat("\n")
-            cat(bold(blue("=== NeuroSlice Object ===")), "\n\n")
-
-            # Type and Dimensions
-            cat(bold(yellow("* Basic Information")), "\n")
-            cat("  ", silver("Type:"), " ", class(object), "\n", sep="")
-            cat("  ", silver("Dimensions:"), " ",
-                paste(dim(object), collapse=" x "),
-                " (", green(mem_size), ")", "\n", sep="")
-
-            # Value Range and Stats
-            cat("\n", bold(yellow("* Data Properties")), "\n", sep="")
-            cat("  ", silver("Value Range:"), " [",
-                blue(sprintf("%.2f", val_range[1])), ", ",
-                blue(sprintf("%.2f", val_range[2])), "]", "\n", sep="")
-            if (n_na > 0) {
-                cat("  ", silver("Missing Values:"), " ",
-                    red(n_na), " (",
-                    sprintf("%.1f%%", 100*n_na/length(object)), ")",
-                    "\n", sep="")
-            }
-
-            # Spatial Properties
-            cat("\n", bold(yellow("* Spatial Properties")), "\n", sep="")
-            cat("  ", silver("Spacing:"), " ",
-                paste(sprintf("%.2f", sp@spacing), collapse=" x "),
-                "\n", sep="")
-            cat("  ", silver("Origin:"), "  ",
-                paste(sprintf("%.2f", sp@origin), collapse=" x "),
-                "\n", sep="")
-            cat("  ", silver("Axes:"), "    ",
-                green(sp@axes@i@axis), " x ",
-                green(sp@axes@j@axis), "\n", sep="")
+            if (n_na > 0) show_field("NAs", format(n_na, big.mark = ","))
 
             # Footer
             cat("\n", blue("=" = 28), "\n", sep="")
@@ -293,13 +266,14 @@ setMethod(f="show",
 #' @return If \code{alpha == 1}, returns a character vector/array of colors.
 #' If \code{alpha < 1}, returns an array with an added RGBA channel (last dimension length 4).
 #'
-#' @import assertthat
 #' @importFrom grDevices col2rgb gray heat.colors
 #' @export
 mapToColors <- function (imslice, col = heat.colors(128, alpha = 1), zero_col = "#00000000",
                          alpha = 1, irange = range(imslice), threshold = c(0, 0)) {
 
-  assertthat::assert_that(diff(irange) >= 0)
+  if (diff(irange) < 0) {
+    cli::cli_abort("{.arg irange} must be non-decreasing (diff >= 0), got diff = {diff(irange)}.")
+  }
   drange <- diff(irange)
   mcols <- (imslice - irange[1])/diff(irange) * (length(col) -1) + 1
   mcols[mcols < 1] <- 1

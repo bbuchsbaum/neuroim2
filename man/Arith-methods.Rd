@@ -6,9 +6,12 @@
 \alias{Arith,DenseNeuroVec,DenseNeuroVec-method}
 \alias{Arith,SparseNeuroVol,NeuroVol-method}
 \alias{Arith,NeuroVol,SparseNeuroVol-method}
+\alias{Arith,ROIVol,ROIVol-method}
 \alias{Arith,DenseNeuroVol,DenseNeuroVol-method}
 \alias{Arith,SparseNeuroVec,SparseNeuroVec-method}
 \alias{Arith,NeuroVec,NeuroVec-method}
+\alias{Arith,NeuroVec,NeuroVol-method}
+\alias{Arith,NeuroVol,NeuroVec-method}
 \alias{Arith,DenseNeuroVol,numeric-method}
 \alias{Arith,numeric,DenseNeuroVol-method}
 \alias{Arith,SparseNeuroVol,numeric-method}
@@ -22,6 +25,8 @@
 \usage{
 \S4method{Arith}{SparseNeuroVol,SparseNeuroVol}(e1, e2)
 
+\S4method{Arith}{ROIVol,ROIVol}(e1, e2)
+
 \S4method{Arith}{DenseNeuroVol,DenseNeuroVol}(e1, e2)
 
 \S4method{Arith}{DenseNeuroVec,DenseNeuroVec}(e1, e2)
@@ -33,6 +38,10 @@
 \S4method{Arith}{SparseNeuroVec,SparseNeuroVec}(e1, e2)
 
 \S4method{Arith}{NeuroVec,NeuroVec}(e1, e2)
+
+\S4method{Arith}{NeuroVec,NeuroVol}(e1, e2)
+
+\S4method{Arith}{NeuroVol,NeuroVec}(e1, e2)
 
 \S4method{Arith}{DenseNeuroVol,numeric}(e1, e2)
 
@@ -53,12 +62,14 @@
 \S4method{Arith}{NeuroVol,ClusteredNeuroVol}(e1, e2)
 }
 \arguments{
-\item{e1}{A NeuroVec object.}
+\item{e1}{A NeuroVol object.}
 
 \item{e2}{A NeuroVec object.}
 }
 \value{
 A SparseNeuroVol object representing the result of the arithmetic operation.
+
+An ROIVol object resulting from the arithmetic operation.
 
 An ROIVol object containing the result of the arithmetic operation between \code{e1} and \code{e2}.
 
@@ -69,6 +80,10 @@ A DenseNeuroVol object representing the result of the arithmetic operation.
 A DenseNeuroVol object representing the result of the arithmetic operation.
 
 A DenseNeuroVec object representing the result of the arithmetic operation.
+
+A DenseNeuroVec object resulting from the arithmetic operation.
+
+A DenseNeuroVec object resulting from the arithmetic operation.
 }
 \description{
 Methods for performing arithmetic operations on neuroimaging objects
@@ -95,4 +110,10 @@ Perform an arithmetic operation between two NeuroVec objects.
 The input NeuroVec objects must have the same dimensions.
 The method performs the arithmetic operation on the elements of the NeuroVec objects.
 The result is returned as a new DenseNeuroVec object.
+
+This function performs arithmetic operations on a NeuroVec object and a
+NeuroVol object.
+
+This function performs arithmetic operations on a NeuroVol object and a
+NeuroVec object.
 }

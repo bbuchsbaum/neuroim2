@@ -3,24 +3,33 @@ template:
   bootstrap: 5
   package: albersdown
 articles:
-- title: Visualization
-  desc: Lightweight, publication-ready plotting helpers and workflows
-  contents:
-  - slice-visualization
-  - ImageVolumes
-  - NeuroVector
-- title: Core Topics
-  desc: Core concepts and how-tos
+- title: Start Here
+  desc: Core orientation and backend choice before task-specific workflows
   contents:
   - Overview
+  - coordinate-systems
+  - ChoosingBackends
+  - NeuroVector
+- title: Spatial Workflows
+  desc: Reading, transforming, and resampling volumetric data
+  contents:
+  - ImageVolumes
+  - Resampling
+  - Smoothing
+- title: Regions and Searchlights
+  desc: ROI construction, clustered representations, and searchlight analysis
+  contents:
   - regionOfInterest
   - clustered-neurovec
   - pipelines
-  - Smoothing
-  - Resampling
+- title: Visualization
+  desc: Slice and montage visualization workflows
+  contents:
+  - slice-visualization
 - title: Cookbook
   desc: Small, task-oriented examples and recipes
-  contents: Cookbook
+  contents:
+  - Cookbook
 reference:
 - title: Visualization Helpers
   desc: Plotting utilities for slices, montages, overlays, and palettes
@@ -157,11 +166,15 @@ reference:
   - origin
   - perm_mat
   - strip_extension
+  - deoblique
   - anatomical_axes
   - TIME
   - findAnatomy3D
   - matrixToQuatern
   - quaternToMatrix
+  - affine_utils
+  - orientation_utils
+  - space_utils
 - title: ROI and Clustering
   desc: |
     Methods for working with regions of interest and clustering
@@ -256,6 +269,7 @@ reference:
   - read_header
   - read_meta_info
   - read_vol_list
+  - read_hyper_vec
 - title: NIfTI Extensions
   desc: |
     Classes and functions for working with NIfTI header extensions

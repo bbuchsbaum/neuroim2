@@ -1,7 +1,7 @@
 Package: neuroim2
 Type: Package
 Title: Data Structures for Brain Imaging Data
-Version: 0.10.0
+Version: 0.11.0
 LinkingTo: 
   Rcpp,
   RcppArmadillo,
@@ -73,6 +73,7 @@ Collate:
     'resample_to.R'
     'roi.R'
     'searchlight.R'
+    'show_helpers.R'
     'simulate.R'
     'space_utils.R'
     'sparse_neurovec.R'
@@ -80,9 +81,8 @@ Collate:
     'theme.R'
     'zzz.R'
 RoxygenNote: 7.3.3
-Imports: 
+Imports:
   purrr,
-  assertthat,
   mmap,
   Rcpp,
   RcppParallel,
@@ -94,7 +94,7 @@ Imports:
   RNiftyReg,
   future.apply,
   deflist,
-  crayon,
+  cli,
   ggplot2,
   magrittr,
   grid
@@ -107,6 +107,7 @@ Suggests:
     Gmedian,
     R.utils,
     spelling,
+    vdiffr,
     xml2
 URL: https://github.com/bbuchsbaum/neuroim2,
     https://bbuchsbaum.github.io/neuroim2/

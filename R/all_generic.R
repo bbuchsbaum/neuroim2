@@ -175,6 +175,21 @@ setGeneric(name="linear_access", def=function(x, i, ...) standardGeneric("linear
 #' # Each column in ts_mat contains the full time series for that voxel
 setGeneric(name="matricized_access", def=function(x, i, ...) standardGeneric("matricized_access"))
 
+#' Extract full sparse rows across time.
+#'
+#' This function extracts one or more rows from the sparse time-by-voxel backing
+#' representation used by sparse neuroimaging vectors. It complements
+#' \code{matricized_access()}, which is the column-oriented accessor.
+#'
+#' @param x a data source, typically a \code{SparseNeuroVec} object containing 4D neuroimaging data
+#' @param i a numeric vector of temporal indices to extract
+#' @param ... additional arguments to be passed to methods.
+#' @return A matrix with one row per requested time index and one column per
+#'   sparse voxel in the backing representation.
+#' @rdname temporal_access-methods
+#' @export
+setGeneric(name="temporal_access", def=function(x, i, ...) standardGeneric("temporal_access"))
+
 #' Read data from a data source.
 #'
 #' This function loads data from a data source and returns it in a format that is compatible with

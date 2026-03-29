@@ -4,22 +4,21 @@
 {}
 #' @include nifti_extensions.R
 {}
-#' @importFrom assertthat assert_that
-
 #' @keywords internal
 #' @noRd
 .checkDimensions <- function(dimvec) {
-	assert_that(all(dimvec >= 0),
-				msg = sprintf("Illegal dimension vector in header: %s", 
-							paste(dimvec, collapse=" x ")))
+  if (!all(dimvec >= 0)) {
+    cli::cli_abort("Illegal dimension vector in header: {paste(dimvec, collapse=' x ')}.")
+  }
 }
 
 
 #' @keywords internal
 #' @noRd
 write_nifti_vector <- function(vec, file_name, data_type="FLOAT") {
-	assert_that(length(dim(vec)) == 4,
-				msg = "Input vector must be 4-dimensional")
+  if (length(dim(vec)) != 4) {
+    cli::cli_abort("Input vector must be 4-dimensional, not {length(dim(vec))}D.")
+  }
 	hdr <- as_nifti_header(vec, file_name=file_name, data_type=data_type)
 
 	conn <- if (substr(file_name, nchar(file_name)-2, nchar(file_name)) == ".gz") {
@@ -42,10 +41,12 @@ write_nifti_vector <- function(vec, file_name, data_type="FLOAT") {
 #' @keywords internal
 #' @noRd
 write_nifti_hyper_vector <- function(vec, file_name, data_type="FLOAT") {
-	assert_that(inherits(vec, "NeuroHyperVec"),
-				msg = "Input must be a NeuroHyperVec")
-	assert_that(length(dim(vec)) == 5,
-				msg = "Input hyper-vector must be 5-dimensional")
+  if (!inherits(vec, "NeuroHyperVec")) {
+    cli::cli_abort("{.arg vec} must be a {.cls NeuroHyperVec} object.")
+  }
+  if (length(dim(vec)) != 5) {
+    cli::cli_abort("Input hyper-vector must be 5-dimensional, not {length(dim(vec))}D.")
+  }
 
 	hdr <- createNIfTIHeader(oneFile=TRUE, file_name=file_name)
 	hdr$file_name <- file_name
@@ -89,8 +90,9 @@ write_nifti_hyper_vector <- function(vec, file_name, data_type="FLOAT") {
 #' @keywords internal
 #' @noRd
 write_nifti_volume <- function(vol, file_name, data_type="FLOAT") {
-	assert_that(length(dim(vol)) == 3,
-				msg = "Input volume must be 3-dimensional")
+  if (length(dim(vol)) != 3) {
+    cli::cli_abort("Input volume must be 3-dimensional, not {length(dim(vol))}D.")
+  }
 	hdr <- as_nifti_header(vol, file_name=file_name, data_type=data_type)
 
 	is_gzipped <- endsWith(file_name, ".gz")

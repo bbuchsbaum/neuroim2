@@ -9,7 +9,6 @@ NULL
 #' @description Methods for performing searchlight analyses on neuroimaging data
 NULL
 
-#' @importFrom assertthat assert_that
 #' @importFrom purrr map map_dbl map_int
 #' @importFrom stats kmeans
 #' @importFrom dbscan frNN
@@ -44,29 +43,40 @@ NULL
 #'
 #' @export
 random_searchlight <- function(mask, radius, nonzero = TRUE) {
-  assert_that(inherits(mask, "NeuroVol"),
-              msg = "mask must be a NeuroVol object")
-  assert_that(radius > 0,
-              msg = "radius must be positive")
-  assert_that(is.logical(nonzero), length(nonzero) == 1,
-              msg = "nonzero must be TRUE or FALSE")
+  if (!inherits(mask, "NeuroVol")) {
+    cli::cli_abort("{.arg mask} must be a {.cls NeuroVol} object.")
+  }
+  if (radius <= 0) {
+    cli::cli_abort("{.arg radius} must be positive, not {.val {radius}}.")
+  }
+  if (!is.logical(nonzero) || length(nonzero) != 1) {
+    cli::cli_abort("{.arg nonzero} must be a single logical value (TRUE or FALSE).")
+  }
 
   mask.idx <- which(mask != 0)
   grid <- index_to_grid(mask, mask.idx)
+  n_total <- length(mask.idx)
 
   # Logical vector tracking remaining voxels
-  remaining <- rep(TRUE, length(mask.idx))
+  remaining <- rep(TRUE, n_total)
 
   # Lookup array: maps voxel coords to index in mask.idx
   lookup <- array(0, dim(mask))
   lookup[mask.idx] <- seq_along(mask.idx)
 
   # Preallocate a result list
-  slist <- vector("list", length(mask.idx))
+  slist <- vector("list", n_total)
   counter <- 1
 
   # Vector of voxel indices that remain
   remain_indices <- seq_along(mask.idx)
+
+  # Progress reporting
+  use_pb <- interactive() && n_total >= 100
+  if (use_pb) {
+    cli::cli_progress_bar("Searchlight", total = n_total,
+                          .auto_close = TRUE, .envir = environment())
+  }
 
   while (length(remain_indices) > 0) {
     # sample a center index from remain_indices
@@ -133,6 +143,11 @@ random_searchlight <- function(mask, radius, nonzero = TRUE) {
 
     slist[[counter]] <- search2
     counter <- counter + 1
+
+    if (use_pb) {
+      cli::cli_progress_update(set = n_total - length(remain_indices),
+                               .envir = environment())
+    }
   }
 
   # Trim slist to the actual number of used slots
@@ -266,26 +281,29 @@ resampled_searchlight <- function(mask,
                                   iter = 100,
                                   shape_fun = NULL,
                                   nonzero = TRUE) {
-  assert_that(inherits(mask, "NeuroVol"),
-              msg = "mask must be a NeuroVol object")
-  assert_that(is.numeric(radius), length(radius) > 0, all(radius > 0),
-              msg = "radius must be positive numeric")
-  assert_that(length(iter) == 1, is.finite(iter), iter > 0,
-              msg = "iter must be a positive number")
-  assert_that(
-    is.null(shape_fun) ||
-      is.function(shape_fun) ||
-      (is.character(shape_fun) && length(shape_fun) == 1),
-    msg = "shape_fun must be NULL, a function, or one of the built-in shape names"
-  )
-  assert_that(is.logical(nonzero), length(nonzero) == 1,
-              msg = "nonzero must be TRUE or FALSE")
+  if (!inherits(mask, "NeuroVol")) {
+    cli::cli_abort("{.arg mask} must be a {.cls NeuroVol} object.")
+  }
+  if (!is.numeric(radius) || length(radius) == 0 || !all(radius > 0)) {
+    cli::cli_abort("{.arg radius} must be a positive numeric value or vector.")
+  }
+  if (length(iter) != 1 || !is.finite(iter) || iter <= 0) {
+    cli::cli_abort("{.arg iter} must be a single positive number, not {.val {iter}}.")
+  }
+  if (!is.null(shape_fun) && !is.function(shape_fun) &&
+      !(is.character(shape_fun) && length(shape_fun) == 1)) {
+    cli::cli_abort("{.arg shape_fun} must be NULL, a function, or one of the built-in shape names.")
+  }
+  if (!is.logical(nonzero) || length(nonzero) != 1) {
+    cli::cli_abort("{.arg nonzero} must be a single logical value (TRUE or FALSE).")
+  }
 
   iter <- as.integer(iter)
 
   mask.idx <- which(mask != 0)
-  assert_that(length(mask.idx) > 0,
-              msg = "mask contains no nonzero voxels to sample")
+  if (length(mask.idx) == 0) {
+    cli::cli_abort("{.arg mask} contains no nonzero voxels to sample.")
+  }
 
   grid <- index_to_grid(mask, mask.idx)
 
@@ -447,8 +465,12 @@ NULL
 #' @rdname searchlight_shape_functions
 #' @export
 ellipsoid_shape <- function(scales = c(1, 1, 1), jitter = 0) {
-  assert_that(is.numeric(scales), length(scales) == 3, all(scales > 0))
-  assert_that(is.numeric(jitter), length(jitter) == 1, jitter >= 0)
+  if (!is.numeric(scales) || length(scales) != 3 || !all(scales > 0)) {
+    cli::cli_abort("{.arg scales} must be a length-3 positive numeric vector.")
+  }
+  if (!is.numeric(jitter) || length(jitter) != 1 || jitter < 0) {
+    cli::cli_abort("{.arg jitter} must be a single non-negative number, not {.val {jitter}}.")
+  }
 
   function(mask, center, radius, iter, nonzero) {
     vox <- spherical_roi(mask, center, radius, nonzero = FALSE)@coords
@@ -488,9 +510,13 @@ cube_shape <- function() {
 #' @rdname searchlight_shape_functions
 #' @export
 blobby_shape <- function(drop = 0.3, edge_fraction = 0.7) {
-  assert_that(is.numeric(drop), length(drop) == 1, drop >= 0, drop <= 1)
-  assert_that(is.numeric(edge_fraction), length(edge_fraction) == 1,
-              edge_fraction > 0, edge_fraction <= 1)
+  if (!is.numeric(drop) || length(drop) != 1 || drop < 0 || drop > 1) {
+    cli::cli_abort("{.arg drop} must be a single number in [0, 1], not {.val {drop}}.")
+  }
+  if (!is.numeric(edge_fraction) || length(edge_fraction) != 1 ||
+      edge_fraction <= 0 || edge_fraction > 1) {
+    cli::cli_abort("{.arg edge_fraction} must be a single number in (0, 1], not {.val {edge_fraction}}.")
+  }
 
   function(mask, center, radius, iter, nonzero) {
     roi <- spherical_roi(mask, center, radius, nonzero = FALSE)
@@ -597,16 +623,21 @@ searchlight_coords <- function(mask, radius, nonzero=FALSE, cores=0) {
 #' @export
 #' @rdname searchlight
 searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
-  assert_that(inherits(mask, "NeuroVol"),
-              msg = "mask must be a NeuroVol object")
-  assert_that(radius > 0,
-              msg = "radius must be positive")
-  assert_that(is.logical(eager),
-              msg = "eager must be TRUE or FALSE")
-  assert_that(is.logical(nonzero),
-              msg = "nonzero must be TRUE or FALSE")
-  assert_that(cores >= 0,
-              msg = "cores must be non-negative")
+  if (!inherits(mask, "NeuroVol")) {
+    cli::cli_abort("{.arg mask} must be a {.cls NeuroVol} object.")
+  }
+  if (radius <= 0) {
+    cli::cli_abort("{.arg radius} must be positive, not {.val {radius}}.")
+  }
+  if (!is.logical(eager)) {
+    cli::cli_abort("{.arg eager} must be TRUE or FALSE.")
+  }
+  if (!is.logical(nonzero)) {
+    cli::cli_abort("{.arg nonzero} must be TRUE or FALSE.")
+  }
+  if (cores < 0) {
+    cli::cli_abort("{.arg cores} must be non-negative, not {.val {cores}}.")
+  }
 
   mask.idx <- which(mask != 0)
   grid <- index_to_grid(mask, mask.idx)
@@ -629,8 +660,17 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
       nonzero = nonzero
     )
 
+    n_res <- length(result_list)
+    use_pb <- interactive() && n_res >= 100
+    if (use_pb) {
+      cli::cli_progress_bar("Searchlight (eager)", total = n_res,
+                            .auto_close = TRUE, .envir = environment())
+    }
     for (i in seq_along(result_list)) {
       attr(result_list[[i]], "mask_index") <- as.integer(i)
+      if (use_pb && i %% 100 == 0) {
+        cli::cli_progress_update(set = i, .envir = environment())
+      }
     }
 
     result_list
@@ -666,13 +706,14 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
 #' @rdname clustered_searchlight
 #' @export
 clustered_searchlight <- function(mask, cvol=NULL, csize=NULL) {
-  assert_that(!is.null(csize) || !is.null(cvol),
-              msg = "must provide either 'cvol' or 'csize' argument")
-  assert_that(inherits(mask, "NeuroVol"),
-              msg = "mask must be a NeuroVol object")
-  if (!is.null(csize)) {
-    assert_that(csize > 0,
-                msg = "csize must be positive")
+  if (is.null(csize) && is.null(cvol)) {
+    cli::cli_abort("Must provide either {.arg cvol} or {.arg csize} argument.")
+  }
+  if (!inherits(mask, "NeuroVol")) {
+    cli::cli_abort("{.arg mask} must be a {.cls NeuroVol} object.")
+  }
+  if (!is.null(csize) && csize <= 0) {
+    cli::cli_abort("{.arg csize} must be positive, not {.val {csize}}.")
   }
 
   mask.idx <- which(mask != 0)

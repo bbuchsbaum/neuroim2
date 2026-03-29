@@ -50,7 +50,6 @@ Memory management modes:
 }
 \note{
 * Memory-mapping (.mmap mode) is not supported for gzipped files
-* For .lv.h5 and .h5 files, the indices and mask parameters are ignored
 * The bigvec mode requires a mask to be specified
 * When loading multiple files, they must have compatible dimensions
 }

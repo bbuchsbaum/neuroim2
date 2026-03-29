@@ -18,36 +18,26 @@ NULL
 SparseNeuroVecSource <- function(meta_info, indices=NULL, mask) {
 
   # Input validation
-  assert_that(length(dim(meta_info)) >= 3,
-              msg = "meta_info must have at least 3 dimensions")
+  if (length(dim(meta_info)) < 3) {
+    cli::cli_abort("{.arg meta_info} must have at least 3 dimensions, not {length(dim(meta_info))}.")
+  }
 
   indices <- if(is.null(indices)) seq(1, dim(meta_info)[4]) else indices
-  assert_that(all(indices >= 1 & indices <= dim(meta_info)[4]),
-              msg = "indices must be within valid range")
+  if (!all(indices >= 1 & indices <= dim(meta_info)[4])) {
+    cli::cli_abort("{.arg indices} must be within valid range [1, {dim(meta_info)[4]}].")
+  }
 
 	D <- dim(meta_info)[1:3]
 
-
-	if (is.vector(mask) && length(mask) < prod(D)) {
-    ### this is a vector of indices
-		m <- array(FALSE, D)
-		m[mask] <- TRUE
-		mask <- m
-	} else if (identical(dim(mask), as.integer(D))) {
-		mask <- as.array(mask)
-	} else if (is.vector(mask) && length(mask) == prod(D)) {
-		mask <- array(mask, D)
-	} else {
-		stop(sprintf("Invalid mask dimensions: %s", paste(dim(mask), collapse=" x ")))
-	}
-
   if (!inherits(mask, "LogicalNeuroVol")) {
-    mspace <- NeuroSpace(dim(mask),  meta_info@spacing, meta_info@origin, meta_info@spatial_axes)
-    mask <- LogicalNeuroVol(mask, mspace)
+    mask_arr <- normalize_mask(mask, D)
+    mspace <- NeuroSpace(dim(mask_arr), meta_info@spacing, meta_info@origin, meta_info@spatial_axes)
+    mask <- LogicalNeuroVol(mask_arr, mspace)
   }
 
-	assert_that(all(dim(mask) == D),
-              msg = "mask dimensions must match data dimensions")
+	if (!all(dim(mask) == D)) {
+	  cli::cli_abort("Mask dimensions {.val {dim(mask)}} must match data dimensions {.val {D}}.")
+	}
 
 	new("SparseNeuroVecSource", meta_info=meta_info, indices=indices, mask=mask)
 }
@@ -65,16 +55,21 @@ prep_sparsenvec <- function(data, space, mask) {
 
   cardinality <- sum(mask)
 
-  assert_that(inherits(mask, "LogicalNeuroVol"),
-              msg = "mask must be a LogicalNeuroVol object")
+  if (!inherits(mask, "LogicalNeuroVol")) {
+    cli::cli_abort("{.arg mask} must be a {.cls LogicalNeuroVol} object.")
+  }
 
   if (is.matrix(data)) {
     Nind <- sum(mask == TRUE)
     if (nrow(data) == Nind) {
       data <- t(data)
-      assert_that(ncol(data) == cardinality, msg = "data matrix must match cardinality of `mask`")
+      if (ncol(data) != cardinality) {
+        cli::cli_abort("Data matrix columns ({ncol(data)}) must match cardinality of {.arg mask} ({cardinality}).")
+      }
     } else if (ncol(data) == Nind) {
-      assert_that(ncol(data) == cardinality, msg = "data matrix must match cardinality of `mask`")
+      if (ncol(data) != cardinality) {
+        cli::cli_abort("Data matrix columns ({ncol(data)}) must match cardinality of {.arg mask} ({cardinality}).")
+      }
     } else {
       stop(sprintf("Matrix dimensions %s do not match mask cardinality %d",
                    paste(dim(data), collapse=" x "), Nind))
@@ -276,8 +271,7 @@ setMethod(
         mapped_idx <- lookup(x, idx)
         out <- rep(0, dim(x)[4])  # time vector
         if (mapped_idx > 0) {
-          # fill from x@data
-          out <- x@data[, mapped_idx]
+          out <- matricized_access(x, mapped_idx)[, 1, drop = TRUE]
         }
         if (drop) {
           # already a 1D vector, so nothing special
@@ -401,14 +395,14 @@ setMethod(f="matricized_access", signature=signature(x = "SparseNeuroVec", i = "
 #' @rdname matricized_access-methods
 setMethod(f="matricized_access", signature=signature(x = "SparseNeuroVec", i = "integer"),
           def=function (x, i) {
-            x@data[,i]
+            x@data[,i, drop = FALSE]
           })
 
 #' @export
 #' @rdname matricized_access-methods
 setMethod(f="matricized_access", signature=signature(x = "SparseNeuroVec", i = "numeric"),
           def=function (x, i) {
-            x@data[,i]
+            x@data[,i, drop = FALSE]
           })
 
 
@@ -423,14 +417,42 @@ setMethod(f="matricized_access", signature=signature(x = "BigNeuroVec", i = "mat
 #' @rdname matricized_access-methods
 setMethod(f="matricized_access", signature=signature(x = "BigNeuroVec", i = "integer"),
           def=function (x, i) {
-            x@data[,i]
+            x@data[,i, drop = FALSE]
           })
 
 #' @export
 #' @rdname matricized_access-methods
 setMethod(f="matricized_access", signature=signature(x = "BigNeuroVec", i = "numeric"),
           def=function (x, i) {
-            x@data[,i]
+            x@data[,i, drop = FALSE]
+          })
+
+#' @export
+#' @rdname temporal_access-methods
+setMethod(f="temporal_access", signature=signature(x = "SparseNeuroVec", i = "integer"),
+          def=function (x, i) {
+            x@data[i, , drop = FALSE]
+          })
+
+#' @export
+#' @rdname temporal_access-methods
+setMethod(f="temporal_access", signature=signature(x = "SparseNeuroVec", i = "numeric"),
+          def=function (x, i) {
+            x@data[i, , drop = FALSE]
+          })
+
+#' @export
+#' @rdname temporal_access-methods
+setMethod(f="temporal_access", signature=signature(x = "BigNeuroVec", i = "integer"),
+          def=function (x, i) {
+            x@data[i, , drop = FALSE]
+          })
+
+#' @export
+#' @rdname temporal_access-methods
+setMethod(f="temporal_access", signature=signature(x = "BigNeuroVec", i = "numeric"),
+          def=function (x, i) {
+            x@data[i, , drop = FALSE]
           })
 
 
@@ -628,6 +650,7 @@ setMethod(
 #'
 #' @return An array containing the extracted subset
 #'
+#' @rdname extract-methods
 #' @export
 setMethod(f="[", signature=signature(x = "AbstractSparseNeuroVec", i = "numeric", j = "numeric"),
           def = function (x, i, j, k, m, ..., drop = TRUE) {
@@ -655,7 +678,8 @@ setMethod(f="[", signature=signature(x = "AbstractSparseNeuroVec", i = "numeric"
             out <- array(0, dimout)
             nz_idx <- which(keep)
             if (length(nz_idx) > 0) {
-              vals <- x@data[m, mapped[nz_idx], drop = FALSE]  # dims: length(m) x length(nz)
+              vals <- matricized_access(x, mapped[nz_idx])
+              vals <- vals[m, , drop = FALSE]
               coords <- vmat[nz_idx, , drop = FALSE]
               for (col in seq_along(nz_idx)) {
                 ii <- match(coords[col,1], i)
@@ -676,14 +700,16 @@ setMethod(f="[", signature=signature(x = "AbstractSparseNeuroVec", i = "numeric"
 #' Extract a sub-vector
 #' @name sub_vector
 #' @rdname sub_vector-methods
-#' @aliases sub_vector,SparseNeuroVec,numeric-method
+#' @aliases sub_vector,AbstractSparseNeuroVec,numeric-method
 #' @export
-setMethod(f="sub_vector", signature=signature(x="SparseNeuroVec", i="numeric"),
+setMethod(f="sub_vector", signature=signature(x="AbstractSparseNeuroVec", i="numeric"),
           def=function(x, i) {
-            assertthat::assert_that(max(i) <= dim(x)[4])
+            if (max(i) > dim(x)[4]) {
+              cli::cli_abort("Max index {.val {max(i)}} exceeds 4th dimension size {.val {dim(x)[4]}}.")
+            }
 
             # Get the subset of data for the requested timepoints
-            res <- x@data[i,, drop=FALSE]
+            res <- temporal_access(x, i)
 
             # Create new space with updated dimensions
             xs <- space(x)
@@ -703,11 +729,12 @@ setMethod(f="sub_vector", signature=signature(x="SparseNeuroVec", i="numeric"),
 #' @param i the volume index
 #' @return a SparseNeuroVol object
 #' @export
-setMethod(f="[[", signature=signature(x="SparseNeuroVec", i="numeric"),
+setMethod(f="[[", signature=signature(x="AbstractSparseNeuroVec", i="numeric"),
           def = function(x, i) {
             stopifnot(length(i) == 1)
             xs <- space(x)
-            dat <- x@data[i,]
+            dat <- temporal_access(x, i)
+            dat <- dat[1, , drop = TRUE]
             newdim <- dim(xs)[1:3]
             bspace <- NeuroSpace(newdim, spacing=spacing(xs), origin=origin(xs), axes(xs), trans(xs))
             SparseNeuroVol(dat, bspace, indices=indices(x))
@@ -715,18 +742,17 @@ setMethod(f="[[", signature=signature(x="SparseNeuroVec", i="numeric"),
 
 
 
-#' @name as
+#' @name as.matrix
+#' @rdname as.matrix-methods
 #' @export
-setAs(from="SparseNeuroVec", to="matrix",
+setAs(from="AbstractSparseNeuroVec", to="matrix",
 		  function(from) {
-		    ind <- indices(from)
-		    out <- matrix(0, dim(from)[4], prod(dim(from)[1:3]))
-		    out[, ind] <- from@data
-		    t(out)
-			  #from@data
+		    as.matrix(from)
 		  })
 
 
+#' @name as.dense
+#' @rdname as.dense-methods
 #' @export
 setAs(from="SparseNeuroVec", to="DenseNeuroVec",
       function(from) {
@@ -746,14 +772,14 @@ setMethod("as_mmap", signature(x = "SparseNeuroVec"),
 
 #' Convert to Matrix
 #'
-#' @aliases as.matrix,SparseNeuroVec-method
+#' @aliases as.matrix,AbstractSparseNeuroVec-method
 #'          as.matrix,NeuroVec-method
 #' @param x The object to convert to a matrix
 #' @param ... Additional arguments
 #' @return A matrix representation of the object
 #' @rdname as.matrix-methods
 #' @export
-setMethod(f="as.matrix", signature=signature(x = "SparseNeuroVec"), def=function(x,...) {
+setMethod(f="as.matrix", signature=signature(x = "AbstractSparseNeuroVec"), def=function(x,...) {
             dsp  <- dim(x)
             nvox <- prod(dsp[1:3])
             nt   <- dsp[4L]
@@ -764,9 +790,10 @@ setMethod(f="as.matrix", signature=signature(x = "SparseNeuroVec"), def=function
             chunk <- 64L
             groups <- split(seq_len(nt), ceiling(seq_len(nt)/chunk))
             for (g in groups) {
-              cols <- lapply(g, function(j) {
+              dat <- temporal_access(x, g)
+              cols <- lapply(seq_along(g), function(ii) {
                 col <- numeric(nvox)
-                col[idx] <- x@data[j, ]
+                col[idx] <- dat[ii, ]
                 col
               })
               out[, g] <- do.call(cbind, cols)
@@ -780,6 +807,7 @@ setMethod(f="as.matrix", signature=signature(x = "SparseNeuroVec"), def=function
 #' @param ... Additional arguments (currently ignored).
 #' @return A dense 4D array with sparse values inserted at mask indices and
 #'   zeros elsewhere.
+#' @rdname as.array-methods
 #' @export
 setMethod("as.array", signature(x = "SparseNeuroVec"), function(x, ...) {
   d <- dim(x)
@@ -800,51 +828,21 @@ setMethod(f="as.list", signature=signature(x = "SparseNeuroVec"), def=function(x
 })
 
 
-#' @importFrom crayon bold blue green red yellow silver
 #' @export
 #' @rdname show-methods
-setMethod("show",
-          signature=signature(object="SparseNeuroVec"),
-          def=function(object) {
-            # Get class name without package prefix
-            class_name <- sub(".*:", "", class(object)[1])
-
-            # Header
-            cat("\n", crayon::bold(crayon::blue(class_name)), " ", sep = "")
-            if (nchar(object@label) > 0) {
-              cat(crayon::silver(paste0("'", object@label, "'")), "\n")
-            } else {
-              cat("\n")
-            }
-
-            # Spatial Info Block
-            cat(crayon::bold("\n+= Spatial Info "), crayon::silver("---------------------------"), "\n", sep = "")
-            dims <- dim(object)
-            cat("| ", crayon::yellow("Dimensions"), "    : ", paste(dims[1:3], collapse = " x "), "\n", sep = "")
-            cat("| ", crayon::yellow("Time Points"), "   : ", dims[4], "\n", sep = "")
-            cat("| ", crayon::yellow("Spacing"), "       : ", paste(spacing(object)[1:3], collapse = " x "), "\n", sep = "")
-            cat("| ", crayon::yellow("Origin"), "        : ", paste(round(origin(object)[1:3], 2), collapse = " x "), "\n", sep = "")
-
-            # Sparse-specific Info Block
-            card <- length(object@map@indices)
-            cat(crayon::bold("\n+- Sparse Info  "), crayon::silver("----------------------------"), "\n", sep = "")
-            cat("| ", crayon::yellow("Cardinality"), "   : ", card, "\n", sep = "")
-
-            # Memory Usage Block
-            mem_size <- object.size(object)
-            size_str <- if (mem_size < 1024) {
-              paste0(round(mem_size, 2), " B")
-            } else if (mem_size < 1024^2) {
-              paste0(round(mem_size/1024, 2), " KB")
-            } else if (mem_size < 1024^3) {
-              paste0(round(mem_size/1024^2, 2), " MB")
-            } else {
-              paste0(round(mem_size/1024^3, 2), " GB")
-            }
-            cat(crayon::bold("\n+= Memory Usage "), crayon::silver("--------------------------"), "\n", sep = "")
-            cat("  ", crayon::yellow("Size"), "          : ", size_str, "\n", sep = "")
-            cat("\n")
-          })
+setMethod("show", "SparseNeuroVec", function(object) {
+  d <- dim(object)
+  class_name <- sub(".*:", "", class(object)[1])
+  show_header(class_name, format_mem(object))
+  show_rule("Spatial")
+  show_field("Dimensions", paste(d[1:3], collapse = " x "))
+  show_field("Time Points", d[4])
+  show_field("Spacing", paste(spacing(object)[1:3], collapse = " x "))
+  show_field("Origin", paste(round(origin(object)[1:3], 2), collapse = ", "))
+  show_rule("Sparse")
+  show_field("Cardinality", length(object@map@indices))
+  if (nchar(object@label) > 0) show_field("Label", object@label)
+})
 
 #' @rdname mask-methods
 #' @export

@@ -33,6 +33,7 @@ NULL
 #'
 #' # Read first 100 voxels
 #' data <- read_elements(reader, 100)
+#' close(reader)
 #'
 #'
 #' @seealso
@@ -56,8 +57,9 @@ setMethod("dim", "FileMetaInfo", function(x) x@dims)
 #' @rdname data_reader-methods
 setMethod("data_reader", "NIFTIMetaInfo",
   function(x, offset = 0) {
-    assert_that(is.numeric(offset) && length(offset) == 1,
-                msg = "'offset' must be a single numeric value")
+    if (!is.numeric(offset) || length(offset) != 1) {
+      cli::cli_abort("{.arg offset} must be a single numeric value.")
+    }
 
     total_offset <- x@data_offset + offset
 
@@ -93,8 +95,9 @@ setMethod("data_reader", "NIFTIMetaInfo",
 #' @rdname data_reader-methods
 setMethod("data_reader", "AFNIMetaInfo",
   function(x, offset = 0) {
-    assert_that(is.numeric(offset) && length(offset) == 1,
-                msg = "'offset' must be a single numeric value")
+    if (!is.numeric(offset) || length(offset) != 1) {
+      cli::cli_abort("{.arg offset} must be a single numeric value.")
+    }
 
     total_offset <- x@data_offset + offset
 
@@ -164,11 +167,13 @@ setMethod("trans", "NIFTIMetaInfo",
 #' @noRd
 niftiDim <- function(nifti_header) {
   dimarray <- nifti_header$dimensions
-  assert_that(is.numeric(dimarray),
-              msg = "Invalid dimension array in NIFTI header")
+  if (!is.numeric(dimarray)) {
+    cli::cli_abort("Invalid dimension array in NIFTI header: must be numeric.")
+  }
   lastidx <- min(which(dimarray == 1)) - 1
-  assert_that(lastidx >= 1,
-              msg = "Invalid dimension specification in NIFTI header")
+  if (lastidx < 1) {
+    cli::cli_abort("Invalid dimension specification in NIFTI header.")
+  }
   dimarray[2:lastidx]
 }
 
@@ -224,7 +229,6 @@ niftiDim <- function(nifti_header) {
 #' \code{\linkS4class{NIFTIMetaInfo}}, \code{\linkS4class{AFNIMetaInfo}}
 #'
 #' @importFrom methods new
-#' @importFrom assertthat assert_that
 #'
 #' @export
 MetaInfo <- function(Dim, spacing, origin = rep(0, length(spacing)),
@@ -232,19 +236,23 @@ MetaInfo <- function(Dim, spacing, origin = rep(0, length(spacing)),
                     spatial_axes = OrientationList3D$AXIAL_LPI,
                     additional_axes = NullAxis) {
 
-  assert_that(is.numeric(Dim) && all(Dim > 0) && all(Dim == floor(Dim)),
-              msg = "'Dim' must be a vector of positive integers")
+  if (!is.numeric(Dim) || !all(Dim > 0) || !all(Dim == floor(Dim))) {
+    cli::cli_abort("{.arg Dim} must be a vector of positive integers.")
+  }
 
-  assert_that(is.numeric(spacing) && all(spacing > 0),
-              msg = "'spacing' must be a vector of positive numbers")
+  if (!is.numeric(spacing) || !all(spacing > 0)) {
+    cli::cli_abort("{.arg spacing} must be a vector of positive numbers.")
+  }
 
-  assert_that(is.numeric(origin) && all(is.finite(origin)),
-              msg = "'origin' must be a vector of finite numbers")
+  if (!is.numeric(origin) || !all(is.finite(origin))) {
+    cli::cli_abort("{.arg origin} must be a vector of finite numbers.")
+  }
 
   # Validate data type
   valid_types <- c("BYTE", "SHORT", "INT", "FLOAT", "DOUBLE")
-  assert_that(data_type %in% valid_types,
-              msg = paste("'data_type' must be one of:", paste(valid_types, collapse = ", ")))
+  if (!data_type %in% valid_types) {
+    cli::cli_abort("{.arg data_type} must be one of {.val {valid_types}}, not {.val {data_type}}.")
+  }
 
   # Create object
   new("MetaInfo",
@@ -511,6 +519,8 @@ read_header <- function(file_name) {
   read_meta_info(desc, file_name)
 }
 
+#' @name as
+#' @rdname as-methods
 #' @export
 setAs(from="MetaInfo", to="NIFTIMetaInfo", def=function(from) {
   if (inherits(from, "NIFTIMetaInfo")) {

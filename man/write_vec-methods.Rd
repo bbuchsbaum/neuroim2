@@ -2,6 +2,10 @@
 % Please edit documentation in R/all_generic.R, R/neurovec.R
 \name{write_vec}
 \alias{write_vec}
+\alias{write_vec,NeuroHyperVec,character,missing,missing-method}
+\alias{write_vec,NeuroHyperVec,character,character,missing-method}
+\alias{write_vec,NeuroHyperVec,character,missing,character-method}
+\alias{write_vec,NeuroHyperVec,character,missing,character,ANY-method}
 \alias{write_vec,ROIVec,character,missing,missing-method}
 \alias{write_vec,NeuroVec,character,missing,missing-method}
 \alias{write_vec,NeuroVec,character,character,missing-method}
@@ -10,6 +14,12 @@
 \title{Write a 4d image vector to disk}
 \usage{
 write_vec(x, file_name, format, data_type, ...)
+
+\S4method{write_vec}{NeuroHyperVec,character,missing,missing}(x, file_name)
+
+\S4method{write_vec}{NeuroHyperVec,character,character,missing}(x, file_name, format, data_type, ...)
+
+\S4method{write_vec}{NeuroHyperVec,character,missing,character}(x, file_name, data_type)
 
 \S4method{write_vec}{ROIVec,character,missing,missing}(x, file_name)
 

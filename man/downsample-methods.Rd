@@ -3,6 +3,7 @@
 \name{downsample}
 \alias{downsample}
 \alias{downsample,DenseNeuroVec-method}
+\alias{downsample,SparseNeuroVec-method}
 \alias{downsample,NeuroVec-method}
 \alias{downsample,DenseNeuroVol-method}
 \alias{downsample,NeuroVol-method}
@@ -11,6 +12,8 @@
 downsample(x, ...)
 
 \S4method{downsample}{DenseNeuroVec}(x, spacing = NULL, factor = NULL, outdim = NULL, method = "box")
+
+\S4method{downsample}{SparseNeuroVec}(x, spacing = NULL, factor = NULL, outdim = NULL, method = "box")
 
 \S4method{downsample}{NeuroVec}(x, spacing = NULL, factor = NULL, outdim = NULL, method = "box")
 

@@ -9,7 +9,6 @@ NULL
 #' @description Methods for applying spatial filters to neuroimaging data
 NULL
 
-#' @importFrom assertthat assert_that
 #' @importFrom methods new
 #' @importFrom stats dnorm
 NULL
@@ -53,15 +52,19 @@ NULL
 #'
 #' @export
 gaussian_blur <- function(vol, mask, sigma = 2, window = 1) {
-  assert_that(inherits(vol, "NeuroVol"),
-              msg = "vol must be a NeuroVol object")
-  assert_that(window >= 1,
-              msg = "window must be >= 1")
-  assert_that(sigma > 0,
-              msg = "sigma must be positive")
+  if (!inherits(vol, "NeuroVol")) {
+    cli::cli_abort("{.arg vol} must be a {.cls NeuroVol} object.")
+  }
+  if (window < 1) {
+    cli::cli_abort("{.arg window} must be >= 1, not {.val {window}}.")
+  }
+  if (sigma <= 0) {
+    cli::cli_abort("{.arg sigma} must be positive, not {.val {sigma}}.")
+  }
   if (!missing(mask)) {
-    assert_that(inherits(mask, "NeuroVol"),
-                msg = "mask must be a NeuroVol object")
+    if (!inherits(mask, "NeuroVol")) {
+      cli::cli_abort("{.arg mask} must be a {.cls NeuroVol} object.")
+    }
   }
 
   if (missing(mask)) {
@@ -126,12 +129,15 @@ gaussian_blur <- function(vol, mask, sigma = 2, window = 1) {
 #'
 #' @export
 guided_filter <- function(vol, radius = 4, epsilon = 0.7^2) {
-  assert_that(inherits(vol, "NeuroVol"),
-              msg = "vol must be a NeuroVol object")
-  assert_that(radius >= 1,
-              msg = "radius must be >= 1")
-  assert_that(epsilon > 0,
-              msg = "epsilon must be positive")
+  if (!inherits(vol, "NeuroVol")) {
+    cli::cli_abort("{.arg vol} must be a {.cls NeuroVol} object.")
+  }
+  if (radius < 1) {
+    cli::cli_abort("{.arg radius} must be >= 1, not {.val {radius}}.")
+  }
+  if (epsilon <= 0) {
+    cli::cli_abort("{.arg epsilon} must be positive, not {.val {epsilon}}.")
+  }
 
   mask_idx <- which(vol !=0)
   mean_I = box_blur(vol, mask_idx, radius)
@@ -172,12 +178,19 @@ guided_filter <- function(vol, radius = 4, epsilon = 0.7^2) {
 #'
 #' @export
 bilateral_filter <- function(vol, mask, spatial_sigma=2, intensity_sigma=1, window=1) {
-  assert_that(window >= 1)
-  assert_that(spatial_sigma > 0)
-  assert_that(intensity_sigma > 0)
+  if (window < 1) {
+    cli::cli_abort("{.arg window} must be >= 1, not {.val {window}}.")
+  }
+  if (spatial_sigma <= 0) {
+    cli::cli_abort("{.arg spatial_sigma} must be positive, not {.val {spatial_sigma}}.")
+  }
+  if (intensity_sigma <= 0) {
+    cli::cli_abort("{.arg intensity_sigma} must be positive, not {.val {intensity_sigma}}.")
+  }
   if (!missing(mask)) {
-    assert_that(inherits(mask, "NeuroVol"),
-                msg = "mask must be a NeuroVol object")
+    if (!inherits(mask, "NeuroVol")) {
+      cli::cli_abort("{.arg mask} must be a {.cls NeuroVol} object.")
+    }
   }
 
   if (missing(mask)) {
@@ -212,17 +225,26 @@ bilateral_filter <- function(vol, mask, spatial_sigma=2, intensity_sigma=1, wind
 #' out <- bilateral_filter_vec(vec,brain_mask)
 #' @noRd
 bilateral_filter_vec <- function(vec, mask, spatial_sigma=2, intensity_sigma=1, window=1) {
-  assert_that(inherits(vec, "NeuroVec"))
-  assert_that(window >= 1)
-  assert_that(spatial_sigma > 0)
-  assert_that(intensity_sigma > 0)
+  if (!inherits(vec, "NeuroVec")) {
+    cli::cli_abort("{.arg vec} must be a {.cls NeuroVec} object.")
+  }
+  if (window < 1) {
+    cli::cli_abort("{.arg window} must be >= 1, not {.val {window}}.")
+  }
+  if (spatial_sigma <= 0) {
+    cli::cli_abort("{.arg spatial_sigma} must be positive, not {.val {spatial_sigma}}.")
+  }
+  if (intensity_sigma <= 0) {
+    cli::cli_abort("{.arg intensity_sigma} must be positive, not {.val {intensity_sigma}}.")
+  }
 
   if (missing(mask)) {
     mask.idx <- seq_len(prod(dim(vec)[1:3]))
     target_space <- space(vec[[1]])
   } else {
-    assert_that(inherits(mask, "NeuroVol"),
-                msg = "mask must be a NeuroVol object")
+    if (!inherits(mask, "NeuroVol")) {
+      cli::cli_abort("{.arg mask} must be a {.cls NeuroVol} object.")
+    }
     mask.idx <- which(mask!=0)
     target_space <- space(mask)
   }
@@ -318,25 +340,42 @@ bilateral_filter_4d <- function(vec,
                                 temporal_window = 1,
                                 temporal_spacing = 1) {
 
-  assert_that(inherits(vec, "NeuroVec"), msg = "vec must be a NeuroVec object")
-  assert_that(is.numeric(spatial_window) && spatial_window >= 1)
-  assert_that(is.numeric(temporal_window) && temporal_window >= 0)
-  assert_that(spatial_sigma > 0)
-  assert_that(intensity_sigma > 0)
-  assert_that(temporal_sigma > 0)
-  assert_that(temporal_spacing > 0)
+  if (!inherits(vec, "NeuroVec")) {
+    cli::cli_abort("{.arg vec} must be a {.cls NeuroVec} object.")
+  }
+  if (!is.numeric(spatial_window) || spatial_window < 1) {
+    cli::cli_abort("{.arg spatial_window} must be a numeric value >= 1, not {.val {spatial_window}}.")
+  }
+  if (!is.numeric(temporal_window) || temporal_window < 0) {
+    cli::cli_abort("{.arg temporal_window} must be a numeric value >= 0, not {.val {temporal_window}}.")
+  }
+  if (spatial_sigma <= 0) {
+    cli::cli_abort("{.arg spatial_sigma} must be positive, not {.val {spatial_sigma}}.")
+  }
+  if (intensity_sigma <= 0) {
+    cli::cli_abort("{.arg intensity_sigma} must be positive, not {.val {intensity_sigma}}.")
+  }
+  if (temporal_sigma <= 0) {
+    cli::cli_abort("{.arg temporal_sigma} must be positive, not {.val {temporal_sigma}}.")
+  }
+  if (temporal_spacing <= 0) {
+    cli::cli_abort("{.arg temporal_spacing} must be positive, not {.val {temporal_spacing}}.")
+  }
 
   # Determine mask and target space
   if (missing(mask)) {
     mask.idx <- seq_len(prod(dim(vec)[1:3]))
     target_space <- space(vec)
   } else {
-    assert_that(inherits(mask, "NeuroVol") || inherits(mask, "LogicalNeuroVol"),
-                msg = "mask must be a NeuroVol/LogicalNeuroVol")
-    assert_that(all(dim(mask) == dim(vec)[1:3]),
-                msg = "mask must match spatial dims of vec")
-    assert_that(all(spacing(mask) == spacing(vec)[1:3]),
-                msg = "mask and vec must have identical spatial spacing")
+    if (!inherits(mask, "NeuroVol") && !inherits(mask, "LogicalNeuroVol")) {
+      cli::cli_abort("{.arg mask} must be a {.cls NeuroVol} or {.cls LogicalNeuroVol} object.")
+    }
+    if (!all(dim(mask) == dim(vec)[1:3])) {
+      cli::cli_abort("{.arg mask} spatial dimensions {.val {dim(mask)}} must match spatial dims of {.arg vec} {.val {dim(vec)[1:3]}}.")
+    }
+    if (!all(spacing(mask) == spacing(vec)[1:3])) {
+      cli::cli_abort("{.arg mask} and {.arg vec} must have identical spatial spacing.")
+    }
     mask.idx <- which(mask != 0)
     # Keep original 4D space
     target_space <- space(vec)
@@ -381,17 +420,29 @@ laplace_enhance <- function(vol, mask, k = 2, patch_size = 3, search_radius = 2,
                           h = 0.7, mapping_params = NULL,
                           use_normalization_free = TRUE) {
 
-  assert_that(inherits(vol, "NeuroVol"))
-  assert_that(k >= 1)
-  assert_that(patch_size >= 3 && patch_size %% 2 == 1)
-  assert_that(search_radius >= 1)
-  assert_that(h > 0)
+  if (!inherits(vol, "NeuroVol")) {
+    cli::cli_abort("{.arg vol} must be a {.cls NeuroVol} object.")
+  }
+  if (k < 1) {
+    cli::cli_abort("{.arg k} must be >= 1, not {.val {k}}.")
+  }
+  if (patch_size < 3 || patch_size %% 2 != 1) {
+    cli::cli_abort("{.arg patch_size} must be an odd integer >= 3, not {.val {patch_size}}.")
+  }
+  if (search_radius < 1) {
+    cli::cli_abort("{.arg search_radius} must be >= 1, not {.val {search_radius}}.")
+  }
+  if (h <= 0) {
+    cli::cli_abort("{.arg h} must be positive, not {.val {h}}.")
+  }
 
   # Create default mask if not provided
   if (missing(mask)) {
     mask <- LogicalNeuroVol(array(TRUE, dim(vol)), space(vol))
   } else {
-    assert_that(inherits(mask, "LogicalNeuroVol"))
+    if (!inherits(mask, "LogicalNeuroVol")) {
+      cli::cli_abort("{.arg mask} must be a {.cls LogicalNeuroVol} object.")
+    }
   }
 
   # Call C++ implementation

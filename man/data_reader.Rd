@@ -40,6 +40,7 @@ reader <- data_reader(meta, offset = 0)
 
 # Read first 100 voxels
 data <- read_elements(reader, 100)
+close(reader)
 
 
 }

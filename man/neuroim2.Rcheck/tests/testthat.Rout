@@ -1,0 +1,66 @@
+
+R version 4.5.1 (2025-06-13) -- "Great Square Root"
+Copyright (C) 2025 The R Foundation for Statistical Computing
+Platform: aarch64-apple-darwin20
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(testthat)
+Warning message:
+package 'testthat' was built under R version 4.5.2 
+> library(neuroim2)
+Loading required package: Matrix
+
+Attaching package: 'neuroim2'
+
+The following object is masked from 'package:base':
+
+    scale
+
+> 
+> test_check("neuroim2")
+[ FAIL 0 | WARN 2 | SKIP 58 | PASS 1091 ]
+
+══ Skipped tests (58) ══════════════════════════════════════════════════════════
+• On CRAN (57): 'test-cgb.R:2:3', 'test-cgb.R:45:3', 'test-cgb.R:93:3',
+  'test-cgb.R:118:3', 'test-cgb.R:143:3', 'test-clusteredneurovol.R:5:3',
+  'test-clusteredneurovol.R:35:3', 'test-clusteredneurovol.R:50:3',
+  'test-clusteredneurovol.R:67:3', 'test-clusteredneurovol.R:86:3',
+  'test-clusteredneurovol.R:102:3', 'test-clusteredneurovol.R:116:3',
+  'test-downsample.R:5:3', 'test-downsample.R:23:3', 'test-downsample.R:63:3',
+  'test-downsample.R:79:3', 'test-downsample.R:106:3',
+  'test-downsample.R:228:3', 'test-downsample.R:245:3',
+  'test-downsample.R:284:3', 'test-downsample.R:299:3',
+  'test-downsample.R:326:3', 'test-filebacked.R:50:3',
+  'test-filebacked.R:116:3', 'test-imageproc.R:5:3', 'test-imageproc.R:19:3',
+  'test-neurovec.R:121:3', 'test-nifti-extensions.R:146:3',
+  'test-nifti-roundtrip.R:62:3', 'test-nifti-roundtrip.R:76:3',
+  'test-oblique-regression.R:6:3', 'test-oblique-regression.R:22:3',
+  'test-oblique-regression.R:35:3', 'test-oblique-regression.R:45:3',
+  'test-oblique-regression.R:60:3', 'test-plot-snapshots.R:6:1',
+  'test-plot-snapshots.R:16:1', 'test-plot-snapshots.R:25:1',
+  'test-plot-snapshots.R:34:1', 'test-plot-snapshots.R:44:1',
+  'test-plot-snapshots.R:54:1', 'test-plot-snapshots.R:65:1',
+  'test-resample-to.R:2:3', 'test-resample.R:8:3', 'test-resample.R:22:3',
+  'test-searchlight.R:20:3', 'test-searchlight.R:40:3', 'test-simulate.R:18:3',
+  'test-simulate.R:52:3', 'test-spatfilter.R:6:3', 'test-spatfilter.R:21:3',
+  'test-spatfilter.R:33:3', 'test-vignette-neuro-vectors.R:4:3',
+  'test-vignette-pipelines.R:6:3', 'test-vignette-pipelines.R:27:3',
+  'test-vignette-pipelines.R:52:3', 'test-vignette-roi.R:6:3'
+• empty test (1):
+
+[ FAIL 0 | WARN 2 | SKIP 58 | PASS 1091 ]
+> 
+> proc.time()
+   user  system elapsed 
+  45.72    1.12   47.41 

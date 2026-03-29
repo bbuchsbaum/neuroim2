@@ -3,7 +3,6 @@ NULL
 #' @include all_generic.R
 NULL
 #' @importFrom methods new
-#' @importFrom assertthat assert_that
 NULL
 
 
@@ -24,8 +23,9 @@ NULL
 #'
 #' @export
 ROICoords <- function(coords) {
-  assert_that(is.matrix(coords) && ncol(coords) == 3,
-              msg = "coords must be a matrix with 3 columns (x,y,z)")
+  if (!is.matrix(coords) || ncol(coords) != 3) {
+    cli::cli_abort("{.arg coords} must be a matrix with 3 columns (x,y,z).")
+  }
   new("ROICoords", coords=coords)
 }
 
@@ -50,10 +50,12 @@ ROICoords <- function(coords) {
 #'
 #' @export
 ROIVol <- function(space, coords, data) {
-  assert_that(is.matrix(coords) && ncol(coords) == 3,
-              msg = "coords must be a matrix with 3 columns (x,y,z)")
-  assert_that(length(data) == nrow(coords),
-              msg = "length of data must match number of coordinates")
+  if (!is.matrix(coords) || ncol(coords) != 3) {
+    cli::cli_abort("{.arg coords} must be a matrix with 3 columns (x,y,z).")
+  }
+  if (length(data) != nrow(coords)) {
+    cli::cli_abort("Length of {.arg data} ({length(data)}) must match number of coordinates ({nrow(coords)}).")
+  }
   new("ROIVol", data, space=space, coords=coords)
 }
 
@@ -85,6 +87,7 @@ ROIVol <- function(space, coords, data) {
 #' @param ... Additional arguments passed to methods
 #' @param drop Whether to drop dimensions of length 1
 #' @return A subset of the input object, with dimensions depending on the indexing and the `drop` parameter.
+#' @rdname extract-methods
 #' @export
 setMethod(f="[", signature=signature(x = "ROIVol", i = "numeric", j = "missing"),
           def=function (x, i, j, k, ..., drop=TRUE) {
@@ -102,6 +105,7 @@ setMethod(f="[", signature=signature(x = "ROIVol", i = "logical", j = "missing")
 )
 
 
+#' @rdname extract-methods
 #' @export
 setMethod(f="[", signature=signature(x = "ROIVol", i = "ROICoords", j = "missing"),
           def=function (x, i, j, k, ..., drop=TRUE) {
@@ -110,6 +114,7 @@ setMethod(f="[", signature=signature(x = "ROIVol", i = "ROICoords", j = "missing
 )
 
 
+#' @rdname extract-methods
 #' @export
 setMethod(f="[", signature=signature(x = "ROIVol", i = "matrix", j = "missing"),
           def=function (x, i, j, k, ..., drop=TRUE) {
@@ -121,6 +126,7 @@ setMethod(f="[", signature=signature(x = "ROIVol", i = "matrix", j = "missing"),
 )
 
 
+#' @rdname extract-methods
 #' @export
 setMethod(f="[", signature=signature(x = "ROIVol", i = "missing", j = "missing"),
           def=function (x, i, j, k, ..., drop=TRUE) {
@@ -129,6 +135,7 @@ setMethod(f="[", signature=signature(x = "ROIVol", i = "missing", j = "missing")
 )
 
 
+#' @rdname extract-methods
 #' @export
 setMethod(f="[", signature=signature(x = "ROIVol", i = "missing", j = "numeric"),
           def=function (x, i, j, k, ..., drop=TRUE) {
@@ -137,6 +144,7 @@ setMethod(f="[", signature=signature(x = "ROIVol", i = "missing", j = "numeric")
 )
 
 
+#' @rdname extract-methods
 #' @export
 setMethod(f="[", signature=signature(x = "ROIVol", i = "numeric", j = "numeric"),
           def=function (x, i, j, k, ..., drop=TRUE) {
@@ -145,6 +153,7 @@ setMethod(f="[", signature=signature(x = "ROIVol", i = "numeric", j = "numeric")
 )
 
 
+#' @rdname extract-methods
 #' @export
 setMethod(f="[", signature=signature(x = "ROIVol", i = "logical", j = "numeric"),
           def=function (x, i, j, k, ..., drop=TRUE) {
@@ -153,6 +162,7 @@ setMethod(f="[", signature=signature(x = "ROIVol", i = "logical", j = "numeric")
 )
 
 
+#' @rdname extract-methods
 #' @export
 setMethod(f="[", signature=signature(x = "ROIVol", i = "ROICoords", j = "numeric"),
           def=function (x, i, j, k, ..., drop=TRUE) {
@@ -161,6 +171,7 @@ setMethod(f="[", signature=signature(x = "ROIVol", i = "ROICoords", j = "numeric
 )
 
 
+#' @rdname extract-methods
 #' @export
 setMethod(f="[", signature=signature(x = "ROIVol", i = "matrix", j = "numeric"),
           def=function (x, i, j, k, ..., drop=TRUE) {
@@ -247,21 +258,12 @@ setMethod(f="coords", signature=signature(x = "ROIVol"),
 
 #' @export
 #' @rdname show-methods
-setMethod(f="show", signature=signature(object = "ROIVol"),
-          def=function(object) {
-            cat("\n", crayon::bold(crayon::blue("ROIVol Object")), "\n\n")
-            cat(crayon::bold(crayon::yellow("Properties:")), "\n")
-            cat("  ", crayon::silver("Dimensions:"), " ",
-                paste(dim(object), collapse=" x "), "\n", sep="")
-            cat("  ", crayon::silver("ROI Points:"), " ",
-                crayon::green(format(length(object), big.mark=",")), "\n", sep="")
-
-            # Value range
-            val_range <- range(object, na.rm=TRUE)
-            cat("  ", crayon::silver("Value Range:"), " [",
-                crayon::blue(sprintf("%.2f", val_range[1])), ", ",
-                crayon::blue(sprintf("%.2f", val_range[2])), "]\n", sep="")
-          })
+setMethod("show", "ROIVol", function(object) {
+  show_header("ROIVol", paste(length(object@.Data), "voxels"))
+  show_field("Coords", paste(nrow(coords(object)), "x 3"))
+  rng <- range(object@.Data, na.rm = TRUE)
+  show_field("Range", sprintf("[%.3f, %.3f]", rng[1], rng[2]))
+})
 
 
 #' @rdname show-methods
@@ -291,6 +293,7 @@ setMethod(f="length", signature=signature(x = "ROICoords"),
           })
 
 
+#' @rdname extract-methods
 #' @export
 setMethod("[", signature(x="ROICoords", i="numeric", j="missing", drop="ANY"),
           function(x, i, j, ..., drop) {
@@ -299,6 +302,7 @@ setMethod("[", signature(x="ROICoords", i="numeric", j="missing", drop="ANY"),
 
 
 
+#' @rdname extract-methods
 #' @export
 setMethod("[", signature(x="ROIVol", i="numeric", j="missing", drop="ANY"),
           function (x, i, j, ..., drop) {
@@ -654,14 +658,22 @@ make_spherical_grid <- function(bvol, centroid, radius, use_cpp=TRUE) {
 spherical_roi <- function(bvol, centroid, radius, fill=NULL, nonzero=FALSE, use_cpp=TRUE) {
   # If centroid is provided as a 1x3 matrix, drop to vector
   if (is.matrix(centroid)) {
-    assertthat::assert_that(ncol(centroid) == 3 & nrow(centroid) == 1)
+    if (ncol(centroid) != 3 || nrow(centroid) != 1) {
+      cli::cli_abort("{.arg centroid} matrix must have exactly 1 row and 3 columns.")
+    }
     centroid <- drop(centroid)
   }
 
   vdim <- dim(bvol)
-  assertthat::assert_that(length(centroid) == 3)
-  assertthat::assert_that(all(centroid > 0))
-  assertthat::assert_that(centroid[1] <= vdim[1] && centroid[2] <= vdim[2] && centroid[3] <= vdim[3])
+  if (length(centroid) != 3) {
+    cli::cli_abort("{.arg centroid} must have length 3, not {length(centroid)}.")
+  }
+  if (!all(centroid > 0)) {
+    cli::cli_abort("All {.arg centroid} values must be positive.")
+  }
+  if (centroid[1] > vdim[1] || centroid[2] > vdim[2] || centroid[3] > vdim[3]) {
+    cli::cli_abort("{.arg centroid} ({.val {centroid}}) exceeds volume dimensions ({.val {vdim[1:3]}}).")
+  }
 
   if (is.null(fill) && is(bvol, "NeuroSpace")) {
     fill <- 1
@@ -773,6 +785,7 @@ roi_surface_matrix <- function(mat, refspace, indices, coords) {
 #' @name as
 #' @param from An object of class \code{ROIVec} to be coerced to a \code{matrix}.
 #' @return A \code{matrix} obtained by coercing the \code{ROIVec} object.
+#' @rdname as.matrix-methods
 #' @export
 setAs(from="ROIVec", to="matrix", function(from) {
   ind <- indices(from)
@@ -933,56 +946,22 @@ setMethod(f="coords", signature=signature(x="ROICoords"),
 
 
 
-#' @importFrom crayon bold blue green red yellow silver
 #' @export
 #' @rdname show-methods
-setMethod("show", signature=signature(object = "ROIVec"),
-          function (object) {
-            # Calculate statistics
-            n_points <- ncol(object@.Data)   # voxels
-            n_features <- nrow(object@.Data) # features/time
-            total_elements <- n_points * n_features
-            mem_size <- format(object.size(object), units="auto")
-            centroid <- colMeans(coords(object))
-            val_range <- range(object@.Data, na.rm=TRUE)
-
-            # Header
-            cat("\n", crayon::bold(crayon::blue("=== ROIVec Object ===")), "\n\n")
-
-            # Basic Information
-            cat(crayon::bold(crayon::yellow("- Structure")), "\n")
-            cat("  ", crayon::silver("Points:"), "     ",
-                crayon::green(format(n_points, big.mark=",")), "\n", sep="")
-            cat("  ", crayon::silver("Features:"), "   ",
-                crayon::green(n_features),
-                " (", format(total_elements, big.mark=","), " total)", "\n", sep="")
-            cat("  ", crayon::silver("Memory:"), "     ",
-                crayon::green(mem_size), "\n", sep="")
-
-            # Spatial Information
-            cat("\n", crayon::bold(crayon::yellow("- Spatial Properties")), "\n", sep="")
-            cat("  ", crayon::silver("Parent Space:"), " ",
-                paste(dim(object@space), collapse=" x "), "\n", sep="")
-            cat("  ", crayon::silver("Centroid:"), "     [",
-                paste(sprintf("%.1f", centroid), collapse=", "),
-                crayon::silver(" mm]"), "\n", sep="")
-
-            # Data Properties
-            cat("\n", crayon::bold(crayon::yellow("- Value Properties")), "\n", sep="")
-            cat("  ", crayon::silver("Range:"), "    [",
-                crayon::blue(sprintf("%.2f", val_range[1])), ", ",
-                crayon::blue(sprintf("%.2f", val_range[2])), "]", "\n", sep="")
-
-            # Footer with usage hints
-            cat(crayon::silver("\n======================================\n"))
-            cat("\n", crayon::bold("Access Methods:"), "\n")
-            cat(" ", crayon::silver("."), " Get Points:  ",
-                crayon::blue("coords(object)"), "\n")
-            cat(" ", crayon::silver("."), " Get Values:  ",
-                crayon::blue("as.matrix(object)"), "\n")
-            cat(" ", crayon::silver("."), " Subset:      ",
-                crayon::blue("object[1:10, ]"), "\n\n")
-          })
+setMethod("show", "ROIVec", function(object) {
+  np <- ncol(object@.Data)
+  nf <- nrow(object@.Data)
+  show_header("ROIVec", paste(np, "voxels x", nf, "features"))
+  show_rule("Structure")
+  show_field("Voxels", np)
+  show_field("Features", nf)
+  show_field("Size", format_mem(object))
+  show_rule("Data")
+  rng <- range(object@.Data, na.rm = TRUE)
+  show_field("Range", sprintf("[%.3f, %.3f]", rng[1], rng[2]))
+  nas <- sum(is.na(object@.Data))
+  if (nas > 0) show_field("NAs", format(nas, big.mark = ","))
+})
 
 
 
@@ -1240,6 +1219,7 @@ spherical_roi_set <- function(bvol, centroids, radius, fill=NULL, nonzero=FALSE)
 # }
 
 
+#' @rdname extract-methods
 #' @export
 setMethod("[", signature(x="NeuroVol", i="ROICoords", j="missing", drop="ANY"),
           function(x, i, j, ..., drop) {

@@ -1,0 +1,191 @@
+* using log directory ‘/Users/bbuchsbaum/code/neuroim2/man/neuroim2.Rcheck’
+* using R version 4.5.1 (2025-06-13)
+* using platform: aarch64-apple-darwin20
+* R was compiled by
+    Apple clang version 16.0.0 (clang-1600.0.26.6)
+    GNU Fortran (GCC) 14.2.0
+* running under: macOS Sonoma 14.3
+* using session charset: UTF-8
+* using options ‘--no-manual --no-vignettes’
+* checking for file ‘neuroim2/DESCRIPTION’ ... OK
+* checking extension type ... Package
+* this is package ‘neuroim2’ version ‘0.10.0’
+* package encoding: UTF-8
+* checking package namespace information ... OK
+* checking package dependencies ... OK
+* checking if this is a source package ... WARNING
+Subdirectory ‘neuroim2/src’ contains apparent object files/libraries
+  RcppExports.o bilateral_filter_3d.o bilateral_filter_4d.o cgb.o
+  conncomp.o downsample_3d.o downsample_4d.o fast_laplacian_enhance.o
+  indexFuns.o kernel_filter.o neuroim2.so radius_search_3d.o
+Object files/libraries should not be included in a source package.
+
+In addition to the above warning(s), found the following notes:
+
+Found the following apparent object files/libraries:
+  neuroim2.Rcheck/00_pkg_src/neuroim2/src/RcppExports.o
+  neuroim2.Rcheck/00_pkg_src/neuroim2/src/bilateral_filter_3d.o
+  neuroim2.Rcheck/00_pkg_src/neuroim2/src/bilateral_filter_4d.o
+  neuroim2.Rcheck/00_pkg_src/neuroim2/src/cgb.o
+  neuroim2.Rcheck/00_pkg_src/neuroim2/src/conncomp.o
+  neuroim2.Rcheck/00_pkg_src/neuroim2/src/downsample_3d.o
+  neuroim2.Rcheck/00_pkg_src/neuroim2/src/downsample_4d.o
+  neuroim2.Rcheck/00_pkg_src/neuroim2/src/fast_laplacian_enhance.o
+  neuroim2.Rcheck/00_pkg_src/neuroim2/src/indexFuns.o
+  neuroim2.Rcheck/00_pkg_src/neuroim2/src/kernel_filter.o
+  neuroim2.Rcheck/00_pkg_src/neuroim2/src/neuroim2.so
+  neuroim2.Rcheck/00_pkg_src/neuroim2/src/radius_search_3d.o
+  neuroim2.Rcheck/neuroim2/libs/neuroim2.so
+Object files/libraries should not be included in a source package.
+
+Subdirectory ‘.’ seems to contain an installed version of the package.
+* checking if there is a namespace ... OK
+* checking for executable files ... OK
+* checking for hidden files and directories ... NOTE
+Found the following hidden files and directories:
+  ..Rcheck/neuroim2/.DS_Store
+  .DS_Store
+  .RData
+  .Rhistory
+  .Rlib/neuroim2/.DS_Store
+  .ecosystem.yml
+  .github/.gitignore
+  .gitignore
+  atlas/.cards_cache.json
+  inst/.DS_Store
+  ..Rcheck
+  .Rcache
+  .Rlib
+  .Rproj.user
+  .albersdown.bak
+  .claude
+  .git
+  .github
+  .omc
+  .vscode
+  man/.omc
+These were most likely included in error. See section ‘Package
+structure’ in the ‘Writing R Extensions’ manual.
+* checking for portable file names ... NOTE
+Found the following non-portable file path:
+  neuroim2/neuroim2.Rcheck/00_pkg_src/neuroim2/man/sub-AbstractSparseNeuroVec-numeric-numeric-ANY-method.Rd
+
+Tarballs are only required to store paths of up to 100 bytes and cannot
+store those of more than 256 bytes, with restrictions including to 100
+bytes for the final component.
+See section ‘Package structure’ in the ‘Writing R Extensions’ manual.
+* checking for sufficient/correct file permissions ... OK
+* checking whether package ‘neuroim2’ can be installed ... OK
+* used C++ compiler: ‘Homebrew clang version 20.1.8’
+* used SDK: ‘MacOSX14.2.sdk’
+* checking C++ specification ... OK
+* checking installed package size ... OK
+* checking package directory ... OK
+* checking DESCRIPTION meta-information ... NOTE
+Checking should be performed on sources prepared by ‘R CMD build’.
+* checking top-level files ... OK
+* checking for left-over files ... OK
+* checking index information ... OK
+* checking package subdirectories ... WARNING
+Found the following directories with names of check directories:
+  ./..Rcheck
+  ./man/neuroim2.Rcheck
+  ./neuroim2.Rcheck
+Most likely, these were included erroneously.
+* checking code files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... OK
+* checking whether the package can be unloaded cleanly ... OK
+* checking whether the namespace can be loaded with stated dependencies ... OK
+* checking whether the namespace can be unloaded cleanly ... OK
+* checking loading without being on the library search path ... OK
+* checking dependencies in R code ... OK
+* checking S3 generic/method consistency ... OK
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ... NOTE
+show,ClusteredNeuroVec: no visible global function definition for
+  ‘median’
+show,ClusteredNeuroVol: no visible global function definition for
+  ‘median’
+show,NeuroSlice: no visible global function definition for ‘bold’
+show,NeuroSlice: no visible global function definition for ‘blue’
+show,NeuroSlice: no visible global function definition for ‘yellow’
+show,NeuroSlice: no visible global function definition for ‘silver’
+show,NeuroSlice: no visible global function definition for ‘green’
+show,NeuroSlice: no visible global function definition for ‘red’
+Undefined global functions or variables:
+  blue bold green median red silver yellow
+Consider adding
+  importFrom("stats", "median")
+to your NAMESPACE file.
+* checking Rd files ... OK
+* checking Rd metadata ... WARNING
+Rd files with duplicated name 'as':
+  ‘as-methods.Rd’ ‘as.Rd’ ‘as.sparse-methods.Rd’
+Rd files with duplicated alias 'as':
+  ‘as-methods.Rd’ ‘as.Rd’ ‘as.dense-methods.Rd’ ‘as.matrix-methods.Rd’
+  ‘as.sparse-methods.Rd’
+* checking Rd cross-references ... OK
+* checking for missing documentation entries ... OK
+* checking for code/documentation mismatches ... OK
+* checking Rd \usage sections ... WARNING
+Documented arguments not in \usage in Rd file 'as.matrix-methods.Rd':
+  ‘from’
+
+Functions with \usage entries need to have the appropriate \alias
+entries, and all their arguments documented.
+The \usage entries must correspond to syntactically valid R code.
+See chapter ‘Writing R documentation files’ in the ‘Writing R
+Extensions’ manual.
+* checking Rd contents ... OK
+* checking for unstated dependencies in examples ... OK
+* checking LazyData ... INFO
+  'LazyData' is specified without a 'data' directory
+* checking line endings in C/C++/Fortran sources/headers ... NOTE
+Found the following sources/headers not terminated with a newline:
+  src/indexFuns.h
+Some compilers warn on such files.
+* checking line endings in Makefiles ... OK
+* checking compilation flags in Makevars ... OK
+* checking for GNU extensions in Makefiles ... OK
+* checking for portable use of $(BLAS_LIBS) and $(LAPACK_LIBS) ... OK
+* checking use of PKG_*FLAGS in Makefiles ... OK
+* checking compiled code ... OK
+* checking files in ‘vignettes’ ... WARNING
+Files in the 'vignettes' directory but no files in 'inst/doc':
+  ‘ChoosingBackends.Rmd’ ‘ChoosingBackends.html’ ‘Cookbook.Rmd’
+  ‘ImageVolumes.Rmd’ ‘ImageVolumes.html’ ‘NeuroVector.Rmd’
+  ‘NeuroVector.html’ ‘Overview.Rmd’ ‘Overview.html’ ‘Overview.md’
+  ‘Resampling.Rmd’ ‘Resampling.html’ ‘Smoothing.Rmd’ ‘albers.css’
+  ‘albers.js’ ‘clustered-neurovec.Rmd’ ‘clustered-neurovec.html’
+  ‘coordinate-systems.Rmd’ ‘lna-neurovec.Rmd’ ‘pipelines.Rmd’
+  ‘regionOfInterest.Rmd’ ‘regionOfInterest.html’
+  ‘slice-visualization.Rmd’
+* checking examples ... OK
+* checking for unstated dependencies in ‘tests’ ... OK
+* checking tests ... OK
+  Running ‘spelling.R’
+  Running ‘testthat.R’
+* checking for unstated dependencies in vignettes ... OK
+* checking package vignettes ... WARNING
+Directory 'inst/doc' does not exist.
+Package vignettes without corresponding single PDF/HTML:
+  ‘ChoosingBackends.Rmd’
+  ‘Cookbook.Rmd’
+  ‘ImageVolumes.Rmd’
+  ‘NeuroVector.Rmd’
+  ‘Overview.Rmd’
+  ‘Resampling.Rmd’
+  ‘Smoothing.Rmd’
+  ‘clustered-neurovec.Rmd’
+  ‘coordinate-systems.Rmd’
+  ‘lna-neurovec.Rmd’
+  ‘pipelines.Rmd’
+  ‘regionOfInterest.Rmd’
+  ‘slice-visualization.Rmd’
+* checking running R code from vignettes ... SKIPPED
+* checking re-building of vignette outputs ... SKIPPED
+* DONE
+Status: 6 WARNINGs, 5 NOTEs

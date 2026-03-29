@@ -1,3 +1,62 @@
+#' Normalize a mask to a logical array
+#'
+#' Coerces various mask representations into a logical 3D array of the
+#' requested dimensions. Accepts: logical arrays, integer index vectors,
+#' \code{LogicalNeuroVol}, numeric \code{NeuroVol} (thresholded > 0),
+#' logical vectors, or \code{NULL} (all \code{TRUE}).
+#'
+#' @param mask The mask input (see description).
+#' @param target_dim Integer vector of length 3 giving the target dimensions.
+#' @return A logical array of dimension \code{target_dim}.
+#' @keywords internal
+normalize_mask <- function(mask, target_dim) {
+  D <- as.integer(target_dim)
+
+  if (is.null(mask)) {
+    return(array(TRUE, D))
+  }
+
+  # Already a LogicalNeuroVol — extract the array
+
+  if (inherits(mask, "LogicalNeuroVol")) {
+    if (!identical(dim(mask)[1:3], D)) {
+      stop(sprintf("mask dimensions [%s] do not match target [%s]",
+                   paste(dim(mask), collapse = "x"), paste(D, collapse = "x")))
+    }
+    return(as.array(mask))
+  }
+
+  # Numeric NeuroVol — threshold > 0
+  if (inherits(mask, "NeuroVol")) {
+    if (!identical(dim(mask)[1:3], D)) {
+      stop(sprintf("mask dimensions [%s] do not match target [%s]",
+                   paste(dim(mask), collapse = "x"), paste(D, collapse = "x")))
+    }
+    return(as.array(mask) > 0)
+  }
+
+  # Short numeric vector — treat as 1D indices into the volume
+  if (is.vector(mask) && is.numeric(mask) && !is.logical(mask) && length(mask) < prod(D)) {
+    m <- array(FALSE, D)
+    m[mask] <- TRUE
+    return(m)
+  }
+
+  # Array with matching dims
+  if (is.array(mask) && identical(dim(mask), D)) {
+    return(array(as.logical(mask), D))
+  }
+
+  # Flat vector of length prod(D)
+  if (is.vector(mask) && length(mask) == prod(D)) {
+    return(array(as.logical(mask), D))
+  }
+
+  stop(sprintf("Cannot coerce mask of class '%s' (length %d) to logical array [%s]",
+               class(mask)[1], length(mask), paste(D, collapse = "x")))
+}
+
+
 #' @export
 #' @rdname read_columns-methods
 setMethod(f="read_columns", signature=c(x="ColumnReader", column_indices="integer"),
@@ -285,17 +344,22 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 
 
 #' .gridToIndex3D
-#' @importFrom assertthat assert_that
 #' @keywords internal
 #' @noRd
 .gridToIndex3D <- function(dimensions, voxmat) {
-	assert_that(length(dimensions) == 3)
+  if (length(dimensions) != 3) {
+    cli::cli_abort("{.arg dimensions} must have length 3, not {length(dimensions)}.")
+  }
   if (is.vector(voxmat)) {
-    assert_that(length(voxmat) == 3)
+    if (length(voxmat) != 3) {
+      cli::cli_abort("{.arg voxmat} vector must have length 3, not {length(voxmat)}.")
+    }
     voxmat <- matrix(voxmat, 1,3)
   }
 
-  assert_that(ncol(voxmat) == 3)
+  if (ncol(voxmat) != 3) {
+    cli::cli_abort("{.arg voxmat} matrix must have 3 columns, not {ncol(voxmat)}.")
+  }
   gridToIndex3DCpp(dimensions, voxmat)
 
 }
@@ -306,7 +370,9 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 #' @noRd
 .gridToIndex <- function(dimensions, vmat) {
   vmat <- as.matrix(vmat)
-  assert_that(length(dimensions) == ncol(vmat), msg=paste("length(dimensions) not equal to ncol(vmat): ", length(dimensions), "!=", ncol(vmat)))
+  if (length(dimensions) != ncol(vmat)) {
+    cli::cli_abort("length(dimensions) not equal to ncol(vmat): {length(dimensions)} != {ncol(vmat)}.")
+  }
 
 	# D <- Reduce("*", dimensions, accumulate=TRUE)
 	# apply(vmat, 1, function(vox) {
@@ -323,8 +389,12 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 #' @keywords internal
 #' @noRd
 .indexToGrid <- function(idx, array.dim) {
-  assert_that(all(idx > 0 & idx <= prod(array.dim)))
-  assert_that(length(array.dim) <= 5)
+  if (!all(idx > 0 & idx <= prod(array.dim))) {
+    cli::cli_abort("{.arg idx} contains out-of-bounds values (must be in [1, {prod(array.dim)}]).")
+  }
+  if (length(array.dim) > 5) {
+    cli::cli_abort("{.arg array.dim} must have length <= 5, not {length(array.dim)}.")
+  }
   indexToGridCpp(idx, array.dim)
 
 }

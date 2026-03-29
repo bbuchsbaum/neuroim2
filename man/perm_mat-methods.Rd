@@ -2,10 +2,16 @@
 % Please edit documentation in R/all_generic.R, R/axis.R
 \name{perm_mat}
 \alias{perm_mat}
+\alias{perm_mat,AxisSet2D-method}
+\alias{perm_mat,AxisSet3D-method}
 \alias{perm_mat,NeuroSpace-method}
 \title{Extract permutation matrix associated with an image}
 \usage{
 perm_mat(x, ...)
+
+\S4method{perm_mat}{AxisSet2D}(x, ...)
+
+\S4method{perm_mat}{AxisSet3D}(x, ...)
 
 \S4method{perm_mat}{NeuroSpace}(x, ...)
 }
@@ -16,6 +22,10 @@ perm_mat(x, ...)
 }
 \value{
 A numeric N x N \code{matrix} representing the permutation transform, where N is the dimensionality of the image.
+
+A matrix representing the axis directions
+
+A matrix representing the axis directions
 
 A numeric N x N \code{matrix} representing the permutation transform, where N is the dimensionality of the image.
 }

@@ -52,18 +52,20 @@ NULL
 #' \code{\link{sub_vector}} for data access methods
 #'
 #' @importFrom methods new
-#' @importFrom assertthat assert_that
 #'
 #' @export
 FileBackedNeuroVec <- function(file_name, label = basename(file_name)) {
-  assert_that(is.character(file_name) && length(file_name) == 1,
-              msg = "'file_name' must be a single character string")
-  assert_that(file.exists(file_name),
-              msg = paste("File", file_name, "does not exist"))
-  
+  if (!is.character(file_name) || length(file_name) != 1) {
+    cli::cli_abort("{.arg file_name} must be a single character string.")
+  }
+  if (!file.exists(file_name)) {
+    cli::cli_abort("File {.path {file_name}} does not exist.")
+  }
+
   meta <- read_header(file_name)
-  assert_that(length(meta@dims) == 4,
-              msg = "Input data must be 4-dimensional (3D + time)")
+  if (length(meta@dims) != 4) {
+    cli::cli_abort("Input data must be 4-dimensional (3D + time), not {length(meta@dims)}D.")
+  }
   
   sp <- NeuroSpace(meta@dims, meta@spacing, meta@origin,
                    meta@spatial_axes, trans(meta))
@@ -98,11 +100,13 @@ FileBackedNeuroVec <- function(file_name, label = basename(file_name)) {
 setMethod(f = "sub_vector", 
           signature = signature(x = "FileBackedNeuroVec", i = "numeric"),
           def = function(x, i) {
-            assert_that(is.numeric(i) && !any(is.na(i)),
-                        msg = "Index 'i' must be a numeric vector without NA values")
-            assert_that(all(i >= 1) && all(i <= dim(x)[4]),
-                        msg = "Index out of bounds")
-            
+            if (!is.numeric(i) || any(is.na(i))) {
+              cli::cli_abort("{.arg i} must be a numeric vector without NA values.")
+            }
+            if (!all(i >= 1) || !all(i <= dim(x)[4])) {
+              cli::cli_abort("{.arg i} is out of bounds: must be in [1, {dim(x)[4]}].")
+            }
+
             mat <- read_mapped_vols(x@meta, i)
             sp <- add_dim(drop_dim(space(x)), length(i))
             DenseNeuroVec(mat, sp)
@@ -182,10 +186,12 @@ setMethod(
   f = "linear_access",
   signature = signature(x = "FileBackedNeuroVec", i = "numeric"),
   def = function(x, i) {
-    assert_that(is.numeric(i) && !any(is.na(i)),
-                msg = "Index 'i' must be a numeric vector without NA values")
-    assert_that(all(i >= 1) && all(i <= prod(dim(x))),
-                msg = "Index out of bounds")
+    if (!is.numeric(i) || any(is.na(i))) {
+      cli::cli_abort("{.arg i} must be a numeric vector without NA values.")
+    }
+    if (!all(i >= 1) || !all(i <= prod(dim(x)))) {
+      cli::cli_abort("{.arg i} is out of bounds: must be in [1, {prod(dim(x))}].")
+    }
     
     dims <- dim(x)
     spatial_nels <- prod(dims[1:3])

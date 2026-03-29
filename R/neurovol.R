@@ -1,4 +1,3 @@
-#' @importFrom assertthat assert_that
 #' @importFrom Matrix sparseVector
 #' @include all_class.R
 #' @include all_generic.R
@@ -6,7 +5,6 @@ NULL
 
 
 #' @importFrom methods new
-#' @importFrom assertthat assert_that
 NULL
 
 #' NeuroVol: 3D Neuroimaging Volume Class
@@ -69,7 +67,9 @@ DenseNeuroVol <- function(data, space, label="", indices=NULL) {
 
 
 	if (!is.null(indices)) {
-	  assert_that(length(indices) == length(data))
+	  if (length(indices) != length(data)) {
+	    cli::cli_abort("Length of {.arg indices} ({length(indices)}) must equal length of {.arg data} ({length(data)}).")
+	  }
 		newdat <- array(0, dim(space))
 		newdat[indices] <- data
 		data <- newdat
@@ -230,6 +230,7 @@ setAs(from="SparseNeuroVol", to="array", def=function(from) {
 #' @param ... Additional arguments (currently ignored).
 #' @return A dense array with voxel values at their spatial locations and zeros
 #'   elsewhere.
+#' @rdname as.array-methods
 #' @export
 setMethod("as.array", signature(x = "SparseNeuroVol"), function(x, ...) {
   as(x, "array")
@@ -243,10 +244,31 @@ setMethod("as.array", signature(x = "SparseNeuroVol"), function(x, ...) {
 #' @param x A `SparseNeuroVol` instance.
 #' @param mode Optional coercion mode (see [base::as.vector]).
 #' @return A vector of length `prod(dim(x))`.
+#' @rdname as.vector-methods
 #' @export
 setMethod("as.vector", signature(x = "SparseNeuroVol"), function(x, mode = "any") {
   as.vector(as.array(x), mode = mode)
 })
+
+
+#' @export
+#' @rdname show-methods
+setMethod("show", "DenseNeuroVol", function(object) {
+  d <- dim(object)
+  sp <- space(object)
+  show_header("DenseNeuroVol", format_mem(object))
+  show_rule("Spatial")
+  show_field("Dimensions", paste(d, collapse = " x "))
+  show_field("Spacing", paste(round(spacing(sp), 3), collapse = " x "), " mm")
+  show_field("Origin", paste(round(origin(sp), 2), collapse = ", "))
+  show_field("Orientation", safe_axcodes(sp))
+  show_rule("Data")
+  rng <- range(object@.Data, na.rm = TRUE)
+  show_field("Range", sprintf("[%.3f, %.3f]", rng[1], rng[2]))
+  nas <- sum(is.na(object@.Data))
+  if (nas > 0) show_field("NAs", format(nas, big.mark = ","))
+})
+
 
 
 #' Convert SparseNeuroVol to numeric
@@ -277,6 +299,7 @@ setMethod(f="as.numeric", signature=signature(x = "SparseNeuroVol"), def=functio
 #' conversion from \code{\linkS4class{NeuroVol}} to \code{\linkS4class{LogicalNeuroVol}}
 #'
 #' @name as
+#' @rdname as-methods
 #' @export
 setAs(from="NeuroVol", to="LogicalNeuroVol", def=function(from) {
 	LogicalNeuroVol(as.array(from), space(from))
@@ -287,145 +310,59 @@ setAs(from="NeuroVol", to="LogicalNeuroVol", def=function(from) {
 #' conversion from \code{\linkS4class{NeuroVol}} to \code{array}
 #'
 #' @name as
+#' @rdname as-methods
 #' @export
 setAs(from="NeuroVol", to="array", def=function(from) from[,,])
 
 #'
-#' @importFrom crayon bold blue green red yellow silver
 #' @importFrom utils object.size
 #' @export
 #' @rdname show-methods
 setMethod(f="show", signature=signature("NeuroVol"),
           def=function(object) {
-            # Get space information and calculate stats
+            d <- dim(object)
             sp <- space(object)
-            val_range <- range(object, na.rm=TRUE)
-            n_na <- sum(is.na(object))
-            mem_size <- format(object.size(object), units="auto")
-            total_voxels <- prod(dim(object))
-
-            # Header
-            cat("\n", crayon::bold(crayon::blue("=== NeuroVol Object ===")), "\n\n")
-
-            # Basic Information
-            cat(crayon::bold(crayon::yellow("* Basic Information")), "\n")
-            cat("  ", crayon::silver("Type:"), "      ", class(object)[1], "\n", sep="")
-            cat("  ", crayon::silver("Dimensions:"), " ",
-                paste(dim(object), collapse=" x "),
-                " (", crayon::green(mem_size), ")", "\n", sep="")
-            cat("  ", crayon::silver("Total Voxels:"), " ",
-                format(total_voxels, big.mark=","), "\n", sep="")
-
-            # Data Properties
-            cat("\n", crayon::bold(crayon::yellow("* Data Properties")), "\n", sep="")
-            cat("  ", crayon::silver("Value Range:"), " [",
-                crayon::blue(sprintf("%.2f", val_range[1])), ", ",
-                crayon::blue(sprintf("%.2f", val_range[2])), "]", "\n", sep="")
-            if (n_na > 0) {
-                cat("  ", crayon::silver("Missing Values:"), " ",
-                    crayon::red(format(n_na, big.mark=",")), " (",
-                    sprintf("%.1f%%", 100*n_na/total_voxels), ")",
-                    "\n", sep="")
+            class_name <- sub(".*:", "", class(object)[1])
+            show_header(class_name, format_mem(object))
+            show_rule("Spatial")
+            show_field("Dimensions", paste(d, collapse = " x "))
+            show_field("Spacing", paste(round(spacing(sp), 3), collapse = " x "), " mm")
+            show_field("Origin", paste(round(origin(sp), 2), collapse = ", "))
+            show_field("Orientation", safe_axcodes(sp))
+            show_rule("Data")
+            rng <- tryCatch(range(object, na.rm = TRUE), error = function(e) c(NA, NA))
+            if (!anyNA(rng)) {
+              show_field("Range", sprintf("[%.3f, %.3f]", rng[1], rng[2]))
             }
-
-            # Spatial Properties
-            cat("\n", crayon::bold(crayon::yellow("* Spatial Properties")), "\n", sep="")
-            cat("  ", crayon::silver("Spacing:"), " ",
-                paste(sprintf("%.2f", sp@spacing), collapse=" x "),
-                crayon::silver(" mm"), "\n", sep="")
-            cat("  ", crayon::silver("Origin:"), "  ",
-                paste(sprintf("%.1f", sp@origin), collapse=", "),
-                crayon::silver(" mm"), "\n", sep="")
-            cat("  ", crayon::silver("Axes:"), "    ",
-                crayon::green(sp@axes@i@axis), " x ",
-                crayon::green(sp@axes@j@axis), " x ",
-                crayon::green(sp@axes@k@axis), "\n", sep="")
-
-            # Footer with usage hints
-            cat(crayon::silver("\n======================================\n"))
-            cat("\n", crayon::bold("Access Methods:"), "\n")
-            cat(" ", crayon::silver("."), " Get Slice:  ",
-                crayon::blue("slice(object, zlevel=10)"), "\n")
-            cat(" ", crayon::silver("."), " Get Value:  ",
-                crayon::blue("object[i, j, k]"), "\n")
-            cat(" ", crayon::silver("."), " Plot:      ",
-                crayon::blue("plot(object)"),
-                crayon::silver(" # shows multiple slices"), "\n\n")
+            show_field("Voxels", format(prod(d), big.mark = ","))
           })
 
 
-#' @importFrom crayon bold blue green red yellow silver
 #' @importFrom utils object.size
 #' @importFrom Matrix which
 #' @rdname show-methods
 #' @export
 setMethod(f="show", signature=signature("SparseNeuroVol"),
           def=function(object) {
-            # Get space information and calculate stats
+            d <- dim(object)
             sp <- space(object)
-            val_range <- range(as.numeric(object), na.rm=TRUE)
-            n_na <- sum(is.na(as.numeric(object)))
-            mem_size <- format(object.size(object), units="auto")
-            total_voxels <- prod(dim(object))
-            nonzero_voxels <- length(Matrix::which(object@data != 0))
-            sparsity <- (total_voxels - nonzero_voxels) / total_voxels * 100
-
-            # Header
-            cat("\n", crayon::bold(crayon::blue("=== SparseNeuroVol Object ===")), "\n\n")
-
-            # Basic Information
-            cat(crayon::bold(crayon::yellow("* Basic Information")), "\n")
-            cat("  ", crayon::silver("Type:"), "      ", class(object)[1], "\n", sep="")
-            cat("  ", crayon::silver("Dimensions:"), " ",
-                paste(dim(object), collapse=" x "),
-                " (", crayon::green(mem_size), ")", "\n", sep="")
-
-            # Sparsity Information
-            cat("\n", crayon::bold(crayon::yellow("* Sparsity Properties")), "\n", sep="")
-            cat("  ", crayon::silver("Total Voxels:  "),
-                format(total_voxels, big.mark=","), "\n", sep="")
-            cat("  ", crayon::silver("Active Voxels: "),
-                crayon::green(format(nonzero_voxels, big.mark=",")),
-                " (", sprintf("%.2f%%", 100-sparsity), ")", "\n", sep="")
-            cat("  ", crayon::silver("Sparsity:     "),
-                sprintf("%.2f%%", sparsity), "\n", sep="")
-
-            # Data Properties
-            cat("\n", crayon::bold(crayon::yellow("* Data Properties")), "\n", sep="")
-            cat("  ", crayon::silver("Value Range:"), " [",
-                crayon::blue(sprintf("%.2f", val_range[1])), ", ",
-                crayon::blue(sprintf("%.2f", val_range[2])), "]", "\n", sep="")
-            if (n_na > 0) {
-                cat("  ", crayon::silver("Missing Values:"), " ",
-                    crayon::red(format(n_na, big.mark=",")), " (",
-                    sprintf("%.1f%%", 100*n_na/total_voxels), ")",
-                    "\n", sep="")
+            n_nonzero <- length(Matrix::which(object@data != 0))
+            n_total <- prod(d)
+            pct <- sprintf("%.1f%% non-zero", 100 * n_nonzero / n_total)
+            show_header("SparseNeuroVol", pct)
+            show_rule("Spatial")
+            show_field("Dimensions", paste(d, collapse = " x "))
+            show_field("Spacing", paste(round(spacing(sp), 3), collapse = " x "), " mm")
+            show_field("Origin", paste(round(origin(sp), 2), collapse = ", "))
+            show_field("Orientation", safe_axcodes(sp))
+            show_rule("Sparse Data")
+            show_field("Active", paste0(format(n_nonzero, big.mark = ","), " / ",
+                       format(n_total, big.mark = ",")))
+            if (n_nonzero > 0) {
+              rng <- range(as.numeric(object), na.rm = TRUE)
+              show_field("Range", sprintf("[%.3f, %.3f]", rng[1], rng[2]))
             }
-
-            # Spatial Properties
-            cat("\n", crayon::bold(crayon::yellow("* Spatial Properties")), "\n", sep="")
-            cat("  ", crayon::silver("Spacing:"), " ",
-                paste(sprintf("%.2f", sp@spacing), collapse=" x "),
-                crayon::silver(" mm"), "\n", sep="")
-            cat("  ", crayon::silver("Origin:"), "  ",
-                paste(sprintf("%.1f", sp@origin), collapse=", "),
-                crayon::silver(" mm"), "\n", sep="")
-            cat("  ", crayon::silver("Axes:"), "    ",
-                crayon::green(sp@axes@i@axis), " x ",
-                crayon::green(sp@axes@j@axis), " x ",
-                crayon::green(sp@axes@k@axis), "\n", sep="")
-
-            # Footer with usage hints
-            cat(crayon::silver("\n======================================\n"))
-            cat("\n", crayon::bold("Access Methods:"), "\n")
-            cat(" ", crayon::silver("."), " Get Slice:     ",
-                crayon::blue("slice(object, zlevel=10)"), "\n")
-            cat(" ", crayon::silver("."), " Get Value:     ",
-                crayon::blue("object[i, j, k]"), "\n")
-            cat(" ", crayon::silver("."), " As Dense:      ",
-                crayon::blue("as(object, \"DenseNeuroVol\")"), "\n")
-            cat(" ", crayon::silver("."), " Active Indices: ",
-                crayon::blue("which(object != 0)"), "\n\n")
+            show_field("Size", format_mem(object))
           }
 )
 
@@ -525,6 +462,7 @@ setMethod(f="slices", signature=signature(x="NeuroVol"),
           })
 
 
+#' @rdname extract-methods
 #' @export
 setMethod(f="[", signature=signature(x = "NeuroVol", i = "ROICoords", j = "missing"),
           def=function (x, i, j, k, ..., drop=TRUE) {
@@ -896,27 +834,12 @@ setMethod(f="mapf", signature=signature(x="NeuroVol", m="Kernel"),
 
 
 #' @export
-#' @importFrom utils capture.output
 #' @rdname show-methods
 setMethod("show", "Kernel", function(object) {
-  # Get dimensions of kernel
-  kernel_dims <- dim(object@weights)
-
-  # Create header string
-  header <- sprintf("Kernel object of dimensions: %s", paste(kernel_dims, collapse=" x "))
-
-  # Get kernel width info
-  width_str <- sprintf("Kernel widths: %s", paste(object@width, collapse=" x "))
-
-  # Format weights matrix/array nicely
-  weights_str <- capture.output(print(round(object@weights, 4)))
-  weights_str <- paste(weights_str, collapse="\n")
-
-  # Print everything
-  cat(header, "\n")
-  cat(width_str, "\n")
-  cat("\nKernel weights:\n")
-  cat(weights_str, "\n")
+  show_header("Kernel", paste(dim(object@weights), collapse = " x "))
+  show_field("Widths", paste(object@width, collapse = " x "))
+  show_field("Voxels", prod(dim(object@weights)))
+  show_field("Sum", round(sum(object@weights), 4))
 })
 
 
@@ -1066,8 +989,12 @@ setMethod(f="as.logical", signature=signature(x = "NeuroVol"), def=function(x) {
 #' @export
 setMethod(f="as.sparse", signature=signature(x="DenseNeuroVol", mask="LogicalNeuroVol"),
           def=function(x, mask) {
-            assert_that(all(dim(x) == dim(mask)))
-            assert_that(all(spacing(x) == spacing(mask)))
+            if (!all(dim(x) == dim(mask))) {
+              cli::cli_abort("Dimensions of {.arg x} ({.val {dim(x)}}) must match dimensions of {.arg mask} ({.val {dim(mask)}}).")
+            }
+            if (!all(spacing(x) == spacing(mask))) {
+              cli::cli_abort("Spacing of {.arg x} and {.arg mask} must be identical.")
+            }
             dat <- x[mask]
             bvec <- SparseNeuroVol(data=dat, space=space(x),indices=which(mask>0))
 
@@ -1077,7 +1004,9 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVol", mask="LogicalNeu
 #' @rdname partition-methods
 setMethod("partition", signature=signature(x="LogicalNeuroVol", k="integer"),
           def=function(x,k) {
-            assert_that(k>1)
+            if (k <= 1) {
+              cli::cli_abort("{.arg k} must be > 1, not {.val {k}}.")
+            }
             idx <- which(x != 0)
             cds <- index_to_coord(x,idx)
             kres <- kmeans(cds, centers=k, iter.max=200)
@@ -1148,6 +1077,7 @@ setMethod(f="linear_access", signature=signature(x = "SparseNeuroVol", i = "nume
 
 
 
+#' @rdname extract-methods
 #' @export
 setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "numeric", drop="ANY"),
           def=function (x, i, j, k, ..., drop=TRUE) {
@@ -1196,7 +1126,6 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 #' @param ov_thresh overlay threshold; values with
 #'   \eqn{|v| < } \code{ov_thresh} become transparent (default 0).
 #' @param legend logical; show the colour bar?
-#' @export
 #' @importFrom graphics plot
 #' @examples
 #'
@@ -1205,6 +1134,7 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 #' \donttest{
 #' plot(slice)
 #' }
+#' @rdname plot-methods
 #' @export
 setMethod("plot", signature=signature(x="NeuroVol", y="missing"),
           def=function(x, y,
@@ -1281,6 +1211,8 @@ setMethod("mask", "LogicalNeuroVol",
             # return a filled mask indicating all voxels are valid
             LogicalNeuroVol(array(TRUE, dim(x)), space(x))
           })
+#' @name as.matrix
+#' @rdname as.matrix-methods
 #' @export
 setAs(from="DenseNeuroVol", to="matrix", function(from) {
   arr <- from@.Data

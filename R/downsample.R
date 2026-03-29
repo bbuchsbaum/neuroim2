@@ -78,6 +78,98 @@ calculate_downsample_dims <- function(current_dims, current_spacing,
   c(new_spatial_dims, time_dim)
 }
 
+#' @keywords internal
+#' @noRd
+.downsample_bin_axis <- function(coord, old_n, new_n) {
+  floor((coord - 1) * new_n / old_n) + 1L
+}
+
+#' @keywords internal
+#' @noRd
+.downsample_sparse_coords <- function(coords, old_dims, new_dims) {
+  cbind(
+    .downsample_bin_axis(coords[, 1], old_dims[1], new_dims[1]),
+    .downsample_bin_axis(coords[, 2], old_dims[2], new_dims[2]),
+    .downsample_bin_axis(coords[, 3], old_dims[3], new_dims[3])
+  )
+}
+
+#' @keywords internal
+#' @noRd
+.downsample_linear_index_3d <- function(coords, dims) {
+  1L +
+    (coords[, 1] - 1L) +
+    (coords[, 2] - 1L) * dims[1] +
+    (coords[, 3] - 1L) * dims[1] * dims[2]
+}
+
+#' @keywords internal
+#' @noRd
+.downsample_sparse_neurovec <- function(x, new_dims) {
+  current_dims <- dim(x)
+  spatial_dims <- current_dims[1:3]
+  nt <- current_dims[4]
+  input_idx <- indices(x)
+  input_coords <- arrayInd(input_idx, .dim = spatial_dims)
+
+  if (nrow(input_coords) == 0L) {
+    stop("Cannot downsample a SparseNeuroVec with an empty mask.")
+  }
+
+  output_coords <- .downsample_sparse_coords(input_coords, spatial_dims, new_dims[1:3])
+  output_keys <- do.call(paste, c(as.data.frame(output_coords), sep = ":"))
+  voxel_groups <- split(seq_len(nrow(output_coords)), output_keys)
+
+  first_members <- vapply(voxel_groups, `[`, integer(1), 1L)
+  kept_coords <- output_coords[first_members, , drop = FALSE]
+  kept_linear_idx <- .downsample_linear_index_3d(kept_coords, new_dims[1:3])
+  order_idx <- order(kept_linear_idx)
+  voxel_groups <- voxel_groups[order_idx]
+  kept_coords <- kept_coords[order_idx, , drop = FALSE]
+  kept_linear_idx <- kept_linear_idx[order_idx]
+
+  out_data <- vapply(
+    voxel_groups,
+    function(idx) {
+      rowMeans(x@data[, idx, drop = FALSE])
+    },
+    numeric(nt)
+  )
+
+  if (!is.matrix(out_data)) {
+    out_data <- matrix(out_data, nrow = nt, ncol = 1L)
+  }
+  colnames(out_data) <- NULL
+
+  out_mask <- array(FALSE, dim = new_dims[1:3])
+  out_mask[kept_linear_idx] <- TRUE
+
+  current_space <- space(x)
+  current_spacing <- current_space@spacing
+  spatial_scale_factors <- current_dims[1:3] / new_dims[1:3]
+  new_spacing <- current_spacing[1:3] * spatial_scale_factors
+  new_trans <- rescale_affine(
+    current_space@trans,
+    shape = current_dims[1:3],
+    zooms = new_spacing,
+    new_shape = new_dims[1:3]
+  )
+
+  if (length(current_spacing) == 4) {
+    new_spacing <- c(new_spacing, current_spacing[4])
+  }
+
+  new_space <- NeuroSpace(
+    dim = new_dims,
+    spacing = new_spacing,
+    origin = new_trans[1:3, 4],
+    axes = current_space@axes,
+    trans = new_trans
+  )
+
+  SparseNeuroVec(out_data, new_space, out_mask, label = x@label)
+}
+
 #' Downsample a DenseNeuroVec
 #'
 #' @rdname downsample-methods
@@ -104,6 +196,7 @@ calculate_downsample_dims <- function(current_dims, current_spacing,
 #' # Downsample to target dimensions
 #' nvec_down3 <- downsample(nvec, outdim = c(32, 32, 16))
 #'
+#' @rdname downsample-methods
 #' @export
 setMethod(f="downsample", signature=signature("DenseNeuroVec"),
           def=function(x, spacing=NULL, factor=NULL, outdim=NULL, method="box") {
@@ -160,6 +253,37 @@ setMethod(f="downsample", signature=signature("DenseNeuroVec"),
             
             # Return new DenseNeuroVec
             DenseNeuroVec(downsampled_data, new_space, label=x@label)
+          })
+
+#' Downsample a SparseNeuroVec
+#'
+#' @rdname downsample-methods
+#' @export
+setMethod(f = "downsample", signature = signature(x = "SparseNeuroVec"),
+          def = function(x, spacing = NULL, factor = NULL, outdim = NULL, method = "box") {
+            if (method != "box") {
+              stop("Only 'box' method is currently supported")
+            }
+
+            if (length(dim(x)) != 4) {
+              stop("Input must be a 4D SparseNeuroVec object")
+            }
+
+            if (sum(!is.null(spacing), !is.null(factor), !is.null(outdim)) != 1) {
+              stop("Exactly one of 'spacing', 'factor', or 'outdim' must be specified")
+            }
+
+            current_dims <- dim(x)
+            current_spacing <- space(x)@spacing
+            new_dims <- calculate_downsample_dims(
+              current_dims,
+              current_spacing,
+              spacing,
+              factor,
+              outdim
+            )
+
+            .downsample_sparse_neurovec(x, new_dims)
           })
 
 #' Downsample a NeuroVec
@@ -271,6 +395,7 @@ calculate_downsample_dims_3d <- function(current_dims, current_spacing,
 #' # Downsample to target dimensions
 #' vol_down3 <- downsample(vol, outdim = c(32, 32, 16))
 #'
+#' @rdname downsample-methods
 #' @export
 setMethod(f="downsample", signature=signature("DenseNeuroVol"),
           def=function(x, spacing=NULL, factor=NULL, outdim=NULL, method="box") {

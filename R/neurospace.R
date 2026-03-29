@@ -27,7 +27,6 @@
 #' @return A new \code{\linkS4class{NeuroSpace}} object
 #'
 #' @importFrom methods new
-#' @importFrom assertthat assert_that
 #'
 #' @section Coordinate Systems:
 #' NeuroSpace manages two coordinate systems:
@@ -95,8 +94,9 @@
 #'
 #' @export
 NeuroSpace <- function(dim, spacing = NULL, origin = NULL, axes = NULL, trans = NULL) {
-  assert_that(is.numeric(dim) && all(dim == as.integer(dim)) && all(dim > 0),
-              msg = "'dim' must be a vector of positive integers")
+  if (!is.numeric(dim) || !all(dim == as.integer(dim)) || !all(dim > 0)) {
+    cli::cli_abort("{.arg dim} must be a vector of positive integers.")
+  }
   dim <- as.integer(dim)
 
   # Set defaults for spacing and origin
@@ -107,12 +107,15 @@ NeuroSpace <- function(dim, spacing = NULL, origin = NULL, axes = NULL, trans = 
     origin <- rep(0, min(length(dim), 3))
   }
 
-  assert_that(is.numeric(spacing) && is.numeric(origin),
-              msg = "'spacing' and 'origin' must be numeric vectors")
-  assert_that(length(origin) == length(spacing),
-              msg = "'origin' and 'spacing' must have the same length")
-  assert_that(all(spacing > 0),
-              msg = "all 'spacing' values must be positive")
+  if (!is.numeric(spacing) || !is.numeric(origin)) {
+    cli::cli_abort("{.arg spacing} and {.arg origin} must be numeric vectors.")
+  }
+  if (length(origin) != length(spacing)) {
+    cli::cli_abort("{.arg origin} and {.arg spacing} must have the same length.")
+  }
+  if (!all(spacing > 0)) {
+    cli::cli_abort("All {.arg spacing} values must be positive.")
+  }
 
   # Create transformation matrix if not provided
   if (is.null(trans)) {
@@ -120,8 +123,13 @@ NeuroSpace <- function(dim, spacing = NULL, origin = NULL, axes = NULL, trans = 
     trans <- diag(c(spacing, 1))
     trans[1:D, D+1] <- origin
   } else {
-    assert_that(is.matrix(trans) && nrow(trans) == ncol(trans),
-                msg = "'trans' must be a square matrix")
+    if (!is.matrix(trans) || nrow(trans) != ncol(trans)) {
+      cli::cli_abort("{.arg trans} must be a square matrix.")
+    }
+    # Derive spacing and origin from the affine when trans is provided
+    D <- nrow(trans) - 1L
+    spacing <- sqrt(colSums(trans[seq_len(D), seq_len(D), drop = FALSE]^2))
+    origin <- trans[seq_len(D), D + 1L]
   }
 
   # Ensure matrix is invertible
@@ -159,141 +167,6 @@ NeuroSpace <- function(dim, spacing = NULL, origin = NULL, axes = NULL, trans = 
 }
 
 
-#' @importFrom crayon bold blue green red yellow silver white bgBlue
-#' @importFrom utils object.size
-#' @rdname show-methods
-#' @export
-setMethod(f="show",
-          signature=signature("NeuroSpace"),
-          def=function(object) {
-            # Helper function for memory size formatting
-            format_bytes <- function(bytes) {
-              units <- c('B', 'KB', 'MB', 'GB', 'TB')
-              i <- floor(log2(bytes) / 10)
-              sprintf("%.1f %s", bytes / 2^(10 * i), units[i + 1])
-            }
-
-            # Helper for matrix formatting
-            format_matrix <- function(mat, digits=3) {
-              # Format each element using formatC to a fixed number of decimal places
-              formatted_numbers <- apply(mat, c(1,2), function(x) formatC(x, format="f", digits=digits))
-
-              # Ensure formatted_numbers is always a matrix
-              if (!is.matrix(formatted_numbers)) {
-                formatted_numbers <- matrix(formatted_numbers, nrow = nrow(mat), ncol = ncol(mat))
-              }
-
-              # For each column, determine the maximum width
-              max_widths <- apply(formatted_numbers, 2, function(col) max(nchar(col)))
-
-              # Pad each element to its column's max width
-              padded <- matrix("", nrow = nrow(mat), ncol = ncol(mat))
-              for (j in 1:ncol(mat)) {
-                padded[,j] <- format(formatted_numbers[,j], width = max_widths[j], justify = "right")
-              }
-
-              # Combine each row into a string
-              row_strings <- apply(padded, 1, paste, collapse = "  ")
-              paste(row_strings, collapse = "\n")
-            }
-
-            # Calculate memory footprint
-            mem_size <- format_bytes(utils::object.size(object))
-
-            # Header
-            cat("\n")
-            cat(bgBlue(white(bold(" NeuroSpace Object "))))
-            cat("\n")
-
-            # Dimension Information
-            cat("\n", bold(yellow(">> Dimensions")), "\n")
-            dim_str <- paste(object@dim, collapse=" x ")
-            cat("  ", silver("Grid Size:"), " ", green(dim_str), "\n", sep="")
-            cat("  ", silver("Memory:"), "   ", green(mem_size), "\n", sep="")
-
-            # Spatial Properties
-            cat("\n", bold(yellow(">> Spatial Properties")), "\n")
-            spacing_str <- paste(sprintf("%.2f", object@spacing), collapse=" x ")
-            origin_str <- paste(sprintf("%.2f", object@origin), collapse=" x ")
-            cat("  ", silver("Spacing:"), "   ", blue(spacing_str), " ", silver("mm"), "\n", sep="")
-            cat("  ", silver("Origin:"), "    ", blue(origin_str), " ", silver("mm"), "\n", sep="")
-
-            # Anatomical Orientation
-            cat("\n", bold(yellow(">> Anatomical Orientation")), "\n")
-            
-            # Check the class of axes object and handle appropriately
-            if (inherits(object@axes, "AxisSet3D") || inherits(object@axes, "AxisSet4D") || inherits(object@axes, "AxisSet5D")) {
-              orientations <- c(
-                paste0("X: ", green(object@axes@i@axis)),
-                paste0("Y: ", green(object@axes@j@axis)),
-                paste0("Z: ", green(object@axes@k@axis))
-              )
-            } else if (inherits(object@axes, "AxisSet2D")) {
-              orientations <- c(
-                paste0("X: ", green(object@axes@i@axis)),
-                paste0("Y: ", green(object@axes@j@axis))
-              )
-            } else if (inherits(object@axes, "AxisSet1D")) {
-              orientations <- c(
-                paste0("X: ", green(object@axes@i@axis))
-              )
-            } else {
-              # For base AxisSet or other cases, just show dimension count
-              orientations <- paste0("Dimensions: ", object@axes@ndim)
-            }
-            cat(paste0("  ", paste(orientations, collapse="  |  ")), "\n")
-
-            # World Transformation
-            cat("\n", bold(yellow(">> World Transformation")), "\n")
-            cat(silver("  Forward (Voxel to World):"), "\n")
-            cat(blue(paste0("    ", format_matrix(object@trans))), "\n")
-            cat(silver("  Inverse (World to Voxel):"), "\n")
-            cat(blue(paste0("    ", format_matrix(object@inverse))), "\n")
-
-            # Bounding Box (in world coordinates)
-            cat("\n", bold(yellow(">> Bounding Box")), "\n")
-            ndim <- length(object@dim)
-            if (ndim == 2) {
-              corners <- matrix(c(0, 0,
-                                object@dim[1]-1, 0,
-                                0, object@dim[2]-1,
-                                object@dim[1]-1, object@dim[2]-1),
-                              nrow=4, byrow=TRUE)
-              world_corners <- t(object@trans[1:2, 1:2, drop=FALSE] %*% t(corners) +
-                                 matrix(object@trans[1:2, 3], nrow=2, ncol=4))
-              min_corner <- apply(world_corners, 2, min)
-              max_corner <- apply(world_corners, 2, max)
-              cat("  ", silver("Min Corner:"), " ",
-                  green(paste(sprintf("%.1f", min_corner), collapse=", ")),
-                  " mm\n", sep="")
-              cat("  ", silver("Max Corner:"), " ",
-                  green(paste(sprintf("%.1f", max_corner), collapse=", ")),
-                  " mm\n", sep="")
-            } else {
-              corners <- matrix(c(0, 0, 0,
-                                object@dim[1]-1, 0, 0,
-                                0, object@dim[2]-1, 0,
-                                object@dim[1]-1, object@dim[2]-1, 0,
-                                0, 0, object@dim[3]-1,
-                                object@dim[1]-1, 0, object@dim[3]-1,
-                                0, object@dim[2]-1, object@dim[3]-1,
-                                object@dim[1]-1, object@dim[2]-1, object@dim[3]-1),
-                              nrow=8, byrow=TRUE)
-              world_corners <- t(object@trans[1:3, 1:3, drop=FALSE] %*% t(corners) +
-                                 matrix(object@trans[1:3, 4], nrow=3, ncol=8))
-              min_corner <- apply(world_corners, 2, min)
-              max_corner <- apply(world_corners, 2, max)
-              cat("  ", silver("Min Corner:"), " ",
-                  green(paste(sprintf("%.1f", min_corner), collapse=", ")),
-                  " mm\n", sep="")
-              cat("  ", silver("Max Corner:"), " ",
-                  green(paste(sprintf("%.1f", max_corner), collapse=", ")),
-                  " mm\n", sep="")
-            }
-
-            # Footer
-            cat("\n", bgBlue(white(bold(paste(rep("=", 50), collapse="")))), "\n", sep="")
-          })
 
 #' add dimension to \code{\linkS4class{NeuroSpace}}
 #' @param x The NeuroSpace object
@@ -312,8 +185,9 @@ setMethod(f="add_dim", signature=signature(x = "NeuroSpace", n="numeric"),
 setMethod(f="drop_dim", signature=signature(x="NeuroSpace", dimnum="numeric"),
           def=function(x, dimnum) {
             D <- dim(x)
-            assert_that(length(D) >= 2,
-                       msg = "Cannot drop dimension from space with less than 2 dimensions")
+            if (length(D) < 2) {
+              cli::cli_abort("Cannot drop dimension from space with less than 2 dimensions.")
+            }
 
             Dind <- seq_len(length(D))[-dimnum]
             if (ndim(x) > 3) {
@@ -348,14 +222,16 @@ setMethod(f="drop_dim", signature=signature(x = "NeuroSpace", dimnum="missing"),
 			Dind <- 1:(length(D)-1)
 
 
-			### TODO doesn't drop dimension in transformation matrix...
-      ### brain vector's don't have th axis and these are incorrectly dropped
       if (ndim(x) > 3) {
 			  NeuroSpace(D[Dind], origin=origin(x)[Dind], spacing=spacing(x)[Dind], axes=axes(x), trans=trans(x))
       } else {
+        # Drop last spatial dimension from the affine:
+        # keep rows/cols for retained axes + homogeneous coordinate
         tx <- trans(x)
-        tx <- rbind(cbind(tx[Dind,Dind], origin(x)[Dind]), c(rep(0, length(Dind)),1))
-        NeuroSpace(D[Dind], origin=origin(x)[Dind], spacing=spacing(x)[Dind], axes=drop_dim(axes(x)), trans=tx)
+        k  <- ndim(x)
+        keep <- c(Dind, k + 1L)
+        tx2 <- tx[keep, keep, drop = FALSE]
+        NeuroSpace(D[Dind], axes=drop_dim(axes(x)), trans=tx2)
       }
 		})
 
@@ -621,9 +497,10 @@ setMethod(f="grid_to_index", signature=signature(x="NeuroSpace", coords="matrix"
 
 			if (ncol(coords) == 2) {
 			  .gridToIndex(dim(x), coords)
-			  #assert_that(ncol(coords) == 2)
 			} else if (ncol(coords) == 3) {
-			  assert_that(length(dx) >= 3)
+			  if (length(dx) < 3) {
+			    cli::cli_abort("Space must have at least 3 dimensions for 3-column coordinate matrix, not {length(dx)}D.")
+			  }
 			  .gridToIndex3D(dx[1:3], coords)
 			} else if (ncol(coords) == 4 ){
 			  .gridToIndex(dim(x), coords)
@@ -639,11 +516,17 @@ setMethod(f="grid_to_index", signature=signature(x="NeuroSpace", coords="numeric
 		def=function(x, coords) {
 		  dx <- dim(x)
 		  if (length(dx) == 2) {
-		    assert_that(length(coords) == 2)
-		    assert_that(coords[1] >= 1 && coords[1] <= dx[1] && coords[2] >= 1 && coords[2] <= dx[2])
+		    if (length(coords) != 2) {
+		      cli::cli_abort("{.arg coords} must have length 2 for a 2D space, not {length(coords)}.")
+		    }
+		    if (coords[1] < 1 || coords[1] > dx[1] || coords[2] < 1 || coords[2] > dx[2]) {
+		      cli::cli_abort("{.arg coords} ({.val {coords}}) are out of bounds for dimensions ({.val {dx}}).")
+		    }
 		    (coords[2]-1)*dx[1] + coords[1]
 		  } else {
-		    assert_that(length(coords) == 3)
+		    if (length(coords) != 3) {
+		      cli::cli_abort("{.arg coords} must have length 3 for a 3D space, not {length(coords)}.")
+		    }
 			  .gridToIndex3D(dim(x), matrix(coords, nrow=1, byrow=TRUE))
 		  }
 		}
@@ -655,7 +538,9 @@ setMethod(f="grid_to_index", signature=signature(x="NeuroSpace", coords="numeric
 #' @rdname coord_to_index-methods
 setMethod(f="coord_to_index", signature=signature(x="NeuroVol", coords="matrix"),
           def=function(x, coords) {
-            assert_that(ncol(coords) == 3)
+            if (ncol(coords) != 3) {
+              cli::cli_abort("Coordinate matrix must have 3 columns, not {ncol(coords)}.")
+            }
             callGeneric(space(x), coords)
           })
 
@@ -694,7 +579,9 @@ setMethod(f="index_to_grid", signature=signature(x="NeuroVol", idx="integer"),
 #' @rdname grid_to_index-methods
 setMethod(f="grid_to_index", signature=signature(x="NeuroVol", coords="matrix"),
           def=function(x, coords) {
-            assert_that(ncol(coords) == 3)
+            if (ncol(coords) != 3) {
+              cli::cli_abort("Coordinate matrix must have 3 columns, not {ncol(coords)}.")
+            }
             array.dim <- dim(x)
             .gridToIndex3D(dim(x), coords)
           })
@@ -704,7 +591,9 @@ setMethod(f="grid_to_index", signature=signature(x="NeuroVol", coords="matrix"),
 #' @rdname grid_to_index-methods
 setMethod(f="grid_to_index", signature=signature(x="NeuroVol", coords="numeric"),
           def=function(x, coords) {
-            assert_that(length(coords) == 3)
+            if (length(coords) != 3) {
+              cli::cli_abort("{.arg coords} must have length 3, not {length(coords)}.")
+            }
             array.dim <- dim(x)
             .gridToIndex3D(dim(x), matrix(coords, nrow=1, byrow=TRUE))
           })
@@ -763,3 +652,19 @@ setMethod(f="inverse_trans", signature=signature(x = "NeuroSpace"), def=function
 #' @export
 #' @rdname space-methods
 setMethod(f="space", signature=signature(x = "NeuroSpace"), def=function(x) x)
+
+
+#' @export
+#' @rdname show-methods
+setMethod("show", "NeuroSpace", function(object) {
+  d <- dim(object)
+  show_header("NeuroSpace", paste0(ndim(object), "D"))
+  show_rule("Geometry")
+  show_field("Dimensions", paste(d, collapse = " x "))
+  show_field("Spacing", paste(round(spacing(object), 3), collapse = " x "), " mm")
+  show_field("Origin", paste(round(origin(object), 2), collapse = ", "))
+  if (ndim(object) >= 3) {
+    show_field("Orientation", safe_axcodes(object))
+  }
+  show_field("Voxels", format(prod(d), big.mark = ","))
+})

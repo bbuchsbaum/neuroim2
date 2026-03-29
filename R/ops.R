@@ -9,12 +9,15 @@ NULL
 #' @description Methods for performing arithmetic and comparison operations on neuroimaging objects
 NULL
 
-#' @importFrom assertthat assert_that
 #' @keywords internal
 #' @noRd
 checkDim <- function(e1,e2) {
-  assert_that(all(dim(e1) == dim(e2)))
-  assert_that(all(spacing(e1) == spacing(e2)))
+  if (!all(dim(e1) == dim(e2))) {
+    cli::cli_abort("Dimensions of operands must match: {.val {dim(e1)}} vs {.val {dim(e2)}}.")
+  }
+  if (!all(spacing(e1) == spacing(e2))) {
+    cli::cli_abort("Spacing of operands must match.")
+  }
 
 }
 
@@ -110,6 +113,7 @@ setMethod(f="Arith", signature=signature(e1="SparseNeuroVol", e2="SparseNeuroVol
 #'
 #' @return An ROIVol object resulting from the arithmetic operation.
 #'
+#' @rdname Arith-methods
 #' @export
 setMethod(f="Arith", signature=signature(e1="ROIVol", e2="ROIVol"),
           def=function(e1, e2) {
@@ -327,6 +331,7 @@ setMethod(f="Arith", signature=signature(e1="NeuroVec", e2="NeuroVec"),
 #'
 #' @return A DenseNeuroVec object resulting from the arithmetic operation.
 #'
+#' @rdname Arith-methods
 #' @export
 setMethod(f="Arith", signature=signature(e1="NeuroVec", e2="NeuroVol"),
 		  def=function(e1, e2) {
@@ -360,6 +365,7 @@ setMethod(f="Arith", signature=signature(e1="NeuroVec", e2="NeuroVol"),
 #'
 #' @return A DenseNeuroVec object resulting from the arithmetic operation.
 #'
+#' @rdname Arith-methods
 #' @export
 setMethod(f="Arith", signature=signature(e1="NeuroVol", e2="NeuroVec"),
           def=function(e1, e2) {

@@ -16,5 +16,5 @@ read_hyper_vec(file_name, mask = NULL)
 A \code{\linkS4class{NeuroHyperVec}}.
 }
 \description{
-Read a 5D image as a NeuroHyperVec.
+Read a 5D image as a NeuroHyperVec
 }

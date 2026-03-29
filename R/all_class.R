@@ -1350,12 +1350,18 @@ setClass("NeuroVecSeq",
          contains=c("NeuroVec", "ArrayLike4D"),
 
          validity = function(object) {
-           assert_that(all(purrr::map_lgl(object@vecs, ~ inherits(., "NeuroVec"))))
+           if (!all(purrr::map_lgl(object@vecs, ~ inherits(., "NeuroVec")))) {
+             return("All elements of @vecs must be NeuroVec objects.")
+           }
            dimlist <- purrr::map(object@vecs, ~ dim(.)[1:3])
            splist <- purrr::map(object@vecs, ~ spacing(.))
-           assert_that(all(purrr::map_lgl(dimlist, ~ all(dimlist[[1]] == .))))
-           assert_that(all(purrr::map_lgl(splist, ~ all(splist[[1]] == .))))
-
+           if (!all(purrr::map_lgl(dimlist, ~ all(dimlist[[1]] == .)))) {
+             return("All NeuroVec objects must have the same spatial dimensions.")
+           }
+           if (!all(purrr::map_lgl(splist, ~ all(splist[[1]] == .)))) {
+             return("All NeuroVec objects must have the same spacing.")
+           }
+           TRUE
          })
 
 

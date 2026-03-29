@@ -1,0 +1,26 @@
+* installing *source* package ‘neuroim2’ ...
+** this is package ‘neuroim2’ version ‘0.10.0’
+** using staged installation
+** libs
+using C++ compiler: ‘Homebrew clang version 20.1.8’
+using C++17
+using SDK: ‘MacOSX14.2.sdk’
+make: Nothing to be done for `all'.
+installing to /Users/bbuchsbaum/code/neuroim2/man/neuroim2.Rcheck/00LOCK-neuroim2/00new/neuroim2/libs
+** R
+** inst
+** byte-compile and prepare package for lazy loading
+Creating a new generic function for ‘scale’ in package ‘neuroim2’
+Creating a new generic function for ‘ndim’ in package ‘neuroim2’
+Creating a new generic function for ‘origin’ in package ‘neuroim2’
+Creating a new generic function for ‘extensions’ in package ‘neuroim2’
+Creating a new generic function for ‘extension’ in package ‘neuroim2’
+** help
+*** installing help indices
+** building package indices
+** installing vignettes
+** testing if installed package can be loaded from temporary location
+** checking absolute paths in shared objects and dynamic libraries
+** testing if installed package can be loaded from final location
+** testing if installed package keeps a record of temporary installation path
+* DONE (neuroim2)

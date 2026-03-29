@@ -44,9 +44,10 @@ plot_overlay(
 
 \item{ov_alpha}{Global alpha for overlay (0..1).}
 
-\item{ov_alpha_mode}{Either \code{"binary"} (thresholded full-alpha overlay) or
-\code{"proportional"} (per-pixel alpha scaled by absolute overlay magnitude,
-multiplied by \code{ov_alpha}).}
+\item{ov_alpha_mode}{Either \code{"binary"} (default, current behavior: pixels
+above threshold get full \code{ov_alpha}, others are transparent) or
+\code{"proportional"} (per-pixel alpha scaled by absolute value of the
+overlay, multiplied by \code{ov_alpha}).}
 
 \item{ncol}{Number of columns in the facet layout.}
 

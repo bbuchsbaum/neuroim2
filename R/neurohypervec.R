@@ -158,21 +158,10 @@ NeuroHyperVec <- function(data, space, mask) {
   num_trials <- dims[4]
 
   # Convert mask to LogicalNeuroVol if needed
-  if (is.array(mask)) {
-    if (length(dim(mask)) != 3) {
-      stop("'mask' must be a 3D logical array")
-    }
-    mask_data <- as.vector(mask)
-    mask <- LogicalNeuroVol(mask, NeuroSpace(dim(mask)))
-  } else if (is.vector(mask) && is.logical(mask)) {
-    mask_space <- NeuroSpace(dim = dims[1:3])
-    mask <- LogicalNeuroVol(mask, mask_space)
-  } else if (!inherits(mask, "LogicalNeuroVol")) {
-    stop("'mask' must be a 3D logical array, a 1D logical vector, or an instance of 'LogicalNeuroVol'.")
-  }
-
-  # Validate mask dimensions
-  if (!all(dim(mask)[1:3] == dims[1:3])) {
+  if (!inherits(mask, "LogicalNeuroVol")) {
+    mask_arr <- normalize_mask(mask, dims[1:3])
+    mask <- LogicalNeuroVol(mask_arr, NeuroSpace(dims[1:3]))
+  } else if (!all(dim(mask)[1:3] == dims[1:3])) {
     stop("Mask dimensions must match spatial dimensions of the space")
   }
 
@@ -318,6 +307,8 @@ dense_array_5d <- function(x) {
 #'
 #' @details when x is a NeuroHyperVec object, the series method returns a 2D array with dimensions [features x trials]
 #' @return A 2D array with dimensions [features x trials]
+#' @rdname series-methods
+#' @export
 setMethod("series", signature(x = "NeuroHyperVec"),
   function(x, i, j, k, ...) {
     # Validate indices
@@ -476,75 +467,25 @@ setMethod("[", signature(x = "NeuroHyperVec"),
 )
 
 
-#' @rdname show-methods
 #' @export
-setMethod("show", signature(object="NeuroHyperVec"),
-          def=function(object) {
-            cat("\n", crayon::bold(crayon::blue("NeuroHyperVec Object")), "\n")
-            cat(crayon::silver("======================================\n"))
-
-            # Dimensions section
-            dims <- dim(object@space)
-            spatial_dims <- paste(dims[1:3], collapse=" x ")
-            cat("\n", crayon::yellow("Dimensions:"), "\n")
-            cat(" ", crayon::silver("."), " Spatial: ",
-                crayon::green(spatial_dims),
-                crayon::silver(" (xyz)"), "\n")
-            cat(" ", crayon::silver("."), " Trials:  ",
-                crayon::green(sprintf("%-6d", dims[4])),
-                crayon::silver(" (4th dimension)"), "\n")
-            cat(" ", crayon::silver("."), " Features:",
-                crayon::green(sprintf("%-6d", dims[5])),
-                crayon::silver(" (5th dimension)"), "\n")
-
-            # Sparsity information
-            n_total <- prod(dims[1:3])
-            n_active <- sum(object@mask@.Data)
-            sparsity <- round(100 * n_active / n_total, 2)
-            cat("\n", crayon::yellow("Sparsity:"), "\n")
-            cat(" ", crayon::silver("."), " Active Voxels: ",
-                crayon::green(sprintf("%d / %d", n_active, n_total)), "\n")
-            cat(" ", crayon::silver("."), " Coverage:      ",
-                crayon::green(sprintf("%.2f%%", sparsity)), "\n")
-            cat(" ", crayon::silver("."), " Compression:   ",
-                crayon::green(sprintf("%.2fx", n_total/n_active)), "\n")
-
-            # Memory usage
-            data_size <- object.size(object@data)
-            total_size <- object.size(object)
-            cat("\n", crayon::yellow("Memory Usage:"), "\n")
-            cat(" ", crayon::silver("."), " Data:    ",
-                crayon::green(format(data_size, units="auto")), "\n")
-            cat(" ", crayon::silver("."), " Total:   ",
-                crayon::green(format(total_size, units="auto")), "\n")
-            cat(" ", crayon::silver("."), " Overhead:",
-                crayon::green(format(total_size - data_size, units="auto")), "\n")
-
-            # Space information
-            sp <- object@space
-            spacing <- spacing(sp)[1:3]
-            origin <- origin(sp)[1:3]
-            cat("\n", crayon::yellow("Spatial Information:"), "\n")
-            cat(" ", crayon::silver("."), " Spacing: ",
-                crayon::green(sprintf("%.2f x %.2f x %.2f", spacing[1], spacing[2], spacing[3])),
-                crayon::silver(" mm"), "\n")
-            cat(" ", crayon::silver("."), " Origin:  ",
-                crayon::green(sprintf("%.1f, %.1f, %.1f", origin[1], origin[2], origin[3])), "\n")
-
-            # Footer with usage hints
-            cat(crayon::silver("\n======================================\n"))
-            cat("\n", crayon::bold("Access Methods:"), "\n")
-            cat(" ", crayon::silver("."), " Extract Series:  ",
-                crayon::blue("series(object, i, j, k)"), "\n")
-            cat(" ", crayon::silver("."), " Get Subset:     ",
-                crayon::blue("object[i, j, k, trial, feature]"), "\n")
-            cat(" ", crayon::silver("."), " Get Volume:     ",
-                crayon::blue("object[, , , 1, 1]"),
-                crayon::silver(" # first trial, first feature"), "\n")
-            cat(" ", crayon::silver("."), " Get Timeseries: ",
-                crayon::blue("series(object, 10, 20, 30)"),
-                crayon::silver(" # at xyz=(10,20,30)"), "\n\n")
-          })
+#' @rdname show-methods
+setMethod("show", "NeuroHyperVec", function(object) {
+  d <- dim(object@space)
+  nf <- d[5]
+  nt <- d[4]
+  nv <- sum(object@mask@.Data)
+  show_header("NeuroHyperVec", paste(nf, "features x", nt, "trials"))
+  show_rule("Spatial")
+  show_field("Dimensions", paste(d[1:3], collapse = " x "))
+  show_field("Active Voxels", paste0(format(nv, big.mark = ","), " / ",
+             format(prod(d[1:3]), big.mark = ",")))
+  show_rule("Structure")
+  show_field("Trials", nt)
+  show_field("Features", nf)
+  show_field("Data Shape", paste(dim(object@data), collapse = " x "),
+             " [feat x trial x vox]")
+  show_field("Size", format_mem(object))
+})
 
 #' @rdname mask-methods
 #' @export

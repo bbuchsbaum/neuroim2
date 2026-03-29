@@ -1,3 +1,36 @@
+# neuroim2 0.11.0
+
+## Bug Fixes
+
+* Fixed `NeuroSpace()` to derive `spacing()` and `origin()` from the affine matrix when constructed with `trans=`. Previously, `spacing()` returned `(1,1,1)` for spaces created from an explicit affine.
+* Fixed `drop_dim()` for 3D-to-2D `NeuroSpace` objects to properly subset the affine matrix, preserving spatial transforms instead of lossy reconstruction from spacing/origin.
+
+## Dependency Changes
+
+* Replaced `crayon` with `cli` for all user-facing output. The `cli` package provides structured error messages, progress bars, and consistent ANSI formatting.
+* Replaced `assertthat` with `cli::cli_abort()` across all 253 assertion sites, providing richer error messages with argument and class markup.
+* Added `vdiffr` to Suggests for visual regression testing.
+
+## Improvements
+
+* All 28 `show()` methods now use a unified formatting style via internal `show_header()`/`show_rule()`/`show_field()` helpers.
+* New `show()` methods for `DenseNeuroVol` and `NeuroSpace` (previously had no informative display).
+* `random_searchlight()` and `searchlight(eager=TRUE)` now display a `cli` progress bar in interactive sessions.
+* New `normalize_mask()` internal helper consolidates duplicated mask-coercion logic.
+
+## Testing
+
+* New `NeuroSpace` test suite (26 tests) covering construction, coordinate transforms, affine operations, and dimension manipulation.
+* New NIfTI I/O round-trip tests (9 tests) verifying data/affine preservation across read-write cycles.
+* New oblique affine regression tests (6 tests) for downsample, resample, and deoblique.
+* New `vdiffr` plot snapshot tests (7 tests) for `plot()`, `plot_ortho()`, `plot_montage()`, and `plot_overlay()`.
+* New shared test helper module with factory functions (`make_vol()`, `make_vec()`, `make_mask()`, etc.).
+
+## Documentation
+
+* New "Coordinate Systems and Spatial Transforms" vignette explaining affine transforms, voxel/world coordinate conversion, orientation codes, and common gotchas.
+* Consolidated `@rdname` method families, reducing man pages from 276 to 265.
+
 # neuroim2 0.10.0
 
 * Fixed `downsample()` for `DenseNeuroVol` and `DenseNeuroVec` so output `NeuroSpace` objects now carry a correctly rescaled affine transform. Previously, voxel dimensions could change while `trans()` still reflected the pre-downsample grid.

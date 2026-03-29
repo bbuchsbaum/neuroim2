@@ -16,8 +16,7 @@ deoblique(
 \item{x}{A \code{NeuroSpace} or \code{NeuroVol}.}
 
 \item{gridset}{Optional output grid (a \code{NeuroSpace} or \code{NeuroVol}),
-analogous to AFNI's \code{-gridset}. Mutually exclusive with \code{newgrid}.
-Must be 3D.}
+analogous to AFNI's \code{-gridset}. Mutually exclusive with \code{newgrid}.}
 
 \item{newgrid}{Optional scalar output voxel size (mm), analogous to AFNI's
 \code{-newgrid}. If omitted and \code{gridset} is \code{NULL}, the minimum
@@ -30,8 +29,8 @@ one of \code{"nearest"}, \code{"linear"}, or \code{"cubic"}.}
 }
 \value{
 If \code{x} is a \code{NeuroSpace}, returns a deobliqued
-\code{NeuroSpace}. If \code{x} is a \code{NeuroVol}, returns a resampled
-\code{NeuroVol} in deobliqued space.
+  \code{NeuroSpace}. If \code{x} is a \code{NeuroVol}, returns a resampled
+  \code{NeuroVol} in deobliqued space.
 }
 \description{
 AFNI-like helper that mirrors the core behavior of
@@ -43,8 +42,10 @@ AFNI-like helper that mirrors the core behavior of
   \item If \code{newgrid} is not supplied, use the minimum input voxel size
   isotropically (AFNI-style default for deobliquing).
 }
-
-Currently supports 3D spaces/volumes.
+}
+\details{
+For \code{NeuroSpace}, this returns the target deobliqued space.
+For \code{NeuroVol}, it also resamples image data into that space.
 }
 \examples{
 sp <- NeuroSpace(c(32, 32, 20), spacing = c(2, 2, 3))
@@ -60,6 +61,7 @@ vol <- NeuroVol(array(rnorm(prod(dim(sp_obl))), dim(sp_obl)), sp_obl)
 \donttest{
 vol_deob <- deoblique(vol, method = "linear")
 }
+
 }
 \seealso{
 \code{\link{output_aligned_space}}, \code{\link{resample_to}}

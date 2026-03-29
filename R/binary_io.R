@@ -86,7 +86,9 @@ read_mapped_series <- function(meta, idx) {
     stop(paste("Cannot create series_reader with gzipped file", meta@data_file))
   }
 
-  assert_that(length(meta@dims) == 4, msg="'file_name' argument must refer to a 4-dimensional image")
+  if (length(meta@dims) != 4) {
+    cli::cli_abort("File must refer to a 4-dimensional image, not {length(meta@dims)}D.")
+  }
   nels <- prod(meta@dims[1:3])
 
   dtype <- .getRStorage(meta@data_type)
@@ -109,7 +111,9 @@ read_mapped_data <- function(meta, idx) {
     stop(paste("Cannot create series_reader with gzipped file", meta@data_file))
   }
 
-  assert_that(length(meta@dims) == 4, msg="'file_name' argument must refer to a 4-dimensional image")
+  if (length(meta@dims) != 4) {
+    cli::cli_abort("File must refer to a 4-dimensional image, not {length(meta@dims)}D.")
+  }
   nels <- prod(meta@dims[1:3])
 
   ret <- .read_mmap(meta, idx)
@@ -129,11 +133,15 @@ read_mapped_vols <- function(meta, idx) {
     stop(paste("Cannot create series_reader with gzipped file", meta@data_file))
   }
 
-  assert_that(length(meta@dims) == 4, msg="'file_name' argument must refer to a 4-dimensional image")
+  if (length(meta@dims) != 4) {
+    cli::cli_abort("File must refer to a 4-dimensional image, not {length(meta@dims)}D.")
+  }
   nels <- prod(meta@dims[1:3])
   nimages <- meta@dims[4]
 
-  assert_that(min(idx) >= 1 && max(idx) <= nimages)
+  if (min(idx) < 1 || max(idx) > nimages) {
+    cli::cli_abort("{.arg idx} must be in range [1, {nimages}], got [{min(idx)}, {max(idx)}].")
+  }
 
   idx_set <- map(idx, ~ (.-1)*nels + seq(1,nels)) %>% flatten_dbl()
   ret <- .read_mmap(meta, idx_set)
@@ -160,7 +168,9 @@ series_reader <- function(file_name) {
   }
 
   meta <- read_header(file_name)
-  assert_that(length(meta@dims) == 4, msg="'file_name' argument must refer to a 4-dimensional image")
+  if (length(meta@dims) != 4) {
+    cli::cli_abort("{.arg file_name} must refer to a 4-dimensional image, not {length(meta@dims)}D.")
+  }
   nels <- prod(meta@dims[1:3])
 
   dtype <- .getRStorage(meta@data_type)
@@ -253,6 +263,7 @@ BinaryReader <- function(input, byte_offset, data_type, bytes_per_element,
 #' con <- file(tmp, "wb")
 #' writer <- BinaryWriter(con, byte_offset = 100L,
 #'                       data_type = "integer", bytes_per_element = 4L)
+#' close(writer)
 #' unlink(tmp)
 #' }
 #' @seealso \code{\link{BinaryReader}} for reading binary data
@@ -331,6 +342,7 @@ setMethod(f="initialize", signature=signature(.Object="BinaryWriter"),
 #' # Clean up
 #' unlink(tmp)
 #' }
+#' @rdname read_elements-methods
 #' @export
 setMethod(f="read_elements", signature=signature(x= "BinaryReader", num_elements="numeric"),
 			def=function(x, num_elements) {

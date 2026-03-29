@@ -37,6 +37,7 @@ tmp <- tempfile()
 con <- file(tmp, "wb")
 writer <- BinaryWriter(con, byte_offset = 100L,
                       data_type = "integer", bytes_per_element = 4L)
+close(writer)
 unlink(tmp)
 }
 }

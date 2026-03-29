@@ -85,6 +85,7 @@ convert_hd <- function(hd) {
 #' @seealso \code{\link{NeuroVol}} for the base volume class
 #' @importFrom RNifti asNifti
 #' @importFrom RNiftyReg buildAffine applyTransform
+#' @rdname resample-methods
 #' @export
 setMethod(f="resample", signature=signature("NeuroVol", "NeuroVol"),
           def=function(source, target, interpolation=3L) {

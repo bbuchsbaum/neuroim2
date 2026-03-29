@@ -111,6 +111,7 @@ AxisSet3D <- function(i, j, k) {
 #' @param x An AxisSet2D object
 #' @param ... Additional arguments (not used)
 #' @return A matrix representing the axis directions
+#' @rdname perm_mat-methods
 #' @export
 setMethod(f="perm_mat", signature=signature(x = "AxisSet2D"),
           def=function(x, ...) {
@@ -122,6 +123,7 @@ setMethod(f="perm_mat", signature=signature(x = "AxisSet2D"),
 #' @param x An AxisSet3D object
 #' @param ... Additional arguments (not used)
 #' @return A matrix representing the axis directions
+#' @rdname perm_mat-methods
 #' @export
 setMethod(f="perm_mat", signature=signature(x = "AxisSet3D"),
           def=function(x, ...) {
@@ -195,6 +197,7 @@ setMethod(f="drop_dim", signature=signature(x = "AxisSet3D", dimnum="missing"),
 #' @param x An AxisSet object
 #' @param ... Additional arguments (not used)
 #' @return An integer representing the number of dimensions in \code{x}.
+#' @rdname ndim-methods
 #' @export
 setMethod(f="ndim",signature(x= "AxisSet"), function(x, ...) { x@ndim })
 
@@ -218,20 +221,16 @@ setMethod(f="print_", signature=signature("NamedAxis"),
 #' @rdname show-methods
 setMethod(f="show", signature("NamedAxis"),
     def=function(object) {
-        header <- crayon::bold(crayon::blue("NamedAxis"))
-        cat(header, "\n")
-        cat(crayon::silver(paste(rep("-", 30), collapse="")), "\n")
-        cat(crayon::white(object@axis), "\n")
+        show_header("NamedAxis")
+        cat("  ", object@axis, "\n")
     })
 
 #' @export
 #' @rdname show-methods
 setMethod(f="show", signature=signature("AxisSet1D"),
     def=function(object) {
-        header <- crayon::bold(crayon::blue("AxisSet1D"))
-        cat(header, "\n")
-        cat(crayon::silver(paste(rep("-", 30), collapse="")), "\n")
-        cat(crayon::yellow("Axis:"), crayon::white(object@i@axis), "\n")
+        show_header("AxisSet1D")
+        show_field("Axis", object@i@axis)
     })
 
 #' Print method for AxisSet2D objects
@@ -250,11 +249,9 @@ setMethod(f="print_", signature=signature("AxisSet2D"),
 #' @export
 setMethod(f="show", signature=signature("AxisSet2D"),
     def=function(object) {
-        header <- crayon::bold(crayon::blue("AxisSet2D"))
-        cat(header, "\n")
-        cat(crayon::silver(paste(rep("-", 30), collapse="")), "\n")
-        cat(crayon::yellow("Axis 1:"), crayon::white(object@i@axis), "\n")
-        cat(crayon::yellow("Axis 2:"), crayon::white(object@j@axis), "\n")
+        show_header("AxisSet2D")
+        show_field("Axis 1", object@i@axis)
+        show_field("Axis 2", object@j@axis)
     })
 
 #' Print method for AxisSet3D objects
@@ -273,25 +270,21 @@ setMethod(f="print_", signature=signature("AxisSet3D"),
 #' @export
 setMethod(f="show", signature=signature("AxisSet3D"),
     def=function(object) {
-        header <- crayon::bold(crayon::blue("AxisSet3D"))
-        cat(header, "\n")
-        cat(crayon::silver(paste(rep("-", 30), collapse="")), "\n")
-        cat(crayon::yellow("Axis 1:"), crayon::white(object@i@axis), "\n")
-        cat(crayon::yellow("Axis 2:"), crayon::white(object@j@axis), "\n")
-        cat(crayon::yellow("Axis 3:"), crayon::white(object@k@axis), "\n")
+        show_header("AxisSet3D")
+        show_field("Axis 1", object@i@axis)
+        show_field("Axis 2", object@j@axis)
+        show_field("Axis 3", object@k@axis)
     })
 
 #' @rdname show-methods
 #' @export
 setMethod(f="show", signature=signature("AxisSet4D"),
     def=function(object) {
-        header <- crayon::bold(crayon::blue("AxisSet4D"))
-        cat(header, "\n")
-        cat(crayon::silver(paste(rep("-", 30), collapse="")), "\n")
-        cat(crayon::yellow("Axis 1:"), crayon::white(object@i@axis), "\n")
-        cat(crayon::yellow("Axis 2:"), crayon::white(object@j@axis), "\n")
-        cat(crayon::yellow("Axis 3:"), crayon::white(object@k@axis), "\n")
-        cat(crayon::yellow("Axis 4:"), crayon::white(object@t@axis), "\n")
+        show_header("AxisSet4D")
+        show_field("Axis 1", object@i@axis)
+        show_field("Axis 2", object@j@axis)
+        show_field("Axis 3", object@k@axis)
+        show_field("Axis 4", object@t@axis)
     })
 
 #' Pre-defined 2D orientation configurations

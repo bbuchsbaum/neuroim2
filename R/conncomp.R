@@ -66,15 +66,16 @@
 #' 
 #' @importFrom purrr map flatten_dbl
 #' @importFrom stats setNames
-#' @importFrom assertthat assert_that
 #'
 #' @export
 conn_comp_3D <- function(mask, connect = c("26-connect", "18-connect", "6-connect")) {
   # Input validation with more informative messages
-  assert_that(is.array(mask) && length(dim(mask)) == 3,
-              msg = "'mask' must be a 3D array")
-  assert_that(is.logical(mask[1]),
-              msg = "'mask' must be a logical array")
+  if (!is.array(mask) || length(dim(mask)) != 3) {
+    cli::cli_abort("{.arg mask} must be a 3D array.")
+  }
+  if (!is.logical(mask[1])) {
+    cli::cli_abort("{.arg mask} must be a logical array.")
+  }
 
   connect <- match.arg(connect)
 
