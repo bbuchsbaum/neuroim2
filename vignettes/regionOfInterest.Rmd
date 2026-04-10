@@ -1,9 +1,9 @@
 ---
-title: Regions of Interest (ROI)
+title: Advanced ROI Construction
 date: '`r Sys.Date()`'
 output: rmarkdown::html_vignette
 vignette: |
-  %\VignetteIndexEntry{Regions of Interest (ROI)}
+  %\VignetteIndexEntry{Advanced ROI Construction}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 params:
@@ -16,7 +16,7 @@ resource_files:
 includes:
   in_header: |-
     <script src="albers.js"></script>
-    <script>document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('palette-violet');});</script>
+    <script>document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('palette-red');});</script>
 
 ---
 
@@ -30,20 +30,15 @@ options(mc.cores=1)
 ```
 
 
-# Introduction to Regions of Interest
+This article is now the detailed ROI reference to read after
+`vignette("AnalysisWorkflows")`. The core workflow vignette shows when to use
+ROIs; this article goes deeper into the different ROI constructors and ROI data
+structures available in `neuroim2`.
 
-## What are ROIs?
+## ROI types in neuroim2
 
-Regions of Interest (ROIs) are fundamental tools in neuroimaging analysis that allow researchers to focus on specific brain areas or patterns. Rather than analyzing every voxel in the brain independently, ROIs enable:
-
-- **Targeted analysis** of anatomically or functionally defined brain regions
-- **Dimensionality reduction** by aggregating signals within regions
-- **Statistical power** improvement through spatial averaging
-- **Hypothesis-driven** investigations of specific brain areas
-
-## ROI Types in neuroim2
-
-The **neuroim2** package provides comprehensive support for creating and manipulating ROIs:
+The package supports several ROI styles, depending on whether you want one
+simple neighborhood, a grid-based box, a parcel map, or a weighted kernel:
 
 | ROI Type | Function | Description | Use Case |
 |----------|----------|-------------|----------|
@@ -53,28 +48,28 @@ The **neuroim2** package provides comprehensive support for creating and manipul
 | **Clustered** | `ClusteredNeuroVol` | Parcellation-based regions | Atlas-based analysis |
 | **Custom** | `Kernel` | Weighted regions | Gaussian-weighted, gradient-based |
 
-## Quick Start
+## Quick start
 
 ```{r}
-# Load the package
-library(neuroim2)
-
-# Read a brain volume
 file_name <- system.file("extdata", "global_mask2.nii.gz", package="neuroim2")
 vol <- read_vol(file_name)
 
-# Create a simple spherical ROI
 roi <- spherical_roi(vol, c(20, 20, 20), radius = 5)
 cat("ROI contains", length(roi), "voxels\n")
 ```
 
 ---
 
-# Basic ROI Operations
+# Basic ROI operations
+
+The introductory ROI extraction and searchlight workflow now lives in
+`vignette("AnalysisWorkflows")`. This article stays focused on ROI
+construction, representation, and less common ROI variants.
 
 ## Creating a Spherical ROI
 
-Spherical ROIs are the most commonly used type in neuroimaging. They're particularly useful for searchlight analyses and seed-based connectivity studies.
+Spherical ROIs are still the base constructor most other workflows build on, so
+this article starts there and then moves into less common patterns.
 
 ```{r}
 # Load an example brain volume
@@ -223,27 +218,9 @@ cat("Memory usage - ROI:", format(roi_size, units = "auto"), "\n")
 cat("Memory usage - Sparse:", format(sparse_size, units = "auto"), "\n")
 ```
 
-## Extracting Time-Series from ROIs (4D Data)
-
-ROIs are particularly useful for extracting time-series from 4D functional data:
-
-```{r}
-# Load a 4D dataset (using mask file as example - normally this would be fMRI data)
-vec4d <- read_vec(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
-cat("4D data dimensions:", dim(vec4d), "\n")
-
-# Create an ROI
-roi <- spherical_roi(vol, c(12, 12, 12), radius = 6)
-
-# Extract time-series from the ROI
-roi_series <- series_roi(vec4d, roi)
-cat("ROI time-series dimensions:", dim(roi_series), "\n")
-
-# Get mean time-series across ROI (average across voxels)
-mat_roi <- values(roi_series)      # T x N matrix
-mean_series <- rowMeans(mat_roi)   # length equals time dimension
-cat("Mean time-series length:", length(mean_series), "\n")
-```
+The basic 4D ROI extraction workflow with `series_roi()` now lives in
+`vignette("AnalysisWorkflows")`. The current article keeps the lower-level ROI
+data structures and construction details.
 
 ## Using ROIVec for 4D ROI Data
 
@@ -272,64 +249,10 @@ roi_matrix <- values(roi_vec)
 cat("Matrix dimensions (T x N):", dim(roi_matrix), "\n")
 ```
 
----
-
-# Searchlight Analyses
-
-Searchlight analysis is a powerful technique for multivariate pattern analysis that examines local neighborhoods throughout the brain.
-
-## Basic Searchlight
-
-```{r}
-library(purrr)
-
-# Generate exhaustive searchlight covering all voxels
-slist <- searchlight(vol, eager = TRUE, radius = 8)
-cat("Number of searchlights:", length(slist), "\n")
-
-# Compute mean value in each searchlight
-searchlight_means <- slist %>% 
-  purrr::map_dbl(~ mean(vol[coords(.)]))
-
-cat("Computed means for", length(searchlight_means), "searchlights\n")
-cat("Mean range:", range(searchlight_means, na.rm = TRUE), "\n")
-```
-
-## Randomized Searchlight
-
-Randomized searchlight samples voxels without replacement, ensuring coverage while reducing redundancy:
-
-```{r}
-# Randomized searchlight - each voxel appears in at least one searchlight
-set.seed(42)  # For reproducibility
-random_lights <- vol %>% 
-  random_searchlight(radius = 8) %>% 
-  purrr::map_dbl(~ mean(vol[coords(.)]))
-
-cat("Random searchlight count:", length(random_lights), "\n")
-```
-
-## Clustered Searchlight
-
-Use anatomical or functional parcellations to define ROIs:
-
-```{r}
-# Create a clustering over the voxel space
-grid <- index_to_coord(vol, which(vol > 0))
-set.seed(123)
-kres <- kmeans(grid, centers = 50, iter.max = 500)
-
-# Create ClusteredNeuroVol
-kvol <- ClusteredNeuroVol(vol, kres$cluster)
-cat("Created", length(unique(kres$cluster)), "clusters\n")
-
-# Run clustered searchlight
-cluster_means <- vol %>% 
-  clustered_searchlight(cvol = kvol) %>% 
-  purrr::map_dbl(~ mean(vol[coords(.)]))
-
-cat("Cluster mean range:", range(cluster_means, na.rm = TRUE), "\n")
-```
+Searchlight workflows, including `searchlight()`, `random_searchlight()`, and
+`clustered_searchlight()`, are now covered in `vignette("AnalysisWorkflows")`.
+That keeps the current article focused on constructing ROIs and ROI-like data
+objects rather than on the first-pass analyses built on top of them.
 
 ---
 

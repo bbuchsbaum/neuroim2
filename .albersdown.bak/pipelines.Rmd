@@ -1,13 +1,14 @@
 ---
-title: 'Pipelines: Split, Map, and Reduce'
+title: Advanced Split, Map, and Reduce
 date: '`r Sys.Date()`'
 output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Pipelines: Split, Map, and Reduce}
+vignette: |
+  %\VignetteIndexEntry{Advanced Split, Map, and Reduce}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 params:
   family: red
+  preset: homage
 css: albers.css
 resource_files:
 - albers.css
@@ -15,74 +16,39 @@ resource_files:
 includes:
   in_header: |-
     <script src="albers.js"></script>
-    <script>document.addEventListener('DOMContentLoaded',()=>document.body.classList.add('palette-red'));</script>
+    <script>document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('palette-red');});</script>
 
 ---
 
 ```{r, echo = FALSE, message = FALSE}
-knitr::opts_chunk$set(collapse = T, comment = "#>", fig.alt = 'Plot output')
-library(purrr)
-library(assertthat)
-library(neuroim2)
+knitr::opts_chunk$set(collapse = T, comment = "#>", fig.alt = 'Plot output', message = FALSE, warning = FALSE)
+suppressPackageStartupMessages({
+  library(purrr)
+  library(neuroim2)
+})
 options(mc.cores=1)
 ```
 
-Pipelining operations using a functional approach
-===================
+This article is now the older, lower-level companion to
+`vignette("AnalysisWorkflows")`. Read that vignette first if you want the
+shortest path to ROI extraction, searchlights, and split-map-reduce patterns.
+Use this article when you want more raw examples of composing those operations
+with `purrr` and direct list-processing.
 
-The `neuroim2` packages provides a set of functions that allows one to split image data in various ways to processing data split into parts. By breaking a dataset up into pieces, we can also more easily parallelize certain operations. 
+# Pipelining operations with a functional style
 
-## Splitting an image into connected components
+`neuroim2` exposes several operations that split an image into pieces, let you
+map a function over those pieces, and then reduce the results back into a
+vector, list, or derived image.
 
-First we load in an example volume, assign it random values, and find its connected components with a threshold of .9
-
-```{r}
-      library(purrr)
-      library(ggplot2)
-      file_name <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
-      vol <- read_vol(file_name)
-      mask.idx <- which(vol>0)
-      
-      vol2 <- vol
-      vol2[mask.idx] <- runif(length(mask.idx))
-      comp <- conn_comp(vol2, threshold=.8)
-      
-      plot(comp$index, zlevels=seq(1,25,by=3), cmap=rainbow(255))
-```
-
-Now we want to find the average value in each of the connected components using the `split_clusters` function. Since `conn_comp` returns a `ClusteredNeuroVol` containing the cluster indices, we use that to split the original volume into a list of `ROIVol`s and compute the mean over each one.
+The ROI- and searchlight-based split-map-reduce patterns now live in
+`vignette("AnalysisWorkflows")`. This article keeps the lower-level iteration
+helpers that are still useful when you want to split by slices, volumes, or
+voxel vectors directly.
 
 ```{r}
-mvals <- vol2 %>% split_clusters(comp$index) %>% map_dbl( ~ mean(.))
-```
-    
-Suppose we want to compute the local standard deviation within a 4mm radius of each voxel. We can use the `searchlight` function to construct a list of spherical ROIs centered on every voxel in the input set.
-
-```{r}
-sdvol <- vol %>% searchlight(radius=5, eager=TRUE) %>% map_dbl( ~ sd(values(.))) 
-sdvol <- NeuroVol(sdvol, space=space(vol), indices=which(vol!=0))
-plot(sdvol, cmap=rainbow(255))
-```
-
-Another thing we might to is compute the k nearest neighbors in each searchlight and replace the center voxel with the average intensity of its neighbors:
-
-```{r}
-k <- 12
-knnfvol <- vol2 %>% searchlight(radius=6, eager=TRUE) %>% map_dbl(function(x) {
-  # Just compute mean of all values in the searchlight
-  mean(values(x))
-}) %>% NeuroVol(space=space(vol), indices=which(vol!=0))
-plot(knnfvol, cmap=rainbow(255))
-```
-
-If we only need access to the searchlight coordinates (in voxel space), we can use the `searchlight_coords` function. Here, we simply replace the center voxel with the average of its neighbors in searchlight space:
-
-```{r}
-avgvol <- vol %>% searchlight_coords(radius=12, nonzero=TRUE) %>% map_dbl(function(x) {
-  vals <- vol[x]
-  mean(vals[vals!=0])
-}) %>% NeuroVol(space=space(vol), indices=which(vol!=0))
-plot(avgvol, cmap=rainbow(2), zlevels=seq(1,25,by=3))
+file_name <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
+vol <- read_vol(file_name)
 ```
 
 ## Mapping a function over every slice of a `NeuroVol`
@@ -101,8 +67,8 @@ vec <- concat(vol,vol,vol,vol,vol)
 vec
 mean_vec <- vec %>% vols %>% map_dbl(~ mean(.))
 sd_vec <- vec %>% vols %>% map_dbl(~ sd(.))
-assert_that(length(mean_vec) == dim(vec)[4])
-assert_that(length(sd_vec) == dim(vec)[4])
+stopifnot(length(mean_vec) == dim(vec)[4])
+stopifnot(length(sd_vec) == dim(vec)[4])
 ```
 
 ## Mapping a function over each vector of a `NeuroVec` object
@@ -111,5 +77,5 @@ assert_that(length(sd_vec) == dim(vec)[4])
 vec <- concat(vol,vol,vol,vol,vol)
 vec
 mean_vol <- vec %>% vectors() %>% map_dbl(~ mean(.)) %>% NeuroVol(., space=space(vol))
-assert_that(all(dim(mean_vol) == dim(vol)))
+stopifnot(all(dim(mean_vol) == dim(vol)))
 ```

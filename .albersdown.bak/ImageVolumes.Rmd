@@ -1,13 +1,14 @@
 ---
-title: Working with 3D Image Volumes
+title: Advanced 3D Volume Patterns
 date: '`r Sys.Date()`'
 output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Working with 3D Image Volumes}
+vignette: |
+  %\VignetteIndexEntry{Advanced 3D Volume Patterns}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 params:
   family: red
+  preset: homage
 css: albers.css
 resource_files:
 - albers.css
@@ -15,92 +16,68 @@ resource_files:
 includes:
   in_header: |-
     <script src="albers.js"></script>
-    <script>document.addEventListener('DOMContentLoaded',()=>document.body.classList.add('palette-red'));</script>
+    <script>document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('palette-red');});</script>
 
 ---
 
-```{r, echo = FALSE, message = FALSE}
-knitr::opts_chunk$set(collapse = T, comment = "#>")
+```{r setup, echo = FALSE, message = FALSE}
+if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("albersdown", quietly = TRUE)) ggplot2::theme_set(albersdown::theme_albers(family = params$family, preset = params$preset))
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE, warning = FALSE)
+suppressPackageStartupMessages(library(neuroim2))
 ```
 
-## Reading a NIFTI formatted image volume
+This article is now the detailed follow-on to `vignette("VolumesAndVectors")`.
+Read that vignette first if you want the shortest introduction to `read_vol()`,
+`read_vec()`, and the basic `NeuroVol` / `NeuroVec` mental model.
 
-The way to read an volumetric image file is to use `read_vol`:
+Use this article when you specifically want deeper 3D-volume details: masks,
+coordinate conversion, manual construction, and slice-level inspection.
 
+## Read one volume to establish context
 
 ```{r}
-    library(neuroim2)
-    file_name <- system.file("extdata", "global_mask2.nii.gz", package="neuroim2")
-    vol <- read_vol(file_name)
+file_name <- system.file("extdata", "global_mask2.nii.gz", package = "neuroim2")
+vol <- read_vol(file_name)
 ```
 
-## Working with image volumes
-
-Information about the geometry of the image volume is shown here:
-
+This article assumes you already know the basic `NeuroVol` story from
+`vignette("VolumesAndVectors")`. The remaining sections focus on patterns that
+are specific to 3D work.
 
 ```{r}
-    print(vol)
+class(vol)
+is.array(vol)
+dim(vol)
+vol[1, 1, 1]
+vol[64, 64, 24]
 ```
 
-
-
-`read_vol` returns an object of class `NeuroVol` object which extends an R `array` and has 3 dimensions (x,y,z).
+## Coordinate conversion and spatial metadata
 
 ```{r}
-    class(vol)
-    
-    is.array(vol)
-    
-    dim(vol)
-    
-    vol[1,1,1]
-    
-    vol[64,64,24]
-    
-```
-    
-Arithmetic can be performed on images as if they were ordinary `array`s:
-
-
-```{r}
-    
-    vol2 <- vol + vol
-    sum(vol2) == 2 * sum(vol)
-    
-    vol3 <- vol2 - 2*vol
-    all(vol3 == 0)
-```
-
-## Inspecting geometry and spatial metadata
-
-Each `NeuroVol` has an associated `NeuroSpace` describing its geometry (dimensions, spacing, origin, axes/orientation).
-
-```{r}
-    sp <- space(vol)
-    sp                 # human-readable summary
-    dim(vol)           # spatial dimensions (x, y, z)
-    spacing(vol)       # voxel size in mm
-    origin(vol)        # image origin
+sp <- space(vol)
+sp
+dim(vol)
+spacing(vol)
+origin(vol)
 ```
 
 You can convert between indices, voxel grid coordinates, and real-world coordinates:
 
 ```{r}
-    idx <- 1:5
-    g   <- index_to_grid(vol, idx)     # 1D index -> (i,j,k)
-    w   <- index_to_coord(vol, idx)    # 1D index -> world coords
-    idx2 <- coord_to_index(vol, w)     # back to indices
-    all.equal(idx, idx2)
+idx <- 1:5
+g <- index_to_grid(vol, idx)
+w <- index_to_coord(vol, idx)
+idx2 <- coord_to_index(vol, w)
+all.equal(idx, idx2)
 ```
 
 A numeric image volume can be converted to a binary image as follows:
 
 ```{r}
-    
-    vol2 <- as.logical(vol)
-    class(vol2)
-    print(vol2[1,1,1])
+vol2 <- as.logical(vol)
+class(vol2)
+print(vol2[1, 1, 1])
 ```
 
 ## Masks and LogicalNeuroVol
@@ -108,28 +85,29 @@ A numeric image volume can be converted to a binary image as follows:
 Create a mask from a threshold or an explicit set of indices. Masks are `LogicalNeuroVol` and align with the 3D space.
 
 ```{r}
-    # Threshold-based mask
-    mask1 <- as.mask(vol > 0.5)
-    mask1
+mask1 <- as.mask(vol > 0.5)
+mask1
 
-    # Index-based mask
-    idx_hi <- which(vol > 0.8)
-    mask2 <- as.mask(vol, idx_hi)
-    sum(mask2) == length(idx_hi)
+idx_hi <- which(vol > 0.8)
+mask2 <- as.mask(vol, idx_hi)
+sum(mask2) == length(idx_hi)
 
-    # Use a mask to compute a summary
-    mean_in_mask <- mean(vol[mask1@.Data])
-    mean_in_mask
+mean_in_mask <- mean(vol[mask1@.Data])
+mean_in_mask
 ```
 
-We can also create a `NeuroVol` instance from an `array` or `numeric` vector. First we consruct a standard R `array`:
+## Constructing volumes manually
+
+We can also create a `NeuroVol` instance from an `array` or `numeric` vector.
+First we construct a standard R `array`:
 
 
 ```{r}
     x <- array(0, c(64,64,64))
 ```
 
-Now we reate a `NeuroSpace` instance that describes the geometry of the image including, at minimum, its dimensions and voxel spacing.
+Now we create a `NeuroSpace` instance that describes the geometry of the image,
+including at minimum its dimensions and voxel spacing.
 
 ```{r}
     bspace <- NeuroSpace(dim=c(64,64,64), spacing=c(1,1,1))
@@ -137,7 +115,9 @@ Now we reate a `NeuroSpace` instance that describes the geometry of the image in
     vol
 ```
 
-We do not usually have to create `NeuroSpace` objects, because geometric information about an image is automatically determined from information stored in the image file header. Thus, `NeuroSpace` objects are usually copied from existing images using the `space` extractor function when needed:
+We do not usually have to create `NeuroSpace` objects by hand because real
+image files carry this information in their headers. In practice you usually
+copy an existing space:
 
 
 ```{r}
@@ -148,7 +128,14 @@ We do not usually have to create `NeuroSpace` objects, because geometric informa
 
 ## Slicing and quick visualization
 
-Extract a single 2D slice for display using standard array indexing:
+The easiest way to view a volume is with `plot()`, which shows a 3 x 3 montage
+of evenly-spaced axial slices:
+
+```{r plot_montage, fig.alt='3x3 montage of axial slices.', fig.cap='Default plot() montage', fig.width=7, fig.height=7}
+plot(vol)
+```
+
+You can also extract a single 2D slice for display using standard array indexing:
 
 ```{r slice_mid, fig.alt='Mid-slice of example volume (grayscale image).', fig.cap='Mid-slice of example volume'}
     z <- ceiling(dim(vol)[3] / 2)
@@ -215,3 +202,6 @@ You can also write to a temporary file during workflows:
     file.exists(tmp)
     unlink(tmp)
 ```
+
+For reorientation, resampling, and downsampling, use
+`vignette("Resampling")`, which now owns that topic directly.
