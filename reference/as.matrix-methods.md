@@ -2,6 +2,10 @@
 
 convert a `NeuroVec` to a matrix
 
+Converts a
+[`NeuroVecSeq`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroVecSeq-class.md)
+to a dense voxel-by-time matrix.
+
 convert a
 [`ROIVec`](https://bbuchsbaum.github.io/neuroim2/reference/ROIVec-class.md)
 to a matrix
@@ -22,6 +26,9 @@ as.matrix(x)
 
 # S4 method for class 'DenseNeuroVec'
 as.matrix(x)
+
+# S4 method for class 'NeuroVecSeq'
+as.matrix(x, ...)
 
 # S4 method for class 'ROIVec'
 as.matrix(x)

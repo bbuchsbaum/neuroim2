@@ -4,12 +4,16 @@ spatial geometry. Non-zero values stored in the sparse vector are placed at
 their corresponding linear indices in the dense array; all other voxels are 0.
 Identity method: returns a DenseNeuroVol (or subclass such
   as LogicalNeuroVol) unchanged.
-This function provides a method to coerce an object of class ROIVol to a DenseNeuroVol using the as.dense method."><meta property="og:description" content="Convert a sparse volumetric image to a dense representation with the same
+This function provides a method to coerce an object of class ROIVol to a DenseNeuroVol using the as.dense method.
+Materializes a NeuroVecSeq as a single
+DenseNeuroVec with the sequence's combined space."><meta property="og:description" content="Convert a sparse volumetric image to a dense representation with the same
 spatial geometry. Non-zero values stored in the sparse vector are placed at
 their corresponding linear indices in the dense array; all other voxels are 0.
 Identity method: returns a DenseNeuroVol (or subclass such
   as LogicalNeuroVol) unchanged.
-This function provides a method to coerce an object of class ROIVol to a DenseNeuroVol using the as.dense method."></head><body>
+This function provides a method to coerce an object of class ROIVol to a DenseNeuroVol using the as.dense method.
+Materializes a NeuroVecSeq as a single
+DenseNeuroVec with the sequence's combined space."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -40,7 +44,7 @@ This function provides a method to coerce an object of class ROIVol to a DenseNe
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Coerce SparseNeuroVol to DenseNeuroVol</h1>
-      <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/neuroim2/blob/master/R/clustervol.R" class="external-link"><code>R/clustervol.R</code></a>, <a href="https://github.com/bbuchsbaum/neuroim2/blob/master/R/neurovol.R" class="external-link"><code>R/neurovol.R</code></a>, <a href="https://github.com/bbuchsbaum/neuroim2/blob/master/R/roi.R" class="external-link"><code>R/roi.R</code></a>, and 1 more</small>
+      <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/neuroim2/blob/master/R/clustervol.R" class="external-link"><code>R/clustervol.R</code></a>, <a href="https://github.com/bbuchsbaum/neuroim2/blob/master/R/neurovol.R" class="external-link"><code>R/neurovol.R</code></a>, <a href="https://github.com/bbuchsbaum/neuroim2/blob/master/R/neurovecseq.R" class="external-link"><code>R/neurovecseq.R</code></a>, and 2 more</small>
       <div class="d-none name"><code>as.dense-methods.Rd</code></div>
     </div>
 
@@ -51,6 +55,8 @@ their corresponding linear indices in the dense array; all other voxels are 0.</
 <p>Identity method: returns a <code>DenseNeuroVol</code> (or subclass such
   as <code>LogicalNeuroVol</code>) unchanged.</p>
 <p>This function provides a method to coerce an object of class <code>ROIVol</code> to a <code>DenseNeuroVol</code> using the <code>as.dense</code> method.</p>
+<p>Materializes a <code><a href="NeuroVecSeq-class.html">NeuroVecSeq</a></code> as a single
+<code><a href="DenseNeuroVec-class.html">DenseNeuroVec</a></code> with the sequence's combined space.</p>
     </div>
 
     <div class="section level2">
@@ -68,6 +74,9 @@ their corresponding linear indices in the dense array; all other voxels are 0.</
 <span><span class="fu"><a href="as.dense.html">as.dense</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'SparseNeuroVec'</span></span>
+<span><span class="fu"><a href="as.dense.html">as.dense</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'NeuroVecSeq'</span></span>
 <span><span class="fu"><a href="as.dense.html">as.dense</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -85,6 +94,7 @@ their corresponding linear indices in the dense array; all other voxels are 0.</
 <p>A DenseNeuroVol with identical spatial dimensions and values expanded
   from the sparse representation.</p>
 <p>A <code>DenseNeuroVol</code> object obtained by coercing the <code>ROIVol</code> object.</p>
+<p>A DenseNeuroVec containing all sequence volumes concatenated in time.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

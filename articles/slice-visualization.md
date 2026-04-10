@@ -252,15 +252,15 @@ sessionInfo()
 ## [1] neuroim2_0.11.0 Matrix_1.7-4    ggplot2_4.0.2  
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] sass_0.4.10           generics_0.1.4        mmap_0.6-24          
+##  [1] sass_0.4.10           generics_0.1.4        mmap_0.6-26          
 ##  [4] stringi_1.8.7         lattice_0.22-9        digest_0.6.39        
-##  [7] magrittr_2.0.4        bigstatsr_1.6.2       evaluate_1.0.5       
+##  [7] magrittr_2.0.5        bigstatsr_1.6.2       evaluate_1.0.5       
 ## [10] grid_4.5.3            RColorBrewer_1.1-3    iterators_1.0.14     
 ## [13] rmio_0.4.0            fastmap_1.2.0         foreach_1.5.2        
 ## [16] doParallel_1.0.17     jsonlite_2.0.0        RNifti_1.9.0         
 ## [19] purrr_1.2.1           deflist_0.2.0         scales_1.4.0         
 ## [22] codetools_0.2-20      textshaping_1.0.5     jquerylib_0.1.4      
-## [25] cli_3.6.5             rlang_1.1.7           cowplot_1.2.0        
+## [25] cli_3.6.6             rlang_1.2.0           cowplot_1.2.0        
 ## [28] splines_4.5.3         withr_3.0.2           cachem_1.1.0         
 ## [31] yaml_2.3.12           flock_0.7             tools_4.5.3          
 ## [34] parallel_4.5.3        memoise_2.0.1         bigassertr_0.1.7     

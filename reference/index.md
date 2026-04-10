@@ -822,6 +822,7 @@ Miscellaneous methods and functions
   [`as.dense(`*`<DenseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.dense-methods.md)
   [`as.dense(`*`<ROIVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.dense-methods.md)
   [`as.dense(`*`<SparseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.dense-methods.md)
+  [`as.dense(`*`<NeuroVecSeq>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.dense-methods.md)
   : Coerce SparseNeuroVol to DenseNeuroVol
 
 - [`as.dense()`](https://bbuchsbaum.github.io/neuroim2/reference/as.dense.md)
@@ -847,6 +848,7 @@ Miscellaneous methods and functions
   [`as.matrix(`*`<MappedNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.matrix-methods.md)
   [`as.matrix(`*`<NeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.matrix-methods.md)
   [`as.matrix(`*`<DenseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.matrix-methods.md)
+  [`as.matrix(`*`<NeuroVecSeq>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.matrix-methods.md)
   [`as.matrix(`*`<ROIVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.matrix-methods.md)
   [`as.matrix(`*`<AbstractSparseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.matrix-methods.md)
   :
