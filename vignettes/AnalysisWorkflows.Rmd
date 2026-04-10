@@ -1,0 +1,143 @@
+---
+title: ROIs, Searchlights, and Pipelines
+output: rmarkdown::html_vignette
+vignette: |
+  %\VignetteIndexEntry{ROIs, Searchlights, and Pipelines}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+params:
+  family: red
+  preset: homage
+css: albers.css
+resource_files:
+- albers.css
+- albers.js
+includes:
+  in_header: |-
+    <script src="albers.js"></script>
+    <script>document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('palette-red');});</script>
+
+---
+
+```{r setup, include = FALSE}
+if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("albersdown", quietly = TRUE)) ggplot2::theme_set(albersdown::theme_albers(family = params$family, preset = params$preset))
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE
+)
+suppressPackageStartupMessages({
+  library(neuroim2)
+  library(purrr)
+})
+```
+
+Most analysis work in `neuroim2` reduces to the same pattern: define a spatial
+support, extract values from it, then summarize or map those values into a new
+result. This article shows the three main ways to do that.
+
+## Extract a time series from one ROI
+
+Start with a 4D image and define one spherical region of interest.
+
+```{r load-demo}
+vec_file <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
+vol <- read_vol(vec_file)
+vec <- read_vec(vec_file)
+```
+
+```{r roi-example}
+roi <- spherical_roi(vol, c(12, 12, 12), radius = 6)
+roi_ts <- series_roi(vec, roi)
+
+dim(values(roi_ts))
+```
+
+```{r roi-example-check}
+stopifnot(length(roi) > 0L)
+stopifnot(nrow(values(roi_ts)) == dim(vec)[4])
+```
+
+That gives you one compact object containing the time series from every voxel
+inside the ROI.
+
+## Split a masked volume into parcels
+
+When you already have a parcellation or cluster assignment, `split_clusters()`
+turns one `NeuroVec` into a list of region-wise objects.
+
+```{r cluster-setup}
+set.seed(1)
+
+mask_vol <- vol > 0
+cluster_ids <- sample(1:4, sum(mask_vol), replace = TRUE)
+clustered <- ClusteredNeuroVol(mask_vol, cluster_ids)
+parts <- split_clusters(vec, clustered)
+
+length(parts)
+```
+
+```{r cluster-summary}
+part_means <- map_dbl(parts, ~ mean(values(.)))
+part_means
+```
+
+```{r cluster-check}
+stopifnot(length(parts) == 4L)
+stopifnot(all(is.finite(part_means)))
+```
+
+This is the right pattern when the support is fixed in advance by an atlas,
+parcel map, or clustering step.
+
+## Build searchlights lazily
+
+Searchlights define many overlapping ROIs, one centered at each voxel in a
+mask. The lazy form is useful because you only realize the neighborhoods you
+actually touch.
+
+```{r searchlight-demo}
+sl <- searchlight(mask_vol, radius = 4, eager = FALSE, nonzero = FALSE)
+first_sl <- sl[[1]]
+
+nrow(coords(first_sl))
+```
+
+```{r searchlight-check}
+stopifnot(nrow(coords(first_sl)) > 0L)
+```
+
+The eager form is better when you want to iterate repeatedly over the full set
+and can afford the up-front construction cost.
+
+## Map a simple statistic over the first few searchlights
+
+You do not need a specialized pipeline framework to use split-map-reduce style
+workflows. A small list of ROIs plus `purrr::map_*()` is often enough.
+
+```{r map-demo}
+first_five <- lapply(seq_len(5), function(i) sl[[i]])
+first_five_means <- map_dbl(first_five, ~ mean(values(.)))
+
+first_five_means
+```
+
+```{r map-check}
+stopifnot(length(first_five_means) == 5L)
+stopifnot(all(is.finite(first_five_means)))
+```
+
+The pattern is the same whether the pieces come from parcels, ROIs, connected
+components, or searchlights:
+
+1. define the spatial pieces
+2. extract the values you need
+3. reduce them into a scalar, vector, or model result
+
+## Where to go next
+
+- `vignette("VolumesAndVectors")` for the core data containers
+- `vignette("regionOfInterest")` for the full ROI API surface
+- `vignette("pipelines")` for older split-map-reduce examples
+- `vignette("clustered-neurovec")` for parcel-based data structures
