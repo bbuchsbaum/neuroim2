@@ -248,6 +248,57 @@ setMethod(f = "linear_access",
             out
           })
 
+# Coerce NeuroVecSeq to matrix.
+setAs(from="NeuroVecSeq", to="matrix",
+      function(from) {
+        as.matrix(from)
+      })
+
+# Coerce NeuroVecSeq to DenseNeuroVec.
+setAs(from="NeuroVecSeq", to="DenseNeuroVec",
+      function(from) {
+        as.dense(from)
+      })
+
+# Coerce NeuroVecSeq to the plain in-memory NeuroVec representation.
+setAs(from="NeuroVecSeq", to="NeuroVec",
+      function(from) {
+        as.dense(from)
+      })
+
+#' Convert a NeuroVecSeq to a matrix
+#'
+#' @description
+#' Converts a \code{\linkS4class{NeuroVecSeq}} to a dense voxel-by-time matrix.
+#'
+#' @param x A NeuroVecSeq object
+#' @param ... Additional arguments
+#' @return A matrix with one row per voxel and one column per time point.
+#'
+#' @rdname as.matrix-methods
+#' @export
+setMethod(f="as.matrix", signature=signature(x="NeuroVecSeq"),
+          def=function(x, ...) {
+            mats <- lapply(x@vecs, as.matrix)
+            do.call(cbind, mats)
+          })
+
+#' Convert a NeuroVecSeq to a DenseNeuroVec
+#'
+#' @description
+#' Materializes a \code{\linkS4class{NeuroVecSeq}} as a single
+#' \code{\linkS4class{DenseNeuroVec}} with the sequence's combined space.
+#'
+#' @param x A NeuroVecSeq object
+#' @return A DenseNeuroVec containing all sequence volumes concatenated in time.
+#'
+#' @rdname as.dense-methods
+#' @export
+setMethod(f="as.dense", signature=signature(x="NeuroVecSeq"),
+          def=function(x) {
+            DenseNeuroVec(as.matrix(x), space(x))
+          })
+
 
 #' @rdname series-methods
 #' @export

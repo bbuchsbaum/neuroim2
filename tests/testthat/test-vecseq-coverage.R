@@ -52,6 +52,37 @@ test_that("NeuroVecSeq length equals sum of time dims", {
   expect_equal(dim(vs)[4], 10L)
 })
 
+test_that("as.matrix on NeuroVecSeq matches concatenated NeuroVec", {
+  v1 <- make_test_vec(4L)
+  v2 <- make_test_vec(6L)
+  vs <- NeuroVecSeq(v1, v2)
+  ref <- concat(v1, v2)
+
+  expect_equal(as.matrix(vs), as.matrix(ref))
+  expect_equal(as(vs, "matrix"), as.matrix(ref))
+})
+
+test_that("NeuroVecSeq can be materialized as DenseNeuroVec", {
+  v1 <- make_test_vec(4L)
+  v2 <- make_test_vec(6L)
+  vs <- NeuroVecSeq(v1, v2)
+  ref <- concat(v1, v2)
+
+  dense <- as.dense(vs)
+  coerced <- as(vs, "DenseNeuroVec")
+  plain <- as(vs, "NeuroVec")
+
+  expect_s4_class(dense, "DenseNeuroVec")
+  expect_s4_class(coerced, "DenseNeuroVec")
+  expect_s4_class(plain, "DenseNeuroVec")
+  expect_false(inherits(plain, "NeuroVecSeq"))
+  expect_equal(dim(dense), dim(ref))
+  expect_equal(space(dense), space(ref))
+  expect_equal(as.matrix(dense), as.matrix(ref))
+  expect_equal(as.matrix(coerced), as.matrix(ref))
+  expect_equal(as.matrix(plain), as.matrix(ref))
+})
+
 # ---------------------------------------------------------------------------
 # [[ extraction
 # ---------------------------------------------------------------------------
