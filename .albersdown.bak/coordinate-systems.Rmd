@@ -1,8 +1,10 @@
 ---
 title: Coordinate Systems and Spatial Transforms
 output: rmarkdown::html_vignette
-vignette: |
-  %\VignetteIndexEntry{Coordinate Systems and Spatial Transforms} %\VignetteEngine{knitr::rmarkdown} %\VignetteEncoding{UTF-8}
+vignette: >
+  %\VignetteIndexEntry{Coordinate Systems and Spatial Transforms}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 params:
   family: red
   preset: homage

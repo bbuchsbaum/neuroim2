@@ -1,12 +1,13 @@
 ---
 title: 'ClusteredNeuroVec: Parcel-based 4D Analysis'
 output: rmarkdown::html_vignette
-vignette: >
+vignette: |
   %\VignetteIndexEntry{ClusteredNeuroVec: Parcel-based 4D Analysis}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 params:
   family: red
+  preset: homage
 css: albers.css
 resource_files:
 - albers.css
@@ -14,11 +15,12 @@ resource_files:
 includes:
   in_header: |-
     <script src="albers.js"></script>
-    <script>document.addEventListener('DOMContentLoaded',()=>document.body.classList.add('palette-red'));</script>
+    <script>document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('palette-red');});</script>
 
 ---
 
 ```{r setup, include=FALSE}
+if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("albersdown", quietly = TRUE)) ggplot2::theme_set(albersdown::theme_albers(family = params$family, preset = params$preset))
 if (requireNamespace("ggplot2", quietly = TRUE)) ggplot2::theme_set(neuroim2::theme_neuro(base_family = params$family))
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -103,13 +105,13 @@ length(ts)  # 20 time points
 Perform searchlight analysis at the cluster level using centroid distances:
 
 ```{r searchlight}
-# K-nearest neighbor searchlight (10 nearest clusters)
-windows_knn <- cluster_searchlight_series(cv, k = 10)
+# K-nearest neighbor searchlight (3 nearest clusters)
+windows_knn <- cluster_searchlight_series(cv, k = 3)
 length(windows_knn)  # One window per cluster
 
 # Look at first window
 win1 <- windows_knn[[1]]
-dim(values(win1))  # 10 neighbors x 20 time points
+dim(values(win1))  # 20 time points x 3 neighbors
 
 # Radius-based searchlight (e.g., 15mm radius)
 windows_radius <- cluster_searchlight_series(cv, radius = 15)
