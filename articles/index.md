@@ -2,49 +2,48 @@
 
 ### Start Here
 
-Core orientation and backend choice before task-specific workflows
+The shortest path from reading data to understanding space and storage
 
 - [Overview: Getting Started with
   neuroim2](https://bbuchsbaum.github.io/neuroim2/articles/Overview.md):
-- [Coordinate Systems and Spatial
-  Transforms](https://bbuchsbaum.github.io/neuroim2/articles/coordinate-systems.md):
 - [Choosing a
   Backend](https://bbuchsbaum.github.io/neuroim2/articles/ChoosingBackends.md):
-- [Working with 4D NeuroVectors
-  (NeuroVec)](https://bbuchsbaum.github.io/neuroim2/articles/NeuroVector.md):
+- [Coordinate Systems and Spatial
+  Transforms](https://bbuchsbaum.github.io/neuroim2/articles/coordinate-systems.md):
+- [Working with Volumes and
+  Vectors](https://bbuchsbaum.github.io/neuroim2/articles/VolumesAndVectors.md):
+- [Resampling, downsampling, and
+  reorientation](https://bbuchsbaum.github.io/neuroim2/articles/Resampling.md):
+
+### Analysis Workflows
+
+Common analysis patterns built from ROIs, searchlights, and summaries
+
+- [ROIs, Searchlights, and
+  Pipelines](https://bbuchsbaum.github.io/neuroim2/articles/AnalysisWorkflows.md):
+- [Slice visualization with
+  neuroim2](https://bbuchsbaum.github.io/neuroim2/articles/slice-visualization.md):
+- [neuroim2
+  Cookbook](https://bbuchsbaum.github.io/neuroim2/articles/Cookbook.md):
 
 ### Spatial Workflows
 
-Reading, transforming, and resampling volumetric data
+Focused spatial methods outside the main onboarding path
 
-- [Working with 3D Image
-  Volumes](https://bbuchsbaum.github.io/neuroim2/articles/ImageVolumes.md):
-- [Resampling, downsampling, and
-  reorientation](https://bbuchsbaum.github.io/neuroim2/articles/Resampling.md):
 - [Smoothing and filtering with
   neuroim2](https://bbuchsbaum.github.io/neuroim2/articles/Smoothing.md):
 
-### Regions and Searchlights
+### Advanced Topics
 
-ROI construction, clustered representations, and searchlight analysis
+Deeper or more specialized articles beyond the main reader path
 
-- [Regions of Interest
-  (ROI)](https://bbuchsbaum.github.io/neuroim2/articles/regionOfInterest.md):
+- [Advanced 3D Volume
+  Patterns](https://bbuchsbaum.github.io/neuroim2/articles/ImageVolumes.md):
+- [Advanced NeuroVec
+  Patterns](https://bbuchsbaum.github.io/neuroim2/articles/NeuroVector.md):
+- [Advanced ROI
+  Construction](https://bbuchsbaum.github.io/neuroim2/articles/regionOfInterest.md):
 - [ClusteredNeuroVec: Parcel-based 4D
   Analysis](https://bbuchsbaum.github.io/neuroim2/articles/clustered-neurovec.md):
-- [Pipelines: Split, Map, and
+- [Advanced Split, Map, and
   Reduce](https://bbuchsbaum.github.io/neuroim2/articles/pipelines.md):
-
-### Visualization
-
-Slice and montage visualization workflows
-
-- [Slice visualization with
-  neuroim2](https://bbuchsbaum.github.io/neuroim2/articles/slice-visualization.md):
-
-### Cookbook
-
-Small, task-oriented examples and recipes
-
-- [neuroim2
-  Cookbook](https://bbuchsbaum.github.io/neuroim2/articles/Cookbook.md):

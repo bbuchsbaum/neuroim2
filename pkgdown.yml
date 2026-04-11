@@ -2,6 +2,7 @@ pandoc: 3.1.11
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
+  AnalysisWorkflows: AnalysisWorkflows.html
   ChoosingBackends: ChoosingBackends.html
   clustered-neurovec: clustered-neurovec.html
   Cookbook: Cookbook.html
@@ -14,7 +15,8 @@ articles:
   Resampling: Resampling.html
   slice-visualization: slice-visualization.html
   Smoothing: Smoothing.html
-last_built: 2026-04-10T18:35Z
+  VolumesAndVectors: VolumesAndVectors.html
+last_built: 2026-04-11T13:15Z
 urls:
   reference: https://bbuchsbaum.github.io/neuroim2/reference
   article: https://bbuchsbaum.github.io/neuroim2/articles

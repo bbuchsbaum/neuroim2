@@ -1,74 +1,47 @@
-# Working with 3D Image Volumes
+# Advanced 3D Volume Patterns
 
-## Reading a NIFTI formatted image volume
+This article is now the detailed follow-on to
+[`vignette("VolumesAndVectors")`](https://bbuchsbaum.github.io/neuroim2/articles/VolumesAndVectors.md).
+Read that vignette first if you want the shortest introduction to
+[`read_vol()`](https://bbuchsbaum.github.io/neuroim2/reference/read_vol.md),
+[`read_vec()`](https://bbuchsbaum.github.io/neuroim2/reference/read_vec.md),
+and the basic `NeuroVol` / `NeuroVec` mental model.
 
-The way to read an volumetric image file is to use `read_vol`:
+Use this article when you specifically want deeper 3D-volume details:
+masks, coordinate conversion, manual construction, and slice-level
+inspection.
+
+## Read one volume to establish context
 
 ``` r
-    suppressPackageStartupMessages(library(neuroim2))
-    file_name <- system.file("extdata", "global_mask2.nii.gz", package="neuroim2")
-    vol <- read_vol(file_name)
+file_name <- system.file("extdata", "global_mask2.nii.gz", package = "neuroim2")
+vol <- read_vol(file_name)
 ```
 
-## Working with image volumes
-
-Information about the geometry of the image volume is shown here:
-
-``` r
-    print(vol)
-#> <DenseNeuroVol> [806.6 Kb] 
-#> ── Spatial ───────────────────────────────────────────────────────────────────── 
-#>   Dimensions    : 64 x 64 x 25
-#>   Spacing       : 3.5 x 3.5 x 3.7 mm
-#>   Origin        : 112, -108.5, -46.25
-#>   Orientation   : LAS
-#> ── Data ──────────────────────────────────────────────────────────────────────── 
-#>   Range         : [0.000, 1.000]
-```
-
-`read_vol` returns an object of class `NeuroVol` object which extends an
-R `array` and has 3 dimensions (x,y,z).
+This article assumes you already know the basic `NeuroVol` story from
+[`vignette("VolumesAndVectors")`](https://bbuchsbaum.github.io/neuroim2/articles/VolumesAndVectors.md).
+The remaining sections focus on patterns that are specific to 3D work.
 
 ``` r
-    class(vol)
+class(vol)
 #> [1] "DenseNeuroVol"
 #> attr(,"package")
 #> [1] "neuroim2"
-    
-    is.array(vol)
+is.array(vol)
 #> [1] TRUE
-    
-    dim(vol)
+dim(vol)
 #> [1] 64 64 25
-    
-    vol[1,1,1]
+vol[1, 1, 1]
 #> [1] 0
-    
-    vol[64,64,24]
+vol[64, 64, 24]
 #> [1] 0
 ```
 
-Arithmetic can be performed on images as if they were ordinary `array`s:
+## Coordinate conversion and spatial metadata
 
 ``` r
-    
-    vol2 <- vol + vol
-    sum(vol2) == 2 * sum(vol)
-#> [1] TRUE
-    
-    vol3 <- vol2 - 2*vol
-    all(vol3 == 0)
-#> [1] TRUE
-```
-
-## Inspecting geometry and spatial metadata
-
-Each `NeuroVol` has an associated `NeuroSpace` describing its geometry
-(dimensions, spacing, origin, axes/orientation).
-
-``` r
-    sp <- space(vol)
-    sp                 # human-readable summary
+sp <- space(vol)
+sp
 #> <NeuroSpace> [3D] 
 #> ── Geometry ──────────────────────────────────────────────────────────────────── 
 #>   Dimensions    : 64 x 64 x 25
@@ -76,11 +49,11 @@ Each `NeuroVol` has an associated `NeuroSpace` describing its geometry
 #>   Origin        : 112, -108.5, -46.25
 #>   Orientation   : LAS
 #>   Voxels        : 102,400
-    dim(vol)           # spatial dimensions (x, y, z)
+dim(vol)
 #> [1] 64 64 25
-    spacing(vol)       # voxel size in mm
+spacing(vol)
 #> [1] 3.5 3.5 3.7
-    origin(vol)        # image origin
+origin(vol)
 #> [1]  112.00 -108.50  -46.25
 ```
 
@@ -88,24 +61,23 @@ You can convert between indices, voxel grid coordinates, and real-world
 coordinates:
 
 ``` r
-    idx <- 1:5
-    g   <- index_to_grid(vol, idx)     # 1D index -> (i,j,k)
-    w   <- index_to_coord(vol, idx)    # 1D index -> world coords
-    idx2 <- coord_to_index(vol, w)     # back to indices
-    all.equal(idx, idx2)
+idx <- 1:5
+g <- index_to_grid(vol, idx)
+w <- index_to_coord(vol, idx)
+idx2 <- coord_to_index(vol, w)
+all.equal(idx, idx2)
 #> [1] "Mean relative difference: 0.3333333"
 ```
 
 A numeric image volume can be converted to a binary image as follows:
 
 ``` r
-    
-    vol2 <- as.logical(vol)
-    class(vol2)
+vol2 <- as.logical(vol)
+class(vol2)
 #> [1] "LogicalNeuroVol"
 #> attr(,"package")
 #> [1] "neuroim2"
-    print(vol2[1,1,1])
+print(vol2[1, 1, 1])
 #> [1] FALSE
 ```
 
@@ -115,9 +87,8 @@ Create a mask from a threshold or an explicit set of indices. Masks are
 `LogicalNeuroVol` and align with the 3D space.
 
 ``` r
-    # Threshold-based mask
-    mask1 <- as.mask(vol > 0.5)
-    mask1
+mask1 <- as.mask(vol > 0.5)
+mask1
 #> <DenseNeuroVol> [406.6 Kb] 
 #> ── Spatial ───────────────────────────────────────────────────────────────────── 
 #>   Dimensions    : 64 x 64 x 25
@@ -127,27 +98,27 @@ Create a mask from a threshold or an explicit set of indices. Masks are
 #> ── Data ──────────────────────────────────────────────────────────────────────── 
 #>   Range         : [0.000, 1.000]
 
-    # Index-based mask
-    idx_hi <- which(vol > 0.8)
-    mask2 <- as.mask(vol, idx_hi)
-    sum(mask2) == length(idx_hi)
+idx_hi <- which(vol > 0.8)
+mask2 <- as.mask(vol, idx_hi)
+sum(mask2) == length(idx_hi)
 #> [1] TRUE
 
-    # Use a mask to compute a summary
-    mean_in_mask <- mean(vol[mask1@.Data])
-    mean_in_mask
+mean_in_mask <- mean(vol[mask1@.Data])
+mean_in_mask
 #> [1] 1
 ```
 
+## Constructing volumes manually
+
 We can also create a `NeuroVol` instance from an `array` or `numeric`
-vector. First we consruct a standard R `array`:
+vector. First we construct a standard R `array`:
 
 ``` r
     x <- array(0, c(64,64,64))
 ```
 
-Now we reate a `NeuroSpace` instance that describes the geometry of the
-image including, at minimum, its dimensions and voxel spacing.
+Now we create a `NeuroSpace` instance that describes the geometry of the
+image, including at minimum its dimensions and voxel spacing.
 
 ``` r
     bspace <- NeuroSpace(dim=c(64,64,64), spacing=c(1,1,1))
@@ -163,11 +134,9 @@ image including, at minimum, its dimensions and voxel spacing.
 #>   Range         : [0.000, 0.000]
 ```
 
-We do not usually have to create `NeuroSpace` objects, because geometric
-information about an image is automatically determined from information
-stored in the image file header. Thus, `NeuroSpace` objects are usually
-copied from existing images using the `space` extractor function when
-needed:
+We do not usually have to create `NeuroSpace` objects by hand because
+real image files carry this information in their headers. In practice
+you usually copy an existing space:
 
 ``` r
     vol2 <- NeuroVol((vol+1)*25, space(vol))
@@ -277,3 +246,7 @@ You can also write to a temporary file during workflows:
 #> [1] TRUE
     unlink(tmp)
 ```
+
+For reorientation, resampling, and downsampling, use
+[`vignette("Resampling")`](https://bbuchsbaum.github.io/neuroim2/articles/Resampling.md),
+which now owns that topic directly.

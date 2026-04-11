@@ -2,392 +2,193 @@
 
 ## Introduction
 
-**neuroim2** is a comprehensive R package for neuroimaging data
-analysis, providing efficient data structures and methods for handling
-3D brain volumes and 4D time-series data. Whether you’re working with
-structural MRI, functional MRI, or other volumetric brain imaging data,
-neuroim2 offers the tools you need.
+`neuroim2` gives you a small set of data structures for 3D and 4D
+neuroimaging data, plus the spatial tools you need to move between file
+I/O, coordinate systems, regions of interest, and resampling. The
+package is broad, so this overview is intentionally narrow: it shows the
+first objects and workflows to learn, then points you to the focused
+vignettes that carry the rest.
 
-### Key Features
+## Quick start
 
-- **Efficient Data Structures**: Optimized representations for both
-  dense and sparse neuroimaging data
-- **Flexible I/O**: Read and write common neuroimaging formats (NIfTI,
-  AFNI)
-- **ROI Analysis**: Create and analyze regions of interest with various
-  shapes
-- **Searchlight Methods**: Implement searchlight analyses for pattern
-  detection
-- **Memory Management**: Handle large datasets with file-backed and
-  memory-mapped arrays
-- **Spatial Operations**: Resample, reorient, filter, and transform
-  brain images
-- **Parcellation Support**: Work with brain atlases and parcellated data
-
-### Quick Start
+Start by reading one image and inspecting its spatial metadata.
 
 ``` r
-library(neuroim2)
-
-# Load a 3D brain volume
 img <- read_vol(system.file("extdata", "global_mask2.nii.gz", package = "neuroim2"))
 
-# Inspect the spatial properties
-space(img)      # Complete spatial information
-#> <NeuroSpace> [3D] 
-#> ── Geometry ──────────────────────────────────────────────────────────────────── 
-#>   Dimensions    : 64 x 64 x 25
-#>   Spacing       : 3.5 x 3.5 x 3.7 mm
-#>   Origin        : 112, -108.5, -46.25
-#>   Orientation   : LAS
-#>   Voxels        : 102,400
-dim(img)        # Dimensions
+dim(img)
 #> [1] 64 64 25
-spacing(img)    # Voxel sizes
+spacing(img)
 #> [1] 3.5 3.5 3.7
-origin(img)     # Origin coordinates
+origin(img)
 #> [1]  112.00 -108.50  -46.25
 ```
 
-## Core Data Structures
+The most important thing to notice is that a `NeuroVol` is not just an
+array. It also carries a `NeuroSpace`, which tracks voxel spacing,
+origin, and affine transforms.
 
-### 3D Volumes: NeuroVol
+## What should you read next?
 
-The `NeuroVol` class represents 3D brain volumes (structural images,
-masks, single time points):
+The recommended path through the package is:
+
+1.  [`vignette("ChoosingBackends", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/ChoosingBackends.md)
+    for dense, sparse, mapped, file-backed, and hyper-vector backends.
+2.  [`vignette("coordinate-systems", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/coordinate-systems.md)
+    for voxel, grid, and world-coordinate conversions.
+3.  [`vignette("VolumesAndVectors", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/VolumesAndVectors.md)
+    for the core manipulation story.
+4.  [`vignette("Resampling", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/Resampling.md)
+    for
+    [`resample()`](https://bbuchsbaum.github.io/neuroim2/reference/resample-methods.md),
+    [`downsample()`](https://bbuchsbaum.github.io/neuroim2/reference/downsample-methods.md),
+    [`reorient()`](https://bbuchsbaum.github.io/neuroim2/reference/reorient-methods.md),
+    and
+    [`deoblique()`](https://bbuchsbaum.github.io/neuroim2/reference/deoblique.md).
+5.  [`vignette("AnalysisWorkflows", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/AnalysisWorkflows.md)
+    for ROIs, searchlights, and map-reduce style analyses.
+
+If you only read one follow-on article after this overview, make it
+[`vignette("VolumesAndVectors", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/VolumesAndVectors.md).
+
+## The core objects
+
+Most work in `neuroim2` starts with three ideas:
+
+- `NeuroVol` for 3D images such as anatomical volumes, masks, and single
+  summary maps.
+- `NeuroVec` for 4D data such as fMRI time-series or stacked volumes.
+- `ROI` objects for region-based extraction and local analyses.
+
+Here is the smallest possible example of each.
 
 ``` r
-# Create a synthetic 3D volume
-dims <- c(64, 64, 40)
-dat <- array(rnorm(prod(dims)), dims)
-vol <- NeuroVol(dat, NeuroSpace(dims))
+mask <- img > 0
+sum(mask)
+#> [1] 29532
 
-# Basic operations
-vol_mean <- mean(vol)
-vol_sd <- sd(vol)
-cat("Volume mean:", vol_mean, "SD:", vol_sd, "\n")
-#> Volume mean: -0.003293314 SD: 1.001015
+vec <- read_vec(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
+dim(vec)
+#> [1] 64 64 25  4
 
-# Logical volumes for masks
-mask <- vol > 0
-cat("Voxels above zero:", sum(mask), "\n")
-#> Voxels above zero: 81574
+roi <- spherical_roi(space(vec), c(45, 45, 20), radius = 4)
+length(roi)
+#> [1] 7
 ```
 
-### 4D Time-Series: NeuroVec
+That is the core mental model for the package:
 
-The `NeuroVec` class handles 4D data (e.g., fMRI time-series):
+- read or construct a spatial object
+- operate in image or vector form as needed
+- define ROIs or neighborhoods
+- extract, transform, or summarize
+
+## A small end-to-end workflow
+
+The next common step is to move from a 4D image to a region-level
+summary.
 
 ``` r
-# Create a 4D time-series (small example)
-dims_4d <- c(10, 10, 10, 20)  # 10x10x10 volume, 20 time points
-dat_4d <- array(rnorm(prod(dims_4d)), dims_4d)
-vec_4d <- NeuroVec(dat_4d, NeuroSpace(dims_4d))
+roi_ts <- series_roi(vec, roi)
+roi_mat <- values(roi_ts)
+mean_ts <- rowMeans(roi_mat)
 
-# Extract time-series at a specific voxel
-ts <- series(vec_4d, 5, 5, 5)
-cat("Time-series length at voxel (5,5,5):", length(ts), "\n")
-#> Time-series length at voxel (5,5,5): 20
+stopifnot(
+  nrow(roi_mat) == dim(vec)[4],
+  ncol(roi_mat) == length(roi),
+  all(is.finite(mean_ts))
+)
 
-# Extract a single volume at time point 10
-vol_t10 <- vec_4d[,,,10]
-cat("Volume at t=10 dimensions:", dim(vol_t10), "\n")
-#> Volume at t=10 dimensions: 10 10 10
+head(mean_ts)
+#> [1] 0 0 0 0
 ```
 
-## Region of Interest (ROI) Analysis
+This is a deliberately small example, but it shows the typical
+`neuroim2` workflow:
 
-### Creating ROIs
+1.  Load a spatial object.
+2.  Define a spatial support such as an ROI.
+3.  Extract values with the correct geometry preserved.
+4.  Compute summaries at the level you care about.
 
-neuroim2 provides multiple ways to define regions of interest:
+For broader ROI and searchlight patterns, move directly to
+[`vignette("AnalysisWorkflows", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/AnalysisWorkflows.md).
+
+## Spatial operations come next
+
+Once you are comfortable reading data and extracting values, the next
+important layer is spatial transformation.
 
 ``` r
-# Spherical ROI - most common for searchlight analyses
-sphere <- spherical_roi(img, c(30, 30, 20), radius = 5)
-cat("Spherical ROI contains", length(sphere), "voxels\n")
-#> Spherical ROI contains 11 voxels
+img_down <- downsample(img, spacing = c(2, 2, 2))
 
-# Cuboid ROI - rectangular box
-cube <- cuboid_roi(space(img), c(30, 30, 20), surround = 3)
-cat("Cuboid ROI contains", length(cube), "voxels\n")
-#> Cuboid ROI contains 343 voxels
-
-# Extract values from the original image using ROI
-roi_values <- img[coords(sphere)]
-cat("Mean value in spherical ROI:", mean(roi_values), "\n")
-#> Mean value in spherical ROI: 1
+dim(img)
+#> [1] 64 64 25
+dim(img_down)
+#> [1] 112 112  46
+spacing(img_down)
+#> [1] 2.00000 2.00000 2.01087
 ```
 
-### Searchlight Analysis
+For the full story, including orientation handling and affine-aware
+transforms, use:
 
-Searchlight is a powerful technique for local pattern analysis:
+- [`vignette("coordinate-systems", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/coordinate-systems.md)
+- [`vignette("Resampling", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/Resampling.md)
 
-``` r
-# Create searchlights with 6mm radius
-lights <- searchlight(img, radius = 6, eager = FALSE)
+## When should you change backends?
 
-# Process first few searchlights (normally you'd process all)
-first_5 <- lights[1:5]
-means <- sapply(first_5, function(roi) mean(img[coords(roi)]))
-cat("First 5 searchlight means:", round(means, 2), "\n")
-#> First 5 searchlight means: 0.5 0.64 0.64 0.5 0.43
-```
+You do not need a special backend to start. Use the default dense path
+first, then switch when the workload demands it.
 
-## Coordinate Systems and Transformations
-
-### Coordinate Conversions
-
-neuroim2 handles conversions between different coordinate systems:
+- Use dense objects when the data fits comfortably in memory.
+- Use sparse objects when most voxels are absent and should be treated
+  as missing support, not stored zeros.
+- Use file-backed or mapped objects when the array is too large to
+  materialize eagerly.
 
 ``` r
-# Voxel coordinates to world coordinates (mm)
-voxel_coords <- c(30, 30, 20)
-world_coords <- grid_to_coord(img, matrix(voxel_coords, nrow = 1))
-cat("Voxel", voxel_coords, "-> World", round(world_coords, 2), "mm\n")
-#> Voxel 30 30 20 -> World 10.5 -7 24.05 mm
-
-# World coordinates back to voxel
-voxel_back <- coord_to_grid(img, world_coords)
-cat("World", round(world_coords, 2), "-> Voxel", voxel_back, "\n")
-#> World 10.5 -7 24.05 -> Voxel 30 30 20
-
-# Linear indices
-idx <- grid_to_index(img, matrix(voxel_coords, nrow = 1))
-cat("Voxel", voxel_coords, "-> Linear index", idx, "\n")
-#> Voxel 30 30 20 -> Linear index 79710
-```
-
-## Memory-Efficient Operations
-
-### Sparse Representations
-
-For data with many zero values (e.g., masks, ROIs):
-
-``` r
-# Create a sparse representation directly from an ROI
-roi <- spherical_roi(img, c(30, 30, 20), radius = 8, fill = 1)
-
-# Convert ROI to sparse volume
-sparse_roi <- as.sparse(roi)
-
-# Compare memory usage (convert original ROI to dense for baseline)
-dense_vol <- as.dense(roi)
-cat("Dense size:", format(object.size(dense_vol), units = "auto"), "\n")
-#> Dense size: 806.6 Kb
-cat("Sparse size:", format(object.size(sparse_roi), units = "auto"), "\n")
-#> Sparse size: 8.3 Kb
-cat("Non-zero voxels:", length(roi), "out of", prod(dim(img)), "total\n")
-#> Non-zero voxels: 49 out of 102400 total
-cat("Space savings:", round((1 - as.numeric(object.size(sparse_roi)) / 
-                              as.numeric(object.size(dense_vol))) * 100, 1), "%\n")
-#> Space savings: 99 %
-```
-
-### File-Backed Arrays
-
-For datasets too large to fit in memory:
-
-``` r
-# Read an on-disk 4D NIfTI without materializing the full array
 big_vec <- read_vec(
   system.file("extdata", "global_mask_v4.nii", package = "neuroim2"),
   mode = "filebacked"
 )
 
-# Access works like regular arrays but data stays on disk
-subset <- big_vec[45, 55, 45, 1:10]  # Load only what you need
+series(big_vec, 45, 45, 20)
 ```
 
-## Spatial Filtering and Processing
+The details and tradeoffs belong in
+[`vignette("ChoosingBackends", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/ChoosingBackends.md).
 
-### Smoothing Operations
+## Where to go next
 
-``` r
-# Gaussian smoothing with single sigma value (pass mask explicitly)
-img_smooth <- gaussian_blur(img, img, sigma = 2)
+### Core path
 
-# Compare original vs smoothed
-orig_vals <- img[30:32, 30:32, 20]
-smooth_vals <- img_smooth[30:32, 30:32, 20]
-cat("Original variance:", var(as.vector(orig_vals)), "\n")
-#> Original variance: 0
-cat("Smoothed variance:", var(as.vector(smooth_vals)), "\n")
-#> Smoothed variance: 0
-```
+- [`vignette("ChoosingBackends", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/ChoosingBackends.md)
+- [`vignette("coordinate-systems", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/coordinate-systems.md)
+- [`vignette("VolumesAndVectors", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/VolumesAndVectors.md)
+- [`vignette("Resampling", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/Resampling.md)
+- [`vignette("AnalysisWorkflows", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/AnalysisWorkflows.md)
 
-### Resampling
+### Advanced and specialized articles
 
-``` r
-# Downsample to 2 mm isotropic voxels
-img_down <- downsample(img, spacing = c(2, 2, 2))
-cat("Original dimensions:", dim(img), "\n")
-#> Original dimensions: 64 64 25
-cat("Downsampled dimensions:", dim(img_down), "\n")
-#> Downsampled dimensions: 112 112 46
-```
+- [`vignette("ImageVolumes", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/ImageVolumes.md)
+- [`vignette("NeuroVector", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/NeuroVector.md)
+- [`vignette("regionOfInterest", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/regionOfInterest.md)
+- [`vignette("clustered-neurovec", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/clustered-neurovec.md)
+- [`vignette("pipelines", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/pipelines.md)
+- [`vignette("slice-visualization", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/slice-visualization.md)
+- [`vignette("Cookbook", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/Cookbook.md)
 
-## Working with Parcellations
-
-### ClusteredNeuroVol for Atlas-Based Analysis
+### Reference and help
 
 ``` r
-# Create a simple parcellation
-coords <- index_to_coord(img, which(as.logical(img)))
-set.seed(123)
-k <- 10  # 10 parcels
-if (nrow(coords) > k) {
-  km <- kmeans(coords, centers = k, iter.max = 100)
-  
-  # Create clustered volume
-  cvol <- ClusteredNeuroVol(img, km$cluster)
-  cat("Created", num_clusters(cvol), "parcels\n")
-  
-  # Get centroids of each parcel
-  centers <- centroids(cvol)
-  cat("First parcel centroid:", round(centers[1,], 1), "mm\n")
-}
-#> Created 10 parcels
-#> First parcel centroid: 41.3 26.2 18.8 mm
-```
-
-## Input/Output Operations
-
-### Reading and Writing
-
-``` r
-# Write a volume to a temporary file
-tmp_file <- tempfile(fileext = ".nii.gz")
-write_vol(img, tmp_file)
-cat("Wrote volume to:", tmp_file, "\n")
-#> Wrote volume to: /tmp/RtmpVOMtBW/file2bfb5b284dd4.nii.gz
-
-# Read it back
-img_read <- read_vol(tmp_file)
-cat("Read volume with dimensions:", dim(img_read), "\n")
-#> Read volume with dimensions: 64 64 25
-
-# Clean up
-file.remove(tmp_file)
-#> [1] TRUE
-```
-
-### Working with Multiple Files
-
-``` r
-# Read multiple volumes (not run)
-files <- c("scan1.nii", "scan2.nii", "scan3.nii")
-vols <- read_vec(files)  # Creates a NeuroVecSeq
-
-# Or read as a single concatenated 4D volume
-vols_list <- lapply(files, read_vol)
-vec_concat <- vec_from_vols(vols_list)
-```
-
-## Practical Example: ROI-Based Time-Series Analysis
-
-Here’s a complete workflow combining multiple features:
-
-``` r
-# Create synthetic fMRI-like data
-dims_fmri <- c(20, 20, 15, 50)  # Small for example
-fmri_data <- array(rnorm(prod(dims_fmri), mean = 1000, sd = 50), dims_fmri)
-fmri <- NeuroVec(fmri_data, NeuroSpace(dims_fmri))
-
-# Define an ROI
-roi <- spherical_roi(space(fmri), c(10, 10, 8), radius = 3)
-cat("ROI size:", length(roi), "voxels\n")
-#> ROI size: 123 voxels
-
-# Extract time-series from ROI
-roi_ts <- series_roi(fmri, roi)
-roi_mat <- values(roi_ts)  # T x N matrix
-cat("ROI time-series matrix:", dim(roi_mat), "\n")
-#> ROI time-series matrix: 50 123
-
-# Compute mean time-series
-mean_ts <- rowMeans(roi_mat)
-
-# Z-score the mean time-series
-z_ts <- as.numeric(base::scale(mean_ts))
-cat("Mean time-series - Mean:", round(mean(z_ts), 4), 
-    "SD:", round(sd(z_ts), 4), "\n")
-#> Mean time-series - Mean: 0 SD: 1
-
-# Find peak activation time
-peak_time <- which.max(z_ts)
-cat("Peak activation at time point:", peak_time, 
-    "with z-score:", round(z_ts[peak_time], 2), "\n")
-#> Peak activation at time point: 39 with z-score: 2.33
-```
-
-## Performance Tips
-
-1.  **Use appropriate data structures**:
-    - `SparseNeuroVol` for masks and ROIs
-    - `FileBackedNeuroVec` for very large datasets
-    - Regular arrays for small-to-medium data
-2.  **Vectorize operations**:
-    - Use
-      [`spherical_roi_set()`](https://bbuchsbaum.github.io/neuroim2/reference/spherical_roi_set.md)
-      instead of loops for multiple ROIs
-    - Process searchlights in parallel when possible
-3.  **Preallocate memory**:
-    - Know your output dimensions and allocate arrays upfront
-4.  **Choose the right format**:
-    - Use compressed NIfTI (.nii.gz) for storage
-    - Keep working data uncompressed for speed
-
-## Getting Help
-
-### Package Documentation
-
-``` r
-# List all functions
 help(package = "neuroim2")
-
-# Search for specific topics
 help.search("roi", package = "neuroim2")
 ```
 
-### Vignettes for Deep Dives
-
-- **3D Volumes**:
-  [`vignette("ImageVolumes", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/ImageVolumes.md)
-- **4D Time-Series**:
-  [`vignette("NeuroVector", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/NeuroVector.md)  
-- **ROI Analysis**:
-  [`vignette("regionOfInterest", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/regionOfInterest.md)
-- **Parcellations**:
-  [`vignette("clustered-neurovec", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/clustered-neurovec.md)
-- **Pipelines**:
-  [`vignette("pipelines", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/pipelines.md)
-
-### Quick Reference
-
-Common operations at a glance:
-
-| Task                  | Function                                                                                                                                                                                     |
-|-----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Read NIfTI file       | [`read_vol()`](https://bbuchsbaum.github.io/neuroim2/reference/read_vol.md), [`read_vec()`](https://bbuchsbaum.github.io/neuroim2/reference/read_vec.md)                                     |
-| Write NIfTI file      | [`write_vol()`](https://bbuchsbaum.github.io/neuroim2/reference/write_vol-methods.md), [`write_vec()`](https://bbuchsbaum.github.io/neuroim2/reference/write_vec-methods.md)                 |
-| Create spherical ROI  | [`spherical_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/spherical_roi.md)                                                                                                        |
-| Extract time-series   | [`series()`](https://bbuchsbaum.github.io/neuroim2/reference/series-methods.md), [`series_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/series_roi.md)                             |
-| Smooth image          | [`gaussian_blur()`](https://bbuchsbaum.github.io/neuroim2/reference/gaussian_blur.md)                                                                                                        |
-| Resample image        | [`resample()`](https://bbuchsbaum.github.io/neuroim2/reference/resample-methods.md)                                                                                                          |
-| Coordinate conversion | [`coord_to_grid()`](https://bbuchsbaum.github.io/neuroim2/reference/coord_to_grid-methods.md), [`grid_to_coord()`](https://bbuchsbaum.github.io/neuroim2/reference/grid_to_coord-methods.md) |
-| Create mask           | [`LogicalNeuroVol()`](https://bbuchsbaum.github.io/neuroim2/reference/LogicalNeuroVol-class.md)                                                                                              |
-| Sparse representation | [`as.sparse()`](https://bbuchsbaum.github.io/neuroim2/reference/as.sparse.md)                                                                                                                |
-| Concatenate volumes   | [`concat()`](https://bbuchsbaum.github.io/neuroim2/reference/concat-methods.md)                                                                                                              |
-
 ## Summary
 
-neuroim2 provides a comprehensive toolkit for neuroimaging analysis in
-R. Its efficient data structures, flexible ROI tools, and
-memory-conscious design make it suitable for both interactive
-exploration and large-scale processing pipelines. Start with the basic
-NeuroVol and NeuroVec classes, explore ROI creation for your specific
-needs, and leverage sparse or file-backed arrays when working with large
-datasets.
-
-For more advanced usage and specific workflows, consult the
-topic-specific vignettes listed above.
+The package becomes much easier to navigate if you treat this overview
+as a map, not a manual. Learn `NeuroVol`, `NeuroVec`, and ROI extraction
+here, then move into the focused workflow vignettes for backend choice,
+spatial transforms, and analysis patterns.

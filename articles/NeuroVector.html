@@ -5,13 +5,13 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Working with 4D NeuroVectors (NeuroVec) • neuroim2</title>
+<title>Advanced NeuroVec Patterns • neuroim2</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
-<script src="../extra.js"></script><meta property="og:title" content="Working with 4D NeuroVectors (NeuroVec)">
+<script src="../extra.js"></script><meta property="og:title" content="Advanced NeuroVec Patterns">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -52,9 +52,9 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Working with 4D NeuroVectors (NeuroVec)</h1>
+      <h1>Advanced NeuroVec Patterns</h1>
             
-            <h4 data-toc-skip class="date">2026-04-10</h4>
+            <h4 data-toc-skip class="date">2026-04-11</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/bbuchsbaum/neuroim2/blob/master/vignettes/NeuroVector.Rmd" class="external-link"><code>vignettes/NeuroVector.Rmd</code></a></small>
       <div class="d-none name"><code>NeuroVector.Rmd</code></div>
@@ -62,62 +62,36 @@
 
     
     
+<p>This article is now the deeper companion to
+<code><a href="../articles/VolumesAndVectors.html">vignette("VolumesAndVectors")</a></code>. Read that first if you want
+the compact introduction to <code>NeuroVec</code>. Stay here when you
+want more detail on multi-file reads, manual construction, matrix views,
+and dense/sparse conversions for 4D data.</p>
 <div class="section level2">
 <h2 id="working-with-neuroimaging-time-series-data">Working with neuroimaging time-series data<a class="anchor" aria-label="anchor" href="#working-with-neuroimaging-time-series-data"></a>
 </h2>
-<p>The <code>neuroim2</code> package contains data structures and
-functions for reading, accessing, and processing 4-dimensional
-neuroimaging data.</p>
-<p>In this vignette, we’ll introduce <code>NeuroVec</code> (4D images)
-and related helpers you’ll use most often:</p>
+<p>This vignette focuses on the parts of the 4D workflow that remain
+useful after you already understand the basic container model:</p>
 <ul>
-<li>Read/write on-disk images (<code>read_vec</code>,
-<code>write_vec</code>)</li>
-<li>Spatial metadata via <code>NeuroSpace</code> (dimensions, spacing,
-origin)</li>
-<li>Voxel- and ROI-based access (<code>series</code>,
-<code>series_roi</code>, <code>coords</code>)</li>
-<li>Common transforms (z-scoring with <code>scale_series</code>,
-concatenation with <code>concat</code>)</li>
-<li>Dense vs. sparse representations (<code>DenseNeuroVec</code>,
-<code>SparseNeuroVec</code>, <code>as.sparse</code>)</li>
+<li>reading many 4D files into a <code>NeuroVecSeq</code>
+</li>
+<li>creating <code>NeuroVec</code> objects from arrays or matrices</li>
+<li>time-series transforms and concatenation</li>
+<li>dense/sparse conversion patterns</li>
+<li>writing vectors back to disk</li>
 </ul>
 <div class="section level3">
-<h3 id="reading-a-four-dimensional-nifti-image-with-read_vec">Reading a four-dimensional NifTI image with read_vec<a class="anchor" aria-label="anchor" href="#reading-a-four-dimensional-nifti-image-with-read_vec"></a>
+<h3 id="reading-multiple-four-dimensional-images">Reading multiple four-dimensional images<a class="anchor" aria-label="anchor" href="#reading-multiple-four-dimensional-images"></a>
 </h3>
-<p>Here we read in an example image. This file is 4D in the package data
-(64×64×25×4), so <code><a href="../reference/read_vec.html">read_vec()</a></code> returns a <code>NeuroVec</code>
-with four volumes (timepoints).</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>      <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
-<span>      <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span>      <span class="va">file_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask_v4.nii"</span>, package<span class="op">=</span><span class="st">"neuroim2"</span><span class="op">)</span></span>
-<span>      <span class="va">vec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vec.html">read_vec</a></span><span class="op">(</span><span class="va">file_name</span><span class="op">)</span></span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">vec</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 64 64 25  4</span></span>
-<span>      <span class="va">vec</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;DenseNeuroVec&gt;</span> [3.1 Mb] </span></span>
-<span><span class="co">#&gt; ── Spatial ───────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;   Dimensions    : 64 x 64 x 25 (4 timepoints)</span></span>
-<span><span class="co">#&gt;   Spacing       : 3.5 x 3.5 x 3.7</span></span>
-<span><span class="co">#&gt;   Origin        : 112, -108, -46.2</span></span>
-<span><span class="co">#&gt;   Orientation   : LAS</span></span>
-<span><span class="co">#&gt; ── Data ──────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;   Mean +/- SD   : 0.288 +/- 0.453 (t=1)</span></span>
-<span><span class="co">#&gt;   Label         : /home/runner/work/_temp/Library/neuroim2/extdata/global_mask_v4.nii</span></span></code></pre></div>
-<p>Now imagine we have a set of images. We can read multiple files with
-<code>read_vec</code>. Passing multiple paths returns a
-<code>NeuroVecSeq</code> (a sequence of vectors) rather than a single
-concatenated 4D vector.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>    </span>
-<span>      <span class="va">file_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask_v4.nii"</span>, package<span class="op">=</span><span class="st">"neuroim2"</span><span class="op">)</span></span>
-<span>      <span class="va">vec_multi</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vec.html">read_vec</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">file_name</span>, <span class="va">file_name</span>, <span class="va">file_name</span><span class="op">)</span><span class="op">)</span></span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">vec_multi</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">file_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask_v4.nii"</span>, package <span class="op">=</span> <span class="st">"neuroim2"</span><span class="op">)</span></span>
+<span><span class="va">vec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vec.html">read_vec</a></span><span class="op">(</span><span class="va">file_name</span><span class="op">)</span></span>
+<span><span class="va">vec_multi</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vec.html">read_vec</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">file_name</span>, <span class="va">file_name</span>, <span class="va">file_name</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">vec_multi</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 64 64 25 12</span></span>
-<span>      </span>
-<span>      <span class="va">vec2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vec.html">read_vec</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">file_name</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
-<span>      <span class="va">vec2</span></span>
+<span></span>
+<span><span class="va">vec2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vec.html">read_vec</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">file_name</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">vec2</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">&lt;NeuroVecSeq&gt;</span> [10 vectors] </span></span>
 <span><span class="co">#&gt; ── Sequence ──────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;     [1]         : DenseNeuroVec 64x64x25 x 4t</span></span>
@@ -126,141 +100,13 @@ concatenated 4D vector.</p>
 <span><span class="co">#&gt;     [4]         : DenseNeuroVec 64x64x25 x 4t</span></span>
 <span><span class="co">#&gt;     [5]         : DenseNeuroVec 64x64x25 x 4t</span></span>
 <span><span class="co">#&gt;   ... and 5 more</span></span></code></pre></div>
-<p>To extract a subset of volumes from a 4D vector, use
-<code>sub_vector</code> directly:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>      <span class="co"># Extract a subset of volumes (first 3 timepoints)</span></span>
-<span>      <span class="va">vec_1_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sub_vector-methods.html">sub_vector</a></span><span class="op">(</span><span class="va">vec</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span></span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">vec_1_3</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 64 64 25  3</span></span>
-<span>      <span class="va">vec_1_3</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;DenseNeuroVec&gt;</span> [2.4 Mb] </span></span>
-<span><span class="co">#&gt; ── Spatial ───────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;   Dimensions    : 64 x 64 x 25 (3 timepoints)</span></span>
-<span><span class="co">#&gt;   Spacing       : 3.5 x 3.5 x 3.7</span></span>
-<span><span class="co">#&gt;   Origin        : 112, -108, -46.2</span></span>
-<span><span class="co">#&gt;   Orientation   : LAS</span></span>
-<span><span class="co">#&gt; ── Data ──────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;   Mean +/- SD   : 0.288 +/- 0.453 (t=1)</span></span>
-<span><span class="co">#&gt;   Label         : none</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="extracting-time-series-data-using-the-series-and-series_roi-functions">Extracting time-series data using the <code>series</code> and
-<code>series_roi</code> functions<a class="anchor" aria-label="anchor" href="#extracting-time-series-data-using-the-series-and-series_roi-functions"></a>
-</h3>
-<p>To get the time-series at voxel (1,1,1) we can use the
-<code>series</code> function:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>      </span>
-<span>      <span class="fu"><a href="../reference/series-methods.html">series</a></span><span class="op">(</span><span class="va">vec_1_3</span>, <span class="fl">1</span>,<span class="fl">1</span>,<span class="fl">1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0 0 0</span></span></code></pre></div>
-<p>We can extract a 4d region of interest with the
-<code>series_roi</code> as follows:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span>      <span class="va">file_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask_v4.nii"</span>, package<span class="op">=</span><span class="st">"neuroim2"</span><span class="op">)</span></span>
-<span>      <span class="va">vol</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">file_name</span><span class="op">)</span></span>
-<span>      <span class="va">roi</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spherical_roi.html">spherical_roi</a></span><span class="op">(</span><span class="va">vol</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">12</span>,<span class="fl">12</span>,<span class="fl">12</span><span class="op">)</span>, radius<span class="op">=</span><span class="fl">8</span><span class="op">)</span></span>
-<span>      <span class="va">rvec1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/series_roi.html">series_roi</a></span><span class="op">(</span><span class="va">vec</span>, <span class="va">roi</span><span class="op">)</span></span>
-<span>      </span>
-<span>      <span class="co">## or alternatively as a pipeline</span></span>
-<span>      <span class="va">rvec2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">file_name</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="../reference/spherical_roi.html">spherical_roi</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">12</span>,<span class="fl">12</span>,<span class="fl">12</span><span class="op">)</span>, radius<span class="op">=</span><span class="fl">8</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="../reference/series_roi.html">series_roi</a></span><span class="op">(</span><span class="va">vec</span>,<span class="va">.</span><span class="op">)</span></span>
-<span>      <span class="va">rvec2</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;ROIVec&gt;</span> [49 voxels x 4 features] </span></span>
-<span><span class="co">#&gt; ── Structure ─────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;   Voxels        : 49</span></span>
-<span><span class="co">#&gt;   Features      : 4</span></span>
-<span><span class="co">#&gt;   Size          : 9.6 Kb</span></span>
-<span><span class="co">#&gt; ── Data ──────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;   Range         : [0.000, 0.000]</span></span>
-<span>      </span>
-<span>      <span class="co">## we can extract the ROI values with the `values` method.</span></span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="fu"><a href="../reference/values-methods.html">values</a></span><span class="op">(</span><span class="va">rvec1</span><span class="op">)</span> <span class="op">==</span> <span class="fu"><a href="../reference/values-methods.html">values</a></span><span class="op">(</span><span class="va">rvec2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span>      <span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/all.html" class="external-link">all</a></span><span class="op">(</span><span class="fu"><a href="../reference/coords.html">coords</a></span><span class="op">(</span><span class="va">rvec1</span><span class="op">)</span> <span class="op">==</span> <span class="fu"><a href="../reference/coords.html">coords</a></span><span class="op">(</span><span class="va">rvec2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span>      </span></code></pre></div>
-<p>We can also extract an ROI using 1d indices:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="va">r1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/series_roi.html">series_roi</a></span><span class="op">(</span><span class="va">vec</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">)</span></span>
-<span><span class="va">r1</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;ROIVec&gt;</span> [100 voxels x 4 features] </span></span>
-<span><span class="co">#&gt; ── Structure ─────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;   Voxels        : 100</span></span>
-<span><span class="co">#&gt;   Features      : 4</span></span>
-<span><span class="co">#&gt;   Size          : 11.2 Kb</span></span>
-<span><span class="co">#&gt; ── Data ──────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;   Range         : [0.000, 0.000]</span></span></code></pre></div>
-<p>Or we can extract a plain matrix using the <code>series</code>
-function:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/series-methods.html">series</a></span><span class="op">(</span><span class="va">vec</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">r2</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1]   4 100</span></span></code></pre></div>
-<p>We can also use coordinate indexing using voxel coordinates. First we
-load a binary mask with the same spatial dimensions as our NeuroVec:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mask</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask_v4.nii"</span>, package<span class="op">=</span><span class="st">"neuroim2"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>Now we convert indices to voxels and extract a matrix of values at
-the specified locations:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">vox</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/index_to_grid-methods.html">index_to_grid</a></span><span class="op">(</span><span class="va">mask</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">r3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/series-methods.html">series</a></span><span class="op">(</span><span class="va">vec</span>, <span class="va">vox</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">r3</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1]   4 100</span></span></code></pre></div>
-<p>And the same using <code>series_roi</code>:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">r4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/series_roi.html">series_roi</a></span><span class="op">(</span><span class="va">vec</span>,<span class="va">vox</span><span class="op">)</span></span>
-<span><span class="va">r4</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;ROIVec&gt;</span> [100 voxels x 4 features] </span></span>
-<span><span class="co">#&gt; ── Structure ─────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;   Voxels        : 100</span></span>
-<span><span class="co">#&gt;   Features      : 4</span></span>
-<span><span class="co">#&gt;   Size          : 12.4 Kb</span></span>
-<span><span class="co">#&gt; ── Data ──────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;   Range         : [0.000, 0.000]</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="inspecting-spatial-metadata-with-neurospace">Inspecting spatial metadata with NeuroSpace<a class="anchor" aria-label="anchor" href="#inspecting-spatial-metadata-with-neurospace"></a>
-</h3>
-<p>Every <code>NeuroVec</code> carries a <code>NeuroSpace</code>
-describing its geometry.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">vec</span><span class="op">)</span></span>
-<span><span class="va">sp</span>                   <span class="co"># dimensions, spacing, origin, axes</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;NeuroSpace&gt;</span> [4D] </span></span>
-<span><span class="co">#&gt; ── Geometry ──────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;   Dimensions    : 64 x 64 x 25 x 4</span></span>
-<span><span class="co">#&gt;   Spacing       : 3.5 x 3.5 x 3.7 mm</span></span>
-<span><span class="co">#&gt;   Origin        : 112, -108, -46.2</span></span>
-<span><span class="co">#&gt;   Orientation   : LAS</span></span>
-<span><span class="co">#&gt;   Voxels        : 409,600</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">vec</span><span class="op">)</span>             <span class="co"># 4D dims: X × Y × Z × T</span></span>
-<span><span class="co">#&gt; [1] 64 64 25  4</span></span>
-<span><span class="fu"><a href="../reference/spacing-methods.html">spacing</a></span><span class="op">(</span><span class="va">vec</span><span class="op">)</span>         <span class="co"># voxel spacing (mm)</span></span>
-<span><span class="co">#&gt; [1] 3.5 3.5 3.7</span></span>
-<span><span class="fu"><a href="../reference/origin-methods.html">origin</a></span><span class="op">(</span><span class="va">vec</span><span class="op">)</span>          <span class="co"># image origin</span></span>
-<span><span class="co">#&gt; [1]  112.0 -108.0  -46.2</span></span>
-<span><span class="fu"><a href="../reference/ndim-methods.html">ndim</a></span><span class="op">(</span><span class="va">vec</span><span class="op">)</span>            <span class="co"># == 4 for time series</span></span>
-<span><span class="co">#&gt; [1] 4</span></span></code></pre></div>
-<p>The default mask for dense vectors is “all voxels are valid”:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mask-methods.html">mask</a></span><span class="op">(</span><span class="va">vec</span><span class="op">)</span></span>
-<span><span class="va">m</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;DenseNeuroVol&gt;</span> [406.6 Kb] </span></span>
-<span><span class="co">#&gt; ── Spatial ───────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;   Dimensions    : 64 x 64 x 25</span></span>
-<span><span class="co">#&gt;   Spacing       : 3.5 x 3.5 x 3.7 mm</span></span>
-<span><span class="co">#&gt;   Origin        : 112, -108, -46.2</span></span>
-<span><span class="co">#&gt;   Orientation   : RAS</span></span>
-<span><span class="co">#&gt; ── Data ──────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;   Range         : [1.000, 1.000]</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="creating-a-neurovec-from-an-in-memory-array">Creating a NeuroVec from an in-memory array<a class="anchor" aria-label="anchor" href="#creating-a-neurovec-from-an-in-memory-array"></a>
 </h3>
 <p>You can build a <code>NeuroVec</code> directly from arrays or
 matrices:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">dims</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">24</span>, <span class="fl">24</span>, <span class="fl">24</span>, <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="va">arr</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/array.html" class="external-link">array</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/prod.html" class="external-link">prod</a></span><span class="op">(</span><span class="va">dims</span><span class="op">)</span><span class="op">)</span>, <span class="va">dims</span><span class="op">)</span></span>
@@ -270,7 +116,7 @@ matrices:</p>
 <span><span class="co">#&gt; [1] 24 24 24  5</span></span></code></pre></div>
 <p>You can also start from a matrix (voxels × time or time × voxels)
 using <code>DenseNeuroVec</code>:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mat</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/prod.html" class="external-link">prod</a></span><span class="op">(</span><span class="va">dims</span><span class="op">)</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/prod.html" class="external-link">prod</a></span><span class="op">(</span><span class="va">dims</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="va">dims</span><span class="op">[</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">dvec2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DenseNeuroVec-class.html">DenseNeuroVec</a></span><span class="op">(</span><span class="va">mat</span>, <span class="va">sp4</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/all.equal-methods.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">dvec</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">dvec2</span><span class="op">)</span><span class="op">)</span></span>
@@ -280,13 +126,13 @@ using <code>DenseNeuroVec</code>:</p>
 <h3 id="time-series-transforms-z-scoring-and-summary-volumes">Time-series transforms: z-scoring and summary volumes<a class="anchor" aria-label="anchor" href="#time-series-transforms-z-scoring-and-summary-volumes"></a>
 </h3>
 <p>Z-score each voxel’s time-series (center and scale across time):</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">vec_z</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scale_series-methods.html">scale_series</a></span><span class="op">(</span><span class="va">dvec</span>, center <span class="op">=</span> <span class="cn">TRUE</span>, scale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">vec_z</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 24 24 24  5</span></span></code></pre></div>
 <p>Compute a mean volume across time and return a 3D
 <code>NeuroVol</code>:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">M</span>      <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as.matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">dvec</span><span class="op">)</span>              <span class="co"># voxels × time</span></span>
 <span><span class="va">vmean</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">M</span><span class="op">)</span>                  <span class="co"># per-voxel mean</span></span>
 <span><span class="va">mean3d</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NeuroVol.html">NeuroVol</a></span><span class="op">(</span><span class="va">vmean</span>, <span class="fu"><a href="../reference/drop_dim-methods.html">drop_dim</a></span><span class="op">(</span><span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">dvec</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
@@ -304,7 +150,7 @@ using <code>DenseNeuroVec</code>:</p>
 <h3 id="concatenating-along-time">Concatenating along time<a class="anchor" aria-label="anchor" href="#concatenating-along-time"></a>
 </h3>
 <p>Append time points by concatenating vectors or volumes:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dvec_more</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/concat-methods.html">concat</a></span><span class="op">(</span><span class="va">dvec</span>, <span class="va">dvec</span><span class="op">)</span>        <span class="co"># doubles the time dimension</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">dvec_more</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 24 24 24 10</span></span></code></pre></div>
@@ -314,7 +160,7 @@ using <code>DenseNeuroVec</code>:</p>
 </h3>
 <p>Sparse representations store only voxels within a mask. This is handy
 for large ROIs or brain masks.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Build a random mask and convert a dense vec to sparse</span></span>
 <span><span class="va">mask_arr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/array.html" class="external-link">array</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/prod.html" class="external-link">prod</a></span><span class="op">(</span><span class="va">dims</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0.7</span>, <span class="va">dims</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">mask_vol</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/LogicalNeuroVol-class.html">LogicalNeuroVol</a></span><span class="op">(</span><span class="va">mask_arr</span>, <span class="fu"><a href="../reference/drop_dim-methods.html">drop_dim</a></span><span class="op">(</span><span class="va">sp4</span><span class="op">)</span><span class="op">)</span></span>
@@ -337,7 +183,7 @@ for large ROIs or brain masks.</p>
 <p>Tip: For file-backed or memory-mapped vectors, convert to
 <code>DenseNeuroVec</code> via a matrix if you need dense-only
 operations:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dv_dense</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/DenseNeuroVec-class.html">DenseNeuroVec</a></span><span class="op">(</span><span class="fu"><a href="../reference/as.matrix.html">as.matrix</a></span><span class="op">(</span><span class="va">vec</span><span class="op">)</span>, <span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">vec</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -345,9 +191,9 @@ operations:</p>
 </h3>
 <p>You can write <code>NeuroVec</code> and <code>NeuroVol</code> objects
 as NIfTI files:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tmp_vec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".nii.gz"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/write_vec-methods.html">write_vec</a></span><span class="op">(</span><span class="va">vec_1_3</span>, <span class="va">tmp_vec</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/write_vec-methods.html">write_vec</a></span><span class="op">(</span><span class="fu"><a href="../reference/sub_vector-methods.html">sub_vector</a></span><span class="op">(</span><span class="va">vec</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span>, <span class="va">tmp_vec</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">tmp_vec</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">tmp_vec</span><span class="op">)</span></span></code></pre></div>
@@ -356,7 +202,7 @@ as NIfTI files:</p>
 <h3 id="putting-it-together-with-an-roi">Putting it together with an ROI<a class="anchor" aria-label="anchor" href="#putting-it-together-with-an-roi"></a>
 </h3>
 <p>Combine ROI extraction with time-series transforms:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">vol3d</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"global_mask_v4.nii"</span>, package<span class="op">=</span><span class="st">"neuroim2"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">roi</span>   <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spherical_roi.html">spherical_roi</a></span><span class="op">(</span><span class="va">vol3d</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">12</span>,<span class="fl">12</span>,<span class="fl">12</span><span class="op">)</span>, radius <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
 <span><span class="va">rts</span>   <span class="op">&lt;-</span> <span class="fu"><a href="../reference/series_roi.html">series_roi</a></span><span class="op">(</span><span class="va">vec</span>, <span class="va">roi</span><span class="op">)</span>          <span class="co"># ROIVec (T × N with coords)</span></span>
@@ -367,10 +213,10 @@ as NIfTI files:</p>
 <span><span class="va">roi_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">mat_z</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">roi_mean</span><span class="op">)</span>                       <span class="co"># matches time dimension</span></span>
 <span><span class="co">#&gt; [1] 4</span></span></code></pre></div>
-<p>That’s the core workflow for 4D data in <code>neuroim2</code>: load
-or create a <code>NeuroVec</code>, inspect its <code>NeuroSpace</code>,
-access time-series via voxels or ROIs, apply simple transforms, and
-optionally move between dense and sparse representations.</p>
+<p>This article now complements the core path rather than replacing it.
+Use <code><a href="../articles/VolumesAndVectors.html">vignette("VolumesAndVectors")</a></code> for the basic 4D
+container model and come back here when you need denser transformation
+and conversion patterns.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

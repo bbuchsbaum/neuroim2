@@ -116,9 +116,8 @@ output](slice-visualization_files/figure-html/unnamed-chunk-3-1.png)
 Notes
 
 - `range = "robust"` uses quantiles (default 2–98%) to ignore outliers.
-- [`coord_fixed()`](https://ggplot2.tidyverse.org/reference/coord_fixed.html) +
-  reversed y are handled internally to preserve geometry and
-  radiological convention.
+- `coord_fixed()` + reversed y are handled internally to preserve
+  geometry and radiological convention.
 - Use `downsample = 2` (or higher) when plotting huge volumes
   interactively.
 
@@ -258,20 +257,20 @@ sessionInfo()
 ## [10] grid_4.5.3            RColorBrewer_1.1-3    iterators_1.0.14     
 ## [13] rmio_0.4.0            fastmap_1.2.0         foreach_1.5.2        
 ## [16] doParallel_1.0.17     jsonlite_2.0.0        RNifti_1.9.0         
-## [19] purrr_1.2.1           deflist_0.2.0         scales_1.4.0         
-## [22] codetools_0.2-20      textshaping_1.0.5     jquerylib_0.1.4      
-## [25] cli_3.6.6             rlang_1.2.0           cowplot_1.2.0        
-## [28] splines_4.5.3         withr_3.0.2           cachem_1.1.0         
-## [31] yaml_2.3.12           flock_0.7             tools_4.5.3          
-## [34] parallel_4.5.3        memoise_2.0.1         bigassertr_0.1.7     
-## [37] assertthat_0.2.1      vctrs_0.7.2           R6_2.6.1             
-## [40] lifecycle_1.0.5       bigparallelr_0.3.2    stringr_1.6.0        
-## [43] fs_2.0.1              dbscan_1.2.4          ragg_1.5.2           
-## [46] pkgconfig_2.0.3       desc_1.4.3            pkgdown_2.2.0        
-## [49] RcppParallel_5.1.11-2 bslib_0.10.0          pillar_1.11.1        
-## [52] gtable_0.3.6          glue_1.8.0            Rcpp_1.1.1           
-## [55] systemfonts_1.3.2     xfun_0.57             tibble_3.3.1         
-## [58] knitr_1.51            farver_2.1.2          htmltools_0.5.9      
-## [61] labeling_0.4.3        RNiftyReg_2.8.5       rmarkdown_2.31       
-## [64] compiler_4.5.3        S7_0.2.1
+## [19] purrr_1.2.2           deflist_0.2.0         scales_1.4.0         
+## [22] albersdown_1.0.0      codetools_0.2-20      textshaping_1.0.5    
+## [25] jquerylib_0.1.4       cli_3.6.6             rlang_1.2.0          
+## [28] cowplot_1.2.0         splines_4.5.3         withr_3.0.2          
+## [31] cachem_1.1.0          yaml_2.3.12           flock_0.7            
+## [34] tools_4.5.3           parallel_4.5.3        memoise_2.0.1        
+## [37] bigassertr_0.1.7      assertthat_0.2.1      vctrs_0.7.2          
+## [40] R6_2.6.1              lifecycle_1.0.5       bigparallelr_0.3.2   
+## [43] stringr_1.6.0         fs_2.0.1              dbscan_1.2.4         
+## [46] ragg_1.5.2            pkgconfig_2.0.3       desc_1.4.3           
+## [49] pkgdown_2.2.0         RcppParallel_5.1.11-2 bslib_0.10.0         
+## [52] pillar_1.11.1         gtable_0.3.6          glue_1.8.0           
+## [55] Rcpp_1.1.1            systemfonts_1.3.2     xfun_0.57            
+## [58] tibble_3.3.1          knitr_1.51            farver_2.1.2         
+## [61] htmltools_0.5.9       labeling_0.4.3        RNiftyReg_2.8.5      
+## [64] rmarkdown_2.31        compiler_4.5.3        S7_0.2.1
 ```
