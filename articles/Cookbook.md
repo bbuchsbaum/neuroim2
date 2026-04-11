@@ -114,7 +114,7 @@ mvec
 #>   Origin        : 112, -108, -46.2
 #> ── Mapping ───────────────────────────────────────────────────────────────────── 
 #>   Offset        : 88
-#>   Label         : file29e1462898f1.nii
+#>   Label         : file29de6ef6ba03.nii
 
 # Or explicitly choose an output file (must be uncompressed for mmap)
 tmp_nii <- tempfile(fileext = ".nii")

@@ -1,16 +1,8 @@
 # convert a `NeuroVec` to a matrix
 
-convert a `NeuroVec` to a matrix
-
 Converts a
 [`NeuroVecSeq`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroVecSeq-class.md)
 to a dense voxel-by-time matrix.
-
-convert a
-[`ROIVec`](https://bbuchsbaum.github.io/neuroim2/reference/ROIVec-class.md)
-to a matrix
-
-Convert to Matrix
 
 ## Usage
 
@@ -54,5 +46,7 @@ as.matrix(x, ...)
   Additional arguments
 
 ## Value
+
+A matrix with one row per voxel and one column per time point.
 
 A matrix representation of the object

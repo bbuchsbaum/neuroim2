@@ -56,8 +56,11 @@ and memory management strategies.</p>
 
 
 <dl><dt id="arg-file-name">file_name<a class="anchor" aria-label="anchor" href="#arg-file-name"></a></dt>
-<dd><p>The name(s) of the file(s) to load. If multiple files are specified,
-they are loaded and concatenated along the time dimension.</p></dd>
+<dd><p>A character vector of one or more file paths to load. A 3D file
+is promoted to a 4D <code>NeuroVec</code> with a single time point (see Details). When
+multiple paths are supplied the result is always a <code><a href="NeuroVecSeq-class.html">NeuroVecSeq</a></code>
+(which itself extends <code><a href="NeuroVec-class.html">NeuroVec</a></code>), regardless of whether the
+individual files are 3D, 4D, or a mix of both.</p></dd>
 
 
 <dt id="arg-indices">indices<a class="anchor" aria-label="anchor" href="#arg-indices"></a></dt>
@@ -80,8 +83,24 @@ and optional for other modes.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>An <code><a href="NeuroVec-class.html">NeuroVec</a></code> object representing the loaded volume(s).</p>
-    </div>
+    <p>The return type depends on how many files are supplied:</p><ul><li><p><strong>Single 3D file</strong> — a <code><a href="NeuroVec-class.html">NeuroVec</a></code> with
+        <code>dim(x)[4] == 1</code> (concrete class depends on <code>mode</code>: e.g.
+        <code><a href="DenseNeuroVec-class.html">DenseNeuroVec</a></code> for <code>"normal"</code>,
+        <code><a href="MappedNeuroVec-class.html">MappedNeuroVec</a></code> for <code>"mmap"</code>,
+        <code><a href="BigNeuroVec-class.html">BigNeuroVec</a></code> for <code>"bigvec"</code>,
+        <code><a href="FileBackedNeuroVec-class.html">FileBackedNeuroVec</a></code> for <code>"filebacked"</code>).</p></li>
+<li><p><strong>Single 4D file</strong> — a <code><a href="NeuroVec-class.html">NeuroVec</a></code> of the same
+        concrete class as above, with <code>dim(x)[4]</code> equal to the 4th dimension
+        of the file (or <code>length(indices)</code> when <code>indices</code> is supplied).</p></li>
+<li><p><strong>Multiple files (any mix of 3D and 4D)</strong> — a
+        <code><a href="NeuroVecSeq-class.html">NeuroVecSeq</a></code> wrapping one <code>NeuroVec</code> per input
+        file in the order given. Because <code>NeuroVecSeq</code> extends
+        <code><a href="NeuroVec-class.html">NeuroVec</a></code>, it can be used wherever a <code>NeuroVec</code>
+        is accepted, but its underlying storage is segmented rather than a single
+        contiguous 4D array. For example, <code>read_vec(c(vol, vec, vec, vol))</code>
+        returns a 4-element <code>NeuroVecSeq</code> whose segments have time lengths
+        <code>c(1, T2, T3, 1)</code>.</p></li>
+</ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This function supports multiple file formats:
@@ -95,6 +114,19 @@ and optional for other modes.</p></dd>
 * "bigvec": Optimized for large datasets where only a subset of voxels are of interest.
   Requires a mask to specify which voxels to load.
 * "filebacked": Similar to mmap but with more flexible caching strategies.</p>
+<p><strong>3D inputs:</strong> A path pointing at a 3D image is not rejected. It is promoted
+to a 4D <code>NeuroVec</code> whose fourth dimension has length 1, so the return type is
+always a <code>NeuroVec</code>, never a <code><a href="NeuroVol-class.html">NeuroVol</a></code>. If you want a true
+volume, use <code><a href="read_vol.html">read_vol</a></code> (or <code>vec[[1]]</code>).</p>
+<p><strong>Multiple files:</strong> When <code>file_name</code> has length &gt; 1, each file is loaded
+independently and the results are wrapped with <code><a href="NeuroVecSeq.html">NeuroVecSeq</a></code>. No data is
+copied or re-concatenated into a single dense 4D array; the returned
+<code>NeuroVecSeq</code> holds the constituent <code>NeuroVec</code>s in its <code>@vecs</code> slot
+and exposes them as a single logical time series. Time-point lookups (e.g.
+<code>x[[i]]</code>, <code>sub_vector(x, i)</code>, <code>linear_access(x, i)</code>) transparently
+walk across the segments. The per-file time lengths may differ (e.g. a 3D file
+contributes 1 time point, a 4D file contributes <code>dim(file)[4]</code>); all spatial
+dimensions must match.</p>
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>

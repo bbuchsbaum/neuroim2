@@ -727,7 +727,7 @@ Methods for input-output operations
   : read_vec
 
 - [`read_vol()`](https://bbuchsbaum.github.io/neuroim2/reference/read_vol.md)
-  : Load an image volume from a file
+  : Load a single 3D image volume from a file
 
 - [`read_image()`](https://bbuchsbaum.github.io/neuroim2/reference/read_image.md)
   : read_image
@@ -922,12 +922,12 @@ Miscellaneous methods and functions
   : Generic as.array Method
 
 - [`as.dense(`*`<ClusteredNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.dense-methods.md)
+  [`as.dense(`*`<NeuroVecSeq>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.dense-methods.md)
   [`as.dense(`*`<SparseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.dense-methods.md)
   [`as.dense(`*`<DenseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.dense-methods.md)
   [`as.dense(`*`<ROIVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.dense-methods.md)
   [`as.dense(`*`<SparseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.dense-methods.md)
-  [`as.dense(`*`<NeuroVecSeq>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.dense-methods.md)
-  : Coerce SparseNeuroVol to DenseNeuroVol
+  : Convert a NeuroVecSeq to a DenseNeuroVec
 
 - [`as.dense()`](https://bbuchsbaum.github.io/neuroim2/reference/as.dense.md)
   : Convert to dense representation

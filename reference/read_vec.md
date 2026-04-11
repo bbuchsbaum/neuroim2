@@ -18,8 +18,14 @@ read_vec(
 
 - file_name:
 
-  The name(s) of the file(s) to load. If multiple files are specified,
-  they are loaded and concatenated along the time dimension.
+  A character vector of one or more file paths to load. A 3D file is
+  promoted to a 4D `NeuroVec` with a single time point (see Details).
+  When multiple paths are supplied the result is always a
+  [`NeuroVecSeq`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroVecSeq-class.md)
+  (which itself extends
+  [`NeuroVec`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroVec-class.md)),
+  regardless of whether the individual files are 3D, 4D, or a mix of
+  both.
 
 - indices:
 
@@ -40,9 +46,35 @@ read_vec(
 
 ## Value
 
-An
-[`NeuroVec`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroVec-class.md)
-object representing the loaded volume(s).
+The return type depends on how many files are supplied:
+
+- **Single 3D file** — a
+  [`NeuroVec`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroVec-class.md)
+  with `dim(x)[4] == 1` (concrete class depends on `mode`: e.g.
+  [`DenseNeuroVec`](https://bbuchsbaum.github.io/neuroim2/reference/DenseNeuroVec-class.md)
+  for `"normal"`,
+  [`MappedNeuroVec`](https://bbuchsbaum.github.io/neuroim2/reference/MappedNeuroVec-class.md)
+  for `"mmap"`,
+  [`BigNeuroVec`](https://bbuchsbaum.github.io/neuroim2/reference/BigNeuroVec-class.md)
+  for `"bigvec"`,
+  [`FileBackedNeuroVec`](https://bbuchsbaum.github.io/neuroim2/reference/FileBackedNeuroVec-class.md)
+  for `"filebacked"`).
+
+- **Single 4D file** — a
+  [`NeuroVec`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroVec-class.md)
+  of the same concrete class as above, with `dim(x)[4]` equal to the 4th
+  dimension of the file (or `length(indices)` when `indices` is
+  supplied).
+
+- **Multiple files (any mix of 3D and 4D)** — a
+  [`NeuroVecSeq`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroVecSeq-class.md)
+  wrapping one `NeuroVec` per input file in the order given. Because
+  `NeuroVecSeq` extends
+  [`NeuroVec`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroVec-class.md),
+  it can be used wherever a `NeuroVec` is accepted, but its underlying
+  storage is segmented rather than a single contiguous 4D array. For
+  example, `read_vec(c(vol, vec, vec, vol))` returns a 4-element
+  `NeuroVecSeq` whose segments have time lengths `c(1, T2, T3, 1)`.
 
 ## Details
 
@@ -56,6 +88,25 @@ loading entirely into memory. Not available for compressed files. \*
 "bigvec": Optimized for large datasets where only a subset of voxels are
 of interest. Requires a mask to specify which voxels to load. \*
 "filebacked": Similar to mmap but with more flexible caching strategies.
+
+**3D inputs:** A path pointing at a 3D image is not rejected. It is
+promoted to a 4D `NeuroVec` whose fourth dimension has length 1, so the
+return type is always a `NeuroVec`, never a
+[`NeuroVol`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroVol-class.md).
+If you want a true volume, use
+[`read_vol`](https://bbuchsbaum.github.io/neuroim2/reference/read_vol.md)
+(or `vec[[1]]`).
+
+**Multiple files:** When `file_name` has length \> 1, each file is
+loaded independently and the results are wrapped with
+[`NeuroVecSeq`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroVecSeq.md).
+No data is copied or re-concatenated into a single dense 4D array; the
+returned `NeuroVecSeq` holds the constituent `NeuroVec`s in its `@vecs`
+slot and exposes them as a single logical time series. Time-point
+lookups (e.g. `x[[i]]`, `sub_vector(x, i)`, `linear_access(x, i)`)
+transparently walk across the segments. The per-file time lengths may
+differ (e.g. a 3D file contributes 1 time point, a 4D file contributes
+`dim(file)[4]`); all spatial dimensions must match.
 
 ## Note
 
