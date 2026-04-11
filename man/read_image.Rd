@@ -14,32 +14,91 @@ read_image(
 )
 }
 \arguments{
-\item{file_name}{Character vector of file paths.}
+\item{file_name}{Character vector of one or more file paths.}
 
 \item{type}{One of \code{"auto"}, \code{"vol"}, \code{"vec"}, or \code{"hyper"}
-to override dispatch.}
+to override header-based dispatch.}
 
-\item{index}{Volume index to use when returning a \code{\linkS4class{NeuroVol}} or
-when you want to load a subset of volumes while still returning a \code{NeuroVec}.}
+\item{index}{Integer volume index. Used as the single-volume selector for
+\code{\link{read_vol}} (when dispatching to it) and, when \code{indices} is
+\code{NULL}, forwarded to \code{\link{read_vec}} as \code{indices} so you can
+pull out a subset of time points while still receiving a \code{NeuroVec}.}
 
-\item{indices}{Optional vector of indices passed through to \code{\link{read_vec}}.}
+\item{indices}{Optional integer vector of sub-volume indices forwarded to
+\code{\link{read_vec}}. Takes precedence over \code{index}.}
 
-\item{mask}{Optional spatial mask passed through to vector/hyper-vector readers.}
+\item{mask}{Optional spatial mask passed through to the vector or hyper-vector
+readers. Ignored by \code{read_vol}.}
 
-\item{mode}{IO mode forwarded to \code{\link{read_vec}}.}
+\item{mode}{IO mode forwarded to \code{\link{read_vec}}; see that function for
+details. Ignored for 3D and 5D dispatch.}
 }
 \value{
-A \code{\linkS4class{NeuroVol}} when the input is effectively 3D (or when
-  \code{type = "vol"}), a \code{\linkS4class{NeuroVec}}/\code{\linkS4class{NeuroVecSeq}}
-  for 4D input, or a \code{\linkS4class{NeuroHyperVec}} for 5D input.
+The return type depends on dispatch:
+\itemize{
+  \item \strong{3D dispatch} (single effectively-3D file, or \code{type = "vol"}):
+        a \code{\linkS4class{DenseNeuroVol}}.
+  \item \strong{4D dispatch} (single 4D file, or \code{type = "vec"} with one file):
+        a \code{\linkS4class{NeuroVec}} (concrete subclass depends on \code{mode}).
+  \item \strong{Multi-file dispatch} (\code{length(file_name) > 1}, or
+        \code{type = "vec"} with multiple files): a
+        \code{\linkS4class{NeuroVecSeq}}, which extends \code{NeuroVec} but stores
+        each file as a distinct segment rather than concatenating into a single
+        contiguous 4D array. Mixed 3D/4D inputs are allowed; each 3D file
+        contributes one time point to the sequence.
+  \item \strong{5D dispatch} (single 5D file, or \code{type = "hyper"}):
+        a \code{\linkS4class{NeuroHyperVec}}.
+}
 }
 \description{
-Convenience wrapper that inspects the file metadata and dispatches to
-\code{\link{read_vol}} for 3D data, \code{\link{read_vec}} for 4D data,
-or \code{\link{read_hyper_vec}} for 5D data.
+Convenience wrapper that inspects the file header(s) and dispatches to the
+appropriate specialized reader: \code{\link{read_vol}} for a single 3D file,
+\code{\link{read_vec}} for 4D data or for any multi-file input, or
+\code{\link{read_hyper_vec}} for 5D data.
+}
+\details{
+Auto-dispatch (\code{type = "auto"}) uses the following rules:
+\itemize{
+  \item \code{length(file_name) > 1}: always routed to \code{\link{read_vec}},
+        so the result is a \code{\linkS4class{NeuroVecSeq}} regardless of
+        whether the individual files are 3D, 4D, or a mix. See
+        \code{\link{read_vec}} for the return-type details.
+  \item Single file with a 5th dimension \code{> 1}: routed to
+        \code{\link{read_hyper_vec}}, returning a \code{\linkS4class{NeuroHyperVec}}.
+  \item Single file with a 4th dimension \code{> 1}: routed to
+        \code{\link{read_vec}}, returning a \code{\linkS4class{NeuroVec}}.
+        If \code{index} is supplied (and \code{indices} is not), it is forwarded
+        as \code{indices} so you can pull out a subset while still getting a
+        \code{NeuroVec} back.
+  \item Single effectively-3D file (either truly 3D or 4D with \code{dim[4] == 1}):
+        routed to \code{\link{read_vol}}, returning a \code{\linkS4class{DenseNeuroVol}}.
+}
+
+Explicit \code{type} values bypass header inspection:
+\itemize{
+  \item \code{type = "vol"}: requires a single file; always returns a
+        \code{\linkS4class{DenseNeuroVol}}. The \code{index} argument picks the
+        sub-volume when the file is 4D.
+  \item \code{type = "vec"}: forwards to \code{\link{read_vec}}. Multi-file input
+        yields a \code{\linkS4class{NeuroVecSeq}}. A single 3D file is promoted
+        to a \code{NeuroVec} with \code{dim[4] == 1}.
+  \item \code{type = "hyper"}: requires a single file; returns a
+        \code{\linkS4class{NeuroHyperVec}}.
+}
 }
 \examples{
+# 3D file -> DenseNeuroVol
 vol <- read_image(system.file("extdata", "global_mask2.nii.gz", package = "neuroim2"))
+
+# 4D file -> NeuroVec
 vec <- read_image(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
 
+# Multiple files (any mix of 3D and 4D) -> NeuroVecSeq
+fn <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
+seq_vec <- read_image(c(fn, fn))
+class(seq_vec)  # "NeuroVecSeq"
+
+}
+\seealso{
+\code{\link{read_vol}}, \code{\link{read_vec}}, \code{\link{read_hyper_vec}}
 }

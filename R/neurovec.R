@@ -1011,8 +1011,11 @@ setMethod(f="split_blocks", signature=signature(x="NeuroVec", indices="factor"),
 #' Loads a neuroimaging volume from one or more files, with support for various input formats
 #' and memory management strategies.
 #'
-#' @param file_name The name(s) of the file(s) to load. If multiple files are specified,
-#'   they are loaded and concatenated along the time dimension.
+#' @param file_name A character vector of one or more file paths to load. A 3D file
+#'   is promoted to a 4D \code{NeuroVec} with a single time point (see Details). When
+#'   multiple paths are supplied the result is always a \code{\linkS4class{NeuroVecSeq}}
+#'   (which itself extends \code{\linkS4class{NeuroVec}}), regardless of whether the
+#'   individual files are 3D, 4D, or a mix of both.
 #' @param indices The indices of the sub-volumes to load (e.g. if the file is 4-dimensional).
 #'   Only supported in "normal" mode.
 #' @param mask A logical mask defining which spatial elements to load. Required for "bigvec" mode
@@ -1027,7 +1030,6 @@ setMethod(f="split_blocks", signature=signature(x="NeuroVec", indices="factor"),
 #' This function supports multiple file formats:
 #' * .nii: Standard NIfTI format
 #' * .nii.gz: Compressed NIfTI (not supported in mmap mode)
-
 #'
 #' Memory management modes:
 #' * "normal": Loads entire dataset into memory. Best for smaller datasets or when memory
@@ -1038,7 +1040,41 @@ setMethod(f="split_blocks", signature=signature(x="NeuroVec", indices="factor"),
 #'   Requires a mask to specify which voxels to load.
 #' * "filebacked": Similar to mmap but with more flexible caching strategies.
 #'
-#' @return An \code{\linkS4class{NeuroVec}} object representing the loaded volume(s).
+#' \strong{3D inputs:} A path pointing at a 3D image is not rejected. It is promoted
+#' to a 4D \code{NeuroVec} whose fourth dimension has length 1, so the return type is
+#' always a \code{NeuroVec}, never a \code{\linkS4class{NeuroVol}}. If you want a true
+#' volume, use \code{\link{read_vol}} (or \code{vec[[1]]}).
+#'
+#' \strong{Multiple files:} When \code{file_name} has length > 1, each file is loaded
+#' independently and the results are wrapped with \code{\link{NeuroVecSeq}}. No data is
+#' copied or re-concatenated into a single dense 4D array; the returned
+#' \code{NeuroVecSeq} holds the constituent \code{NeuroVec}s in its \code{@@vecs} slot
+#' and exposes them as a single logical time series. Time-point lookups (e.g.
+#' \code{x[[i]]}, \code{sub_vector(x, i)}, \code{linear_access(x, i)}) transparently
+#' walk across the segments. The per-file time lengths may differ (e.g. a 3D file
+#' contributes 1 time point, a 4D file contributes \code{dim(file)[4]}); all spatial
+#' dimensions must match.
+#'
+#' @return The return type depends on how many files are supplied:
+#' \itemize{
+#'   \item \strong{Single 3D file} --- a \code{\linkS4class{NeuroVec}} with
+#'         \code{dim(x)[4] == 1} (concrete class depends on \code{mode}: e.g.
+#'         \code{\linkS4class{DenseNeuroVec}} for \code{"normal"},
+#'         \code{\linkS4class{MappedNeuroVec}} for \code{"mmap"},
+#'         \code{\linkS4class{BigNeuroVec}} for \code{"bigvec"},
+#'         \code{\linkS4class{FileBackedNeuroVec}} for \code{"filebacked"}).
+#'   \item \strong{Single 4D file} --- a \code{\linkS4class{NeuroVec}} of the same
+#'         concrete class as above, with \code{dim(x)[4]} equal to the 4th dimension
+#'         of the file (or \code{length(indices)} when \code{indices} is supplied).
+#'   \item \strong{Multiple files (any mix of 3D and 4D)} --- a
+#'         \code{\linkS4class{NeuroVecSeq}} wrapping one \code{NeuroVec} per input
+#'         file in the order given. Because \code{NeuroVecSeq} extends
+#'         \code{\linkS4class{NeuroVec}}, it can be used wherever a \code{NeuroVec}
+#'         is accepted, but its underlying storage is segmented rather than a single
+#'         contiguous 4D array. For example, \code{read_vec(c(vol, vec, vec, vol))}
+#'         returns a 4-element \code{NeuroVecSeq} whose segments have time lengths
+#'         \code{c(1, T2, T3, 1)}.
+#' }
 #'
 #' @examples
 #'

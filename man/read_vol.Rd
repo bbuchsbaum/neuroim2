@@ -2,25 +2,42 @@
 % Please edit documentation in R/neurovol.R
 \name{read_vol}
 \alias{read_vol}
-\title{Load an image volume from a file}
+\title{Load a single 3D image volume from a file}
 \usage{
 read_vol(file_name, index = 1)
 }
 \arguments{
-\item{file_name}{the name of the file to load}
+\item{file_name}{Path to a single image file (NIfTI \code{.nii} or \code{.nii.gz}).
+A character vector of length > 1 is not supported --- use \code{\link{read_vec}}
+if you need to read multiple files, or call \code{read_vol} in a loop.}
 
-\item{index}{the index of the volume (e.g. if the file is 4-dimensional)}
+\item{index}{Integer giving the index of the sub-volume to load. Must be \code{1}
+for a 3D file. For a 4D file, must satisfy \code{1 <= index <= dim(file)[4]}.}
 }
 \value{
-an instance of the class \code{\linkS4class{DenseNeuroVol}}
+A \code{\linkS4class{DenseNeuroVol}} (always 3D, always dense). The
+  associated \code{\linkS4class{NeuroSpace}} has three spatial dimensions even
+  when the source file is 4D.
 }
 \description{
-Load an image volume from a file
+Reads exactly one 3D volume from a neuroimaging file and returns it as a
+\code{\linkS4class{DenseNeuroVol}}. Accepts both 3D files (where only
+\code{index = 1} is valid) and 4D files (where \code{index} selects a single
+sub-volume along the 4th dimension).
 }
 \examples{
+# Read the first volume from a 4D file
 fname <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
 x <- read_vol(fname)
-print(dim(x))
+print(dim(x))    # 3D
 space(x)
 
+# Read the 3rd sub-volume from the same 4D file
+x3 <- read_vol(fname, index = 3)
+
+}
+\seealso{
+\code{\link{read_vec}} for loading 4D data as a \code{\linkS4class{NeuroVec}},
+\code{\link{read_image}} for automatic dimensionality-based dispatch, and
+\code{\link{read_hyper_vec}} for 5D data.
 }

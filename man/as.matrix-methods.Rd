@@ -35,14 +35,10 @@ Defaults to "cluster" to return a TxK matrix of cluster time-series.
 \item{...}{Additional arguments}
 }
 \value{
+A matrix with one row per voxel and one column per time point.
+
 A matrix representation of the object
 }
 \description{
-convert a \code{NeuroVec} to a matrix
-
 Converts a \code{\linkS4class{NeuroVecSeq}} to a dense voxel-by-time matrix.
-
-convert a \code{\linkS4class{ROIVec}} to a matrix
-
-Convert to Matrix
 }
