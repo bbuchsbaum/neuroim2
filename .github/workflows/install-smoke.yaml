@@ -1,0 +1,43 @@
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+name: install-smoke
+
+permissions: read-all
+
+jobs:
+  install-smoke:
+    runs-on: ubuntu-latest
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fail on compiled artifacts in src
+        run: |
+          bad="$(find src -maxdepth 1 -type f \( -name '*.o' -o -name '*.so' -o -name '*.dll' -o -name '*.gcno' -o -name '*.gcda' \))"
+          test -z "$bad" || { echo "$bad"; exit 1; }
+        shell: bash
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          needs: check
+
+      - name: Fresh install and load
+        run: |
+          lib <- file.path(Sys.getenv("RUNNER_TEMP"), "install-smoke-lib")
+          dir.create(lib, recursive = TRUE, showWarnings = FALSE)
+          system2("R", c("CMD", "INSTALL", "-l", lib, "."), stdout = TRUE, stderr = TRUE)
+          .libPaths(c(lib, .libPaths()))
+          library(neuroim2)
+          packageVersion("neuroim2")
+        shell: Rscript {0}

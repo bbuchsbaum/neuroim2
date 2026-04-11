@@ -74,8 +74,10 @@ jobs:
           files <- c(
             "vignettes/Overview.Rmd",
             "vignettes/ChoosingBackends.Rmd",
-            "vignettes/NeuroVector.Rmd",
-            "vignettes/Resampling.Rmd"
+            "vignettes/coordinate-systems.Rmd",
+            "vignettes/VolumesAndVectors.Rmd",
+            "vignettes/Resampling.Rmd",
+            "vignettes/AnalysisWorkflows.Rmd"
           )
           out_dir <- file.path(tempdir(), "docs-check")
           dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)

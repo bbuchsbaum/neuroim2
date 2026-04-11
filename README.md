@@ -103,3 +103,8 @@ the pkgdown site:
 | [Coordinate Systems](https://bbuchsbaum.github.io/neuroim2/articles/coordinate-systems.html) | [Cookbook](https://bbuchsbaum.github.io/neuroim2/articles/Cookbook.html) | [Regions of Interest](https://bbuchsbaum.github.io/neuroim2/articles/regionOfInterest.html) |
 | [Volumes & Vectors](https://bbuchsbaum.github.io/neuroim2/articles/VolumesAndVectors.html) | [Smoothing](https://bbuchsbaum.github.io/neuroim2/articles/Smoothing.html) | [Clustered NeuroVec](https://bbuchsbaum.github.io/neuroim2/articles/clustered-neurovec.html) |
 | [Resampling](https://bbuchsbaum.github.io/neuroim2/articles/Resampling.html) |  | [Pipelines](https://bbuchsbaum.github.io/neuroim2/articles/pipelines.html) |
+
+<!-- albersdown:theme-note:start -->
+## Albers theme
+This package uses the albersdown theme. Existing vignette theme hooks are replaced so `albers.css` and local `albers.js` render consistently on CRAN and GitHub Pages. The defaults are configured via `params$family` and `params$preset` (family = 'red', preset = 'homage'). The pkgdown site uses `template: { package: albersdown }`.
+<!-- albersdown:theme-note:end -->

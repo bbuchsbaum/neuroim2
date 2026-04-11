@@ -4,32 +4,30 @@ template:
   package: albersdown
 articles:
 - title: Start Here
-  desc: Core orientation and backend choice before task-specific workflows
+  desc: The shortest path from reading data to understanding space and storage
   contents:
   - Overview
-  - coordinate-systems
   - ChoosingBackends
-  - NeuroVector
+  - coordinate-systems
+  - VolumesAndVectors
+  - Resampling
+- title: Analysis Workflows
+  desc: Common analysis patterns built from ROIs, searchlights, and summaries
+  contents:
+  - AnalysisWorkflows
+  - slice-visualization
+  - Cookbook
 - title: Spatial Workflows
-  desc: Reading, transforming, and resampling volumetric data
+  desc: Focused spatial methods outside the main onboarding path
+  contents: Smoothing
+- title: Advanced Topics
+  desc: Deeper or more specialized articles beyond the main reader path
   contents:
   - ImageVolumes
-  - Resampling
-  - Smoothing
-- title: Regions and Searchlights
-  desc: ROI construction, clustered representations, and searchlight analysis
-  contents:
+  - NeuroVector
   - regionOfInterest
   - clustered-neurovec
   - pipelines
-- title: Visualization
-  desc: Slice and montage visualization workflows
-  contents:
-  - slice-visualization
-- title: Cookbook
-  desc: Small, task-oriented examples and recipes
-  contents:
-  - Cookbook
 reference:
 - title: Visualization Helpers
   desc: Plotting utilities for slices, montages, overlays, and palettes
