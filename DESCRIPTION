@@ -109,6 +109,7 @@ Suggests:
     pkgdown,
     roxygen2,
     rmarkdown,
+    albersdown,
     Gmedian,
     R.utils,
     spelling,
