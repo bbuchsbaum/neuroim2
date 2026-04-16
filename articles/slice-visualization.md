@@ -248,7 +248,7 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] neuroim2_0.11.0 Matrix_1.7-4    ggplot2_4.0.2  
+## [1] neuroim2_0.12.0 Matrix_1.7-4    ggplot2_4.0.2  
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] sass_0.4.10           generics_0.1.4        mmap_0.6-26          

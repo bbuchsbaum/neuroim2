@@ -106,7 +106,7 @@ vec <- read_vec(file_name)  # DenseNeuroVec in memory
 # Convert to a memory-mapped representation backed by a temporary .nii file
 mvec <- as_mmap(vec)
 mvec
-#> <MappedNeuroVec> [7.3 Kb] 
+#> <MappedNeuroVec> [7.4 Kb] 
 #> ── Spatial ───────────────────────────────────────────────────────────────────── 
 #>   Dimensions    : 64 x 64 x 25
 #>   Time Points   : 4
@@ -114,7 +114,7 @@ mvec
 #>   Origin        : 112, -108, -46.2
 #> ── Mapping ───────────────────────────────────────────────────────────────────── 
 #>   Offset        : 88
-#>   Label         : file29de700af1ce.nii
+#>   Label         : file2a0b3b702ce7.nii
 
 # Or explicitly choose an output file (must be uncompressed for mmap)
 tmp_nii <- tempfile(fileext = ".nii")

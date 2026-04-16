@@ -111,7 +111,7 @@ mask_vol <- LogicalNeuroVol(mask_arr, drop_dim(sp4))
 
 svec <- as.sparse(dvec, mask_vol)     # SparseNeuroVec with explicit mask
 svec                                 # note the stored mask and cardinality
-#> <SparseNeuroVec> [306 Kb] 
+#> <SparseNeuroVec> [306.2 Kb] 
 #> ── Spatial ───────────────────────────────────────────────────────────────────── 
 #>   Dimensions    : 24 x 24 x 24
 #>   Time Points   : 5
