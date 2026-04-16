@@ -6,7 +6,7 @@
 \alias{SparseNeuroVec}
 \title{SparseNeuroVec Class}
 \usage{
-SparseNeuroVec(data, space, mask, label = "")
+SparseNeuroVec(data, space, mask, label = "", volume_labels = character())
 }
 \arguments{
 \item{data}{A matrix or a 4-D array containing the neuroimaging data. The dimensions of the data should be consistent with the dimensions of the provided NeuroSpace object and mask.}
@@ -16,6 +16,9 @@ SparseNeuroVec(data, space, mask, label = "")
 \item{mask}{A 3D array, 1D vector of type logical, or an instance of type \link{LogicalNeuroVol}, which specifies the locations of the non-zero values in the data.}
 
 \item{label}{Optional character string providing a label for the vector}
+
+\item{volume_labels}{Optional character vector of length \code{dim(space)[4]}
+giving per-volume labels.}
 }
 \value{
 A SparseNeuroVec object, containing the sparse neuroimaging data, mask, and associated NeuroSpace information.

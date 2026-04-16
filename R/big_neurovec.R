@@ -8,6 +8,7 @@
 #' @param space A NeuroSpace object defining the spatial properties
 #' @param mask A logical mask indicating which voxels contain data
 #' @param label Optional character string label for the vector
+#' @param volume_labels Optional character vector of per-volume labels
 #' @param type Storage type, one of "double", "float", or "integer"
 #' @param backingfile Path to the file used for memory mapping (defaults to tempfile())
 #'

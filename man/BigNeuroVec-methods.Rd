@@ -9,6 +9,7 @@ BigNeuroVec(
   space,
   mask,
   label = "",
+  volume_labels = character(),
   type = c("double", "float", "integer"),
   backingfile = tempfile()
 )
@@ -21,6 +22,8 @@ BigNeuroVec(
 \item{mask}{A logical mask indicating which voxels contain data}
 
 \item{label}{Optional character string label for the vector}
+
+\item{volume_labels}{Optional character vector of per-volume labels}
 
 \item{type}{Storage type, one of "double", "float", or "integer"}
 

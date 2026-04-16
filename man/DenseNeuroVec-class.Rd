@@ -6,7 +6,7 @@
 \alias{DenseNeuroVec}
 \title{DenseNeuroVec Class}
 \usage{
-DenseNeuroVec(data, space, label = "none")
+DenseNeuroVec(data, space, label = "none", volume_labels = character())
 }
 \arguments{
 \item{data}{The image data. This can be:
@@ -20,6 +20,9 @@ DenseNeuroVec(data, space, label = "none")
 \item{space}{A \code{\linkS4class{NeuroSpace}} object defining the spatial properties of the image.}
 
 \item{label}{A character string providing a label for the DenseNeuroVec object. Default is an empty string.}
+
+\item{volume_labels}{Optional character vector of length \code{dim(space)[4]}
+giving per-volume labels.}
 }
 \value{
 A concrete instance of the \code{\linkS4class{DenseNeuroVec}} class.

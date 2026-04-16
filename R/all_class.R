@@ -957,6 +957,7 @@ setClass("IndexLookupVol",
 #' \describe{
 #'   \item{space}{A \code{\linkS4class{NeuroSpace}} object defining the spatial properties of the image.}
 #'   \item{label}{A character string providing a label for the NeuroVec object.}
+#'   \item{volume_labels}{An optional character vector of per-volume labels with length 0 or \code{dim(x)[4]}.}
 #' }
 #'
 #' @section Methods:

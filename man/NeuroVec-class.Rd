@@ -6,7 +6,13 @@
 \alias{NeuroVec}
 \title{NeuroVec Class}
 \usage{
-NeuroVec(data, space = NULL, mask = NULL, label = "")
+NeuroVec(
+  data,
+  space = NULL,
+  mask = NULL,
+  label = "",
+  volume_labels = character()
+)
 }
 \arguments{
 \item{data}{The image data. This can be:
@@ -25,6 +31,9 @@ properties of the image. Not required if \code{data} is a list of NeuroVol objec
 a SparseNeuroVec object will be created.}
 
 \item{label}{A character string providing a label for the NeuroVec object. Default is an empty string.}
+
+\item{volume_labels}{Optional character vector of length \code{dim(x)[4]} giving
+per-volume labels.}
 }
 \value{
 A concrete instance of the \code{\linkS4class{NeuroVec}} class:
@@ -62,6 +71,7 @@ The function performs several operations:
 \describe{
   \item{space}{A \code{\linkS4class{NeuroSpace}} object defining the spatial properties of the image.}
   \item{label}{A character string providing a label for the NeuroVec object.}
+  \item{volume_labels}{An optional character vector of per-volume labels with length 0 or \code{dim(x)[4]}.}
 }
 }
 

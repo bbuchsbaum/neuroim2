@@ -52,6 +52,16 @@ NULL
 
 #' @keywords internal
 #' @noRd
+.infer_volume_labels_from_vols <- function(vols) {
+  labs <- vapply(vols, function(x) {
+    if ("label" %in% methods::slotNames(x)) x@label else ""
+  }, character(1))
+
+  if (any(nzchar(labs))) labs else character()
+}
+
+#' @keywords internal
+#' @noRd
 .resolve_volume_label_index <- function(x, label) {
   if (!is.character(label) || length(label) != 1L || is.na(label)) {
     cli::cli_abort("{.arg label} must be a single, non-missing character string.")
@@ -75,6 +85,8 @@ NULL
 
 #' @export
 #' @rdname volume_labels-methods
+#' @param x A \code{NeuroVec} or compatible object.
+#' @return A character vector of per-volume labels, or \code{character(0)} if none are set.
 setMethod("volume_labels", "NeuroVec", function(x) x@volume_labels)
 
 
@@ -148,10 +160,7 @@ setMethod("volume_labels", "NeuroVec", function(x) x@volume_labels)
 NeuroVec <- function(data, space = NULL, mask = NULL, label = "", volume_labels = character()) {
   if (is.list(data)) {
     if (length(volume_labels) == 0L) {
-      volume_labels <- vapply(data, function(x) x@label, character(1))
-      if (!any(nzchar(volume_labels))) {
-        volume_labels <- character()
-      }
+      volume_labels <- .infer_volume_labels_from_vols(data)
     }
     space <- space(data[[1]])
     space <- add_dim(space, length(data))
@@ -511,7 +520,7 @@ read_vol_list <- function(file_names, mask=NULL) {
 	if (is.null(mask)) {
 		mat <- do.call(cbind, lapply(vols, function(v) as.vector(v@.Data)))
 		dspace <- add_dim(space(vols[[1]]), length(vols))
-    labs <- vapply(vols, function(v) v@label, character(1))
+    labs <- .infer_volume_labels_from_vols(vols)
 		DenseNeuroVec(mat, dspace, label = "",
                   volume_labels = if (any(nzchar(labs))) labs else character())
 	} else {
@@ -528,7 +537,7 @@ read_vol_list <- function(file_names, mask=NULL) {
 
 
 		#SparseNeuroVec(mat[mask,], dspace, mask=mask, label=map_chr(meta_info, function(m) m@label))
-    labs <- vapply(vols, function(v) v@label, character(1))
+    labs <- .infer_volume_labels_from_vols(vols)
 		SparseNeuroVec(mat[mask,], dspace, mask = mask,
                    volume_labels = if (any(nzchar(labs))) labs else character())
 

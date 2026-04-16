@@ -5,6 +5,7 @@
 \alias{[,DenseNeuroVol,numeric,missing,ANY-method}
 \alias{[,DenseNeuroVol,integer,missing,ANY-method}
 \alias{[[,NeuroVec,numeric-method}
+\alias{[[,NeuroVec,character-method}
 \alias{[,NeuroVol,ROICoords,missing,ANY-method}
 \alias{[,NeuroVol,ROIVol,missing,ANY-method}
 \alias{[,DenseNeuroVol,ROIVol,missing,ANY-method}
@@ -29,6 +30,8 @@
 \S4method{[}{DenseNeuroVol,integer,missing,ANY}(x, i, j, k, ..., drop = TRUE)
 
 \S4method{[[}{NeuroVec,numeric}(x, i)
+
+\S4method{[[}{NeuroVec,character}(x, i)
 
 \S4method{[}{NeuroVol,ROICoords,missing,ANY}(x, i, j, ..., drop = TRUE)
 
