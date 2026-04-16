@@ -15,7 +15,13 @@ spatial reference system provided by
 ## Usage
 
 ``` r
-NeuroVec(data, space = NULL, mask = NULL, label = "")
+NeuroVec(
+  data,
+  space = NULL,
+  mask = NULL,
+  label = "",
+  volume_labels = character()
+)
 ```
 
 ## Arguments
@@ -52,6 +58,11 @@ NeuroVec(data, space = NULL, mask = NULL, label = "")
 
   A character string providing a label for the NeuroVec object. Default
   is an empty string.
+
+- volume_labels:
+
+  Optional character vector of length `dim(x)[4]` giving per-volume
+  labels.
 
 ## Value
 
@@ -95,6 +106,11 @@ The function performs several operations:
 - label:
 
   A character string providing a label for the NeuroVec object.
+
+- volume_labels:
+
+  An optional character vector of per-volume labels with length 0 or
+  `dim(x)[4]`.
 
 ## Methods
 

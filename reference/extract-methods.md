@@ -17,6 +17,9 @@ x[i, j, k, ..., drop = TRUE]
 # S4 method for class 'NeuroVec,numeric'
 x[[i]]
 
+# S4 method for class 'NeuroVec,character'
+x[[i]]
+
 # S4 method for class 'NeuroVol,ROICoords,missing,ANY'
 x[i, j, ..., drop = TRUE]
 

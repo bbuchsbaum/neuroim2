@@ -11,7 +11,7 @@ formats and ensures proper dimensionality.
 ## Usage
 
 ``` r
-DenseNeuroVec(data, space, label = "none")
+DenseNeuroVec(data, space, label = "none", volume_labels = character())
 ```
 
 ## Arguments
@@ -37,6 +37,11 @@ DenseNeuroVec(data, space, label = "none")
 
   A character string providing a label for the DenseNeuroVec object.
   Default is an empty string.
+
+- volume_labels:
+
+  Optional character vector of length `dim(space)[4]` giving per-volume
+  labels.
 
 ## Value
 

@@ -10,7 +10,7 @@ values.
 ## Usage
 
 ``` r
-SparseNeuroVec(data, space, mask, label = "")
+SparseNeuroVec(data, space, mask, label = "", volume_labels = character())
 ```
 
 ## Arguments
@@ -37,6 +37,11 @@ SparseNeuroVec(data, space, mask, label = "")
 - label:
 
   Optional character string providing a label for the vector
+
+- volume_labels:
+
+  Optional character vector of length `dim(space)[4]` giving per-volume
+  labels.
 
 ## Value
 

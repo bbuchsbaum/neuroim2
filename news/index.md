@@ -4,9 +4,10 @@
 
 ### New Features
 
-- `NeuroVec` now supports optional per-volume `volume_labels()` metadata
-  across dense, sparse, mapped, file-backed, bigvec, and `NeuroVecSeq`
-  backends.
+- `NeuroVec` now supports optional per-volume
+  [`volume_labels()`](https://bbuchsbaum.github.io/neuroim2/reference/volume_labels-methods.md)
+  metadata across dense, sparse, mapped, file-backed, bigvec, and
+  `NeuroVecSeq` backends.
 - Named volume access is now supported via `vec[["label"]]`, with strict
   unique-match semantics, and
   [`sub_vector()`](https://bbuchsbaum.github.io/neuroim2/reference/sub_vector-methods.md)

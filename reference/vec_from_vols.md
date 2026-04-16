@@ -45,7 +45,6 @@ spc <- NeuroSpace(c(10, 10, 10))
 vol1 <- NeuroVol(rnorm(10*10*10), spc)
 vol2 <- NeuroVol(rnorm(10*10*10), spc)
 vec <- vec_from_vols(list(vol1, vol2))
-#> Error in FUN(X[[i]], ...): no slot of name "label" for this object of class "DenseNeuroVol"
 print(dim(vec))  # Should be c(10, 10, 10, 2)
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'x' in selecting a method for function 'print': object 'vec' not found
+#> [1] 10 10 10  2
 ```

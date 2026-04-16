@@ -710,6 +710,7 @@ Miscellaneous methods and functions
 - [`` `[`( ``*`<DenseNeuroVol>`*`,`*`<numeric>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
   [`` `[`( ``*`<DenseNeuroVol>`*`,`*`<integer>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
   [`` `[[`( ``*`<NeuroVec>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+  [`` `[[`( ``*`<NeuroVec>`*`,`*`<character>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
   [`` `[`( ``*`<NeuroVol>`*`,`*`<ROICoords>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
   [`` `[`( ``*`<NeuroVol>`*`,`*`<ROIVol>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
   [`` `[`( ``*`<DenseNeuroVol>`*`,`*`<ROIVol>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
@@ -1213,6 +1214,11 @@ Miscellaneous methods and functions
 
 - [`vols()`](https://bbuchsbaum.github.io/neuroim2/reference/vols-methods.md)
   : Extract an ordered series of 3D volumes.
+
+- [`volume_labels()`](https://bbuchsbaum.github.io/neuroim2/reference/volume_labels-methods.md)
+  :
+
+  Get per-volume labels for a `NeuroVec`.
 
 - [`voxels()`](https://bbuchsbaum.github.io/neuroim2/reference/voxels-methods.md)
   : extract voxel coordinates

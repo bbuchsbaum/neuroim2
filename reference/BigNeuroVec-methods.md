@@ -12,6 +12,7 @@ BigNeuroVec(
   space,
   mask,
   label = "",
+  volume_labels = character(),
   type = c("double", "float", "integer"),
   backingfile = tempfile()
 )
@@ -34,6 +35,10 @@ BigNeuroVec(
 - label:
 
   Optional character string label for the vector
+
+- volume_labels:
+
+  Optional character vector of per-volume labels
 
 - type:
 

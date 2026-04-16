@@ -16,6 +16,9 @@ sub_vector(x, i)
 # S4 method for class 'NeuroVec,numeric'
 sub_vector(x, i)
 
+# S4 method for class 'NeuroVec,character'
+sub_vector(x, i)
+
 # S4 method for class 'NeuroVecSeq,numeric'
 sub_vector(x, i)
 
