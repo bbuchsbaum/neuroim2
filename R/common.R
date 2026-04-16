@@ -240,7 +240,8 @@ setMethod(f="scale_series", signature=signature(x="DenseNeuroVec", center="logic
               M <- M / rsd
             }
             dim(M) <- d
-            new("DenseNeuroVec", .Data = M, space = space(x))
+            new("DenseNeuroVec", .Data = M, space = space(x),
+                label = x@label, volume_labels = volume_labels(x))
           })
 
 #' @export
@@ -311,6 +312,7 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 #' @noRd
 .concat4D <- function(x, y, ...) {
   rest <- list(...)
+  objs <- c(list(x, y), rest)
 
   D <- dim(x)[1:3]
 
@@ -341,7 +343,22 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
       trans = trans(x@space)
     )
 
-  DenseNeuroVec(out, nspace)
+  volume_labels <- {
+    labs <- unlist(lapply(objs, function(obj) {
+      if (inherits(obj, "NeuroVec")) {
+        cur <- volume_labels(obj)
+        if (length(cur) == 0L) rep("", dim(obj)[4]) else cur
+      } else if (inherits(obj, "NeuroVol")) {
+        ""
+      } else {
+        character()
+      }
+    }), use.names = FALSE)
+
+    if (any(nzchar(labs))) labs else character()
+  }
+
+  DenseNeuroVec(out, nspace, volume_labels = volume_labels)
 
 }
 

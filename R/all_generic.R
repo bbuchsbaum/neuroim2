@@ -1035,6 +1035,21 @@ setGeneric(name="grid_to_grid",   def=function(x, vox) standardGeneric("grid_to_
 setGeneric(name="grid_to_index",   def=function(x, coords) standardGeneric("grid_to_index"))
 
 
+#' Get per-volume labels for a \code{NeuroVec}.
+#'
+#' @param x A \code{NeuroVec} or compatible object.
+#' @return A character vector of labels. Returns \code{character(0)} when no
+#'   labels are defined.
+#' @export
+#' @examples
+#' sp <- NeuroSpace(c(2, 2, 2, 3), c(1, 1, 1))
+#' vec <- NeuroVec(array(1:24, dim = c(2, 2, 2, 3)), sp,
+#'                 volume_labels = c("baseline", "task", "rest"))
+#' volume_labels(vec)
+#' @rdname volume_labels-methods
+setGeneric(name="volume_labels", def=function(x) standardGeneric("volume_labels"))
+
+
 
 #' Generic function to extract a sub-vector from a \code{NeuroVec} object.
 #' @param x four-dimensional image

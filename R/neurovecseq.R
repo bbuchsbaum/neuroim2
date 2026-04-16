@@ -122,7 +122,8 @@ NeuroVecSeq <- function(...) {
   lens <- map_dbl(vecs, function(x) dim(x)[4])
   sp <- add_dim(drop_dim(sp), sum(lens))
 
-  new("NeuroVecSeq", space=sp, vecs=vecs, lens=lens)
+  new("NeuroVecSeq", space = sp, vecs = vecs, lens = lens,
+      volume_labels = .combine_volume_labels(vecs))
 }
 
 #' Get length of NeuroVecSeq object

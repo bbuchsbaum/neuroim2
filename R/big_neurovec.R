@@ -36,7 +36,8 @@
 #'
 #' @rdname BigNeuroVec-methods
 #' @export
-BigNeuroVec <- function(data, space, mask, label = "", type = c("double", "float", "integer"), backingfile=tempfile()) {
+BigNeuroVec <- function(data, space, mask, label = "", volume_labels = character(),
+                        type = c("double", "float", "integer"), backingfile=tempfile()) {
   type <- match.arg(type)
   stopifnot(inherits(space, "NeuroSpace"))
 
@@ -46,9 +47,11 @@ BigNeuroVec <- function(data, space, mask, label = "", type = c("double", "float
   }
 
   p <- prep_sparsenvec(data, space, mask)
+  volume_labels <- .normalize_volume_labels(volume_labels, dim(p$space)[4])
 
   fbm <- bigstatsr::as_FBM(p$data, type=type, backingfile=backingfile)
 
   new("BigNeuroVec", space=p$space, mask=p$mask,
-      map=IndexLookupVol(space(p$mask), as.integer(which(p$mask))), data=fbm, label=label)
+      map=IndexLookupVol(space(p$mask), as.integer(which(p$mask))), data=fbm,
+      label=label, volume_labels = volume_labels)
 }

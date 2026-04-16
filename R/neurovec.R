@@ -3,6 +3,80 @@ NULL
 #' @include all_generic.R
 NULL
 
+#' @keywords internal
+#' @noRd
+.normalize_volume_labels <- function(volume_labels, n) {
+  if (is.null(volume_labels) || length(volume_labels) == 0L) {
+    return(character())
+  }
+
+  if (!is.character(volume_labels)) {
+    cli::cli_abort("{.arg volume_labels} must be a character vector.")
+  }
+
+  if (length(volume_labels) != n) {
+    cli::cli_abort(
+      "{.arg volume_labels} must have length 0 or match the number of volumes ({n})."
+    )
+  }
+
+  as.character(volume_labels)
+}
+
+#' @keywords internal
+#' @noRd
+.subset_volume_labels <- function(volume_labels, i) {
+  if (length(volume_labels) == 0L) {
+    character()
+  } else {
+    volume_labels[i]
+  }
+}
+
+#' @keywords internal
+#' @noRd
+.combine_volume_labels <- function(vecs) {
+  label_list <- lapply(vecs, volume_labels)
+  if (!any(vapply(label_list, length, integer(1)) > 0L)) {
+    return(character())
+  }
+
+  unlist(Map(function(vec, labs) {
+    if (length(labs) == 0L) {
+      rep("", dim(vec)[4])
+    } else {
+      labs
+    }
+  }, vecs, label_list), use.names = FALSE)
+}
+
+#' @keywords internal
+#' @noRd
+.resolve_volume_label_index <- function(x, label) {
+  if (!is.character(label) || length(label) != 1L || is.na(label)) {
+    cli::cli_abort("{.arg label} must be a single, non-missing character string.")
+  }
+
+  labs <- volume_labels(x)
+  if (length(labs) == 0L) {
+    cli::cli_abort("{.cls NeuroVec} object has no per-volume labels.")
+  }
+
+  matches <- which(!is.na(labs) & nzchar(labs) & labs == label)
+  if (length(matches) == 0L) {
+    cli::cli_abort("Unknown volume label {.val {label}}.")
+  }
+  if (length(matches) > 1L) {
+    cli::cli_abort("Volume label {.val {label}} is not unique.")
+  }
+
+  matches[[1]]
+}
+
+#' @export
+#' @rdname volume_labels-methods
+setMethod("volume_labels", "NeuroVec", function(x) x@volume_labels)
+
 
 
 #' NeuroVec: Neuroimaging Data Vector Class
@@ -25,6 +99,8 @@ NULL
 #' @param mask An optional logical array specifying which voxels to include. If provided,
 #'   a SparseNeuroVec object will be created.
 #' @param label A character string providing a label for the NeuroVec object. Default is an empty string.
+#' @param volume_labels Optional character vector of length \code{dim(x)[4]} giving
+#'   per-volume labels.
 #'
 #' @return A concrete instance of the \code{\linkS4class{NeuroVec}} class:
 #'   \itemize{
@@ -69,8 +145,14 @@ NULL
 #' @export
 #' @importFrom methods new
 #' @rdname NeuroVec-class
-NeuroVec <- function(data, space = NULL, mask = NULL, label = "") {
+NeuroVec <- function(data, space = NULL, mask = NULL, label = "", volume_labels = character()) {
   if (is.list(data)) {
+    if (length(volume_labels) == 0L) {
+      volume_labels <- vapply(data, function(x) x@label, character(1))
+      if (!any(nzchar(volume_labels))) {
+        volume_labels <- character()
+      }
+    }
     space <- space(data[[1]])
     space <- add_dim(space, length(data))
     data <- do.call(cbind, lapply(data, function(x) as.vector(x)))
@@ -81,10 +163,9 @@ NeuroVec <- function(data, space = NULL, mask = NULL, label = "") {
 	  if (prod(dim(space)) != length(data)) {
 	    stop("dimensions of data argument do not match dimensions of space argument")
 	  }
-		DenseNeuroVec(data,space, label)
+		DenseNeuroVec(data, space, label = label, volume_labels = volume_labels)
 	} else {
-		#SparseNeuroVec(data,space,mask,label)
-	  SparseNeuroVec(data,space,mask)
+	  SparseNeuroVec(data, space, mask, label = label, volume_labels = volume_labels)
 	}
 
 }
@@ -156,6 +237,8 @@ vec_from_vols <- function(vols, mask = NULL) {
 #'   }
 #' @param space A \code{\linkS4class{NeuroSpace}} object defining the spatial properties of the image.
 #' @param label A character string providing a label for the DenseNeuroVec object. Default is an empty string.
+#' @param volume_labels Optional character vector of length \code{dim(space)[4]}
+#'   giving per-volume labels.
 #'
 #' @return A concrete instance of the \code{\linkS4class{DenseNeuroVec}} class.
 #'
@@ -193,7 +276,7 @@ vec_from_vols <- function(vols, mask = NULL) {
 #'
 #' @export
 #' @rdname DenseNeuroVec-class
-DenseNeuroVec <- function(data, space, label="none") {
+DenseNeuroVec <- function(data, space, label = "none", volume_labels = character()) {
 	if (is.matrix(data)) {
 		splen <- prod(dim(space)[1:3])
 		data <- if (nrow(data) == splen) {
@@ -214,7 +297,9 @@ DenseNeuroVec <- function(data, space, label="none") {
 	  data <- array(data, dim(space))
 	}
 
-	new("DenseNeuroVec", .Data=data, space=space, label=label)
+	volume_labels <- .normalize_volume_labels(volume_labels, dim(space)[4])
+	new("DenseNeuroVec", .Data = data, space = space, label = label,
+      volume_labels = volume_labels)
 
 }
 
@@ -290,7 +375,16 @@ setMethod(f="load_data", signature=c("NeuroVecSource"),
                                  meta@spatial_axes,
                                  trans(meta))
 
-            DenseNeuroVec(dat, bspace, label = meta@data_file)
+            DenseNeuroVec(
+              dat,
+              bspace,
+              label = meta@data_file,
+              volume_labels = nifti_volume_labels(
+                meta@header,
+                expected_length = length(ind),
+                indices = ind
+              )
+            )
           })
 
 
@@ -417,7 +511,9 @@ read_vol_list <- function(file_names, mask=NULL) {
 	if (is.null(mask)) {
 		mat <- do.call(cbind, lapply(vols, function(v) as.vector(v@.Data)))
 		dspace <- add_dim(space(vols[[1]]), length(vols))
-		DenseNeuroVec(mat, dspace, label="")
+    labs <- vapply(vols, function(v) v@label, character(1))
+		DenseNeuroVec(mat, dspace, label = "",
+                  volume_labels = if (any(nzchar(labs))) labs else character())
 	} else {
 		mat <- do.call(cbind, lapply(vols, function(v) as.vector(v@.Data)))
 		dspace <- add_dim(space(vols[[1]]), length(vols))
@@ -432,7 +528,9 @@ read_vol_list <- function(file_names, mask=NULL) {
 
 
 		#SparseNeuroVec(mat[mask,], dspace, mask=mask, label=map_chr(meta_info, function(m) m@label))
-		SparseNeuroVec(mat[mask,], dspace, mask=mask)
+    labs <- vapply(vols, function(v) v@label, character(1))
+		SparseNeuroVec(mat[mask,], dspace, mask = mask,
+                   volume_labels = if (any(nzchar(labs))) labs else character())
 
 	}
 }
@@ -486,6 +584,9 @@ setMethod("show", "NeuroVec", function(object) {
   show_field("Spacing", paste(spacing(object)[1:3], collapse = " x "))
   show_field("Origin", paste(round(origin(object)[1:3], 2), collapse = ", "))
   show_field("Orientation", safe_axcodes(space(object)))
+  if (length(volume_labels(object)) > 0L) {
+    show_field("Volume Labels", sum(nzchar(volume_labels(object))), paste0("/", d[4], " named"))
+  }
 })
 
 
@@ -966,6 +1067,9 @@ setMethod("show", "DenseNeuroVec", function(object) {
   if (!is.null(object@label) && nchar(object@label) > 0) {
     show_field("Label", object@label)
   }
+  if (length(volume_labels(object)) > 0L) {
+    show_field("Volume Labels", sum(nzchar(volume_labels(object))), paste0("/", d[4], " named"))
+  }
 })
 
 
@@ -1162,7 +1266,8 @@ read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap
     for (i  in seq_along(file_name)) {
       message("loading ", file_name[i], " as bigvec ")
       v <- load_data(NeuroVecSource(file_name[i], indices, mask))
-      out[[i]] <- BigNeuroVec(v@data, space(v), mask)
+      out[[i]] <- BigNeuroVec(v@data, space(v), mask,
+                              volume_labels = volume_labels(v))
     }
 
     out
@@ -1333,7 +1438,20 @@ setMethod(f="sub_vector", signature=signature(x="NeuroVec", i="numeric"),
 
             newdim <- c(dim(x)[1:3], length(i))
             bspace <- NeuroSpace(newdim, spacing=spacing(xs), origin=origin(xs), axes(xs), trans(xs))
-            DenseNeuroVec(dat, bspace)
+            DenseNeuroVec(
+              dat,
+              bspace,
+              label = x@label,
+              volume_labels = .subset_volume_labels(volume_labels(x), i)
+            )
+          })
+
+#' @rdname sub_vector-methods
+#' @export
+setMethod(f = "sub_vector", signature = signature(x = "NeuroVec", i = "character"),
+          def = function(x, i) {
+            idx <- vapply(i, function(lbl) .resolve_volume_label_index(x, lbl), integer(1))
+            sub_vector(x, idx)
           })
 
 
@@ -1403,6 +1521,13 @@ setMethod(f="[[", signature=signature(x="NeuroVec", i="numeric"),
             DenseNeuroVol(dat, bspace)
           })
 
+#' @export
+#' @rdname extract-methods
+setMethod(f = "[[", signature = signature(x = "NeuroVec", i = "character"),
+          def = function(x, i) {
+            x[[.resolve_volume_label_index(x, i)]]
+          })
+
 
 #' @export
 #' @rdname write_vec-methods
@@ -1460,6 +1585,10 @@ setMethod("show", "NeuroVecSeq", function(object) {
   }
   if (n > 5) {
     cat("  ... and", n - 5, "more\n")
+  }
+  if (length(volume_labels(object)) > 0L) {
+    show_field("Volume Labels", sum(nzchar(volume_labels(object))),
+               paste0("/", dim(object)[4], " named"))
   }
 })
 

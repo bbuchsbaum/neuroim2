@@ -19,7 +19,9 @@ write_nifti_vector <- function(vec, file_name, data_type="FLOAT") {
   if (length(dim(vec)) != 4) {
     cli::cli_abort("Input vector must be 4-dimensional, not {length(dim(vec))}D.")
   }
-	hdr <- as_nifti_header(vec, file_name=file_name, data_type=data_type)
+	ext <- .make_nifti_volume_labels_extension(volume_labels(vec))
+	hdr <- as_nifti_header(vec, file_name = file_name, data_type = data_type,
+                         extensions = ext)
 
 	conn <- if (substr(file_name, nchar(file_name)-2, nchar(file_name)) == ".gz") {
 				gzfile(file_name, open="wb")

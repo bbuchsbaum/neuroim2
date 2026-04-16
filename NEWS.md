@@ -1,3 +1,15 @@
+# neuroim2 0.12.0
+
+## New Features
+
+* `NeuroVec` now supports optional per-volume `volume_labels()` metadata across dense, sparse, mapped, file-backed, bigvec, and `NeuroVecSeq` backends.
+* Named volume access is now supported via `vec[["label"]]`, with strict unique-match semantics, and `sub_vector()` now accepts character label vectors.
+* `write_vec()` now round-trips per-volume labels through a custom NIfTI extension; `read_vec()` and low-footprint readers restore labels on load.
+
+## Testing
+
+* Added focused tests for per-volume label access, concatenation semantics, `NeuroVecSeq`, and NIfTI label round-tripping.
+
 # neuroim2 0.11.0
 
 ## Bug Fixes

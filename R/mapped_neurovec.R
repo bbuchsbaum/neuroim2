@@ -195,7 +195,8 @@ setMethod(f = "load_data",
                 space = bspace,
                 filemap = fmap,
                 offset = as.integer(offset),
-                label = basename(meta@data_file))
+                label = basename(meta@data_file),
+                volume_labels = nifti_volume_labels(meta@header, expected_length = meta@dims[4]))
           })
 
 #' Linear Access to Memory-Mapped Data
@@ -241,6 +242,9 @@ setMethod("show", "MappedNeuroVec", function(object) {
   show_rule("Mapping")
   show_field("Offset", object@offset)
   if (nchar(object@label) > 0) show_field("Label", object@label)
+  if (length(volume_labels(object)) > 0L) {
+    show_field("Volume Labels", sum(nzchar(volume_labels(object))), paste0("/", d[4], " named"))
+  }
 })
 
 #' @export

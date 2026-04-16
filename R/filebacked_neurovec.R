@@ -73,7 +73,8 @@ FileBackedNeuroVec <- function(file_name, label = basename(file_name)) {
   new("FileBackedNeuroVec",
       space = sp,
       meta = meta,
-      label = label)
+      label = label,
+      volume_labels = nifti_volume_labels(meta@header, expected_length = meta@dims[4]))
 }
 
 #' Extract Sub-vector from FileBackedNeuroVec
@@ -109,7 +110,12 @@ setMethod(f = "sub_vector",
 
             mat <- read_mapped_vols(x@meta, i)
             sp <- add_dim(drop_dim(space(x)), length(i))
-            DenseNeuroVec(mat, sp)
+            DenseNeuroVec(
+              mat,
+              sp,
+              label = x@label,
+              volume_labels = .subset_volume_labels(volume_labels(x), i)
+            )
           })
 
 #' Convert FileBackedNeuroVec to List

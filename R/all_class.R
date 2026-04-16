@@ -993,9 +993,39 @@ setClass("IndexLookupVol",
 #' @export
 #' @rdname NeuroVec-class
 setClass("NeuroVec",
-         slots = c(label = "character"),
-         prototype = list(label = ""),
+         slots = c(
+           label = "character",
+           volume_labels = "character"
+         ),
+         prototype = list(
+           label = "",
+           volume_labels = character()
+         ),
          contains = c("NeuroObj"))
+
+#' @keywords internal
+#' @noRd
+setValidity("NeuroVec", function(object) {
+  labs <- object@volume_labels
+  if (!is.character(labs)) {
+    return("volume_labels must be a character vector")
+  }
+
+  if (length(labs) == 0L) {
+    return(TRUE)
+  }
+
+  d <- try(dim(object), silent = TRUE)
+  if (inherits(d, "try-error") || length(d) < 4L) {
+    return(TRUE)
+  }
+
+  if (length(labs) != d[4]) {
+    return(sprintf("volume_labels must have length 0 or match dim(x)[4] (%d)", d[4]))
+  }
+
+  TRUE
+})
 
 #' DenseNeuroVec Class
 #'
@@ -1675,4 +1705,3 @@ setClass("ClusteredNeuroVec",
            if (!ok) return("Invalid ts/cl_map dimensions.")
            TRUE
          })
-

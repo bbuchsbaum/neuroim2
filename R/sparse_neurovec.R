@@ -102,6 +102,8 @@ prep_sparsenvec <- function(data, space, mask) {
 #' @param space A \link{NeuroSpace} object representing the dimensions and voxel spacing of the neuroimaging data.
 #' @param mask A 3D array, 1D vector of type logical, or an instance of type \link{LogicalNeuroVol}, which specifies the locations of the non-zero values in the data.
 #' @param label Optional character string providing a label for the vector
+#' @param volume_labels Optional character vector of length \code{dim(space)[4]}
+#'   giving per-volume labels.
 #' @return A SparseNeuroVec object, containing the sparse neuroimaging data, mask, and associated NeuroSpace information.
 #' @export
 #'
@@ -112,7 +114,7 @@ prep_sparsenvec <- function(data, space, mask) {
 #' svec <- SparseNeuroVec(mat, bspace, mask)
 #' length(indices(svec)) == sum(mask)
 #' @rdname SparseNeuroVec-class
-SparseNeuroVec <- function(data, space, mask, label = "") {
+SparseNeuroVec <- function(data, space, mask, label = "", volume_labels = character()) {
 	stopifnot(inherits(space, "NeuroSpace"))
 
   # Ensure space has 4 dimensions
@@ -121,9 +123,11 @@ SparseNeuroVec <- function(data, space, mask, label = "") {
   }
 
   p <- prep_sparsenvec(data, space, mask)
+  volume_labels <- .normalize_volume_labels(volume_labels, dim(p$space)[4])
 
 	new("SparseNeuroVec", space=p$space, mask=p$mask,
-	    map=IndexLookupVol(space(p$mask), as.integer(which(p$mask))), data=p$data, label=label)
+	    map=IndexLookupVol(space(p$mask), as.integer(which(p$mask))), data=p$data,
+      label=label, volume_labels = volume_labels)
 }
 
 #' @rdname load_data-methods
@@ -176,7 +180,17 @@ setMethod(f="load_data", signature=c("SparseNeuroVecSource"),
 				bspace <- NeuroSpace(c(dim(meta)[1:3], length(ind)), meta@spacing,
 				                     meta@origin, meta@spatial_axes, trans=trans(meta))
 
-				SparseNeuroVec(arr, bspace, x@mask)
+				SparseNeuroVec(
+          arr,
+          bspace,
+          x@mask,
+          label = meta@data_file,
+          volume_labels = nifti_volume_labels(
+            meta@header,
+            expected_length = length(ind),
+            indices = ind
+          )
+        )
 
 			})
 
@@ -362,11 +376,21 @@ setMethod(f="concat", signature=signature(x="SparseNeuroVec", y="SparseNeuroVec"
               ndim <- c(d1[1:3], d1[4] + d2[4] + nrow(mat))
               ndat <- rbind(ndat, mat)
               nspace <- NeuroSpace(ndim, spacing(x@space),  origin(x@space), axes(x@space), trans(x@space))
-              SparseNeuroVec(ndat, nspace, mask=x@mask)
+              SparseNeuroVec(
+                ndat,
+                nspace,
+                mask = x@mask,
+                volume_labels = .combine_volume_labels(c(list(x, y), rest))
+              )
             } else {
               ndim <- c(d1[1:3], d1[4] + d2[4])
               nspace <- NeuroSpace(ndim, spacing(x@space),  origin(x@space), axes(x@space), trans(x@space))
-              SparseNeuroVec(ndat, nspace, mask=x@mask)
+              SparseNeuroVec(
+                ndat,
+                nspace,
+                mask = x@mask,
+                volume_labels = .combine_volume_labels(list(x, y))
+              )
             }
 
           })
@@ -718,7 +742,8 @@ setMethod(f="sub_vector", signature=signature(x="AbstractSparseNeuroVec", i="num
 
             # Create new SparseNeuroVec with subset of data
             new("SparseNeuroVec", space=bspace, mask=x@mask,
-                map=x@map, data=res, label=x@label)
+                map=x@map, data=res, label=x@label,
+                volume_labels = .subset_volume_labels(volume_labels(x), i))
           })
 
 #' [[
@@ -832,6 +857,9 @@ setMethod("show", "SparseNeuroVec", function(object) {
   show_rule("Sparse")
   show_field("Cardinality", length(object@map@indices))
   if (nchar(object@label) > 0) show_field("Label", object@label)
+  if (length(volume_labels(object)) > 0L) {
+    show_field("Volume Labels", sum(nzchar(volume_labels(object))), paste0("/", d[4], " named"))
+  }
 })
 
 #' @rdname mask-methods

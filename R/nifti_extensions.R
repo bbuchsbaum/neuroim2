@@ -299,6 +299,74 @@ parse_comment_extension <- function(ext) {
   rawToChar(edata)
 }
 
+#' @keywords internal
+#' @noRd
+.NIFTI_VOLUME_LABELS_MARKER <- "neuroim2.volume_labels.v1"
+
+#' @keywords internal
+#' @noRd
+.make_nifti_volume_labels_extension <- function(volume_labels) {
+  if (length(volume_labels) == 0L) {
+    return(NULL)
+  }
+
+  payload <- paste(
+    c(.NIFTI_VOLUME_LABELS_MARKER, utils::URLencode(volume_labels, reserved = TRUE)),
+    collapse = "\n"
+  )
+  new("NiftiExtensionList", list(NiftiExtension(ecode = 6L, data = payload)))
+}
+
+#' @keywords internal
+#' @noRd
+nifti_volume_labels <- function(x, expected_length = NULL, indices = NULL) {
+  exts <- if (is.list(x) && !is.null(x$extensions)) {
+    x$extensions
+  } else if (is(x, "NiftiExtensionList")) {
+    x
+  } else {
+    new("NiftiExtensionList")
+  }
+
+  labels <- character()
+  for (ext in as.list(exts)) {
+    if (!is(ext, "NiftiExtension") || ext@ecode != 6L) {
+      next
+    }
+
+    payload <- parse_comment_extension(ext)
+    if (!startsWith(payload, paste0(.NIFTI_VOLUME_LABELS_MARKER, "\n")) &&
+        payload != .NIFTI_VOLUME_LABELS_MARKER) {
+      next
+    }
+
+    lines <- strsplit(payload, "\n", fixed = TRUE)[[1]]
+    labels <- if (length(lines) <= 1L) {
+      character()
+    } else {
+      utils::URLdecode(lines[-1L])
+    }
+    break
+  }
+
+  if (length(labels) > 0L && !is.null(indices)) {
+    labels <- labels[indices]
+  }
+
+  if (length(labels) > 0L && !is.null(expected_length) && length(labels) != expected_length) {
+    warning(
+      sprintf(
+        "Ignoring volume-label extension with length %d; expected %d.",
+        length(labels), expected_length
+      ),
+      call. = FALSE
+    )
+    return(character())
+  }
+
+  labels
+}
+
 
 #' Parse AFNI Extension
 #'
