@@ -161,6 +161,70 @@ matrix_to_raster_grob <- function(mat, cmap = "grays", limits = NULL, alpha = 1,
   grid::rasterGrob(rgba, interpolate = FALSE)
 }
 
+#' Reorient a slice matrix so rasterGrob places voxels at their world location
+#'
+#' `grid::rasterGrob` renders row 1 of a matrix at the top of the destination
+#' region and column 1 at the left, independently of any affine transform, while
+#' ggplot2 places pixels at their true world (mm) position. Without reorienting,
+#' an overlay rasterGrob is flipped / mirrored relative to a background plotted
+#' in world coordinates whenever the slice's transform flips an in-plane axis.
+#'
+#' Given a 2D NeuroSlice and a matching matrix, returns the matrix rearranged so
+#' that voxel `(i, j)` is rendered at its world location, together with a
+#' pixel-edge extent (`xmin/xmax/ymin/ymax`) suitable for `annotation_custom`.
+#' Assumes the in-plane axes map to world axes via flips only (no rotation).
+#'
+#' @keywords internal
+#' @noRd
+orient_slice_for_raster <- function(sl, mat) {
+  nr <- nrow(mat); nc <- ncol(mat)
+  sp <- space(sl)
+
+  idx_11 <- 1L
+  idx_N1 <- as.integer(max(nr, 1L))
+  idx_1N <- as.integer((max(nc, 1L) - 1L) * max(nr, 1L) + 1L)
+  idx_NN <- as.integer(max(nr * nc, 1L))
+
+  c_11 <- as.numeric(index_to_coord(sp, idx_11))
+  c_N1 <- as.numeric(index_to_coord(sp, idx_N1))
+  c_1N <- as.numeric(index_to_coord(sp, idx_1N))
+  c_NN <- as.numeric(index_to_coord(sp, idx_NN))
+
+  d1 <- c_N1 - c_11
+  d2 <- c_1N - c_11
+
+  axis1_is_world_x <- abs(d1[1]) >= abs(d1[2])
+
+  m <- mat
+  if (axis1_is_world_x) {
+    if (d1[1] < 0) m <- m[nr:1, , drop = FALSE]
+    if (d2[2] < 0) m <- m[, nc:1, drop = FALSE]
+    m <- t(m)
+    m <- m[nrow(m):1, , drop = FALSE]
+  } else {
+    if (d1[2] < 0) m <- m[nr:1, , drop = FALSE]
+    if (d2[1] < 0) m <- m[, nc:1, drop = FALSE]
+    m <- m[nrow(m):1, , drop = FALSE]
+  }
+
+  sp_sl <- spacing(sl)
+  if (axis1_is_world_x) {
+    sp_x <- sp_sl[1]; sp_y <- sp_sl[2]
+  } else {
+    sp_x <- sp_sl[2]; sp_y <- sp_sl[1]
+  }
+
+  all_x <- c(c_11[1], c_N1[1], c_1N[1], c_NN[1])
+  all_y <- c(c_11[2], c_N1[2], c_1N[2], c_NN[2])
+  list(
+    mat  = m,
+    xmin = min(all_x) - sp_x / 2,
+    xmax = max(all_x) + sp_x / 2,
+    ymin = min(all_y) - sp_y / 2,
+    ymax = max(all_y) + sp_y / 2
+  )
+}
+
 #' Coordinate helper: fixed aspect and reversed y for radiological convention
 #' @keywords internal
 #' @noRd
