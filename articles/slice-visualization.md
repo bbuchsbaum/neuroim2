@@ -265,12 +265,12 @@ sessionInfo()
 ## [34] tools_4.5.3           parallel_4.5.3        memoise_2.0.1        
 ## [37] bigassertr_0.1.7      assertthat_0.2.1      vctrs_0.7.3          
 ## [40] R6_2.6.1              lifecycle_1.0.5       bigparallelr_0.3.2   
-## [43] stringr_1.6.0         fs_2.0.1              dbscan_1.2.4         
+## [43] stringr_1.6.0         fs_2.1.0              dbscan_1.2.4         
 ## [46] ragg_1.5.2            pkgconfig_2.0.3       desc_1.4.3           
 ## [49] pkgdown_2.2.0         RcppParallel_5.1.11-2 bslib_0.10.0         
-## [52] pillar_1.11.1         gtable_0.3.6          glue_1.8.0           
-## [55] Rcpp_1.1.1            systemfonts_1.3.2     xfun_0.57            
+## [52] pillar_1.11.1         gtable_0.3.6          glue_1.8.1           
+## [55] Rcpp_1.1.1-1          systemfonts_1.3.2     xfun_0.57            
 ## [58] tibble_3.3.1          knitr_1.51            farver_2.1.2         
 ## [61] htmltools_0.5.9       labeling_0.4.3        RNiftyReg_2.8.5      
-## [64] rmarkdown_2.31        compiler_4.5.3        S7_0.2.1
+## [64] rmarkdown_2.31        compiler_4.5.3        S7_0.2.1-1
 ```

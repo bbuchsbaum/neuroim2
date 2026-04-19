@@ -2,6 +2,23 @@
 
 ## neuroim2 0.12.0
 
+### Bug Fixes
+
+- [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
+  no longer renders the overlay flipped relative to the background.
+  Previously the overlay was drawn via
+  [`grid::rasterGrob`](https://rdrr.io/r/grid/grid.raster.html), which
+  ignored the slice’s affine transform, so voxel `(1,1)` was placed at
+  the top-left of the panel while the background placed it at its true
+  world (mm) position. Overlays are now reoriented to match the
+  background and span the full pixel-edge extent.
+- [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
+  no longer errors with “NAs are not allowed in subscripted assignments”
+  when the overlay contains `NA` voxels and `ov_thresh > 0`.
+- [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
+  panel titles now use `x =`, `y =`, or `z =` based on the slicing axis
+  (`along`).
+
 ### New Features
 
 - `NeuroVec` now supports optional per-volume

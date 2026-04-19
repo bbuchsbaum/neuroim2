@@ -36,6 +36,15 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.12.0" id="neuroim2-0120">neuroim2 0.12.0<a class="anchor" aria-label="anchor" href="#neuroim2-0120"></a></h2>
 <div class="section level3">
+<h3 id="bug-fixes-0-12-0">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-12-0"></a></h3>
+<ul><li>
+<code><a href="../reference/plot_overlay.html">plot_overlay()</a></code> no longer renders the overlay flipped relative to the background. Previously the overlay was drawn via <code><a href="https://rdrr.io/r/grid/grid.raster.html" class="external-link">grid::rasterGrob</a></code>, which ignored the slice’s affine transform, so voxel <code>(1,1)</code> was placed at the top-left of the panel while the background placed it at its true world (mm) position. Overlays are now reoriented to match the background and span the full pixel-edge extent.</li>
+<li>
+<code><a href="../reference/plot_overlay.html">plot_overlay()</a></code> no longer errors with “NAs are not allowed in subscripted assignments” when the overlay contains <code>NA</code> voxels and <code>ov_thresh &gt; 0</code>.</li>
+<li>
+<code><a href="../reference/plot_overlay.html">plot_overlay()</a></code> panel titles now use <code>x =</code>, <code>y =</code>, or <code>z =</code> based on the slicing axis (<code>along</code>).</li>
+</ul></div>
+<div class="section level3">
 <h3 id="new-features-0-12-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-0-12-0"></a></h3>
 <ul><li>
 <code>NeuroVec</code> now supports optional per-volume <code><a href="../reference/volume_labels-methods.html">volume_labels()</a></code> metadata across dense, sparse, mapped, file-backed, bigvec, and <code>NeuroVecSeq</code> backends.</li>
