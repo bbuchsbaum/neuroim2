@@ -105,9 +105,10 @@ test_that("plot_overlay tolerates NAs in overlay with ov_thresh > 0", {
 })
 
 test_that("plot_overlay supports ov_alpha_mode='proportional'", {
-  sp <- neuroim2::NeuroSpace(c(6, 6, 4))
-  bg <- neuroim2::NeuroVol(array(0, dim = c(6, 6, 4)), sp)
-  ov <- neuroim2::NeuroVol(array(stats::rnorm(6 * 6 * 4), dim = c(6, 6, 4)), sp)
+  dims <- c(6L, 9L, 4L)
+  sp <- neuroim2::NeuroSpace(dims)
+  bg <- neuroim2::NeuroVol(array(0, dim = dims), sp)
+  ov <- neuroim2::NeuroVol(array(stats::rnorm(prod(dims)), dim = dims), sp)
 
   tf <- tempfile(fileext = ".png")
   grDevices::png(tf)

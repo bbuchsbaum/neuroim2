@@ -61,22 +61,37 @@ plot_overlay <- function(
         amap[below] <- 0
       }
       amap[is.na(amap)] <- 0
-      ov_lim <- compute_limits(as.numeric(mov), mode = ov_range, probs = probs)
-      ov_o   <- orient_slice_for_raster(sl_ov, mov)
-      amap_o <- orient_slice_for_raster(sl_ov, amap)$mat
-      g_ov <- matrix_to_raster_grob(ov_o$mat, cmap = ov_cmap, limits = ov_lim,
-                                     alpha = ov_alpha, alpha_map = amap_o)
+      oriented <- orient_slice_for_raster(sl_ov, mov, alpha_map = amap)
+      ov_lim <- compute_limits(
+        as.numeric(oriented$mat[is.finite(oriented$mat)]),
+        mode = ov_range,
+        probs = probs
+      )
+      g_ov <- matrix_to_raster_grob(
+        oriented$mat,
+        cmap = ov_cmap,
+        limits = ov_lim,
+        alpha = ov_alpha,
+        alpha_map = oriented$alpha_map
+      )
     } else {
       if (isTRUE(ov_thresh > 0)) {
         below <- !is.na(mov) & abs(mov) < ov_thresh
         mov[below] <- NA_real_
       }
-      ov_lim <- compute_limits(as.numeric(mov), mode = ov_range, probs = probs)
-      ov_o <- orient_slice_for_raster(sl_ov, mov)
-      g_ov <- matrix_to_raster_grob(ov_o$mat, cmap = ov_cmap, limits = ov_lim, alpha = ov_alpha)
+      oriented <- orient_slice_for_raster(sl_ov, mov)
+      ov_lim <- compute_limits(as.numeric(oriented$mat), mode = ov_range, probs = probs)
+      g_ov <- matrix_to_raster_grob(
+        oriented$mat,
+        cmap = ov_cmap,
+        limits = ov_lim,
+        alpha = ov_alpha
+      )
     }
 
     slice_label <- switch(as.character(along), "1" = "x", "2" = "y", "3" = "z")
+    xr <- raster_extent_from_centers(oriented$x)
+    yr <- raster_extent_from_centers(oriented$y)
 
     p <- ggplot2::ggplot(df_bg, ggplot2::aes(x, y, fill = value)) +
       ggplot2::geom_raster(interpolate = FALSE) +
@@ -84,11 +99,7 @@ plot_overlay <- function(
       ggplot2::coord_fixed() +
       theme_neuro() +
       ggplot2::labs(title = paste0(slice_label, " = ", z)) +
-      ggplot2::annotation_custom(
-        g_ov,
-        xmin = ov_o$xmin, xmax = ov_o$xmax,
-        ymin = ov_o$ymin, ymax = ov_o$ymax
-      )
+      ggplot2::annotation_custom(g_ov, xmin = xr[1], xmax = xr[2], ymin = yr[1], ymax = yr[2])
 
     p
   }

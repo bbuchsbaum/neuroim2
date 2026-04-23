@@ -1,0 +1,197 @@
+{"symbol":"neuroim2::ANT_POST","language":"R","type":"function","signature":"ANT_POST(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::BigNeuroVec","language":"R","type":"function","signature":"BigNeuroVec(data = , space = , mask = , label = \"\", type = c(\"double\",      \"float\", \"integer\"), backingfile = tempfile()","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::BinaryReader","language":"R","type":"function","signature":"BinaryReader(input = , byte_offset = , data_type = , bytes_per_element = , endian = .Platform$endian, signed = TRUE","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::BinaryWriter","language":"R","type":"function","signature":"BinaryWriter(output = , byte_offset = , data_type = , bytes_per_element = , endian = .Platform$endian","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::ClusteredNeuroVec","language":"R","type":"function","signature":"ClusteredNeuroVec(x = , cvol = , FUN = mean, weights = NULL, label = \"\"","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::ClusteredNeuroVol","language":"R","type":"function","signature":"ClusteredNeuroVol(mask = , clusters = , label_map = NULL, label = \"\"","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::ColumnReader","language":"R","type":"function","signature":"ColumnReader(nrow = , ncol = , reader = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::DenseNeuroVec","language":"R","type":"function","signature":"DenseNeuroVec(data = , space = , label = \"none\"","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::DenseNeuroVol","language":"R","type":"function","signature":"DenseNeuroVol(data = , space = , label = \"\", indices = NULL","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::FileBackedNeuroVec","language":"R","type":"function","signature":"FileBackedNeuroVec(file_name = , label = basename(file_name)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::INF_SUP","language":"R","type":"function","signature":"INF_SUP(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::IndexLookupVol","language":"R","type":"function","signature":"IndexLookupVol(space = , indices = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::Kernel","language":"R","type":"function","signature":"Kernel(kerndim = , vdim = , FUN = dnorm, ... = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::LEFT_RIGHT","language":"R","type":"function","signature":"LEFT_RIGHT(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::LogicalNeuroVol","language":"R","type":"function","signature":"LogicalNeuroVol(data = , space = , label = \"\", indices = NULL","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::MappedNeuroVec","language":"R","type":"function","signature":"MappedNeuroVec(file_name = , label = basename(file_name)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::MappedNeuroVecSource","language":"R","type":"function","signature":"MappedNeuroVecSource(file_name = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::MetaInfo","language":"R","type":"function","signature":"MetaInfo(Dim = , spacing = , origin = rep(0, length(spacing)), data_type = \"FLOAT\", label = \"\", spatial_axes = OrientationList3D$AXIAL_LPI, additional_axes = NullAxis","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::NIFTIMetaInfo","language":"R","type":"function","signature":"NIFTIMetaInfo(descriptor = , nifti_header = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::NeuroHyperVec","language":"R","type":"function","signature":"NeuroHyperVec(data = , space = , mask = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::NeuroSlice","language":"R","type":"function","signature":"NeuroSlice(data = , space = , indices = NULL","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::NeuroSpace","language":"R","type":"function","signature":"NeuroSpace(dim = , spacing = NULL, origin = NULL, axes = NULL, trans = NULL","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::NeuroVec","language":"R","type":"function","signature":"NeuroVec(data = , space = NULL, mask = NULL, label = \"\"","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::NeuroVecSeq","language":"R","type":"function","signature":"NeuroVecSeq(... = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::NeuroVol","language":"R","type":"function","signature":"NeuroVol(data = , space = , label = \"\", indices = NULL","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::NeuroVolSource","language":"R","type":"function","signature":"NeuroVolSource(input = , index = 1","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::NiftiExtension","language":"R","type":"function","signature":"NiftiExtension(ecode = , data = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::NiftiExtensionCodes","language":"R","type":"function","signature":"NiftiExtensionCodes(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::None","language":"R","type":"function","signature":"None(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::NullAxis","language":"R","type":"function","signature":"NullAxis(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::OrientationList2D","language":"R","type":"function","signature":"OrientationList2D(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::OrientationList3D","language":"R","type":"function","signature":"OrientationList3D(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::POST_ANT","language":"R","type":"function","signature":"POST_ANT(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::RIGHT_LEFT","language":"R","type":"function","signature":"RIGHT_LEFT(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::ROICoords","language":"R","type":"function","signature":"ROICoords(coords = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::ROIVec","language":"R","type":"function","signature":"ROIVec(vspace = , coords = , data = matrix(1, nrow = 1,      ncol = nrow(coords))","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::ROIVol","language":"R","type":"function","signature":"ROIVol(space = , coords = , data = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::SUP_INF","language":"R","type":"function","signature":"SUP_INF(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::SparseNeuroVec","language":"R","type":"function","signature":"SparseNeuroVec(data = , space = , mask = , label = \"\"","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::SparseNeuroVol","language":"R","type":"function","signature":"SparseNeuroVol(data = , space = , indices = NULL, label = \"\"","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::TIME","language":"R","type":"function","signature":"TIME(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::TimeAxis","language":"R","type":"function","signature":"TimeAxis(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::add_dim","language":"R","type":"function","signature":"add_dim(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::affine_to_axcodes","language":"R","type":"function","signature":"affine_to_axcodes(affine = , labels = NULL, tol = NULL","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::affine_to_orientation","language":"R","type":"function","signature":"affine_to_orientation(affine = , tol = NULL","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::annotate_orientation","language":"R","type":"function","signature":"annotate_orientation(plane = c(\"axial\", \"coronal\", \"sagittal\"), dims = , gp = grid::gpar(col = \"white\",      cex = 0.9, fontface = \"bold\")","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::append_diag","language":"R","type":"function","signature":"append_diag(aff = , steps = , starts = numeric(0)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::apply_affine","language":"R","type":"function","signature":"apply_affine(aff = , pts = , inplace = FALSE","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::apply_orientation","language":"R","type":"function","signature":"apply_orientation(arr = , ornt = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::as","language":"R","type":"function","signature":"as(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::as.array","language":"R","type":"function","signature":"as.array(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::as.dense","language":"R","type":"function","signature":"as.dense(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::as.mask","language":"R","type":"function","signature":"as.mask(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::as.matrix","language":"R","type":"function","signature":"as.matrix(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::as.sparse","language":"R","type":"function","signature":"as.sparse(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::as_mmap","language":"R","type":"function","signature":"as_mmap(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::as_nifti_header","language":"R","type":"function","signature":"as_nifti_header(vol = , file_name = , oneFile = TRUE, data_type = \"FLOAT\", extensions = NULL","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::axcodes_to_orientation","language":"R","type":"function","signature":"axcodes_to_orientation(axcodes = , labels = NULL","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::axes","language":"R","type":"function","signature":"axes(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::bilateral_filter","language":"R","type":"function","signature":"bilateral_filter(vol = , mask = , spatial_sigma = 2, intensity_sigma = 1, window = 1","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::bilateral_filter_4d","language":"R","type":"function","signature":"bilateral_filter_4d(vec = , mask = , spatial_sigma = 2, intensity_sigma = 1, temporal_sigma = 1, spatial_window = 1, temporal_window = 1, temporal_spacing = 1","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::blobby_shape","language":"R","type":"function","signature":"blobby_shape(drop = 0.3, edge_fraction = 0.7)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::bootstrap_searchlight","language":"R","type":"function","signature":"bootstrap_searchlight(mask = , radius = 8, iter = 100","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::centroid","language":"R","type":"function","signature":"centroid(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::centroids","language":"R","type":"function","signature":"centroids(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::cgb_filter","language":"R","type":"function","signature":"cgb_filter(runs = , mask = NULL, spatial_sigma = 2, window = NULL, corr_map = c(\"power\",      \"exp\", \"soft\"), corr_param = 2, topk = 16L, passes = 1L, lambda = 1, leave_one_out = FALSE, run_weights = NULL, add_self = TRUE, time_weights = NULL, confounds = NULL, robust = c(\"none\",      \"huber\", \"tukey\"), robust_c = 1.345, return_graph = FALSE","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::cgb_make_graph","language":"R","type":"function","signature":"cgb_make_graph(runs = , mask = NULL, window = 1L, spatial_sigma = 2, corr_map = c(\"power\",      \"exp\", \"soft\"), corr_param = 2, topk = 16L, leave_one_out = FALSE, run_weights = NULL, add_self = TRUE, time_weights = NULL, confounds = NULL, robust = c(\"none\",      \"huber\", \"tukey\"), robust_c = 1.345","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::cgb_smooth","language":"R","type":"function","signature":"cgb_smooth(x = , graph = , passes = 1L, lambda = 1","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::cgb_smooth_loro","language":"R","type":"function","signature":"cgb_smooth_loro(runs = , graphs = , passes = 1L, lambda = 1","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::cluster_searchlight_series","language":"R","type":"function","signature":"cluster_searchlight_series(x = , cvol = NULL, k = 10L, radius = NULL, label = \"\"","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::clustered_searchlight","language":"R","type":"function","signature":"clustered_searchlight(mask = , cvol = NULL, csize = NULL","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::concat","language":"R","type":"function","signature":"concat(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::conn_comp","language":"R","type":"function","signature":"conn_comp(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::conn_comp_3D","language":"R","type":"function","signature":"conn_comp_3D(mask = , connect = c(\"26-connect\", \"18-connect\",      \"6-connect\")","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::coord_to_grid","language":"R","type":"function","signature":"coord_to_grid(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::coord_to_index","language":"R","type":"function","signature":"coord_to_index(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::coords","language":"R","type":"function","signature":"coords(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::createNIfTIHeader","language":"R","type":"function","signature":"createNIfTIHeader(oneFile = TRUE, file_name = NULL)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::cube_shape","language":"R","type":"function","signature":"cube_shape(NULL)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::cuboid_roi","language":"R","type":"function","signature":"cuboid_roi(bvol = , centroid = , surround = , fill = NULL, nonzero = FALSE","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::data_file","language":"R","type":"function","signature":"data_file(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::data_file_matches","language":"R","type":"function","signature":"data_file_matches(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::data_reader","language":"R","type":"function","signature":"data_reader(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::dim_of","language":"R","type":"function","signature":"dim_of(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::dot_reduce","language":"R","type":"function","signature":"dot_reduce(... = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::downsample","language":"R","type":"function","signature":"downsample(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::drop","language":"R","type":"function","signature":"drop(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::drop_dim","language":"R","type":"function","signature":"drop_dim(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::ecode_name","language":"R","type":"function","signature":"ecode_name(ecode = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::ellipsoid_shape","language":"R","type":"function","signature":"ellipsoid_shape(scales = c(1, 1, 1), jitter = 0)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::embed_kernel","language":"R","type":"function","signature":"embed_kernel(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::extension","language":"R","type":"function","signature":"extension(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::extensions","language":"R","type":"function","signature":"extensions(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::file_matches","language":"R","type":"function","signature":"file_matches(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::findAnatomy3D","language":"R","type":"function","signature":"findAnatomy3D(axis1 = \"L\", axis2 = \"P\", axis3 = \"I\")","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::from_matvec","language":"R","type":"function","signature":"from_matvec(matrix = , vector = NULL","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::gaussian_blur","language":"R","type":"function","signature":"gaussian_blur(vol = , mask = , sigma = 2, window = 1","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::get_afni_attribute","language":"R","type":"function","signature":"get_afni_attribute(ext = , attr_name = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::grid_to_coord","language":"R","type":"function","signature":"grid_to_coord(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::grid_to_grid","language":"R","type":"function","signature":"grid_to_grid(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::grid_to_index","language":"R","type":"function","signature":"grid_to_index(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::guided_filter","language":"R","type":"function","signature":"guided_filter(vol = , radius = 4, epsilon = 0.7^2","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::has_extensions","language":"R","type":"function","signature":"has_extensions(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::header_file","language":"R","type":"function","signature":"header_file(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::header_file_matches","language":"R","type":"function","signature":"header_file_matches(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::image","language":"R","type":"function","signature":"image(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::index_to_coord","language":"R","type":"function","signature":"index_to_coord(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::index_to_grid","language":"R","type":"function","signature":"index_to_grid(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::indices","language":"R","type":"function","signature":"indices(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::inverse_trans","language":"R","type":"function","signature":"inverse_trans(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::laplace_enhance","language":"R","type":"function","signature":"laplace_enhance(vol = , mask = , k = 2, patch_size = 3, search_radius = 2, h = 0.7, mapping_params = NULL, use_normalization_free = TRUE","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::linear_access","language":"R","type":"function","signature":"linear_access(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::list_afni_attributes","language":"R","type":"function","signature":"list_afni_attributes(ext = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::load_data","language":"R","type":"function","signature":"load_data(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::lookup","language":"R","type":"function","signature":"lookup(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::make_time_weights","language":"R","type":"function","signature":"make_time_weights(fd = NULL, dvars = NULL, spike = NULL, fd_thr = 0.5, dvars_z = 2.5, spike_z = 5, fd_soft = 0.1, dvars_soft = 0.25, combine = c(\"min\",      \"prod\"","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::mapToColors","language":"R","type":"function","signature":"mapToColors(imslice = , col = heat.colors(128, alpha = 1), zero_col = \"#00000000\", alpha = 1, irange = range(imslice), threshold = c(0,      0)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::map_values","language":"R","type":"function","signature":"map_values(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::mapf","language":"R","type":"function","signature":"mapf(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::mask","language":"R","type":"function","signature":"mask(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::matricized_access","language":"R","type":"function","signature":"matricized_access(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::matrixToQuatern","language":"R","type":"function","signature":"matrixToQuatern(mat = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::meta_info","language":"R","type":"function","signature":"meta_info(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::ndim","language":"R","type":"function","signature":"ndim(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::num_clusters","language":"R","type":"function","signature":"num_clusters(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::obliquity","language":"R","type":"function","signature":"obliquity(affine = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::orientation_inverse_affine","language":"R","type":"function","signature":"orientation_inverse_affine(ornt = , shape = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::orientation_to_axcodes","language":"R","type":"function","signature":"orientation_to_axcodes(ornt = , labels = NULL","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::orientation_transform","language":"R","type":"function","signature":"orientation_transform(start_ornt = , end_ornt = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::origin","language":"R","type":"function","signature":"origin(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::output_aligned_space","language":"R","type":"function","signature":"output_aligned_space(mapped_voxels = , voxel_sizes = NULL","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::parse_afni_extension","language":"R","type":"function","signature":"parse_afni_extension(ext = , as_xml = TRUE","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::parse_extension","language":"R","type":"function","signature":"parse_extension(ext = , ... = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::partition","language":"R","type":"function","signature":"partition(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::patch_set","language":"R","type":"function","signature":"patch_set(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::perm_mat","language":"R","type":"function","signature":"perm_mat(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::plot","language":"R","type":"function","signature":"plot(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::plot_montage","language":"R","type":"function","signature":"plot_montage(x = , zlevels = NULL, along = 3L, cmap = \"grays\", range = c(\"robust\",      \"data\"), probs = c(0.02, 0.98), ncol = 6L, downsample = 1L, title = NULL, subtitle = NULL, caption = NULL","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::plot_ortho","language":"R","type":"function","signature":"plot_ortho(vol = , coord = NULL, unit = c(\"index\", \"mm\"), cmap = \"grays\", range = c(\"robust\",      \"data\"), probs = c(0.02, 0.98), crosshair = TRUE, annotate = TRUE, downsample = 1L","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::plot_overlay","language":"R","type":"function","signature":"plot_overlay(bgvol = , overlay = , zlevels = NULL, along = 3L, bg_cmap = \"grays\", ov_cmap = \"inferno\", bg_range = c(\"robust\",      \"data\"), ov_range = c(\"robust\", \"data\"), probs = c(0.02,      0.98), ov_thresh = 0, ov_alpha = 0.7, ncol = 3L, title = NULL, subtitle = NULL, caption = NULL","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::prepare_confounds","language":"R","type":"function","signature":"prepare_confounds(confounds = , time_weights = NULL, run_lengths = , include_intercept = TRUE, center_cols = TRUE, scale_cols = FALSE","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::quaternToMatrix","language":"R","type":"function","signature":"quaternToMatrix(quat = , origin = , stepSize = , qfac = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::random_searchlight","language":"R","type":"function","signature":"random_searchlight(mask = , radius = , nonzero = TRUE","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::read_columns","language":"R","type":"function","signature":"read_columns(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::read_elements","language":"R","type":"function","signature":"read_elements(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::read_header","language":"R","type":"function","signature":"read_header(file_name = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::read_hyper_vec","language":"R","type":"function","signature":"read_hyper_vec(file_name = , mask = NULL","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::read_image","language":"R","type":"function","signature":"read_image(file_name = , type = c(\"auto\", \"vol\", \"vec\",      \"hyper\"), index = 1, indices = NULL, mask = NULL, mode = c(\"normal\",      \"mmap\", \"bigvec\", \"filebacked\")","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::read_meta_info","language":"R","type":"function","signature":"read_meta_info(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::read_vec","language":"R","type":"function","signature":"read_vec(file_name = , indices = NULL, mask = NULL, mode = c(\"normal\",      \"mmap\", \"bigvec\", \"filebacked\")","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::read_vol","language":"R","type":"function","signature":"read_vol(file_name = , index = 1","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::read_vol_list","language":"R","type":"function","signature":"read_vol_list(file_names = , mask = NULL","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::reorient","language":"R","type":"function","signature":"reorient(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::resample","language":"R","type":"function","signature":"resample(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::resample_to","language":"R","type":"function","signature":"resample_to(source = , target = , method = c(\"nearest\",      \"linear\", \"cubic\"), engine = c(\"internal\"), ... = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::resampled_searchlight","language":"R","type":"function","signature":"resampled_searchlight(mask = , radius = 8, iter = 100, shape_fun = NULL, nonzero = TRUE","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::rescale_affine","language":"R","type":"function","signature":"rescale_affine(affine = , shape = , zooms = , new_shape = NULL","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::resolve_cmap","language":"R","type":"function","signature":"resolve_cmap(name = \"grays\", n = 256)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::scale","language":"R","type":"function","signature":"scale(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::scale_fill_neuro","language":"R","type":"function","signature":"scale_fill_neuro(cmap = \"grays\", range = c(\"robust\", \"data\"), probs = c(0.02,      0.98), limits = NULL, na.value = \"transparent\", guide = \"colorbar\")","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::scale_series","language":"R","type":"function","signature":"scale_series(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::searchlight","language":"R","type":"function","signature":"searchlight(mask = , radius = , eager = FALSE, nonzero = FALSE, cores = 0","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::searchlight_coords","language":"R","type":"function","signature":"searchlight_coords(mask = , radius = , nonzero = FALSE, cores = 0","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::series","language":"R","type":"function","signature":"series(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::series_roi","language":"R","type":"function","signature":"series_roi(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::simulate_fmri","language":"R","type":"function","signature":"simulate_fmri(mask = , n_time = , TR = 2, spatial_fwhm = 6, ar_mean = 0.45, ar_sd = 0.08, noise_sd = 1, hetero_fwhm = 20, hetero_strength = 0.6, global_amp = 0.2, global_rho = 0.85, n_factors = 4, factor_fwhm = 12, factor_rho = 0.8, seed = NULL, return_centered = TRUE","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::slice","language":"R","type":"function","signature":"slice(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::slice2volume","language":"R","type":"function","signature":"slice2volume(index = , axis = , shape = NULL, index_base = c(\"R\",      \"zero\")","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::slice_to_volume_affine","language":"R","type":"function","signature":"slice_to_volume_affine(index = , axis = , shape = NULL, index_base = c(\"R\",      \"zero\")","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::slices","language":"R","type":"function","signature":"slices(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::space","language":"R","type":"function","signature":"space(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::spacing","language":"R","type":"function","signature":"spacing(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::spherical_roi","language":"R","type":"function","signature":"spherical_roi(bvol = , centroid = , radius = , fill = NULL, nonzero = FALSE, use_cpp = TRUE","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::spherical_roi_set","language":"R","type":"function","signature":"spherical_roi_set(bvol = , centroids = , radius = , fill = NULL, nonzero = FALSE","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::split_blocks","language":"R","type":"function","signature":"split_blocks(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::split_clusters","language":"R","type":"function","signature":"split_clusters(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::split_fill","language":"R","type":"function","signature":"split_fill(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::split_reduce","language":"R","type":"function","signature":"split_reduce(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::split_scale","language":"R","type":"function","signature":"split_scale(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::square_roi","language":"R","type":"function","signature":"square_roi(bvol = , centroid = , surround = , fill = NULL, nonzero = FALSE, fixdim = 3","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::strip_extension","language":"R","type":"function","signature":"strip_extension(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::sub_clusters","language":"R","type":"function","signature":"sub_clusters(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::sub_vector","language":"R","type":"function","signature":"sub_vector(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::theme_neuro","language":"R","type":"function","signature":"theme_neuro(base_size = 10, base_family = \"\")","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::to_matvec","language":"R","type":"function","signature":"to_matvec(transform = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::trans","language":"R","type":"function","signature":"trans(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::values","language":"R","type":"function","signature":"values(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::vec_from_vols","language":"R","type":"function","signature":"vec_from_vols(vols = , mask = NULL","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::vectors","language":"R","type":"function","signature":"vectors(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::vols","language":"R","type":"function","signature":"vols(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::vox2out_vox","language":"R","type":"function","signature":"vox2out_vox(mapped_voxels = , voxel_sizes = NULL","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::voxel_sizes","language":"R","type":"function","signature":"voxel_sizes(affine = ","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::voxels","language":"R","type":"function","signature":"voxels(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::which_dim","language":"R","type":"function","signature":"which_dim(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::write_elements","language":"R","type":"function","signature":"write_elements(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::write_vec","language":"R","type":"function","signature":"write_vec(...)","summary":null,"source":{"path":null,"lines":null}}
+{"symbol":"neuroim2::write_vol","language":"R","type":"function","signature":"write_vol(...)","summary":null,"source":{"path":null,"lines":null}}

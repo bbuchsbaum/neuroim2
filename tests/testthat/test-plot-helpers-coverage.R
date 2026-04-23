@@ -16,6 +16,18 @@ test_that("slice_to_matrix handles a NeuroSlice", {
   sl <- NeuroSlice(array(1:25, c(5, 5)), sp)
   result <- neuroim2:::slice_to_matrix(sl)
   expect_true(is.matrix(result))
+  expect_false(inherits(result, "NeuroSlice"))
+})
+
+test_that("slice_to_matrix preserves non-square NeuroSlice dimensions", {
+  sp <- NeuroSpace(c(5L, 7L), c(1, 1))
+  sl <- NeuroSlice(array(seq_len(35), c(5, 7)), sp)
+  result <- neuroim2:::slice_to_matrix(sl)
+
+  expect_true(is.matrix(result))
+  expect_false(inherits(result, "NeuroSlice"))
+  expect_identical(dim(result), c(5L, 7L))
+  expect_equal(result, matrix(seq_len(35), nrow = 5, ncol = 7))
 })
 
 # ---- slice_df ----
@@ -41,6 +53,30 @@ test_that("slice_df works with a NeuroSlice", {
   df <- neuroim2:::slice_df(sl)
   expect_true(is.data.frame(df))
   expect_equal(nrow(df), 36L)
+})
+
+# ---- orient_slice_for_raster ----
+
+test_that("orient_slice_for_raster maps slice indices into raster order", {
+  sp <- NeuroSpace(c(4L, 3L), c(1, 1))
+  sl <- NeuroSlice(array(seq_len(12), c(4, 3)), sp)
+  mat <- neuroim2:::slice_to_matrix(sl)
+  amap <- matrix(seq(0.1, 1.2, by = 0.1), nrow = 4, ncol = 3)
+
+  result <- neuroim2:::orient_slice_for_raster(sl, mat, alpha_map = amap)
+
+  expect_identical(dim(result$mat), c(3L, 4L))
+  expect_equal(result$mat, t(mat[, 3:1, drop = FALSE]))
+  expect_equal(result$alpha_map, t(amap[, 3:1, drop = FALSE]))
+  expect_equal(result$x, c(0.5, 1.5, 2.5, 3.5))
+  expect_equal(result$y, c(2.5, 1.5, 0.5))
+})
+
+# ---- raster_extent_from_centers ----
+
+test_that("raster_extent_from_centers expands center coordinates to edges", {
+  ext <- neuroim2:::raster_extent_from_centers(c(0.5, 1.5, 2.5, 3.5))
+  expect_equal(ext, c(0, 4))
 })
 
 # ---- compute_limits ----
