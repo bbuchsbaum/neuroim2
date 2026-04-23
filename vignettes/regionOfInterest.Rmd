@@ -26,7 +26,6 @@ suppressPackageStartupMessages({
   library(purrr)
   library(neuroim2)
 })
-options(mc.cores=1)
 ```
 
 

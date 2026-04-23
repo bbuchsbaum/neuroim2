@@ -661,6 +661,69 @@ setMethod(f="as.mask", signature=signature(x="NeuroVol", indices="numeric"),
             LogicalNeuroVol(M, space(x))
           })
 
+#' @rdname apply_mask-methods
+#' @export
+setMethod("apply_mask", signature(x = "NeuroVol", mask = "ANY"),
+          function(x, mask) {
+            mask_vol <- .coerce_spatial_mask(mask, space(x))
+            out <- as.array(x)
+            out[!as.array(mask_vol)] <- 0
+            DenseNeuroVol(out, space(x))
+          })
+
+#' @rdname apply_mask-methods
+#' @export
+setMethod("apply_mask", signature(x = "LogicalNeuroVol", mask = "ANY"),
+          function(x, mask) {
+            mask_vol <- .coerce_spatial_mask(mask, space(x))
+            LogicalNeuroVol(as.array(x) & as.array(mask_vol), space(x))
+          })
+
+#' @rdname apply_mask-methods
+#' @export
+setMethod("apply_mask", signature(x = "SparseNeuroVol", mask = "ANY"),
+          function(x, mask) {
+            mask_vol <- .coerce_spatial_mask(mask, space(x))
+            idx <- x@data@i
+            keep <- as.vector(as.array(mask_vol))[idx]
+            SparseNeuroVol(data = x@data@x[keep], space = space(x), indices = idx[keep])
+          })
+
+#' @rdname clip_level-methods
+#' @export
+setMethod("clip_level", signature(x = "NeuroVol"),
+          function(x, mfrac = 0.5, gradual = FALSE, representative = "median") {
+            arr <- as.array(x)
+
+            if (isTRUE(gradual)) {
+              DenseNeuroVol(.afni_gradual_clip_array(arr, mfrac = mfrac), space(x))
+            } else {
+              .afni_clip_level_numeric(arr, mfrac = mfrac)
+            }
+          })
+
+#' @rdname automask-methods
+#' @export
+setMethod("automask", signature(x = "NeuroVol"),
+          function(x,
+                   mfrac = 0.5,
+                   gradual = TRUE,
+                   representative = "mean_abs",
+                   peels = 1L,
+                   peel_threshold = 17L,
+                   connect = c("26-connect", "18-connect", "6-connect")) {
+            mask_arr <- .automask_array(
+              abs(as.array(x)),
+              mfrac = mfrac,
+              gradual = gradual,
+              peels = peels,
+              peel_threshold = peel_threshold,
+              connect = connect
+            )
+
+            LogicalNeuroVol(mask_arr, space(x))
+          })
+
 
 #' @export
 #' @rdname coord_to_grid-methods

@@ -493,3 +493,18 @@ setMethod("mask", "NeuroHyperVec",
           function(x) {
             x@mask
           })
+
+#' @rdname apply_mask-methods
+#' @export
+setMethod("apply_mask", signature(x = "NeuroHyperVec", mask = "ANY"),
+          function(x, mask) {
+            mask_vol <- .coerce_spatial_mask(mask, space(x@mask))
+            old_idx <- which(x@mask@.Data)
+            keep <- as.vector(as.array(mask_vol))[old_idx]
+
+            new_mask <- array(FALSE, dim(mask_vol))
+            new_mask[old_idx[keep]] <- TRUE
+
+            NeuroHyperVec(x@data[, , keep, drop = FALSE], space(x),
+                          LogicalNeuroVol(new_mask, space(mask_vol)))
+          })

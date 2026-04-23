@@ -1148,6 +1148,95 @@ setGeneric(name="as.dense", def=function(x) standardGeneric("as.dense"))
 #' @export
 setGeneric("as.mask", function(x, indices) standardGeneric("as.mask"))
 
+#' Apply a spatial mask to an image
+#'
+#' Zeroes voxels outside a 3D spatial mask while preserving the geometry of the
+#' input object. Unlike \code{\link{mask}}, which returns an object's spatial
+#' domain, \code{apply_mask()} modifies image values.
+#'
+#' @param x A neuroimaging object.
+#' @param mask A 3D mask supplied as a \code{LogicalNeuroVol}, numeric
+#'   \code{NeuroVol} (thresholded at \code{> 0}), logical array/vector, integer
+#'   voxel indices, or \code{NULL} for no masking.
+#' @return A masked neuroimaging object. Dense inputs remain dense; sparse
+#'   inputs return a sparse object with the intersected mask.
+#' @rdname apply_mask-methods
+#' @examples
+#' sp <- NeuroSpace(c(4, 4, 4), spacing = c(1, 1, 1))
+#' vol <- NeuroVol(array(rnorm(64), c(4, 4, 4)), sp)
+#' msk <- LogicalNeuroVol(array(runif(64) > 0.5, c(4, 4, 4)), sp)
+#' masked <- apply_mask(vol, msk)
+#' @export
+setGeneric("apply_mask", function(x, mask) standardGeneric("apply_mask"))
+
+#' Estimate an image clip level
+#'
+#' Computes an AFNI-inspired clip threshold for separating foreground from
+#' low-intensity background. For 4D images, the threshold is computed from a
+#' representative 3D volume, typically the voxelwise median across time.
+#'
+#' @param x A neuroimaging object.
+#' @param mfrac Fraction used in the median-update step. Values outside
+#'   \code{(0, 0.99)} fall back to \code{0.5}.
+#' @param gradual If \code{FALSE}, return a scalar clip level. If \code{TRUE},
+#'   return a 3D clip map interpolated across image octants.
+#' @param representative For multi-volume inputs, the 3D summary image used for
+#'   thresholding. Supported values are \code{"median"} and \code{"mean_abs"}.
+#' @return If \code{gradual = FALSE}, a numeric scalar clip level. If
+#'   \code{gradual = TRUE}, a \code{DenseNeuroVol} with voxelwise clip levels.
+#' @rdname clip_level-methods
+#' @examples
+#' sp <- NeuroSpace(c(8, 8, 8), spacing = c(1, 1, 1))
+#' vol <- NeuroVol(array(abs(rnorm(512)), c(8, 8, 8)), sp)
+#' clip_level(vol)
+#' @export
+setGeneric(
+  "clip_level",
+  function(x, mfrac = 0.5, gradual = FALSE, representative = "median") {
+    standardGeneric("clip_level")
+  }
+)
+
+#' Compute a brain-like mask from image intensities
+#'
+#' Builds a spatial mask from image content rather than requiring an external
+#' mask. The implementation is AFNI-inspired: it computes a clip level, applies
+#' thresholding to a representative 3D image, retains the largest connected
+#' component, and optionally applies peel/unpeel cleanup.
+#'
+#' @param x A neuroimaging object.
+#' @param mfrac Fraction used in the clip-level update step.
+#' @param gradual If \code{TRUE}, use a spatially varying clip map across
+#'   octants. If \code{FALSE}, use a single global clip threshold.
+#' @param representative For multi-volume inputs, the 3D summary image used for
+#'   thresholding. Supported values are \code{"mean_abs"} and \code{"median"}.
+#' @param peels Number of AFNI-style peel/unpeel iterations. Use \code{0} to
+#'   disable.
+#' @param peel_threshold Minimum number of 18-neighbors required for a voxel to
+#'   survive peeling.
+#' @param connect Connectivity used when retaining the largest component.
+#' @return A \code{LogicalNeuroVol}.
+#' @rdname automask-methods
+#' @examples
+#' sp <- NeuroSpace(c(8, 8, 8), spacing = c(1, 1, 1))
+#' arr <- array(abs(rnorm(512)), c(8, 8, 8))
+#' arr[3:6, 3:6, 3:6] <- arr[3:6, 3:6, 3:6] + 10
+#' vol <- NeuroVol(arr, sp)
+#' mask <- automask(vol, gradual = FALSE, peels = 0)
+#' @export
+setGeneric(
+  "automask",
+  function(x,
+           mfrac = 0.5,
+           gradual = TRUE,
+           representative = "mean_abs",
+           peels = 1L,
+           peel_threshold = 17L,
+           connect = c("26-connect", "18-connect", "6-connect")) {
+    standardGeneric("automask")
+  }
+)
+
 
 
 #' Generate a set of coordinate "patches" of fixed size from an image object.

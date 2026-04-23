@@ -237,3 +237,41 @@ setMethod("mask", "FileBackedNeuroVec",
                                      spacing(x)[1:3],
                                      origin(x)[1:3]))
           })
+
+#' @rdname apply_mask-methods
+#' @export
+setMethod("apply_mask", signature(x = "FileBackedNeuroVec", mask = "ANY"),
+          function(x, mask) {
+            dense <- sub_vector(x, seq_len(dim(x)[4]))
+            apply_mask(dense, mask)
+          })
+
+#' @rdname clip_level-methods
+#' @export
+setMethod("clip_level", signature(x = "FileBackedNeuroVec"),
+          function(x, mfrac = 0.5, gradual = FALSE, representative = "median") {
+            dense <- sub_vector(x, seq_len(dim(x)[4]))
+            clip_level(dense, mfrac = mfrac, gradual = gradual, representative = representative)
+          })
+
+#' @rdname automask-methods
+#' @export
+setMethod("automask", signature(x = "FileBackedNeuroVec"),
+          function(x,
+                   mfrac = 0.5,
+                   gradual = TRUE,
+                   representative = "mean_abs",
+                   peels = 1L,
+                   peel_threshold = 17L,
+                   connect = c("26-connect", "18-connect", "6-connect")) {
+            dense <- sub_vector(x, seq_len(dim(x)[4]))
+            automask(
+              dense,
+              mfrac = mfrac,
+              gradual = gradual,
+              representative = representative,
+              peels = peels,
+              peel_threshold = peel_threshold,
+              connect = connect
+            )
+          })

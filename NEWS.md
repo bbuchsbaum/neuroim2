@@ -1,3 +1,28 @@
+# neuroim2 0.14.0
+
+## New Features
+
+* `NeuroVecSeq` now supports matrix conversion and dense coercion helpers for easier interoperability with standard matrix workflows.
+* `NeuroVec` now supports optional per-volume `volume_labels()` metadata across dense, sparse, mapped, file-backed, bigvec, and `NeuroVecSeq` backends.
+* Named volume access is now supported via `vec[["label"]]`, with strict unique-match semantics, and `sub_vector()` now accepts character label vectors.
+* `write_vec()` now round-trips per-volume labels through a custom NIfTI extension; `read_vec()` and low-footprint readers restore labels on load.
+* Added AFNI-inspired masking helpers: `apply_mask()` to apply an existing 3D mask, `clip_level()` to estimate a foreground clip threshold or gradual clip map, and `automask()` to derive a brain-like mask from image intensities for `NeuroVol`, `NeuroVec`, sparse, mapped, and file-backed objects.
+
+## Documentation
+
+* Added new introductory workflow and container vignettes and refocused the advanced volume and ROI vignettes around current package workflows.
+* Standardized vignette theme/setup chunks, fixed vignette metadata and dependency declarations, and clarified return types in the `read_vec()`, `read_vol()`, and `read_image()` documentation.
+
+## Improvements
+
+* Fixed `NeuroVec` label inference for lists of `NeuroVol` inputs and refreshed the generated documentation for `volume_labels()` and related extractors.
+* Improved 4D masking performance by moving representative-volume reduction for `clip_level()`/`automask()` into compiled code while preserving the existing `median` and `mean_abs` semantics.
+
+## Testing
+
+* Added differential tests for `clip_level()` against explicit voxelwise `median` and `mean_abs` reference volumes, plus a regression test for integer-valued histogram behavior.
+* Added metamorphic tests for `mean_abs` sign-flip invariance and backend-parity tests covering `clip_level()`, `automask()`, and `apply_mask()` on dense, mapped, and file-backed vectors.
+
 # neuroim2 0.12.0
 
 ## Bug Fixes

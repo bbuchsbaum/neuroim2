@@ -958,6 +958,140 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVec", mask="numeric"),
 
 		})
 
+#' @rdname apply_mask-methods
+#' @export
+setMethod("apply_mask", signature(x = "DenseNeuroVec", mask = "ANY"),
+          function(x, mask) {
+            spatial_space <- drop_dim(space(x))
+            mask_vol <- .coerce_spatial_mask(mask, spatial_space)
+            keep <- as.vector(as.array(mask_vol))
+            out <- as.matrix(x)
+            out[!keep, ] <- 0
+
+            DenseNeuroVec(out,
+                          space(x),
+                          label = x@label,
+                          volume_labels = volume_labels(x))
+          })
+
+#' @rdname apply_mask-methods
+#' @export
+setMethod("apply_mask", signature(x = "AbstractSparseNeuroVec", mask = "ANY"),
+          function(x, mask) {
+            spatial_space <- drop_dim(space(x))
+            mask_vol <- .coerce_spatial_mask(mask, spatial_space)
+            old_idx <- indices(x)
+            keep <- as.vector(as.array(mask_vol))[old_idx]
+            data_mat <- temporal_access(x, seq_len(dim(x)[4]))[, keep, drop = FALSE]
+
+            new_mask <- array(FALSE, dim(mask_vol))
+            new_mask[old_idx[keep]] <- TRUE
+
+            new("SparseNeuroVec",
+                space = space(x),
+                mask = LogicalNeuroVol(new_mask, spatial_space),
+                map = IndexLookupVol(spatial_space, as.integer(which(new_mask))),
+                data = data_mat,
+                label = x@label,
+                volume_labels = volume_labels(x))
+          })
+
+#' @rdname clip_level-methods
+#' @export
+setMethod("clip_level", signature(x = "DenseNeuroVec"),
+          function(x, mfrac = 0.5, gradual = FALSE, representative = "median") {
+            ref <- .representative_volume_from_matrix(
+              as.matrix(x),
+              dim(x)[1:3],
+              representative = representative
+            )
+            sp3 <- drop_dim(space(x))
+
+            if (isTRUE(gradual)) {
+              DenseNeuroVol(.afni_gradual_clip_array(ref, mfrac = mfrac), sp3)
+            } else {
+              .afni_clip_level_numeric(ref, mfrac = mfrac)
+            }
+          })
+
+#' @rdname clip_level-methods
+#' @export
+setMethod("clip_level", signature(x = "AbstractSparseNeuroVec"),
+          function(x, mfrac = 0.5, gradual = FALSE, representative = "median") {
+            ref <- .representative_volume_from_matrix(
+              as.matrix(x),
+              dim(x)[1:3],
+              representative = representative
+            )
+            sp3 <- drop_dim(space(x))
+
+            if (isTRUE(gradual)) {
+              DenseNeuroVol(.afni_gradual_clip_array(ref, mfrac = mfrac), sp3)
+            } else {
+              .afni_clip_level_numeric(ref, mfrac = mfrac)
+            }
+          })
+
+#' @rdname automask-methods
+#' @export
+setMethod("automask", signature(x = "DenseNeuroVec"),
+          function(x,
+                   mfrac = 0.5,
+                   gradual = TRUE,
+                   representative = "mean_abs",
+                   peels = 1L,
+                   peel_threshold = 17L,
+                   connect = c("26-connect", "18-connect", "6-connect")) {
+            ref <- .representative_volume_from_matrix(
+              as.matrix(x),
+              dim(x)[1:3],
+              representative = representative
+            )
+            sp3 <- drop_dim(space(x))
+
+            LogicalNeuroVol(
+              .automask_array(
+                ref,
+                mfrac = mfrac,
+                gradual = gradual,
+                peels = peels,
+                peel_threshold = peel_threshold,
+                connect = connect
+              ),
+              sp3
+            )
+          })
+
+#' @rdname automask-methods
+#' @export
+setMethod("automask", signature(x = "AbstractSparseNeuroVec"),
+          function(x,
+                   mfrac = 0.5,
+                   gradual = TRUE,
+                   representative = "mean_abs",
+                   peels = 1L,
+                   peel_threshold = 17L,
+                   connect = c("26-connect", "18-connect", "6-connect")) {
+            ref <- .representative_volume_from_matrix(
+              as.matrix(x),
+              dim(x)[1:3],
+              representative = representative
+            )
+            sp3 <- drop_dim(space(x))
+
+            LogicalNeuroVol(
+              .automask_array(
+                ref,
+                mfrac = mfrac,
+                gradual = gradual,
+                peels = peels,
+                peel_threshold = peel_threshold,
+                connect = connect
+              ),
+              sp3
+            )
+          })
+
 
 
 

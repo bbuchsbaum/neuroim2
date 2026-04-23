@@ -93,3 +93,7 @@ radius_search_3d_precomputed <- function(cds_vox, cds_mm, queries_mm, radius_mm,
     .Call(`_neuroim2_radius_search_3d_precomputed`, cds_vox, cds_mm, queries_mm, radius_mm, sx, sy, sz, ox_mm, oy_mm, oz_mm)
 }
 
+representative_volume_cpp <- function(mat, representative) {
+    .Call(`_neuroim2_representative_volume_cpp`, mat, representative)
+}
+

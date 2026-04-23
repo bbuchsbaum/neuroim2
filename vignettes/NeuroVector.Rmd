@@ -27,7 +27,6 @@ suppressPackageStartupMessages({
   library(purrr)
   library(neuroim2)
 })
-options(mc.cores = 1)
 ```
 
 This article is now the deeper companion to `vignette("VolumesAndVectors")`.

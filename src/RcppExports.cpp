@@ -379,6 +379,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// representative_volume_cpp
+NumericVector representative_volume_cpp(NumericMatrix mat, std::string representative);
+RcppExport SEXP _neuroim2_representative_volume_cpp(SEXP matSEXP, SEXP representativeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< std::string >::type representative(representativeSEXP);
+    rcpp_result_gen = Rcpp::wrap(representative_volume_cpp(mat, representative));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_neuroim2_bilateral_weights", (DL_FUNC) &_neuroim2_bilateral_weights, 5},
@@ -404,6 +416,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_neuroim2_radius_search_3d_nonisotropic", (DL_FUNC) &_neuroim2_radius_search_3d_nonisotropic, 10},
     {"_neuroim2_radius_search_3d_direct", (DL_FUNC) &_neuroim2_radius_search_3d_direct, 10},
     {"_neuroim2_radius_search_3d_precomputed", (DL_FUNC) &_neuroim2_radius_search_3d_precomputed, 10},
+    {"_neuroim2_representative_volume_cpp", (DL_FUNC) &_neuroim2_representative_volume_cpp, 2},
     {NULL, NULL, 0}
 };
 

@@ -267,6 +267,53 @@ setMethod("mask", "MappedNeuroVec",
             x@mask
           })
 
+#' @rdname apply_mask-methods
+#' @export
+setMethod("apply_mask", signature(x = "MappedNeuroVec", mask = "ANY"),
+          function(x, mask) {
+            dense <- DenseNeuroVec(as.matrix(x),
+                                   space(x),
+                                   label = x@label,
+                                   volume_labels = volume_labels(x))
+            apply_mask(dense, mask)
+          })
+
+#' @rdname clip_level-methods
+#' @export
+setMethod("clip_level", signature(x = "MappedNeuroVec"),
+          function(x, mfrac = 0.5, gradual = FALSE, representative = "median") {
+            dense <- DenseNeuroVec(as.matrix(x),
+                                   space(x),
+                                   label = x@label,
+                                   volume_labels = volume_labels(x))
+            clip_level(dense, mfrac = mfrac, gradual = gradual, representative = representative)
+          })
+
+#' @rdname automask-methods
+#' @export
+setMethod("automask", signature(x = "MappedNeuroVec"),
+          function(x,
+                   mfrac = 0.5,
+                   gradual = TRUE,
+                   representative = "mean_abs",
+                   peels = 1L,
+                   peel_threshold = 17L,
+                   connect = c("26-connect", "18-connect", "6-connect")) {
+            dense <- DenseNeuroVec(as.matrix(x),
+                                   space(x),
+                                   label = x@label,
+                                   volume_labels = volume_labels(x))
+            automask(
+              dense,
+              mfrac = mfrac,
+              gradual = gradual,
+              representative = representative,
+              peels = peels,
+              peel_threshold = peel_threshold,
+              connect = connect
+            )
+          })
+
 
 #' Convert to memory-mapped NeuroVec
 #'
