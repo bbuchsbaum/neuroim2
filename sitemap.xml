@@ -110,6 +110,7 @@
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/affine_utils.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/anatomical_axes.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/annotate_orientation.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/neuroim2/reference/apply_mask-methods.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/as-ClusteredNeuroVol-DenseNeuroVol.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/as-DenseNeuroVol-array.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/as.array-methods.html</loc></url>
@@ -130,6 +131,7 @@
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/as_canonical.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/as_mmap.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/as_nifti_header.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/neuroim2/reference/automask-methods.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/axcodes-methods.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/axes-methods.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/bilateral_filter.html</loc></url>
@@ -141,6 +143,7 @@
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/cgb_make_graph.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/cgb_smooth.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/cgb_smooth_loro.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/neuroim2/reference/clip_level-methods.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/close-methods.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/cluster_searchlight_series.html</loc></url>
 <url><loc>https://bbuchsbaum.github.io/neuroim2/reference/clustered_searchlight.html</loc></url>

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">neuroim2</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.12.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,35 @@
       <small>Source: <a href="https://github.com/bbuchsbaum/neuroim2/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.14.0" id="neuroim2-0140">neuroim2 0.14.0<a class="anchor" aria-label="anchor" href="#neuroim2-0140"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-14-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-0-14-0"></a></h3>
+<ul><li>
+<code>NeuroVecSeq</code> now supports matrix conversion and dense coercion helpers for easier interoperability with standard matrix workflows.</li>
+<li>
+<code>NeuroVec</code> now supports optional per-volume <code><a href="../reference/volume_labels-methods.html">volume_labels()</a></code> metadata across dense, sparse, mapped, file-backed, bigvec, and <code>NeuroVecSeq</code> backends.</li>
+<li>Named volume access is now supported via <code>vec[["label"]]</code>, with strict unique-match semantics, and <code><a href="../reference/sub_vector-methods.html">sub_vector()</a></code> now accepts character label vectors.</li>
+<li>
+<code><a href="../reference/write_vec-methods.html">write_vec()</a></code> now round-trips per-volume labels through a custom NIfTI extension; <code><a href="../reference/read_vec.html">read_vec()</a></code> and low-footprint readers restore labels on load.</li>
+<li>Added AFNI-inspired masking helpers: <code><a href="../reference/apply_mask-methods.html">apply_mask()</a></code> to apply an existing 3D mask, <code><a href="../reference/clip_level-methods.html">clip_level()</a></code> to estimate a foreground clip threshold or gradual clip map, and <code><a href="../reference/automask-methods.html">automask()</a></code> to derive a brain-like mask from image intensities for <code>NeuroVol</code>, <code>NeuroVec</code>, sparse, mapped, and file-backed objects.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-0-14-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-14-0"></a></h3>
+<ul><li>Added new introductory workflow and container vignettes and refocused the advanced volume and ROI vignettes around current package workflows.</li>
+<li>Standardized vignette theme/setup chunks, fixed vignette metadata and dependency declarations, and clarified return types in the <code><a href="../reference/read_vec.html">read_vec()</a></code>, <code><a href="../reference/read_vol.html">read_vol()</a></code>, and <code><a href="../reference/read_image.html">read_image()</a></code> documentation.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="improvements-0-14-0">Improvements<a class="anchor" aria-label="anchor" href="#improvements-0-14-0"></a></h3>
+<ul><li>Fixed <code>NeuroVec</code> label inference for lists of <code>NeuroVol</code> inputs and refreshed the generated documentation for <code><a href="../reference/volume_labels-methods.html">volume_labels()</a></code> and related extractors.</li>
+<li>Improved 4D masking performance by moving representative-volume reduction for <code><a href="../reference/clip_level-methods.html">clip_level()</a></code>/<code><a href="../reference/automask-methods.html">automask()</a></code> into compiled code while preserving the existing <code>median</code> and <code>mean_abs</code> semantics.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="testing-0-14-0">Testing<a class="anchor" aria-label="anchor" href="#testing-0-14-0"></a></h3>
+<ul><li>Added differential tests for <code><a href="../reference/clip_level-methods.html">clip_level()</a></code> against explicit voxelwise <code>median</code> and <code>mean_abs</code> reference volumes, plus a regression test for integer-valued histogram behavior.</li>
+<li>Added metamorphic tests for <code>mean_abs</code> sign-flip invariance and backend-parity tests covering <code><a href="../reference/clip_level-methods.html">clip_level()</a></code>, <code><a href="../reference/automask-methods.html">automask()</a></code>, and <code><a href="../reference/apply_mask-methods.html">apply_mask()</a></code> on dense, mapped, and file-backed vectors.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.12.0" id="neuroim2-0120">neuroim2 0.12.0<a class="anchor" aria-label="anchor" href="#neuroim2-0120"></a></h2>
 <div class="section level3">

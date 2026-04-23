@@ -951,6 +951,12 @@ Miscellaneous methods and functions
 - [`add_dim()`](https://bbuchsbaum.github.io/neuroim2/reference/add_dim-methods.md)
   : Add a Dimension to an Object
 
+- [`apply_mask()`](https://bbuchsbaum.github.io/neuroim2/reference/apply_mask-methods.md)
+  : Apply a spatial mask to an image
+
+- [`automask()`](https://bbuchsbaum.github.io/neuroim2/reference/automask-methods.md)
+  : Compute a brain-like mask from image intensities
+
 - [`axcodes()`](https://bbuchsbaum.github.io/neuroim2/reference/axcodes-methods.md)
   : Get Orientation Axis Codes
 
@@ -965,6 +971,9 @@ Miscellaneous methods and functions
 
 - [`centroids()`](https://bbuchsbaum.github.io/neuroim2/reference/centroids-methods.md)
   : Return a matrix of centroids of an object
+
+- [`clip_level()`](https://bbuchsbaum.github.io/neuroim2/reference/clip_level-methods.md)
+  : Estimate an image clip level
 
 - [`concat()`](https://bbuchsbaum.github.io/neuroim2/reference/concat-methods.md)
   : Concatenate two objects in the time dimension
