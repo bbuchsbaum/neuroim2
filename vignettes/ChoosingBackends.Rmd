@@ -37,7 +37,7 @@ This guide is the shortest path to that choice.
 # Quick Rules
 
 - Use `DenseNeuroVol` or `DenseNeuroVec` when the data fits comfortably in memory and you want the simplest behavior.
-- Use `SparseNeuroVol` or `SparseNeuroVec` when only a subset of voxels is meaningful and absent voxels should be treated as missing support rather than literal zeros.
+- Use `SparseNeuroVol` or `SparseNeuroVec` when a mask defines the stored voxel set, whether out-of-mask locations are outside the analysis support or simply implicit background zeros for your workflow.
 - Use `MappedNeuroVec` when you want fast random access to an uncompressed NIfTI on disk without loading it all into memory.
 - Use `FileBackedNeuroVec` when you want on-demand volume access from a file and can tolerate more I/O per access.
 - Use `NeuroHyperVec` when the input is genuinely 5D.
@@ -92,7 +92,7 @@ Use this when:
 
 - your workflow is defined on a brain mask or ROI support
 - you want to avoid materializing out-of-mask voxels
-- absent voxels should be treated as missing support
+- your downstream operations have clear semantics for absent voxels, such as outside-support values or implicit background zeros after densification
 
 # Memory-Mapped Access
 
