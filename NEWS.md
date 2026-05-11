@@ -1,3 +1,18 @@
+# neuroim2 0.16.0
+
+## New Features
+
+* `bilateral_filter()` and `bilateral_filter_4d()` now accept `range_scale` so callers can fix the intensity-kernel scale across observed and null maps instead of re-estimating it separately for each input.
+* `bilateral_filter()`, internal vector bilateral filtering, and `bilateral_filter_4d()` now filter each center voxel using only in-mask, in-bounds neighbors with weight renormalization.
+
+## Improvements
+
+* The 3D bilateral backend now guards zero or non-finite auto-estimated range scales, avoiding `NaN` outputs for singleton or constant masks.
+
+## Testing
+
+* Added regression tests for mask-normalized bilateral filtering, volume-boundary behavior, fixed `range_scale` parity with the default auto scale, singleton-mask stability, and 4D mask-normalized filtering.
+
 # neuroim2 0.14.0
 
 ## New Features

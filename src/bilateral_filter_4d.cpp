@@ -26,7 +26,8 @@ NumericVector bilateral_filter_4d_cpp_par(
     double spatial_sigma,
     double intensity_sigma,
     double temporal_sigma,
-    NumericVector spacing
+    NumericVector spacing,
+    double range_scale
 ) {
   // Extract dims from arr
   IntegerVector dims = arr.attr("dim");
@@ -59,11 +60,14 @@ NumericVector bilateral_filter_4d_cpp_par(
       }
     }
   }
-  double intensity_sd = 0.0;
-  if (count > 1) {
-    long double mean = sum / static_cast<long double>(count);
-    long double var = (sumsq / static_cast<long double>(count)) - mean * mean;
-    intensity_sd = (var > 0.0L) ? std::sqrt(static_cast<double>(var)) : 0.0;
+  double intensity_sd = range_scale;
+  if (!std::isfinite(intensity_sd)) {
+    intensity_sd = 0.0;
+    if (count > 1) {
+      long double mean = sum / static_cast<long double>(count);
+      long double var = (sumsq / static_cast<long double>(count)) - mean * mean;
+      intensity_sd = (var > 0.0L) ? std::sqrt(static_cast<double>(var)) : 0.0;
+    }
   }
 
   // Precompute constants
@@ -102,17 +106,30 @@ NumericVector bilateral_filter_4d_cpp_par(
     }
   }
 
-  // Precompute neighbor offsets
-  std::vector<int> neighbor_offsets(total_elements);
+  std::vector<unsigned char> in_mask;
+  in_mask.assign(slicedim_xyz, 0);
+  for (int m = 0; m < mask_idx.size(); ++m) {
+    int idx = mask_idx[m] - 1;
+    if (idx >= 0 && idx < slicedim_xyz) {
+      in_mask[idx] = 1;
+    }
+  }
+
+  // Precompute neighbor deltas
+  std::vector<int> neighbor_dx(total_elements);
+  std::vector<int> neighbor_dy(total_elements);
+  std::vector<int> neighbor_dz(total_elements);
+  std::vector<int> neighbor_dt(total_elements);
   {
     int idx = 0;
     for (int tt = -temporal_window; tt <= temporal_window; tt++) {
       for (int ii = -spatial_window; ii <= spatial_window; ii++) {
         for (int jj = -spatial_window; jj <= spatial_window; jj++) {
           for (int kk = -spatial_window; kk <= spatial_window; kk++) {
-            // offset = ii + jj*nx + kk*nx*ny + tt*nx*ny*nz
-            int offset = ii + jj*nx + kk*slicedim_xy + tt*slicedim_xyz;
-            neighbor_offsets[idx] = offset;
+            neighbor_dx[idx] = ii;
+            neighbor_dy[idx] = jj;
+            neighbor_dz[idx] = kk;
+            neighbor_dt[idx] = tt;
             idx++;
           }
         }
@@ -126,8 +143,12 @@ NumericVector bilateral_filter_4d_cpp_par(
     double* out_ptr;
     const int nx, ny, nz, nt;
     const int slicedim_xy, slicedim_xyz;
-    const std::vector<int>& neighbor_offsets;
+    const std::vector<int>& neighbor_dx;
+    const std::vector<int>& neighbor_dy;
+    const std::vector<int>& neighbor_dz;
+    const std::vector<int>& neighbor_dt;
     const std::vector<double>& spatial_temporal_kernel;
+    const std::vector<unsigned char>& in_mask;
     const IntegerVector& mask_idx;
     double intensity_var;
 
@@ -136,14 +157,19 @@ NumericVector bilateral_filter_4d_cpp_par(
       double* out_ptr,
       int nx, int ny, int nz, int nt,
       int slicedim_xy, int slicedim_xyz,
-      const std::vector<int>& neighbor_offsets,
+      const std::vector<int>& neighbor_dx,
+      const std::vector<int>& neighbor_dy,
+      const std::vector<int>& neighbor_dz,
+      const std::vector<int>& neighbor_dt,
       const std::vector<double>& spatial_temporal_kernel,
+      const std::vector<unsigned char>& in_mask,
       const IntegerVector& mask_idx,
       double intensity_var
     ) : arr_ptr(arr_ptr), out_ptr(out_ptr), nx(nx), ny(ny), nz(nz), nt(nt),
         slicedim_xy(slicedim_xy), slicedim_xyz(slicedim_xyz),
-        neighbor_offsets(neighbor_offsets), spatial_temporal_kernel(spatial_temporal_kernel),
-        mask_idx(mask_idx), intensity_var(intensity_var) {}
+        neighbor_dx(neighbor_dx), neighbor_dy(neighbor_dy), neighbor_dz(neighbor_dz),
+        neighbor_dt(neighbor_dt), spatial_temporal_kernel(spatial_temporal_kernel),
+        in_mask(in_mask), mask_idx(mask_idx), intensity_var(intensity_var) {}
 
     void operator()(std::size_t begin, std::size_t end) {
       for (std::size_t m = begin; m < end; m++) {
@@ -163,15 +189,11 @@ NumericVector bilateral_filter_4d_cpp_par(
           double val_sum = 0.0;
           double w_sum = 0.0;
 
-          for (size_t n = 0; n < neighbor_offsets.size(); n++) {
-            int offset = neighbor_offsets[n];
-
-            int neighbor_t = t + (offset / slicedim_xyz);
-            int remainder_xyz = offset % slicedim_xyz;
-            int neighbor_z = z + (remainder_xyz / (nx*ny));
-            int remainder_xy = remainder_xyz % (nx*ny);
-            int neighbor_y = y + (remainder_xy / nx);
-            int neighbor_x = x + (remainder_xy % nx);
+          for (size_t n = 0; n < spatial_temporal_kernel.size(); n++) {
+            int neighbor_t = t + neighbor_dt[n];
+            int neighbor_z = z + neighbor_dz[n];
+            int neighbor_y = y + neighbor_dy[n];
+            int neighbor_x = x + neighbor_dx[n];
 
             // Check bounds
             if (neighbor_x < 0 || neighbor_x >= nx ||
@@ -181,7 +203,12 @@ NumericVector bilateral_filter_4d_cpp_par(
               continue;
             }
 
-            int neighbor_idx = neighbor_x + neighbor_y*nx + neighbor_z*slicedim_xy + neighbor_t*slicedim_xyz;
+            int neighbor_spatial_idx = neighbor_x + neighbor_y*nx + neighbor_z*slicedim_xy;
+            if (!in_mask[neighbor_spatial_idx]) {
+              continue;
+            }
+
+            int neighbor_idx = neighbor_spatial_idx + neighbor_t*slicedim_xyz;
             double neighbor_val = arr_ptr[neighbor_idx];
             if (!R_finite(neighbor_val)) {
               continue;
@@ -206,7 +233,8 @@ NumericVector bilateral_filter_4d_cpp_par(
 
   BilateralFilter4DWorker worker(
     arr_ptr, out_ptr, nx, ny, nz, nt, slicedim_xy, slicedim_xyz,
-    neighbor_offsets, spatial_temporal_kernel, mask_idx, intensity_var
+    neighbor_dx, neighbor_dy, neighbor_dz, neighbor_dt,
+    spatial_temporal_kernel, in_mask, mask_idx, intensity_var
   );
 
   // Parallel execution

@@ -101,6 +101,67 @@ test_that("bilateral_filter with explicit mask", {
   expect_equal(dim(out), dim(vol))
 })
 
+test_that("bilateral_filter uses only in-mask neighbors", {
+  sp <- NeuroSpace(c(3L, 3L, 3L), c(1, 1, 1))
+  arr <- array(0, c(3, 3, 3))
+  arr[2, 2, 2] <- 10
+  vol <- DenseNeuroVol(arr, sp)
+
+  mask_arr <- array(FALSE, c(3, 3, 3))
+  mask_arr[2, 2, 2] <- TRUE
+  mask <- LogicalNeuroVol(mask_arr, sp)
+
+  out <- bilateral_filter(vol, mask = mask, spatial_sigma = 100,
+                          intensity_sigma = 1, window = 1,
+                          range_scale = 100)
+
+  expect_equal(as.array(out)[2, 2, 2], 10)
+})
+
+test_that("bilateral_filter skips volume-boundary zeros", {
+  sp <- NeuroSpace(c(3L, 3L, 3L), c(1, 1, 1))
+  vol <- DenseNeuroVol(array(10, c(3, 3, 3)), sp)
+
+  out <- bilateral_filter(vol, spatial_sigma = 100,
+                          intensity_sigma = 1, window = 1,
+                          range_scale = 100)
+
+  expect_equal(as.array(out)[1, 1, 1], 10)
+})
+
+test_that("bilateral_filter explicit range_scale matches auto scale", {
+  sp <- NeuroSpace(c(3L, 3L, 3L), c(1, 1, 1))
+  arr <- array(seq_len(27), c(3, 3, 3))
+  vol <- DenseNeuroVol(arr, sp)
+  mask <- LogicalNeuroVol(array(TRUE, c(3, 3, 3)), sp)
+  scale <- stats::sd(as.numeric(arr))
+
+  auto <- bilateral_filter(vol, mask = mask, spatial_sigma = 1,
+                           intensity_sigma = 1, window = 1)
+  fixed <- bilateral_filter(vol, mask = mask, spatial_sigma = 1,
+                            intensity_sigma = 1, window = 1,
+                            range_scale = scale)
+
+  expect_equal(as.array(fixed), as.array(auto), tolerance = 1e-10)
+})
+
+test_that("bilateral_filter auto range scale stays finite for singleton masks", {
+  sp <- NeuroSpace(c(3L, 3L, 3L), c(1, 1, 1))
+  arr <- array(0, c(3, 3, 3))
+  arr[2, 2, 2] <- 10
+  vol <- DenseNeuroVol(arr, sp)
+
+  mask_arr <- array(FALSE, c(3, 3, 3))
+  mask_arr[2, 2, 2] <- TRUE
+  mask <- LogicalNeuroVol(mask_arr, sp)
+
+  out <- bilateral_filter(vol, mask = mask, spatial_sigma = 1,
+                          intensity_sigma = 1, window = 1)
+
+  expect_true(is.finite(as.array(out)[2, 2, 2]))
+  expect_equal(as.array(out)[2, 2, 2], 10)
+})
+
 test_that("bilateral_filter rejects window < 1", {
   sp  <- NeuroSpace(c(8L, 8L, 8L), c(1, 1, 1))
   vol <- DenseNeuroVol(array(rnorm(512), c(8, 8, 8)), sp)
@@ -123,6 +184,12 @@ test_that("bilateral_filter rejects invalid mask type", {
   sp  <- NeuroSpace(c(8L, 8L, 8L), c(1, 1, 1))
   vol <- DenseNeuroVol(array(rnorm(512), c(8, 8, 8)), sp)
   expect_error(bilateral_filter(vol, mask = array(TRUE, c(8, 8, 8))), class = "error")
+})
+
+test_that("bilateral_filter rejects invalid range_scale", {
+  sp  <- NeuroSpace(c(8L, 8L, 8L), c(1, 1, 1))
+  vol <- DenseNeuroVol(array(rnorm(512), c(8, 8, 8)), sp)
+  expect_error(bilateral_filter(vol, range_scale = 0), class = "error")
 })
 
 # ---- bilateral_filter_vec (internal function via :::) ----

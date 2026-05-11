@@ -5,12 +5,12 @@ bilateral_weights <- function(window, spatial_sigma, intensity_sigma, spacing, i
     .Call(`_neuroim2_bilateral_weights`, window, spatial_sigma, intensity_sigma, spacing, intensity_sd)
 }
 
-bilateral_filter_cpp <- function(arr, mask_idx, window, spatial_sigma, intensity_sigma, spacing) {
-    .Call(`_neuroim2_bilateral_filter_cpp`, arr, mask_idx, window, spatial_sigma, intensity_sigma, spacing)
+bilateral_filter_cpp <- function(arr, mask_idx, window, spatial_sigma, intensity_sigma, spacing, range_scale) {
+    .Call(`_neuroim2_bilateral_filter_cpp`, arr, mask_idx, window, spatial_sigma, intensity_sigma, spacing, range_scale)
 }
 
-bilateral_filter_4d_cpp_par <- function(arr, mask_idx, spatial_window, temporal_window, spatial_sigma, intensity_sigma, temporal_sigma, spacing) {
-    .Call(`_neuroim2_bilateral_filter_4d_cpp_par`, arr, mask_idx, spatial_window, temporal_window, spatial_sigma, intensity_sigma, temporal_sigma, spacing)
+bilateral_filter_4d_cpp_par <- function(arr, mask_idx, spatial_window, temporal_window, spatial_sigma, intensity_sigma, temporal_sigma, spacing, range_scale) {
+    .Call(`_neuroim2_bilateral_filter_4d_cpp_par`, arr, mask_idx, spatial_window, temporal_window, spatial_sigma, intensity_sigma, temporal_sigma, spacing, range_scale)
 }
 
 build_cgb_graph_cpp <- function(arr, mask_idx, run_ends, window, spatial_sigma, spacing, corr_mode, corr_param, topk, leave_out_run, run_weights, add_self) {

@@ -4,7 +4,14 @@
 \alias{bilateral_filter}
 \title{Apply a bilateral filter to a volumetric image}
 \usage{
-bilateral_filter(vol, mask, spatial_sigma = 2, intensity_sigma = 1, window = 1)
+bilateral_filter(
+  vol,
+  mask,
+  spatial_sigma = 2,
+  intensity_sigma = 1,
+  window = 1,
+  range_scale = NULL
+)
 }
 \arguments{
 \item{vol}{A \code{\linkS4class{NeuroVol}} object representing the image volume to be smoothed.}
@@ -13,9 +20,14 @@ bilateral_filter(vol, mask, spatial_sigma = 2, intensity_sigma = 1, window = 1)
 
 \item{spatial_sigma}{A numeric value specifying the standard deviation of the spatial Gaussian kernel (default is 2).}
 
-\item{intensity_sigma}{A numeric value specifying the standard deviation of the intensity Gaussian kernel (default is 25).}
+\item{intensity_sigma}{A numeric value specifying the standard deviation of the intensity Gaussian kernel (default is 1).}
 
 \item{window}{An integer specifying the number of voxels around the center voxel to include on each side. For example, window=1 for a 3x3x3 kernel (default is 1).}
+
+\item{range_scale}{Optional positive numeric range scale used by the intensity kernel.
+If \code{NULL}, the scale is estimated as the standard deviation of the current
+input values inside \code{mask}. Supply a
+fixed value to apply the same range bandwidth across observed and null maps.}
 }
 \value{
 A smoothed image of class \code{\linkS4class{NeuroVol}}.
@@ -23,6 +35,7 @@ A smoothed image of class \code{\linkS4class{NeuroVol}}.
 \description{
 This function smooths a volumetric image (3D brain MRI data) using a bilateral filter.
 The bilateral filter considers both spatial closeness and intensity similarity for smoothing.
+Only in-mask, in-bounds neighbors contribute to each local weighted average.
 }
 \examples{
 brain_mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))

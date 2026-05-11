@@ -27,8 +27,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // bilateral_filter_cpp
-NumericVector bilateral_filter_cpp(NumericVector arr, IntegerVector mask_idx, int window, double spatial_sigma, double intensity_sigma, NumericVector spacing);
-RcppExport SEXP _neuroim2_bilateral_filter_cpp(SEXP arrSEXP, SEXP mask_idxSEXP, SEXP windowSEXP, SEXP spatial_sigmaSEXP, SEXP intensity_sigmaSEXP, SEXP spacingSEXP) {
+NumericVector bilateral_filter_cpp(NumericVector arr, IntegerVector mask_idx, int window, double spatial_sigma, double intensity_sigma, NumericVector spacing, double range_scale);
+RcppExport SEXP _neuroim2_bilateral_filter_cpp(SEXP arrSEXP, SEXP mask_idxSEXP, SEXP windowSEXP, SEXP spatial_sigmaSEXP, SEXP intensity_sigmaSEXP, SEXP spacingSEXP, SEXP range_scaleSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -38,13 +38,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type spatial_sigma(spatial_sigmaSEXP);
     Rcpp::traits::input_parameter< double >::type intensity_sigma(intensity_sigmaSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type spacing(spacingSEXP);
-    rcpp_result_gen = Rcpp::wrap(bilateral_filter_cpp(arr, mask_idx, window, spatial_sigma, intensity_sigma, spacing));
+    Rcpp::traits::input_parameter< double >::type range_scale(range_scaleSEXP);
+    rcpp_result_gen = Rcpp::wrap(bilateral_filter_cpp(arr, mask_idx, window, spatial_sigma, intensity_sigma, spacing, range_scale));
     return rcpp_result_gen;
 END_RCPP
 }
 // bilateral_filter_4d_cpp_par
-NumericVector bilateral_filter_4d_cpp_par(NumericVector arr, IntegerVector mask_idx, int spatial_window, int temporal_window, double spatial_sigma, double intensity_sigma, double temporal_sigma, NumericVector spacing);
-RcppExport SEXP _neuroim2_bilateral_filter_4d_cpp_par(SEXP arrSEXP, SEXP mask_idxSEXP, SEXP spatial_windowSEXP, SEXP temporal_windowSEXP, SEXP spatial_sigmaSEXP, SEXP intensity_sigmaSEXP, SEXP temporal_sigmaSEXP, SEXP spacingSEXP) {
+NumericVector bilateral_filter_4d_cpp_par(NumericVector arr, IntegerVector mask_idx, int spatial_window, int temporal_window, double spatial_sigma, double intensity_sigma, double temporal_sigma, NumericVector spacing, double range_scale);
+RcppExport SEXP _neuroim2_bilateral_filter_4d_cpp_par(SEXP arrSEXP, SEXP mask_idxSEXP, SEXP spatial_windowSEXP, SEXP temporal_windowSEXP, SEXP spatial_sigmaSEXP, SEXP intensity_sigmaSEXP, SEXP temporal_sigmaSEXP, SEXP spacingSEXP, SEXP range_scaleSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -56,7 +57,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type intensity_sigma(intensity_sigmaSEXP);
     Rcpp::traits::input_parameter< double >::type temporal_sigma(temporal_sigmaSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type spacing(spacingSEXP);
-    rcpp_result_gen = Rcpp::wrap(bilateral_filter_4d_cpp_par(arr, mask_idx, spatial_window, temporal_window, spatial_sigma, intensity_sigma, temporal_sigma, spacing));
+    Rcpp::traits::input_parameter< double >::type range_scale(range_scaleSEXP);
+    rcpp_result_gen = Rcpp::wrap(bilateral_filter_4d_cpp_par(arr, mask_idx, spatial_window, temporal_window, spatial_sigma, intensity_sigma, temporal_sigma, spacing, range_scale));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -394,8 +396,8 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_neuroim2_bilateral_weights", (DL_FUNC) &_neuroim2_bilateral_weights, 5},
-    {"_neuroim2_bilateral_filter_cpp", (DL_FUNC) &_neuroim2_bilateral_filter_cpp, 6},
-    {"_neuroim2_bilateral_filter_4d_cpp_par", (DL_FUNC) &_neuroim2_bilateral_filter_4d_cpp_par, 8},
+    {"_neuroim2_bilateral_filter_cpp", (DL_FUNC) &_neuroim2_bilateral_filter_cpp, 7},
+    {"_neuroim2_bilateral_filter_4d_cpp_par", (DL_FUNC) &_neuroim2_bilateral_filter_4d_cpp_par, 9},
     {"_neuroim2_build_cgb_graph_cpp", (DL_FUNC) &_neuroim2_build_cgb_graph_cpp, 12},
     {"_neuroim2_build_cgb_graph_nuis_cpp", (DL_FUNC) &_neuroim2_build_cgb_graph_nuis_cpp, 14},
     {"_neuroim2_apply_cgb_graph_cpp", (DL_FUNC) &_neuroim2_apply_cgb_graph_cpp, 7},

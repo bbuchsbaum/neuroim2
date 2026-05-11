@@ -160,12 +160,17 @@ guided_filter <- function(vol, radius = 4, epsilon = 0.7^2) {
 #'
 #' This function smooths a volumetric image (3D brain MRI data) using a bilateral filter.
 #' The bilateral filter considers both spatial closeness and intensity similarity for smoothing.
+#' Only in-mask, in-bounds neighbors contribute to each local weighted average.
 #'
 #' @param vol A \code{\linkS4class{NeuroVol}} object representing the image volume to be smoothed.
 #' @param mask An optional \code{\linkS4class{LogicalNeuroVol}} object representing the image mask that defines the region where the filtering is applied. If not provided, the entire volume is considered.
 #' @param spatial_sigma A numeric value specifying the standard deviation of the spatial Gaussian kernel (default is 2).
-#' @param intensity_sigma A numeric value specifying the standard deviation of the intensity Gaussian kernel (default is 25).
+#' @param intensity_sigma A numeric value specifying the standard deviation of the intensity Gaussian kernel (default is 1).
 #' @param window An integer specifying the number of voxels around the center voxel to include on each side. For example, window=1 for a 3x3x3 kernel (default is 1).
+#' @param range_scale Optional positive numeric range scale used by the intensity kernel.
+#'   If \code{NULL}, the scale is estimated as the standard deviation of the current
+#'   input values inside \code{mask}. Supply a
+#'   fixed value to apply the same range bandwidth across observed and null maps.
 #'
 #' @return A smoothed image of class \code{\linkS4class{NeuroVol}}.
 #'
@@ -177,7 +182,8 @@ guided_filter <- function(vol, radius = 4, epsilon = 0.7^2) {
 #' intensity_sigma = 25, window = 1)
 #'
 #' @export
-bilateral_filter <- function(vol, mask, spatial_sigma=2, intensity_sigma=1, window=1) {
+bilateral_filter <- function(vol, mask, spatial_sigma=2, intensity_sigma=1, window=1,
+                             range_scale = NULL) {
   if (window < 1) {
     cli::cli_abort("{.arg window} must be >= 1, not {.val {window}}.")
   }
@@ -186,6 +192,11 @@ bilateral_filter <- function(vol, mask, spatial_sigma=2, intensity_sigma=1, wind
   }
   if (intensity_sigma <= 0) {
     cli::cli_abort("{.arg intensity_sigma} must be positive, not {.val {intensity_sigma}}.")
+  }
+  if (!is.null(range_scale)) {
+    if (!is.numeric(range_scale) || length(range_scale) != 1 || !is.finite(range_scale) || range_scale <= 0) {
+      cli::cli_abort("{.arg range_scale} must be {.code NULL} or a single positive finite number.")
+    }
   }
   if (!missing(mask)) {
     if (!inherits(mask, "NeuroVol")) {
@@ -202,7 +213,9 @@ bilateral_filter <- function(vol, mask, spatial_sigma=2, intensity_sigma=1, wind
   }
 
   arr <- as.array(vol)
-  farr <- bilateral_filter_cpp(arr, as.integer(mask.idx), as.integer(window), spatial_sigma, intensity_sigma, spacing(vol))
+  farr <- bilateral_filter_cpp(arr, as.integer(mask.idx), as.integer(window),
+                               spatial_sigma, intensity_sigma, spacing(vol),
+                               if (is.null(range_scale)) NA_real_ else range_scale)
 
   out <- NeuroVol(farr, target_space)
   out
@@ -218,13 +231,16 @@ bilateral_filter <- function(vol, mask, spatial_sigma=2, intensity_sigma=1, wind
 #' @param spatial_sigma The spatial sigma for the bilateral filter (default = 2).
 #' @param intensity_sigma The intensity sigma for the bilateral filter (default = 1).
 #' @param window The size of the window for the bilateral filter (default = 1).
+#' @param range_scale Optional positive numeric range scale. If \code{NULL}, each
+#'   volume estimates its own masked standard deviation.
 #' @return A NeuroVec object with the filtered volumes.
 #' @examples
 #' brain_mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #' vec <- read_vec(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #' out <- bilateral_filter_vec(vec,brain_mask)
 #' @noRd
-bilateral_filter_vec <- function(vec, mask, spatial_sigma=2, intensity_sigma=1, window=1) {
+bilateral_filter_vec <- function(vec, mask, spatial_sigma=2, intensity_sigma=1, window=1,
+                                 range_scale = NULL) {
   if (!inherits(vec, "NeuroVec")) {
     cli::cli_abort("{.arg vec} must be a {.cls NeuroVec} object.")
   }
@@ -236,6 +252,11 @@ bilateral_filter_vec <- function(vec, mask, spatial_sigma=2, intensity_sigma=1, 
   }
   if (intensity_sigma <= 0) {
     cli::cli_abort("{.arg intensity_sigma} must be positive, not {.val {intensity_sigma}}.")
+  }
+  if (!is.null(range_scale)) {
+    if (!is.numeric(range_scale) || length(range_scale) != 1 || !is.finite(range_scale) || range_scale <= 0) {
+      cli::cli_abort("{.arg range_scale} must be {.code NULL} or a single positive finite number.")
+    }
   }
 
   if (missing(mask)) {
@@ -252,7 +273,9 @@ bilateral_filter_vec <- function(vec, mask, spatial_sigma=2, intensity_sigma=1, 
   res<- lapply(seq_len(dim(vec)[4]), function(i) {
     vol_i <- vec[[i]]
     arr <- as.array(vol_i)
-    farr <- bilateral_filter_cpp(arr, as.integer(mask.idx), as.integer(window), spatial_sigma, intensity_sigma, spacing(vec)[1:3])
+    farr <- bilateral_filter_cpp(arr, as.integer(mask.idx), as.integer(window),
+                                 spatial_sigma, intensity_sigma, spacing(vec)[1:3],
+                                 if (is.null(range_scale)) NA_real_ else range_scale)
     NeuroVol(farr, target_space)
   })
 
@@ -266,6 +289,7 @@ bilateral_filter_vec <- function(vec, mask, spatial_sigma=2, intensity_sigma=1, 
 #' smoothing jointly across space (x, y, z) and time (t). The filter uses
 #' spatial, temporal, and intensity kernels to preserve edges while reducing
 #' noise, leveraging a parallel C++ backend for performance.
+#' Only in-mask, in-bounds spatial neighbors contribute to each local weighted average.
 #'
 #' @param vec A \code{\linkS4class{NeuroVec}} object (4D image).
 #' @param mask An optional \code{\linkS4class{LogicalNeuroVol}} or \code{\linkS4class{NeuroVol}}
@@ -280,6 +304,10 @@ bilateral_filter_vec <- function(vec, mask, spatial_sigma=2, intensity_sigma=1, 
 #'   e.g., 1 => 3 timepoints (t-1, t, t+1).
 #' @param temporal_spacing Numeric; spacing of the temporal dimension (e.g., TR in seconds).
 #'   Default is 1. This sets the temporal scale used for the temporal kernel.
+#' @param range_scale Optional positive numeric range scale used by the intensity kernel.
+#'   If \code{NULL}, the scale is estimated from all finite input values inside
+#'   \code{mask} across time. Supply a fixed value to use the same range bandwidth
+#'   across observed and null data.
 #'
 #' @details
 #' Parameter guidance and units:
@@ -338,7 +366,8 @@ bilateral_filter_4d <- function(vec,
                                 temporal_sigma = 1,
                                 spatial_window = 1,
                                 temporal_window = 1,
-                                temporal_spacing = 1) {
+                                temporal_spacing = 1,
+                                range_scale = NULL) {
 
   if (!inherits(vec, "NeuroVec")) {
     cli::cli_abort("{.arg vec} must be a {.cls NeuroVec} object.")
@@ -360,6 +389,11 @@ bilateral_filter_4d <- function(vec,
   }
   if (temporal_spacing <= 0) {
     cli::cli_abort("{.arg temporal_spacing} must be positive, not {.val {temporal_spacing}}.")
+  }
+  if (!is.null(range_scale)) {
+    if (!is.numeric(range_scale) || length(range_scale) != 1 || !is.finite(range_scale) || range_scale <= 0) {
+      cli::cli_abort("{.arg range_scale} must be {.code NULL} or a single positive finite number.")
+    }
   }
 
   # Determine mask and target space
@@ -392,7 +426,8 @@ bilateral_filter_4d <- function(vec,
                                        spatial_sigma,
                                        intensity_sigma,
                                        temporal_sigma,
-                                       sp4)
+                                       sp4,
+                                       if (is.null(range_scale)) NA_real_ else range_scale)
 
   DenseNeuroVec(farr, target_space)
 }

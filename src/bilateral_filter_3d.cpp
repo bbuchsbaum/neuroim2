@@ -7,6 +7,7 @@
 #if defined(__clang__)
 #  pragma clang diagnostic pop
 #endif
+#include <cmath>
 #include "indexFuns.h"
 using namespace Rcpp;
 
@@ -40,7 +41,7 @@ NumericMatrix bilateral_weights(int window, double spatial_sigma, double intensi
 
 // [[Rcpp::export]]
 NumericVector bilateral_filter_cpp(NumericVector arr, IntegerVector mask_idx, int window, double spatial_sigma, double intensity_sigma,
-                                   NumericVector spacing) {
+                                   NumericVector spacing, double range_scale) {
   IntegerVector dims = arr.attr("dim");
   int nx = dims[0];
   int ny = dims[1];
@@ -48,11 +49,19 @@ NumericVector bilateral_filter_cpp(NumericVector arr, IntegerVector mask_idx, in
 
   NumericVector out(arr.size());
 
-  double intensity_sd = indexfuns::masked_sd(arr, mask_idx);
+  double intensity_sd = range_scale;
+  if (!std::isfinite(intensity_sd)) {
+    intensity_sd = indexfuns::masked_sd(arr, mask_idx);
+  }
+
   NumericMatrix wts = bilateral_weights(window, spatial_sigma, intensity_sigma, spacing, intensity_sd);
 
   // Precompute intensity denominator (same for all)
-  double intensity_denom = wts(0,1); 
+  double intensity_denom = wts(0,1);
+  const double min_intensity_denom = 1e-12;
+  if (!std::isfinite(intensity_denom) || intensity_denom < min_intensity_denom) {
+    intensity_denom = min_intensity_denom;
+  }
   NumericVector spatial_wts = wts(_,0); 
   double *spatial_ptr = &spatial_wts[0];
   
@@ -64,17 +73,34 @@ NumericVector bilateral_filter_cpp(NumericVector arr, IntegerVector mask_idx, in
 
   int N = spatial_wts.size();
 
-  // Precompute neighborhood offsets once
+  std::vector<unsigned char> in_mask;
+  in_mask.assign(arr.size(), 0);
+  for (int m = 0; m < mask_idx.size(); ++m) {
+    int idx = mask_idx[m] - 1;
+    if (idx >= 0 && idx < arr.size()) {
+      in_mask[idx] = 1;
+    }
+  }
+
+  // Precompute neighborhood offsets and coordinate deltas once.
   std::vector<int> offsets;
+  std::vector<int> delta_x;
+  std::vector<int> delta_y;
+  std::vector<int> delta_z;
   offsets.reserve(N);
+  delta_x.reserve(N);
+  delta_y.reserve(N);
+  delta_z.reserve(N);
 
   {
-    int ind = 0;
     for (int i = -window; i <= window; i++) {
       for (int j = -window; j <= window; j++) {
-        for (int k = -window; k <= window; k++, ind++) {
+        for (int k = -window; k <= window; k++) {
           int offset = i + j*nx + k*slicedim;
           offsets.push_back(offset);
+          delta_x.push_back(i);
+          delta_y.push_back(j);
+          delta_z.push_back(k);
         }
       }
     }
@@ -93,17 +119,21 @@ NumericVector bilateral_filter_cpp(NumericVector arr, IntegerVector mask_idx, in
     // Gather neighborhood
     for (int n = 0; n < N; n++) {
       int offset = offsets[n];
-      // Compute neighbor coordinates to check bounds
-      int k_vox = z + (offset/(nx*ny)); 
-      int remain_k = offset % (nx*ny);
-      int j_vox = y + (remain_k / nx);
-      int i_vox = x + (remain_k % nx);
+      int i_vox = x + delta_x[n];
+      int j_vox = y + delta_y[n];
+      int k_vox = z + delta_z[n];
 
       double neigh_val = 0.0;
       if (i_vox >= 0 && i_vox < nx && 
           j_vox >= 0 && j_vox < ny &&
           k_vox >= 0 && k_vox < nz) {
-        neigh_val = arr_ptr[center_idx + offset];
+        int neigh_idx = center_idx + offset;
+        if (!in_mask[neigh_idx]) {
+          continue;
+        }
+        neigh_val = arr_ptr[neigh_idx];
+      } else {
+        continue;
       }
 
       double diff = neigh_val - center_val;
@@ -113,12 +143,9 @@ NumericVector bilateral_filter_cpp(NumericVector arr, IntegerVector mask_idx, in
       w_sum += w;
     }
 
-    out_ptr[mask_idx[m]-1] = val_sum / w_sum;
+    out_ptr[mask_idx[m]-1] = (w_sum > 0.0) ? val_sum / w_sum : center_val;
   }
 
   out.attr("dim") = dims;
   return out;
 }
-
-
-

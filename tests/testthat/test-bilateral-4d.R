@@ -11,7 +11,8 @@ test_that("bilateral_filter_4d_cpp_par is identity for zero window", {
     spatial_sigma = 1,
     intensity_sigma = 1,
     temporal_sigma = 1,
-    spacing = c(1, 1, 1, 1)
+    spacing = c(1, 1, 1, 1),
+    range_scale = NA_real_
   )
 
   expect_equal(as.numeric(out), as.numeric(arr))
@@ -29,11 +30,31 @@ test_that("bilateral_filter_4d_cpp_par preserves constant arrays without NaNs", 
     spatial_sigma = 1,
     intensity_sigma = 1,
     temporal_sigma = 1,
-    spacing = c(1, 1, 1, 1)
+    spacing = c(1, 1, 1, 1),
+    range_scale = NA_real_
   )
 
   expect_true(all(is.finite(as.numeric(out))))
   expect_equal(as.numeric(out), as.numeric(arr))
+})
+
+test_that("bilateral_filter_4d uses only in-mask spatial neighbors", {
+  d <- c(3L, 3L, 3L, 1L)
+  sp <- NeuroSpace(d, spacing = c(1, 1, 1))
+  arr <- array(0, dim = d)
+  arr[2, 2, 2, 1] <- 10
+  vec <- DenseNeuroVec(arr, sp)
+
+  mask_arr <- array(FALSE, dim = d[1:3])
+  mask_arr[2, 2, 2] <- TRUE
+  mask <- LogicalNeuroVol(mask_arr, drop_dim(sp))
+
+  out <- bilateral_filter_4d(vec, mask = mask, spatial_sigma = 100,
+                             intensity_sigma = 1, temporal_sigma = 1,
+                             spatial_window = 1, temporal_window = 0,
+                             range_scale = 100)
+
+  expect_equal(as.array(out)[2, 2, 2, 1], 10)
 })
 
 test_that("as.array works for SparseNeuroVec and preserves masked layout", {
