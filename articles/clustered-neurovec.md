@@ -23,6 +23,7 @@ maintaining compatibility with standard `NeuroVec` operations.
 ### From scratch with synthetic data
 
 ``` r
+
 # Create a simple 3D space with mask
 space <- NeuroSpace(c(10, 10, 10), spacing = c(2, 2, 2))
 mask_data <- array(TRUE, c(10, 10, 10))
@@ -56,6 +57,7 @@ print(cv)
 ### Key properties
 
 ``` r
+
 # Dimensions: still 4D (x, y, z, time)
 dim(cv)
 #> [1] 10 10 10 20
@@ -75,6 +77,7 @@ dim(ts_matrix)  # 20 time points x 5 clusters
 `ClusteredNeuroVec` behaves like a regular 4D array:
 
 ``` r
+
 # Extract 3D volume at time point 1
 vol_t1 <- cv[,,,1]
 dim(vol_t1)  # 10 x 10 x 10
@@ -95,6 +98,7 @@ Perform searchlight analysis at the cluster level using centroid
 distances:
 
 ``` r
+
 # K-nearest neighbor searchlight (3 nearest clusters)
 windows_knn <- cluster_searchlight_series(cv, k = 3)
 length(windows_knn)  # One window per cluster
@@ -112,6 +116,7 @@ windows_radius <- cluster_searchlight_series(cv, radius = 15)
 ## Real-world example: Schaefer parcellation
 
 ``` r
+
 # Load fMRI data
 fmri_data <- read_vec("subject01_task.nii.gz")
 
@@ -140,6 +145,7 @@ dim(cor_matrix)  # 400 x 400
 functions:
 
 ``` r
+
 # Use with split_reduce for custom aggregation
 # (ClusteredNeuroVec already uses this internally)
 

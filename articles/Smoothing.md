@@ -22,6 +22,7 @@ We’ll work with the demo volume used elsewhere in the package. All code
 assumes this setup:
 
 ``` r
+
 set.seed(1)
 
 demo_path <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
@@ -43,6 +44,7 @@ useful as a simple, fast baseline smoother.
   3×3×3).
 
 ``` r
+
 blur_light <- gaussian_blur(vol3d, vol3d, sigma = 2, window = 1)
 blur_strong <- gaussian_blur(vol3d, vol3d, sigma = 4, window = 2)
 
@@ -64,6 +66,7 @@ the input and output.
   contrast.
 
 ``` r
+
 gf_vol <- guided_filter(vol3d, radius = 4, epsilon = 0.7^2)
 gf_vol
 #> <DenseNeuroVol> [806.6 Kb] 
@@ -86,6 +89,7 @@ combines spatial distance and intensity similarity, reducing noise while
 respecting edges.
 
 ``` r
+
 bf_vol <- bilateral_filter(
   vol3d,
   spatial_sigma   = 2,
@@ -100,7 +104,7 @@ bf_vol
 #>   Origin        : 112, -108, -46.2
 #>   Orientation   : LAS
 #> ── Data ──────────────────────────────────────────────────────────────────────── 
-#>   Range         : [0.000, 0.990]
+#>   Range         : [0.000, 1.000]
 ```
 
 Key parameters:
@@ -120,6 +124,7 @@ is designed for *sharpening* rather than smoothing. It uses a
 multi‑layer, non‑local Laplacian scheme to enhance details.
 
 ``` r
+
 sharp_vol <- laplace_enhance(vol3d, k = 2, patch_size = 3,
                              search_radius = 2, h = 0.7)
 sharp_vol
@@ -148,6 +153,7 @@ extends the bilateral idea across space and time:
 - `temporal_spacing` — units of the time axis (e.g., TR in seconds).
 
 ``` r
+
 mask3d <- read_vol(system.file("extdata", "global_mask_v4.nii",
                                package = "neuroim2"))
 
@@ -179,6 +185,7 @@ then diffuses data over that graph.
 Basic usage mirrors the bilateral interface:
 
 ``` r
+
 cgf <- cgb_filter(
   vec4d,
   mask          = mask3d,
@@ -214,6 +221,7 @@ to diffuse over it. Use `return_graph = TRUE` to keep the graph for
 reuse.
 
 ``` r
+
 cg_out <- cgb_filter(vec4d, mask3d,
                      spatial_sigma = 3, window = NULL,
                      topk = 16, return_graph = TRUE)

@@ -148,6 +148,7 @@ for 3D volumetric data.
 ## Examples
 
 ``` r
+
 # Load an example 4D brain image
 example_4d_image <- read_vec(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
 

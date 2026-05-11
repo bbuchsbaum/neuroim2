@@ -70,6 +70,7 @@ for a dense representation of 3D brain images.
 ## Examples
 
 ``` r
+
 # Create a sparse 3D brain image
 dim <- c(64L, 64L, 64L)
 space <- NeuroSpace(dim = dim, origin = c(0, 0, 0), spacing = c(1, 1, 1))

@@ -52,6 +52,7 @@ for related file name manipulation
 ## Examples
 
 ``` r
+
 fmt <- new("FileFormat", header_extension = "hdr", data_extension = "img")
 header_file(fmt, "brain_scan.hdr")  # Returns "brain_scan.hdr"
 #> [1] "brain_scan.hdr"

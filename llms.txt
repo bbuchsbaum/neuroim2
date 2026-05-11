@@ -33,12 +33,14 @@ resampling/filtering.
 ### CRAN
 
 ``` r
+
 install.packages("neuroim2")
 ```
 
 ### R-universe (daily builds)
 
 ``` r
+
 install.packages("neuroim2",
   repos = c("https://bbuchsbaum.r-universe.dev", "https://cloud.r-project.org"))
 ```
@@ -46,6 +48,7 @@ install.packages("neuroim2",
 ### Development version (GitHub)
 
 ``` r
+
 # install.packages("remotes")
 remotes::install_github("bbuchsbaum/neuroim2")
 ```
@@ -55,6 +58,7 @@ remotes::install_github("bbuchsbaum/neuroim2")
 Read a NIFTI image and perform simple operations:
 
 ``` r
+
 library(neuroim2)
 fname <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
 vol <- read_vol(fname)
@@ -71,6 +75,7 @@ all(vol == (vol2 - vol))
 Create a 4D image from volumes:
 
 ``` r
+
 vec <- vec_from_vols(list(vol, vol, vol2))
 series1 <- vec[1,1,1,]
 length(series1)
@@ -86,13 +91,13 @@ Browse the full set of
 [articles](https://bbuchsbaum.github.io/neuroim2/articles/index.html) on
 the pkgdown site:
 
-| Getting Started                                                                              | Analysis Workflows                                                                             | Advanced                                                                                     |
-|----------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------|
-| [Overview](https://bbuchsbaum.github.io/neuroim2/articles/Overview.html)                     | [Analysis Workflows](https://bbuchsbaum.github.io/neuroim2/articles/AnalysisWorkflows.html)    | [Image Volumes](https://bbuchsbaum.github.io/neuroim2/articles/ImageVolumes.html)            |
-| [Choosing Backends](https://bbuchsbaum.github.io/neuroim2/articles/ChoosingBackends.html)    | [Slice Visualization](https://bbuchsbaum.github.io/neuroim2/articles/slice-visualization.html) | [NeuroVector](https://bbuchsbaum.github.io/neuroim2/articles/NeuroVector.html)               |
-| [Coordinate Systems](https://bbuchsbaum.github.io/neuroim2/articles/coordinate-systems.html) | [Cookbook](https://bbuchsbaum.github.io/neuroim2/articles/Cookbook.html)                       | [Regions of Interest](https://bbuchsbaum.github.io/neuroim2/articles/regionOfInterest.html)  |
-| [Volumes & Vectors](https://bbuchsbaum.github.io/neuroim2/articles/VolumesAndVectors.html)   | [Smoothing](https://bbuchsbaum.github.io/neuroim2/articles/Smoothing.html)                     | [Clustered NeuroVec](https://bbuchsbaum.github.io/neuroim2/articles/clustered-neurovec.html) |
-| [Resampling](https://bbuchsbaum.github.io/neuroim2/articles/Resampling.html)                 |                                                                                                | [Pipelines](https://bbuchsbaum.github.io/neuroim2/articles/pipelines.html)                   |
+| Getting Started | Analysis Workflows | Advanced |
+|----|----|----|
+| [Overview](https://bbuchsbaum.github.io/neuroim2/articles/Overview.html) | [Analysis Workflows](https://bbuchsbaum.github.io/neuroim2/articles/AnalysisWorkflows.html) | [Image Volumes](https://bbuchsbaum.github.io/neuroim2/articles/ImageVolumes.html) |
+| [Choosing Backends](https://bbuchsbaum.github.io/neuroim2/articles/ChoosingBackends.html) | [Slice Visualization](https://bbuchsbaum.github.io/neuroim2/articles/slice-visualization.html) | [NeuroVector](https://bbuchsbaum.github.io/neuroim2/articles/NeuroVector.html) |
+| [Coordinate Systems](https://bbuchsbaum.github.io/neuroim2/articles/coordinate-systems.html) | [Cookbook](https://bbuchsbaum.github.io/neuroim2/articles/Cookbook.html) | [Regions of Interest](https://bbuchsbaum.github.io/neuroim2/articles/regionOfInterest.html) |
+| [Volumes & Vectors](https://bbuchsbaum.github.io/neuroim2/articles/VolumesAndVectors.html) | [Smoothing](https://bbuchsbaum.github.io/neuroim2/articles/Smoothing.html) | [Clustered NeuroVec](https://bbuchsbaum.github.io/neuroim2/articles/clustered-neurovec.html) |
+| [Resampling](https://bbuchsbaum.github.io/neuroim2/articles/Resampling.html) |  | [Pipelines](https://bbuchsbaum.github.io/neuroim2/articles/pipelines.html) |
 
 ## Albers theme
 

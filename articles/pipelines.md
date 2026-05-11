@@ -20,6 +20,7 @@ useful when you want to split by slices, volumes, or voxel vectors
 directly.
 
 ``` r
+
 file_name <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
 vol <- read_vol(file_name)
 ```
@@ -31,6 +32,7 @@ function to each slice. We can use the `slices` function to achieve this
 as follows:
 
 ``` r
+
 slice_means <- vol %>% slices %>% map_dbl(~ mean(.))
 plot(slice_means, type='l', ylab="mean intensity", xlab="slice number")
 ```
@@ -40,6 +42,7 @@ plot(slice_means, type='l', ylab="mean intensity", xlab="slice number")
 ### Mapping a function over each volume of a `NeuroVec` object
 
 ``` r
+
 vec <- concat(vol,vol,vol,vol,vol)
 vec
 #> <DenseNeuroVec> [3.9 Mb] 
@@ -60,6 +63,7 @@ stopifnot(length(sd_vec) == dim(vec)[4])
 ### Mapping a function over each vector of a `NeuroVec` object
 
 ``` r
+
 vec <- concat(vol,vol,vol,vol,vol)
 vec
 #> <DenseNeuroVec> [3.9 Mb] 

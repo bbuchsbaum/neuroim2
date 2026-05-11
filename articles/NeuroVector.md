@@ -20,6 +20,7 @@ after you already understand the basic container model:
 ### Reading multiple four-dimensional images
 
 ``` r
+
 file_name <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
 vec <- read_vec(file_name)
 vec_multi <- read_vec(c(file_name, file_name, file_name))
@@ -43,6 +44,7 @@ vec2
 You can build a `NeuroVec` directly from arrays or matrices:
 
 ``` r
+
 set.seed(1)
 dims <- c(24, 24, 24, 5)
 arr  <- array(rnorm(prod(dims)), dims)
@@ -56,6 +58,7 @@ You can also start from a matrix (voxels × time or time × voxels) using
 `DenseNeuroVec`:
 
 ``` r
+
 mat  <- matrix(rnorm(prod(dims)), nrow = prod(dims[1:3]), ncol = dims[4])
 dvec2 <- DenseNeuroVec(mat, sp4)
 all.equal(dim(dvec), dim(dvec2))
@@ -67,6 +70,7 @@ all.equal(dim(dvec), dim(dvec2))
 Z-score each voxel’s time-series (center and scale across time):
 
 ``` r
+
 vec_z <- scale_series(dvec, center = TRUE, scale = TRUE)
 dim(vec_z)
 #> [1] 24 24 24  5
@@ -75,6 +79,7 @@ dim(vec_z)
 Compute a mean volume across time and return a 3D `NeuroVol`:
 
 ``` r
+
 M      <- as.matrix(dvec)              # voxels × time
 vmean  <- rowMeans(M)                  # per-voxel mean
 mean3d <- NeuroVol(vmean, drop_dim(space(dvec)))
@@ -94,6 +99,7 @@ mean3d
 Append time points by concatenating vectors or volumes:
 
 ``` r
+
 dvec_more <- concat(dvec, dvec)        # doubles the time dimension
 dim(dvec_more)
 #> [1] 24 24 24 10
@@ -105,6 +111,7 @@ Sparse representations store only voxels within a mask. This is handy
 for large ROIs or brain masks.
 
 ``` r
+
 # Build a random mask and convert a dense vec to sparse
 mask_arr <- array(runif(prod(dims[1:3])) > 0.7, dims[1:3])
 mask_vol <- LogicalNeuroVol(mask_arr, drop_dim(sp4))
@@ -130,6 +137,7 @@ Tip: For file-backed or memory-mapped vectors, convert to
 `DenseNeuroVec` via a matrix if you need dense-only operations:
 
 ``` r
+
 dv_dense <- DenseNeuroVec(as.matrix(vec), space(vec))
 ```
 
@@ -138,6 +146,7 @@ dv_dense <- DenseNeuroVec(as.matrix(vec), space(vec))
 You can write `NeuroVec` and `NeuroVol` objects as NIfTI files:
 
 ``` r
+
 tmp_vec <- tempfile(fileext = ".nii.gz")
 write_vec(sub_vector(vec, 1:3), tmp_vec)
 file.exists(tmp_vec)
@@ -150,6 +159,7 @@ unlink(tmp_vec)
 Combine ROI extraction with time-series transforms:
 
 ``` r
+
 vol3d <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 roi   <- spherical_roi(vol3d, c(12,12,12), radius = 6)
 rts   <- series_roi(vec, roi)          # ROIVec (T × N with coords)

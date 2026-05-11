@@ -12,6 +12,7 @@ Use
 when the file is a 3D image or when you want one volume at a time.
 
 ``` r
+
 vol_file <- system.file("extdata", "global_mask2.nii.gz", package = "neuroim2")
 vol <- read_vol(vol_file)
 
@@ -24,6 +25,7 @@ origin(vol)
 ```
 
 ``` r
+
 stopifnot(length(dim(vol)) == 3L)
 stopifnot(all(spacing(vol) > 0))
 ```
@@ -33,6 +35,7 @@ The returned object behaves like an array, but it also carries a
 coordinates.
 
 ``` r
+
 space(vol)
 #> <NeuroSpace> [3D] 
 #> ── Geometry ──────────────────────────────────────────────────────────────────── 
@@ -53,6 +56,7 @@ when the file contains a time series or another stack of aligned
 volumes.
 
 ``` r
+
 vec_file <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
 vec <- read_vec(vec_file)
 
@@ -71,6 +75,7 @@ vec
 ```
 
 ``` r
+
 stopifnot(length(dim(vec)) == 4L)
 stopifnot(dim(vec)[4] > 1L)
 ```
@@ -84,6 +89,7 @@ is the axis you usually split, subset, and summarize.
 is the direct way to keep only selected timepoints.
 
 ``` r
+
 first_two <- sub_vector(vec, 1:2)
 
 dim(first_two)
@@ -91,6 +97,7 @@ dim(first_two)
 ```
 
 ``` r
+
 stopifnot(dim(first_two)[4] == 2L)
 ```
 
@@ -100,6 +107,7 @@ stopifnot(dim(first_two)[4] == 2L)
 is useful when you want one row per voxel and one column per timepoint.
 
 ``` r
+
 mat <- as.matrix(vec)
 
 dim(mat)
@@ -113,6 +121,7 @@ mat[1:4, 1:2]
 ```
 
 ``` r
+
 stopifnot(nrow(mat) == prod(dim(vec)[1:3]))
 stopifnot(ncol(mat) == dim(vec)[4])
 ```
@@ -126,6 +135,7 @@ For a single voxel, use
 [`series()`](https://bbuchsbaum.github.io/neuroim2/reference/series-methods.md).
 
 ``` r
+
 voxel_ts <- series(vec, 12, 12, 12)
 voxel_ts
 #> [1] 0 0 0 0
@@ -135,6 +145,7 @@ For a spatial region, create an ROI and use
 [`series_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/series_roi.md).
 
 ``` r
+
 roi <- spherical_roi(drop(first_two[[1]]), c(12, 12, 12), radius = 6)
 roi_ts <- series_roi(vec, roi)
 
@@ -143,6 +154,7 @@ dim(values(roi_ts))
 ```
 
 ``` r
+
 stopifnot(length(roi) > 0L)
 stopifnot(nrow(values(roi_ts)) == dim(vec)[4])
 ```
@@ -153,6 +165,7 @@ If only a subset of voxels should be considered present, read through a
 mask and keep the result sparse.
 
 ``` r
+
 mask_vol <- read_vol(vec_file) > 0
 sparse_vec <- read_vec(vec_file, mask = mask_vol)
 
@@ -165,6 +178,7 @@ dim(sparse_vec)
 ```
 
 ``` r
+
 stopifnot(inherits(sparse_vec, "SparseNeuroVec"))
 stopifnot(identical(dim(sparse_vec), dim(vec)))
 ```

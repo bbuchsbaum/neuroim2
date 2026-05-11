@@ -56,6 +56,7 @@ for data access methods
 ## Examples
 
 ``` r
+
 # Create a file-backed vector from a NIFTI file
 fbvec <- FileBackedNeuroVec(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
 

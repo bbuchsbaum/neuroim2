@@ -24,20 +24,21 @@ This guide is the shortest path to that choice.
 
 ## Decision Table
 
-| Situation                                         | Recommended backend  | Why                             |
-|:--------------------------------------------------|:---------------------|:--------------------------------|
-| Small-to-moderate 3D image                        | `DenseNeuroVol`      | simplest, lowest overhead       |
-| Small-to-moderate 4D fMRI series                  | `DenseNeuroVec`      | easiest indexing and arithmetic |
-| Masked analysis over a subset of voxels           | `SparseNeuroVec`     | stores only supported voxels    |
-| Large uncompressed NIfTI with random-access needs | `MappedNeuroVec`     | memory mapping is efficient     |
-| Large file, on-demand volume access               | `FileBackedNeuroVec` | no full materialization         |
-| 5D image                                          | `NeuroHyperVec`      | intended representation         |
+| Situation | Recommended backend | Why |
+|:---|:---|:---|
+| Small-to-moderate 3D image | `DenseNeuroVol` | simplest, lowest overhead |
+| Small-to-moderate 4D fMRI series | `DenseNeuroVec` | easiest indexing and arithmetic |
+| Masked analysis over a subset of voxels | `SparseNeuroVec` | stores only supported voxels |
+| Large uncompressed NIfTI with random-access needs | `MappedNeuroVec` | memory mapping is efficient |
+| Large file, on-demand volume access | `FileBackedNeuroVec` | no full materialization |
+| 5D image | `NeuroHyperVec` | intended representation |
 
 ## Dense In-Memory Data
 
 If the dataset fits in RAM, start here.
 
 ``` r
+
 file_name <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
 vec <- read_vec(file_name)
 
@@ -63,6 +64,7 @@ If you only care about a subset of voxels, read the data through a mask
 and keep the representation sparse.
 
 ``` r
+
 file_name <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
 mask_vol <- read_vol(file_name) > 0
 svec <- read_vec(file_name, mask = mask_vol)
@@ -89,6 +91,7 @@ For large uncompressed NIfTI files, `mmap` mode gives efficient on-disk
 access.
 
 ``` r
+
 file_name <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
 mvec <- read_vec(file_name, mode = "mmap")
 
@@ -108,6 +111,7 @@ Use this when:
 access without requiring the full dense object in memory.
 
 ``` r
+
 file_name <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
 fbvec <- read_vec(file_name, mode = "filebacked")
 
@@ -129,6 +133,7 @@ or
 [`read_hyper_vec()`](https://bbuchsbaum.github.io/neuroim2/reference/read_hyper_vec.md).
 
 ``` r
+
 img5d <- read_image("some_5d_image.nii.gz")
 class(img5d)
 ```

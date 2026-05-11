@@ -87,6 +87,7 @@ for the base 4D brain image class.
 ## Examples
 
 ``` r
+
 # Create a sparse 4D brain image
 mask <- LogicalNeuroVol(array(runif(64*64*32) > 0.7, c(64,64,32)), NeuroSpace(c(64,64,32)))
 data <- matrix(rnorm(sum(mask) * 100), nrow=sum(mask), ncol=100)

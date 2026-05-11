@@ -36,6 +36,7 @@ the indices of the lookup volume
 ## Examples
 
 ``` r
+
 space <- NeuroSpace(c(64, 64, 64), c(1, 1, 1), c(0, 0, 0))
 ilv <- IndexLookupVol(space, c(1:100))
 idx <- indices(ilv)  # Get included indices

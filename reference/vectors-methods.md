@@ -87,6 +87,7 @@ voxels.
 ## Examples
 
 ``` r
+
 file_name <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")
 vec <- read_vec(file_name)
 v <- vectors(vec)

@@ -63,6 +63,7 @@ No other file output formats are currently supported.
 ## Examples
 
 ``` r
+
 bvol <- NeuroVol(array(0, c(10,10,10)), NeuroSpace(c(10,10,10), c(1,1,1)))
 # \donttest{
 tmp1 <- tempfile(fileext = ".nii")

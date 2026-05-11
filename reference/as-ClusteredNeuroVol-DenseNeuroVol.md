@@ -29,6 +29,7 @@ Convert a ClusteredNeuroVol Object to a DenseNeuroVol Object
 ## Examples
 
 ``` r
+
 # Create a clustered volume
 mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 clusters <- rep(1:5, length.out=sum(mask))

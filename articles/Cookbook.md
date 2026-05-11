@@ -22,6 +22,7 @@ The pattern is:
 3.  Reshape back to 3D and wrap as a `NeuroVol`.
 
 ``` r
+
 file_name <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
 vec <- read_vec(file_name)  # 4D NeuroVec
 
@@ -61,6 +62,7 @@ each timepoint belongs to, then split the time index and convert each
 subset to a sub-vector (this is what does internally):
 
 ``` r
+
 space4 <- NeuroSpace(c(10, 10, 10, 9), c(1, 1, 1))
 vec4d  <- NeuroVec(array(rnorm(10 * 10 * 10 * 9),
                          dim = c(10, 10, 10, 9)),
@@ -100,6 +102,7 @@ helper converts common vector types (`NeuroVec`, `SparseNeuroVec`,
 NIfTI file if needed.
 
 ``` r
+
 file_name <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
 vec <- read_vec(file_name)  # DenseNeuroVec in memory
 
@@ -114,7 +117,7 @@ mvec
 #>   Origin        : 112, -108, -46.2
 #> ── Mapping ───────────────────────────────────────────────────────────────────── 
 #>   Offset        : 88
-#>   Label         : file2a2456895f6a.nii
+#>   Label         : file2a8e630893d9.nii
 
 # Or explicitly choose an output file (must be uncompressed for mmap)
 tmp_nii <- tempfile(fileext = ".nii")
@@ -139,6 +142,7 @@ with a `Kernel` object. This keeps the familiar `NeuroVol`/`NeuroSpace`
 metadata while doing neighborhood computations.
 
 ``` r
+
 bspace <- NeuroSpace(c(10, 10, 10), c(1, 1, 1))
 vol    <- NeuroVol(array(rnorm(10 * 10 * 10), c(10, 10, 10)), bspace)
 
@@ -168,6 +172,7 @@ can turn a `NeuroVec` into a list of `ROIVec` objects—one per
 cluster—each containing the time‑series of voxels in that cluster.
 
 ``` r
+
 file_name <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
 vec <- read_vec(file_name)
 
@@ -210,6 +215,7 @@ can compute one summary time‑series per group directly from a
 `NeuroVec`.
 
 ``` r
+
 file_name <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
 vec <- read_vec(file_name)
 
@@ -239,6 +245,7 @@ the same space, use
 along the time dimension.
 
 ``` r
+
 sp3  <- NeuroSpace(c(10, 10, 10), c(1, 1, 1))
 vol1 <- NeuroVol(array(rnorm(10 * 10 * 10), c(10, 10, 10)), sp3)
 vol2 <- NeuroVol(array(rnorm(10 * 10 * 10), c(10, 10, 10)), sp3)
@@ -271,6 +278,7 @@ sessions) into a longer 4D vector, again with
 [`concat()`](https://bbuchsbaum.github.io/neuroim2/reference/concat-methods.md).
 
 ``` r
+
 file_name <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
 
 run1 <- read_vec(file_name)          # 4D NeuroVec
@@ -301,6 +309,7 @@ on a `NeuroVol`. This is handy for summarizing thresholded statistical
 maps or cleaning up binary masks.
 
 ``` r
+
 sp  <- NeuroSpace(c(10, 10, 10), c(1, 1, 1))
 arr <- array(0, c(10, 10, 10))
 
@@ -323,6 +332,7 @@ You can also request a `cluster_table` of summary statistics or
 `local_maxima` for peak finding:
 
 ``` r
+
 cc2 <- conn_comp(vol, threshold = 0, cluster_table = TRUE)
 head(cc2$cluster_table)
 #>   index x y z N Area value

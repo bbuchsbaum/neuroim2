@@ -119,6 +119,7 @@ Key features:
 ## Examples
 
 ``` r
+
 # Create a simple 5D dataset (10x10x10 spatial, 5 trials, 3 features)
 dims <- c(10, 10, 10)
 space <- NeuroSpace(c(dims, 5, 3))

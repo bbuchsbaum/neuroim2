@@ -53,6 +53,7 @@ scaled according to `f`.
 ## Examples
 
 ``` r
+
 M <- matrix(rnorm(1000), 10, 100)
 fac <- factor(rep(1:2, each=5))
 Ms <- split_scale(M, fac)

@@ -47,6 +47,7 @@ for related file format validation
 ## Examples
 
 ``` r
+
 fmt <- new("FileFormat", header_extension = "hdr", data_extension = "img")
 header_file_matches(fmt, "brain_scan.hdr")  # TRUE
 #> [1] TRUE

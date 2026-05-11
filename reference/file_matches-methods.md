@@ -52,6 +52,7 @@ for individual file type checking
 ## Examples
 
 ``` r
+
 # Create a FileFormat for NIFTI format
 # \donttest{
 fmt <- new("FileFormat",

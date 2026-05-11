@@ -42,6 +42,7 @@ A matrix of coordinates
 ## Examples
 
 ``` r
+
 space <- NeuroSpace(c(64, 64, 64), c(1, 1, 1), c(0, 0, 0))
 ilv <- IndexLookupVol(space, c(1:100))
 coords(ilv, 1)  # Extract coordinates for index 1

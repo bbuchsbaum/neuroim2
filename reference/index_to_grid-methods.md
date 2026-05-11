@@ -53,6 +53,7 @@ for the inverse operation
 ## Examples
 
 ``` r
+
  bvol <- NeuroVol(array(0, c(10,10,10)), NeuroSpace(c(10,10,10), c(1,1,1)))
  idx <- 1:10
  g <- index_to_grid(bvol, idx)

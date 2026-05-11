@@ -29,6 +29,7 @@ An integer representing the length of the specified `axis` of `x`.
 ## Examples
 
 ``` r
+
 x <- NeuroSpace(c(10,10,10), spacing=c(1,1,1))
 stopifnot(dim_of(x, x@axes@i) == 10)
 ```

@@ -1,6 +1,7 @@
 # Coordinate Systems and Spatial Transforms
 
 ``` r
+
 library(neuroim2)
 ```
 
@@ -33,6 +34,7 @@ image. It bundles:
   points (`axes`)
 
 ``` r
+
 sp <- NeuroSpace(
   dim     = c(64L, 64L, 40L),
   spacing = c(2, 2, 2),
@@ -49,6 +51,7 @@ sp
 ```
 
 ``` r
+
 dim(sp)       # grid dimensions
 #> [1] 64 64 40
 spacing(sp)   # voxel sizes in mm
@@ -82,6 +85,7 @@ For an axis-aligned image built from `spacing` and `origin`, `M` is
 diagonal:
 
 ``` r
+
 trans(sp)
 #>      [,1] [,2] [,3] [,4]
 #> [1,]    2    0    0  -90
@@ -94,6 +98,7 @@ The translation column (`trans(sp)[1:3, 4]`) recovers the origin, and
 the diagonal of the linear block recovers the voxel sizes:
 
 ``` r
+
 # Translation column = origin
 trans(sp)[1:3, 4]
 #> [1]  -90 -126  -72
@@ -107,6 +112,7 @@ The inverse affine (world -\> voxel) is cached and accessible via
 `inverse_trans(sp)`:
 
 ``` r
+
 inverse_trans(sp)
 #>      [,1] [,2] [,3] [,4]
 #> [1,]  0.5  0.0  0.0   45
@@ -122,6 +128,7 @@ You can supply a full 4 × 4 affine directly to
 neuroim2 will derive `spacing` and `origin` from it automatically:
 
 ``` r
+
 aff <- diag(c(3, 3, 4, 1))          # 3 × 3 × 4 mm voxels
 aff[1:3, 4] <- c(-90, -126, -72)    # origin
 
@@ -150,10 +157,10 @@ conventions. The affine convention is therefore:
 
 There are two flavours of voxel addressing:
 
-| Address type | Range                      | Description                                   |
-|:-------------|:---------------------------|:----------------------------------------------|
-| Linear index | `1 ... prod(dim)`          | Single integer; column-major (as in R arrays) |
-| Grid index   | `(1...d1, 1...d2, 1...d3)` | 3-tuple of 1-based integers                   |
+| Address type | Range | Description |
+|:---|:---|:---|
+| Linear index | `1 ... prod(dim)` | Single integer; column-major (as in R arrays) |
+| Grid index | `(1...d1, 1...d2, 1...d3)` | 3-tuple of 1-based integers |
 
 And one world-coordinate system: millimetres, defined by the affine.
 
@@ -173,6 +180,7 @@ its attached space) as the first argument.
 ### Grid \<-\> linear index
 
 ``` r
+
 # Which linear index does grid position (10, 12, 5) map to?
 grid_to_index(sp, matrix(c(10, 12, 5), nrow = 1))
 #> [1] 17098
@@ -189,6 +197,7 @@ index_to_grid(sp, 8394L)
 affine, so grid `(1, 1, 1)` maps exactly to the origin:
 
 ``` r
+
 grid_to_coord(sp, matrix(c(1, 1, 1), nrow = 1))   # should equal origin(sp)
 #>      [,1] [,2] [,3]
 #> [1,]  -90 -126  -72
@@ -200,6 +209,7 @@ grid_to_coord(sp, matrix(c(10, 12, 5), nrow = 1))
 Multiple points are passed as a matrix with one row per point:
 
 ``` r
+
 pts <- matrix(c(
    1,  1,  1,
   32, 32, 20,
@@ -216,6 +226,7 @@ grid_to_coord(sp, pts)
 ### World -\> grid coordinates
 
 ``` r
+
 coord_to_grid(sp, c(0, 0, 0))          # near isocenter
 #> [1] 46 64 37
 coord_to_grid(sp, matrix(c(0, 0, 0,
@@ -228,6 +239,7 @@ coord_to_grid(sp, matrix(c(0, 0, 0,
 ### Convenience: linear index \<-\> world
 
 ``` r
+
 # Linear index 1 should land at the origin (pass integer)
 index_to_coord(sp, 1L)
 #>      [,1] [,2] [,3]
@@ -241,6 +253,7 @@ coord_to_index(sp, matrix(c(-90, -126, -72), nrow = 1))
 ### A concrete round-trip
 
 ``` r
+
 idx   <- 12345L
 grid  <- index_to_grid(sp, idx)
 world <- grid_to_coord(sp, grid)
@@ -277,6 +290,7 @@ reverses all three.
 reads the orientation directly from the affine matrix:
 
 ``` r
+
 affine_to_axcodes(trans(sp))
 #> [1] "R" "A" "S"
 ```
@@ -286,6 +300,7 @@ nearest-anatomy convention inferred from the affine. You can also
 inspect the `axes` slot directly:
 
 ``` r
+
 axes(sp)
 #> <AxisSet3D> 
 #>   Axis 1        : Left-to-Right
@@ -299,6 +314,7 @@ axes(sp)
 flips and permutes the affine to match a target orientation string:
 
 ``` r
+
 sp_ras <- reorient(sp, c("R", "A", "S"))
 affine_to_axcodes(trans(sp_ras))
 #> [1] "L" "P" "I"
@@ -313,6 +329,7 @@ affine_to_axcodes(trans(sp_ras))
 The simplest case: an isotropic or anisotropic grid with no rotation.
 
 ``` r
+
 # 2 mm isotropic, MNI-ish origin
 sp_mni <- NeuroSpace(
   dim     = c(91L, 109L, 91L),
@@ -334,6 +351,7 @@ sp_mni
 When you have a NIfTI sform/qform matrix, pass it directly:
 
 ``` r
+
 # Oblique affine: slight off-diagonal terms (scanner tilt)
 aff_obl <- matrix(c(
    2.0,  0.2,  0.0,  -90,
@@ -367,6 +385,7 @@ You can also compute voxel sizes from any affine matrix with
 [`voxel_sizes()`](https://bbuchsbaum.github.io/neuroim2/reference/affine_utils.md):
 
 ``` r
+
 voxel_sizes(aff_obl)
 #> [1] 2.000000 2.009975 2.002498
 ```
@@ -382,6 +401,7 @@ extends a 3D `NeuroSpace` to 4D by appending a new dimension. The
 spatial affine is preserved unchanged:
 
 ``` r
+
 sp_3d <- NeuroSpace(c(64L, 64L, 40L), spacing = c(2, 2, 2),
                     origin = c(-90, -126, -72))
 sp_4d <- add_dim(sp_3d, 200)   # 200 time points
@@ -401,6 +421,7 @@ trans(sp_4d)                   # 4x4 spatial affine unchanged
 removes the last (or a named) dimension:
 
 ``` r
+
 sp_back <- drop_dim(sp_4d)
 dim(sp_back)
 #> [1] 64 64 40
@@ -422,6 +443,7 @@ resamples a `NeuroVol` into a target space (or another volume’s space).
 To demonstrate, build a small volume and resample it to a coarser grid:
 
 ``` r
+
 vol_mni <- NeuroVol(array(rnorm(prod(dim(sp_mni))), dim(sp_mni)), sp_mni)
 sp_coarse <- NeuroSpace(c(45L, 54L, 45L), spacing = c(4, 4, 4),
                         origin = origin(sp_mni))
@@ -442,6 +464,7 @@ builds an axis-aligned output space that encloses the original field of
 view, using the minimum input voxel size by default (AFNI-style):
 
 ``` r
+
 sp_deob <- deoblique(sp_obl)
 affine_to_axcodes(trans(sp_deob))   # now axis-aligned
 #> [1] "R" "A" "S"
@@ -462,6 +485,7 @@ not match `spacing(sp)`, the affine is oblique. Use
 `obliquity(trans(sp))` to quantify the tilt angle (in radians) per axis.
 
 ``` r
+
 obliquity(aff_obl)        # non-zero: image is slightly tilted
 #> [1] 0.00000000 0.09966865 0.04995840
 obliquity(trans(sp_mni))  # near zero: axis-aligned
@@ -496,22 +520,22 @@ show sub-voxel floating-point noise at the ~0.001 mm level.
 
 ## Quick Reference
 
-| Function                  | Input -\> Output                | Typical use                   |
-|:--------------------------|:--------------------------------|:------------------------------|
-| `grid_to_index(sp, mat)`  | grid -\> linear index           | looking up voxel data         |
-| `index_to_grid(sp, idx)`  | linear index -\> grid           | converting R array subscripts |
-| `grid_to_coord(sp, mat)`  | grid -\> mm                     | overlay on anatomy            |
-| `coord_to_grid(sp, mat)`  | mm -\> grid                     | atlas lookup                  |
-| `index_to_coord(sp, idx)` | linear index -\> mm             | shortcut past grid            |
-| `coord_to_index(sp, mat)` | mm -\> linear index             | mask extraction               |
-| `affine_to_axcodes(aff)`  | affine -\> `"RAS"` etc.         | orientation check             |
-| `voxel_sizes(aff)`        | affine -\> mm vector            | physical voxel size           |
-| `obliquity(aff)`          | affine -\> radians              | tilt check                    |
-| `add_dim(sp, n)`          | 3D space -\> 4D space           | attach time axis              |
-| `drop_dim(sp)`            | 4D space -\> 3D space           | strip time axis               |
-| `resample(sp, spacing)`   | space -\> resampled space       | change resolution             |
-| `reorient(sp, codes)`     | space -\> reoriented space      | standardise orientation       |
-| `deoblique(sp)`           | oblique space -\> aligned space | remove scanner tilt           |
+| Function | Input -\> Output | Typical use |
+|:---|:---|:---|
+| `grid_to_index(sp, mat)` | grid -\> linear index | looking up voxel data |
+| `index_to_grid(sp, idx)` | linear index -\> grid | converting R array subscripts |
+| `grid_to_coord(sp, mat)` | grid -\> mm | overlay on anatomy |
+| `coord_to_grid(sp, mat)` | mm -\> grid | atlas lookup |
+| `index_to_coord(sp, idx)` | linear index -\> mm | shortcut past grid |
+| `coord_to_index(sp, mat)` | mm -\> linear index | mask extraction |
+| `affine_to_axcodes(aff)` | affine -\> `"RAS"` etc. | orientation check |
+| `voxel_sizes(aff)` | affine -\> mm vector | physical voxel size |
+| `obliquity(aff)` | affine -\> radians | tilt check |
+| `add_dim(sp, n)` | 3D space -\> 4D space | attach time axis |
+| `drop_dim(sp)` | 4D space -\> 3D space | strip time axis |
+| `resample(sp, spacing)` | space -\> resampled space | change resolution |
+| `reorient(sp, codes)` | space -\> reoriented space | standardise orientation |
+| `deoblique(sp)` | oblique space -\> aligned space | remove scanner tilt |
 
 ## Where to go next
 

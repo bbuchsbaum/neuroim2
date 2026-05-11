@@ -101,6 +101,7 @@ for the mask representation.
 ## Examples
 
 ``` r
+
 # Create a simple clustered brain volume
 dim <- c(10L, 10L, 10L)
 mask_data <- array(rep(c(TRUE, FALSE), 500), dim)

@@ -14,6 +14,7 @@ vignettes that carry the rest.
 Start by reading one image and inspecting its spatial metadata.
 
 ``` r
+
 img <- read_vol(system.file("extdata", "global_mask2.nii.gz", package = "neuroim2"))
 
 dim(img)
@@ -63,6 +64,7 @@ Most work in `neuroim2` starts with three ideas:
 Here is the smallest possible example of each.
 
 ``` r
+
 mask <- img > 0
 sum(mask)
 #> [1] 29532
@@ -89,6 +91,7 @@ The next common step is to move from a 4D image to a region-level
 summary.
 
 ``` r
+
 roi_ts <- series_roi(vec, roi)
 roi_mat <- values(roi_ts)
 mean_ts <- rowMeans(roi_mat)
@@ -120,6 +123,7 @@ Once you are comfortable reading data and extracting values, the next
 important layer is spatial transformation.
 
 ``` r
+
 img_down <- downsample(img, spacing = c(2, 2, 2))
 
 dim(img)
@@ -148,6 +152,7 @@ first, then switch when the workload demands it.
   materialize eagerly.
 
 ``` r
+
 big_vec <- read_vec(
   system.file("extdata", "global_mask_v4.nii", package = "neuroim2"),
   mode = "filebacked"
@@ -182,6 +187,7 @@ The details and tradeoffs belong in
 ### Reference and help
 
 ``` r
+
 help(package = "neuroim2")
 help.search("roi", package = "neuroim2")
 ```

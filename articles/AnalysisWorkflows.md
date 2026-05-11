@@ -10,12 +10,14 @@ that.
 Start with a 4D image and define one spherical region of interest.
 
 ``` r
+
 vec_file <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
 vol <- read_vol(vec_file)
 vec <- read_vec(vec_file)
 ```
 
 ``` r
+
 roi <- spherical_roi(vol, c(12, 12, 12), radius = 6)
 roi_ts <- series_roi(vec, roi)
 
@@ -24,6 +26,7 @@ dim(values(roi_ts))
 ```
 
 ``` r
+
 stopifnot(length(roi) > 0L)
 stopifnot(nrow(values(roi_ts)) == dim(vec)[4])
 ```
@@ -38,6 +41,7 @@ When you already have a parcellation or cluster assignment,
 turns one `NeuroVec` into a list of region-wise objects.
 
 ``` r
+
 set.seed(1)
 
 mask_vol <- vol > 0
@@ -50,6 +54,7 @@ length(parts)
 ```
 
 ``` r
+
 part_means <- map_dbl(parts, ~ mean(values(.)))
 part_means
 #> 1 2 3 4 
@@ -57,6 +62,7 @@ part_means
 ```
 
 ``` r
+
 stopifnot(length(parts) == 4L)
 stopifnot(all(is.finite(part_means)))
 ```
@@ -71,6 +77,7 @@ a mask. The lazy form is useful because you only realize the
 neighborhoods you actually touch.
 
 ``` r
+
 sl <- searchlight(mask_vol, radius = 4, eager = FALSE, nonzero = FALSE)
 first_sl <- sl[[1]]
 
@@ -79,6 +86,7 @@ nrow(coords(first_sl))
 ```
 
 ``` r
+
 stopifnot(nrow(coords(first_sl)) > 0L)
 ```
 
@@ -92,6 +100,7 @@ style workflows. A small list of ROIs plus `purrr::map_*()` is often
 enough.
 
 ``` r
+
 first_five <- lapply(seq_len(5), function(i) sl[[i]])
 first_five_means <- map_dbl(first_five, ~ mean(values(.)))
 
@@ -100,6 +109,7 @@ first_five_means
 ```
 
 ``` r
+
 stopifnot(length(first_five_means) == 5L)
 stopifnot(all(is.finite(first_five_means)))
 ```

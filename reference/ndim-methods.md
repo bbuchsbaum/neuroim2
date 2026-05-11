@@ -44,6 +44,7 @@ An integer representing the number of dimensions in `x`.
 ## Examples
 
 ``` r
+
 x = NeuroSpace(c(10,10,10), spacing=c(1,1,1))
 ndim(x) == 3
 #> [1] TRUE

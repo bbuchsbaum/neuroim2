@@ -12,17 +12,18 @@ The package supports several ROI styles, depending on whether you want
 one simple neighborhood, a grid-based box, a parcel map, or a weighted
 kernel:
 
-| ROI Type      | Function                                                                              | Description                  | Use Case                                      |
-|---------------|---------------------------------------------------------------------------------------|------------------------------|-----------------------------------------------|
+| ROI Type | Function | Description | Use Case |
+|----|----|----|----|
 | **Spherical** | [`spherical_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/spherical_roi.md) | Sphere around a center point | Searchlight analysis, seed-based connectivity |
-| **Cuboid**    | [`cuboid_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/cuboid_roi.md)       | Rectangular box region       | Grid-based parcellation                       |
-| **Square**    | [`square_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/square_roi.md)       | 2D square in one plane       | Slice-based analysis                          |
-| **Clustered** | `ClusteredNeuroVol`                                                                   | Parcellation-based regions   | Atlas-based analysis                          |
-| **Custom**    | `Kernel`                                                                              | Weighted regions             | Gaussian-weighted, gradient-based             |
+| **Cuboid** | [`cuboid_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/cuboid_roi.md) | Rectangular box region | Grid-based parcellation |
+| **Square** | [`square_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/square_roi.md) | 2D square in one plane | Slice-based analysis |
+| **Clustered** | `ClusteredNeuroVol` | Parcellation-based regions | Atlas-based analysis |
+| **Custom** | `Kernel` | Weighted regions | Gaussian-weighted, gradient-based |
 
 ### Quick start
 
 ``` r
+
 file_name <- system.file("extdata", "global_mask2.nii.gz", package="neuroim2")
 vol <- read_vol(file_name)
 
@@ -47,6 +48,7 @@ on, so this article starts there and then moves into less common
 patterns.
 
 ``` r
+
 # Load an example brain volume
 file_name <- system.file("extdata", "global_mask2.nii.gz", package="neuroim2")
 vol <- read_vol(file_name)
@@ -67,6 +69,7 @@ cat("All values are 100:", all(sphere == 100), "\n")
 #### Performance Note: C++ vs Pure R Implementation
 
 ``` r
+
 # The spherical_roi function can use either C++ (fast) or pure R (slower)
 # C++ is the default and recommended for performance
 sphere_cpp <- spherical_roi(vol, c(20, 20, 20), radius = 5, use_cpp = TRUE)
@@ -87,6 +90,7 @@ Often, you’ll have coordinates in millimeter space (e.g., from published
 studies) rather than voxel indices.
 
 ``` r
+
 # Define a real-world coordinate in mm
 rpoint <- c(-34, -28, 10)
 
@@ -116,6 +120,7 @@ When creating many ROIs, use the vectorized
 function for better performance:
 
 ``` r
+
 library(neuroim2)
 vol <- read_vol(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
 d <- dim(vol)
@@ -145,6 +150,7 @@ cat("Loop method also created", length(rois2), "ROIs\n")
 #### Cuboid ROIs (3D boxes)
 
 ``` r
+
 # Create a cuboid ROI - a 3D rectangular box
 sp1 <- NeuroSpace(c(20, 20, 20), c(1, 1, 1))
 
@@ -170,6 +176,7 @@ cat("  Z:", range(vox_coords[,3]), "\n")
 #### Square ROIs (2D in 3D space)
 
 ``` r
+
 # Create a square ROI - a 2D square fixed in one dimension
 sp1 <- NeuroSpace(c(20, 20, 20), c(1, 1, 1))
 
@@ -197,6 +204,7 @@ Sparse volumes are memory-efficient representations that only store
 non-zero values:
 
 ``` r
+
 # Create a spherical ROI
 sphere <- spherical_roi(vol, c(50, 10, 10), radius = 10, fill = 1)
 cat("ROI contains", length(sphere), "voxels\n")
@@ -233,6 +241,7 @@ construction details.
 The `ROIVec` class is designed for efficient storage of 4D ROI data:
 
 ``` r
+
 # Create a 4D NeuroSpace
 vspace <- NeuroSpace(dim = c(10, 10, 10, 20), spacing = c(1, 1, 1))
 
@@ -276,6 +285,7 @@ Patches are regular, fixed-size regions that tile the image space,
 useful for convolutional approaches:
 
 ``` r
+
 # Create 3x3x1 patches covering the volume
 pset <- patch_set(vol, dims = c(3, 3, 1))
 cat("Number of patches:", length(pset), "\n")
@@ -308,6 +318,7 @@ cat("Patch size:", unique(patch_sizes), "voxels\n")
 Create Gaussian-weighted or other custom-shaped ROIs:
 
 ``` r
+
 # Create a Gaussian kernel for weighted ROI
 kern_dim <- c(5, 5, 5)  # 5x5x5 kernel
 voxel_dim <- c(1, 1, 1)  # 1mm isotropic voxels
@@ -329,6 +340,7 @@ Efficiently handle parcellated 4D data where voxels are grouped into
 regions:
 
 ``` r
+
 # Create synthetic 4D data
 sp4 <- NeuroSpace(c(10, 10, 10, 20), c(1, 1, 1))
 arr <- array(rnorm(10*10*10*20), dim = c(10, 10, 10, 20))
@@ -362,6 +374,7 @@ cat("(", dim(cluster_matrix)[1], "timepoints x",
 Combine and manipulate multiple ROIs:
 
 ``` r
+
 # Create two overlapping spherical ROIs
 roi1 <- spherical_roi(vol, c(20, 20, 20), radius = 6, fill = 1)
 roi2 <- spherical_roi(vol, c(23, 20, 20), radius = 6, fill = 1)
@@ -400,6 +413,7 @@ cat("Overlap:", round(overlap_pct, 1), "%\n")
 When working with many ROIs, consider memory usage:
 
 ``` r
+
 # Compare memory usage of different ROI storage methods
 n_rois <- 100
 centers <- matrix(runif(n_rois * 3, 5, 15), ncol = 3)
@@ -443,6 +457,7 @@ cat("  Sparse combined:", format(object.size(combined_sparse), units = "auto"), 
 Guidelines for selecting appropriate ROI sizes:
 
 ``` r
+
 # Demonstrate effect of ROI size on coverage and overlap
 radii <- c(6, 8, 10, 12)
 coverage_stats <- data.frame(
@@ -478,6 +493,7 @@ print(coverage_stats)
 For large-scale ROI analyses, consider parallel processing:
 
 ``` r
+
 # Example of parallel searchlight analysis (not run in vignette)
 library(parallel)
 library(foreach)
@@ -508,6 +524,7 @@ stopCluster(cl)
 #### Issue: ROI extends outside brain mask
 
 ``` r
+
 # Problem: ROI at edge of brain
 edge_vox <- c(2, 2, 2)  # Near edge of volume
 
@@ -526,6 +543,7 @@ if (length(roi_filtered) < 10) {
 #### Issue: Different coordinate systems
 
 ``` r
+
 # Always verify your coordinate system
 test_coord_mm <- c(-34, -28, 10)  # MNI coordinates
 test_coord_vox <- coord_to_grid(vol, test_coord_mm)
@@ -566,5 +584,6 @@ For related functionality, see these other vignettes and help pages:
 For the complete list of ROI-related functions:
 
 ``` r
+
 help(package = "neuroim2", topic = "roi")
 ```

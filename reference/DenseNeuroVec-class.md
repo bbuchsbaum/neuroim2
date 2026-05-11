@@ -95,6 +95,7 @@ for details on spatial properties.
 ## Examples
 
 ``` r
+
 # Create a simple 4D brain image
 data <- array(rnorm(64*64*32*10), dim = c(64, 64, 32, 10))
 space <- NeuroSpace(dim = c(64, 64, 32,10), origin = c(0, 0, 0), spacing = c(3, 3, 4))

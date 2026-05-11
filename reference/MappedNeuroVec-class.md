@@ -120,6 +120,7 @@ details
 ## Examples
 
 ``` r
+
 # Create a MappedNeuroVec object (pseudo-code)
 file_path <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
 mapped_vec <- MappedNeuroVec(file_path)

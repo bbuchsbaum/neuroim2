@@ -52,6 +52,7 @@ for reading binary data
 ## Examples
 
 ``` r
+
 # Create reader for NIFTI file
 meta <- read_header(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 reader <- data_reader(meta, offset = 0)

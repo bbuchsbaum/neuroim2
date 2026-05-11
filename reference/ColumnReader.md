@@ -32,6 +32,7 @@ An object of class
 ## Examples
 
 ``` r
+
 reader_func <- function(cols) {
   matrix(rnorm(100 * length(cols)), 100, length(cols))
 }

@@ -99,6 +99,7 @@ Invisibly returns `NULL` after writing the vector to disk.
 ## Examples
 
 ``` r
+
 bvec <- NeuroVec(array(0, c(10,10,10,10)), NeuroSpace(c(10,10,10,10), c(1,1,1)))
 # \donttest{
 # Create temporary files

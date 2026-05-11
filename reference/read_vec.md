@@ -117,6 +117,7 @@ files, they must have compatible dimensions
 ## Examples
 
 ``` r
+
 # Load a single NIfTI file
 img <- read_vec(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 

@@ -30,6 +30,7 @@ the object `x`.
 ## Examples
 
 ``` r
+
 x <- NeuroSpace(c(10,10,10), spacing=c(1,1,1))
 which_dim(x, x@axes@j) == 2
 #> [1] TRUE

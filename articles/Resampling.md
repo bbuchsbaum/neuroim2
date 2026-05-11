@@ -14,6 +14,7 @@ This vignette shows how to:
 We’ll use the example NIfTI that ships with the package:
 
 ``` r
+
 demo_path <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
 vol  <- read_vol(demo_path)  # 3D NeuroVol
 vec4 <- read_vec(demo_path)  # 4D NeuroVec
@@ -36,6 +37,7 @@ You specify a *target* grid (`NeuroSpace` or `NeuroVol`) and choose
 `"nearest"`, `"linear"`, or `"cubic"` interpolation:
 
 ``` r
+
 # Create a target space with 2× smaller voxels in each dimension
 sp_fine <- NeuroSpace(
   dim    = sp@dim * 2L,
@@ -70,6 +72,7 @@ on a `NeuroVec` or `NeuroVol`.
 ### 2.1 Downsample a 4D NeuroVec
 
 ``` r
+
 # Downsample by a factor of 0.5 in each spatial dimension
 vec_down_factor <- downsample(vec4, factor = 0.5)
 
@@ -86,6 +89,7 @@ spacing(vec_down_factor)
 You can also specify a target spacing or output dimensions:
 
 ``` r
+
 # Target spacing (mm)
 vec_down_spacing <- downsample(vec4, spacing = c(4, 4, 4))
 
@@ -101,6 +105,7 @@ current implementation uses a simple box‑averaging scheme in space.
 The same interface applies to volumes:
 
 ``` r
+
 vol_down_factor <- downsample(vol, factor = 0.5)
 
 dim(vol)
@@ -122,6 +127,7 @@ directions.
 For `NeuroSpace`, you supply three axis codes:
 
 ``` r
+
 sp_lpi <- sp                      # assume input is LPI‑like
 sp_ras <- reorient(sp_lpi, c("R", "A", "S"))
 
@@ -146,6 +152,7 @@ sp_ras
 For `NeuroVol` / `NeuroVec`, you typically reorient via their space:
 
 ``` r
+
 vol_ras <- NeuroVol(as.array(vol), sp_ras)
 dim(vol_ras)
 #> [1] 64 64 25

@@ -3,7 +3,9 @@
 This function applies a full 4D bilateral filter to a `NeuroVec`,
 smoothing jointly across space (x, y, z) and time (t). The filter uses
 spatial, temporal, and intensity kernels to preserve edges while
-reducing noise, leveraging a parallel C++ backend for performance.
+reducing noise, leveraging a parallel C++ backend for performance. Only
+in-mask, in-bounds spatial neighbors contribute to each local weighted
+average.
 
 ## Usage
 
@@ -16,7 +18,8 @@ bilateral_filter_4d(
   temporal_sigma = 1,
   spatial_window = 1,
   temporal_window = 1,
-  temporal_spacing = 1
+  temporal_spacing = 1,
+  range_scale = NULL
 )
 ```
 
@@ -65,6 +68,13 @@ bilateral_filter_4d(
   Default is 1. This sets the temporal scale used for the temporal
   kernel.
 
+- range_scale:
+
+  Optional positive numeric range scale used by the intensity kernel. If
+  `NULL`, the scale is estimated from all finite input values inside
+  `mask` across time. Supply a fixed value to use the same range
+  bandwidth across observed and null data.
+
 ## Value
 
 A
@@ -101,6 +111,7 @@ temporal_sigma = 1.5 x TR, windows = 2
 
 Tip: If your time axis has known TR, pass it via `temporal_spacing`. For
 NIfTI inputs, you can get TR via:
+
 
       hdr <- read_header(nifti_path)
       tr  <- hdr@header$pixdim[5]

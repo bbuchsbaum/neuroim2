@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">neuroim2</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.14.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.16.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,24 @@
       <small>Source: <a href="https://github.com/bbuchsbaum/neuroim2/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.16.0" id="neuroim2-0160">neuroim2 0.16.0<a class="anchor" aria-label="anchor" href="#neuroim2-0160"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-16-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-0-16-0"></a></h3>
+<ul><li>
+<code><a href="../reference/bilateral_filter.html">bilateral_filter()</a></code> and <code><a href="../reference/bilateral_filter_4d.html">bilateral_filter_4d()</a></code> now accept <code>range_scale</code> so callers can fix the intensity-kernel scale across observed and null maps instead of re-estimating it separately for each input.</li>
+<li>
+<code><a href="../reference/bilateral_filter.html">bilateral_filter()</a></code>, internal vector bilateral filtering, and <code><a href="../reference/bilateral_filter_4d.html">bilateral_filter_4d()</a></code> now filter each center voxel using only in-mask, in-bounds neighbors with weight renormalization.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="improvements-0-16-0">Improvements<a class="anchor" aria-label="anchor" href="#improvements-0-16-0"></a></h3>
+<ul><li>The 3D bilateral backend now guards zero or non-finite auto-estimated range scales, avoiding <code>NaN</code> outputs for singleton or constant masks.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="testing-0-16-0">Testing<a class="anchor" aria-label="anchor" href="#testing-0-16-0"></a></h3>
+<ul><li>Added regression tests for mask-normalized bilateral filtering, volume-boundary behavior, fixed <code>range_scale</code> parity with the default auto scale, singleton-mask stability, and 4D mask-normalized filtering.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.14.0" id="neuroim2-0140">neuroim2 0.14.0<a class="anchor" aria-label="anchor" href="#neuroim2-0140"></a></h2>
 <div class="section level3">

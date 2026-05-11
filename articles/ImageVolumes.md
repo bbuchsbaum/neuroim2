@@ -14,6 +14,7 @@ inspection.
 ## Read one volume to establish context
 
 ``` r
+
 file_name <- system.file("extdata", "global_mask2.nii.gz", package = "neuroim2")
 vol <- read_vol(file_name)
 ```
@@ -23,6 +24,7 @@ This article assumes you already know the basic `NeuroVol` story from
 The remaining sections focus on patterns that are specific to 3D work.
 
 ``` r
+
 class(vol)
 #> [1] "DenseNeuroVol"
 #> attr(,"package")
@@ -40,6 +42,7 @@ vol[64, 64, 24]
 ## Coordinate conversion and spatial metadata
 
 ``` r
+
 sp <- space(vol)
 sp
 #> <NeuroSpace> [3D] 
@@ -61,6 +64,7 @@ You can convert between indices, voxel grid coordinates, and real-world
 coordinates:
 
 ``` r
+
 idx <- 1:5
 g <- index_to_grid(vol, idx)
 w <- index_to_coord(vol, idx)
@@ -72,6 +76,7 @@ all.equal(idx, idx2)
 A numeric image volume can be converted to a binary image as follows:
 
 ``` r
+
 vol2 <- as.logical(vol)
 class(vol2)
 #> [1] "LogicalNeuroVol"
@@ -87,6 +92,7 @@ Create a mask from a threshold or an explicit set of indices. Masks are
 `LogicalNeuroVol` and align with the 3D space.
 
 ``` r
+
 mask1 <- as.mask(vol > 0.5)
 mask1
 #> <DenseNeuroVol> [406.6 Kb] 
@@ -114,6 +120,7 @@ We can also create a `NeuroVol` instance from an `array` or `numeric`
 vector. First we construct a standard R `array`:
 
 ``` r
+
     x <- array(0, c(64,64,64))
 ```
 
@@ -121,6 +128,7 @@ Now we create a `NeuroSpace` instance that describes the geometry of the
 image, including at minimum its dimensions and voxel spacing.
 
 ``` r
+
     bspace <- NeuroSpace(dim=c(64,64,64), spacing=c(1,1,1))
     vol <- NeuroVol(x, bspace)
     vol
@@ -139,6 +147,7 @@ real image files carry this information in their headers. In practice
 you usually copy an existing space:
 
 ``` r
+
     vol2 <- NeuroVol((vol+1)*25, space(vol))
     max(vol2)
 #> [1] 25
@@ -159,6 +168,7 @@ The easiest way to view a volume is with
 3 x 3 montage of evenly-spaced axial slices:
 
 ``` r
+
 plot(vol)
 ```
 
@@ -171,6 +181,7 @@ You can also extract a single 2D slice for display using standard array
 indexing:
 
 ``` r
+
     z <- ceiling(dim(vol)[3] / 2)
     image(vol[,,z], main = paste("Slice z=", z))
 ```
@@ -189,6 +200,7 @@ to remap axes (e.g., to RAS) and
 to match a target space.
 
 ``` r
+
     # Reorient the space (LPI -> RAS) and compare coordinate mappings
     sp_lpi <- space(vol)
     sp_ras <- reorient(sp_lpi, c("R","A","S"))
@@ -201,6 +213,7 @@ to match a target space.
 Resample to a new spacing or match a target `NeuroSpace`:
 
 ``` r
+
     # Create a target space with 2x finer resolution
     sp  <- space(vol)
     sp2 <- NeuroSpace(sp@dim * c(2,2,2), sp@spacing/2, origin=sp@origin, trans=trans(vol))
@@ -215,6 +228,7 @@ Resample to a new spacing or match a target `NeuroSpace`:
 Reduce spatial resolution to speed up downstream operations.
 
 ``` r
+
     # Downsample by target spacing
     vol_ds1 <- downsample(vol, spacing = spacing(vol)[1:3] * 2)
     dim(vol_ds1)
@@ -231,6 +245,7 @@ Reduce spatial resolution to speed up downstream operations.
 When we’re ready to write an image volume to disk, we use `write_vol`
 
 ``` r
+
     write_vol(vol2, "output.nii")
     
     ## adding a '.gz' extension results ina gzipped file.
@@ -240,6 +255,7 @@ When we’re ready to write an image volume to disk, we use `write_vol`
 You can also write to a temporary file during workflows:
 
 ``` r
+
     tmp <- tempfile(fileext = ".nii.gz")
     write_vol(vol2, tmp)
     file.exists(tmp)

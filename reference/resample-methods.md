@@ -62,6 +62,7 @@ for the base volume class
 ## Examples
 
 ``` r
+
 img <- read_vol(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
 rspace <- space(img)
 

@@ -8,6 +8,7 @@ shows a 3 x 3 montage of evenly-spaced axial slices with a perceptually
 uniform grayscale palette and clean theme.
 
 ``` r
+
 plot(vol)                       # 3x3 montage, grayscale
 plot(vol, cmap = "viridis")     # different palette
 plot(vol, overlay)              # overlay with inferno palette, alpha = 0.5
@@ -50,6 +51,7 @@ If that is not available, they create a small synthetic 3D volume and
 wrap it in `NeuroVol`. Either way, the rest of the code is identical.
 
 ``` r
+
 set.seed(1)
 
 make_synthetic_vol <- function(dims = c(96, 96, 72), vox = c(2, 2, 2)) {
@@ -99,6 +101,7 @@ The montage helper facets a single ggplot object—so you get a shared
 colorbar, clean panel labels, and proper aspect ratio.
 
 ``` r
+
 # Choose a sensible set of axial slices
 zlevels <- unique(round(seq( round(dims[3]*.25), round(dims[3]*.85), length.out = 12 )))
 
@@ -122,6 +125,7 @@ Notes
   interactively.
 
 ``` r
+
 plot_montage(
   t1, zlevels = zlevels, along = 3,
   cmap = "grays", range = "robust", ncol = 6, downsample = 2,
@@ -141,6 +145,7 @@ produces aligned sagittal, coronal, and axial slices with a shared
 scale, optional crosshairs, and compact orientation glyphs.
 
 ``` r
+
 center_voxel <- round(dim(t1) / 2)
 plot_ortho(
   t1, coord = center_voxel, unit = "index",
@@ -165,6 +170,7 @@ use its own limits and palette) and stacks them as rasters. No extra
 packages required.
 
 ``` r
+
 plot_overlay(
   bgvol = t1, overlay = overlay,
   zlevels = zlevels[seq(2, length(zlevels), by = 2)],  # fewer panels for the vignette
@@ -199,6 +205,7 @@ All examples above use neuro‑friendly defaults:
 You can switch palettes easily:
 
 ``` r
+
 plot_montage(
   t1, zlevels = zlevels[1:6], along = 3,
   cmap = "viridis", range = "robust", ncol = 6,
@@ -226,8 +233,9 @@ output](slice-visualization_files/figure-html/unnamed-chunk-7-1.png)
 ## Reproducibility
 
 ``` r
+
 sessionInfo()
-## R version 4.5.3 (2026-03-11)
+## R version 4.6.0 (2026-04-24)
 ## Platform: x86_64-pc-linux-gnu
 ## Running under: Ubuntu 24.04.4 LTS
 ## 
@@ -248,29 +256,29 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] neuroim2_0.14.0 Matrix_1.7-4    ggplot2_4.0.2  
+## [1] neuroim2_0.16.0 Matrix_1.7-5    ggplot2_4.0.3  
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] sass_0.4.10           generics_0.1.4        mmap_0.6-26          
 ##  [4] stringi_1.8.7         lattice_0.22-9        digest_0.6.39        
 ##  [7] magrittr_2.0.5        bigstatsr_1.6.2       evaluate_1.0.5       
-## [10] grid_4.5.3            RColorBrewer_1.1-3    iterators_1.0.14     
+## [10] grid_4.6.0            RColorBrewer_1.1-3    iterators_1.0.14     
 ## [13] rmio_0.4.0            fastmap_1.2.0         foreach_1.5.2        
 ## [16] doParallel_1.0.17     jsonlite_2.0.0        RNifti_1.9.0         
 ## [19] purrr_1.2.2           deflist_0.2.0         scales_1.4.0         
-## [22] albersdown_1.0.0      codetools_0.2-20      textshaping_1.0.5    
+## [22] albersdown_1.0.1      codetools_0.2-20      textshaping_1.0.5    
 ## [25] jquerylib_0.1.4       cli_3.6.6             rlang_1.2.0          
-## [28] cowplot_1.2.0         splines_4.5.3         withr_3.0.2          
+## [28] cowplot_1.2.0         splines_4.6.0         withr_3.0.2          
 ## [31] cachem_1.1.0          yaml_2.3.12           flock_0.7            
-## [34] tools_4.5.3           parallel_4.5.3        memoise_2.0.1        
+## [34] tools_4.6.0           parallel_4.6.0        memoise_2.0.1        
 ## [37] bigassertr_0.1.7      assertthat_0.2.1      vctrs_0.7.3          
 ## [40] R6_2.6.1              lifecycle_1.0.5       bigparallelr_0.3.2   
 ## [43] stringr_1.6.0         fs_2.1.0              dbscan_1.2.4         
 ## [46] ragg_1.5.2            pkgconfig_2.0.3       desc_1.4.3           
 ## [49] pkgdown_2.2.0         RcppParallel_5.1.11-2 bslib_0.10.0         
 ## [52] pillar_1.11.1         gtable_0.3.6          glue_1.8.1           
-## [55] Rcpp_1.1.1-1          systemfonts_1.3.2     xfun_0.57            
+## [55] Rcpp_1.1.1-1.1        systemfonts_1.3.2     xfun_0.57            
 ## [58] tibble_3.3.1          knitr_1.51            farver_2.1.2         
 ## [61] htmltools_0.5.9       labeling_0.4.3        RNiftyReg_2.8.5      
-## [64] rmarkdown_2.31        compiler_4.5.3        S7_0.2.1-1
+## [64] rmarkdown_2.31        compiler_4.6.0        S7_0.2.2
 ```
