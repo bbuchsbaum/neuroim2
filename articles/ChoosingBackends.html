@@ -80,8 +80,9 @@ front.</p>
 the data fits comfortably in memory and you want the simplest
 behavior.</li>
 <li>Use <code>SparseNeuroVol</code> or <code>SparseNeuroVec</code> when
-only a subset of voxels is meaningful and absent voxels should be
-treated as missing support rather than literal zeros.</li>
+a mask defines the stored voxel set, whether out-of-mask locations are
+outside the analysis support or simply implicit background zeros for
+your workflow.</li>
 <li>Use <code>MappedNeuroVec</code> when you want fast random access to
 an uncompressed NIfTI on disk without loading it all into memory.</li>
 <li>Use <code>FileBackedNeuroVec</code> when you want on-demand volume
@@ -182,7 +183,9 @@ mask and keep the representation sparse.</p>
 <ul>
 <li>your workflow is defined on a brain mask or ROI support</li>
 <li>you want to avoid materializing out-of-mask voxels</li>
-<li>absent voxels should be treated as missing support</li>
+<li>your downstream operations have clear semantics for absent voxels,
+such as outside-support values or implicit background zeros after
+densification</li>
 </ul>
 </div>
 <div class="section level2">
