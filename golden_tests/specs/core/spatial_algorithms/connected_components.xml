@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<golden_test xmlns="http://golden-tests.org/schema">
+  <metadata>
+    <id>connected_components_3d</id>
+    <version>1.0</version>
+    <description>Test connected components algorithm on binary 3D volume</description>
+    <tags>
+      <tag>spatial_algorithms</tag>
+      <tag>connected_components</tag>
+      <tag>clustering</tag>
+      <tag>core</tag>
+    </tags>
+  </metadata>
+  
+  <semantic_description>
+    <purpose>
+      Validate the connected components algorithm for identifying distinct clusters
+      in a binary 3D volume using 6-connect (face neighbors only).
+    </purpose>
+    <algorithm>
+      1. Create a 5x5x5 binary volume with three separate clusters
+      2. Cluster 1: Small 2x2x1 region at corner (4 voxels)
+      3. Cluster 2: L-shaped region in middle (4 voxels)
+      4. Cluster 3: Single isolated voxel (1 voxel)
+      5. Apply connected components with 6-connectivity
+      6. Verify number of components found
+      7. Verify size of each component
+      8. Verify labeling is consistent and sequential
+    </algorithm>
+  </semantic_description>
+  
+  <inputs>
+    <array>
+      <name>binary_volume</name>
+      <dimensions>5 5 5</dimensions>
+      <values>
+        1 1 0 0 0
+        1 1 0 0 0
+        0 0 0 0 0
+        0 0 0 0 0
+        0 0 0 0 0
+        
+        0 0 0 0 0
+        0 0 0 0 0
+        0 0 0 0 0
+        0 0 0 0 0
+        0 0 0 0 0
+        
+        0 0 0 0 0
+        0 1 1 0 0
+        0 1 0 0 0
+        0 1 1 0 0
+        0 0 0 0 0
+        
+        0 0 0 0 0
+        0 0 0 0 0
+        0 0 0 0 0
+        0 0 0 0 0
+        0 0 0 0 0
+        
+        0 0 0 0 0
+        0 0 0 0 0
+        0 0 0 0 1
+        0 0 0 0 0
+        0 0 0 0 0
+      </values>
+    </array>
+    <parameters>
+      <parameter>
+        <name>connect</name>
+        <value>6-connect</value>
+      </parameter>
+    </parameters>
+  </inputs>
+  
+  <expected_outputs>
+    <numeric_checks>
+      <!-- Number of components -->
+      <check>
+        <type>exact_value</type>
+        <name>num_components</name>
+        <location>num_clusters</location>
+        <expected>3</expected>
+      </check>
+      
+      <!-- Component sizes -->
+      <check>
+        <type>exact_value</type>
+        <name>component_sizes_sorted</name>
+        <location>sort(cluster_sizes)</location>
+        <expected>1 4 4</expected>
+      </check>
+      
+      <!-- Total labeled voxels -->
+      <check>
+        <type>exact_value</type>
+        <name>total_labeled</name>
+        <location>total_labeled</location>
+        <expected>9</expected>
+      </check>
+      
+      <!-- Check specific cluster labels -->
+      <check>
+        <type>range</type>
+        <name>label_at_1_1_1</name>
+        <location>labeled_vol[1,1,1]</location>
+        <min>1</min>
+        <max>3</max>
+      </check>
+      
+      <check>
+        <type>range</type>
+        <name>label_at_2_3_3</name>
+        <location>labeled_vol[2,3,3]</location>
+        <min>1</min>
+        <max>3</max>
+      </check>
+      
+      <check>
+        <type>range</type>
+        <name>label_at_3_5_5</name>
+        <location>labeled_vol[3,5,5]</location>
+        <min>1</min>
+        <max>3</max>
+      </check>
+      
+      <!-- Verify labels are sequential -->
+      <check>
+        <type>exact_value</type>
+        <name>unique_labels</name>
+        <location>length(unique(values(labeled_vol)[values(labeled_vol) &gt; 0]))</location>
+        <expected>3</expected>
+      </check>
+      
+      <!-- Check that background is 0 -->
+      <check>
+        <type>exact_value</type>
+        <name>background_value</name>
+        <location>labeled_vol[3,3,1]</location>
+        <expected>0</expected>
+      </check>
+      
+      <!-- Verify cluster 1 size (corner cluster) -->
+      <check>
+        <type>exact_value</type>
+        <name>corner_cluster_size</name>
+        <location>corner_cluster_count</location>
+        <expected>4</expected>
+      </check>
+    </numeric_checks>
+  </expected_outputs>
+  
+  <implementations>
+    <R><![CDATA[
+library(neuroim2)
+
+# Create test space
+space <- NeuroSpace(dim = c(5, 5, 5), 
+                    spacing = c(1, 1, 1), 
+                    origin = c(0, 0, 0))
+
+# Create binary volume with three clusters
+binary_data <- array(0, dim = c(5, 5, 5))
+
+# Cluster 1: 2x2x1 corner region (4 voxels)
+binary_data[1:2, 1:2, 1] <- 1
+
+# Cluster 2: L-shaped region (5 voxels)
+binary_data[2, 2:3, 3] <- 1
+binary_data[2, 4, 3] <- 1
+binary_data[2:3, 2, 3] <- 1
+
+# Cluster 3: Single isolated voxel
+binary_data[3, 5, 5] <- 1
+
+# Create NeuroVol
+binary_vol <- NeuroVol(binary_data, space)
+
+# Run connected components
+result <- conn_comp(binary_vol, threshold = 0.5, connect = "6-connect")
+
+# Extract the labeled volume (ClusteredNeuroVol)
+labeled_vol <- result$index
+
+# Get number of clusters from cluster_table
+num_clusters <- nrow(result$cluster_table)
+
+# Get cluster sizes from cluster_table
+cluster_sizes <- result$cluster_table$N
+
+# Get specific values for testing
+label_1_1_1 <- labeled_vol[1, 1, 1]
+label_2_3_3 <- labeled_vol[2, 3, 3]
+label_3_5_5 <- labeled_vol[3, 5, 5]
+label_background <- labeled_vol[3, 3, 1]
+
+# Count total labeled voxels
+total_labeled <- sum(result$cluster_table$N)
+
+# Check corner cluster
+corner_cluster_count <- sum(labeled_vol[1:2, 1:2, 1] > 0)
+]]></R>
+  </implementations>
+  
+  <propagation_status>
+    <implementation lang="R" status="complete" date="2025-01-06"/>
+    <implementation lang="Python" status="pending"/>
+    <implementation lang="Rust" status="pending"/>
+  </propagation_status>
+</golden_test>
