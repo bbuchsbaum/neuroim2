@@ -301,6 +301,74 @@ annotation_theme <- function(style) {
   )
 }
 
+#' Assemble a panel block into a single figure (colorbar, optional legend, card)
+#'
+#' Shared by \code{plot_overlay()}, \code{plot_ortho()}, and \code{plot_montage()}
+#' so the assembled look (right-hand colorbar, light/dark/report card, bold
+#' title) is identical across the family.
+#'
+#' @param panel_block A patchwork/ggplot holding the slice panels.
+#' @param lim Numeric length-2 limits for the colorbar.
+#' @param cmap Palette name for the colorbar.
+#' @param thresh Threshold to mark on the colorbar (0 to omit).
+#' @param style "light"/"dark"/"report".
+#' @param colorbar Logical; append the right-hand colorbar.
+#' @param cbar_title Colorbar title.
+#' @param legend Optional ggplot legend strip placed under the panels.
+#' @param title,subtitle,caption Layout labels.
+#' @return A patchwork object.
+#' @keywords internal
+#' @noRd
+assemble_figure <- function(panel_block, lim, cmap, thresh = 0,
+                            style = "light", colorbar = TRUE,
+                            cbar_title = "value", legend = NULL,
+                            title = NULL, subtitle = NULL, caption = NULL) {
+  top <- panel_block
+  if (isTRUE(colorbar)) {
+    cbar <- make_overlay_colorbar(lim, cmap, thresh = thresh, style = style,
+                                  title = cbar_title)
+    top <- patchwork::wrap_plots(top, cbar, nrow = 1L, widths = c(1, 0.08))
+  }
+  combined <- top
+  if (!is.null(legend)) {
+    combined <- patchwork::wrap_plots(top, legend, ncol = 1L, heights = c(1, 0.11))
+  }
+  combined +
+    patchwork::plot_annotation(title = title, subtitle = subtitle, caption = caption,
+                               theme = annotation_theme(style))
+}
+
+#' Per-panel theme tweaks for borderless "report" brain tiles
+#' @keywords internal
+#' @noRd
+report_tile_theme <- function() {
+  ggplot2::theme(
+    panel.border = ggplot2::element_blank(),
+    plot.margin  = grid::unit(c(5, 5, 5, 5), "pt")
+  )
+}
+
+#' Faceted-montage theme for the "report" style (dark tiles on a light card)
+#' @keywords internal
+#' @noRd
+report_facet_theme <- function() {
+  sc <- .plot_style_colors("report")
+  ggplot2::theme_minimal(base_size = 10) %+replace% ggplot2::theme(
+    plot.background  = ggplot2::element_rect(fill = sc$card, colour = NA),
+    panel.background = ggplot2::element_rect(fill = "black", colour = NA),
+    panel.grid       = ggplot2::element_blank(),
+    panel.spacing    = grid::unit(5, "pt"),
+    axis.title = ggplot2::element_blank(),
+    axis.text  = ggplot2::element_blank(),
+    axis.ticks = ggplot2::element_blank(),
+    strip.background = ggplot2::element_rect(fill = "black", colour = NA),
+    strip.text = ggplot2::element_text(colour = "grey92", face = "bold",
+                                       margin = ggplot2::margin(t = 2, b = 3)),
+    legend.position = "none",
+    plot.margin = grid::unit(c(4, 4, 4, 4), "pt")
+  )
+}
+
 #' Bounding-box crop window (world coords) around the brain + suprathreshold overlay
 #'
 #' Returns \code{list(xlim, ylim)} spanning, across all displayed slices, the

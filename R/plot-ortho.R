@@ -19,21 +19,32 @@
 #' @param title,subtitle,caption Optional layout-level labels used when drawing.
 #' @param draw Logical; if `TRUE`, draw the panels on the active graphics
 #'   device. If `FALSE`, only return the ggplot objects invisibly.
-#' @param style Visual style, either \code{"light"} or \code{"dark"}.
+#' @param style Visual style: \code{"light"}, \code{"dark"}, or \code{"report"}
+#'   (light card, dark cropped tiles, typography, and a colorbar -- matching
+#'   \code{\link{plot_overlay}}'s report look).
 #' @param enhance Display-only enhancement of an unsmoothed statistical
 #'   \code{vol}. \code{FALSE} (default) leaves it untouched; \code{TRUE} applies
 #'   \code{\link{enhance_stat_map}} with defaults; a named \code{list} is
 #'   forwarded as arguments to \code{enhance_stat_map()}.
+#' @param crop,interpolate Logical or \code{NULL}; crop panels to the brain
+#'   bounding box / smooth the raster. \code{NULL} (default) enables both for
+#'   \code{style = "report"} only.
 #' @export
 plot_ortho <- function(
   vol, coord = NULL, unit = c("index","mm"),
   cmap = "grays", range = c("robust","data"), probs = c(.02,.98),
   crosshair = TRUE, annotate = TRUE, downsample = 1L,
   title = NULL, subtitle = NULL, caption = NULL,
-  draw = TRUE, style = c("light", "dark"), enhance = FALSE
+  draw = TRUE, style = c("light", "dark", "report"), enhance = FALSE,
+  crop = NULL, interpolate = NULL
 ) {
   unit <- match.arg(unit)
   style <- match.arg(style)
+
+  is_report   <- identical(style, "report")
+  panel_style <- .plot_style_colors(style)$panel
+  do_crop     <- if (is.null(crop)) is_report else isTRUE(crop)
+  interp_bg   <- if (is.null(interpolate)) is_report else isTRUE(interpolate)
 
   # Optional display-only enhancement of an unsmoothed statistical volume.
   vol <- apply_enhance_arg(vol, enhance)
@@ -91,12 +102,30 @@ plot_ortho <- function(
 
   make_panel_world <- function(df, plane, cross_mm, plane_id) {
     xr <- range(df$x, na.rm = TRUE); yr <- range(df$y, na.rm = TRUE)
+
+    coord <- ggplot2::coord_fixed()
+    if (isTRUE(do_crop)) {
+      fin <- df$value[is.finite(df$value)]
+      if (length(fin)) {
+        thr <- min(fin) + 0.02 * diff(range(fin))
+        keep <- is.finite(df$value) & df$value > thr
+        if (any(keep)) {
+          cx <- range(df$x[keep]); cy <- range(df$y[keep])
+          mx <- diff(cx) * 0.06; my <- diff(cy) * 0.06
+          coord <- ggplot2::coord_fixed(xlim = c(cx[1] - mx, cx[2] + mx),
+                                        ylim = c(cy[1] - my, cy[2] + my),
+                                        expand = FALSE)
+        }
+      }
+    }
+
     p <- ggplot2::ggplot(df, ggplot2::aes(x, y, fill = value)) +
-      ggplot2::geom_raster(interpolate = FALSE) +
+      ggplot2::geom_raster(interpolate = interp_bg) +
       scale_fill_neuro(cmap = cmap, limits = lim, guide = "none") +
-      ggplot2::coord_fixed() +
-      theme_neuro(style = style) +
+      coord +
+      theme_neuro(style = panel_style) +
       ggplot2::labs(title = plane)
+    if (is_report) p <- p + report_tile_theme()
 
     if (crosshair && length(cross_mm) == 2) {
       p <- p +
@@ -131,6 +160,16 @@ plot_ortho <- function(
   ps <- make_panel_world(d_sa, "Sagittal", sa_mm, "sagittal")
   plots <- list(axial = pa, coronal = pc, sagittal = ps)
   attr(plots, "labels") <- list(title = title, subtitle = subtitle, caption = caption)
+
+  if (isTRUE(is_report)) {
+    combined <- assemble_figure(
+      patchwork::wrap_plots(plots, ncol = 3L),
+      lim = lim, cmap = cmap, thresh = 0, style = style,
+      colorbar = TRUE, title = title, subtitle = subtitle, caption = caption
+    )
+    if (isTRUE(draw)) print(combined)
+    return(invisible(combined))
+  }
 
   if (!isTRUE(draw)) {
     return(invisible(plots))

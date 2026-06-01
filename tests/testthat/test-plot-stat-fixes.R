@@ -180,6 +180,41 @@ test_that("style colors, legend grob, and crop window helpers behave", {
   expect_true(is.null(win) || (is.list(win) && all(c("xlim", "ylim") %in% names(win))))
 })
 
+# ---- report style is consistent across the plot_ family ---------------------
+
+test_that("plot_ortho supports style = 'report' and returns an assembled object", {
+  skip_if_not_installed("patchwork")
+  d <- make_signed_overlay()
+  obj <- plot_ortho(d$bg, style = "report", draw = FALSE)
+  expect_true(inherits(obj, "patchwork") || inherits(obj, "gg"))
+  # light/dark path still returns the per-panel list
+  lst <- plot_ortho(d$bg, style = "dark", draw = FALSE)
+  expect_type(lst, "list")
+  expect_length(lst, 3L)
+})
+
+test_that("plot_montage supports style = 'report' and returns an assembled object", {
+  skip_if_not_installed("patchwork")
+  d <- make_signed_overlay()
+  obj <- plot_montage(d$bg, zlevels = c(8L, 10L, 12L), ncol = 3L, style = "report")
+  expect_true(inherits(obj, "patchwork") || inherits(obj, "gg"))
+  # light/dark path still returns a faceted ggplot
+  fac <- plot_montage(d$bg, zlevels = c(8L, 10L), style = "dark")
+  expect_true(inherits(fac, "ggplot"))
+})
+
+test_that("report style ggsave round-trips for ortho and montage", {
+  skip_if_not_installed("patchwork")
+  d <- make_signed_overlay()
+  for (obj in list(plot_ortho(d$bg, style = "report", draw = FALSE),
+                   plot_montage(d$bg, zlevels = c(8L, 10L), style = "report"))) {
+    tf <- tempfile(fileext = ".png")
+    ggplot2::ggsave(tf, obj, width = 8, height = 5, dpi = 50, bg = "#f6f6f4")
+    expect_gt(file.info(tf)$size, 0)
+    unlink(tf)
+  }
+})
+
 # ---- #18.2: shared (not per-slice) alpha denominator ------------------------
 
 test_that("proportional alpha uses a shared cap across panels", {

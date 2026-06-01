@@ -139,4 +139,18 @@ save_overlay("11_report_style_3x3.png",
              subtitle = "enhance(despike_k = 2.5, radius = 3, detail_gain = 0.8), thresh = 3",
              w = 9.5, h = 10)
 
+# 12-13. Report style is consistent across plot_ortho and plot_montage.
+ggplot2::ggsave(
+  file.path(outdir, "12_ortho_report.png"),
+  plot_ortho(anat, style = "report", title = "plot_ortho - report style", draw = FALSE),
+  width = 11, height = 4.6, dpi = 120, bg = "#f6f6f4")
+message("wrote ", file.path(outdir, "12_ortho_report.png"))
+
+ggplot2::ggsave(
+  file.path(outdir, "13_montage_report.png"),
+  plot_montage(anat, zlevels = z9, ncol = 3, style = "report",
+               title = "plot_montage - report style"),
+  width = 9, height = 9, dpi = 120, bg = "#f6f6f4")
+message("wrote ", file.path(outdir, "13_montage_report.png"))
+
 message("\nVisual QC PNGs written to: ", normalizePath(outdir))

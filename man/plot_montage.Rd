@@ -16,7 +16,9 @@ plot_montage(
   title = NULL,
   subtitle = NULL,
   caption = NULL,
-  style = c("light", "dark")
+  style = c("light", "dark", "report"),
+  crop = NULL,
+  interpolate = NULL
 )
 }
 \arguments{
@@ -39,7 +41,13 @@ numeric \code{c(lo, hi)}.}
 
 \item{title, subtitle, caption}{Optional ggplot labels.}
 
-\item{style}{Visual style, either \code{"light"} or \code{"dark"}.}
+\item{style}{Visual style: \code{"light"}, \code{"dark"}, or \code{"report"}
+(light card, dark cropped tiles, typography, and a colorbar -- matching
+\code{\link{plot_overlay}}'s report look).}
+
+\item{crop, interpolate}{Logical or \code{NULL}; crop to the brain bounding box
+/ smooth the raster. \code{NULL} (default) enables both for
+\code{style = "report"} only. (Cropping applies to the volume path.)}
 }
 \description{
 This avoids extra dependencies by using a single ggplot with facets

@@ -18,8 +18,10 @@ plot_ortho(
   subtitle = NULL,
   caption = NULL,
   draw = TRUE,
-  style = c("light", "dark"),
-  enhance = FALSE
+  style = c("light", "dark", "report"),
+  enhance = FALSE,
+  crop = NULL,
+  interpolate = NULL
 )
 }
 \arguments{
@@ -49,12 +51,18 @@ if available in your environment.}
 \item{draw}{Logical; if `TRUE`, draw the panels on the active graphics
 device. If `FALSE`, only return the ggplot objects invisibly.}
 
-\item{style}{Visual style, either \code{"light"} or \code{"dark"}.}
+\item{style}{Visual style: \code{"light"}, \code{"dark"}, or \code{"report"}
+(light card, dark cropped tiles, typography, and a colorbar -- matching
+\code{\link{plot_overlay}}'s report look).}
 
 \item{enhance}{Display-only enhancement of an unsmoothed statistical
 \code{vol}. \code{FALSE} (default) leaves it untouched; \code{TRUE} applies
 \code{\link{enhance_stat_map}} with defaults; a named \code{list} is
 forwarded as arguments to \code{enhance_stat_map()}.}
+
+\item{crop, interpolate}{Logical or \code{NULL}; crop panels to the brain
+bounding box / smooth the raster. \code{NULL} (default) enables both for
+\code{style = "report"} only.}
 }
 \description{
 Creates axial, coronal, and sagittal panels at a given coordinate with

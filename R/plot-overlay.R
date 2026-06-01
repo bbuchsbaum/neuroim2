@@ -218,14 +218,7 @@ plot_overlay <- function(
       ggplot2::labs(title = paste0(slice_label, " = ", z)) +
       ggplot2::annotation_custom(g_ov, xmin = xr[1], xmax = xr[2], ymin = yr[1], ymax = yr[2])
 
-    if (is_report) {
-      # Borderless dark tiles with a touch more gutter, to read as cards on the
-      # light background.
-      p <- p + ggplot2::theme(
-        panel.border = ggplot2::element_blank(),
-        plot.margin  = grid::unit(c(5, 5, 5, 5), "pt")
-      )
-    }
+    if (is_report) p <- p + report_tile_theme()  # borderless dark tiles on the card
 
     p
   }
@@ -234,25 +227,19 @@ plot_overlay <- function(
   attr(plots, "labels") <- list(title = title, subtitle = subtitle, caption = caption)
 
   if (isTRUE(assemble)) {
-    top <- patchwork::wrap_plots(plots, ncol = ncol)
-    if (isTRUE(colorbar)) {
-      cbar <- make_overlay_colorbar(ov_lim, ov_cmap, thresh = ov_thresh,
-                                    style = style, title = "value")
-      top <- patchwork::wrap_plots(top, cbar, nrow = 1L, widths = c(1, 0.08))
-    }
-
-    combined <- top
+    leg <- NULL
     if (isTRUE(show_legend)) {
       pal <- resolve_cmap(ov_cmap, 256)
       plane <- switch(as.character(along), "1" = "Sagittal", "2" = "Coronal", "Axial")
       leg <- make_overlay_legend(ov_thresh, pal[length(pal)], pal[1L],
                                  symmetric = symmetric, style = style, plane = plane)
-      combined <- patchwork::wrap_plots(top, leg, ncol = 1L, heights = c(1, 0.11))
     }
-
-    combined <- combined +
-      patchwork::plot_annotation(title = title, subtitle = subtitle, caption = caption,
-                                 theme = annotation_theme(style))
+    combined <- assemble_figure(
+      patchwork::wrap_plots(plots, ncol = ncol),
+      lim = ov_lim, cmap = ov_cmap, thresh = ov_thresh, style = style,
+      colorbar = colorbar, legend = leg,
+      title = title, subtitle = subtitle, caption = caption
+    )
     if (isTRUE(draw)) print(combined)
     return(invisible(combined))
   }

@@ -13,17 +13,28 @@
 #' @param ncol Number of columns in the facet layout.
 #' @param downsample Integer decimation for speed.
 #' @param title,subtitle,caption Optional ggplot labels.
-#' @param style Visual style, either \code{"light"} or \code{"dark"}.
+#' @param style Visual style: \code{"light"}, \code{"dark"}, or \code{"report"}
+#'   (light card, dark cropped tiles, typography, and a colorbar -- matching
+#'   \code{\link{plot_overlay}}'s report look).
+#' @param crop,interpolate Logical or \code{NULL}; crop to the brain bounding box
+#'   / smooth the raster. \code{NULL} (default) enables both for
+#'   \code{style = "report"} only. (Cropping applies to the volume path.)
 #' @export
 plot_montage <- function(
   x, zlevels = NULL, along = 3L,
   cmap = "grays", range = c("robust","data"), probs = c(.02,.98),
   ncol = 6L, downsample = 1L,
   title = NULL, subtitle = NULL, caption = NULL,
-  style = c("light", "dark")
+  style = c("light", "dark", "report"),
+  crop = NULL, interpolate = NULL
 ) {
   style <- match.arg(style)
-  if (inherits(x, "NeuroVol")) {
+  is_report <- identical(style, "report")
+  do_crop   <- if (is.null(crop)) is_report else isTRUE(crop)
+  interp_bg <- if (is.null(interpolate)) is_report else isTRUE(interpolate)
+
+  world <- inherits(x, "NeuroVol")
+  if (world) {
     # World-coordinate aware path (respects anatomical orientation)
     if (is.null(zlevels)) {
       zlevels <- unique(round(seq(1, dim(x)[along], length.out = 12)))
@@ -45,16 +56,6 @@ plot_montage <- function(
         data.frame(x = cds[,1], y = cds[,2], z = z, value = vals)
       }
     })
-    df <- do.call(rbind, dfl)
-    lim <- resolve_display_limits(range, df$value, probs = probs)
-
-    p <- ggplot2::ggplot(df, ggplot2::aes(x, y, fill = value)) +
-      ggplot2::geom_raster(interpolate = FALSE) +
-      ggplot2::facet_wrap(~ z, ncol = ncol, scales = "fixed") +
-      scale_fill_neuro(cmap = cmap, limits = lim) +
-      ggplot2::coord_fixed() +
-      theme_neuro(style = style) +
-      ggplot2::labs(title = title, subtitle = subtitle, caption = caption)
   } else {
     # Fallback for lists of slices / plain matrices (pixel grid)
     make_slice <- function(z) {
@@ -72,17 +73,43 @@ plot_montage <- function(
       }
       dfl <- lapply(zlevels, make_slice)
     }
-    df <- do.call(rbind, dfl)
-    lim <- resolve_display_limits(range, df$value, probs = probs)
+  }
+  df <- do.call(rbind, dfl)
+  lim <- resolve_display_limits(range, df$value, probs = probs)
 
-    p <- ggplot2::ggplot(df, ggplot2::aes(x, y, fill = value)) +
-      ggplot2::geom_raster(interpolate = FALSE) +
-      ggplot2::facet_wrap(~ z, ncol = ncol, scales = "fixed") +
-      scale_fill_neuro(cmap = cmap, limits = lim) +
-      coord_neuro_fixed() +
-      theme_neuro(style = style) +
-      ggplot2::labs(title = title, subtitle = subtitle, caption = caption)
+  p <- ggplot2::ggplot(df, ggplot2::aes(x, y, fill = value)) +
+    ggplot2::geom_raster(interpolate = interp_bg) +
+    ggplot2::facet_wrap(~ z, ncol = ncol, scales = "fixed") +
+    scale_fill_neuro(cmap = cmap, limits = lim,
+                     guide = if (is_report) "none" else "colourbar")
+
+  # Crop to the brain bounding box (volume/world path only).
+  crop_coord <- NULL
+  if (isTRUE(do_crop) && world) {
+    fin <- df$value[is.finite(df$value)]
+    if (length(fin)) {
+      thr  <- min(fin) + 0.02 * diff(range(fin))
+      keep <- is.finite(df$value) & df$value > thr
+      if (any(keep)) {
+        cx <- range(df$x[keep]); cy <- range(df$y[keep])
+        mx <- diff(cx) * 0.06;   my <- diff(cy) * 0.06
+        crop_coord <- ggplot2::coord_fixed(xlim = c(cx[1] - mx, cx[2] + mx),
+                                           ylim = c(cy[1] - my, cy[2] + my),
+                                           expand = FALSE)
+      }
+    }
+  }
+  p <- p + if (!is.null(crop_coord)) crop_coord
+           else if (world) ggplot2::coord_fixed() else coord_neuro_fixed()
+
+  if (is_report) {
+    p <- p + report_facet_theme()
+    return(assemble_figure(p, lim = lim, cmap = cmap, thresh = 0, style = "report",
+                           colorbar = TRUE, title = title, subtitle = subtitle,
+                           caption = caption))
   }
 
-  p
+  p +
+    theme_neuro(style = style) +
+    ggplot2::labs(title = title, subtitle = subtitle, caption = caption)
 }
