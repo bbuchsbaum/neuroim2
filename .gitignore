@@ -23,3 +23,6 @@ vignettes/*.html
 vignettes/*.md
 man/neuroim2.Rcheck/
 *.Rcheck/
+
+# Visual QC render outputs (tools/visual-qc-plots.R)
+tools/visual-qc-output/

@@ -4,12 +4,14 @@
 \alias{theme_neuro}
 \title{A minimal, publication-friendly theme for image slices}
 \usage{
-theme_neuro(base_size = 10, base_family = "")
+theme_neuro(base_size = 10, base_family = "", style = c("light", "dark"))
 }
 \arguments{
 \item{base_size}{Base font size.}
 
 \item{base_family}{Base font family.}
+
+\item{style}{Visual style, either \code{"light"} or \code{"dark"}.}
 }
 \description{
 Quiet axes, thin panel border, no grid, generous margins, slim legend.

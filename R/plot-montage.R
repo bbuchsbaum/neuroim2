@@ -7,19 +7,22 @@
 #' @param zlevels Integer indices of slices to plot (if `x` is a volume).
 #' @param along Axis along which to slice (1 = sagittal, 2 = coronal, 3 = axial).
 #' @param cmap Palette name or vector (see [resolve_cmap()]).
-#' @param range "robust" (quantile-based) or "data" (min/max).
+#' @param range "robust" (quantile-based), "data" (min/max), or an explicit
+#'   numeric \code{c(lo, hi)}.
 #' @param probs Quantiles for `range="robust"`.
 #' @param ncol Number of columns in the facet layout.
 #' @param downsample Integer decimation for speed.
 #' @param title,subtitle,caption Optional ggplot labels.
+#' @param style Visual style, either \code{"light"} or \code{"dark"}.
 #' @export
 plot_montage <- function(
   x, zlevels = NULL, along = 3L,
   cmap = "grays", range = c("robust","data"), probs = c(.02,.98),
   ncol = 6L, downsample = 1L,
-  title = NULL, subtitle = NULL, caption = NULL
+  title = NULL, subtitle = NULL, caption = NULL,
+  style = c("light", "dark")
 ) {
-  range <- match.arg(range)
+  style <- match.arg(style)
   if (inherits(x, "NeuroVol")) {
     # World-coordinate aware path (respects anatomical orientation)
     if (is.null(zlevels)) {
@@ -43,14 +46,14 @@ plot_montage <- function(
       }
     })
     df <- do.call(rbind, dfl)
-    lim <- compute_limits(df$value, mode = range, probs = probs)
+    lim <- resolve_display_limits(range, df$value, probs = probs)
 
     p <- ggplot2::ggplot(df, ggplot2::aes(x, y, fill = value)) +
       ggplot2::geom_raster(interpolate = FALSE) +
       ggplot2::facet_wrap(~ z, ncol = ncol, scales = "fixed") +
       scale_fill_neuro(cmap = cmap, limits = lim) +
       ggplot2::coord_fixed() +
-      theme_neuro() +
+      theme_neuro(style = style) +
       ggplot2::labs(title = title, subtitle = subtitle, caption = caption)
   } else {
     # Fallback for lists of slices / plain matrices (pixel grid)
@@ -70,14 +73,14 @@ plot_montage <- function(
       dfl <- lapply(zlevels, make_slice)
     }
     df <- do.call(rbind, dfl)
-    lim <- compute_limits(df$value, mode = range, probs = probs)
+    lim <- resolve_display_limits(range, df$value, probs = probs)
 
     p <- ggplot2::ggplot(df, ggplot2::aes(x, y, fill = value)) +
       ggplot2::geom_raster(interpolate = FALSE) +
       ggplot2::facet_wrap(~ z, ncol = ncol, scales = "fixed") +
       scale_fill_neuro(cmap = cmap, limits = lim) +
       coord_neuro_fixed() +
-      theme_neuro() +
+      theme_neuro(style = style) +
       ggplot2::labs(title = title, subtitle = subtitle, caption = caption)
   }
 

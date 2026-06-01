@@ -13,7 +13,13 @@ plot_ortho(
   probs = c(0.02, 0.98),
   crosshair = TRUE,
   annotate = TRUE,
-  downsample = 1L
+  downsample = 1L,
+  title = NULL,
+  subtitle = NULL,
+  caption = NULL,
+  draw = TRUE,
+  style = c("light", "dark"),
+  enhance = FALSE
 )
 }
 \arguments{
@@ -27,7 +33,8 @@ if available in your environment.}
 
 \item{cmap}{Palette for the slices.}
 
-\item{range}{"robust" or "data" for intensity limits shared by all panels.}
+\item{range}{Intensity limits shared by all panels: \code{"robust"},
+\code{"data"}, or an explicit numeric \code{c(lo, hi)}.}
 
 \item{probs}{Quantiles for robust range.}
 
@@ -36,9 +43,21 @@ if available in your environment.}
 \item{annotate}{Logical; add orientation glyphs.}
 
 \item{downsample}{Integer decimation for speed.}
+
+\item{title, subtitle, caption}{Optional layout-level labels used when drawing.}
+
+\item{draw}{Logical; if `TRUE`, draw the panels on the active graphics
+device. If `FALSE`, only return the ggplot objects invisibly.}
+
+\item{style}{Visual style, either \code{"light"} or \code{"dark"}.}
+
+\item{enhance}{Display-only enhancement of an unsmoothed statistical
+\code{vol}. \code{FALSE} (default) leaves it untouched; \code{TRUE} applies
+\code{\link{enhance_stat_map}} with defaults; a named \code{list} is
+forwarded as arguments to \code{enhance_stat_map()}.}
 }
 \description{
 Creates axial, coronal, and sagittal panels at a given coordinate with
-harmonized aesthetics. Returns (invisibly) the three ggplot objects after
-printing them in a single row using base grid (no extra deps).
+harmonized aesthetics. Returns the three ggplot objects invisibly after
+drawing, or without drawing when \code{draw = FALSE}.
 }

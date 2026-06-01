@@ -129,3 +129,35 @@ test_that("plot_overlay supports ov_alpha_mode='proportional'", {
     )
   )
 })
+
+test_that("plot_overlay validates grids and can return panels without drawing", {
+  dims <- c(6L, 9L, 4L)
+  sp <- neuroim2::NeuroSpace(dims)
+  bg <- neuroim2::NeuroVol(array(0, dim = dims), sp)
+  ov <- neuroim2::NeuroVol(array(stats::rnorm(prod(dims)), dim = dims), sp)
+
+  result <- neuroim2::plot_overlay(
+    bg,
+    ov,
+    zlevels = c(1L, 3L),
+    title = "Overlay",
+    draw = FALSE,
+    assemble = FALSE,
+    style = "dark",
+    ov_cmap = "coldhot",
+    ov_symmetric = TRUE
+  )
+  expect_length(result, 2L)
+  expect_true(all(vapply(result, inherits, logical(1), what = "ggplot")))
+  expect_equal(attr(result, "labels")$title, "Overlay")
+
+  shifted <- neuroim2::NeuroVol(array(0, dim = dims), neuroim2::NeuroSpace(dims, spacing = c(2, 2, 2)))
+  expect_error(
+    neuroim2::plot_overlay(bg, shifted, zlevels = 2L, draw = FALSE),
+    "same NeuroSpace grid"
+  )
+  expect_error(
+    neuroim2::plot_overlay(bg, ov, zlevels = integer(0), draw = FALSE),
+    "`zlevels`"
+  )
+})

@@ -69,3 +69,22 @@ test_that("plot_ortho unit='mm' path runs without error", {
   dev.off()
   expect_true(is.list(result))
 })
+
+test_that("plot_ortho supports draw=FALSE and validates coordinates", {
+  sp <- NeuroSpace(c(10L, 10L, 10L), c(1, 1, 1))
+  vol <- DenseNeuroVol(array(rnorm(1000), c(10, 10, 10)), sp)
+
+  result <- plot_ortho(vol, coord = c(5L, 5L, 5L), draw = FALSE, style = "dark")
+  expect_true(is.list(result))
+  expect_s3_class(result$axial, "gg")
+  expect_equal(attr(result, "labels")$title, NULL)
+
+  expect_error(
+    plot_ortho(vol, coord = c(5L, 5L), draw = FALSE),
+    "`coord`"
+  )
+  expect_error(
+    plot_ortho(vol, coord = c(5L, 5L, 99L), draw = FALSE),
+    "`coord`"
+  )
+})

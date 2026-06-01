@@ -8,7 +8,10 @@ resolve_cmap(name = "grays", n = 256)
 }
 \arguments{
 \item{name}{Palette name (e.g., "grays", "viridis", "inferno", "magma",
-"plasma", "turbo", "cividis"). Case-insensitive. If you pass a vector of
+"plasma", "turbo", "cividis", "coldhot", "blue-red", "coolwarm"). Any
+palette in \code{grDevices::hcl.pals()} (e.g. "RdBu", "Spectral", "Reds")
+is also accepted. Case- and punctuation-insensitive. Unknown names emit a
+warning and fall back to a viridis-like ramp. If you pass a vector of
 colors, it's returned unchanged.}
 
 \item{n}{Number of colors to generate.}

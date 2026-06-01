@@ -15,7 +15,8 @@ plot_montage(
   downsample = 1L,
   title = NULL,
   subtitle = NULL,
-  caption = NULL
+  caption = NULL,
+  style = c("light", "dark")
 )
 }
 \arguments{
@@ -27,7 +28,8 @@ plot_montage(
 
 \item{cmap}{Palette name or vector (see [resolve_cmap()]).}
 
-\item{range}{"robust" (quantile-based) or "data" (min/max).}
+\item{range}{"robust" (quantile-based), "data" (min/max), or an explicit
+numeric \code{c(lo, hi)}.}
 
 \item{probs}{Quantiles for `range="robust"`.}
 
@@ -36,6 +38,8 @@ plot_montage(
 \item{downsample}{Integer decimation for speed.}
 
 \item{title, subtitle, caption}{Optional ggplot labels.}
+
+\item{style}{Visual style, either \code{"light"} or \code{"dark"}.}
 }
 \description{
 This avoids extra dependencies by using a single ggplot with facets

@@ -2,16 +2,49 @@
 
 ## New Features
 
+* Added `enhance_stat_map()`, a display-oriented preprocessor for unsmoothed ("salt-and-pepper") statistical maps. It runs a selective median despike, an edge-preserving base smooth (guided/bilateral/gaussian), and a signal-gated unsharp pass so true clusters keep (or sharpen) their amplitude while the noise floor is denoised. `plot_overlay()` and `plot_ortho()` gained an `enhance` argument (`TRUE`, `FALSE`, or a list forwarded to `enhance_stat_map()`) to apply it inline.
+* **Breaking:** `plot_overlay()` now returns a single assembled patchwork object by default (`assemble = TRUE`), honoring `ncol`/labels and suitable for `ggsave()`, with an overlay statistic colorbar (`colorbar = TRUE`, threshold marked). Pass `assemble = FALSE` for the previous behavior (draw a panel grid and return the per-slice ggplot list invisibly). `patchwork` is now a hard dependency.
+* `plot_overlay()` gained a publication `style = "report"` (dark brain tiles on a light card, bold/italic typography, titled colorbar, bottom legend strip, brain-bounding-box cropping, and a smoothed background). The underlying features are individually toggleable on any style via `legend`, `crop`, and `interpolate`.
+* `plot_overlay()` now renders signed statistical maps correctly by default: overlays with both positive and negative values use a diverging palette and symmetric limits, so negatives are as visible as positives. Choosing a sequential `ov_cmap` for signed data now warns. A new `ov_alpha_mode = "ramp"` ramps opacity from the threshold to the cap, and `ov_cap` pins the magnitude scale.
+* `plot_overlay()`, `plot_ortho()`, and `plot_montage()` now accept explicit numeric display ranges (e.g. `ov_range = c(-6, 6)`, `range = c(0, 1000)`) in addition to `"robust"`/`"data"`, for consistent scaling across panels and subjects. The overlay color limits and proportional-alpha denominator are now computed once over the displayed volume rather than per slice.
 * `bilateral_filter()` and `bilateral_filter_4d()` now accept `range_scale` so callers can fix the intensity-kernel scale across observed and null maps instead of re-estimating it separately for each input.
 * `bilateral_filter()`, internal vector bilateral filtering, and `bilateral_filter_4d()` now filter each center voxel using only in-mask, in-bounds neighbors with weight renormalization.
 
 ## Improvements
 
+* `resolve_cmap()` now resolves any palette in `grDevices::hcl.pals()` (e.g. `"RdBu"`, `"Spectral"`, `"Reds"`) and the `"coolwarm"` diverging alias, instead of silently returning a viridis-like ramp. Unknown palette names now emit a warning rather than mis-coloring silently. Added the internal `is_diverging_cmap()` classifier.
 * The 3D bilateral backend now guards zero or non-finite auto-estimated range scales, avoiding `NaN` outputs for singleton or constant masks.
 
 ## Testing
 
+* Added tests for `enhance_stat_map()` covering impulse (salt-and-pepper) suppression, signal-peak preservation, noise-floor denoising, mask restriction, all three base methods, and the `enhance` plot arguments.
+* Added tests for `resolve_cmap()` palette resolution and warnings, `is_diverging_cmap()`, numeric display ranges across `plot_overlay()`/`plot_ortho()`/`plot_montage()`, signed-map diverging defaults, `ov_alpha_mode = "ramp"`, and `assemble`/`colorbar` (including `ggsave()` round-trip).
+* Added `tools/visual-qc-plots.R`, which renders labelled PNGs of the overlay scenarios (signed diverging vs. the sequential-palette bug, alpha modes, colorbar, and `enhance_stat_map()` de-speckling) over the bundled MNI template for human visual QC.
 * Added regression tests for mask-normalized bilateral filtering, volume-boundary behavior, fixed `range_scale` parity with the default auto scale, singleton-mask stability, and 4D mask-normalized filtering.
+
+# neuroim2 0.15.0
+
+## New Features
+
+* Added registration QC plotting helpers: `plot_checkerboard()` for alternating tiles from two registered volumes, and `plot_edge_overlay()` for comparing fixed and moving edge maps over a structural background.
+* Added a dark plotting style via `theme_neuro(style = "dark")` and matching `style` arguments for montage, overlay, orthogonal, checkerboard, and edge-overlay plots.
+* Added diverging colormap aliases `coldhot` and `blue-red` for signed statistical overlays.
+
+## Improvements
+
+* Registration QC plots now validate that all inputs share the same 3D `NeuroSpace` grid, not just matching array dimensions.
+* QC panel layouts now validate `zlevels`, `along`, and `ncol` before drawing and provide clear errors for empty or invalid layouts.
+* `title`, `subtitle`, and `caption` are now layout-level draw labels, preserving per-slice panel titles such as `z = 12`.
+* `plot_overlay()` now validates same-grid inputs, supports `draw = FALSE`, uses consistent intensity limits across selected slices, hides repeated background legends, and supports symmetric overlay limits for signed maps.
+* `plot_ortho()` now supports `draw = FALSE`, layout-level labels, dark styling, coordinate validation, and a cleaner no-legend three-plane layout.
+* `scale_fill_neuro()` now squishes out-of-range values to the nearest color endpoint instead of censoring them to `NA`, preventing robust intensity limits from creating black/transparent holes in high-intensity anatomy.
+* `plot_checkerboard()` now accepts `cmap` so registration checkerboards can use the same anatomical display palette as surrounding QC plots.
+* `plot_edge_overlay()` now keeps all-zero edge slices transparent instead of tinting the full panel when edge limits collapse.
+
+## Testing
+
+* Added focused tests for registration QC plotting, including same-grid validation, invalid layout arguments, invisible `ggplot` return values, and `draw = TRUE` rendering.
+* Added tests for `plot_overlay()` grid validation and no-draw return values, `plot_ortho(draw = FALSE)`, invalid orthogonal coordinates, scale squishing, and all-zero edge overlay transparency.
 
 # neuroim2 0.14.0
 

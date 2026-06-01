@@ -66,6 +66,8 @@ Collate:
     'ops.R'
     'orientation.R'
     'palettes.R'
+    'plot-checkerboard.R'
+    'plot-edge-overlay.R'
     'plot-helpers.R'
     'plot-montage.R'
     'plot-ortho.R'
@@ -101,7 +103,8 @@ Imports:
   cli,
   ggplot2,
   magrittr,
-  grid
+  grid,
+  patchwork
 Suggests:
     testthat,
     covr,

@@ -1,5 +1,5 @@
 ---
-title: Slice visualization with neuroim2
+title: "Slice visualization with neuroim2"
 output: rmarkdown::html_vignette
 vignette: |
   %\VignetteIndexEntry{Slice visualization with neuroim2}
@@ -16,201 +16,314 @@ includes:
   in_header: |-
     <script src="albers.js"></script>
     <script>document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('palette-red');});</script>
-
 ---
 
-```{r setup, include=FALSE}
-if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("albersdown", quietly = TRUE)) ggplot2::theme_set(albersdown::theme_albers(family = params$family, preset = params$preset))
-if (requireNamespace("ggplot2", quietly = TRUE)) ggplot2::theme_set(neuroim2::theme_neuro(base_family = params$family))
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE, echo = TRUE, message = FALSE, warning = FALSE,
-  fig.width = 7, fig.height = 5, dpi = 120, fig.alt = 'Plot output'
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE,
+  fig.width = 7,
+  fig.height = 4,
+  dpi = 120,
+  fig.alt = "Plot output"
 )
-suppressPackageStartupMessages({
-  library(ggplot2)
-  library(neuroim2)
+
+library(neuroim2)
+```
+
+You often need to answer a simple question before doing anything more
+complicated with a brain image: *does this volume look plausible, and does the
+map or registration result line up with it?*
+
+The plotting helpers in neuroim2 are meant for that first visual check. They
+work with `NeuroVol` objects, preserve image aspect ratio, use robust intensity
+scaling by default, and return ordinary `ggplot2` objects or lists of panels
+when you want to customize or save the result.
+
+## What are we plotting?
+
+This vignette uses a small anatomical image shipped with the package. We also
+build a synthetic signed statistical map and simple anatomical edge masks on the
+same `NeuroSpace` grid so the overlay and registration-QC examples are
+reproducible.
+
+```{r load-demo-data}
+anat_path <- system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2")
+raw_anat <- read_vol(anat_path)
+
+data.frame(
+  object = "raw_anat",
+  class = class(raw_anat)[1],
+  dimensions = paste(dim(raw_anat), collapse = " x ")
+)
+```
+
+```{r prepare-demo-objects, include = FALSE}
+set.seed(42)
+
+dims <- dim(raw_anat)
+display_arr <- array(as.numeric(raw_anat), dim = dims)
+anat <- raw_anat
+anatomy_cmap <- c("#242424", "#9a9a9a", "#f4f4f4")
+
+shift_array <- function(x, offset, fill = 0) {
+  stopifnot(length(offset) == length(dim(x)))
+  out <- array(fill, dim = dim(x))
+  src <- Map(seq_len, dim(x))
+  dst <- Map(seq_len, dim(x))
+
+  for (axis in seq_along(offset)) {
+    step <- offset[[axis]]
+    if (step > 0) {
+      src[[axis]] <- seq_len(dim(x)[[axis]] - step)
+      dst[[axis]] <- seq.int(step + 1L, dim(x)[[axis]])
+    } else if (step < 0) {
+      src[[axis]] <- seq.int(1L - step, dim(x)[[axis]])
+      dst[[axis]] <- seq_len(dim(x)[[axis]] + step)
+    }
+  }
+
+  out[dst[[1]], dst[[2]], dst[[3]]] <- x[src[[1]], src[[2]], src[[3]]]
+  out
+}
+
+edge_from_mask <- function(mask) {
+  offsets <- rbind(
+    c(1, 0, 0), c(-1, 0, 0),
+    c(0, 1, 0), c(0, -1, 0),
+    c(0, 0, 1), c(0, 0, -1)
+  )
+  edge <- array(FALSE, dim = dim(mask))
+
+  for (row in seq_len(nrow(offsets))) {
+    neighbor <- shift_array(mask, offsets[row, ], fill = FALSE)
+    edge <- edge | (mask & !neighbor)
+  }
+  edge
+}
+
+dilate_once <- function(mask) {
+  offsets <- rbind(
+    c(0, 0, 0),
+    c(1, 0, 0), c(-1, 0, 0),
+    c(0, 1, 0), c(0, -1, 0)
+  )
+  out <- array(FALSE, dim = dim(mask))
+  for (row in seq_len(nrow(offsets))) {
+    out <- out | shift_array(mask, offsets[row, ], fill = FALSE)
+  }
+  out
+}
+
+grid <- expand.grid(
+  i = seq_len(dims[1]),
+  j = seq_len(dims[2]),
+  k = seq_len(dims[3])
+)
+
+scaled <- within(grid, {
+  x <- (i - mean(range(i))) / diff(range(i))
+  y <- (j - mean(range(j))) / diff(range(j))
+  z <- (k - mean(range(k))) / diff(range(k))
 })
-```
 
-## Quick start: `plot()`
-
-The simplest way to visualize a volume is the S4 `plot()` method. It shows a
-3 x 3 montage of evenly-spaced axial slices with a perceptually uniform
-grayscale palette and clean theme.
-
-```{r eval=FALSE}
-plot(vol)                       # 3x3 montage, grayscale
-plot(vol, cmap = "viridis")     # different palette
-plot(vol, overlay)              # overlay with inferno palette, alpha = 0.5
-plot(vol, overlay, ov_alpha = 0.7, ov_thresh = 2)
-```
-
-For more control — coronal/sagittal planes, downsampling, custom facet
-layouts — the dedicated helpers below give full flexibility.
-
-## Why these helpers?
-
-Neuroimaging images are large, orientation-sensitive rasters. The goal of these helpers is to make reasonable defaults easy to use: perceptually uniform palettes, robust scaling, fixed aspect ratios, and clean legends — without extra heavy dependencies or any JavaScript.
-
-This vignette shows how to:
-
-- Build publication-ready montages
-- Create a compact orthogonal (three-plane) view with crosshairs
-- Overlay a statistical map on a structural background (threshold + alpha)
-
-The helpers used here are:
-
-- `resolve_cmap()`, `scale_fill_neuro()`, `theme_neuro()`
-- `plot_montage()`, `plot_ortho()`, `plot_overlay()`
-- `annotate_orientation()`
-
----
-
-## Getting a demo volume
-
-The examples below try to read a sample NIfTI included with the package. If that is not available, they create a small synthetic 3D volume and wrap it in `NeuroVol`. Either way, the rest of the code is identical.
-
-```{r}
-set.seed(1)
-
-make_synthetic_vol <- function(dims = c(96, 96, 72), vox = c(2, 2, 2)) {
-  i <- array(rep(seq_len(dims[1]), times = dims[2]*dims[3]), dims)
-  j <- array(rep(rep(seq_len(dims[2]), each = dims[1]), times = dims[3]), dims)
-  k <- array(rep(seq_len(dims[3]), each = dims[1]*dims[2]), dims)
-
-  c0 <- dims / 2
-  g1 <- exp(-((i - c0[1])^2 + (j - c0[2])^2 + (k - c0[3])^2) / (2*(min(dims)/4)^2))
-  g2 <- 0.5 * exp(-((i - (c0[1] + 15))^2 + (j - (c0[2] - 10))^2 + (k - (c0[3] + 8))^2) / (2*(min(dims)/6)^2))
-  x  <- g1 + g2 + 0.05 * array(stats::rnorm(prod(dims)), dims)
-
-  sp <- NeuroSpace(dims, spacing = vox)
-  NeuroVol(x, sp)
+blob <- function(cx, cy, cz, sigma) {
+  exp(-((scaled$x - cx)^2 + (scaled$y - cy)^2 + (scaled$z - cz)^2) / (2 * sigma^2))
 }
 
-# Prefer an included demo file. Use a real example from inst/extdata.
-demo_path <- system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2")
+stat_arr <- 4.2 * blob(0.18, -0.10, 0.05, 0.075) -
+  3.6 * blob(-0.16, 0.16, -0.08, 0.070)
+stat_arr <- array(stat_arr, dim = dims)
+stat_arr[abs(stat_arr) < 0.35] <- 0
+stat_map <- NeuroVol(stat_arr, space(anat))
 
-t1 <- if (nzchar(demo_path)) {
-  read_vol(demo_path)
-} else {
-  make_synthetic_vol()
-}
+shift_voxels <- 3L
+comparison_arr <- shift_array(display_arr, c(shift_voxels, 0, 0), fill = 0)
+comparison <- NeuroVol(comparison_arr, space(anat))
 
-dims <- dim(t1)
+brain_threshold <- stats::quantile(display_arr[display_arr > 0], 0.12, na.rm = TRUE)
+fixed_mask <- display_arr > brain_threshold
+moving_mask <- shift_array(fixed_mask, c(shift_voxels, 0, 0), fill = FALSE)
+fixed_edge_arr <- dilate_once(edge_from_mask(fixed_mask))
+moving_edge_arr <- dilate_once(edge_from_mask(moving_mask))
+fixed_edges <- NeuroVol(fixed_edge_arr, space(anat))
+moving_edges <- NeuroVol(moving_edge_arr, space(anat))
 
-# Build a synthetic "z-statistic" overlay matched to t1's dims
-mk_blob <- function(mu, sigma = 8) {
-  i <- array(rep(seq_len(dims[1]), times = dims[2]*dims[3]), dims)
-  j <- array(rep(rep(seq_len(dims[2]), each = dims[1]), times = dims[3]), dims)
-  k <- array(rep(seq_len(dims[3]), each = dims[1]*dims[2]), dims)
-  exp(-((i - mu[1])^2 + (j - mu[2])^2 + (k - mu[3])^2) / (2*sigma^2))
-}
-ov_arr <- 3.5 * mk_blob(mu = round(dims * c(.60, .45, .55)), sigma = 7) -
-          3.2 * mk_blob(mu = round(dims * c(.35, .72, .40)), sigma = 6) +
-          0.3 * array(stats::rnorm(prod(dims)), dims)
+zlevels <- unique(round(seq(dims[3] * 0.25, dims[3] * 0.82, length.out = 6)))
+center_voxel <- round(dims / 2)
 
-overlay <- NeuroVol(ov_arr, space(t1))
-```
+selected_anat <- display_arr[, , zlevels, drop = FALSE]
+selected_stat <- stat_arr[, , zlevels, drop = FALSE]
 
----
-
-## 1) Montages that read well at a glance
-
-The montage helper facets a single ggplot object—so you get a shared colorbar, clean panel labels, and proper aspect ratio.
-
-```{r}
-# Choose a sensible set of axial slices
-zlevels <- unique(round(seq( round(dims[3]*.25), round(dims[3]*.85), length.out = 12 )))
-
-p <- plot_montage(
-  t1, zlevels = zlevels, along = 3,
-  cmap = "grays", range = "robust", probs = c(.02, .98),
-  ncol = 6, title = "Axial montage (robust scaling)"
+stopifnot(
+  length(dim(anat)) == 3L,
+  identical(dim(anat), dim(stat_map)),
+  identical(space(anat), space(stat_map)),
+  any(is.finite(selected_anat)),
+  diff(range(selected_anat, finite = TRUE)) > 0,
+  sum(display_arr > 0) > 0,
+  any(selected_stat > 0),
+  any(selected_stat < 0),
+  sum(fixed_edge_arr) > 0,
+  sum(moving_edge_arr) > 0
 )
-p + theme_neuro()
 ```
 
-Notes
+## How do I make a slice montage?
 
-- `range = "robust"` uses quantiles (default 2–98%) to ignore outliers.
-- `coord_fixed()` + reversed y are handled internally to preserve geometry and radiological convention.
-- Use `downsample = 2` (or higher) when plotting huge volumes interactively.
+Use `plot_montage()` when you want to scan several slices at once. The function
+returns a single `ggplot2` object, so you can print it, add labels, or save it
+with your usual plotting workflow.
 
-```{r}
+```{r montage-dark, fig.cap = "A dark-style anatomical montage with robust intensity scaling.", fig.alt = "Six axial anatomical slices on a dark background.", fig.width = 8, fig.height = 3.6, dev.args = list(bg = "#141414")}
 plot_montage(
-  t1, zlevels = zlevels, along = 3,
-  cmap = "grays", range = "robust", ncol = 6, downsample = 2,
-  title = "Downsampled montage (for speed)"
+  anat,
+  zlevels = zlevels,
+  ncol = 6,
+  cmap = anatomy_cmap,
+  range = "robust",
+  title = "Anatomical montage",
+  style = "dark"
 )
 ```
 
----
+Use the light style when you are preparing a figure for a manuscript page or a
+white-background report.
 
-## 2) Orthogonal three‑plane view (with crosshairs)
+```{r montage-light, fig.cap = "The same slices using the light plotting style.", fig.alt = "Six axial anatomical slices on a light background."}
+plot_montage(
+  anat,
+  zlevels = zlevels[1:4],
+  ncol = 4,
+  cmap = anatomy_cmap,
+  range = "robust",
+  title = "Light style montage",
+  style = "light"
+)
+```
 
-`plot_ortho()` produces aligned sagittal, coronal, and axial slices with a shared scale, optional crosshairs, and compact orientation glyphs.
+## How do I inspect one location in three planes?
 
-```{r}
-center_voxel <- round(dim(t1) / 2)
+Use `plot_ortho()` when you care about one voxel or world coordinate. The
+default crosshairs make it easier to confirm that the same location is shown in
+the axial, coronal, and sagittal panels.
+
+```{r ortho-view, fig.cap = "Orthogonal view through the center voxel.", fig.alt = "Axial, coronal, and sagittal slices with crosshairs.", fig.width = 8, fig.height = 4, dev.args = list(bg = "#141414")}
 plot_ortho(
-  t1, coord = center_voxel, unit = "index",
-  cmap = "grays", range = "robust",
-  crosshair = TRUE, annotate = TRUE
+  anat,
+  coord = center_voxel,
+  unit = "index",
+  cmap = anatomy_cmap,
+  title = "Three-plane view",
+  style = "dark"
 )
 ```
 
-Tip: If you have MNI/world coordinates, pass `unit = "mm"` and a length‑3 numeric; internally it will convert using `coord_to_grid(space(vol), …)` if available.
+If you want the panels without drawing them immediately, set `draw = FALSE`.
+That is useful in scripts that save plots or compose figures later.
 
----
+```{r no-draw-panels}
+ortho_panels <- plot_ortho(anat, coord = center_voxel, draw = FALSE)
+names(ortho_panels)
+```
 
-## 3) Overlaying an activation map on a structural background
+## How do I overlay a signed statistical map?
 
-The overlay compositor colorizes each layer independently (so each can use its own limits and palette) and stacks them as rasters. No extra packages required.
+Use `plot_overlay()` when you have a background image and a second volume on the
+same grid. For signed maps, a diverging palette and symmetric overlay limits
+make positive and negative clusters comparable.
 
-```{r}
+```{r overlay-signed, fig.cap = "Signed statistical map overlaid on the anatomical image.", fig.alt = "An anatomical montage with blue and orange statistical clusters.", fig.width = 8, fig.height = 3.8, dev.args = list(bg = "#141414")}
 plot_overlay(
-  bgvol = t1, overlay = overlay,
-  zlevels = zlevels[seq(2, length(zlevels), by = 2)],  # fewer panels for the vignette
-  bg_cmap = "grays", ov_cmap = "inferno",
-  bg_range = "robust", ov_range = "robust", probs = c(.02, .98),
-  ov_thresh = 2.5,   # make weaker signal transparent
-  ov_alpha  = 0.65,
-  ncol = 3, title = "Statistical overlay (threshold 2.5, alpha 0.65)"
+  bgvol = anat,
+  overlay = stat_map,
+  zlevels = zlevels,
+  bg_cmap = anatomy_cmap,
+  bg_range = "robust",
+  ov_range = "robust",
+  ov_thresh = 1.8,
+  ov_alpha = 0.75,
+  ov_cmap = "coldhot",
+  ov_symmetric = TRUE,
+  ncol = 6,
+  title = "Thresholded signed overlay",
+  style = "dark"
 )
 ```
 
----
-
-## 4) Palettes and aesthetics
-
-All examples above use neuro‑friendly defaults:
-
-- Palettes: `resolve_cmap()` wraps base R’s `hcl.colors()` with aliases like "grays", "viridis", "inferno"—and safe fallbacks.
-- Theme: `theme_neuro()` keeps panels quiet and legends slim.
-- Legend: one shared colorbar for facetted montages via `scale_fill_neuro()`.
-
-You can switch palettes easily:
-
-```{r}
-plot_montage(
-  t1, zlevels = zlevels[1:6], along = 3,
-  cmap = "viridis", range = "robust", ncol = 6,
-  title = "Same data, Viridis palette"
+```{r overlay-diagnostics}
+data.frame(
+  positive_voxels = sum(stat_arr > 1.8),
+  negative_voxels = sum(stat_arr < -1.8),
+  max_stat = round(max(stat_arr), 2),
+  min_stat = round(min(stat_arr), 2)
 )
 ```
 
----
+## How do I check registration by eye?
 
-## 5) Practical tips
+Registration QC usually asks whether two images or edge maps agree on the same
+grid. The QC helpers intentionally require matching `NeuroSpace` objects; if
+the grids differ, resample first rather than relying on a plot to hide the
+mismatch.
 
-- Choose slices with meaning. Use mm positions (if you have an affine) or meaningful indices; label strips are handled for you by the helper.
-- Speed vs. fidelity. Use `downsample` for exploration; keep `downsample = 1` for final figures.
-- Consistent limits. For side‑by‑side comparisons, compute limits on a combined set of values (the helpers do this for orthogonal panels automatically).
+`plot_checkerboard()` alternates tiles from a reference and comparison volume.
+Misalignment shows up as broken anatomy across tile boundaries.
 
----
-
-## Reproducibility
-
-```{r}
-sessionInfo()
+```{r checkerboard-qc, fig.cap = "Checkerboard comparison between the anatomical image and a shifted copy.", fig.alt = "Checkerboard slices showing discontinuities from a shifted comparison image.", fig.width = 8, fig.height = 3.8, dev.args = list(bg = "#141414")}
+plot_checkerboard(
+  anat,
+  comparison,
+  zlevels = zlevels,
+  tile = 8,
+  cmap = anatomy_cmap,
+  ncol = 6,
+  title = "Checkerboard registration QC",
+  style = "dark"
+)
 ```
+
+`plot_edge_overlay()` is useful when you have fixed and moving edge maps. Here
+the moving edge mask is shifted by three voxels, so the mismatch is visible
+where the colored edges separate.
+
+```{r edge-overlay-qc, fig.cap = "Fixed and moving edge maps overlaid on the anatomical image.", fig.alt = "Edge overlay QC slices with colored edge disagreement.", fig.width = 8, fig.height = 3.8, dev.args = list(bg = "#141414")}
+plot_edge_overlay(
+  anat,
+  fixed_edges,
+  moving_edges,
+  zlevels = zlevels,
+  bg_cmap = anatomy_cmap,
+  ncol = 6,
+  title = "Edge overlay registration QC",
+  style = "dark"
+)
+```
+
+## Which helper should I reach for?
+
+| Task | Helper |
+|---|---|
+| Quick axial scan of one volume | `plot()` or `plot_montage()` |
+| Publication-style slice grid | `plot_montage()` |
+| One location in axial/coronal/sagittal planes | `plot_ortho()` |
+| Statistical or mask overlay on anatomy | `plot_overlay()` |
+| Registration check from two images | `plot_checkerboard()` |
+| Registration check from edge maps | `plot_edge_overlay()` |
+| Shared package styling | `theme_neuro()` |
+
+## Practical tips
+
+- Use `range = "robust"` for anatomical images unless outliers are the point.
+- Use `ov_symmetric = TRUE` with diverging palettes for signed overlays.
+- Use `style = "dark"` for visual inspection and `style = "light"` for reports
+  that need a white page.
+- Use `draw = FALSE` when a helper returns multiple panels and you want to save
+  or arrange them yourself.
+
+For related workflows, see `vignette("ImageVolumes")` for volume objects,
+`vignette("coordinate-systems")` for voxel/world coordinates, and
+`vignette("Resampling")` before plotting images that do not already share a
+grid.

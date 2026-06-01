@@ -137,6 +137,22 @@ test_that("rescale01 returns x unchanged when from has non-finite values", {
   expect_equal(r, x)
 })
 
+# ---- squish_oob ----
+
+test_that("squish_oob clamps finite values to scale limits", {
+  x <- c(-10, 0, 5, 10, 20, NA, Inf)
+  result <- neuroim2:::squish_oob(x, range = c(0, 10))
+
+  expect_equal(result[1:5], c(0, 0, 5, 10, 10))
+  expect_true(is.na(result[6]))
+  expect_equal(result[7], Inf)
+})
+
+test_that("scale_fill_neuro uses squishing rather than censoring outliers", {
+  scale <- scale_fill_neuro(limits = c(0, 1))
+  expect_equal(scale$oob(c(-1, 0.5, 2), range = c(0, 1)), c(0, 0.5, 1))
+})
+
 # ---- matrix_to_colors ----
 
 test_that("matrix_to_colors returns a character vector", {

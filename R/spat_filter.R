@@ -496,3 +496,277 @@ laplace_enhance <- function(vol, mask, k = 2, patch_size = 3, search_radius = 2,
   out <- NeuroVol(farr, space(vol))
   out
 }
+
+# ---------------------------------------------------------------------------
+# Visualization enhancement for unsmoothed statistical maps
+# ---------------------------------------------------------------------------
+
+#' Selective median despike of impulsive ("salt-and-pepper") voxels
+#'
+#' Internal helper. Flags voxels whose deviation from the local box mean exceeds
+#' \code{k} robust (MAD) scales, then replaces \emph{only} those voxels with the
+#' median of their in-mask, non-flagged neighbours. Unflagged voxels keep their
+#' exact value, so genuine clusters are untouched. The cheap mean-based flagging
+#' is robust to isolated impulses because a single spike shifts a 27-neighbour
+#' mean by only ~1/27 of its amplitude while the spike itself deviates fully.
+#'
+#' @param arr A numeric 3D array (carrying a \code{dim} attribute).
+#' @param mask.idx Integer linear indices of in-mask voxels.
+#' @param d Integer vector of array dimensions.
+#' @param k Robust-deviation threshold for flagging impulses.
+#' @param window Half-width (in voxels) of the neighbourhood.
+#' @return A despiked copy of \code{arr}.
+#' @keywords internal
+#' @noRd
+.despike_impulses <- function(arr, mask.idx, d, k = 3.5, window = 1L) {
+  idx <- as.integer(mask.idx)
+  m <- box_blur(arr, idx, as.integer(window))
+  dev <- arr - m
+  scale <- stats::mad(dev[mask.idx], na.rm = TRUE)
+  if (!is.finite(scale) || scale <= 0) {
+    return(arr)
+  }
+
+  inmask <- logical(prod(d))
+  inmask[mask.idx] <- TRUE
+  flagged <- which(inmask & abs(dev) > k * scale)
+  if (length(flagged) == 0L) {
+    return(arr)
+  }
+
+  flagset <- logical(prod(d))
+  flagset[flagged] <- TRUE
+
+  coords <- arrayInd(flagged, .dim = d)
+  offs <- as.matrix(expand.grid(seq.int(-window, window),
+                                seq.int(-window, window),
+                                seq.int(-window, window)))
+  offs <- offs[!(offs[, 1] == 0 & offs[, 2] == 0 & offs[, 3] == 0), , drop = FALSE]
+
+  nb_vals <- matrix(NA_real_, nrow = nrow(coords), ncol = nrow(offs))
+  for (o in seq_len(nrow(offs))) {
+    nc <- sweep(coords, 2L, offs[o, ], "+")
+    valid <- nc[, 1] >= 1 & nc[, 1] <= d[1] &
+             nc[, 2] >= 1 & nc[, 2] <= d[2] &
+             nc[, 3] >= 1 & nc[, 3] <= d[3]
+    if (!any(valid)) next
+    lin <- nc[valid, 1] + (nc[valid, 2] - 1L) * d[1] + (nc[valid, 3] - 1L) * d[1] * d[2]
+    # only borrow from in-mask voxels that are not themselves impulses
+    ok <- inmask[lin] & !flagset[lin]
+    rows <- which(valid)[ok]
+    nb_vals[rows, o] <- arr[lin[ok]]
+  }
+
+  med <- apply(nb_vals, 1L, stats::median, na.rm = TRUE)
+  has <- rowSums(!is.na(nb_vals)) > 0L
+  out <- arr
+  out[flagged[has]] <- med[has]
+  out
+}
+
+#' Guided-filter base layer (mask-aware), returning the smoothed volume.
+#'
+#' @param arr Numeric 3D array with \code{dim} attribute.
+#' @param idx Integer linear indices of in-mask voxels.
+#' @param radius Box radius for the local linear model.
+#' @param epsilon Regularisation (~ noise variance) separating noise from signal.
+#' @return A numeric 3D array (the base layer).
+#' @keywords internal
+#' @noRd
+.guided_base <- function(arr, idx, radius, epsilon) {
+  mean_I  <- box_blur(arr, idx, radius)
+  mean_II <- box_blur(arr * arr, idx, radius)
+  var_I   <- mean_II - mean_I * mean_I
+  var_I[var_I < 0] <- 0
+  a <- var_I / (var_I + epsilon)
+  b <- (1 - a) * mean_I
+  mean_a <- box_blur(a, idx, radius)
+  mean_b <- box_blur(b, idx, radius)
+  mean_a * arr + mean_b
+}
+
+#' Enhance an unsmoothed statistical map for visualization
+#'
+#' @description
+#' De-speckles a noisy ("salt-and-pepper") statistical map so it renders cleanly
+#' as an overlay, \emph{without} the peak-depressing and cluster-smearing that a
+#' plain Gaussian blur causes. This is a display-oriented preprocessor: it is not
+#' intended to produce maps for statistical inference (it deliberately sharpens
+#' for visual punch and does not preserve the null distribution).
+#'
+#' @details
+#' The enhancement runs in three stages, each reusing the package's existing
+#' filtering primitives:
+#'
+#' \enumerate{
+#'   \item \strong{Selective despike.} Isolated impulsive voxels (flagged by a
+#'     robust deviation from their local mean) are replaced by the median of
+#'     their in-mask, non-impulse neighbours. All other voxels keep their exact
+#'     value, so true clusters are preserved.
+#'   \item \strong{Edge-preserving base smooth.} An edge-preserving filter
+#'     (\code{"guided"} by default; see \code{\link{guided_filter}} /
+#'     \code{\link{bilateral_filter}} / \code{\link{gaussian_blur}}) removes
+#'     residual low-amplitude grain. With the guided filter, in-cluster voxels
+#'     (local variance \eqn{\gg} noise variance) are returned at essentially
+#'     full amplitude, so peaks are not depressed.
+#'   \item \strong{Signal-gated unsharp.} Local contrast is boosted by
+#'     \code{detail_gain}, weighted per-voxel by a guided-style signal weight
+#'     \eqn{w = \mathrm{var}/(\mathrm{var} + \sigma^2_{noise})}. Because
+#'     \eqn{w \to 0} in flat/noisy regions, the despeckled background stays
+#'     smooth while real clusters gain crisp, punchy edges.
+#'   }
+#'
+#' The noise scale \eqn{\sigma_{noise}} is estimated robustly (MAD of the
+#' high-frequency residual within the mask) and is used both for the default
+#' guided \code{epsilon} and for the signal weight, so the method adapts to the
+#' scale of the input map (e.g. a z-map versus a raw beta map).
+#'
+#' @param vol A \code{\linkS4class{NeuroVol}} statistical map to enhance.
+#' @param mask An optional \code{\linkS4class{NeuroVol}} / \code{\linkS4class{LogicalNeuroVol}}
+#'   restricting the region processed. If omitted, all non-zero, finite voxels
+#'   of \code{vol} are used.
+#' @param despike Logical; run the selective median despike stage (default \code{TRUE}).
+#' @param despike_k Robust-deviation threshold for flagging impulses. Lower is
+#'   more aggressive (default 3.5).
+#' @param despike_window Integer half-width of the despike neighbourhood (default 1L => 3x3x3).
+#' @param method Edge-preserving base filter: one of \code{"guided"} (default),
+#'   \code{"bilateral"}, or \code{"gaussian"}.
+#' @param radius Integer box radius for the base filter and signal-weight
+#'   estimation (default 2).
+#' @param epsilon Guided-filter regularisation. If \code{NULL} (default) it is
+#'   set to the estimated noise variance. Only used when \code{method = "guided"}.
+#' @param spatial_sigma Spatial Gaussian SD for \code{method = "bilateral"} or
+#'   \code{"gaussian"} (default 2).
+#' @param intensity_sigma Intensity Gaussian SD for \code{method = "bilateral"} (default 1).
+#' @param detail_gain Strength of the signal-gated unsharp stage. \code{0} gives
+#'   a pure denoise; \code{1} restores original detail in signal regions; values
+#'   \code{> 1} sharpen for display (default 1.5). Set to 0 to disable.
+#' @param verbose Logical; report the number of despiked voxels and the noise
+#'   estimate (default \code{FALSE}).
+#'
+#' @return A \code{\linkS4class{NeuroVol}} with the enhanced map (zero outside the mask).
+#'
+#' @examples
+#' \donttest{
+#' mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
+#' # A noisy synthetic stat map on the mask grid
+#' set.seed(1)
+#' noisy <- mask * 0
+#' idx <- which(mask > 0)
+#' vals <- rnorm(length(idx))
+#' vals[sample(length(idx), length(idx) %/% 20)] <- 8  # salt-and-pepper spikes
+#' noisy[idx] <- vals
+#' stat <- NeuroVol(noisy, space(mask))
+#'
+#' clean <- enhance_stat_map(stat, mask)
+#' }
+#'
+#' @seealso \code{\link{guided_filter}}, \code{\link{bilateral_filter}},
+#'   \code{\link{gaussian_blur}}, \code{\link{plot_overlay}}, \code{\link{plot_ortho}}
+#' @export
+enhance_stat_map <- function(vol, mask,
+                             despike = TRUE,
+                             despike_k = 3.5,
+                             despike_window = 1L,
+                             method = c("guided", "bilateral", "gaussian"),
+                             radius = 2,
+                             epsilon = NULL,
+                             spatial_sigma = 2,
+                             intensity_sigma = 1,
+                             detail_gain = 1.5,
+                             verbose = FALSE) {
+  if (!inherits(vol, "NeuroVol")) {
+    cli::cli_abort("{.arg vol} must be a {.cls NeuroVol} object.")
+  }
+  method <- match.arg(method)
+  if (!is.numeric(despike_k) || length(despike_k) != 1L || despike_k <= 0) {
+    cli::cli_abort("{.arg despike_k} must be a single positive number.")
+  }
+  if (!is.numeric(radius) || length(radius) != 1L || radius < 1) {
+    cli::cli_abort("{.arg radius} must be a single number >= 1, not {.val {radius}}.")
+  }
+  if (!is.numeric(detail_gain) || length(detail_gain) != 1L || detail_gain < 0) {
+    cli::cli_abort("{.arg detail_gain} must be a single non-negative number.")
+  }
+  if (!is.null(epsilon) &&
+      (!is.numeric(epsilon) || length(epsilon) != 1L || !is.finite(epsilon) || epsilon <= 0)) {
+    cli::cli_abort("{.arg epsilon} must be {.code NULL} or a single positive finite number.")
+  }
+
+  d <- dim(vol)
+  arr <- as.array(vol)
+  arr[!is.finite(arr)] <- 0
+
+  if (missing(mask)) {
+    mask.idx <- which(arr != 0)
+    target_space <- space(vol)
+  } else {
+    if (!inherits(mask, "NeuroVol")) {
+      cli::cli_abort("{.arg mask} must be a {.cls NeuroVol} object.")
+    }
+    mask.idx <- which(mask != 0)
+    target_space <- space(mask)
+  }
+  if (length(mask.idx) == 0L) {
+    cli::cli_abort("Mask is empty; nothing to enhance.")
+  }
+  idx <- as.integer(mask.idx)
+  radius <- as.integer(round(radius))
+
+  # ---- Stage 1: selective median despike ------------------------------------
+  despiked <- arr
+  n_despiked <- 0L
+  if (isTRUE(despike)) {
+    despiked <- .despike_impulses(arr, mask.idx, d, k = despike_k,
+                                  window = as.integer(despike_window))
+    n_despiked <- sum(despiked[mask.idx] != arr[mask.idx])
+  }
+
+  # ---- Robust noise estimate (MAD of high-frequency residual) ---------------
+  hf <- despiked - box_blur(despiked, idx, 1L)
+  noise_sd <- stats::mad(hf[mask.idx], na.rm = TRUE)
+  if (!is.finite(noise_sd) || noise_sd <= 0) {
+    noise_sd <- stats::sd(hf[mask.idx], na.rm = TRUE)
+  }
+  if (!is.finite(noise_sd) || noise_sd <= 0) {
+    noise_sd <- 1
+  }
+  noise_var <- noise_sd^2
+
+  # ---- Stage 2: edge-preserving base layer ----------------------------------
+  base <- switch(method,
+    guided = .guided_base(despiked, idx, radius,
+                          if (is.null(epsilon)) noise_var else epsilon),
+    bilateral = bilateral_filter_cpp(despiked, idx, max(1L, radius),
+                                     spatial_sigma, intensity_sigma,
+                                     spacing(vol), NA_real_),
+    gaussian = gaussian_blur_cpp(despiked, idx, max(1L, radius),
+                                 spatial_sigma, spacing(vol))
+  )
+
+  # ---- Stage 3: signal-gated unsharp ----------------------------------------
+  out <- base
+  if (detail_gain > 0) {
+    mean_I <- box_blur(despiked, idx, radius)
+    mean_II <- box_blur(despiked * despiked, idx, radius)
+    var_I <- mean_II - mean_I * mean_I
+    var_I[var_I < 0] <- 0
+    w <- var_I / (var_I + noise_var)          # guided-style signal weight in [0,1]
+
+    radius_broad <- as.integer(max(radius + 1L, ceiling(radius * 2)))
+    broad <- box_blur(base, idx, radius_broad)
+    out <- base + detail_gain * w * (base - broad)
+  }
+
+  if (isTRUE(verbose)) {
+    cli::cli_inform(c(
+      "i" = "enhance_stat_map: {n_despiked} voxel{?s} despiked.",
+      "i" = "Noise scale (MAD) = {.val {round(noise_sd, 4)}}; method = {.val {method}}."
+    ))
+  }
+
+  res <- numeric(prod(d))
+  res[mask.idx] <- out[mask.idx]
+  dim(res) <- d
+  NeuroVol(res, target_space)
+}

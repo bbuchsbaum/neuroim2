@@ -1,8 +1,8 @@
 #' Orthogonal three-plane view with optional crosshairs
 #'
 #' Creates axial, coronal, and sagittal panels at a given coordinate with
-#' harmonized aesthetics. Returns (invisibly) the three ggplot objects after
-#' printing them in a single row using base grid (no extra deps).
+#' harmonized aesthetics. Returns the three ggplot objects invisibly after
+#' drawing, or without drawing when \code{draw = FALSE}.
 #'
 #' @param vol A 3D volume handled by `slice()`.
 #' @param coord Length-3 coordinate of the target point. Interpreted as voxel
@@ -10,19 +10,33 @@
 #'   if available in your environment.
 #' @param unit "index" or "mm".
 #' @param cmap Palette for the slices.
-#' @param range "robust" or "data" for intensity limits shared by all panels.
+#' @param range Intensity limits shared by all panels: \code{"robust"},
+#'   \code{"data"}, or an explicit numeric \code{c(lo, hi)}.
 #' @param probs Quantiles for robust range.
 #' @param crosshair Logical; draw crosshair lines.
 #' @param annotate Logical; add orientation glyphs.
 #' @param downsample Integer decimation for speed.
+#' @param title,subtitle,caption Optional layout-level labels used when drawing.
+#' @param draw Logical; if `TRUE`, draw the panels on the active graphics
+#'   device. If `FALSE`, only return the ggplot objects invisibly.
+#' @param style Visual style, either \code{"light"} or \code{"dark"}.
+#' @param enhance Display-only enhancement of an unsmoothed statistical
+#'   \code{vol}. \code{FALSE} (default) leaves it untouched; \code{TRUE} applies
+#'   \code{\link{enhance_stat_map}} with defaults; a named \code{list} is
+#'   forwarded as arguments to \code{enhance_stat_map()}.
 #' @export
 plot_ortho <- function(
   vol, coord = NULL, unit = c("index","mm"),
   cmap = "grays", range = c("robust","data"), probs = c(.02,.98),
-  crosshair = TRUE, annotate = TRUE, downsample = 1L
+  crosshair = TRUE, annotate = TRUE, downsample = 1L,
+  title = NULL, subtitle = NULL, caption = NULL,
+  draw = TRUE, style = c("light", "dark"), enhance = FALSE
 ) {
   unit <- match.arg(unit)
-  range <- match.arg(range)
+  style <- match.arg(style)
+
+  # Optional display-only enhancement of an unsmoothed statistical volume.
+  vol <- apply_enhance_arg(vol, enhance)
 
   if (is.null(coord)) coord <- round(dim(vol) / 2)
 
@@ -37,6 +51,9 @@ plot_ortho <- function(
     }
   }
   coord <- as.integer(round(coord))
+  if (length(coord) != 3L || anyNA(coord) || any(coord < 1L | coord > dim(vol)[1:3])) {
+    stop("`coord` must be a valid length-3 voxel coordinate.", call. = FALSE)
+  }
 
   # Extract three orthogonal slices
   s_ax <- slice(vol, coord[3], along = 3L)  # axial: (i,j)
@@ -65,7 +82,7 @@ plot_ortho <- function(
   d_sa <- slice_world_df(s_sa, downsample); d_sa$plane <- "Sagittal"
 
   # Shared limits across panels
-  lim <- compute_limits(c(d_ax$value, d_co$value, d_sa$value), range, probs)
+  lim <- resolve_display_limits(range, c(d_ax$value, d_co$value, d_sa$value), probs = probs)
 
   # Crosshair mm positions
   ax_mm <- as.numeric(grid_to_coord(space(s_ax), matrix(c(coord[1], coord[2]), ncol = 2)))
@@ -76,9 +93,9 @@ plot_ortho <- function(
     xr <- range(df$x, na.rm = TRUE); yr <- range(df$y, na.rm = TRUE)
     p <- ggplot2::ggplot(df, ggplot2::aes(x, y, fill = value)) +
       ggplot2::geom_raster(interpolate = FALSE) +
-      scale_fill_neuro(cmap = cmap, limits = lim) +
+      scale_fill_neuro(cmap = cmap, limits = lim, guide = "none") +
       ggplot2::coord_fixed() +
-      theme_neuro() +
+      theme_neuro(style = style) +
       ggplot2::labs(title = plane)
 
     if (crosshair && length(cross_mm) == 2) {
@@ -112,13 +129,19 @@ plot_ortho <- function(
   pa <- make_panel_world(d_ax, "Axial",    ax_mm, "axial")
   pc <- make_panel_world(d_co, "Coronal",  co_mm, "coronal")
   ps <- make_panel_world(d_sa, "Sagittal", sa_mm, "sagittal")
+  plots <- list(axial = pa, coronal = pc, sagittal = ps)
+  attr(plots, "labels") <- list(title = title, subtitle = subtitle, caption = caption)
 
-  # Print in a single row using base grid (no cowplot/patchwork)
-  grid::grid.newpage()
-  vp <- grid::viewport(layout = grid::grid.layout(1, 3))
-  grid::pushViewport(vp)
-  print(pa, vp = grid::viewport(layout.pos.row = 1, layout.pos.col = 1))
-  print(pc, vp = grid::viewport(layout.pos.row = 1, layout.pos.col = 2))
-  print(ps, vp = grid::viewport(layout.pos.row = 1, layout.pos.col = 3))
-  invisible(list(axial = pa, coronal = pc, sagittal = ps))
+  if (!isTRUE(draw)) {
+    return(invisible(plots))
+  }
+
+  draw_plot_panel_grid(
+    plots,
+    ncol = 3L,
+    title = title,
+    subtitle = subtitle,
+    caption = caption,
+    style = style
+  )
 }

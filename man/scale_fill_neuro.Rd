@@ -33,3 +33,8 @@ A ggplot2 scale object.
 \description{
 A ggplot2 fill scale with neuroimaging-friendly defaults
 }
+\details{
+Values outside `limits` are clamped to the nearest color endpoint
+  rather than converted to `NA`. This keeps robust display limits from
+  creating transparent holes in bright or dark image regions.
+}
