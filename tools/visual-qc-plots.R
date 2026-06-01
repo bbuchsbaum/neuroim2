@@ -139,6 +139,18 @@ save_overlay("11_report_style_3x3.png",
              subtitle = "enhance(despike_k = 2.5, radius = 3, detail_gain = 0.8), thresh = 3",
              w = 9.5, h = 10)
 
+# 11b. Nonlinear self-tuning opacity: soft vs proportional (no hard threshold).
+save_overlay("11b_alpha_proportional.png",
+             bgvol = anat, overlay = noisy, zlevels = z9, ncol = 3,
+             ov_thresh = 0, ov_alpha_mode = "proportional", style = "report",
+             title = "ov_alpha_mode = 'proportional' (noise stays visible)",
+             w = 9.5, h = 10)
+save_overlay("11c_alpha_soft.png",
+             bgvol = anat, overlay = noisy, zlevels = z9, ncol = 3,
+             ov_thresh = 0, ov_alpha_mode = "soft", style = "report",
+             title = "ov_alpha_mode = 'soft' (nonlinear, noise fades to transparent)",
+             w = 9.5, h = 10)
+
 # 12-13. Report style is consistent across plot_ortho and plot_montage.
 ggplot2::ggsave(
   file.path(outdir, "12_ortho_report.png"),

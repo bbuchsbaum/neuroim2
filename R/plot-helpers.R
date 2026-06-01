@@ -467,6 +467,56 @@ make_overlay_legend <- function(thresh, pos_col, neg_col, symmetric = TRUE,
     )
 }
 
+#' Self-tuning nonlinear alpha mapping for statistical overlays
+#'
+#' Parameters for the \code{"soft"} alpha mode, where per-voxel opacity is
+#' \deqn{alpha(m) = clamp((m - lo) / (hi - lo), 0, 1)^{gamma}.}
+#' The knee \code{lo} (below which alpha is 0) defaults to the threshold, or --
+#' when no threshold is set -- to the median in-mask magnitude, a robust
+#' noise-floor proxy, so near-zero values stay transparent. \code{gamma} is
+#' tuned so the median \emph{displayed} (supra-knee) magnitude maps to a faint
+#' \code{alpha_mid}; this pushes the noisy bulk toward transparency while the
+#' upper tail saturates to opaque, and adapts automatically to the value
+#' distribution. \code{gamma} is clamped to \code{[gamma_min, gamma_max]} so the
+#' curve stays convex (low values are never boosted).
+#'
+#' @param mags Numeric vector of overlay magnitudes (typically \code{abs(values)}).
+#' @param thresh Hard/soft threshold; used as the knee when \code{> 0}.
+#' @param cap Upper anchor (mapped to alpha 1); defaults to \code{max(mags)}.
+#' @param gamma Optional fixed exponent; \code{NULL} auto-tunes it.
+#' @param alpha_mid Target alpha for the median displayed magnitude.
+#' @param gamma_min,gamma_max Clamp range for the tuned exponent (>= 1 keeps the
+#'   curve convex; the lower bound guarantees a visible nonlinearity).
+#' @return A list with \code{lo}, \code{hi}, and \code{gamma}.
+#' @keywords internal
+#' @noRd
+soft_alpha_params <- function(mags, thresh = 0, cap = NULL, gamma = NULL,
+                              alpha_mid = 0.2, gamma_min = 1.5, gamma_max = 5) {
+  mags <- mags[is.finite(mags) & mags > 0]
+  knee <- if (isTRUE(thresh > 0)) {
+    thresh
+  } else if (length(mags)) {
+    stats::median(mags)
+  } else {
+    0
+  }
+  hi <- if (!is.null(cap) && is.finite(cap)) cap else if (length(mags)) max(mags) else knee + 1
+  if (!is.finite(hi) || hi <= knee) hi <- knee + 1
+
+  if (is.null(gamma)) {
+    supra <- mags[mags > knee]
+    if (length(supra) >= 10L) {
+      t_med <- stats::median((supra - knee) / (hi - knee))
+      t_med <- min(max(t_med, 1e-3), 0.999)
+      gamma <- log(alpha_mid) / log(t_med)
+    } else {
+      gamma <- 2
+    }
+    gamma <- min(max(gamma, gamma_min), gamma_max)
+  }
+  list(lo = knee, hi = hi, gamma = gamma)
+}
+
 #' Resolve a display-range argument to numeric limits
 #'
 #' Accepts either a mode string (\code{"robust"}/\code{"data"}, resolved against

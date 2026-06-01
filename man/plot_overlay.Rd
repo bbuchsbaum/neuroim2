@@ -16,8 +16,9 @@ plot_overlay(
   probs = c(0.02, 0.98),
   ov_thresh = 0,
   ov_alpha = 0.7,
-  ov_alpha_mode = c("binary", "proportional", "ramp"),
+  ov_alpha_mode = c("binary", "proportional", "ramp", "soft"),
   ov_symmetric = NULL,
+  alpha_gamma = NULL,
   ov_cap = NULL,
   ncol = 3L,
   title = NULL,
@@ -59,14 +60,23 @@ for consistent coloring across panels and subjects.}
 
 \item{ov_alpha_mode}{One of \code{"binary"} (default: pixels above threshold
 get full \code{ov_alpha}, others transparent), \code{"proportional"}
-(per-pixel alpha = |v| / cap), or \code{"ramp"} (alpha ramps linearly from 0
-at \code{ov_thresh} to 1 at the cap). The cap is shared across all panels so
-identical values get identical opacity everywhere.}
+(per-pixel alpha = |v| / cap), \code{"ramp"} (alpha ramps linearly from 0 at
+\code{ov_thresh} to 1 at the cap), or \code{"soft"} (a nonlinear,
+self-tuning curve, \code{alpha = clamp((|v|-lo)/(hi-lo),0,1)^gamma}, where
+the knee \code{lo} defaults to \code{ov_thresh} or, if unset, the median
+in-mask magnitude, and \code{gamma} adapts to the value distribution so that
+opacity rises rapidly away from zero and the noisy bulk stays faint). The
+cap is shared across all panels so identical values get identical opacity
+everywhere.}
 
 \item{ov_symmetric}{Logical or \code{NULL}. \code{NULL} (default) auto-selects
 symmetric limits around zero when the overlay has both positive and negative
 values; \code{TRUE}/\code{FALSE} forces the choice. Symmetric limits keep
 negative and positive values equally visible with a diverging palette.}
+
+\item{alpha_gamma}{Optional exponent for \code{ov_alpha_mode = "soft"}.
+\code{NULL} (default) auto-tunes it from the data; larger values push more
+of the low-value range toward transparency.}
 
 \item{ov_cap}{Optional numeric; the magnitude used as the upper end of the
 (symmetric) color/alpha scale. Defaults to the data-driven limit.}

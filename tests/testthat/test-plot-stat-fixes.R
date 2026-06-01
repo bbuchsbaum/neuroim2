@@ -122,6 +122,40 @@ test_that("plot_overlay supports ov_alpha_mode = 'ramp'", {
   expect_renderable(res)
 })
 
+# ---- soft (nonlinear, self-tuning) alpha ------------------------------------
+
+test_that("soft_alpha_params yields a convex, monotone, self-tuning curve", {
+  set.seed(1)
+  mags <- c(abs(rnorm(5000)), abs(rnorm(200, 5, 1)))   # noise bulk + signal tail
+  p <- soft_alpha_params(mags, thresh = 0, cap = stats::quantile(mags, 0.99))
+  expect_true(p$gamma >= 1.5 && p$gamma <= 5)
+  expect_equal(unname(p$lo), unname(stats::median(mags[mags > 0])))  # knee at noise median
+
+  alpha <- function(m) pmin(pmax((m - p$lo) / (p$hi - p$lo), 0), 1)^p$gamma
+  grid <- seq(0, p$hi, length.out = 50)
+  a <- alpha(grid)
+  expect_equal(a[1], 0)                                  # zero -> transparent
+  expect_true(all(diff(a) >= -1e-9))                     # monotone non-decreasing
+  expect_lt(alpha(p$lo + 0.05 * (p$hi - p$lo)), 0.1)     # faint just above knee (convex)
+  expect_gt(alpha(p$hi), 0.99)                           # opaque at cap
+
+  # explicit threshold becomes the knee; explicit gamma is respected
+  p2 <- soft_alpha_params(mags, thresh = 2.3, cap = 6, gamma = 3)
+  expect_equal(p2$lo, 2.3)
+  expect_equal(p2$gamma, 3)
+})
+
+test_that("plot_overlay supports ov_alpha_mode = 'soft'", {
+  d <- make_signed_overlay()
+  res <- plot_overlay(d$bg, d$ov, zlevels = c(8L, 10L),
+                      ov_alpha_mode = "soft", draw = FALSE)
+  expect_renderable(res)
+  # explicit gamma override also works
+  res2 <- plot_overlay(d$bg, d$ov, zlevels = 10L,
+                       ov_alpha_mode = "soft", alpha_gamma = 3, draw = FALSE)
+  expect_renderable(res2)
+})
+
 # ---- #19.1 / #19.2: assemble + colorbar -------------------------------------
 
 test_that("assemble = TRUE returns a single ggsave-able object", {

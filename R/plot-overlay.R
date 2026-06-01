@@ -18,9 +18,17 @@
 #' @param ov_alpha Global alpha for overlay (0..1).
 #' @param ov_alpha_mode One of \code{"binary"} (default: pixels above threshold
 #'   get full \code{ov_alpha}, others transparent), \code{"proportional"}
-#'   (per-pixel alpha = |v| / cap), or \code{"ramp"} (alpha ramps linearly from 0
-#'   at \code{ov_thresh} to 1 at the cap). The cap is shared across all panels so
-#'   identical values get identical opacity everywhere.
+#'   (per-pixel alpha = |v| / cap), \code{"ramp"} (alpha ramps linearly from 0 at
+#'   \code{ov_thresh} to 1 at the cap), or \code{"soft"} (a nonlinear,
+#'   self-tuning curve, \code{alpha = clamp((|v|-lo)/(hi-lo),0,1)^gamma}, where
+#'   the knee \code{lo} defaults to \code{ov_thresh} or, if unset, the median
+#'   in-mask magnitude, and \code{gamma} adapts to the value distribution so that
+#'   opacity rises rapidly away from zero and the noisy bulk stays faint). The
+#'   cap is shared across all panels so identical values get identical opacity
+#'   everywhere.
+#' @param alpha_gamma Optional exponent for \code{ov_alpha_mode = "soft"}.
+#'   \code{NULL} (default) auto-tunes it from the data; larger values push more
+#'   of the low-value range toward transparency.
 #' @param ov_symmetric Logical or \code{NULL}. \code{NULL} (default) auto-selects
 #'   symmetric limits around zero when the overlay has both positive and negative
 #'   values; \code{TRUE}/\code{FALSE} forces the choice. Symmetric limits keep
@@ -77,7 +85,8 @@ plot_overlay <- function(
   bg_cmap = "grays", ov_cmap = "inferno",
   bg_range = c("robust","data"), ov_range = c("robust","data"),
   probs = c(.02,.98), ov_thresh = 0, ov_alpha = .7,
-  ov_alpha_mode = c("binary", "proportional", "ramp"), ov_symmetric = NULL,
+  ov_alpha_mode = c("binary", "proportional", "ramp", "soft"), ov_symmetric = NULL,
+  alpha_gamma = NULL,
   ov_cap = NULL, ncol = 3L, title = NULL, subtitle = NULL, caption = NULL,
   draw = TRUE, style = c("light", "dark", "report"), enhance = FALSE,
   assemble = TRUE, colorbar = TRUE, legend = NULL, crop = NULL, interpolate = NULL
@@ -141,6 +150,13 @@ plot_overlay <- function(
   ov_abs_max <- max(abs(ov_lim), na.rm = TRUE)
   if (!is.finite(ov_abs_max) || ov_abs_max <= 0) ov_abs_max <- 1
 
+  # Nonlinear, self-tuning alpha curve (computed once over the displayed data).
+  soft <- NULL
+  if (ov_alpha_mode == "soft") {
+    soft <- soft_alpha_params(abs(ov_vals), thresh = ov_thresh,
+                              cap = ov_abs_max, gamma = alpha_gamma)
+  }
+
   # Shared brain bounding box (so every panel is framed identically).
   crop_win <- NULL
   if (isTRUE(do_crop)) {
@@ -178,13 +194,19 @@ plot_overlay <- function(
       )
     } else {
       abs_mov <- abs(mov)
-      if (ov_alpha_mode == "proportional") {
-        amap <- abs_mov / ov_abs_max            # shared (not per-slice) denominator
-      } else {                                   # "ramp": 0 at thresh -> 1 at cap
-        denom <- ov_abs_max - ov_thresh
-        if (!is.finite(denom) || denom <= 0) denom <- ov_abs_max
-        amap <- (abs_mov - ov_thresh) / denom
-      }
+      amap <- switch(ov_alpha_mode,
+        proportional = abs_mov / ov_abs_max,     # shared (not per-slice) denominator
+        ramp = {                                  # linear: 0 at thresh -> 1 at cap
+          denom <- ov_abs_max - ov_thresh
+          if (!is.finite(denom) || denom <= 0) denom <- ov_abs_max
+          (abs_mov - ov_thresh) / denom
+        },
+        soft = {                                  # nonlinear, self-tuning gamma curve
+          t <- (abs_mov - soft$lo) / (soft$hi - soft$lo)
+          t[] <- pmin(pmax(t, 0), 1)
+          t^soft$gamma
+        }
+      )
       amap[] <- pmin(pmax(amap, 0), 1)
       if (isTRUE(ov_thresh > 0)) {
         amap[!is.na(abs_mov) & abs_mov < ov_thresh] <- 0
