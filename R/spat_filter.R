@@ -25,6 +25,14 @@ NULL
 #' @param sigma A numeric value specifying the standard deviation of the Gaussian kernel. Default is 2.
 #' @param window An integer specifying the kernel size. It represents the number of voxels to include
 #'   on each side of the center voxel. For example, window=1 results in a 3x3x3 kernel. Default is 1.
+#' @param normalize A logical value controlling how the mask boundary is handled. When \code{TRUE}
+#'   (the default), the blur is \emph{insulated} to the mask: each in-mask output voxel is computed
+#'   from in-mask neighbours only and the kernel is renormalized by the in-mask weight (a
+#'   "smooth-in-mask" convolution, cf. AFNI \code{3dBlurInMask}). Out-of-mask values --- finite or
+#'   not (including \code{NaN}/\code{Inf}) --- never influence in-mask outputs, and edge voxels are
+#'   not biased toward the mask exterior. When \code{FALSE}, the legacy behavior is used: the full
+#'   kernel is applied with zero padding outside the volume and out-of-mask neighbour values are
+#'   read into the convolution (retained only for backward compatibility).
 #'
 #' @return A \code{\linkS4class{NeuroVol}} object representing the smoothed image.
 #'
@@ -32,6 +40,11 @@ NULL
 #' The function uses a C++ implementation for efficient Gaussian blurring. The blurring is applied
 #' only to voxels within the specified mask (or the entire volume if no mask is provided).
 #' The kernel size is determined by the 'window' parameter, and its shape by the 'sigma' parameter.
+#'
+#' With the default \code{normalize = TRUE}, smoothing a masked statistical map (e.g. a first-level
+#' fMRI coefficient map written as \code{NaN} outside the brain) within its brain mask preserves the
+#' full in-mask coverage; out-of-mask \code{NaN}s do not erode the masked region and the renormalized
+#' edge values match the interior on their shared support.
 #'
 #' @examples
 #' # Load a sample brain mask
@@ -51,7 +64,7 @@ NULL
 #' Gaussian blur: https://en.wikipedia.org/wiki/Gaussian_blur
 #'
 #' @export
-gaussian_blur <- function(vol, mask, sigma = 2, window = 1) {
+gaussian_blur <- function(vol, mask, sigma = 2, window = 1, normalize = TRUE) {
   if (!inherits(vol, "NeuroVol")) {
     cli::cli_abort("{.arg vol} must be a {.cls NeuroVol} object.")
   }
@@ -60,6 +73,9 @@ gaussian_blur <- function(vol, mask, sigma = 2, window = 1) {
   }
   if (sigma <= 0) {
     cli::cli_abort("{.arg sigma} must be positive, not {.val {sigma}}.")
+  }
+  if (!is.logical(normalize) || length(normalize) != 1L || is.na(normalize)) {
+    cli::cli_abort("{.arg normalize} must be a single {.cls logical} (TRUE or FALSE).")
   }
   if (!missing(mask)) {
     if (!inherits(mask, "NeuroVol")) {
@@ -76,7 +92,8 @@ gaussian_blur <- function(vol, mask, sigma = 2, window = 1) {
   }
 
   arr <- as.array(vol)
-  farr <- gaussian_blur_cpp(arr, as.integer(mask.idx), as.integer(window), sigma, spacing(vol))
+  farr <- gaussian_blur_cpp(arr, as.integer(mask.idx), as.integer(window), sigma,
+                            spacing(vol), normalize)
 
   out <- NeuroVol(farr, target_space)
   out

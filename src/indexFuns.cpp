@@ -44,9 +44,9 @@ NumericVector gaussian_weights(int window, double sigma, NumericVector spacing) 
 }
 
 // [[Rcpp::export]]
-NumericVector gaussian_blur_cpp(NumericVector arr, IntegerVector mask_idx, int window, 
-                              double sigma, NumericVector spacing) {
-    return indexfuns::gaussian_blur_cpp_impl(arr, mask_idx, window, sigma, spacing);
+NumericVector gaussian_blur_cpp(NumericVector arr, IntegerVector mask_idx, int window,
+                              double sigma, NumericVector spacing, bool normalize = true) {
+    return indexfuns::gaussian_blur_cpp_impl(arr, mask_idx, window, sigma, spacing, normalize);
 }
 
 // [[Rcpp::export]]
@@ -192,20 +192,61 @@ namespace indexfuns {
         return out/tot;
     }
 
-    NumericVector gaussian_blur_cpp_impl(NumericVector arr, IntegerVector mask_idx, int window, 
-                                       double sigma, NumericVector spacing) {
+    NumericVector gaussian_blur_cpp_impl(NumericVector arr, IntegerVector mask_idx, int window,
+                                       double sigma, NumericVector spacing, bool normalize) {
         IntegerVector dims = arr.attr("dim");
-        NumericVector out = NumericVector(arr.length());
-        NumericVector local = NumericVector(pow((window*2)+1, 3));
+        R_xlen_t n = arr.length();
+        NumericVector out = NumericVector(n);
 
         NumericVector wts = gaussian_weights(window, sigma, spacing);
         NumericMatrix cds = indexToGridCpp(mask_idx, dims);
-        int slicedim = dims[0]*dims[1];
+        int dim0 = dims[0], dim1 = dims[1], dim2 = dims[2];
+        int slicedim = dim0 * dim1;
 
+        // Membership lookup so the convolution can be insulated to the mask:
+        // out-of-mask neighbours are skipped entirely (their values are never
+        // read), making out-of-mask NaN/Inf irrelevant, and the kernel is
+        // renormalised by the in-mask weight so edge voxels are not biased.
+        std::vector<char> in_mask(n, 0);
         for (int i = 0; i < mask_idx.length(); i++) {
-            NumericVector ret = box_nbhd(arr, dims, cds(i,0)-1, cds(i,1)-1, cds(i,2)-1, 
-                                       window, local, slicedim);
-            out[mask_idx[i]-1] = sum(ret*wts);
+            in_mask[mask_idx[i] - 1] = 1;
+        }
+
+        for (int m = 0; m < mask_idx.length(); m++) {
+            int cx = cds(m, 0) - 1;
+            int cy = cds(m, 1) - 1;
+            int cz = cds(m, 2) - 1;
+
+            double acc = 0.0;
+            double wsum = 0.0;
+            int ind = 0;
+            for (int k = cz - window; k <= cz + window; k++) {
+                for (int j = cy - window; j <= cy + window; j++) {
+                    for (int i = cx - window; i <= cx + window; i++) {
+                        double w = wts[ind];
+                        ind++;
+                        if (i < 0 || i >= dim0 || j < 0 || j >= dim1 ||
+                            k < 0 || k >= dim2) {
+                            continue;  // out of bounds: zero-pad (legacy) / skip
+                        }
+                        R_xlen_t nb = i + (R_xlen_t)j * dim0 + (R_xlen_t)k * slicedim;
+                        if (normalize) {
+                            if (!in_mask[nb]) continue;  // never read out-of-mask
+                            acc += w * arr[nb];
+                            wsum += w;
+                        } else {
+                            acc += w * arr[nb];          // legacy: full kernel
+                        }
+                    }
+                }
+            }
+
+            if (normalize) {
+                // The centre voxel is always in-mask, so wsum > 0.
+                out[mask_idx[m] - 1] = (wsum > 0.0) ? (acc / wsum) : 0.0;
+            } else {
+                out[mask_idx[m] - 1] = acc;
+            }
         }
 
         out.attr("dim") = dims;

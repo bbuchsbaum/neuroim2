@@ -48,11 +48,12 @@ namespace indexfuns {
                                             double sigma, 
                                             Rcpp::NumericVector spacing);
     
-    Rcpp::NumericVector gaussian_blur_cpp_impl(Rcpp::NumericVector arr, 
-                                             Rcpp::IntegerVector mask_idx, 
-                                             int window, 
-                                             double sigma, 
-                                             Rcpp::NumericVector spacing);
+    Rcpp::NumericVector gaussian_blur_cpp_impl(Rcpp::NumericVector arr,
+                                             Rcpp::IntegerVector mask_idx,
+                                             int window,
+                                             double sigma,
+                                             Rcpp::NumericVector spacing,
+                                             bool normalize);
     
     Rcpp::NumericVector box_blur_impl(Rcpp::NumericVector arr, 
                                      Rcpp::IntegerVector mask_idx, 

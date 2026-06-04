@@ -4,7 +4,7 @@
 \alias{gaussian_blur}
 \title{Gaussian Blur for Volumetric Images}
 \usage{
-gaussian_blur(vol, mask, sigma = 2, window = 1)
+gaussian_blur(vol, mask, sigma = 2, window = 1, normalize = TRUE)
 }
 \arguments{
 \item{vol}{A \code{\linkS4class{NeuroVol}} object representing the image volume to be smoothed.}
@@ -16,6 +16,15 @@ This mask defines the region where the blurring is applied. If not provided, the
 
 \item{window}{An integer specifying the kernel size. It represents the number of voxels to include
 on each side of the center voxel. For example, window=1 results in a 3x3x3 kernel. Default is 1.}
+
+\item{normalize}{A logical value controlling how the mask boundary is handled. When \code{TRUE}
+(the default), the blur is \emph{insulated} to the mask: each in-mask output voxel is computed
+from in-mask neighbours only and the kernel is renormalized by the in-mask weight (a
+"smooth-in-mask" convolution, cf. AFNI \code{3dBlurInMask}). Out-of-mask values --- finite or
+not (including \code{NaN}/\code{Inf}) --- never influence in-mask outputs, and edge voxels are
+not biased toward the mask exterior. When \code{FALSE}, the legacy behavior is used: the full
+kernel is applied with zero padding outside the volume and out-of-mask neighbour values are
+read into the convolution (retained only for backward compatibility).}
 }
 \value{
 A \code{\linkS4class{NeuroVol}} object representing the smoothed image.
@@ -28,6 +37,11 @@ The blurring is performed within a specified image mask, with customizable kerne
 The function uses a C++ implementation for efficient Gaussian blurring. The blurring is applied
 only to voxels within the specified mask (or the entire volume if no mask is provided).
 The kernel size is determined by the 'window' parameter, and its shape by the 'sigma' parameter.
+
+With the default \code{normalize = TRUE}, smoothing a masked statistical map (e.g. a first-level
+fMRI coefficient map written as \code{NaN} outside the brain) within its brain mask preserves the
+full in-mask coverage; out-of-mask \code{NaN}s do not erode the masked region and the renormalized
+edge values match the interior on their shared support.
 }
 \examples{
 # Load a sample brain mask

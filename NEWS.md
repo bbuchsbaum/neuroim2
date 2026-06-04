@@ -10,6 +10,7 @@
 * `plot_overlay()`, `plot_ortho()`, and `plot_montage()` now accept explicit numeric display ranges (e.g. `ov_range = c(-6, 6)`, `range = c(0, 1000)`) in addition to `"robust"`/`"data"`, for consistent scaling across panels and subjects. The overlay color limits and proportional-alpha denominator are now computed once over the displayed volume rather than per slice.
 * `bilateral_filter()` and `bilateral_filter_4d()` now accept `range_scale` so callers can fix the intensity-kernel scale across observed and null maps instead of re-estimating it separately for each input.
 * `bilateral_filter()`, internal vector bilateral filtering, and `bilateral_filter_4d()` now filter each center voxel using only in-mask, in-bounds neighbors with weight renormalization.
+* `gaussian_blur()` now insulates the blur to the mask by default (new `normalize = TRUE` argument). Each in-mask output voxel is computed from in-mask neighbors only and the kernel is renormalized by the in-mask weight (a "smooth-in-mask" convolution, cf. AFNI `3dBlurInMask`). Previously the masked path read out-of-mask neighbor values into the convolution and normalized by the full kernel, so (1) out-of-mask `NaN`/`Inf` (e.g. brain-exterior values in first-level statistic maps) silently erased a `~window`-voxel shell of the masked region, and (2) finite exterior values (e.g. zero padding) biased in-mask edge voxels. Out-of-mask values --- finite or not --- can no longer affect in-mask outputs. Pass `normalize = FALSE` to restore the legacy full-kernel behavior (GitHub #22).
 
 ## Improvements
 

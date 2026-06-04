@@ -61,8 +61,8 @@ gaussian_weights <- function(window, sigma, spacing) {
     .Call(`_neuroim2_gaussian_weights`, window, sigma, spacing)
 }
 
-gaussian_blur_cpp <- function(arr, mask_idx, window, sigma, spacing) {
-    .Call(`_neuroim2_gaussian_blur_cpp`, arr, mask_idx, window, sigma, spacing)
+gaussian_blur_cpp <- function(arr, mask_idx, window, sigma, spacing, normalize = TRUE) {
+    .Call(`_neuroim2_gaussian_blur_cpp`, arr, mask_idx, window, sigma, spacing, normalize)
 }
 
 box_blur <- function(arr, mask_idx, window) {

@@ -252,8 +252,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // gaussian_blur_cpp
-NumericVector gaussian_blur_cpp(NumericVector arr, IntegerVector mask_idx, int window, double sigma, NumericVector spacing);
-RcppExport SEXP _neuroim2_gaussian_blur_cpp(SEXP arrSEXP, SEXP mask_idxSEXP, SEXP windowSEXP, SEXP sigmaSEXP, SEXP spacingSEXP) {
+NumericVector gaussian_blur_cpp(NumericVector arr, IntegerVector mask_idx, int window, double sigma, NumericVector spacing, bool normalize);
+RcppExport SEXP _neuroim2_gaussian_blur_cpp(SEXP arrSEXP, SEXP mask_idxSEXP, SEXP windowSEXP, SEXP sigmaSEXP, SEXP spacingSEXP, SEXP normalizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -262,7 +262,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type window(windowSEXP);
     Rcpp::traits::input_parameter< double >::type sigma(sigmaSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type spacing(spacingSEXP);
-    rcpp_result_gen = Rcpp::wrap(gaussian_blur_cpp(arr, mask_idx, window, sigma, spacing));
+    Rcpp::traits::input_parameter< bool >::type normalize(normalizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(gaussian_blur_cpp(arr, mask_idx, window, sigma, spacing, normalize));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -410,7 +411,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_neuroim2_exgridToIndex4DCpp", (DL_FUNC) &_neuroim2_exgridToIndex4DCpp, 5},
     {"_neuroim2_box_nbhd", (DL_FUNC) &_neuroim2_box_nbhd, 8},
     {"_neuroim2_gaussian_weights", (DL_FUNC) &_neuroim2_gaussian_weights, 3},
-    {"_neuroim2_gaussian_blur_cpp", (DL_FUNC) &_neuroim2_gaussian_blur_cpp, 5},
+    {"_neuroim2_gaussian_blur_cpp", (DL_FUNC) &_neuroim2_gaussian_blur_cpp, 6},
     {"_neuroim2_box_blur", (DL_FUNC) &_neuroim2_box_blur, 3},
     {"_neuroim2_local_sphere", (DL_FUNC) &_neuroim2_local_sphere, 6},
     {"_neuroim2_local_spheres", (DL_FUNC) &_neuroim2_local_spheres, 4},
