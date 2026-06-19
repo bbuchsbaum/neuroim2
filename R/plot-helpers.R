@@ -2,7 +2,7 @@
 
 #' @keywords internal
 #' @noRd
-utils::globalVariables(c("x","y","value","z"))
+utils::globalVariables(c("x", "y", "value", "z", "fill"))
 
 #' Coerce a NeuroSlice (or matrix-like) to a numeric matrix
 #' @keywords internal
@@ -89,11 +89,18 @@ orient_slice_for_raster <- function(slc, mat, alpha_map = NULL) {
     out_alpha[fill_idx] <- as.numeric(alpha_map)
   }
 
+  xr <- raster_extent_from_centers(xvals)
+  yr <- raster_extent_from_centers(yvals)
+
   list(
     mat = out_mat,
     alpha_map = out_alpha,
     x = xvals,
-    y = yvals
+    y = yvals,
+    xmin = xr[1],
+    xmax = xr[2],
+    ymin = yr[1],
+    ymax = yr[2]
   )
 }
 
@@ -449,7 +456,7 @@ make_overlay_legend <- function(thresh, pos_col, neg_col, symmetric = TRUE,
       ggplot2::annotate("segment", x = 0.58, xend = 0.625, y = 0.60, yend = 0.60,
                         colour = fg, linetype = "dashed", linewidth = 0.6) +
       ggplot2::annotate("text", x = 0.635, y = 0.60,
-                        label = sprintf("Threshold (±%g)", thresh),
+                        label = sprintf("Threshold (+/-%g)", thresh),
                         hjust = 0, vjust = 0.5, colour = fg, size = 3.3)
   }
 
