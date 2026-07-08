@@ -139,5 +139,5 @@ components, or searchlights:
 
 - `vignette("VolumesAndVectors")` for the core data containers
 - `vignette("regionOfInterest")` for the full ROI API surface
-- `vignette("pipelines")` for older split-map-reduce examples
+- `vignette("pipelines")` for direct slice, volume, and voxel-vector iteration
 - `vignette("clustered-neurovec")` for parcel-based data structures

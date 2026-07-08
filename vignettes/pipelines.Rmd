@@ -28,11 +28,11 @@ suppressPackageStartupMessages({
 })
 ```
 
-This article is now the older, lower-level companion to
-`vignette("AnalysisWorkflows")`. Read that vignette first if you want the
-shortest path to ROI extraction, searchlights, and split-map-reduce patterns.
-Use this article when you want more raw examples of composing those operations
-with `purrr` and direct list-processing.
+This article focuses on the direct iteration tools in `neuroim2`: splitting
+volumes, vectors, and voxel series into pieces, mapping ordinary R functions
+over those pieces, and reducing the results. For ROI- and searchlight-centered
+workflows, see `vignette("AnalysisWorkflows")`; for slice-, volume-, and
+voxel-vector iteration, start here.
 
 # Pipelining operations with a functional style
 
@@ -40,10 +40,10 @@ with `purrr` and direct list-processing.
 map a function over those pieces, and then reduce the results back into a
 vector, list, or derived image.
 
-The ROI- and searchlight-based split-map-reduce patterns now live in
-`vignette("AnalysisWorkflows")`. This article keeps the lower-level iteration
-helpers that are still useful when you want to split by slices, volumes, or
-voxel vectors directly.
+The examples below use `purrr` and simple list-processing. They are useful when
+the pieces are defined directly by the image container itself: slices from a
+`NeuroVol`, volumes from a `NeuroVec`, or voxel-wise time series from a 4D
+object.
 
 ```{r}
 file_name <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
