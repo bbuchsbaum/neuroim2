@@ -89,7 +89,8 @@ The simulation combines several realistic features:
 }
 
 The spatial smoothing uses the package's optimized \code{\link{gaussian_blur}} 
-function for efficiency.
+function for efficiency. Set any FWHM argument to \code{0} to disable that
+smoothing step.
 }
 \examples{
 # Create a simple spherical mask

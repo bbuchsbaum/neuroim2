@@ -167,3 +167,20 @@ test_that("print.summary.NeuroVec works for SparseNeuroVec summary", {
   expect_true(length(out) > 0)
   expect_true(any(grepl("SparseNeuroVec", out)))
 })
+
+test_that("Summary group methods for sparse objects include structural zeros", {
+  sp3 <- NeuroSpace(c(3L, 3L, 3L), c(1, 1, 1))
+  svol <- SparseNeuroVol(c(3, 4, 5), sp3, indices = c(1L, 2L, 3L))
+  expect_equal(min(svol), 0)
+  expect_equal(range(svol), c(0, 5))
+  expect_equal(prod(svol), 0)
+  expect_false(suppressWarnings(all(svol)))
+
+  sp4 <- NeuroSpace(c(3L, 3L, 3L, 2L), c(1, 1, 1))
+  mask <- array(FALSE, c(3L, 3L, 3L))
+  mask[1:3] <- TRUE
+  svec <- SparseNeuroVec(matrix(3:8, nrow = 2, ncol = 3), sp4, mask = mask)
+  expect_equal(min(svec), 0)
+  expect_equal(range(svec), c(0, 8))
+  expect_equal(prod(svec), 0)
+})

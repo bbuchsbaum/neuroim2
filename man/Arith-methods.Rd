@@ -62,16 +62,18 @@
 \S4method{Arith}{NeuroVol,ClusteredNeuroVol}(e1, e2)
 }
 \arguments{
-\item{e1}{A NeuroVol object.}
+\item{e1, e2}{For the \code{ROIVol} method, \code{ROIVol} objects with
+identical space and voxel sets.}
 
 \item{e2}{A NeuroVec object.}
+
+\item{e1}{A NeuroVol object.}
 }
 \value{
 A SparseNeuroVol object representing the result of the arithmetic operation.
 
-An ROIVol object resulting from the arithmetic operation.
-
-An ROIVol object containing the result of the arithmetic operation between \code{e1} and \code{e2}.
+For the \code{ROIVol} method, an \code{ROIVol} with the same
+  coordinates as \code{e1}, containing the element-wise result.
 
 A DenseNeuroVec object representing the result of the arithmetic operation.
 
@@ -87,9 +89,6 @@ A DenseNeuroVec object resulting from the arithmetic operation.
 }
 \description{
 Methods for performing arithmetic operations on neuroimaging objects
-
-This method performs arithmetic operations between two ROIVol objects (\code{e1} and \code{e2}) using a generic arithmetic function.
-The dimensions of both objects are checked for compatibility before performing the operation.
 
 Perform an arithmetic operation between two DenseNeuroVec objects.
 The input DenseNeuroVec objects must have the same dimensions and NeuroSpace objects.
@@ -116,4 +115,11 @@ NeuroVol object.
 
 This function performs arithmetic operations on a NeuroVol object and a
 NeuroVec object.
+}
+\details{
+\strong{ROIVol contract:} element-wise arithmetic requires the same spatial
+support. Both operands must share the same \code{NeuroSpace} and the same set
+of voxel coordinates (order may differ). Missing voxels are not treated as
+zero, and the result does not grow to the union of the two ROIs. Values are
+aligned by linear voxel index before the operation.
 }

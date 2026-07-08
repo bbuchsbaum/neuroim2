@@ -68,12 +68,18 @@ validate_indices <- function(dimensions, indices, dim_names) {
     if (!is.numeric(idx)) {
       stop(sprintf("Indices for dimension '%s' must be numeric.", dim_names[d]))
     }
-    if (any(idx < 1 | idx > dimensions[d], na.rm = TRUE)) {
+    if (length(idx) == 0L) {
+      next
+    }
+    if (anyNA(idx)) {
+      stop(sprintf("NA values are not allowed in indices for dimension '%s'.", dim_names[d]))
+    }
+    # A single range() pass replaces the two logical vectors that
+    # `idx < 1 | idx > dimensions[d]` would otherwise allocate.
+    rng <- range(idx)
+    if (rng[1L] < 1 || rng[2L] > dimensions[d]) {
       stop(sprintf("Index out of bounds for dimension '%s'. Valid range: 1-%d, provided: %s",
                    dim_names[d], dimensions[d], paste(idx, collapse = ",")))
-    }
-    if (any(is.na(idx))) {
-      stop(sprintf("NA values are not allowed in indices for dimension '%s'.", dim_names[d]))
     }
   }
 }
@@ -222,12 +228,20 @@ setMethod(f="[", signature=signature(x = "ArrayLike4D", i = "missing", j = "nume
 #' @export
 setMethod(f="[", signature=signature(x = "ArrayLike3D", i = "numeric", j = "missing", drop="ANY"),
           def=function (x, i, j, k, ..., drop=TRUE) {
-            if (missing(k)) k <- 1:(dim(x)[3])
-            j_full <- seq_len(dim(x)[2])
-            grid <- expand.grid(i=i, j=j_full, k=k)
-            lin <- grid_to_index(space(x), as.matrix(grid))
+            d <- dim(x)
+            if (missing(k)) k <- seq_len(d[3])
+            j_full <- seq_len(d[2])
+            ni <- length(i); nj <- length(j_full); nk <- length(k)
+
+            # Build column-major linear indices directly (i fastest, then j, then
+            # k) instead of materialising an expand.grid data.frame + matrix.
+            ii <- rep.int(as.numeric(i), nj * nk)
+            jj <- rep(rep(j_full, each = ni), times = nk)
+            kk <- rep(k, each = ni * nj)
+            lin <- ii + (jj - 1) * d[1] + (kk - 1) * d[1] * d[2]
+
             vals <- linear_access(x, lin)
-            arr <- array(vals, dim = c(length(i), length(j_full), length(k)))
+            arr <- array(vals, dim = c(ni, nj, nk))
             if (drop) base::drop(arr) else arr
           }
 )
@@ -304,32 +318,44 @@ setMethod("linear_access", signature(x="DenseNeuroVec", i="integer"),
             x@.Data[i]
           })
 
+# DenseNeuroVec: subset the backing 4D array directly. The generic ArrayLike4D
+# path materialises a full linear-index vector via exgridToIndex4DCpp() before
+# calling linear_access(); for dense storage that is pure overhead.
+#' @rdname extract-methods
+#' @export
+setMethod(f="[", signature=signature(x = "DenseNeuroVec", i = "numeric", j = "numeric", drop = "ANY"),
+          def=function (x, i, j, k, m, ..., drop=TRUE) {
+            d <- dim(x)
+            if (missing(k)) k <- seq_len(d[3])
+            if (missing(m)) m <- seq_len(d[4])
+            validate_indices(d, list(i = i, j = j, k = k, m = m), c("i", "j", "k", "m"))
+            x@.Data[i, j, k, m, drop = drop]
+          })
+
 # DenseNeuroVol explicit extractor to ensure S4 dispatch respects drop
 #' @rdname extract-methods
 #' @export
 setMethod(f="[", signature=signature(x = "DenseNeuroVol", i = "numeric", j = "missing"),
           def=function (x, i, j, k, ..., drop=TRUE) {
             if (missing(k)) {
-              # decide between first-dimension slicing and linear indexing
-              if (all(i >= 1 & i <= dim(x)[1])) {
-                k <- 1:(dim(x)[3])
-                j_full <- seq_len(dim(x)[2])
-                grid <- expand.grid(i=i, j=j_full, k=k)
-                lin <- grid_to_index(space(x), as.matrix(grid))
-                vals <- linear_access(x, lin)
-                arr <- array(vals, dim = c(length(i), length(j_full), length(k)))
-                if (drop) base::drop(arr) else arr
+              # Decide between first-dimension slicing (x[i, ]) and linear
+              # indexing (x[idx]). range() is a single C pass and avoids the
+              # temporary logical vector that `all(i >= 1 & i <= d1)` allocates.
+              if (length(i) > 0L) {
+                rng <- range(i)
+                in_first_dim <- rng[1L] >= 1 && rng[2L] <= dim(x)[1L]
               } else {
-                # treat as linear indices when out-of-range for first dimension
-                return(linear_access(x, i))
+                in_first_dim <- TRUE
+              }
+              if (in_first_dim) {
+                # Index the underlying array directly: identical column-major
+                # ordering to grid_to_index(), but no grid materialisation.
+                x@.Data[i, , , drop = drop]
+              } else {
+                linear_access(x, i)
               }
             } else {
-              j_full <- seq_len(dim(x)[2])
-              grid <- expand.grid(i=i, j=j_full, k=k)
-              lin <- grid_to_index(space(x), as.matrix(grid))
-              vals <- linear_access(x, lin)
-              arr <- array(vals, dim = c(length(i), length(j_full), length(k)))
-              if (drop) base::drop(arr) else arr
+              x@.Data[i, , k, drop = drop]
             }
           })
 
@@ -338,26 +364,20 @@ setMethod(f="[", signature=signature(x = "DenseNeuroVol", i = "numeric", j = "mi
 #' @export
 setMethod(f="[", signature=signature(x = "DenseNeuroVol", i = "integer", j = "missing"),
           def=function (x, i, j, k, ..., drop=TRUE) {
-            i <- as.numeric(i)
             if (missing(k)) {
-              if (all(i >= 1 & i <= dim(x)[1])) {
-                k <- 1:(dim(x)[3])
-                j_full <- seq_len(dim(x)[2])
-                grid <- expand.grid(i=i, j=j_full, k=k)
-                lin <- grid_to_index(space(x), as.matrix(grid))
-                vals <- linear_access(x, lin)
-                arr <- array(vals, dim = c(length(i), length(j_full), length(k)))
-                if (drop) base::drop(arr) else arr
+              if (length(i) > 0L) {
+                rng <- range(i)
+                in_first_dim <- rng[1L] >= 1L && rng[2L] <= dim(x)[1L]
               } else {
-                return(linear_access(x, i))
+                in_first_dim <- TRUE
+              }
+              if (in_first_dim) {
+                x@.Data[i, , , drop = drop]
+              } else {
+                linear_access(x, as.numeric(i))
               }
             } else {
-              j_full <- seq_len(dim(x)[2])
-              grid <- expand.grid(i=i, j=j_full, k=k)
-              lin <- grid_to_index(space(x), as.matrix(grid))
-              vals <- linear_access(x, lin)
-              arr <- array(vals, dim = c(length(i), length(j_full), length(k)))
-              if (drop) base::drop(arr) else arr
+              x@.Data[i, , k, drop = drop]
             }
           })
 

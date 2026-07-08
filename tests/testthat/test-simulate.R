@@ -181,3 +181,77 @@ test_that("simulate_fmri TR attribute is set", {
   
   expect_equal(attr(sim_data, "TR"), TR_val)
 })
+
+test_that("simulate_fmri supports zero smoothing FWHM values", {
+  dims <- c(6, 6, 4)
+  mask_array <- array(TRUE, dims)
+  mask <- NeuroVol(mask_array, NeuroSpace(dims, c(2, 2, 2)))
+
+  sim_data <- simulate_fmri(
+    mask,
+    n_time = 6,
+    spatial_fwhm = 0,
+    hetero_fwhm = 0,
+    factor_fwhm = 0,
+    n_factors = 2,
+    seed = 42
+  )
+
+  expect_s4_class(sim_data, "NeuroVec")
+  expect_equal(dim(sim_data), c(dims, 6))
+  expect_false(anyNA(as.array(sim_data)))
+})
+
+test_that("simulate_fmri supports n_time = 1", {
+  dims <- c(6, 6, 4)
+  mask_array <- array(TRUE, dims)
+  mask <- NeuroVol(mask_array, NeuroSpace(dims))
+
+  sim_data <- simulate_fmri(
+    mask,
+    n_time = 1,
+    global_amp = 0.2,
+    n_factors = 2,
+    seed = 12,
+    return_centered = FALSE
+  )
+
+  expect_s4_class(sim_data, "NeuroVec")
+  expect_equal(dim(sim_data), c(dims, 1))
+  expect_false(anyNA(as.array(sim_data)))
+})
+
+test_that("simulate_fmri handles single-voxel masks without NA output", {
+  dims <- c(6, 6, 4)
+  mask_array <- array(FALSE, dims)
+  mask_array[3, 3, 2] <- TRUE
+  mask <- NeuroVol(mask_array, NeuroSpace(dims))
+
+  sim_data <- simulate_fmri(
+    mask,
+    n_time = 5,
+    n_factors = 0,
+    global_amp = 0,
+    seed = 123
+  )
+
+  sim_array <- as.array(sim_data)
+  expect_false(anyNA(sim_array))
+  expect_true(all(sim_array[!array(mask_array, dim = c(dims, 1))] == 0))
+})
+
+test_that("simulate_fmri validates scalar parameters", {
+  dims <- c(6, 6, 4)
+  mask_array <- array(TRUE, dims)
+  mask <- NeuroVol(mask_array, NeuroSpace(dims))
+
+  expect_error(simulate_fmri(mask, n_time = 1.5), "n_time")
+  expect_error(simulate_fmri(mask, n_time = 2, TR = 0), "TR")
+  expect_error(simulate_fmri(mask, n_time = 2, spatial_fwhm = -1), "spatial_fwhm")
+  expect_error(simulate_fmri(mask, n_time = 2, hetero_fwhm = -1), "hetero_fwhm")
+  expect_error(simulate_fmri(mask, n_time = 2, factor_fwhm = -1), "factor_fwhm")
+  expect_error(simulate_fmri(mask, n_time = 2, global_rho = 1), "global_rho")
+  expect_error(simulate_fmri(mask, n_time = 2, factor_rho = 1), "factor_rho")
+  expect_error(simulate_fmri(mask, n_time = 2, n_factors = 1.5), "n_factors")
+  expect_error(simulate_fmri(mask, n_time = 2, return_centered = NA), "return_centered")
+})

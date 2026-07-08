@@ -54,7 +54,8 @@ NULL
 #' }
 #'
 #' The spatial smoothing uses the package's optimized \code{\link{gaussian_blur}} 
-#' function for efficiency.
+#' function for efficiency. Set any FWHM argument to \code{0} to disable that
+#' smoothing step.
 #'
 #' @examples
 #' # Create a simple spherical mask
@@ -105,12 +106,49 @@ simulate_fmri <- function(mask,
   if (!is.null(seed)) set.seed(seed)
   
   # Validate inputs
-  stopifnot(inherits(mask, "NeuroVol"))
-  stopifnot(n_time > 0)
-  stopifnot(spatial_fwhm >= 0)
-  stopifnot(ar_mean >= 0 && ar_mean < 1)
-  stopifnot(ar_sd >= 0)
-  stopifnot(noise_sd > 0)
+  if (!inherits(mask, "NeuroVol")) {
+    cli::cli_abort("{.arg mask} must inherit from {.cls NeuroVol}.")
+  }
+
+  assert_scalar <- function(x, name, whole = FALSE) {
+    if (!is.numeric(x) || length(x) != 1L || is.na(x) || !is.finite(x)) {
+      cli::cli_abort("{.arg {name}} must be a single finite numeric value.")
+    }
+    if (whole && x != floor(x)) {
+      cli::cli_abort("{.arg {name}} must be a whole number.")
+    }
+    invisible(x)
+  }
+
+  assert_scalar(n_time, "n_time", whole = TRUE)
+  assert_scalar(TR, "TR")
+  assert_scalar(spatial_fwhm, "spatial_fwhm")
+  assert_scalar(ar_mean, "ar_mean")
+  assert_scalar(ar_sd, "ar_sd")
+  assert_scalar(noise_sd, "noise_sd")
+  assert_scalar(hetero_fwhm, "hetero_fwhm")
+  assert_scalar(hetero_strength, "hetero_strength")
+  assert_scalar(global_amp, "global_amp")
+  assert_scalar(global_rho, "global_rho")
+  assert_scalar(n_factors, "n_factors", whole = TRUE)
+  assert_scalar(factor_fwhm, "factor_fwhm")
+  assert_scalar(factor_rho, "factor_rho")
+
+  if (n_time < 1L) cli::cli_abort("{.arg n_time} must be >= 1.")
+  if (TR <= 0) cli::cli_abort("{.arg TR} must be > 0.")
+  if (spatial_fwhm < 0) cli::cli_abort("{.arg spatial_fwhm} must be >= 0.")
+  if (hetero_fwhm < 0) cli::cli_abort("{.arg hetero_fwhm} must be >= 0.")
+  if (factor_fwhm < 0) cli::cli_abort("{.arg factor_fwhm} must be >= 0.")
+  if (ar_mean < 0 || ar_mean >= 1) cli::cli_abort("{.arg ar_mean} must be in [0, 1).")
+  if (ar_sd < 0) cli::cli_abort("{.arg ar_sd} must be >= 0.")
+  if (noise_sd <= 0) cli::cli_abort("{.arg noise_sd} must be > 0.")
+  if (global_amp < 0) cli::cli_abort("{.arg global_amp} must be >= 0.")
+  if (global_rho < 0 || global_rho >= 1) cli::cli_abort("{.arg global_rho} must be in [0, 1).")
+  if (n_factors < 0L) cli::cli_abort("{.arg n_factors} must be >= 0.")
+  if (factor_rho < 0 || factor_rho >= 1) cli::cli_abort("{.arg factor_rho} must be in [0, 1).")
+  if (!is.logical(return_centered) || length(return_centered) != 1L || is.na(return_centered)) {
+    cli::cli_abort("{.arg return_centered} must be TRUE or FALSE.")
+  }
   
   # Get mask dimensions and indices
   dm <- dim(mask)
@@ -134,19 +172,27 @@ simulate_fmri <- function(mask,
   factor_sigma <- fwhm_to_sigma(factor_fwhm)
   
   # Compute window size for gaussian_blur (3 sigma on each side)
-  spatial_window <- max(1, ceiling(3 * spatial_sigma / min(voxsize)))
-  hetero_window <- max(1, ceiling(3 * hetero_sigma / min(voxsize)))
-  factor_window <- max(1, ceiling(3 * factor_sigma / min(voxsize)))
+  spatial_window <- if (spatial_sigma > 0) max(1L, ceiling(3 * spatial_sigma / min(voxsize))) else 0L
+  hetero_window <- if (hetero_sigma > 0) max(1L, ceiling(3 * hetero_sigma / min(voxsize))) else 0L
+  factor_window <- if (factor_sigma > 0) max(1L, ceiling(3 * factor_sigma / min(voxsize))) else 0L
   
   # Create mask as LogicalNeuroVol for gaussian_blur
   mask_vol <- as.logical(mask)
+
+  smooth_vol <- function(vol, sigma, window) {
+    if (sigma > 0) {
+      gaussian_blur(vol, mask_vol, sigma = sigma, window = as.integer(window))
+    } else {
+      vol
+    }
+  }
   
   # Pre-compute scaling factor for spatial smoothing
   # Create calibration noise and smooth it to determine scaling
   calib_array <- array(0, dm)
   calib_array[mask_idx] <- rnorm(n_vox)
   calib_vol <- NeuroVol(calib_array, space(mask))
-  calib_smooth <- gaussian_blur(calib_vol, mask_vol, sigma = spatial_sigma, window = spatial_window)
+  calib_smooth <- smooth_vol(calib_vol, spatial_sigma, spatial_window)
   sm_sd <- sd(as.array(calib_smooth)[mask_idx])
   smooth_scale <- if (!is.na(sm_sd) && sm_sd > 0) 1 / sm_sd else 1
   
@@ -160,7 +206,7 @@ simulate_fmri <- function(mask,
     rho_vol <- NeuroVol(rho_array, space(mask))
     rho_smooth <- gaussian_blur(rho_vol, mask_vol, 
                                 sigma = spatial_sigma / 4,  # Light smoothing
-                                window = max(1, spatial_window / 4))
+                                window = max(1L, as.integer(ceiling(spatial_window / 4))))
     rho_array <- as.array(rho_smooth)
   }
   
@@ -170,9 +216,19 @@ simulate_fmri <- function(mask,
   het_array <- array(0, dm)
   het_array[mask_idx] <- rnorm(n_vox)
   het_vol <- NeuroVol(het_array, space(mask))
-  het_smooth <- gaussian_blur(het_vol, mask_vol, sigma = hetero_sigma, window = hetero_window)
+  het_smooth <- smooth_vol(het_vol, hetero_sigma, hetero_window)
   het_field <- as.array(het_smooth)[mask_idx]
-  het_field <- as.numeric(base::scale(het_field))  # Standardize
+  if (hetero_strength == 0) {
+    het_field <- numeric(n_vox)
+  } else {
+    het_mean <- mean(het_field)
+    het_sd <- sd(het_field)
+    if (is.finite(het_sd) && het_sd > 0) {
+      het_field <- as.numeric((het_field - het_mean) / het_sd)
+    } else {
+      het_field <- numeric(n_vox)
+    }
+  }
   sd_vox <- as.numeric(noise_sd * exp(hetero_strength * het_field))
   
   # AR(1) innovation SD per voxel
@@ -183,8 +239,10 @@ simulate_fmri <- function(mask,
   if (global_amp > 0) {
     g_e_sd <- sqrt(1 - global_rho^2)
     g[1] <- rnorm(1, sd = 1)
-    for (t in 2:n_time) {
-      g[t] <- global_rho * g[t-1] + rnorm(1, sd = g_e_sd)
+    if (n_time >= 2L) {
+      for (t in 2:n_time) {
+        g[t] <- global_rho * g[t-1] + rnorm(1, sd = g_e_sd)
+      }
     }
     g <- g * (global_amp * stats::median(sd_vox))
   }
@@ -198,12 +256,8 @@ simulate_fmri <- function(mask,
       m_array <- array(0, dm)
       m_array[mask_idx] <- rnorm(n_vox)
       m_vol <- NeuroVol(m_array, space(mask))
-      m_smooth <- gaussian_blur(m_vol, mask_vol, sigma = factor_sigma, window = factor_window)
+      m_smooth <- smooth_vol(m_vol, factor_sigma, factor_window)
       v <- as.array(m_smooth)[mask_idx]
-      if (length(v) != n_vox) {
-        warning(sprintf("factor map length (%d) differs from mask voxels (%d); regenerating unsmoothed factor", length(v), n_vox))
-        v <- rnorm(n_vox)
-      }
       v <- v / sqrt(sum(v^2) + 1e-12)  # L2 normalize
       F_maps[, k] <- v
     }
@@ -212,8 +266,10 @@ simulate_fmri <- function(mask,
     Z_tc <- matrix(0, nrow = n_factors, ncol = n_time)
     e_sd <- sqrt(1 - factor_rho^2)
     Z_tc[, 1] <- rnorm(n_factors, sd = 1)
-    for (t in 2:n_time) {
-      Z_tc[, t] <- factor_rho * Z_tc[, t-1] + rnorm(n_factors, sd = e_sd)
+    if (n_time >= 2L) {
+      for (t in 2:n_time) {
+        Z_tc[, t] <- factor_rho * Z_tc[, t-1] + rnorm(n_factors, sd = e_sd)
+      }
     }
     Z_tc <- Z_tc * (0.3 * stats::median(sd_vox))
   }
@@ -230,7 +286,7 @@ simulate_fmri <- function(mask,
     eps_array <- array(0, dm)
     eps_array[mask_idx] <- rnorm(n_vox)
     eps_vol <- NeuroVol(eps_array, space(mask))
-    eps_smooth <- gaussian_blur(eps_vol, mask_vol, sigma = spatial_sigma, window = spatial_window)
+    eps_smooth <- smooth_vol(eps_vol, spatial_sigma, spatial_window)
     e_vec <- as.array(eps_smooth)[mask_idx] * smooth_scale * sigma_e
     
     # AR(1) update
@@ -255,10 +311,10 @@ simulate_fmri <- function(mask,
   
   # Optionally center each voxel time series
   if (return_centered) {
-    mu <- apply(out, 1:3, mean)
-    for (t in seq_len(n_time)) {
-      out[,,,t] <- out[,,,t] - mu
-    }
+    out_mat <- matrix(out, nrow = prod(dm), ncol = n_time)
+    out_mat[mask_idx, ] <- out_mat[mask_idx, , drop = FALSE] -
+      rowMeans(out_mat[mask_idx, , drop = FALSE])
+    out <- array(out_mat, dim = c(dm, n_time))
   }
   
   # Create 4D NeuroSpace by adding time dimension to mask space

@@ -119,6 +119,20 @@ test_that("DenseNeuroVol == DenseNeuroVol returns LogicalNeuroVol", {
   expect_true(all(r@.Data))
 })
 
+test_that("ROIVol arithmetic requires the same voxel set and aligns by index", {
+  sp_roi <- NeuroSpace(c(10L, 10L, 10L), c(1, 1, 1))
+  # Same two voxels, different order
+  r1 <- ROIVol(sp_roi, rbind(c(5, 1, 1), c(2, 1, 1)), c(50, 20))
+  r2 <- ROIVol(sp_roi, rbind(c(2, 1, 1), c(5, 1, 1)), c(1, 3))
+
+  res <- r1 + r2
+  expect_equal(coords(res), coords(r1))
+  expect_equal(res@.Data, c(53, 21))
+
+  r3 <- ROIVol(sp_roi, rbind(c(2, 1, 1)), c(1))
+  expect_error(r1 + r3, "same voxel set")
+})
+
 test_that("SparseNeuroVol > numeric returns LogicalNeuroVol", {
   svol <- make_sparse()
   r <- svol > 1
@@ -293,6 +307,30 @@ test_that("DenseNeuroVec * DenseNeuroVec element-wise correctness", {
   expect_true(all(r@.Data == 6))
 })
 
+test_that("NeuroVec arithmetic fallback matches dense matrix arithmetic", {
+  sp4 <- NeuroSpace(c(3L, 3L, 3L, 4L), c(1, 1, 1))
+  mask <- array(c(rep(TRUE, 10), rep(FALSE, 17)), c(3L, 3L, 3L))
+  dat <- matrix(seq_len(4 * sum(mask)), nrow = 4, ncol = sum(mask))
+  sv <- SparseNeuroVec(dat, sp4, mask = mask)
+  dv <- DenseNeuroVec(array(1, c(3L, 3L, 3L, 4L)), sp4)
+
+  res <- sv + dv
+  expect_s4_class(res, "DenseNeuroVec")
+  expect_equal(as.matrix(res), as.matrix(sv) + as.matrix(dv))
+})
+
+test_that("NeuroVec comparison fallback supports sparse inputs", {
+  sp4 <- NeuroSpace(c(3L, 3L, 3L, 2L), c(1, 1, 1))
+  mask <- array(c(rep(TRUE, 5), rep(FALSE, 22)), c(3L, 3L, 3L))
+  sv <- SparseNeuroVec(matrix(1:10, nrow = 2, ncol = 5), sp4, mask = mask)
+  dv <- DenseNeuroVec(array(3, c(3L, 3L, 3L, 2L)), sp4)
+
+  res <- sv > dv
+  expect_true(is.array(res))
+  expect_equal(dim(res), dim(sv))
+  expect_equal(as.vector(res), as.vector(as.matrix(sv) > as.matrix(dv)))
+})
+
 test_that("DenseNeuroVec - DenseNeuroVec dimension mismatch errors", {
   sp4a <- NeuroSpace(c(3L, 3L, 3L, 5L), c(1, 1, 1))
   sp4b <- NeuroSpace(c(4L, 4L, 4L, 5L), c(1, 1, 1))
@@ -338,6 +376,19 @@ test_that("NeuroVec * NeuroVol scales each time-point correctly", {
   expect_true(all(as.matrix(r) == 6))
 })
 
+test_that("NeuroVol op NeuroVec matches dense matrix broadcast", {
+  sp4 <- NeuroSpace(c(2L, 2L, 2L, 3L), c(1, 1, 1))
+  sp3 <- NeuroSpace(c(2L, 2L, 2L),     c(1, 1, 1))
+  arr <- array(seq_len(2^3 * 3), c(2, 2, 2, 3))
+  vol_arr <- array(seq_len(2^3), c(2, 2, 2))
+  dv <- DenseNeuroVec(arr, sp4)
+  vol <- DenseNeuroVol(vol_arr, sp3)
+
+  res <- vol - dv
+  expect_s4_class(res, "DenseNeuroVec")
+  expect_equal(as.matrix(res), as.vector(vol_arr) - as.matrix(dv))
+})
+
 test_that("NeuroVec + NeuroVol spatial dim mismatch errors", {
   sp4 <- NeuroSpace(c(3L, 3L, 3L, 4L), c(1, 1, 1))
   sp3 <- NeuroSpace(c(4L, 4L, 4L),     c(1, 1, 1))
@@ -360,6 +411,16 @@ test_that("mean(DenseNeuroVec) returns DenseNeuroVol with correct values", {
   # Check one voxel: mean over time
   expected_vox1 <- mean(arr[1, 1, 1, ])
   expect_equal(mv[1, 1, 1], expected_vox1, tolerance = 1e-10)
+})
+
+test_that("mean(DenseNeuroVec) honors na.rm", {
+  sp4 <- NeuroSpace(c(2L, 2L, 2L, 3L), c(1, 1, 1))
+  arr <- array(1, c(2, 2, 2, 3))
+  arr[1, 1, 1, 2] <- NA
+  dv <- DenseNeuroVec(arr, sp4)
+
+  expect_true(is.na(mean(dv)[1, 1, 1]))
+  expect_equal(mean(dv, na.rm = TRUE)[1, 1, 1], 1)
 })
 
 test_that("mean(SparseNeuroVec) returns SparseNeuroVol", {

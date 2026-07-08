@@ -1,3 +1,16 @@
+# neuroim2 0.17.0
+
+## Bug Fixes
+
+* Fixed `linear_access()` on sparse `NeuroVec` objects, which could return wrong values or error when there were more masked voxels than time points. The sparse data matrix is stored as `[time × voxel]`; the linear-index path now indexes rows and columns in the correct order.
+* Fixed `ROIVol` arithmetic so values are aligned by voxel index, not by the original coordinate order, and fixed sparse `Summary` group methods so reductions include implicit structural zeros. `ROIVol` arithmetic now documents and enforces a same-support contract (identical space and voxel set; order may differ); missing voxels are not treated as zero.
+* Hardened `simulate_fmri()` edge cases: zero FWHM values now disable the corresponding smoothing step, `n_time = 1` no longer trips AR loops, tiny or constant masks no longer produce `NA` heteroscedasticity fields, and scalar arguments now receive explicit validation.
+
+## Improvements
+
+* Faster data access for dense and sparse neuroimaging objects: `DenseNeuroVol` and `DenseNeuroVec` subsetting now indexes the backing array directly instead of materialising full spatial grids via `expand.grid()`; `ArrayLike3D` builds column-major linear indices with vector arithmetic; and `linear_access()`, `lookup()`, and `validate_indices()` use lighter bounds checks (`anyNA` + `range()` instead of allocating large logical vectors).
+* `NeuroVec` arithmetic now uses matrix-level operations instead of per-volume S4 dispatch, `NeuroVec` comparisons work for sparse-backed inputs, and temporal `mean()` methods now honor `na.rm`.
+
 # neuroim2 0.16.0
 
 ## New Features

@@ -153,15 +153,25 @@ setMethod(f = "indices",
 setMethod(f = "lookup",
           signature = signature(x = "IndexLookupVol", i = "numeric"),
           def = function(x, i) {
-            if (!is.numeric(i) || !all(is.finite(i))) {
+            if (!is.numeric(i)) {
+              cli::cli_abort("{.arg i} must be a vector of finite numeric values.")
+            }
+            if (anyNA(i)) {
               cli::cli_abort("{.arg i} must be a vector of finite numeric values.")
             }
 
-            # Convert to integer and validate range
             i <- as.integer(i)
+            # as.integer() maps non-finite values (Inf/NaN) to NA.
+            if (anyNA(i)) {
+              cli::cli_abort("{.arg i} must be a vector of finite numeric values.")
+            }
+
             nels <- prod(dim(x@space)[1:3])
-            if (!all(i >= 1) || !all(i <= nels)) {
-              cli::cli_abort("{.arg i} must be within the range of the space dimensions [1, {nels}].")
+            if (length(i) > 0L) {
+              rng <- range(i)
+              if (rng[1L] < 1L || rng[2L] > nels) {
+                cli::cli_abort("{.arg i} must be within the range of the space dimensions [1, {nels}].")
+              }
             }
 
             x@map[i]

@@ -12,8 +12,6 @@
 \S4method{Summary}{SparseNeuroVol}(x, ..., na.rm = FALSE)
 
 \S4method{Summary}{DenseNeuroVol}(x, ..., na.rm = FALSE)
-
-\S4method{Summary}{DenseNeuroVol}(x, ..., na.rm = FALSE)
 }
 \arguments{
 \item{x}{A neuroimaging object (SparseNeuroVec, SparseNeuroVol, or DenseNeuroVol)}

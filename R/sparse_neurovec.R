@@ -506,88 +506,57 @@ setMethod(
   f = "linear_access",
   signature = signature(x = "AbstractSparseNeuroVec", i = "numeric"),
   def = function(x, i) {
-    # -------------------------------
-    # Input Validation
-    # -------------------------------
     if (!is.numeric(i)) {
       stop("'i' must be a numeric vector.")
     }
-
-    if (any(is.na(i))) {
+    if (anyNA(i)) {
       stop("'i' contains NA values, which are not allowed.")
     }
 
-    if (any(i <= 0)) {
-      stop("All indices in 'i' must be positive integers.")
-    }
-
-    if (any(i != floor(i))) {
-      stop("All indices in 'i' must be integers.")
-    }
-
-    # -------------------------------
-    # Dimension Retrieval and Validation
-    # -------------------------------
     dims <- dim(x)
     if (is.null(dims) || length(dims) < 4) {
       stop("The object 'x' must have at least 4 dimensions.")
     }
 
-    spatial_nels <- prod(dims[1:3])  # Number of elements in the first three dimensions
-    num_timepoints <- dims[4]        # Fourth dimension (e.g., time)
-
-    # Total number of elements in 'x'
+    spatial_nels <- prod(dims[1:3])
+    num_timepoints <- dims[4]
     total_elements <- spatial_nels * num_timepoints
-    if (any(i > total_elements)) {
+
+    # Single-pass bounds check avoids allocating logical vectors for large i.
+    rng <- range(i)
+    if (rng[1L] <= 0) {
+      stop("All indices in 'i' must be positive integers.")
+    }
+    if (rng[2L] > total_elements) {
       stop(sprintf("Indices in 'i' exceed the total number of elements (%d).", total_elements))
     }
-
-    # -------------------------------
-    # Mapping Linear Indices to 4D Coordinates
-    # -------------------------------
-    # Calculate timepoints and spatial_offsets using integer division and modulo
-    timepoints <- ((i - 1) %/% spatial_nels) + 1
-    spatial_offsets <- ((i - 1) %% spatial_nels) + 1
-
-    # -------------------------------
-    # Sparse Lookup
-    # -------------------------------
-    # Perform lookup to get mapping indices; assumes 'lookup' returns 0 for zeros
-    lookup_values <- lookup(x, spatial_offsets)
-
-    # Identify non-zero lookups
-    non_zero_indices <- which(lookup_values > 0)
-
-    # Early exit if all lookups are zero
-    if (length(non_zero_indices) == 0) {
-      return(rep(0, length(i)))  # All requested values are zero
+    if (!is.integer(i) && any(i != floor(i))) {
+      stop("All indices in 'i' must be integers.")
     }
 
-    # -------------------------------
-    # Prepare Indices for Data Retrieval
-    # -------------------------------
-    # Extract corresponding timepoints and spatial indices for non-zero lookups
-    data_indices <- lookup_values[non_zero_indices]  # Indices in the sparse data matrix
+    # Map linear indices to (timepoint, spatial offset).
+    i0 <- i - 1
+    timepoints <- (i0 %/% spatial_nels) + 1
+    spatial_offsets <- (i0 %% spatial_nels) + 1
 
-    # Create a two-column matrix for 'matricized_access'
-    idx_matrix <- cbind(data_indices, timepoints[non_zero_indices])
+    # Direct reverse-map lookup: spatial_offsets are guaranteed in [1, spatial_nels],
+    # so we can skip the re-validation that lookup()/IndexLookupVol would perform.
+    lookup_values <- x@map@map[spatial_offsets]
 
-    # -------------------------------
-    # Retrieve Non-Zero Values
-    # -------------------------------
-    # Retrieve the non-zero values from the data matrix
+    non_zero_indices <- which(lookup_values > 0L)
+    if (length(non_zero_indices) == 0L) {
+      return(numeric(length(i)))
+    }
+
+    data_indices <- lookup_values[non_zero_indices]
+
+    # x@data is stored as [time x voxel]; matrix index is (row = timepoint, col = voxel).
+    idx_matrix <- cbind(timepoints[non_zero_indices], data_indices)
     non_zero_values <- matricized_access(x, idx_matrix)
 
-    # -------------------------------
-    # Assemble Output Vector
-    # -------------------------------
-    # Initialize the output vector with zeros
     output_values <- numeric(length(i))
-
-    # Assign the retrieved non-zero values to their respective positions
     output_values[non_zero_indices] <- non_zero_values
-
-    return(output_values)
+    output_values
   }
 )
 

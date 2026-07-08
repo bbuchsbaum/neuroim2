@@ -7,16 +7,19 @@
 \alias{mean,NeuroVec-method}
 \title{Temporal Mean of a NeuroVec}
 \usage{
-\S4method{mean}{DenseNeuroVec}(x, ...)
+\S4method{mean}{DenseNeuroVec}(x, ..., na.rm = FALSE)
 
-\S4method{mean}{SparseNeuroVec}(x, ...)
+\S4method{mean}{SparseNeuroVec}(x, ..., na.rm = FALSE)
 
-\S4method{mean}{NeuroVec}(x, ...)
+\S4method{mean}{NeuroVec}(x, ..., na.rm = FALSE)
 }
 \arguments{
 \item{x}{A \code{\linkS4class{NeuroVec}} object.}
 
-\item{...}{Ignored.}
+\item{...}{Additional arguments (currently unused).}
+
+\item{na.rm}{Logical; if \code{TRUE}, missing values are omitted before
+computing the temporal mean at each voxel.}
 }
 \value{
 A \code{\linkS4class{NeuroVol}} containing the temporal mean at

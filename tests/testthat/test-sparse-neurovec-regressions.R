@@ -27,6 +27,25 @@ test_that("linear_access returns zeros for masked-out elements", {
   expect_equal(linear_access(svec, lin), 0)
 })
 
+test_that("linear_access matches dense conversion for masked-in voxels", {
+  svec <- make_sparse_vec()
+  dvec <- as(svec, "DenseNeuroVec")
+
+  # Full linear sweep across every element (this sparse vec has more voxels
+  # than timepoints, which previously exposed a row/column swap when mapping
+  # linear indices into the [time x voxel] data matrix).
+  all_idx <- seq_len(prod(dim(svec)))
+  expect_equal(linear_access(svec, all_idx),
+               as.vector(as.array(dvec))[all_idx])
+
+  # Spot-check a masked-in voxel at a non-first timepoint.
+  nsp <- prod(dim(svec)[1:3])
+  mask_idx <- which(svec@mask@.Data)
+  lin <- mask_idx[1] + (2 - 1) * nsp
+  dense_full <- as.array(dvec)
+  expect_equal(linear_access(svec, lin), dense_full[lin])
+})
+
 test_that("as.dense populates only masked voxels", {
   svec <- make_sparse_vec()
   dvec <- as(svec, "DenseNeuroVec")

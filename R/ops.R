@@ -12,13 +12,36 @@ NULL
 #' @keywords internal
 #' @noRd
 checkDim <- function(e1,e2) {
-  if (!all(dim(e1) == dim(e2))) {
+  d1 <- dim(e1)
+  d2 <- dim(e2)
+  if (length(d1) != length(d2) || !all(d1 == d2)) {
     cli::cli_abort("Dimensions of operands must match: {.val {dim(e1)}} vs {.val {dim(e2)}}.")
   }
-  if (!all(spacing(e1) == spacing(e2))) {
+  s1 <- spacing(e1)
+  s2 <- spacing(e2)
+  if (length(s1) != length(s2) || !all(s1 == s2)) {
     cli::cli_abort("Spacing of operands must match.")
   }
 
+}
+
+#' @keywords internal
+#' @noRd
+.sparse_summary <- function(values, total_length, generic, ..., na.rm = FALSE) {
+  structural_zero <- total_length > length(values)
+  if (generic %in% c("min", "max", "range", "prod", "any", "all") &&
+      structural_zero) {
+    values <- c(values, 0)
+  }
+  switch(generic,
+         sum = sum(values, ..., na.rm = na.rm),
+         min = min(values, ..., na.rm = na.rm),
+         max = max(values, ..., na.rm = na.rm),
+         range = range(values, ..., na.rm = na.rm),
+         prod = prod(values, ..., na.rm = na.rm),
+         any = any(values, ..., na.rm = na.rm),
+         all = all(values, ..., na.rm = na.rm),
+         cli::cli_abort("Unsupported summary operation {.val {generic}}."))
 }
 
 #' Comparison Operations
@@ -105,43 +128,47 @@ setMethod(f="Arith", signature=signature(e1="SparseNeuroVol", e2="SparseNeuroVol
           })
 
 
+#' @details
+#' \strong{ROIVol contract:} element-wise arithmetic requires the same spatial
+#' support. Both operands must share the same \code{NeuroSpace} and the same set
+#' of voxel coordinates (order may differ). Missing voxels are not treated as
+#' zero, and the result does not grow to the union of the two ROIs. Values are
+#' aligned by linear voxel index before the operation.
 #'
-#' This function performs arithmetic operations on two ROIVol objects.
-#'
-#' @param e1 An ROIVol object.
-#' @param e2 An ROIVol object.
-#'
-#' @return An ROIVol object resulting from the arithmetic operation.
+#' @param e1,e2 For the \code{ROIVol} method, \code{ROIVol} objects with
+#'   identical space and voxel sets.
+#' @return For the \code{ROIVol} method, an \code{ROIVol} with the same
+#'   coordinates as \code{e1}, containing the element-wise result.
 #'
 #' @rdname Arith-methods
 #' @export
 setMethod(f="Arith", signature=signature(e1="ROIVol", e2="ROIVol"),
           def=function(e1, e2) {
-            checkDim(e1,e2)
+            if (!identical(dim(e1@space), dim(e2@space)) ||
+                !identical(spacing(e1@space), spacing(e2@space))) {
+              cli::cli_abort(
+                "{.cls ROIVol} operands must share the same spatial dimensions and spacing."
+              )
+            }
 
-            idx1 <- grid_to_index(e1@space, e1@coords)
-            idx2 <- grid_to_index(e2@space, e2@coords)
+            idx1 <- as.integer(grid_to_index(e1@space, e1@coords))
+            idx2 <- as.integer(grid_to_index(e2@space, e2@coords))
+            if (length(idx1) != length(idx2) ||
+                !setequal(idx1, idx2)) {
+              cli::cli_abort(
+                c(
+                  "{.cls ROIVol} arithmetic requires the same voxel set in both operands.",
+                  "i" = "Got {length(idx1)} and {length(idx2)} voxels; missing voxels are not treated as 0."
+                )
+              )
+            }
 
-            indices <- sort(union(idx1, idx2))
-            v1 <- numeric(length(indices))
-            v2 <- numeric(length(indices))
-            v1[indices %in% idx1] <- e1@.Data
-            v2[indices %in% idx2] <- e2@.Data
-            res <- callGeneric(v1,v2)
-
-            ROIVol(space(e1), data=res,
-                   coords = index_to_grid(space(e1), indices))
-
+            # Align e2 to e1's coordinate order (order-independent same support).
+            v2 <- e2@.Data[match(idx1, idx2)]
+            res <- callGeneric(e1@.Data, v2)
+            ROIVol(space(e1), coords = e1@coords, data = res)
           })
 
-#' Perform arithmetic operations between two ROIVol objects
-#'
-#' This method performs arithmetic operations between two ROIVol objects (\code{e1} and \code{e2}) using a generic arithmetic function.
-#' The dimensions of both objects are checked for compatibility before performing the operation.
-#'
-#' @param e1 An ROIVol object to be used in the arithmetic operation.
-#' @param e2 An ROIVol object to be used in the arithmetic operation.
-#' @return An ROIVol object containing the result of the arithmetic operation between \code{e1} and \code{e2}.
 #' @rdname Arith-methods
 #' @export
 setMethod(f="Arith", signature=signature(e1="DenseNeuroVol", e2="DenseNeuroVol"),
@@ -265,21 +292,9 @@ setMethod(f="Arith", signature=signature(e1="SparseNeuroVec", e2="SparseNeuroVec
 #' The result is returned as a new DenseNeuroVec object.
 setMethod(f="Arith", signature=signature(e1="NeuroVec", e2="NeuroVec"),
           def=function(e1, e2) {
-            if (!all(dim(e1) == dim(e2))) {
-              stop("cannot perform arithmetic operation on arguments with different dimensions")
-            }
-
-            D4 <- dim(e1)[4]
-            vols <- list()
-
-            for (i in 1:D4) {
-              ## sub_vol(e1,i)
-              vols[[i]] <- callGeneric(e1[[i]], e2[[i]])
-            }
-
-            mat <- do.call(cbind, vols)
-            dspace <- add_dim(space(vols[[1]]), length(vols))
-            DenseNeuroVec(mat, dspace)
+            checkDim(e1, e2)
+            ret <- callGeneric(as.matrix(e1), as.matrix(e2))
+            DenseNeuroVec(ret, space(e1))
 
           })
 
@@ -302,17 +317,8 @@ setMethod(f="Arith", signature=signature(e1="NeuroVec", e2="NeuroVol"),
                spatial dimensions")
 			  }
 
-			  D4 <- dim(e1)[4]
-			  vols <- list()
-
-			  for (i in 1:D4) {
-			    ## sub_vol(e1,i)
-				  vols[[i]] <- callGeneric(e1[[i]], e2)
-			  }
-
-			  mat <- do.call(cbind, vols)
-			  dspace <- add_dim(space(vols[[1]]), length(vols))
-			  DenseNeuroVec(mat, dspace)
+			  ret <- callGeneric(as.matrix(e1), as.vector(as.dense(e2)@.Data))
+			  DenseNeuroVec(ret, space(e1))
 
 
 		  })
@@ -336,16 +342,8 @@ setMethod(f="Arith", signature=signature(e1="NeuroVol", e2="NeuroVec"),
                     different spatial dimensions")
             }
 
-            D4 <- dim(e2)[4]
-            vols <- list()
-
-            for (i in 1:D4) {
-              vols[[i]] <- callGeneric(e1, e2[[i]])
-            }
-
-            mat <- do.call(cbind, vols)
-            dspace <- add_dim(space(e1), D4)
-            DenseNeuroVec(mat, dspace)
+            ret <- callGeneric(as.vector(as.dense(e1)@.Data), as.matrix(e2))
+            DenseNeuroVec(ret, space(e2))
           })
 
 
@@ -375,14 +373,14 @@ setMethod(f="Arith", signature=signature(e1="NeuroVol", e2="NeuroVec"),
 #' @rdname Summary-methods
 setMethod(f="Summary", signature=signature(x="SparseNeuroVec"),
 		def=function(x, ..., na.rm = FALSE) {
-			callGeneric(x@data, ..., na.rm = na.rm)
+			.sparse_summary(as.vector(x@data), prod(dim(x)), .Generic, ..., na.rm = na.rm)
 		})
 
 #' @export
 #' @rdname Summary-methods
 setMethod(f="Summary", signature=signature(x="SparseNeuroVol"),
     def=function(x, ..., na.rm = FALSE) {
-      callGeneric(x@data, ..., na.rm = na.rm)
+      .sparse_summary(x@data@x, prod(dim(x)), .Generic, ..., na.rm = na.rm)
     })
 
 #' @export
@@ -392,14 +390,6 @@ setMethod(f="Summary", signature=signature(x="DenseNeuroVol"),
       callGeneric(x@.Data, ..., na.rm = na.rm)
     })
 
-#' @export
-#' @rdname Summary-methods
-setMethod(f="Summary", signature=signature(x="DenseNeuroVol", na.rm="ANY"),
-    def=function(x, ..., na.rm) {
-      callGeneric(x@.Data, ..., na.rm=na.rm)
-    })
-
-
 # ---- Temporal Mean for NeuroVec types ----------------------------------------
 
 #' Temporal Mean of a NeuroVec
@@ -408,7 +398,9 @@ setMethod(f="Summary", signature=signature(x="DenseNeuroVol", na.rm="ANY"),
 #' a 3D \code{\linkS4class{DenseNeuroVol}} or \code{\linkS4class{SparseNeuroVol}}.
 #'
 #' @param x A \code{\linkS4class{NeuroVec}} object.
-#' @param ... Ignored.
+#' @param ... Additional arguments (currently unused).
+#' @param na.rm Logical; if \code{TRUE}, missing values are omitted before
+#'   computing the temporal mean at each voxel.
 #' @return A \code{\linkS4class{NeuroVol}} containing the temporal mean at
 #'   each voxel.
 #'
@@ -424,26 +416,26 @@ setMethod(f="Summary", signature=signature(x="DenseNeuroVol", na.rm="ANY"),
 #' @aliases mean,DenseNeuroVec-method mean,SparseNeuroVec-method
 #'   mean,NeuroVec-method
 #' @export
-setMethod("mean", signature(x = "DenseNeuroVec"), function(x, ...) {
+setMethod("mean", signature(x = "DenseNeuroVec"), function(x, ..., na.rm = FALSE) {
   d <- dim(x)
   M <- matrix(x@.Data, nrow = prod(d[1:3]), ncol = d[4])
-  DenseNeuroVol(rowMeans(M), drop_dim(space(x)))
+  DenseNeuroVol(rowMeans(M, na.rm = na.rm), drop_dim(space(x)))
 })
 
 #' @rdname mean-methods
 #' @export
-setMethod("mean", signature(x = "SparseNeuroVec"), function(x, ...) {
-  vals <- colMeans(x@data)
+setMethod("mean", signature(x = "SparseNeuroVec"), function(x, ..., na.rm = FALSE) {
+  vals <- colMeans(x@data, na.rm = na.rm)
   idx  <- indices(x)
   SparseNeuroVol(vals, drop_dim(space(x)), indices = idx)
 })
 
 #' @rdname mean-methods
 #' @export
-setMethod("mean", signature(x = "NeuroVec"), function(x, ...) {
+setMethod("mean", signature(x = "NeuroVec"), function(x, ..., na.rm = FALSE) {
   d <- dim(x)
   M <- as.matrix(x)  # voxels x time
-  DenseNeuroVol(rowMeans(M), drop_dim(space(x)))
+  DenseNeuroVol(rowMeans(M, na.rm = na.rm), drop_dim(space(x)))
 })
 
 
@@ -452,7 +444,14 @@ setMethod("mean", signature(x = "NeuroVec"), function(x, ...) {
 setMethod(f="Compare", signature=signature(e1="NeuroVec", e2="NeuroVec"),
           def=function(e1, e2) {
             checkDim(e1,e2)
-            callGeneric(e1@.Data, e2@.Data)
+            ret <- if (inherits(e1, "DenseNeuroVec") && inherits(e2, "DenseNeuroVec")) {
+              callGeneric(e1@.Data, e2@.Data)
+            } else {
+              out <- callGeneric(as.matrix(e1), as.matrix(e2))
+              dim(out) <- dim(e1)
+              out
+            }
+            ret
           })
 
 
