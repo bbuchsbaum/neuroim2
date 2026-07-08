@@ -89,10 +89,7 @@ test_that("registration QC plots draw panel grids with layout labels", {
   vols <- make_registration_qc_volumes(c(5L, 6L, 4L))
   tf <- tempfile(fileext = ".png")
   grDevices::png(tf)
-  on.exit({
-    grDevices::dev.off()
-    unlink(tf)
-  }, add = TRUE)
+  on.exit(unlink(tf), add = TRUE)
 
   expect_error(
     neuroim2::plot_checkerboard(
@@ -119,6 +116,7 @@ test_that("registration QC plots draw panel grids with layout labels", {
     ),
     NA
   )
+  grDevices::dev.off()
   expect_gt(file.info(tf)$size, 0)
 })
 

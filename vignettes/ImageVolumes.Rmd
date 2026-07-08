@@ -33,16 +33,20 @@ Read that vignette first if you want the shortest introduction to `read_vol()`,
 Use this article when you specifically want deeper 3D-volume details: masks,
 coordinate conversion, manual construction, and slice-level inspection.
 
-## Read one volume to establish context
+## Read volumes to establish context
 
 ```{r}
-file_name <- system.file("extdata", "global_mask2.nii.gz", package = "neuroim2")
-vol <- read_vol(file_name)
+mask_file <- system.file("extdata", "global_mask2.nii.gz", package = "neuroim2")
+vol <- read_vol(mask_file)
+
+anat_file <- system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2")
+anat_vol <- read_vol(anat_file)
 ```
 
 This article assumes you already know the basic `NeuroVol` story from
 `vignette("VolumesAndVectors")`. The remaining sections focus on patterns that
-are specific to 3D work.
+are specific to 3D work. We use the binary mask volume for mask examples and
+the anatomical volume for slice visualization, where intensity variation matters.
 
 ```{r}
 class(vol)
@@ -111,8 +115,8 @@ including at minimum its dimensions and voxel spacing.
 
 ```{r}
     bspace <- NeuroSpace(dim=c(64,64,64), spacing=c(1,1,1))
-    vol <- NeuroVol(x, bspace)
-    vol
+    manual_vol <- NeuroVol(x, bspace)
+    manual_vol
 ```
 
 We do not usually have to create `NeuroSpace` objects by hand because real
@@ -121,25 +125,26 @@ copy an existing space:
 
 
 ```{r}
-    vol2 <- NeuroVol((vol+1)*25, space(vol))
+    vol2 <- NeuroVol((manual_vol + 1) * 25, space(manual_vol))
     max(vol2)
     space(vol2)
 ```
 
 ## Slicing and quick visualization
 
-The easiest way to view a volume is with `plot()`, which shows a 3 x 3 montage
-of evenly-spaced axial slices:
+The easiest way to view an intensity volume is with `plot()`, which shows a
+3 x 3 montage of evenly-spaced axial slices. Use an anatomical or statistical
+image here rather than a binary mask or a synthetic all-zero array:
 
 ```{r plot_montage, fig.alt='3x3 montage of axial slices.', fig.cap='Default plot() montage', fig.width=7, fig.height=7}
-plot(vol)
+plot(anat_vol)
 ```
 
 You can also extract a single 2D slice for display using standard array indexing:
 
 ```{r slice_mid, fig.alt='Mid-slice of example volume (grayscale image).', fig.cap='Mid-slice of example volume'}
-    z <- ceiling(dim(vol)[3] / 2)
-    image(vol[,,z], main = paste("Slice z=", z))
+    z <- ceiling(dim(anat_vol)[3] / 2)
+    image(anat_vol[, , z], main = paste("Slice z=", z), col = gray.colors(256))
 ```
 
 ## Reorienting and resampling
