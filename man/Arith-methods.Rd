@@ -62,12 +62,7 @@
 \S4method{Arith}{NeuroVol,ClusteredNeuroVol}(e1, e2)
 }
 \arguments{
-\item{e1, e2}{For the \code{ROIVol} method, \code{ROIVol} objects with
-identical space and voxel sets.}
-
-\item{e2}{A NeuroVec object.}
-
-\item{e1}{A NeuroVol object.}
+\item{e1, e2}{Neuroimaging operands or numeric values.}
 }
 \value{
 A SparseNeuroVol object representing the result of the arithmetic operation.

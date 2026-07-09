@@ -110,8 +110,7 @@ setMethod(f="Compare", signature=signature(e1="numeric", e2="SparseNeuroVol"),
 #'          Arith,NeuroVol,SparseNeuroVol-method
 #' @description Methods for performing arithmetic operations on neuroimaging objects
 #'
-#' @param e1 A SparseNeuroVol object.
-#' @param e2 A SparseNeuroVol object.
+#' @param e1,e2 Neuroimaging operands or numeric values.
 #' @return A SparseNeuroVol object representing the result of the arithmetic operation.
 #' @rdname Arith-methods
 #' @export
@@ -135,8 +134,6 @@ setMethod(f="Arith", signature=signature(e1="SparseNeuroVol", e2="SparseNeuroVol
 #' zero, and the result does not grow to the union of the two ROIs. Values are
 #' aligned by linear voxel index before the operation.
 #'
-#' @param e1,e2 For the \code{ROIVol} method, \code{ROIVol} objects with
-#'   identical space and voxel sets.
 #' @return For the \code{ROIVol} method, an \code{ROIVol} with the same
 #'   coordinates as \code{e1}, containing the element-wise result.
 #'
@@ -182,8 +179,6 @@ setMethod(f="Arith", signature=signature(e1="DenseNeuroVol", e2="DenseNeuroVol")
 
 #' @export
 #' @rdname Arith-methods
-#' @param e1 A DenseNeuroVec object.
-#' @param e2 A DenseNeuroVec object.
 #' @return A DenseNeuroVec object representing the result of the arithmetic operation.
 #' @description Perform an arithmetic operation between two DenseNeuroVec objects.
 #' The input DenseNeuroVec objects must have the same dimensions and NeuroSpace objects.
@@ -202,8 +197,6 @@ setMethod(f="Arith", signature=signature(e1="DenseNeuroVec", e2="DenseNeuroVec")
 
 #' @export
 #' @rdname Arith-methods
-#' @param e1 A SparseNeuroVol object.
-#' @param e2 A NeuroVol object.
 #' @return A DenseNeuroVol object representing the result of the arithmetic operation.
 #' @description Perform an arithmetic operation between a SparseNeuroVol object and a NeuroVol object.
 #' The input SparseNeuroVol and NeuroVol objects must have the same dimensions.
@@ -221,8 +214,6 @@ setMethod(f="Arith", signature=signature(e1="SparseNeuroVol", e2="NeuroVol"),
 
 #' @export
 #' @rdname Arith-methods
-#' @param e1 A NeuroVol object.
-#' @param e2 A SparseNeuroVol object.
 #' @return A DenseNeuroVol object representing the result of the arithmetic operation.
 #' @description Perform an arithmetic operation between a NeuroVol object and a SparseNeuroVol object.
 #' The input NeuroVol and SparseNeuroVol objects must have the same dimensions.
@@ -240,8 +231,6 @@ setMethod(f="Arith", signature=signature(e1="NeuroVol", e2="SparseNeuroVol"),
 
 #' @export
 #' @rdname Arith-methods
-#' @param e1 A SparseNeuroVec object.
-#' @param e2 A SparseNeuroVec object.
 setMethod(f="Arith", signature=signature(e1="SparseNeuroVec", e2="SparseNeuroVec"),
           def=function(e1, e2) {
             checkDim(e1, e2)
@@ -283,8 +272,6 @@ setMethod(f="Arith", signature=signature(e1="SparseNeuroVec", e2="SparseNeuroVec
 
 #' @export
 #' @rdname Arith-methods
-#' @param e1 A NeuroVec object.
-#' @param e2 A NeuroVec object.
 #' @return A DenseNeuroVec object representing the result of the arithmetic operation.
 #' @description Perform an arithmetic operation between two NeuroVec objects.
 #' The input NeuroVec objects must have the same dimensions.
@@ -302,9 +289,6 @@ setMethod(f="Arith", signature=signature(e1="NeuroVec", e2="NeuroVec"),
 #'
 #' This function performs arithmetic operations on a NeuroVec object and a
 #' NeuroVol object.
-#'
-#' @param e1 A NeuroVec object.
-#' @param e2 A NeuroVol object.
 #'
 #' @return A DenseNeuroVec object resulting from the arithmetic operation.
 #'
@@ -327,9 +311,6 @@ setMethod(f="Arith", signature=signature(e1="NeuroVec", e2="NeuroVol"),
 #'
 #' This function performs arithmetic operations on a NeuroVol object and a
 #' NeuroVec object.
-#'
-#' @param e1 A NeuroVol object.
-#' @param e2 A NeuroVec object.
 #'
 #' @return A DenseNeuroVec object resulting from the arithmetic operation.
 #'

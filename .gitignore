@@ -26,3 +26,7 @@ man/neuroim2.Rcheck/
 
 # Visual QC render outputs (tools/visual-qc-plots.R)
 tools/visual-qc-output/
+
+# Generated benchmark outputs
+dev/bench_after.txt
+dev/bench_baseline.txt
