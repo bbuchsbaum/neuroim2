@@ -34,17 +34,6 @@ setGeneric("as.array", function(x, ...) standardGeneric("as.array"),
 #' @export
 setGeneric("as.matrix", function(x, ...) standardGeneric("as.matrix"))
 
-#' Generic Scale Method
-#'
-#' Scales an object by (typically) subtracting the mean and dividing by the standard deviation.
-#'
-#' @param x The object to be scaled.
-#' @param ... Additional arguments for scaling methods.
-#' @return An object of the same class as \code{x}, scaled by the specified method.
-#'
-#' @export
-setGeneric("scale", function(x, ...) standardGeneric("scale"))
-
 #' Resample an Image to Match the Space of Another Image
 #'
 #' This function resamples a source image to match the spatial properties (dimensions, resolution, and orientation) of a target image.

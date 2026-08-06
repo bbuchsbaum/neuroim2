@@ -22,9 +22,14 @@ NULL
 #' @param vol A \code{\linkS4class{NeuroVol}} object representing the image volume to be smoothed.
 #' @param mask An optional \code{\linkS4class{LogicalNeuroVol}} object representing the image mask.
 #'   This mask defines the region where the blurring is applied. If not provided, the entire volume is processed.
-#' @param sigma A numeric value specifying the standard deviation of the Gaussian kernel. Default is 2.
+#' @param sigma A numeric value specifying the standard deviation of the Gaussian kernel, expressed
+#'   in the \strong{spatial units of the image} (millimetres for a typical NIfTI) --- \strong{not
+#'   voxels}. The kernel is evaluated in physical distance using \code{spacing(vol)}, so the same
+#'   \code{sigma} produces the same physical smoothing regardless of voxel size. Default is 2.
 #' @param window An integer specifying the kernel size. It represents the number of voxels to include
 #'   on each side of the center voxel. For example, window=1 results in a 3x3x3 kernel. Default is 1.
+#'   Note that \code{window} is a half-width in \strong{voxels} while \code{sigma} is in
+#'   \strong{millimetres}; see Details for how to size one against the other.
 #' @param normalize A logical value controlling how the mask boundary is handled. When \code{TRUE}
 #'   (the default), the blur is \emph{insulated} to the mask: each in-mask output voxel is computed
 #'   from in-mask neighbours only and the kernel is renormalized by the in-mask weight (a
@@ -41,6 +46,23 @@ NULL
 #' only to voxels within the specified mask (or the entire volume if no mask is provided).
 #' The kernel size is determined by the 'window' parameter, and its shape by the 'sigma' parameter.
 #'
+#' \strong{Units.} \code{sigma} is in the spatial units of the image (millimetres for typical
+#' NIfTI data), \emph{not} voxels: neighbour offsets are multiplied by \code{spacing(vol)} before
+#' the kernel is evaluated. \code{window}, by contrast, is a half-width counted in voxels. Mixing
+#' the two is the easy mistake --- converting an FWHM to sigma in voxels and passing that as
+#' \code{sigma} silently under-smooths, with no error or warning. To smooth to a target FWHM:
+#'
+#' \preformatted{
+#' fwhm_mm  <- 6
+#' sigma_mm <- fwhm_mm / (2 * sqrt(2 * log(2)))          # ~2.55 mm
+#' window   <- ceiling(3 * sigma_mm / mean(spacing(vol))) # cover +/- 3 sigma, in voxels
+#' gaussian_blur(vol, mask, sigma = sigma_mm, window = window)
+#' }
+#'
+#' \code{window} must be large enough to contain the kernel: because the kernel is truncated at
+#' \code{window} voxels, a \code{window} much smaller than \code{3 * sigma_mm / spacing} clips the
+#' Gaussian tails and delivers less smoothing than \code{sigma} implies.
+#'
 #' With the default \code{normalize = TRUE}, smoothing a masked statistical map (e.g. a first-level
 #' fMRI coefficient map written as \code{NaN} outside the brain) within its brain mask preserves the
 #' full in-mask coverage; out-of-mask \code{NaN}s do not erode the masked region and the renormalized
@@ -56,6 +78,13 @@ NULL
 #' # View a slice of the original and blurred volumes
 #' image(brain_mask[,,12])
 #' image(blurred_vol[,,12])
+#'
+#' # Smooth to a target FWHM. `sigma` is in millimetres, so convert FWHM -> sigma
+#' # in mm (NOT voxels); `window` is a voxel half-width sized to cover +/- 3 sigma.
+#' fwhm_mm  <- 6
+#' sigma_mm <- fwhm_mm / (2 * sqrt(2 * log(2)))
+#' window   <- ceiling(3 * sigma_mm / mean(spacing(brain_mask)))
+#' smoothed <- gaussian_blur(brain_mask, brain_mask, sigma = sigma_mm, window = window)
 #'
 #' @seealso
 #' \code{\link{NeuroVol-class}}, \code{\link{LogicalNeuroVol-class}}, \code{\link{bilateral_filter}}

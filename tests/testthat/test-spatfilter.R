@@ -92,6 +92,36 @@ test_that("gaussian_blur rejects invalid normalize", {
                class = "error")
 })
 
+# `sigma` is in physical units (mm), not voxels (GitHub issue #23). Pinned here
+# because the units are invisible at the call site -- `window` is in voxels, so
+# a silent switch to voxel-space sigma would halve smoothing without erroring.
+test_that("gaussian_blur sigma is in millimetres, not voxels", {
+  skip_on_cran()
+
+  # Weighted SD (in mm) of the impulse response profile along x.
+  impulse_sd_mm <- function(spacing_mm, sigma_mm, window) {
+    n <- 41L; ctr <- 21L
+    sp  <- NeuroSpace(c(n, n, n), spacing = rep(spacing_mm, 3))
+    arr <- array(0, c(n, n, n)); arr[ctr, ctr, ctr] <- 1
+    full <- LogicalNeuroVol(array(TRUE, c(n, n, n)), sp)
+
+    out <- gaussian_blur(NeuroVol(arr, sp), full, sigma = sigma_mm, window = window)
+    prof <- as.numeric(out)[seq_len(n) + (ctr - 1L) * n + (ctr - 1L) * n * n]
+    x_mm <- (seq_len(n) - ctr) * spacing_mm
+    sqrt(sum(prof * x_mm^2) / sum(prof))
+  }
+
+  # Output SD in mm tracks `sigma` directly: sigma is physical, not voxel-count.
+  expect_equal(impulse_sd_mm(2, sigma_mm = 4, window = 8), 4, tolerance = 0.02)
+  expect_equal(impulse_sd_mm(2, sigma_mm = 6, window = 12), 6, tolerance = 0.02)
+
+  # The same `sigma` gives the same physical width at a different voxel size.
+  # (If sigma were in voxels, 1 mm spacing would smooth half as far as 2 mm.)
+  expect_equal(impulse_sd_mm(1, sigma_mm = 4, window = 16),
+               impulse_sd_mm(2, sigma_mm = 4, window = 8),
+               tolerance = 0.02)
+})
+
 # Test the guided_filter function
 test_that("guided_filter works correctly", {
   skip_on_cran()

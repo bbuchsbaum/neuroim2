@@ -1,3 +1,13 @@
+# neuroim2 (development version)
+
+## Bug Fixes
+
+* **Breaking:** Removed the exported S4 generic `scale()`. It had no methods whatsoever, so attaching neuroim2 masked `base::scale()` and broke it for *every* input, not just neuroimaging objects (`scale(c(1, 2, 3))` errored with "unable to find an inherited method"). The package itself already called `base::scale()` internally to work around the mask. `scale()` now resolves to base R again; use `scale_series()` for the neuroimaging-specific scaling generic (GitHub #16).
+
+## Documentation
+
+* Clarified that `gaussian_blur()`'s `sigma` is expressed in the spatial units of the image (millimetres for typical NIfTI data), **not** voxels, while `window` remains a voxel half-width. Mixing the two silently under-smooths: an FWHM converted to sigma in voxels applies roughly half the intended smoothing with no error or warning. Added a Details section on units and an FWHM → sigma conversion example (GitHub #23).
+
 # neuroim2 0.17.0
 
 ## Bug Fixes
