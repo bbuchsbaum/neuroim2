@@ -148,17 +148,37 @@ test_that("spherical_roi keeps sorting the dbscan fallback path", {
   g <- b@coords
   expect_identical(order(g[, 1], g[, 2], g[, 3]), seq_len(nrow(g)))
 
-  # NOTE: the two paths select the same NUMBER of voxels but not the same
-  # voxels -- a long-standing discrepancy in the legacy dbscan branch that is
-  # unrelated to the offset template (both branches reproduce their own
-  # pre-optimisation output exactly). Pinned so it stays visible; the compiled
-  # path is the default and the one to trust.
+  # NOTE: the fallback is shifted by exactly +1 voxel on every axis.
+  # make_spherical_grid() documents a 0-based contract and the compiled branch
+  # honours it, but the dbscan branch returns an already-1-based cube, and
+  # spherical_roi() adds 1 unconditionally. Long-standing and unrelated to the
+  # offset template -- both branches reproduce their own pre-optimisation
+  # output exactly. Pinned so it stays visible; use_cpp = TRUE is the default
+  # and the one to trust.
   a <- spherical_roi(sp1, c(6L, 6L, 6L), 4, use_cpp = TRUE)
   expect_equal(nrow(a@coords), nrow(b@coords))
-  expect_true(any(a@coords[, 1] == 6 & a@coords[, 2] == 6 & a@coords[, 3] == 6))
-  ka <- apply(unname(a@coords), 1, paste, collapse = ",")
-  kb <- apply(unname(b@coords), 1, paste, collapse = ",")
-  expect_true(length(setdiff(ka, kb)) > 0)
+  expect_equal(unname(b@coords) - 1L, unname(a@coords))
+})
+
+test_that("the sphere primitives reject hostile inputs instead of misbehaving", {
+  # (int) of a ratio past INT_MAX is UB and yields INT_MIN on x86-64, which is
+  # NA_integer_ -- the template would silently be full of NA offsets.
+  expect_error(neuroim2:::sphere_offsets_cpp(5, c(1e-9, 1, 1)),
+               "exceeds the representable")
+  expect_error(neuroim2:::sphere_offsets_cpp(Inf, c(1, 1, 1)),
+               "non-negative and finite|exceeds the representable")
+
+  # Rcpp's operator() is unchecked: a 2-column template read past the SEXP and
+  # returned nondeterministic coordinates.
+  expect_error(neuroim2:::sphere_at_cpp(matrix(1L, 4, 2), c(3L, 3L, 3L), c(5L, 5L, 5L)),
+               "exactly 3 columns")
+
+  expect_error(neuroim2:::sphere_offsets_cpp(4, c(0, 1, 1)), "positive and finite")
+  expect_error(neuroim2:::sphere_offsets_cpp(-1, c(1, 1, 1)), "non-negative")
+  expect_error(neuroim2:::.sphere_offsets(c(1, 2), c(1, 1, 1)), "single value")
+
+  # and the normal path is untouched
+  expect_equal(nrow(neuroim2:::sphere_offsets_cpp(4, c(2, 2, 2))), 33L)
 })
 
 test_that("the offset cache does not confuse distinct radii or spacings", {

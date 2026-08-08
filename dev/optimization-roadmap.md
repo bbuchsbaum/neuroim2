@@ -174,22 +174,40 @@ Independent of everything above; each is small and self-contained.
 Not a performance issue, but it surfaced while verifying Phase 2's ordering
 claim and should be recorded.
 
-`spherical_roi(..., use_cpp = FALSE)` and `use_cpp = TRUE` return the **same
-number of voxels but a different set**. For a 12³ volume at 2 mm spacing,
-centroid (6,6,6), radius 4: both return 33 voxels, 19 of which differ. The
-compiled path is centred on the requested centroid; the dbscan fallback is
-offset from it.
+`spherical_roi(..., use_cpp = FALSE)` returns a neighbourhood shifted by
+**exactly +1 voxel on every axis** relative to `use_cpp = TRUE`:
+
+```r
+sp1 <- NeuroSpace(c(10,10,10), c(1,1,1))
+range(coords(spherical_roi(sp1, c(5,5,5), 3.5, use_cpp = TRUE))[,1])   # 2 8
+range(coords(spherical_roi(sp1, c(5,5,5), 3.5, use_cpp = FALSE))[,1])  # 3 9
+all.equal(coords(spherical_roi(sp1, c(5,5,5), 3.5, use_cpp = FALSE)) - 1L,
+          coords(spherical_roi(sp1, c(5,5,5), 3.5, use_cpp = TRUE)))    # TRUE
+```
+
+**Root cause.** `make_spherical_grid()` documents a 0-based contract, and the
+compiled branch honours it. The `dbscan` branch returns `cube`, which is built
+from `seq(centroid - w, centroid + w)` and is therefore already **1-based**.
+`spherical_roi()` then applies `grid <- grid + 1L` unconditionally, so the
+fallback comes out one voxel high on each axis.
 
 This predates the optimisation work — both branches reproduce their own
 pre-change output byte-for-byte across the golden sweep, so nothing here
 introduced it. `use_cpp = TRUE` is the default and is the correct one.
 
-Options, in order of preference: delete the fallback (it exists only as a
-pre-C++ legacy path and nothing in the package or tests uses it); or fix the
-`dbscan::frNN` index mapping and add an equivalence test between the branches.
-The discrepancy is currently pinned by a test in
-`tests/testthat/test-roi-series-fastpaths.R` so it cannot regress silently
-further.
+Options, in order of preference:
+
+1. **Delete the fallback.** It exists only as a pre-C++ legacy path; nothing in
+   the package or its tests uses `use_cpp = FALSE`. This also drops the
+   `dbscan::frNN` dependency from this file.
+2. **Fix it**: subtract 1 from `cube` in the `dbscan` branch so it satisfies the
+   0-based contract, then assert branch equivalence in a test.
+
+Either is a small change, but both alter output for anyone passing
+`use_cpp = FALSE`, so it is the maintainer's call rather than something to fold
+into a performance commit. The discrepancy is pinned by a test in
+`tests/testthat/test-roi-series-fastpaths.R` so it cannot drift further
+unnoticed.
 
 ---
 

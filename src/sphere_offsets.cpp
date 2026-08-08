@@ -43,12 +43,24 @@ IntegerMatrix sphere_offsets_cpp(double radius, NumericVector spacing) {
         stop("sphere_offsets_cpp: 'radius' must be non-negative and finite");
     }
 
-    const int wx = (int) std::ceil(radius / spacing[0]);
-    const int wy = (int) std::ceil(radius / spacing[1]);
-    const int wz = (int) std::ceil(radius / spacing[2]);
+    // Casting the ratio to int is undefined once it exceeds INT_MAX, and on
+    // x86-64 it yields INT_MIN -- which is R's NA_integer_, so the template
+    // would silently be full of NA offsets. Reject before the cast.
+    double wd[3];
+    for (int a = 0; a < 3; ++a) {
+        wd[a] = std::ceil(radius / spacing[a]);
+        if (!R_finite(wd[a]) || wd[a] > 2147483000.0) {
+            stop("sphere_offsets_cpp: radius/spacing exceeds the representable "
+                 "neighbourhood size on axis %d", a + 1);
+        }
+    }
+    const int wx = (int) wd[0];
+    const int wy = (int) wd[1];
+    const int wz = (int) wd[2];
 
     std::vector<int> ox, oy, oz;
-    // Upper bound on the sphere's volume, to avoid repeated reallocation.
+    // Typical searchlight neighbourhoods are a few hundred voxels; this is a
+    // starting hint that avoids the first few reallocations, not a bound.
     ox.reserve(256); oy.reserve(256); oz.reserve(256);
 
     for (int i = -wx; i <= wx; i++) {
@@ -85,6 +97,11 @@ NumericMatrix sphere_at_cpp(IntegerMatrix off, IntegerVector centre, IntegerVect
                             bool base0 = true) {
     if (centre.size() < 3 || dim.size() < 3) {
         stop("sphere_at_cpp: 'centre' and 'dim' must have at least 3 elements");
+    }
+    // Rcpp's operator() is unchecked, so a template with the wrong shape would
+    // read past the end of the SEXP rather than error.
+    if (off.ncol() != 3) {
+        stop("sphere_at_cpp: 'off' must have exactly 3 columns");
     }
     const int cx = centre[0], cy = centre[1], cz = centre[2];
     const int d0 = dim[0], d1 = dim[1], d2 = dim[2];
