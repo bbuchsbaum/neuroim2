@@ -50,6 +50,18 @@ length(roi)
 head(coords(roi), 3)
 ```
 
+`nonzero` only bites near the edge of the mask. Deep inside the brain it has
+nothing to remove; at the boundary it removes a great deal:
+
+```{r nonzero}
+edge <- c(20, 10, 4)
+
+c(
+  all = length(spherical_roi(mask, edge, radius = 8)),
+  in_mask = length(spherical_roi(mask, edge, radius = 8, nonzero = TRUE))
+)
+```
+
 An ROI knows three things: where its voxels are (`coords()`), their linear
 positions (`indices()`), and what is stored in them (`values()`). Pulling a
 region's time courses out of a 4D image is `series_roi()`:
@@ -72,15 +84,19 @@ length(cuboid_roi(sp, c(10, 10, 10), surround = 3))
 length(square_roi(sp, c(10, 10, 10), surround = 2, fixdim = 3))
 ```
 
-Building many spheres at once is much faster through `spherical_roi_set()` than
-a loop:
+`spherical_roi_set()` is the convenience wrapper for a list of centres — it
+loops over `spherical_roi()` internally, so expect convenience rather than
+speed:
 
 ```{r roi-set}
 centres <- rbind(c(20, 20, 10), c(40, 40, 14), c(32, 32, 12))
-rois <- spherical_roi_set(bvol = mask, centroids = centres, radius = 8, fill = 1)
+rois <- spherical_roi_set(mask, centroids = centres, radius = 8, nonzero = TRUE)
 
 lengths(lapply(rois, indices))
 ```
+
+Leave `fill` alone unless you want constant-valued ROIs: setting it replaces the
+image data with that constant.
 
 ### Combining regions
 
@@ -132,8 +148,10 @@ rownames(parcel_ts)
 
 `split_reduce()` wants one label per voxel in the whole grid, so out-of-mask
 voxels become a group of their own — row `"0"` above, which you drop. Build the
-label vector as integers and factor it at the end: assigning into an existing
-factor silently produces `NA`s instead.
+label vector as integers and factor it at the end. Assigning into an existing
+factor instead turns every assigned element into `NA`, with a warning
+(`invalid factor level, NA generated`) that is easy to miss if warnings are
+suppressed.
 
 The default reduction is the mean; pass `FUN` for anything else.
 
@@ -156,10 +174,17 @@ nrow(coords(sl[[1]]))
 covers every voxel exactly once for a fraction of the work:
 
 ```{r random-searchlight}
+set.seed(42)
 rsl <- random_searchlight(brain, radius = 8)
 
 length(rsl)
+summary(lengths(lapply(rsl, indices)))
 ```
+
+Note the spread. Because the spheres tile rather than overlap, those at the mask
+edge are truncated — some hold a single voxel. Any statistic you compare across
+searchlights has to survive that, which is the main reason the analysis below is
+read at the cluster level rather than at its single brightest voxel.
 
 `clustered_searchlight()` uses a parcellation instead of spheres, giving one
 neighbourhood per parcel:
@@ -208,24 +233,30 @@ piecewise constant — every voxel in a sphere carries its sphere's score. Use
 `searchlight()` instead when you want a smoothly varying map, at the cost of one
 neighbourhood per voxel rather than one per sphere.
 
-Did it work? The peak should land inside the sphere we planted:
+Did it work? Compare the planted region against the rest of the brain, in units
+of the background's own spread:
 
 ```{r verify}
-peak <- which.max(as.vector(score_map))
-peak %in% indices(target)
+outside_idx <- setdiff(which(as.vector(brain)), indices(target))
+inside <- as.vector(score_map)[indices(target)]
+outside <- as.vector(score_map)[outside_idx]
 
-c(
-  inside = mean(as.vector(score_map)[indices(target)]),
-  outside = mean(as.vector(score_map)[setdiff(which(as.vector(brain)), indices(target))])
-)
+c(inside = mean(inside), outside = mean(outside), sd_outside = sd(outside),
+  z = (mean(inside) - mean(outside)) / sd(outside))
 ```
 
-The peak is inside the target and mean score there is an order of magnitude
-above background.
+The planted region sits about three background standard deviations up — a real
+effect, and a modest one. Resist reading the single brightest voxel: with
+neighbourhoods this ragged the maximum is often a two-voxel searchlight at the
+mask edge, and which voxel wins changes with the tiling.
 
-```{r score-fig, fig.cap = "Searchlight score map. The bright region is where the signal was planted.", fig.alt = "Axial slices of a searchlight correlation map with one bright cluster.", fig.height = 3.0}
-plot(score_map, zlevels = c(9, 12, 15), irange = c(0, max(score)))
+```{r score-fig, fig.cap = "Searchlight score map. The bright cluster is where the signal was planted.", fig.alt = "Three axial slices of a searchlight correlation map with one bright cluster.", fig.height = 3.2}
+plot(score_map, zlevels = c(9, 12, 15))
 ```
+
+The default intensity range matters here. Passing `irange = c(0, max(score))`
+would put the negative half of the map outside the scale limits, where it
+renders transparent — reading as maximum signal rather than as no signal.
 
 ## From a map back to regions
 
@@ -287,8 +318,10 @@ score <- future_sapply(rsl, function(r) {
 plan(sequential)
 ```
 
-Keep the per-neighbourhood function self-contained — workers do not share your
-session — and prefer fewer, larger tasks over many tiny ones.
+**future** exports the globals your function references automatically, so this
+works — but it also means `planted` is serialised to every worker. On a real
+dataset that transfer can dominate the computation, so keep large objects out of
+the closure where you can, and prefer fewer, larger tasks over many tiny ones.
 
 ## Which support should you use?
 
