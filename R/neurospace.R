@@ -366,8 +366,15 @@ setMethod(f="coord_to_index", signature=signature(x="NeuroSpace", coords="matrix
             # The inverse affine yields 0-based positions; add 1 to get the
             # 1-based grid, matching coord_to_grid(). Adding 0.5 instead shifts
             # the result into a neighbouring voxel.
+            #
+            # Round before handing over: grid_to_index() truncates, and the
+            # affine is stored to 7 significant figures, so an exact voxel
+            # centre can come back as 2.9999998 and truncate to the voxel
+            # below. A world coordinate names the nearest voxel centre, so
+            # round-to-nearest is also the right semantics for points that do
+            # not land on a centre at all.
             grid = t(inverse_trans(x) %*% t(cbind(coords, rep(1, nrow(coords)))))
-            grid_to_index(x, grid[,1:3] + 1)
+            grid_to_index(x, round(grid[,1:3, drop=FALSE] + 1))
           })
 
 #' @export

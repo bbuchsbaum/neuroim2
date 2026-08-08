@@ -37,6 +37,16 @@
   maps exactly to `origin()` by either route. Raster extents produced by the
   plotting helpers shift by half a voxel as a consequence, placing voxel
   centres on their affine positions.
+* Fixed an off-by-one in world-to-index conversion on anisotropic and
+  large-origin grids. `grid_to_index()` truncates, and `NeuroSpace` stores
+  affines to 7 significant figures, so a coordinate that is arithmetically an
+  exact voxel centre could arrive as `2.9999985` and truncate to the voxel
+  below — on the shipped EPI mask the error reached 1.6e-6 grid units.
+  `coord_to_index()` now rounds to the nearest voxel centre, and
+  `grid_to_index()` snaps values within 1e-4 of an integer. Genuinely
+  fractional grid coordinates still truncate, matching R's array indexing.
+  (The previous 0.5-voxel offset was partly masking this, since `trunc(x + 0.5)`
+  rounds; correcting the offset alone exposed it.)
 * Fixed `linear_access()` on sparse `NeuroVec` objects, which could return wrong values or error when there were more masked voxels than time points. The sparse data matrix is stored as `[time × voxel]`; the linear-index path now indexes rows and columns in the correct order.
 * Fixed `ROIVol` arithmetic so values are aligned by voxel index, not by the original coordinate order, and fixed sparse `Summary` group methods so reductions include implicit structural zeros. `ROIVol` arithmetic now documents and enforces a same-support contract (identical space and voxel set; order may differ); missing voxels are not treated as zero.
 * Hardened `simulate_fmri()` edge cases: zero FWHM values now disable the corresponding smoothing step, `n_time = 1` no longer trips AR loops, tiny or constant masks no longer produce `NA` heteroscedasticity fields, and scalar arguments now receive explicit validation.
