@@ -1,0 +1,194 @@
+---
+title: 'neuroim2: a tour'
+output: rmarkdown::html_vignette
+vignette: |
+  %\VignetteIndexEntry{neuroim2: a tour}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+css: albers.css
+resource_files:
+- albers.css
+- albers.js
+includes:
+  in_header: |-
+    <script src="albers.js"></script>
+    <script>document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('palette-red');});</script>
+---
+
+```{r setup, include = FALSE}
+source("_common.R")
+```
+
+```{r load}
+library(neuroim2)
+```
+
+## Look at an image
+
+```{r anatomy, fig.cap = "plot() on a NeuroVol: a 3 x 3 montage of evenly spaced axial slices.", fig.alt = "Nine axial slices of an anatomical brain image.", fig.height = 6.5}
+anat <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
+plot(anat)
+```
+
+That is a brain, read from a NIfTI file in one line and drawn in another. It is
+also an ordinary R array:
+
+```{r array-like}
+dim(anat)
+anat[24, 28, 24]
+mean(anat > 0)
+```
+
+Indexing, arithmetic and comparison all work the way you expect, and the result
+of `anat > 0` is still an image rather than a bare logical array. Everything in
+this package is built on that idea: objects that behave like arrays but never
+forget their geometry.
+
+## Geometry is the part that matters
+
+An image is not just numbers, it is numbers *somewhere*. That somewhere is a
+`NeuroSpace`, attached to every object, and it is what separates neuroimaging
+from array programming.
+
+Here is the functional dataset this tour analyses — a brain mask on the grid an
+EPI run was acquired on. Anatomical and functional images are separate
+acquisitions with separate grids, which is why we now switch images.
+
+```{r mask}
+mask <- read_vol(system.file("extdata", "global_mask2.nii.gz", package = "neuroim2"))
+
+space(mask)
+```
+
+The space records voxel size in millimetres, where the grid sits in the scanner,
+and which anatomical direction each axis runs:
+
+```{r geometry}
+spacing(mask)
+affine_to_axcodes(trans(mask))
+```
+
+So `spacing()` tells you these voxels are 3.5 x 3.5 x 3.7 mm, and the axis codes
+say the first axis increases towards the **L**eft, the second towards the
+**A**nterior, the third towards the **S**uperior. With that, the package can
+answer the question you actually care about: *which voxel sits at this
+anatomical location?*
+
+```{r coord}
+coord_to_grid(mask, c(-34, -28, 10))
+```
+
+Left auditory cortex, in millimetres, becomes a position on this grid. The
+answer is fractional because a millimetre coordinate rarely lands on a voxel
+centre. `grid_to_coord()` goes back the other way:
+
+```{r coord-back}
+grid_to_coord(mask, matrix(c(42.714, 24, 16.203), nrow = 1))
+```
+
+Keep the fractional position if you are going to interpolate, and round it only
+when you need an integer index — rounding moves you up to half a voxel, which on
+this grid is nearly 2 mm:
+
+```{r coord-round}
+grid_to_coord(mask, matrix(c(43, 24, 16), nrow = 1))
+```
+
+## Add a time axis
+
+Functional data has a fourth dimension. `read_vec()` reads 4D files; here we
+simulate a run instead, so that the time series in this article have the
+temporal structure real BOLD data has.
+
+```{r bold}
+bold <- simulate_fmri(mask, n_time = 60, seed = 1)
+
+dim(bold)
+```
+
+A `NeuroVec` is 60 volumes sharing one spatial frame. Pull the time course of a
+single voxel with `series()`:
+
+```{r series, fig.cap = "One voxel's simulated BOLD time course.", fig.alt = "Line plot of a single voxel time series over 60 scans."}
+ts <- series(bold, 43, 24, 16)
+
+plot(ts,
+  type = "l", xlab = "scan", ylab = "signal",
+  main = "Voxel (43, 24, 16)"
+)
+```
+
+## Summarise a region
+
+Single voxels are noisy, so analyses usually work over a region. Put a 10 mm
+sphere at the coordinate from earlier and extract every time course inside it.
+`nonzero = TRUE` keeps only voxels that are actually in the mask.
+
+```{r roi}
+roi <- spherical_roi(mask, c(43, 24, 16), radius = 10, nonzero = TRUE)
+length(roi)
+
+roi_ts <- series_roi(bold, roi)
+dim(values(roi_ts))
+```
+
+`values()` gives scans by voxels, so averaging across columns gives the region's
+mean time course:
+
+```{r roi-mean, fig.cap = "Averaging over 85 voxels suppresses noise the single voxel had.", fig.alt = "Line plot of the ROI mean time series, visibly smoother than the single voxel."}
+roi_mean <- rowMeans(values(roi_ts))
+
+plot(roi_mean,
+  type = "l", xlab = "scan", ylab = "signal",
+  main = "ROI mean, 85 voxels"
+)
+```
+
+That is the shape of most work in this package: **define a spatial support,
+extract values from it, reduce them to something smaller.**
+
+## Make a result and write it out
+
+Reductions run the other way too — from a 4D series down to one volume. Here is
+each voxel's temporal standard deviation, a standard quality-control map:
+
+```{r sdmap, fig.cap = "Temporal standard deviation, computed per voxel and returned as a NeuroVol.", fig.alt = "Nine axial slices of a temporal standard deviation map.", fig.height = 6.5}
+sd_map <- NeuroVol(
+  apply(as.matrix(bold), 1, sd),
+  drop_dim(space(bold))
+)
+
+plot(sd_map)
+```
+
+Two details carry the geometry through: `as.matrix()` flattens a `NeuroVec` to
+voxels-by-time, and `drop_dim()` takes the 4D space down to the matching 3D one.
+The result is a proper `NeuroVol`, so writing it produces a NIfTI any other tool
+can read.
+
+```{r write}
+out <- tempfile(fileext = ".nii.gz")
+write_vol(sd_map, out)
+
+file.exists(out)
+```
+
+```{r cleanup, include = FALSE}
+unlink(out)
+```
+
+## Where to go next
+
+You have now read images, inspected their geometry, moved between millimetres
+and voxels, extracted a region's time course, reduced a series to a map, and
+written it back to disk. Three articles take that further:
+
+- `vignette("spaces-and-coordinates")` — the affine, orientation codes and
+  conversions in full. Read this one next; everything else assumes it.
+- `vignette("volumes-and-vectors")` — the container types and how to build,
+  slice, combine and convert them.
+- `vignette("regions-and-searchlights")` — ROIs, parcels and searchlights, and
+  the split–map–reduce patterns built on them.
+
+Reference pages worth knowing early: `?read_vol`, `?NeuroSpace`,
+`?spherical_roi`, `?series`.

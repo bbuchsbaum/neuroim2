@@ -1,0 +1,315 @@
+---
+title: Spaces and coordinates
+output: rmarkdown::html_vignette
+vignette: |
+  %\VignetteIndexEntry{Spaces and coordinates}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+css: albers.css
+resource_files:
+- albers.css
+- albers.js
+includes:
+  in_header: |-
+    <script src="albers.js"></script>
+    <script>document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('palette-red');});</script>
+---
+
+```{r setup, include = FALSE}
+source("_common.R")
+```
+
+```{r load}
+library(neuroim2)
+```
+
+Every object in neuroim2 — a `NeuroVol`, a `NeuroVec`, an ROI — carries a
+`NeuroSpace` that answers one question: *where in the scanner does this voxel
+sit?* Get that mapping right and anatomical coordinates, atlas overlays and
+multi-subject registration all follow. Get it wrong and your activations end up
+in the other hemisphere.
+
+## What a NeuroSpace holds
+
+Call `space()` on any object to see it. Here is the space of the brain mask that
+ships with the package:
+
+```{r real-space}
+mask <- demo_mask()
+space(mask)
+```
+
+Five things are recorded:
+
+- **Grid dimensions** — voxel counts along each axis (`dim`)
+- **Voxel spacing** — physical voxel size in millimetres (`spacing`)
+- **Origin** — world coordinates of voxel `(1, 1, 1)` (`origin`)
+- **Affine transform** — the 4 x 4 matrix mapping voxel indices to millimetres (`trans`)
+- **Axis orientation** — the anatomical direction each axis runs (`axes`)
+
+You can also build one directly, which is what the rest of this article does so
+that the numbers stay easy to follow:
+
+```{r create-space}
+sp <- NeuroSpace(
+  dim     = c(64L, 64L, 40L),
+  spacing = c(2, 2, 2),
+  origin  = c(-90, -126, -72)
+)
+
+dim(sp)
+spacing(sp)
+origin(sp)
+```
+
+## The affine transform
+
+The affine is a 4 x 4 homogeneous matrix in `trans(sp)`. It maps a
+**zero-based** voxel position to millimetres:
+
+```
+[x_mm]   [        ] [i]
+[y_mm] = [  M   t ] [j]
+[z_mm]   [        ] [k]
+[  1 ]   [ 0    1 ] [1]
+```
+
+`M` is the 3 x 3 linear block — spacing, rotation and any shear — and `t` is the
+translation, which is the origin. For an axis-aligned image `M` is diagonal:
+
+```{r show-trans}
+trans(sp)
+```
+
+Both pieces can be read straight back out:
+
+```{r decompose-affine}
+trans(sp)[1:3, 4]          # translation column = origin
+diag(trans(sp)[1:3, 1:3])  # diagonal of linear block = voxel sizes
+```
+
+The inverse (world to voxel) is cached on the space:
+
+```{r inverse-trans}
+inverse_trans(sp)
+```
+
+You can supply a full affine instead of `spacing` and `origin`, and neuroim2
+derives the rest from it:
+
+```{r explicit-affine}
+aff <- diag(c(3, 3, 4, 1))
+aff[1:3, 4] <- c(-90, -126, -72)
+
+sp_aff <- NeuroSpace(dim = c(60L, 60L, 35L), trans = aff)
+spacing(sp_aff)
+origin(sp_aff)
+```
+
+## Three ways to address a voxel
+
+neuroim2 uses **1-based grid indices** throughout, matching R's arrays. There
+are two voxel addressing schemes and one world system:
+
+| Address | Range | Description |
+|:--|:--|:--|
+| Linear index | `1 ... prod(dim)` | one integer, column-major, as in any R array |
+| Grid index | `(1...d1, 1...d2, 1...d3)` | a 1-based triple |
+| World coordinate | millimetres | defined by the affine |
+
+```{r coord-diagram, echo = FALSE, fig.cap = "The three addressing schemes and the functions that convert between them.", fig.alt = "Diagram showing linear index, grid index and world coordinates connected by conversion functions.", fig.width = 6.4, fig.height = 2.4}
+op <- par(mar = c(0, 0, 0, 0))
+plot.new()
+plot.window(xlim = c(0, 10), ylim = c(0.4, 2.6))
+
+rect(0.2, 0.8, 2.8, 2.2, col = "#dce8f5", border = "#3a7abf", lwd = 1.5)
+rect(3.7, 0.8, 6.3, 2.2, col = "#dce8f5", border = "#3a7abf", lwd = 1.5)
+rect(7.2, 0.8, 9.8, 2.2, col = "#dce8f5", border = "#3a7abf", lwd = 1.5)
+
+text(1.5, 1.7, "Linear\nindex", cex = 0.85, font = 2)
+text(1.5, 1.15, "1 ... prod(dim)", cex = 0.68, col = "#555555")
+text(5.0, 1.7, "Grid\nindex", cex = 0.85, font = 2)
+text(5.0, 1.15, "(i, j, k)  1-based", cex = 0.68, col = "#555555")
+text(8.5, 1.7, "World\ncoords", cex = 0.85, font = 2)
+text(8.5, 1.15, "x, y, z  mm", cex = 0.68, col = "#555555")
+
+arrows(2.85, 1.5, 3.65, 1.5, length = 0.08, lwd = 1.4, col = "#3a7abf")
+arrows(3.65, 1.3, 2.85, 1.3, length = 0.08, lwd = 1.4, col = "#888888")
+text(3.25, 1.78, "index_to_grid", cex = 0.58, col = "#3a7abf")
+text(3.25, 1.02, "grid_to_index", cex = 0.58, col = "#888888")
+
+arrows(6.35, 1.5, 7.15, 1.5, length = 0.08, lwd = 1.4, col = "#3a7abf")
+arrows(7.15, 1.3, 6.35, 1.3, length = 0.08, lwd = 1.4, col = "#888888")
+text(6.75, 1.78, "grid_to_coord", cex = 0.58, col = "#3a7abf")
+text(6.75, 1.02, "coord_to_grid", cex = 0.58, col = "#888888")
+
+arrows(2.85, 0.72, 7.15, 0.72, length = 0.08, lwd = 1.2, col = "#3a7abf", lty = 2)
+arrows(7.15, 0.52, 2.85, 0.52, length = 0.08, lwd = 1.2, col = "#888888", lty = 2)
+text(5.0, 0.85, "index_to_coord", cex = 0.55, col = "#3a7abf")
+text(5.0, 0.42, "coord_to_index", cex = 0.55, col = "#888888")
+
+par(op)
+```
+
+### Grid and linear index
+
+```{r grid-index}
+grid_to_index(sp, matrix(c(10, 12, 5), nrow = 1))
+index_to_grid(sp, 17098L)
+```
+
+### Grid and world
+
+`grid_to_coord()` subtracts 1 from the 1-based grid before applying the affine,
+so voxel `(1, 1, 1)` lands exactly on the origin:
+
+```{r grid-to-coord}
+grid_to_coord(sp, matrix(c(1, 1, 1), nrow = 1))
+origin(sp)
+```
+
+Pass a matrix with one row per point to convert many at once:
+
+```{r grid-to-coord-multi}
+pts <- matrix(c(
+   1,  1,  1,
+  32, 32, 20,
+  64, 64, 40
+), ncol = 3, byrow = TRUE)
+
+grid_to_coord(sp, pts)
+```
+
+### World back to grid
+
+```{r coord-to-grid}
+coord_to_grid(sp, c(0, 0, 0))
+```
+
+### A round trip
+
+Going out to millimetres and back returns the voxel you started from:
+
+```{r roundtrip}
+idx   <- 12345L
+grid  <- index_to_grid(sp, idx)
+world <- grid_to_coord(sp, grid)
+back  <- grid_to_index(sp, coord_to_grid(sp, world))
+
+c(index = idx, back = back)
+```
+
+## Orientation codes
+
+Images are stored in many orientations. The orientation code names the
+anatomical direction each axis runs *towards*:
+
+| Letter | Increasing index moves towards |
+|:--:|:--|
+| R / L | Right / Left |
+| A / P | Anterior / Posterior |
+| S / I | Superior / Inferior |
+
+`"RAS"` means axis 1 runs towards the right, axis 2 towards the front, axis 3
+towards the top — the NIfTI and MNI convention. Read it straight from an affine:
+
+```{r axcodes}
+affine_to_axcodes(trans(sp))
+affine_to_axcodes(trans(mask))
+```
+
+The mask is `LAS`: its first axis runs the other way, towards the left. That
+single difference is the usual reason an overlay comes out mirrored, and it is
+worth checking with `affine_to_axcodes()` before trusting any two images to line
+up.
+
+Changing orientation, rather than just reading it, is a separate operation —
+see `vignette("resampling-and-orientation")`.
+
+## Oblique affines
+
+Scanners often acquire at a slight tilt, which puts off-diagonal terms in the
+affine:
+
+```{r oblique}
+aff_obl <- matrix(c(
+   2.0,  0.2,  0.0,  -90,
+   0.0,  2.0,  0.1, -126,
+   0.0,  0.0,  2.0,  -72,
+   0.0,  0.0,  0.0,    1
+), nrow = 4, byrow = TRUE)
+
+sp_obl <- NeuroSpace(dim = c(91L, 109L, 91L), trans = aff_obl)
+```
+
+`spacing()` returns the **column norms** of the linear block — the true physical
+edge lengths — which is why it disagrees with the diagonal here:
+
+```{r oblique-spacing}
+spacing(sp_obl)
+diag(aff_obl[1:3, 1:3])
+```
+
+Always use `spacing()`, never the diagonal. `obliquity()` quantifies the tilt,
+and `voxel_sizes()` computes edge lengths from any affine:
+
+```{r obliquity}
+obliquity(aff_obl)
+obliquity(trans(sp))
+voxel_sizes(aff_obl)
+```
+
+## Adding and dropping a time axis
+
+`add_dim()` extends a 3D space to 4D; `drop_dim()` reverses it. Both leave the
+spatial affine untouched, which is what makes it safe to move between a series
+and a summary volume:
+
+```{r dims}
+sp_4d <- add_dim(sp, 200L)
+dim(sp_4d)
+
+sp_back <- drop_dim(sp_4d)
+identical(trans(sp_back), trans(sp))
+```
+
+## Four things that catch people out
+
+**Oblique affines.** If `diag(trans(sp)[1:3, 1:3])` disagrees with `spacing(sp)`,
+the image is tilted. Use `obliquity()` to measure it and `deoblique()` to remove
+it.
+
+**1-based indices.** `grid_to_coord()` subtracts 1 for you. If you ever do raw
+affine arithmetic yourself, subtract it first or every coordinate is off by one
+voxel.
+
+**sform versus qform.** NIfTI stores two affines. neuroim2 follows the standard
+priority — use the sform when `sform_code > 0`, otherwise the qform — so
+`trans(space(img))` reflects whichever won. When a file's two affines disagree,
+what you get may not be what the pixdim field advertises;
+`vignette("reading-and-writing")` shows how to inspect both.
+
+**Float32 precision.** NIfTI stores affine coefficients as 32-bit floats, and
+neuroim2 rounds to 7 significant figures to match. Round trips can show
+floating-point noise around 0.001 mm. Compare coordinates with a tolerance.
+
+## Quick reference
+
+| Function | Maps | Typical use |
+|:--|:--|:--|
+| `grid_to_index(sp, m)` | grid to linear | looking up voxel data |
+| `index_to_grid(sp, i)` | linear to grid | interpreting array subscripts |
+| `grid_to_coord(sp, m)` | grid to mm | reporting a location |
+| `coord_to_grid(sp, m)` | mm to grid | atlas and seed lookup |
+| `affine_to_axcodes(a)` | affine to `"RAS"` | orientation check |
+| `voxel_sizes(a)` | affine to mm | physical voxel size |
+| `obliquity(a)` | affine to radians | tilt check |
+| `add_dim(sp, n)` | 3D to 4D | attach a time axis |
+| `drop_dim(sp)` | 4D to 3D | strip a time axis |
+
+## Where to go next
+
+- `vignette("volumes-and-vectors")` — the containers this geometry is attached to
+- `vignette("resampling-and-orientation")` — changing a grid rather than just
+  reinterpreting it
+- `?NeuroSpace`, `?affine_to_axcodes`, `?obliquity`

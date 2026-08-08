@@ -2,6 +2,23 @@
 
 ## Bug Fixes
 
+* **Breaking:** Fixed `reorient()`, which never returned the orientation it was
+  asked for. It applied a transform derived only from the target axis codes,
+  ignoring the space's current orientation, and it interpreted those codes with
+  the sense inverted, so `reorient(sp, c("R", "A", "S"))` produced an `LPI`
+  space and asking for an image's existing orientation was not a no-op.
+  Orientation codes are now read the way `affine_to_axcodes()` reports them —
+  naming the direction each axis increases *towards* — and the transform is
+  computed relative to the current orientation. Code that compensated for the
+  old inversion by requesting the opposite codes will need updating.
+* **Breaking:** Fixed a half-voxel offset in `index_to_coord()` and
+  `coord_to_index()`. Both used a 0.5-voxel shift where `grid_to_coord()` and
+  `coord_to_grid()` use the 1-based-to-0-based offset of 1, so the shortcut
+  conversions disagreed with the equivalent two-step path by half a voxel and
+  `coord_to_index()` could return a neighbouring voxel. Voxel `(1, 1, 1)` now
+  maps exactly to `origin()` by either route. Raster extents produced by the
+  plotting helpers shift by half a voxel as a consequence, placing voxel
+  centres on their affine positions.
 * Fixed `linear_access()` on sparse `NeuroVec` objects, which could return wrong values or error when there were more masked voxels than time points. The sparse data matrix is stored as `[time × voxel]`; the linear-index path now indexes rows and columns in the correct order.
 * Fixed `ROIVol` arithmetic so values are aligned by voxel index, not by the original coordinate order, and fixed sparse `Summary` group methods so reductions include implicit structural zeros. `ROIVol` arithmetic now documents and enforces a same-support contract (identical space and voxel set; order may differ); missing voxels are not treated as zero.
 * Hardened `simulate_fmri()` edge cases: zero FWHM values now disable the corresponding smoothing step, `n_time = 1` no longer trips AR loops, tiny or constant masks no longer produce `NA` heteroscedasticity fields, and scalar arguments now receive explicit validation.
