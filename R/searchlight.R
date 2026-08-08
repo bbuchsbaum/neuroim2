@@ -122,12 +122,11 @@ random_searchlight <- function(mask, radius, nonzero = TRUE) {
 
     parent_idx <- grid_to_index(mask, center_coord)
 
-    search2 <- new("ROIVolWindow",
-                   rep(1, nrow(kept_vox)),
-                   space=space(mask),
-                   coords=kept_vox,
-                   center_index=as.integer(center_row),
-                   parent_index=as.integer(parent_idx))
+    search2 <- .new_roi_vol_window(rep(1, nrow(kept_vox)),
+                                   space(mask),
+                                   kept_vox,
+                                   as.integer(center_row),
+                                   as.integer(parent_idx))
 
     # Expose row index within the ROI coordinates for downstream consumers
     attr(search2, "center_row_index") <- as.integer(center_row)
@@ -348,12 +347,9 @@ resampled_searchlight <- function(mask,
       }
       center_row <- if (length(center_row) == 0) NA_integer_ else center_row[1]
 
-      return(new("ROIVolWindow",
-                 vals,
-                 space = space(mask),
-                 coords = coords,
-                 center_index = as.integer(center_row),
-                 parent_index = as.integer(parent_index)))
+      return(.new_roi_vol_window(vals, space(mask), coords,
+                                 as.integer(center_row),
+                                 as.integer(parent_index)))
     }
 
     # Allow a bare matrix of voxel coordinates (integer, 3 cols)
@@ -374,24 +370,19 @@ resampled_searchlight <- function(mask,
       }
 
       if (nrow(coords) == 0) {
-        return(new("ROIVolWindow",
-                   numeric(0),
-                   space = space(mask),
-                   coords = matrix(ncol = 3, nrow = 0),
-                   center_index = as.integer(NA),
-                   parent_index = as.integer(parent_index)))
+        return(.new_roi_vol_window(numeric(0), space(mask),
+                                   matrix(ncol = 3, nrow = 0),
+                                   NA_integer_,
+                                   as.integer(parent_index)))
       }
 
       # identify where (if anywhere) the sampled center lives in coords
       center_row <- which(rowSums(coords == matrix(center_coord, nrow(coords), 3, byrow = TRUE)) == 3)
       center_row <- if (length(center_row) == 0) NA_integer_ else center_row[1]
 
-      return(new("ROIVolWindow",
-                 rep(1, nrow(coords)),
-                 space = space(mask),
-                 coords = coords,
-                 center_index = as.integer(center_row),
-                 parent_index = as.integer(parent_index)))
+      return(.new_roi_vol_window(rep(1, nrow(coords)), space(mask), coords,
+                                 as.integer(center_row),
+                                 as.integer(parent_index)))
     }
 
     stop("shape_fun must return a ROIVolWindow or an n x 3 matrix of voxel coordinates")

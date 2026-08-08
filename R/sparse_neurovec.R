@@ -243,6 +243,34 @@ setMethod("series", signature(x="AbstractSparseNeuroVec", i="numeric"),
             }
           })
 
+#' Compiled column gather for the sparse [time x voxel] store
+#'
+#' Reads \code{x@data} directly, so it is only valid for classes whose
+#' \code{matricized_access()} method is plain column indexing into that slot.
+#' That is exactly \code{SparseNeuroVec} -- \code{BigNeuroVec} keeps its data in
+#' an FBM, and user-defined lazy subclasses may hold a placeholder in
+#' \code{@data} while serving real values from an overridden
+#' \code{matricized_access()}. The test is deliberately on the concrete class,
+#' not \code{is()}: any subclass may override the accessor, and honouring that
+#' hook matters more than the speed-up.
+#'
+#' Returns \code{NULL} when the fast path does not apply, so callers fall back
+#' to the accessor-based implementation.
+#'
+#' @keywords internal
+#' @noRd
+.sparse_series_fast <- function(x, mapped_idx) {
+  if (!identical(class(x)[1L], "SparseNeuroVec")) {
+    return(NULL)
+  }
+  dat <- x@data
+  if (!is.matrix(dat) || !is.double(dat)) {
+    return(NULL)
+  }
+  series_gather_sparse(dat, as.integer(mapped_idx))
+}
+
+
 #' @rdname series-methods
 #' @export
 setMethod(
@@ -253,16 +281,17 @@ setMethod(
     if (missing(j) && missing(k)) {
       # Map linear indices -> actual row in sparse matrix or 0 if none
       mapped_idx <- lookup(x, i)  # vector of the same length as i
-      # Prepare output: #rows = time, #cols = length(i)
-      out <- matrix(0, nrow = dim(x)[4], ncol = length(i))
 
-      # Identify which of those voxel indices are actually non-zero
-      nz <- which(mapped_idx > 0)
-      if (length(nz) > 0) {
-        # Access the non-zero columns from x@data
-        # Because x@data is (time x voxels)
-        # We want to fill the columns out[, nz] from x@data[, mapped_idx[nz]]
-        out[, nz] <- matricized_access(x, mapped_idx[nz])
+      # One compiled pass writes the mapped columns and leaves the rest zero,
+      # instead of allocating a zero matrix and scattering into it.
+      out <- .sparse_series_fast(x, mapped_idx)
+      if (is.null(out)) {
+        out <- matrix(0, nrow = dim(x)[4], ncol = length(i))
+        nz <- which(mapped_idx > 0)
+        if (length(nz) > 0) {
+          # x@data is (time x voxels): fill out[, nz] from x@data[, mapped_idx[nz]]
+          out[, nz] <- matricized_access(x, mapped_idx[nz])
+        }
       }
 
       # If user says drop=TRUE and asked for a single voxel, drop down to vector
@@ -296,10 +325,13 @@ setMethod(
         coords_mat <- cbind(i, j, k)
         lin_idx <- .gridToIndex3D(dim(x)[1:3], coords_mat)
         mapped_idx <- lookup(x, lin_idx)
-        out <- matrix(0, nrow = dim(x)[4], ncol = nrow(coords_mat))
-        nz <- which(mapped_idx > 0)
-        if (length(nz) > 0) {
-          out[, nz] <- matricized_access(x, mapped_idx[nz])
+        out <- .sparse_series_fast(x, mapped_idx)
+        if (is.null(out)) {
+          out <- matrix(0, nrow = dim(x)[4], ncol = nrow(coords_mat))
+          nz <- which(mapped_idx > 0)
+          if (length(nz) > 0) {
+            out[, nz] <- matricized_access(x, mapped_idx[nz])
+          }
         }
         # If user requested drop=TRUE and exactly one voxel, drop dimension
         if (drop && nrow(coords_mat) == 1) {

@@ -2,8 +2,103 @@
 NULL
 #' @include all_generic.R
 NULL
-#' @importFrom methods new
+#' @importFrom methods new validObject
 NULL
+
+
+# ---------------------------------------------------------------------------
+# Fast ROI construction
+#
+# `new("ROIVolWindow", ...)` costs ~450us and the cost is independent of ROI
+# size: the class reaches a basic type ("numeric") through two levels of
+# contains=, so the default initialize() walks that chain with callNextMethod()
+# and runs validObject() at each level -- and validObject() recurses into the
+# NeuroSpace slot and its nested AxisSet/NamedAxis tree. In an exhaustive
+# searchlight that fixed overhead is ~70% of total runtime.
+#
+# Cloning a cached prototype and assigning the slots produces an object that is
+# identical() to the new() result for ~1/11th of the cost. The class invariants
+# that validObject() would have checked are asserted directly here instead, so
+# nothing is silently skipped -- they are just checked once, cheaply, in the one
+# place these objects are built.
+# ---------------------------------------------------------------------------
+
+#' @keywords internal
+#' @noRd
+.roi_proto_cache <- new.env(parent = emptyenv())
+
+#' @keywords internal
+#' @noRd
+.roi_prototype <- function(class_name) {
+  hit <- .roi_proto_cache[[class_name]]
+  if (!is.null(hit)) {
+    return(hit)
+  }
+
+  sp <- NeuroSpace(c(1L, 1L, 1L))
+  proto <- switch(
+    class_name,
+    ROIVolWindow = new("ROIVolWindow", numeric(0), space = sp,
+                       coords = matrix(0, nrow = 0, ncol = 3),
+                       center_index = integer(0), parent_index = NA_integer_),
+    ROIVol       = new("ROIVol", numeric(0), space = sp,
+                       coords = matrix(0, nrow = 0, ncol = 3)),
+    cli::cli_abort("No ROI prototype for {.cls {class_name}}.")
+  )
+
+  assign(class_name, proto, envir = .roi_proto_cache)
+  proto
+}
+
+#' Construct a ROIVolWindow without paying for the default initialize()
+#'
+#' Equivalent to \code{new("ROIVolWindow", data, space = space, ...)} --
+#' \code{identical()} to it -- but roughly an order of magnitude cheaper,
+#' which matters because searchlights build one of these per voxel.
+#'
+#' @keywords internal
+#' @noRd
+.new_roi_vol_window <- function(data, space, coords, center_index, parent_index) {
+  # The invariants the class validity function checks.
+  if (!is.matrix(coords) || ncol(coords) != 3L) {
+    stop("coords slot must be a matrix with 3 columns")
+  }
+  if (!is.vector(data)) {
+    stop("'data' must be a vector")
+  }
+  if (length(data) != nrow(coords)) {
+    stop("length of data vector must equal 'nrow(coords)'")
+  }
+
+  obj <- .roi_prototype("ROIVolWindow")
+  obj@.Data <- data
+  obj@space <- space
+  obj@coords <- coords
+  obj@center_index <- center_index
+  obj@parent_index <- parent_index
+  obj
+}
+
+#' @rdname dot-new_roi_vol_window
+#' @keywords internal
+#' @noRd
+.new_roi_vol <- function(data, space, coords) {
+  if (!is.matrix(coords) || ncol(coords) != 3L) {
+    stop("coords slot must be a matrix with 3 columns")
+  }
+  if (!is.vector(data)) {
+    stop("'data' must be a vector")
+  }
+  if (length(data) != nrow(coords)) {
+    stop("length of data vector must equal 'nrow(coords)'")
+  }
+
+  obj <- .roi_prototype("ROIVol")
+  obj@.Data <- data
+  obj@space <- space
+  obj@coords <- coords
+  obj
+}
 
 
 #' ROI Coordinates
@@ -561,6 +656,40 @@ cuboid_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE) {
 
 }
 
+#' Cached spherical offset template
+#'
+#' The voxel offsets forming a spherical neighbourhood depend only on the
+#' radius and the voxel spacing, so they are computed once per
+#' \code{(radius, spacing)} pair and reused across centres. This is what makes
+#' an exhaustive searchlight cheap: per centre the work drops to translating
+#' the template and clipping it to the volume bounds.
+#'
+#' @keywords internal
+#' @noRd
+.sphere_offset_cache <- new.env(parent = emptyenv())
+
+#' @keywords internal
+#' @noRd
+.sphere_offsets <- function(radius, spacing) {
+  spacing <- as.numeric(spacing)[1:3]
+  key <- paste0(sprintf("%.17g", radius), "|",
+                paste(sprintf("%.17g", spacing), collapse = ","))
+
+  hit <- .sphere_offset_cache[[key]]
+  if (!is.null(hit)) {
+    return(hit)
+  }
+
+  # Bound the cache: analyses sweep a handful of radii, not thousands.
+  if (length(ls(.sphere_offset_cache, all.names = TRUE)) >= 64L) {
+    rm(list = ls(.sphere_offset_cache, all.names = TRUE), envir = .sphere_offset_cache)
+  }
+
+  off <- sphere_offsets_cpp(radius, spacing)
+  assign(key, off, envir = .sphere_offset_cache)
+  off
+}
+
 #' @importFrom dbscan frNN
 #' @keywords internal
 #' @noRd
@@ -576,11 +705,15 @@ make_spherical_grid <- function(bvol, centroid, radius, use_cpp=TRUE) {
   centroid <- as.integer(centroid)
 
   out <- if (use_cpp) {
-    # local_sphere expects 0-based voxel indices; convert from 1-based
-    local_sphere(centroid[1] - 1L,
-                 centroid[2] - 1L,
-                 centroid[3] - 1L,
-                 radius, vspacing, vdim)
+    # Translate the cached offset template to this centre and clip to bounds.
+    # Equivalent to local_sphere() -- same membership test, same emission
+    # order -- but the sphere itself is built once per (radius, spacing).
+    # Returned coordinates are 1-based here, so callers subtract 1 to keep the
+    # 0-based contract local_sphere() had.
+    sphere_at_cpp(.sphere_offsets(radius, vspacing),
+                  as.integer(centroid[1:3]),
+                  as.integer(vdim[1:3]),
+                  base0 = TRUE)
   } else {
     deltas <- map_dbl(vspacing, function(x) round(radius/x))
 
@@ -684,18 +817,18 @@ spherical_roi <- function(bvol, centroid, radius, fill=NULL, nonzero=FALSE, use_
 
   # If no voxels returned, return an empty ROIVolWindow
   if (nrow(grid) == 0) {
-    return(new("ROIVolWindow",
-               numeric(0),
-               space=bspace,
-               coords=matrix(ncol=3, nrow=0),
-               center_index=integer(0),
-               parent_index=as.integer(NA)))
+    return(.new_roi_vol_window(numeric(0), bspace, matrix(ncol=3, nrow=0),
+                               integer(0), NA_integer_))
   }
 
   # Convert to 1-based indexing
   grid <- grid + 1L
-  # Sort for consistency
-  grid <- grid[order(grid[,1], grid[,2], grid[,3]), , drop=FALSE]
+
+  # The compiled path emits rows already ordered by (x, y, z); only the
+  # dbscan fallback returns them in neighbour order and needs sorting.
+  if (!use_cpp) {
+    grid <- grid[order(grid[,1], grid[,2], grid[,3]), , drop=FALSE]
+  }
 
   vals <- if (!is.null(fill)) {
     rep(fill, nrow(grid))
@@ -710,33 +843,25 @@ spherical_roi <- function(bvol, centroid, radius, fill=NULL, nonzero=FALSE, use_
 
     # If filtering leaves no voxels, return empty
     if (nrow(grid) == 0) {
-      return(new("ROIVolWindow",
-                 numeric(0),
-                 space=bspace,
-                 coords=matrix(ncol=3, nrow=0),
-                 center_index=integer(0),
-                 parent_index=as.integer(NA)))
+      return(.new_roi_vol_window(numeric(0), bspace, matrix(ncol=3, nrow=0),
+                                 integer(0), NA_integer_))
     }
   }
 
-  # Find the center voxel in the grid
-  # Compare each row in grid to centroid
-  # If grid is non-empty, this is safe
-  match_count <- rowSums(grid == matrix(centroid, nrow(grid), 3, byrow=TRUE))
-  center_index <- which(match_count == 3)
+  # Row of the centre voxel within the (possibly filtered) grid. Three column
+  # comparisons rather than building an n x 3 matrix to rowSums over.
+  center_index <- which(grid[,1] == centroid[1] &
+                        grid[,2] == centroid[2] &
+                        grid[,3] == centroid[3])
   if (length(center_index) == 0) {
-    # No exact match found, choose first voxel or handle gracefully
+    # Centre was filtered out by `nonzero`; fall back to the first voxel.
     center_index <- 1L
   }
 
   parent_index <- grid_to_index(bvol, grid[center_index, , drop=FALSE])
 
-  new("ROIVolWindow",
-      vals,
-      space=bspace,
-      coords=grid,
-      center_index = as.integer(center_index),
-      parent_index = as.integer(parent_index))
+  .new_roi_vol_window(vals, bspace, grid,
+                      as.integer(center_index), as.integer(parent_index))
 }
 
 # spherical_basis <- function(bvol, coord, kernel, weight=1) {

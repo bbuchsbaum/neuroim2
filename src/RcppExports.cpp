@@ -394,6 +394,57 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// series_gather_dense
+NumericMatrix series_gather_dense(SEXP data, IntegerVector dim, IntegerMatrix coords);
+RcppExport SEXP _neuroim2_series_gather_dense(SEXP dataSEXP, SEXP dimSEXP, SEXP coordsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type dim(dimSEXP);
+    Rcpp::traits::input_parameter< IntegerMatrix >::type coords(coordsSEXP);
+    rcpp_result_gen = Rcpp::wrap(series_gather_dense(data, dim, coords));
+    return rcpp_result_gen;
+END_RCPP
+}
+// series_gather_sparse
+NumericMatrix series_gather_sparse(SEXP data, IntegerVector mapped);
+RcppExport SEXP _neuroim2_series_gather_sparse(SEXP dataSEXP, SEXP mappedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type mapped(mappedSEXP);
+    rcpp_result_gen = Rcpp::wrap(series_gather_sparse(data, mapped));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sphere_offsets_cpp
+IntegerMatrix sphere_offsets_cpp(double radius, NumericVector spacing);
+RcppExport SEXP _neuroim2_sphere_offsets_cpp(SEXP radiusSEXP, SEXP spacingSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type radius(radiusSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type spacing(spacingSEXP);
+    rcpp_result_gen = Rcpp::wrap(sphere_offsets_cpp(radius, spacing));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sphere_at_cpp
+NumericMatrix sphere_at_cpp(IntegerMatrix off, IntegerVector centre, IntegerVector dim, bool base0);
+RcppExport SEXP _neuroim2_sphere_at_cpp(SEXP offSEXP, SEXP centreSEXP, SEXP dimSEXP, SEXP base0SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerMatrix >::type off(offSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type centre(centreSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type dim(dimSEXP);
+    Rcpp::traits::input_parameter< bool >::type base0(base0SEXP);
+    rcpp_result_gen = Rcpp::wrap(sphere_at_cpp(off, centre, dim, base0));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_neuroim2_bilateral_weights", (DL_FUNC) &_neuroim2_bilateral_weights, 5},
@@ -420,6 +471,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_neuroim2_radius_search_3d_direct", (DL_FUNC) &_neuroim2_radius_search_3d_direct, 10},
     {"_neuroim2_radius_search_3d_precomputed", (DL_FUNC) &_neuroim2_radius_search_3d_precomputed, 10},
     {"_neuroim2_representative_volume_cpp", (DL_FUNC) &_neuroim2_representative_volume_cpp, 2},
+    {"_neuroim2_series_gather_dense", (DL_FUNC) &_neuroim2_series_gather_dense, 3},
+    {"_neuroim2_series_gather_sparse", (DL_FUNC) &_neuroim2_series_gather_sparse, 2},
+    {"_neuroim2_sphere_offsets_cpp", (DL_FUNC) &_neuroim2_sphere_offsets_cpp, 2},
+    {"_neuroim2_sphere_at_cpp", (DL_FUNC) &_neuroim2_sphere_at_cpp, 4},
     {NULL, NULL, 0}
 };
 

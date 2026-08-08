@@ -97,3 +97,19 @@ representative_volume_cpp <- function(mat, representative) {
     .Call(`_neuroim2_representative_volume_cpp`, mat, representative)
 }
 
+series_gather_dense <- function(data, dim, coords) {
+    .Call(`_neuroim2_series_gather_dense`, data, dim, coords)
+}
+
+series_gather_sparse <- function(data, mapped) {
+    .Call(`_neuroim2_series_gather_sparse`, data, mapped)
+}
+
+sphere_offsets_cpp <- function(radius, spacing) {
+    .Call(`_neuroim2_sphere_offsets_cpp`, radius, spacing)
+}
+
+sphere_at_cpp <- function(off, centre, dim, base0 = TRUE) {
+    .Call(`_neuroim2_sphere_at_cpp`, off, centre, dim, base0)
+}
+
