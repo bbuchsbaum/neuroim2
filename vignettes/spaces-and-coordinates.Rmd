@@ -186,17 +186,25 @@ grid_to_coord(sp, pts)
 coord_to_grid(sp, c(0, 0, 0))
 ```
 
+### Straight from linear index to millimetres
+
+`index_to_coord()` and `coord_to_index()` skip the grid step:
+
+```{r shortcuts}
+index_to_coord(sp, 12345L)
+coord_to_index(sp, matrix(c(22, -126, -66), nrow = 1))
+```
+
 ### A round trip
 
-Going out to millimetres and back returns the voxel you started from:
+Going out to millimetres and back returns the voxel you started from, by either
+route:
 
 ```{r roundtrip}
-idx   <- 12345L
-grid  <- index_to_grid(sp, idx)
-world <- grid_to_coord(sp, grid)
-back  <- grid_to_index(sp, coord_to_grid(sp, world))
+idx <- 12345L
 
-c(index = idx, back = back)
+grid_to_index(sp, coord_to_grid(sp, grid_to_coord(sp, index_to_grid(sp, idx))))
+coord_to_index(sp, index_to_coord(sp, idx))
 ```
 
 ## Orientation codes
@@ -220,11 +228,24 @@ affine_to_axcodes(trans(mask))
 
 The mask is `LAS`: its first axis runs the other way, towards the left. That
 single difference is the usual reason an overlay comes out mirrored, and it is
-worth checking with `affine_to_axcodes()` before trusting any two images to line
-up.
+worth checking with `affine_to_axcodes()` before trusting two images to line up.
 
-Changing orientation, rather than just reading it, is a separate operation —
-see `vignette("resampling-and-orientation")`.
+`reorient()` rewrites a space to a target orientation:
+
+```{r reorient}
+sp_ras <- reorient(space(mask), c("R", "A", "S"))
+affine_to_axcodes(trans(sp_ras))
+```
+
+It is relative to where you started, so asking for the orientation an image
+already has changes nothing:
+
+```{r reorient-noop}
+identical(trans(reorient(space(mask), c("L", "A", "S"))), trans(space(mask)))
+```
+
+This reinterprets the grid; it does not move the voxels. To resample the data
+itself onto a new grid, see `vignette("resampling-and-orientation")`.
 
 ## Oblique affines
 
@@ -301,7 +322,10 @@ floating-point noise around 0.001 mm. Compare coordinates with a tolerance.
 | `index_to_grid(sp, i)` | linear to grid | interpreting array subscripts |
 | `grid_to_coord(sp, m)` | grid to mm | reporting a location |
 | `coord_to_grid(sp, m)` | mm to grid | atlas and seed lookup |
+| `index_to_coord(sp, i)` | linear to mm | shortcut past the grid |
+| `coord_to_index(sp, m)` | mm to linear | mask extraction |
 | `affine_to_axcodes(a)` | affine to `"RAS"` | orientation check |
+| `reorient(sp, codes)` | space to space | standardise orientation |
 | `voxel_sizes(a)` | affine to mm | physical voxel size |
 | `obliquity(a)` | affine to radians | tilt check |
 | `add_dim(sp, n)` | 3D to 4D | attach a time axis |

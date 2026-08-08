@@ -1,0 +1,257 @@
+---
+title: Volumes and vectors
+output: rmarkdown::html_vignette
+vignette: |
+  %\VignetteIndexEntry{Volumes and vectors}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+css: albers.css
+resource_files:
+- albers.css
+- albers.js
+includes:
+  in_header: |-
+    <script src="albers.js"></script>
+    <script>document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('palette-red');});</script>
+---
+
+```{r setup, include = FALSE}
+source("_common.R")
+```
+
+```{r load}
+library(neuroim2)
+```
+
+Two containers carry almost everything in neuroim2: `NeuroVol` for one 3D image
+and `NeuroVec` for a stack of them sharing a spatial frame. This article covers
+how to build them, take them apart, and put them back together.
+
+```{r data}
+anat <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
+mask <- read_vol(system.file("extdata", "global_mask2.nii.gz", package = "neuroim2"))
+bold <- simulate_fmri(mask, n_time = 20, seed = 1)
+
+class(anat)[1]
+class(bold)[1]
+```
+
+`read_vol()` reads a 3D file; `read_vec()` reads a 4D one. Here the functional
+series is simulated rather than read, so that its time courses have realistic
+temporal structure.
+
+## They behave like arrays
+
+Indexing, arithmetic and comparison all work, and — this is the important part —
+the result keeps its geometry instead of decaying into a bare array:
+
+```{r arraylike}
+dim(anat)
+anat[24, 28, 24]
+
+class(anat * 2)[1]
+max(anat)
+```
+
+`Arith`, `Compare`, `Logic` and `Summary` group generics are all defined, so
+`anat / 2`, `anat > 100` and `range(anat)` do what you expect.
+
+## Masks
+
+A comparison produces a `LogicalNeuroVol` — a mask that knows where it is:
+
+```{r mask-class}
+brain <- anat > 100
+class(brain)[1]
+sum(brain)
+```
+
+`as.mask()` is the explicit constructor, and takes either a logical volume or a
+set of indices:
+
+```{r as-mask}
+m1 <- as.mask(anat > 100)
+m2 <- as.mask(anat, which(anat > 500))
+
+c(loose = sum(m1), strict = sum(m2))
+```
+
+Masks index volumes directly, which is the usual way to pull out the voxels you
+care about:
+
+```{r mask-index}
+vals <- anat[brain]
+
+length(vals)
+mean(vals)
+```
+
+```{r mask-fig, fig.cap = "A volume and the mask derived from it, same grid, same geometry.", fig.alt = "Two axial slices side by side: an anatomical slice and its binary mask.", fig.height = 3.4}
+op <- par(mfrow = c(1, 2), mar = c(1, 1, 2, 1))
+image(anat[, , 24], main = "anat", col = gray.colors(256), axes = FALSE, asp = 1)
+image(brain[, , 24], main = "anat > 100", col = gray.colors(2), axes = FALSE, asp = 1)
+par(op)
+```
+
+## Building one by hand
+
+A `NeuroVol` is an array plus a `NeuroSpace`:
+
+```{r build-vol}
+sp <- NeuroSpace(dim = c(16L, 16L, 8L), spacing = c(2, 2, 2))
+vol <- NeuroVol(array(rnorm(16 * 16 * 8), c(16, 16, 8)), sp)
+
+vol
+```
+
+In practice you rarely write the space out. Copy it from an image you already
+have, which is what keeps a derived result aligned with its source:
+
+```{r copy-space}
+derived <- NeuroVol((anat + 1) * 25, space(anat))
+identical(space(derived), space(anat))
+```
+
+The same for 4D, from either an array or a voxels-by-time matrix:
+
+```{r build-vec}
+sp4 <- NeuroSpace(c(16L, 16L, 8L, 5L), spacing = c(2, 2, 2))
+
+v_arr <- NeuroVec(array(rnorm(16 * 16 * 8 * 5), c(16, 16, 8, 5)), sp4)
+v_mat <- DenseNeuroVec(matrix(rnorm(16 * 16 * 8 * 5), nrow = 16 * 16 * 8), sp4)
+
+identical(dim(v_arr), dim(v_mat))
+dim(v_arr)
+```
+
+## Taking a 4D object apart
+
+Three ways, depending on what you want back.
+
+A single volume, by position:
+
+```{r extract-vol}
+dim(bold[[3]])
+class(bold[[3]])[1]
+```
+
+A shorter series, keeping it 4D:
+
+```{r sub-vector}
+dim(sub_vector(bold, 1:5))
+```
+
+Every volume as a list, for iteration:
+
+```{r vols}
+length(vols(bold))
+```
+
+`slices()` does the same along the third axis of a 3D image, and `slice()` pulls
+one out as a `NeuroSlice`:
+
+```{r slices}
+length(slices(anat))
+class(slice(anat, 24, along = 3))[1]
+```
+
+## The matrix view
+
+`as.matrix()` flattens a `NeuroVec` to **voxels by time**, which is the shape
+most modelling code wants:
+
+```{r as-matrix}
+mat <- as.matrix(bold)
+dim(mat)
+```
+
+Going back needs the matching 3D space, which `drop_dim()` supplies. This
+round trip — flatten, reduce along time, rewrap — is the single most common
+operation in the package:
+
+```{r reduce}
+ar1 <- NeuroVol(
+  apply(mat, 1, function(x) if (sd(x) > 0) cor(x[-1], x[-length(x)]) else 0),
+  drop_dim(space(bold))
+)
+
+dim(ar1)
+range(ar1)
+```
+
+That is a lag-1 autocorrelation map: one number per voxel, summarising how
+strongly each time course predicts itself one scan later. Any function from a
+numeric vector to a scalar works in its place — `mean`, `sd`, a trimmed mean,
+the slope of a regression.
+
+## Putting objects together
+
+`concat()` stacks along time. Volumes become a series:
+
+```{r concat-vols}
+dim(concat(anat, anat, anat))
+```
+
+and series extend each other, which is how runs get joined:
+
+```{r concat-vecs}
+run1 <- sub_vector(bold, 1:5)
+run2 <- sub_vector(bold, 6:12)
+
+dim(concat(run1, run2))
+```
+
+All inputs must share a `NeuroSpace`; `concat()` errors rather than guessing if
+they do not.
+
+`split_blocks()` is the inverse, cutting a concatenated series back into runs
+given a block label per timepoint:
+
+```{r split-blocks}
+blocks <- split_blocks(bold, rep(1:4, each = 5))
+
+length(blocks)
+dim(blocks[[1]])
+```
+
+## Time series at a location
+
+`series()` takes a voxel, `series_roi()` takes a region:
+
+```{r series}
+length(series(bold, 32, 32, 12))
+```
+
+Regions, parcels and searchlights are the subject of
+`vignette("regions-and-searchlights")`; this is just the hook they hang on.
+
+## Dense and sparse
+
+When a mask defines which voxels count, a sparse representation stores only
+those:
+
+```{r sparse}
+sparse <- as.sparse(bold, as.mask(mask > 0))
+
+class(sparse)[1]
+dim(sparse)
+```
+
+Dimensions are unchanged — sparsity is about storage, not shape — and
+`as.dense()` reverses it. `read_vec(file, mask = ...)` reads straight into the
+sparse form without materialising the dense one first.
+
+```{r dense-again}
+class(as.dense(sparse))[1]
+```
+
+When that trade is worth making, and the other backends available when data
+outgrows memory, is the subject of `vignette("large-data")`.
+
+## Where to go next
+
+- `vignette("reading-and-writing")` — getting these objects to and from disk
+- `vignette("regions-and-searchlights")` — ROIs, parcels, searchlights
+- `vignette("large-data")` — sparse, mapped and file-backed storage
+
+Reference: `?NeuroVol`, `?NeuroVec`, `?concat`, `?sub_vector`, `?as.mask`.
