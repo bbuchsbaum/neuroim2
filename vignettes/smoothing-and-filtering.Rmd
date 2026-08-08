@@ -23,28 +23,41 @@ source("_common.R")
 library(neuroim2)
 ```
 
-Filtering trades detail for noise. neuroim2 offers six filters that make that
+Filtering trades detail for noise. neuroim2 offers six filters that make the
 trade differently: some blur everything, some try to keep edges, one sharpens
 instead, and two work across time as well as space. This article shows what each
-one does to the same image, and gives you numbers rather than adjectives.
+does to the same image, measured rather than asserted.
 
 ```{r data}
-anat <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
-mask <- as.mask(anat > 100)
+anat <- demo_anatomy()
+brain <- demo_anatomy_mask()
+
+spacing(anat)
 ```
 
-A helper to compare slices on a shared intensity scale, so differences between
-panels are real rather than an artefact of rescaling:
+That 1 mm matters for everything below: kernel widths are specified in
+millimetres, so what a filter actually does depends on `sigma` **relative to the
+voxel size**. On this image the two happen to coincide.
+
+Every number in this article is computed inside the brain mask. Statistics over
+the whole array are dominated by the 75% of voxels that are air, where every
+filter looks identical and every difference is invisible.
+
+```{r inmask}
+inside <- which(as.vector(brain))
+baseline <- as.array(anat)[inside]
+```
+
+A helper to compare slices on a shared intensity scale:
 
 ```{r panel-helper}
 compare <- function(..., z = 24) {
   imgs <- list(...)
-  zlim <- range(vapply(imgs, function(v) range(as.array(v)), numeric(2)))
+  zlim <- range(vapply(imgs, function(v) range(v[, , z]), numeric(2)))
   op <- par(mfrow = c(1, length(imgs)), mar = c(0.5, 0.5, 2, 0.5))
   for (nm in names(imgs)) {
     image(imgs[[nm]][, , z],
-      main = nm, zlim = zlim, col = gray.colors(256),
-      axes = FALSE, asp = 1
+      main = nm, zlim = zlim, col = gray.colors(256), axes = FALSE, asp = 1
     )
   }
   par(op)
@@ -56,181 +69,208 @@ compare <- function(..., z = 24) {
 `gaussian_blur()` is the fast, unconditional baseline: every voxel becomes a
 weighted average of its neighbours regardless of what is there.
 
-```{r gaussian, fig.cap = "Gaussian smoothing at two kernel widths. Structure survives the narrow kernel and dissolves under the wide one.", fig.alt = "Three axial slices: original, lightly smoothed, heavily smoothed.", fig.height = 3.2}
-light <- gaussian_blur(anat, mask, sigma = 2, window = 1)
-heavy <- gaussian_blur(anat, mask, sigma = 3, window = 3)
+```{r gaussian, fig.cap = "Gaussian smoothing at two kernel widths.", fig.alt = "Three axial slices: original, lightly smoothed, heavily smoothed.", fig.height = 3.2}
+light <- gaussian_blur(anat, brain, sigma = 2, window = 1)
+heavy <- gaussian_blur(anat, brain, sigma = 4, window = 4)
 
-compare(original = anat, `sigma 2, window 1` = light, `sigma 3, window 3` = heavy)
+compare(original = anat, `sigma 2, window 1` = light, `sigma 4, window 4` = heavy)
 ```
 
-Two parameters, and it is worth knowing which one is doing the work. `sigma` is
-the decay scale in millimetres; `window` is the discrete support in voxels, so
-`window = 1` gives a 3 x 3 x 3 kernel and `window = 3` a 7 x 7 x 7 one. The
-window truncates the kernel, so raising `sigma` past what the window can hold
-buys you very little:
+Two parameters, and they are not independent. `window` is the support in voxels
+either side, so `window = 1` is a 3 x 3 x 3 kernel covering `spacing` millimetres
+either way; `sigma` is the decay scale in millimetres. **The window truncates the
+kernel**, so a `sigma` much larger than `window * spacing` is wasted, and a
+`sigma` smaller than `spacing` does nothing at all:
 
 ```{r sigma-window}
-similarity <- function(x) cor(as.vector(as.array(x)), as.vector(as.array(anat)))
+fidelity <- function(x) cor(as.array(x)[inside], baseline)
 
 c(
-  `sigma 1, window 1` = similarity(gaussian_blur(anat, mask, sigma = 1, window = 1)),
-  `sigma 3, window 1` = similarity(gaussian_blur(anat, mask, sigma = 3, window = 1)),
-  `sigma 3, window 3` = similarity(gaussian_blur(anat, mask, sigma = 3, window = 3))
+  `sigma 1, window 1` = fidelity(gaussian_blur(anat, brain, sigma = 1, window = 1)),
+  `sigma 4, window 1` = fidelity(gaussian_blur(anat, brain, sigma = 4, window = 1)),
+  `sigma 4, window 2` = fidelity(gaussian_blur(anat, brain, sigma = 4, window = 2)),
+  `sigma 4, window 4` = fidelity(gaussian_blur(anat, brain, sigma = 4, window = 4))
 )
 ```
 
-Tripling `sigma` inside a fixed window barely moves the result; widening the
-window is what actually smooths. Set both together.
+Quadrupling `sigma` inside `window = 1` moves the result very little, because the
+kernel is clipped at one voxel either side. Widening the window then does a great
+deal. A workable rule is `window >= ceiling(2 * sigma / min(spacing(vol)))`; set
+the two together, and remember that on a 3.5 mm EPI grid a `sigma` of 3 mm is
+under one voxel and will barely register.
 
 ## Edge-preserving filters
 
-Gaussian blur does not know where anatomy stops. The next two do.
+Gaussian blur does not know where anatomy stops. `guided_filter()` fits local
+linear models, smoothing within regions and leaving boundaries alone.
+`bilateral_filter()` weights neighbours by intensity similarity as well as
+distance, so voxels across a tissue boundary contribute little.
 
-`guided_filter()` fits local linear models, smoothing within regions while
-leaving boundaries alone. `bilateral_filter()` weights neighbours by intensity
-similarity as well as distance, so voxels across a tissue boundary contribute
-little.
+One parameter needs care. `bilateral_filter()`'s `intensity_sigma` is a
+*multiple of the image's own standard deviation*, but `guided_filter()`'s
+`epsilon` is **absolute, in squared intensity units**. On an image scaled 0 to
+9533 an `epsilon` of 0.5 is indistinguishable from zero; it has to be scaled to
+the data.
 
-```{r edge-preserving, fig.cap = "Gaussian blur against two edge-preserving filters at comparable strength.", fig.alt = "Four axial slices comparing original, Gaussian, guided and bilateral filtering.", fig.height = 3.2}
-guided <- guided_filter(anat, radius = 4, epsilon = 0.7^2)
-bilateral <- bilateral_filter(anat, spatial_sigma = 2, intensity_sigma = 1, window = 1)
+```{r edge-preserving, fig.cap = "Gaussian blur against two edge-preserving filters at matched support.", fig.alt = "Four axial slices comparing original, Gaussian, guided and bilateral filtering.", fig.height = 3.2}
+sd_in <- sd(baseline)
+
+guided <- guided_filter(anat, radius = 1, epsilon = (0.6 * sd_in)^2)
+bilateral <- bilateral_filter(anat, brain, spatial_sigma = 2, intensity_sigma = 1, window = 1)
 
 compare(original = anat, gaussian = light, guided = guided, bilateral = bilateral)
 ```
 
-The difference is easier to see in numbers than in a small figure. A filter that
-preserves edges should reduce variance *within* tissue while keeping the overall
-intensity structure intact:
+All three now use a one-voxel radius, so the comparison is about method rather
+than support. The question an edge-preserving filter has to answer is: **how much
+variance can you remove per unit of distortion?**
 
 ```{r edge-numbers}
-edge_stats <- function(x) {
-  a <- as.array(x)
-  c(sd = sd(a), similarity = cor(as.vector(a), as.vector(as.array(anat))))
+score <- function(x) {
+  v <- as.array(x)[inside]
+  removed <- 1 - var(v) / var(baseline)
+  distortion <- 1 - cor(v, baseline)
+  c(sd = sd(v), removed = removed, distortion = distortion,
+    ratio = removed / distortion)
 }
 
 round(rbind(
-  gaussian = edge_stats(light),
-  guided = edge_stats(guided),
-  bilateral = edge_stats(bilateral)
-), 4)
+  original = score(anat),
+  gaussian = score(light),
+  guided = score(guided),
+  bilateral = score(bilateral)
+), 3)
 ```
 
-That table is the whole argument for edge-preserving filters. `guided_filter()`
-removes the most variance of the three — the lowest `sd` — and yet stays
-*closer* to the original image than the Gaussian does. Gaussian blur pays for
-its variance reduction by moving the image; the guided filter gets more
-reduction for less distortion, because it spends its smoothing inside regions
-instead of across their boundaries. `bilateral_filter()` is the most
-conservative here on both counts.
+`bilateral_filter()` removes a third of the variance for a twentieth of the
+distortion — an exchange rate three times better than the Gaussian's, and that
+ratio is what "edge preserving" buys you. `gaussian_blur()` removes more variance
+outright but pays the most per unit for it. `guided_filter()` is the weakest of
+the three at this `epsilon`: it barely smooths, and the little it does costs
+about what the Gaussian charges. Raise `epsilon` towards `sd_in^2` to get more
+out of it.
 
-Tune `epsilon` and `intensity_sigma` to move along that trade: smaller values
-preserve more contrast, larger values converge on plain Gaussian behaviour.
+Note that a plain whole-array `sd()` would have told you the opposite story.
+Outside the mask these images are nearly constant, so filters that flatten air
+look like strong denoisers when scored over the full volume.
 
 ## Sharpening
 
-`laplace_enhance()` runs the other direction, amplifying detail with a
-multi-scale non-local scheme. It is a display and detection aid, not a
-denoiser — it raises noise along with structure.
+`laplace_enhance()` runs the other way, amplifying detail with a multi-scale
+non-local scheme. It is a display and detection aid, not a denoiser.
 
 ```{r sharpen, fig.cap = "Laplacian enhancement increases local contrast rather than reducing it.", fig.alt = "Two axial slices: original and sharpened.", fig.height = 3.4}
-sharp <- laplace_enhance(anat, k = 2, patch_size = 3, search_radius = 1, h = 0.7)
+sharp <- laplace_enhance(anat, brain, k = 2, patch_size = 3, search_radius = 1, h = 0.7)
 
 compare(original = anat, enhanced = sharp)
 ```
 
+Pass the mask, whose second argument position is easy to skip. It is what keeps
+the enhancement off the background — and the background is where
+over-enhancement shows first:
+
 ```{r sharpen-numbers}
-c(original = sd(as.array(anat)), enhanced = sd(as.array(sharp)))
+outside <- which(as.vector(brain) == 0)
+sharp_arr <- as.array(sharp)
+
+round(rbind(
+  original = c(inside = sd(baseline), outside = sd(as.array(anat)[outside])),
+  enhanced = c(sd(sharp_arr[inside]), sd(sharp_arr[outside]))
+), 2)
 ```
 
-Variance goes up, which is the point. Raise `k` or `h` for a stronger effect,
-and watch the background — that is where over-enhancement shows first.
+Contrast inside the brain rises by more than half, which is the point, and the
+noise floor outside is untouched because the mask excluded it. Drop the mask and
+that second column climbs instead.
+
+The output does go negative on a non-negative image, so clip before writing
+anything downstream:
+
+```{r sharpen-range}
+range(sharp_arr)
+```
 
 ## Filtering across time
 
-Two filters work on a `NeuroVec`, smoothing over space and time together. Both
-need a series with real temporal structure, so we simulate one:
+Two filters work on a `NeuroVec`, over space and time together. Both need a
+series with real temporal structure:
 
 ```{r bold}
-bold_mask <- read_vol(system.file("extdata", "global_mask2.nii.gz", package = "neuroim2"))
-bold <- simulate_fmri(bold_mask, n_time = 40, seed = 1)
+bold_mask <- demo_mask()
+bold <- demo_bold(n_time = 40)
+
+attr(bold, "TR")
 ```
 
-`bilateral_filter_4d()` extends the bilateral idea along the time axis, with
-`temporal_sigma` and `temporal_window` controlling that extent and
-`temporal_spacing` giving the units of the time axis (the TR, if you are working
-in seconds).
+`bilateral_filter_4d()` extends the bilateral idea along the time axis.
+`temporal_spacing` is the units of that axis, so it must be your TR — here read
+straight off the simulated series rather than assumed:
 
 ```{r bilat4d}
 bf4d <- bilateral_filter_4d(
   bold, bold_mask,
-  spatial_sigma = 2, intensity_sigma = 1, temporal_sigma = 1,
-  spatial_window = 1, temporal_window = 1, temporal_spacing = 1
+  spatial_sigma = 4, intensity_sigma = 1, temporal_sigma = 1,
+  spatial_window = 1, temporal_window = 1,
+  temporal_spacing = attr(bold, "TR")
 )
 ```
 
 `cgb_filter()` decides which voxels belong together by **correlating their time
-courses**, not by comparing intensities. It builds a sparse graph — spatial
-proximity times time-series affinity — and diffuses the data over it. That makes
-it the right choice for functional data, where two voxels in the same network
-should smooth together even if their raw intensities differ.
+courses** rather than comparing intensities. It builds a sparse graph — spatial
+proximity times time-series affinity — and diffuses over it, which is the right
+model for functional data where two voxels in a network should smooth together
+even if their raw intensities differ.
 
 ```{r cgb}
-cgb <- cgb_filter(
-  bold,
-  mask = bold_mask,
-  spatial_sigma = 5, window = NULL,
+out <- cgb_filter(
+  bold, mask = bold_mask,
+  spatial_sigma = 5, window = 1,
   corr_map = "power", corr_param = 2,
-  topk = 16, passes = 1, lambda = 1
+  topk = 16, passes = 1, lambda = 1,
+  return_graph = TRUE
 )
 ```
 
-Both should reduce per-voxel noise and raise the coherence of nearby voxels.
-They do:
+Both should reduce per-voxel noise. Measure on a **random** sample of in-mask
+voxels — taking the first 300 by linear index gives you a contiguous patch in the
+bottom slice, where support is truncated and neighbours are trivially correlated:
 
 ```{r fourd-numbers}
-inmask <- head(which(as.vector(bold_mask) > 0), 300)
+set.seed(1)
+sample_idx <- sample(which(as.vector(bold_mask) > 0), 300)
 
-summarise <- function(x) {
-  m <- as.matrix(x)[inmask, ]
-  c(
-    voxel_sd = mean(apply(m, 1, sd)),
-    pairwise_cor = mean(cor(t(m))[upper.tri(diag(nrow(m)))])
-  )
-}
+noise <- function(x) mean(apply(as.matrix(x)[sample_idx, ], 1, sd))
 
-round(rbind(
-  raw = summarise(bold),
-  bilateral_4d = summarise(bf4d),
-  cgb = summarise(cgb)
-), 3)
+c(raw = noise(bold), bilateral_4d = noise(bf4d), cgb = noise(out$result))
 ```
 
-Per-voxel standard deviation falls and mean pairwise correlation rises, with
-`cgb_filter()` doing more of both at these settings. Raise `passes`, or lower
-`lambda`, to move further along that trade.
+`return_graph = TRUE` kept the graph, so further passes cost nothing to set up:
 
-`return_graph = TRUE` keeps the graph so you can reuse it instead of rebuilding
-it for every variant:
-
-```{r cgb-graph}
-out <- cgb_filter(bold, bold_mask, spatial_sigma = 5, topk = 16, return_graph = TRUE)
-
-names(out)
+```{r cgb-reuse}
+c(
+  raw = noise(bold),
+  pass_1 = noise(out$result),
+  pass_2 = noise(cgb_smooth(bold, out$graph, passes = 2))
+)
 ```
+
+Building the graph is the expensive part of `cgb_filter()`; `cgb_smooth()` reuses
+it, which is how you explore `passes` and `lambda` without paying for it each
+time.
 
 ## Choosing
 
 | Want | Use | Watch out for |
 |:--|:--|:--|
-| A fast, predictable baseline | `gaussian_blur()` | set `window` as well as `sigma` |
-| Denoise but keep tissue boundaries | `guided_filter()` | `epsilon` sets the trade |
-| Same, with finer intensity control | `bilateral_filter()` | cost grows with `window` |
-| More visible detail, not less | `laplace_enhance()` | amplifies noise too |
-| Joint space and time denoising | `bilateral_filter_4d()` | `temporal_spacing` must match your TR |
-| Smoothing that follows networks | `cgb_filter()` | needs series with real temporal structure |
+| A fast, predictable baseline | `gaussian_blur()` | `window` truncates `sigma` — set both |
+| Denoise but keep boundaries | `bilateral_filter()` | `intensity_sigma` scales with the image SD |
+| Same, local-linear formulation | `guided_filter()` | `epsilon` is absolute, in intensity squared |
+| More visible detail, not less | `laplace_enhance()` | raises the noise floor; can go negative |
+| Joint space and time denoising | `bilateral_filter_4d()` | `temporal_spacing` must be your TR |
+| Smoothing that follows networks | `cgb_filter()` | needs real temporal structure |
 
 ## Where to go next
 
 - `vignette("visualization")` — inspecting the results of any of these
 - `vignette("resampling-and-orientation")` — changing the grid rather than the values
-- `?gaussian_blur`, `?guided_filter`, `?cgb_filter`, `?cgb_make_graph`
+- `?gaussian_blur`, `?guided_filter`, `?cgb_filter`, `?cgb_smooth`

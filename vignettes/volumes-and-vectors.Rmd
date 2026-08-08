@@ -28,33 +28,51 @@ and `NeuroVec` for a stack of them sharing a spatial frame. This article covers
 how to build them, take them apart, and put them back together.
 
 ```{r data}
-anat <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
-mask <- read_vol(system.file("extdata", "global_mask2.nii.gz", package = "neuroim2"))
-bold <- simulate_fmri(mask, n_time = 20, seed = 1)
+anat <- demo_anatomy()
+mask <- demo_mask()
+bold <- demo_bold(n_time = 20)
 
 class(anat)[1]
 class(bold)[1]
 ```
 
-`read_vol()` reads a 3D file; `read_vec()` reads a 4D one. Here the functional
-series is simulated rather than read, so that its time courses have realistic
-temporal structure.
+`demo_anatomy()` and friends are shorthand this article set defines for the
+shipped example data; behind them are `read_vol()` for a 3D file, `read_vec()`
+for a 4D one, and `simulate_fmri()` for the functional series, which is
+simulated rather than read so its time courses have realistic temporal
+structure.
 
-## They behave like arrays
+Note the classes: `NeuroVol` and `NeuroVec` are the generic constructors, and
+what you get back is a concrete implementation — `DenseNeuroVol` here, with the
+sparse and on-disk alternatives covered in `vignette("large-data")`.
 
-Indexing, arithmetic and comparison all work, and — this is the important part —
-the result keeps its geometry instead of decaying into a bare array:
+## What survives an operation
+
+These objects behave like arrays, but not every operation returns one that still
+knows where it is. The rule is worth learning early, because it decides when you
+have to reattach a space by hand.
+
+Arithmetic and comparison preserve geometry — `Arith`, `Compare` and `Logic`
+group generics are all defined:
 
 ```{r arraylike}
+class(anat * 2)[1]
+class(anat > 100)[1]
+```
+
+Extraction deliberately does not. `[` gives you plain R data:
+
+```{r indexing}
 dim(anat)
 anat[24, 28, 24]
 
-class(anat * 2)[1]
-max(anat)
+class(anat[, , 24])[1]
+class(anat[anat > 100])[1]
 ```
 
-`Arith`, `Compare`, `Logic` and `Summary` group generics are all defined, so
-`anat / 2`, `anat > 100` and `range(anat)` do what you expect.
+That is the right default — you usually want a matrix or a vector to compute on
+— but it means anything you build from extracted values has to be given a space
+again, which is the subject of the next section but one.
 
 ## Masks
 
@@ -70,10 +88,10 @@ sum(brain)
 set of indices:
 
 ```{r as-mask}
-m1 <- as.mask(anat > 100)
-m2 <- as.mask(anat, which(anat > 500))
+from_logical <- as.mask(anat > 100)
+from_indices <- as.mask(anat, which(anat > 6000))
 
-c(loose = sum(m1), strict = sum(m2))
+c(brain = sum(from_logical), bright = sum(from_indices))
 ```
 
 Masks index volumes directly, which is the usual way to pull out the voxels you

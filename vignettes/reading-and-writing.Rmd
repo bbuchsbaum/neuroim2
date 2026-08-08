@@ -25,22 +25,23 @@ library(neuroim2)
 
 Every analysis starts and ends at a file. This article covers the readers and
 writers, how to inspect a header before committing to loading anything, and the
-one header problem that silently produces wrong results.
+one header problem that produces wrong results without producing an error.
 
 ```{r paths}
 mask_file <- system.file("extdata", "global_mask2.nii.gz", package = "neuroim2")
 series_file <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
+anat_file <- system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2")
 ```
 
 ## Choosing a reader
 
 | Function | Returns | Use for |
 |:--|:--|:--|
-| `read_vol()` | `NeuroVol` | a 3D image |
+| `read_vol()` | `NeuroVol` | a 3D image, or one volume of a 4D one |
 | `read_vec()` | `NeuroVec` | a 4D series |
 | `read_image()` | whichever fits | unknown dimensionality |
-| `read_vol_list()` | list of `NeuroVol` | many 3D files |
-| `read_header()` | `NIFTIMetaInfo` | metadata without the data |
+| `read_vol_list()` | `NeuroVec` | many 3D files as one series |
+| `read_header()` | `FileMetaInfo` | metadata without the data |
 
 ```{r readers}
 vol <- read_vol(mask_file)
@@ -50,21 +51,32 @@ dim(vol)
 dim(vec)
 ```
 
-Compression is handled by extension: `.nii` and `.nii.gz` both work, on read and
-on write. `read_vol()` on a 4D file returns its first volume, so reach for
-`read_image()` when you do not know what a file holds:
+Compression is handled by extension: `.nii` and `.nii.gz` both work on read and
+on write. `read_vol()` on a 4D file returns its first volume, and `index` picks
+a different one:
+
+```{r read-index}
+dim(read_vol(series_file, index = 3))
+```
+
+Use `read_image()` when you do not know what a file holds:
 
 ```{r read-image}
 class(read_image(series_file))[1]
 ```
 
-Several files at once, either as a list of volumes or concatenated into one
-series:
+Reading several files gives you a 4D object either way, but not the same one.
+`read_vol_list()` builds a single contiguous series; `read_vec()` on a vector of
+paths keeps the runs as separable segments:
 
 ```{r multi}
-length(read_vol_list(c(mask_file, mask_file)))
+class(read_vol_list(c(mask_file, mask_file)))[1]
+class(read_vec(c(series_file, series_file)))[1]
+
 dim(read_vec(c(series_file, series_file)))
 ```
+
+Neither returns a list, despite the name — `length()` on either counts volumes.
 
 ## Looking before you load
 
@@ -74,13 +86,21 @@ tells you what you are about to commit to:
 ```{r header}
 hdr <- read_header(mask_file)
 
-hdr@dims
-hdr@spacing
+dim(hdr)
 hdr@data_type
+hdr@spacing
 ```
 
-The full NIfTI header sits in the `header` slot as a plain list, so anything the
-accessors do not expose is still reachable:
+`dim()` and `trans()` work on a header, which is the quickest way to see the
+affine neuroim2 will actually use without loading a byte of data:
+
+```{r header-trans}
+trans(hdr)
+```
+
+`spacing()`, `origin()` and `space()` are not defined for headers — read the
+slots (`hdr@spacing`, `hdr@origin`) instead. The full NIfTI header is a plain
+list in the `header` slot, so anything the slots omit is still reachable:
 
 ```{r header-slot}
 hdr@header$datatype
@@ -88,14 +108,11 @@ hdr@header$encoding
 hdr@header$vox_offset
 ```
 
-Note that geometry lives in slots on the metadata object rather than behind the
-`spacing()` and `space()` generics — those are defined for images, not headers.
-
 ## The two affines
 
 A NIfTI file can carry **two** spatial transforms: the `qform` (a rigid
 transform stored as a quaternion) and the `sform` (a general affine). Each has a
-code saying whether it is set. The standard says: use the sform when
+code saying whether it is set. The standard says use the sform when
 `sform_code > 0`, otherwise the qform.
 
 On a well-formed file the two agree:
@@ -106,51 +123,79 @@ c(qform_code = hdr@header$qform_code, sform_code = hdr@header$sform_code)
 all.equal(hdr@header$qform, hdr@header$sform)
 ```
 
-They do not always agree, and when they disagree the file is lying to somebody.
-The anatomical image shipped with this package is a real example:
+They do not always agree. The anatomical image shipped with this package is a
+real example — its qform describes 4 mm voxels and its sform describes 1 mm
+ones:
 
 ```{r affines-bad}
-anat_hdr <- read_header(
-  system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2")
-)
+anat_hdr <- read_header(anat_file)
 
-anat_hdr@header$pixdim[2:4]  # voxel sizes the header advertises
-anat_hdr@header$qform        # 4 mm voxels
-anat_hdr@header$sform        # 1 mm voxels
+anat_hdr@header$pixdim[2:4]
+anat_hdr@header$qform
+anat_hdr@header$sform
 ```
 
-Both codes are set, so the sform wins, and the image reports 1 mm voxels even
-though its `pixdim` says 4 mm:
+Both codes are set, so the sform wins and the image reports 1 mm voxels even
+though `pixdim` says otherwise:
 
 ```{r affines-consequence}
-spacing(read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2")))
+spacing(read_vol(anat_file))
 ```
 
-Nothing errors. The image loads, plots correctly, and every millimetre
-coordinate derived from it is wrong by a factor of four. **This is the failure
-mode to know about**, because no amount of care downstream will catch it. A
-two-line check when a file first arrives is worth it:
+Nothing errors. The image loads and plots correctly, and every **distance,
+volume and ROI radius** derived from it is wrong by a factor of about four. The
+coordinates themselves are not scaled by four — both affines share a translation,
+so they agree exactly at voxel `(1, 1, 1)` and diverge by a growing offset that
+reaches roughly 140 mm at the far corner:
+
+```{r affines-divergence}
+far <- matrix(dim(read_vol(anat_file)), nrow = 1)
+
+sform_xyz <- grid_to_coord(space(read_vol(anat_file)), far)
+qform_xyz <- (anat_hdr@header$qform %*% c(far - 1, 1))[1:3]
+
+rbind(sform = as.vector(sform_xyz), qform = qform_xyz)
+```
+
+**This is the failure mode to know about**, because no amount of care downstream
+will catch it. Check when a file first arrives:
 
 ```{r affine-check}
-check_affines <- function(file) {
+affines_agree <- function(file) {
   h <- read_header(file)
-  if (h@header$qform_code > 0 && h@header$sform_code > 0) {
-    isTRUE(all.equal(h@header$qform, h@header$sform, tolerance = 1e-4))
-  } else {
-    NA
-  }
+  qc <- h@header$qform_code
+  sc <- h@header$sform_code
+  if (is.null(qc) || is.null(sc) || qc <= 0 || sc <= 0) return(NA)
+  isTRUE(all.equal(h@header$qform, h@header$sform, tolerance = 1e-4))
 }
 
-c(
-  mask = check_affines(mask_file),
-  anat = check_affines(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
+c(mask = affines_agree(mask_file), anat = affines_agree(anat_file))
+```
+
+The `is.null()` guard matters: not every format carries these fields, and
+returning `NA` for "cannot tell" is better than erroring on an AFNI file.
+
+If a file is affected and you trust its `pixdim`, rebuild the geometry:
+
+```{r repair}
+bad <- read_vol(anat_file)
+fixed <- NeuroVol(
+  as.array(bad),
+  NeuroSpace(dim(bad),
+    spacing = anat_hdr@header$pixdim[2:4],
+    origin = anat_hdr@header$qform[1:3, 4],
+    axes = space(bad)@axes
+  )
 )
+
+spacing(fixed)
 ```
 
 ## Writing
 
 `write_vol()` and `write_vec()` take an object and a path. The extension decides
-the container and the compression:
+the container and the compression; an unrecognised or absent extension gives
+uncompressed NIfTI.
 
 ```{r write}
 out_nii <- tempfile(fileext = ".nii")
@@ -162,13 +207,25 @@ write_vol(vol, out_gz)
 c(plain = file.size(out_nii), gzipped = file.size(out_gz))
 ```
 
-What matters is that a round trip preserves both the data and the geometry:
+That plain file is 400 kB for a binary mask, because `write_vol()` promotes to
+`FLOAT` by default. Pass `data_type` when you know better:
+
+```{r datatype}
+out_byte <- tempfile(fileext = ".nii")
+write_vol(vol, out_byte, data_type = "UBYTE")
+
+c(float = file.size(out_nii), ubyte = file.size(out_byte))
+read_header(out_byte)@data_type
+```
+
+Valid types are `UNKNOWN`, `BINARY`, `UBYTE`, `SHORT`, `INT`, `FLOAT` and
+`DOUBLE`. A round trip preserves both data and geometry either way:
 
 ```{r roundtrip}
 back <- read_vol(out_gz)
 
 all.equal(as.array(back), as.array(vol))
-all.equal(trans(space(back)), trans(space(vol)))
+identical(trans(space(back)), trans(space(vol)))
 ```
 
 4D objects work the same way:
@@ -180,23 +237,38 @@ write_vec(sub_vector(vec, 1:2), out_vec)
 dim(read_vec(out_vec))
 ```
 
-```{r cleanup, include = FALSE}
-unlink(c(out_nii, out_gz, out_vec))
+### A precision surprise that is not about files
+
+Affines round to seven significant figures, and spacing and origin to six — but
+this happens in `NeuroSpace()`, when the object is built, not when it is written:
+
+```{r precision}
+sp <- NeuroSpace(c(4L, 4L, 4L), spacing = c(1 / 3, 0.123456789012, pi))
+
+spacing(sp)
 ```
 
-Affine coefficients are stored as 32-bit floats, so geometry survives a round
-trip to about seven significant figures rather than exactly. Compare
-coordinates with a tolerance, not `identical()`.
+No file was involved. Because both sides of a round trip get the same rounding,
+`identical()` on a re-read affine does succeed, as above. What you cannot rely on
+is an affine you constructed matching the full-precision numbers you passed in.
 
-## Other formats
+```{r cleanup, include = FALSE}
+unlink(c(out_nii, out_gz, out_byte, out_vec))
+```
+
+## AFNI files
 
 AFNI `HEAD`/`BRIK` pairs are read by the same functions — pass the `.HEAD` file
-and the matching `.BRIK` is found alongside it. `read_meta_info()` exposes AFNI
-header attributes, and NIML surface files have their own reader. `?read_vol` and
-`?read_meta_info` list the supported formats.
+and the matching `.BRIK` is found beside it. `read_header()` returns an
+`AFNIMetaInfo` whose `header` slot holds the AFNI attribute list:
+
+```{r afni, eval = FALSE}
+vol <- read_vol("subject_anat+orig.HEAD")
+names(read_header("subject_anat+orig.HEAD")@header)
+```
 
 ## Where to go next
 
-- `vignette("spaces-and-coordinates")` — what the affine you just read actually means
+- `vignette("spaces-and-coordinates")` — what the affine you just read means
 - `vignette("large-data")` — reading files too big to hold in memory
 - `?read_vol`, `?read_header`, `?write_vol`
