@@ -1,0 +1,216 @@
+---
+title: Resampling and orientation
+output:
+  rmarkdown::html_vignette:
+    css: albers.css
+    includes:
+      in_header: albers-header.html
+vignette: |
+  %\VignetteIndexEntry{Resampling and orientation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+resource_files:
+- albers.css
+- albers.js
+- albers-header.html
+---
+
+```{r setup, include = FALSE}
+source("_common.R")
+```
+
+```{r load}
+library(neuroim2)
+```
+
+Four operations change an image's grid, and they are easy to confuse because
+three of them can produce an image of a different shape. The distinction that
+matters is whether the voxel *values* move:
+
+| Operation | Changes the grid | Moves the data | Use when |
+|:--|:--|:--|:--|
+| `downsample()` | coarser, same field of view | yes | you want fewer voxels |
+| `resample_to()` | any target grid | yes | you must match another image |
+| `reorient()` | relabels axes only | **no** | the axis codes are wrong |
+| `deoblique()` | removes scanner tilt | yes | the affine is oblique |
+
+```{r data}
+anat <- demo_anatomy()
+mask <- demo_mask()
+```
+
+## Downsampling
+
+`downsample()` keeps the field of view and coarsens the grid. Give it exactly one
+of `factor`, `spacing` or `outdim`:
+
+```{r downsample}
+half <- downsample(anat, factor = 0.5)
+
+dim(anat)
+dim(half)
+round(spacing(half), 3)
+```
+
+```{r downsample-fig, fig.cap = "Full resolution and half resolution, same field of view.", fig.alt = "Two axial slices, the second visibly blockier.", fig.height = 3.4}
+op <- par(mfrow = c(1, 2), mar = c(1, 1, 2, 1))
+image(anat[, , 24], main = "original", col = gray.colors(256), axes = FALSE, asp = 1)
+image(half[, , 12], main = "factor = 0.5", col = gray.colors(256), axes = FALSE, asp = 1)
+par(op)
+```
+
+The current implementation box-averages in space, which is the right default for
+intensity images and the wrong one for labels — averaging label 3 and label 5
+gives you label 4.
+
+## Resampling onto a target grid
+
+`resample_to()` puts an image onto any grid you name. Building that grid is
+where things go wrong, so start there.
+
+### Build the target from the source affine
+
+It is tempting to describe a target with `dim`, `spacing` and `origin`. Do not:
+those three do not carry **orientation**, and the constructor will give you an
+axis-aligned RAS affine regardless of what the source looked like.
+
+```{r bad-target}
+affine_to_axcodes(trans(mask))
+
+naive <- NeuroSpace(round(dim(mask) * 1.6), spacing(mask) / 1.6, origin = origin(mask))
+affine_to_axcodes(trans(naive))
+```
+
+The source runs `LAS` and the target runs `RAS`, so the target grid sits
+somewhere the source has no data. Resampling into it succeeds and returns an
+empty image:
+
+```{r bad-resample}
+sum(resample_to(mask, naive, method = "nearest"))
+```
+
+No error, no warning, no data. Instead, scale the source's own affine, which
+keeps orientation and origin intact:
+
+```{r good-target}
+tr <- trans(mask)
+tr[1:3, 1:3] <- tr[1:3, 1:3] / 1.6
+
+finer <- NeuroSpace(round(dim(mask) * 1.6), trans = tr)
+
+affine_to_axcodes(trans(finer))
+round(spacing(finer), 3)
+```
+
+```{r good-resample}
+up <- resample_to(mask, finer, method = "nearest")
+
+c(source = sum(mask), resampled = sum(up), expected = sum(mask) * 1.6^3)
+```
+
+The in-mask volume is preserved to within a percent, which is the check worth
+making after any resample.
+
+### Choosing an interpolation method
+
+`"nearest"`, `"linear"` and `"cubic"` are available. The rule is simple: **labels
+and masks take `"nearest"`, continuous data takes `"linear"` or `"cubic"`.** The
+reason is visible in one number:
+
+```{r interpolation}
+non_integer <- function(x) mean(abs(as.array(x) - round(as.array(x))) > 1e-6)
+
+c(
+  nearest = non_integer(resample_to(mask, finer, method = "nearest")),
+  linear = non_integer(resample_to(mask, finer, method = "linear"))
+)
+```
+
+Linear interpolation turns 5% of a binary mask into fractions somewhere between
+0 and 1. Those voxels are neither in nor out, and every count you take
+afterwards is wrong.
+
+### Matching another image
+
+The common real task is putting one image onto another's grid, which needs no
+target construction at all — pass the image:
+
+```{r match-image}
+coarse <- downsample(mask, factor = 0.5)
+matched <- resample_to(mask, coarse, method = "nearest")
+
+identical(dim(matched), dim(coarse))
+identical(trans(space(matched)), trans(space(coarse)))
+```
+
+Two images that share a `NeuroSpace` can be compared, overlaid and subtracted.
+Two that do not, cannot — several plotting helpers require it explicitly rather
+than silently resampling behind your back.
+
+## Reorienting
+
+`reorient()` is the odd one out: it rewrites the affine so the axes carry
+different codes, without touching a single voxel.
+
+```{r reorient}
+ras <- reorient(space(mask), c("R", "A", "S"))
+
+affine_to_axcodes(trans(space(mask)))
+affine_to_axcodes(trans(ras))
+```
+
+It is relative to the current orientation, so asking for the orientation an
+image already has is a no-op:
+
+```{r reorient-noop}
+identical(trans(reorient(space(mask), c("L", "A", "S"))), trans(space(mask)))
+```
+
+Use it when a file's axis codes are wrong. If you want the array itself
+rearranged so that, say, the first index really does run left to right, that is a
+resample onto a reoriented grid — build the target with `reorient()`, then call
+`resample_to()`.
+
+## Deobliquing
+
+Scanners often acquire at a tilt, leaving off-diagonal terms in the affine.
+`obliquity()` measures it:
+
+```{r oblique}
+aff <- matrix(c(
+   2.0,  0.2,  0.0,  -90,
+   0.0,  2.0,  0.1, -126,
+   0.0,  0.0,  2.0,  -72,
+   0.0,  0.0,  0.0,    1
+), nrow = 4, byrow = TRUE)
+
+tilted <- NeuroVol(array(rnorm(40 * 40 * 30), c(40, 40, 30)),
+                   NeuroSpace(c(40L, 40L, 30L), trans = aff))
+
+round(obliquity(trans(space(tilted))), 4)
+```
+
+`deoblique()` builds an axis-aligned space enclosing the original field of view
+and — when given a volume rather than a space — resamples the data into it. The
+grid grows slightly, because an axis-aligned box around a tilted one is bigger:
+
+```{r deoblique}
+straight <- deoblique(tilted)
+
+dim(tilted)
+dim(straight)
+round(obliquity(trans(space(straight))), 6)
+```
+
+`as_canonical()` is the related convenience for getting an image into a standard
+axis order:
+
+```{r canonical}
+dim(as_canonical(anat))
+```
+
+## Where to go next
+
+- `vignette("spaces-and-coordinates")` — what the affine you are rebuilding means
+- `vignette("visualization")` — checking a resample by eye
+- `?resample_to`, `?downsample`, `?reorient`, `?deoblique`

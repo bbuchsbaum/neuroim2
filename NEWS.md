@@ -1,5 +1,23 @@
 # neuroim2 0.17.0
 
+## Documentation
+
+* The vignettes have been rewritten as nine articles in three tiers: *Learn*
+  (`neuroim2`, `spaces-and-coordinates`, `volumes-and-vectors`,
+  `reading-and-writing`), *Do* (`regions-and-searchlights`,
+  `resampling-and-orientation`, `smoothing-and-filtering`, `visualization`) and
+  *Scale* (`large-data`), replacing the previous fourteen. Old article URLs
+  redirect to their successors on the package website; `vignette()` calls using
+  the old names will need updating.
+* Vignette examples no longer take time series from `global_mask_v4.nii`, which
+  is a binary mask repeated across four timepoints — every "time series" drawn
+  from it was a constant vector. Anything with a time axis now uses
+  `simulate_fmri()`, so time courses have real temporal structure and the
+  smoothing, searchlight and ROI examples demonstrate measurable effects.
+* Vignette YAML placed `css` and `includes` at the document root, where
+  `html_vignette` ignores them, so the package stylesheet never reached the
+  rendered articles. They are now nested under the output format.
+
 ## Bug Fixes
 
 * **Breaking:** Fixed `reorient()`, which never returned the orientation it was

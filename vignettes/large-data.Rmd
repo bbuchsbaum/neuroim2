@@ -1,0 +1,219 @@
+---
+title: Large data
+output:
+  rmarkdown::html_vignette:
+    css: albers.css
+    includes:
+      in_header: albers-header.html
+vignette: |
+  %\VignetteIndexEntry{Large data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+resource_files:
+- albers.css
+- albers.js
+- albers-header.html
+---
+
+```{r setup, include = FALSE}
+source("_common.R")
+```
+
+```{r load}
+library(neuroim2)
+```
+
+Start dense. Move only when memory or I/O forces you to, and know what each move
+costs — the backends differ enormously in *which* access pattern they make
+cheap, and picking the wrong one is far worse than staying dense.
+
+Everything below measures the same dataset, written to an uncompressed NIfTI so
+that every backend can read it:
+
+```{r data}
+bold <- demo_bold(n_time = 60)
+brain <- as.mask(demo_mask() > 0)
+
+path <- tempfile(fileext = ".nii")
+write_vec(bold, path)
+
+c(dim = dim(bold), file_MB = round(file.size(path) / 1e6, 1))
+```
+
+## What each backend costs
+
+```{r backends}
+dense <- read_vec(path)
+sparse <- read_vec(path, mask = brain)
+mapped <- read_vec(path, mode = "mmap")
+filebacked <- read_vec(path, mode = "filebacked")
+
+mb <- function(x) round(as.numeric(object.size(x)) / 1e6, 1)
+
+data.frame(
+  backend = c("DenseNeuroVec", "SparseNeuroVec", "MappedNeuroVec", "FileBackedNeuroVec"),
+  memory_MB = c(mb(dense), mb(sparse), mb(mapped), mb(filebacked))
+)
+```
+
+They all hold the same data:
+
+```{r agreement}
+ref <- as.numeric(series(dense, 32, 32, 12))
+
+vapply(
+  list(sparse = sparse, mapped = mapped, filebacked = filebacked),
+  function(x) isTRUE(all.equal(as.numeric(series(x, 32, 32, 12)), ref)),
+  logical(1)
+)
+```
+
+## The number that actually decides it
+
+Memory is the easy axis. The one that catches people is access *pattern*. Here
+is the same work — twenty whole volumes, then twenty voxel time courses — on
+each backend:
+
+```{r timing}
+time_it <- function(expr) round(system.time(expr)["elapsed"], 2)
+
+set.seed(1)
+idx <- sample(which(as.vector(brain)), 20)
+g <- index_to_grid(demo_mask(), idx)
+
+bench <- function(x) {
+  c(
+    volumes = time_it(for (i in 1:20) invisible(x[[i]])),
+    series = time_it(for (i in 1:20) series(x, g[i, 1], g[i, 2], g[i, 3]))
+  )
+}
+
+round(rbind(
+  dense = bench(dense),
+  sparse = bench(sparse),
+  mapped = bench(mapped),
+  filebacked = bench(filebacked)
+), 2)
+```
+
+`FileBackedNeuroVec` reads a whole volume to answer any question. Asking it for
+one voxel's time course means reading the entire file once per voxel, which is
+why that cell is thousands of times slower than the others rather than a little
+slower. **Use it only when you genuinely work volume at a time.**
+`MappedNeuroVec` is cheap on both patterns and is the better default whenever the
+file is uncompressed.
+
+## The ladder
+
+**Dense** is the default. Predictable arithmetic, indexing and plotting, and
+nothing to think about.
+
+**Sparse** stores only the voxels a mask admits. Here the brain is 29% of the
+grid, and the object is about a third the size:
+
+```{r sparse}
+c(in_mask = sum(brain), total = prod(dim(brain)))
+c(dense_MB = mb(dense), sparse_MB = mb(sparse))
+```
+
+Dimensions are unchanged — sparsity is storage, not shape. Reach for it when a
+mask defines your analysis anyway.
+
+**Memory-mapped** leaves the data on disk and lets the operating system page it
+in. It needs an *uncompressed* file, which is the one real constraint: a
+`.nii.gz` cannot be mapped.
+
+```{r mmap}
+class(mapped)[1]
+dim(mapped)
+```
+
+`as_mmap()` converts an in-memory object, writing an uncompressed file if it has
+to:
+
+```{r as-mmap}
+converted <- as_mmap(dense)
+
+class(converted)[1]
+isTRUE(all.equal(as.numeric(series(converted, 32, 32, 12)), ref))
+```
+
+**BigNeuroVec** backs a masked series with an on-disk `bigstatsr` matrix, which
+is the option for data larger than RAM that still needs voxelwise access:
+
+```{r bigvec}
+big <- read_vec(path, mode = "bigvec", mask = brain)
+
+class(big)[1]
+mb(big)
+```
+
+## Dropping to parcels
+
+Every backend so far keeps one time course per voxel. The largest reduction
+available comes from deciding you do not need them: a `ClusteredNeuroVec` stores
+one series per *parcel*.
+
+```{r clustered}
+set.seed(1)
+parcels <- ClusteredNeuroVol(brain, sample(1:100, sum(brain), replace = TRUE))
+cvec <- ClusteredNeuroVec(bold, parcels)
+
+num_clusters(cvec)
+dim(cvec)
+```
+
+It still behaves like a 4D image — `dim()` is unchanged and indexing works — but
+only 100 time courses exist behind it:
+
+```{r clustered-size}
+dim(as.matrix(cvec, by = "cluster"))
+
+c(dense_MB = mb(dense), clustered_MB = mb(cvec))
+```
+
+```{r clustered-access}
+length(series(cvec, 32, 32, 12))
+dim(cvec[, , , 1])
+```
+
+Every voxel in a parcel returns that parcel's series, which is the trade: a
+100-fold reduction in stored series, and no within-parcel detail at all. For
+atlas-based connectivity this is exactly right; for anything that needs
+voxelwise variation it is not.
+
+Cluster-level searchlights come with it, using centroid distances rather than
+voxel neighbourhoods:
+
+```{r cluster-searchlight}
+windows <- cluster_searchlight_series(cvec, k = 3)
+
+length(windows)
+dim(values(windows[[1]]))
+```
+
+```{r cleanup, include = FALSE}
+unlink(path)
+```
+
+## Choosing
+
+| Situation | Backend | Why |
+|:--|:--|:--|
+| It fits in memory | `DenseNeuroVec` | simplest, fastest, no caveats |
+| A mask defines the analysis | `SparseNeuroVec` | stores only admitted voxels |
+| Large uncompressed file, mixed access | `MappedNeuroVec` | cheap on both access patterns |
+| Large file, strictly volume at a time | `FileBackedNeuroVec` | never for voxel series |
+| Larger than RAM, needs voxel access | `BigNeuroVec` | on-disk matrix |
+| Parcel-level analysis is enough | `ClusteredNeuroVec` | orders of magnitude fewer series |
+| Genuinely 5D input | `NeuroHyperVec` | the intended representation |
+
+If you are unsure: read with `read_vec()`, and change only when a measurement
+tells you to. `object.size()` and `system.time()`, as used above, are the whole
+toolkit.
+
+## Where to go next
+
+- `vignette("volumes-and-vectors")` — the containers these all implement
+- `vignette("regions-and-searchlights")` — parcels and searchlights in depth
+- `?read_vec`, `?as_mmap`, `?ClusteredNeuroVec`, `?BigNeuroVec`

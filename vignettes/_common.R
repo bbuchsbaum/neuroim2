@@ -137,3 +137,45 @@ demo_stat_map <- function(mask = demo_mask(), n_time = 30, seed = 2,
 
   neuroim2::NeuroVol(array(tstat, dim(mask)), neuroim2::space(mask))
 }
+
+# --- registration-QC demo data -----------------------------------------------
+# The visualization article needs a deliberately misaligned copy of an image and
+# a pair of edge maps. These live here rather than in a 90-line hidden chunk at
+# the top of that article.
+
+#' Shift a volume by whole voxels along one axis, keeping its space.
+demo_shifted <- function(vol, by = 3L, axis = 1L) {
+  a <- as.array(vol)
+  out <- array(0, dim(a))
+  d <- dim(a)
+  src <- lapply(d, seq_len)
+  dst <- src
+  src[[axis]] <- seq_len(d[axis] - by)
+  dst[[axis]] <- seq.int(by + 1L, d[axis])
+  out[dst[[1]], dst[[2]], dst[[3]]] <- a[src[[1]], src[[2]], src[[3]]]
+  neuroim2::NeuroVol(out, neuroim2::space(vol))
+}
+
+#' A one-voxel-thick boundary of a mask, as a NeuroVol on the same grid.
+demo_edges <- function(mask_vol) {
+  m <- as.array(mask_vol) > 0
+  d <- dim(m)
+  edge <- array(FALSE, d)
+  for (ax in 1:3) {
+    for (step in c(-1L, 1L)) {
+      nb <- array(FALSE, d)
+      src <- lapply(d, seq_len)
+      dst <- src
+      if (step > 0) {
+        src[[ax]] <- seq_len(d[ax] - 1L)
+        dst[[ax]] <- seq.int(2L, d[ax])
+      } else {
+        src[[ax]] <- seq.int(2L, d[ax])
+        dst[[ax]] <- seq_len(d[ax] - 1L)
+      }
+      nb[dst[[1]], dst[[2]], dst[[3]]] <- m[src[[1]], src[[2]], src[[3]]]
+      edge <- edge | (m & !nb)
+    }
+  }
+  neuroim2::NeuroVol(array(as.numeric(edge), d), neuroim2::space(mask_vol))
+}
