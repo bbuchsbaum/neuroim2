@@ -116,17 +116,23 @@ par(op)
 A `NeuroVol` is an array plus a `NeuroSpace`:
 
 ```{r build-vol}
+set.seed(1)
+
 sp <- NeuroSpace(dim = c(16L, 16L, 8L), spacing = c(2, 2, 2))
 vol <- NeuroVol(array(rnorm(16 * 16 * 8), c(16, 16, 8)), sp)
 
 vol
 ```
 
-In practice you rarely write the space out. Copy it from an image you already
-have, which is what keeps a derived result aligned with its source:
+In practice you rarely write a space out. Arithmetic keeps the one it has, so
+the case that matters is rebuilding an image from values that have *lost* their
+geometry — anything that has been through `[`, `as.matrix()` or `apply()`:
 
 ```{r copy-space}
-derived <- NeuroVol((anat + 1) * 25, space(anat))
+values <- as.array(anat)[]        # a plain numeric vector: no space
+class(values)
+
+derived <- NeuroVol(values, space(anat))
 identical(space(derived), space(anat))
 ```
 
@@ -134,17 +140,18 @@ The same for 4D, from either an array or a voxels-by-time matrix:
 
 ```{r build-vec}
 sp4 <- NeuroSpace(c(16L, 16L, 8L, 5L), spacing = c(2, 2, 2))
+d <- rnorm(16 * 16 * 8 * 5)
 
-v_arr <- NeuroVec(array(rnorm(16 * 16 * 8 * 5), c(16, 16, 8, 5)), sp4)
-v_mat <- DenseNeuroVec(matrix(rnorm(16 * 16 * 8 * 5), nrow = 16 * 16 * 8), sp4)
+v_arr <- NeuroVec(array(d, c(16, 16, 8, 5)), sp4)
+v_mat <- NeuroVec(matrix(d, nrow = 16 * 16 * 8), sp4)
 
-identical(dim(v_arr), dim(v_mat))
 dim(v_arr)
+all.equal(as.array(v_arr), as.array(v_mat))
 ```
 
-## Taking a 4D object apart
+## Taking an object apart
 
-Three ways, depending on what you want back.
+A few ways, depending on what you want back.
 
 A single volume, by position:
 
@@ -165,8 +172,8 @@ Every volume as a list, for iteration:
 length(vols(bold))
 ```
 
-`slices()` does the same along the third axis of a 3D image, and `slice()` pulls
-one out as a `NeuroSlice`:
+For a 3D image the equivalent is `slices()` along the third axis, with `slice()`
+pulling one out as a `NeuroSlice`:
 
 ```{r slices}
 length(slices(anat))
@@ -183,24 +190,32 @@ mat <- as.matrix(bold)
 dim(mat)
 ```
 
-Going back needs the matching 3D space, which `drop_dim()` supplies. This
-round trip — flatten, reduce along time, rewrap — is the single most common
-operation in the package:
+Most of those rows are outside the brain and constant, so reduce over the mask
+and scatter the answers back. This masked form is the pattern you will use most
+often, and it is what the rest of these articles assume:
 
 ```{r reduce}
-ar1 <- NeuroVol(
-  apply(mat, 1, function(x) if (sd(x) > 0) cor(x[-1], x[-length(x)]) else 0),
-  drop_dim(space(bold))
-)
+inside <- which(as.vector(mask) > 0)
 
-dim(ar1)
-range(ar1)
+ar1 <- numeric(nrow(mat))
+ar1[inside] <- apply(mat[inside, ], 1, function(x) cor(x[-1], x[-length(x)]))
+
+ar1_map <- NeuroVol(ar1, drop_dim(space(bold)))
+
+c(voxels = nrow(mat), reduced = length(inside))
+round(range(ar1[inside]), 3)
 ```
 
-That is a lag-1 autocorrelation map: one number per voxel, summarising how
-strongly each time course predicts itself one scan later. Any function from a
-numeric vector to a scalar works in its place — `mean`, `sd`, a trimmed mean,
-the slope of a regression.
+`drop_dim()` supplies the matching 3D space, which is what keeps the result
+aligned with its source. The reduction itself is a lag-1 autocorrelation — one
+number per voxel — and any vector-to-scalar function works in its place.
+
+`vectors()` is the iterator form of the same idea, yielding one voxel time
+course at a time:
+
+```{r vectors}
+length(vectors(bold))
+```
 
 ## Putting objects together
 
@@ -219,29 +234,28 @@ run2 <- sub_vector(bold, 6:12)
 dim(concat(run1, run2))
 ```
 
-All inputs must share a `NeuroSpace`; `concat()` errors rather than guessing if
-they do not.
+`concat()` takes the **first** argument's `NeuroSpace` for the result and does
+not check that the others agree — a mismatched run is silently absorbed rather
+than rejected. Check before you concatenate:
+
+```{r concat-check}
+identical(space(run1), space(run2))
+```
 
 `split_blocks()` is the inverse, cutting a concatenated series back into runs
 given a block label per timepoint:
 
 ```{r split-blocks}
-blocks <- split_blocks(bold, rep(1:4, each = 5))
+joined <- concat(run1, run2)
+blocks <- split_blocks(joined, rep(1:2, c(5, 7)))
 
 length(blocks)
-dim(blocks[[1]])
+vapply(blocks, function(b) dim(b)[4], integer(1))
 ```
 
-## Time series at a location
-
-`series()` takes a voxel, `series_roi()` takes a region:
-
-```{r series}
-length(series(bold, 32, 32, 12))
-```
-
-Regions, parcels and searchlights are the subject of
-`vignette("regions-and-searchlights")`; this is just the hook they hang on.
+`series()` pulls one voxel's time course directly, and `series_roi()` a whole
+region's; regions, parcels and searchlights are the subject of
+`vignette("regions-and-searchlights")`.
 
 ## Dense and sparse
 
@@ -249,10 +263,13 @@ When a mask defines which voxels count, a sparse representation stores only
 those:
 
 ```{r sparse}
-sparse <- as.sparse(bold, as.mask(mask > 0))
+sparse <- as.sparse(bold, as.mask(mask))
 
 class(sparse)[1]
 dim(sparse)
+
+c(dense_MB = as.numeric(object.size(bold)) / 1e6,
+  sparse_MB = as.numeric(object.size(sparse)) / 1e6)
 ```
 
 Dimensions are unchanged — sparsity is about storage, not shape — and

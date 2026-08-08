@@ -31,7 +31,8 @@ return ordinary `ggplot2` objects you can modify or save.
 
 ```{r data}
 anat <- demo_anatomy()
-stat_map <- demo_stat_map(demo_anatomy_mask())
+brain <- demo_anatomy_mask()
+stat_map <- demo_stat_map(brain, radius_mm = 6)
 
 identical(space(anat), space(stat_map))
 ```
@@ -59,7 +60,7 @@ plot_montage(anat,
 
 `style = "light"` is the version for a manuscript page:
 
-```{r montage-light, fig.cap = "The same slices in the light style.", fig.alt = "Four axial anatomical slices on a light background.", fig.height = 3.4}
+```{r montage-light, fig.cap = "The same slices in the light style.", fig.alt = "Four axial anatomical slices, dark brain tiles on a light page.", fig.height = 3.4}
 plot_montage(anat,
   zlevels = zlevels[1:4], ncol = 4,
   cmap = anatomy_cmap, range = "robust",
@@ -105,7 +106,8 @@ plot_overlay(
 )
 ```
 
-The threshold is doing real work. It is worth knowing how much survives it:
+It is worth knowing how much survives the threshold — on a real map this is the
+first number a reviewer asks for:
 
 ```{r overlay-counts}
 a <- as.array(stat_map)
@@ -128,17 +130,25 @@ enhanced <- enhance_stat_map(stat_map)
 raw <- as.array(stat_map)
 enh <- as.array(enhanced)
 
+# Judge the noise floor on voxels chosen from the RAW map, so both columns
+# describe the same voxels rather than each map's own quiet region.
+quiet <- which(as.vector(brain) & abs(raw) < 2)
+
 round(rbind(
-  raw = c(peak = max(raw), above_3 = sum(raw > 3), null_sd = sd(raw[raw != 0 & abs(raw) < 2])),
-  enhanced = c(max(enh), sum(enh > 3), sd(enh[enh != 0 & abs(enh) < 2]))
+  raw = c(peak = max(raw), above_3 = sum(raw > 3), quiet_sd = sd(raw[quiet])),
+  enhanced = c(max(enh), sum(enh > 3), sd(enh[quiet]))
 ), 3)
 ```
 
-Read that table carefully, because it is the reason this is a display tool.
-The peak rises by a third and a third more voxels clear `t > 3`, while the noise
-floor's spread is unchanged. Clusters are being amplified, not revealed. Thresholds
-and voxel counts taken from an enhanced map mean nothing — enhance for the figure,
-infer from the original.
+Read that table carefully, because it is the reason this is a display tool. The
+peak grows by about a third — and the spread of the *quiet* voxels grows by
+more. Enhancement amplifies the noise floor at least as hard as the signal, so
+the extra voxels clearing `t > 3` are not new discoveries. Enhance for the
+figure; threshold and count on the original.
+
+Choosing those quiet voxels from the raw map matters. Score each map on its own
+sub-threshold voxels and both come out near 1.0, because you are measuring a
+truncated sample rather than the noise floor.
 
 `plot_overlay()` and `plot_ortho()` take `enhance = TRUE` to apply it inline.
 
@@ -148,20 +158,22 @@ Two images on the same grid can be compared directly. `plot_checkerboard()`
 alternates tiles between them, so misalignment shows up as anatomy breaking
 across tile edges.
 
-```{r checkerboard, fig.cap = "Checkerboard against a copy shifted by four voxels. Anatomy breaks at tile boundaries.", fig.alt = "Checkerboard slices with visible discontinuities.", fig.height = 3.6, dev.args = list(bg = "#141414")}
+```{r checkerboard, fig.cap = "Checkerboard against a copy shifted by four voxels. Anatomy steps across tile boundaries.", fig.alt = "Three large checkerboard slices; brain structures are offset between alternating tiles.", fig.height = 4.6, dev.args = list(bg = "#141414")}
 shifted <- demo_shifted(anat, by = 4L)
 
 plot_checkerboard(anat, shifted,
-  zlevels = zlevels, tile = 8, ncol = 6,
+  zlevels = zlevels[2:4], tile = 12, ncol = 3,
   cmap = anatomy_cmap, title = "Checkerboard QC", style = "dark"
 )
 ```
+
+Checkerboards need room: at six panels across a page the tile steps are too
+small to see, so prefer a few large slices over many small ones.
 
 `plot_edge_overlay()` compares boundaries instead, which is easier to judge when
 the two images have different contrast:
 
 ```{r edges, fig.cap = "Fixed and moving edge maps. Where the colours separate, the images disagree.", fig.alt = "Edge overlay slices with two colours of outline separating.", fig.height = 3.6, dev.args = list(bg = "#141414")}
-brain <- demo_anatomy_mask()
 fixed_edges <- demo_edges(brain)
 moving_edges <- demo_edges(demo_shifted(brain, by = 4L))
 
@@ -185,14 +197,23 @@ data onto one. Together they cover the cases the helpers do not:
 coldhot <- resolve_cmap("coldhot")
 head(coldhot, 3)
 
-strongest <- head(order(-abs(raw)), 5)
-raw[strongest]
-mapToColors(raw[strongest], col = coldhot)
+probe <- c(-4, -1, 0, 1, 4)
+mapToColors(probe, col = coldhot, irange = c(-4, 4))
 ```
 
-Positive peaks come back warm, negative ones cold. Values at or below the
-`threshold` argument map to `zero_col`, which defaults to fully transparent —
-that is how overlays leave the background showing through.
+Positive values come back warm, negative cold, and zero is transparent. Two
+arguments control the blanking and they are not interchangeable: `zero_col`
+recolours exactly-zero voxels, while `threshold` takes a **two-element band**
+and blanks everything inside it to transparent regardless of `zero_col`.
+
+```{r colours-threshold}
+mapToColors(probe, col = coldhot, irange = c(-4, 4), zero_col = "#00FF00")
+mapToColors(probe, col = coldhot, irange = c(-4, 4), threshold = c(-2, 2))
+```
+
+A scalar `threshold` errors, so pass both ends. Note also `irange`: left at its
+default it spans the data, which for an asymmetric map puts zero off-centre —
+the same trap `ov_symmetric` exists to avoid.
 
 A palette is a plain character vector, so any vector of colours works: the
 `anatomy_cmap` used throughout this article is three greys.
@@ -201,14 +222,14 @@ A palette is a plain character vector, so any vector of colours works: the
 
 | Task | Helper |
 |:--|:--|
-| Quick look at one volume | `plot()` |
+| Quick look at one volume | `plot()`, as used in the tour |
 | Publication slice grid | `plot_montage()` |
 | One location in three planes | `plot_ortho()` |
 | Statistic or mask over anatomy | `plot_overlay()` |
 | Registration, two images | `plot_checkerboard()` |
 | Registration, two edge maps | `plot_edge_overlay()` |
 | Tidy a noisy map for display | `enhance_stat_map()` |
-| Consistent ggplot styling | `theme_neuro()` |
+| Consistent styling for your own ggplots | `theme_neuro()` |
 
 Four habits worth keeping: `range = "robust"` for anatomy, `ov_symmetric = TRUE`
 for signed maps, `style = "dark"` to inspect and `"light"` to publish, and

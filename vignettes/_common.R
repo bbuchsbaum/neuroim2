@@ -31,7 +31,9 @@
 # article silently produced NAs from a bad factor assignment, and `warning =
 # FALSE` hid it. The articles are expected to knit with zero warnings, which is
 # a check worth keeping rather than a nuisance worth muting. Messages stay off:
-# those are package startup chatter, not signal.
+# those are mostly package startup chatter. Note that a few calls signal through
+# messages rather than warnings -- read_vec(mode = "mmap") announces its
+# memory mapping that way -- so a suppressed message is not always noise.
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -78,7 +80,9 @@ demo_bold <- function(n_time = 60, seed = 1) {
   neuroim2::simulate_fmri(demo_mask(), n_time = n_time, seed = seed)
 }
 
-#' A boxcar task regressor for `n_time` scans: `block` on, `block` off.
+#' A boxcar task regressor for `n_time` scans: `block` on, `block` off. Short
+#' blocks keep the regressor away from the lowest frequencies, where the AR(1)
+#' noise has most of its power.
 demo_design <- function(n_time = 60, block = 10) {
   rep(rep(c(0, 1), each = block), length.out = n_time)
 }
@@ -96,9 +100,14 @@ demo_anatomy_mask <- function(anat = demo_anatomy()) {
 #' A signed t-statistic map on the grid of `mask`.
 #'
 #' Simulates a series, plants task signal in two spheres, then actually fits the
-#' design at every voxel. The result has the properties a real statistic map has:
-#' signed, spatially smooth, noisy, with a null distribution of roughly unit
-#' spread -- none of which a hand-drawn blob image would have.
+#' design at every voxel. The result is signed, spatially smooth and noisy --
+#' none of which a hand-drawn blob image would be.
+#'
+#' Its null is over-dispersed (sd around 1.6 rather than 1) because the design
+#' is a low-frequency block regressor while simulate_fmri() supplies AR(1)
+#' noise, and the OLS variance below does not model that autocorrelation. That
+#' is realistic of an unwhitened first-level fit, but it means the t values are
+#' inflated and should not be read as calibrated statistics.
 demo_stat_map <- function(mask = demo_mask(), n_time = 30, seed = 2,
                           effect = c(1.3, -1.2), radius_mm = 12) {
   # Express smoothness in voxels rather than millimetres so the cost does not
