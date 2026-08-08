@@ -260,11 +260,20 @@ setMethod("series", signature(x="AbstractSparseNeuroVec", i="numeric"),
 #' @keywords internal
 #' @noRd
 .sparse_series_fast <- function(x, mapped_idx) {
-  if (!identical(class(x)[1L], "SparseNeuroVec")) {
+  # class(x) on an S4 object carries a "package" attribute; class(x)[1L] would
+  # drop it, so a same-named class from elsewhere -- or a rewritten class
+  # attribute -- could take this path and bypass the accessor hook.
+  if (!identical(class(x), getClass("SparseNeuroVec")@className)) {
     return(NULL)
   }
   dat <- x@data
   if (!is.matrix(dat) || !is.double(dat)) {
+    return(NULL)
+  }
+  # The zero-fill-and-scatter implementation this replaces produced a
+  # dim(x)[4]-row result; refuse rather than silently return a different shape
+  # if the store and the space disagree.
+  if (nrow(dat) != dim(x)[4L]) {
     return(NULL)
   }
   series_gather_sparse(dat, as.integer(mapped_idx))

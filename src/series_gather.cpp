@@ -39,14 +39,28 @@ NumericMatrix series_gather_dense(SEXP data, IntegerVector dim, IntegerMatrix co
 
     const R_xlen_t d0 = dim[0], d1 = dim[1], d2 = dim[2];
     const R_xlen_t nt = dim[3];
-    const R_xlen_t slice = d0 * d1;
-    const R_xlen_t nels = slice * d2;
     const int n = coords.nrow();
 
+    // NA_INTEGER is INT_MIN, so it is caught here too.
     if (d0 <= 0 || d1 <= 0 || d2 <= 0 || nt < 0) {
         stop("series_gather_dense: 'dim' must be positive");
     }
-    if (nels * nt > Rf_xlength(data)) {
+
+    // dim() on a NeuroVec reports the NeuroSpace slot, which R does not keep in
+    // sync with the length of the underlying array -- so `dim` can claim far
+    // more elements than `data` holds. Build the strides with division-based
+    // checks: forming d0*d1*d2*nt first can overflow R_xlen_t and wrap negative,
+    // which would let a bogus dim slip past the guard and read out of bounds.
+    const R_xlen_t xlen = Rf_xlength(data);
+    if (d1 > xlen / d0) {
+        stop("series_gather_dense: 'data' is shorter than prod(dim)");
+    }
+    const R_xlen_t slice = d0 * d1;
+    if (d2 > xlen / slice) {
+        stop("series_gather_dense: 'data' is shorter than prod(dim)");
+    }
+    const R_xlen_t nels = slice * d2;
+    if (nt > 0 && nels > xlen / nt) {
         stop("series_gather_dense: 'data' is shorter than prod(dim)");
     }
 
@@ -86,6 +100,10 @@ NumericMatrix series_gather_sparse(SEXP data, IntegerVector mapped) {
     const R_xlen_t nt = INTEGER(dimAttr)[0];
     const R_xlen_t nk = INTEGER(dimAttr)[1];
     const int n = mapped.size();
+
+    if (nt < 0 || nk < 0 || nt * nk > Rf_xlength(data)) {
+        stop("series_gather_sparse: 'data' dim does not match its length");
+    }
 
     NumericMatrix out(nt, n);
     const double* dp = REAL(data);

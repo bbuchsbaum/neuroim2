@@ -284,6 +284,63 @@ test_that("lazy sparse subclasses still route through matricized_access", {
   expect_null(neuroim2:::.sparse_series_fast(x, 1L))
 })
 
+test_that("the dense gather rejects a dim that overflows, rather than reading OOB", {
+  # dim() on a NeuroVec reports the NeuroSpace slot, which R does not keep in
+  # sync with the length of the underlying array -- so dim can claim more
+  # elements than the data holds. Computing prod(dim) to check that can
+  # overflow R_xlen_t and wrap negative, letting a bogus dim past the guard and
+  # segfaulting on the read. These are the exact overflow points.
+  msg <- "shorter than prod\\(dim\\)"
+
+  # d0*d1*d2 == 2^63 exactly
+  D <- 2097152L
+  dv <- DenseNeuroVec(array(as.numeric(1:8), c(2, 2, 2, 1)),
+                      NeuroSpace(c(D, D, D, 1L)))
+  expect_error(series(dv, cbind(1L, 1L, 2L)), msg)
+
+  # overflow in the nt stride rather than the spatial one
+  dv2 <- DenseNeuroVec(array(as.numeric(1:8), c(2, 2, 2, 1)),
+                       NeuroSpace(c(208064L, 208064L, 208064L, 1024L)))
+  expect_error(series(dv2, cbind(1L, 1L, 1L)), msg)
+
+  # reached by a single slot assignment on an otherwise valid object
+  dv3 <- DenseNeuroVec(array(rnorm(128), c(4, 4, 4, 2)), NeuroSpace(c(4, 4, 4, 2)))
+  dv3@space <- NeuroSpace(c(D, D, D, 1L))
+  expect_error(series(dv3, cbind(1L, 1L, 2L)), msg)
+
+  # one below the overflow point must still be caught by the plain guard
+  D2 <- 2097151L
+  dv4 <- DenseNeuroVec(array(as.numeric(1:8), c(2, 2, 2, 1)),
+                       NeuroSpace(c(D2, D2, D2, 1L)))
+  expect_error(series(dv4, cbind(1L, 1L, 2L)), msg)
+
+  # and a well-formed object is unaffected
+  ok <- DenseNeuroVec(array(rnorm(128), c(4, 4, 4, 2)), NeuroSpace(c(4, 4, 4, 2)))
+  expect_equal(dim(series(ok, cbind(1L, 1L, 1L))), c(2L, 1L))
+})
+
+test_that("the sparse fast path is gated on the exact class, package included", {
+  d <- c(2L, 2L, 1L)
+  m <- array(c(TRUE, FALSE, TRUE, FALSE), dim = d)
+  mask <- LogicalNeuroVol(m, NeuroSpace(d))
+  sv <- SparseNeuroVec(matrix(c(1, 2, 3, 4, 5, 6), 3, 2), NeuroSpace(c(d, 3L)), mask)
+
+  # a genuine SparseNeuroVec takes the fast path
+  expect_false(is.null(neuroim2:::.sparse_series_fast(sv, 1L)))
+
+  # an object whose class attribute merely *says* SparseNeuroVec (different
+  # package) must not: class(x)[1L] would drop the package qualifier.
+  bad <- sv
+  attr(bad, "class") <- structure("SparseNeuroVec", package = ".GlobalEnv")
+  expect_null(neuroim2:::.sparse_series_fast(bad, 1L))
+
+  # a store whose row count disagrees with dim(x)[4] must not either: the
+  # implementation this replaced returned a dim(x)[4]-row result.
+  odd <- sv
+  odd@data <- matrix(c(1, 2, 3, 4), 2, 2)
+  expect_null(neuroim2:::.sparse_series_fast(odd, 1L))
+})
+
 test_that("the dense gather does not scale with volume size", {
   # Guards against re-introducing a whole-volume duplicate on every call:
   # passing x@.Data (rather than x) into .Call copies the entire image.
