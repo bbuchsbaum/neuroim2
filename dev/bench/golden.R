@@ -63,8 +63,24 @@ capture_spherical <- function() {
       }
     }
   }
-  ## explicit fill values
+  ## explicit fill values -- including types/attributes that new() coerces
   d <- c(12L,12L,12L); sp <- c(2,2,2); spc <- mk_space(d, sp)
+  # NOTE: fill = factor(...) is deliberately absent. The pre-optimisation
+  # new()-based path was not deterministic for it -- inside a long run it
+  # produced an integer .Data carrying a stray "levels" attribute, while in
+  # isolation it produced a clean double. There is no stable reference to
+  # compare against, so it is pinned by an explicit unit test instead.
+  fills <- list(one=1, six=6, zero=0, int=1L, lgl=TRUE, lglF=FALSE,
+                named=c(a=1), named3=c(a=1,b=2,c=3), lst=list(2),
+                chr="a", cplx=1+2i)
+  for (fn in names(fills)) {
+    f <- fills[[fn]]
+    out[[sprintf("sphfilltype|%s", fn)]] <- tryCatch({
+      r <- suppressWarnings(spherical_roi(spc, c(6L,6L,6L), 3.5, fill = f))
+      list(ok=TRUE, data=unname(as.numeric(r@.Data)), tp=typeof(r@.Data),
+           attrs=sort(names(attributes(r))), ci=r@center_index, pi=r@parent_index)
+    }, error=function(e) list(ok=FALSE, msg=conditionMessage(e)))
+  }
   for (f in list(1, 6, 0)) {
     r <- spherical_roi(spc, c(6L,6L,6L), 3.5, fill = f)
     out[[sprintf("sphfill|%g", f)]] <- list(ok=TRUE, coords=unname(r@coords),
@@ -110,6 +126,9 @@ capture_roi_set <- function() {
   rs <- spherical_roi_set(spc, cents, 4, fill = seq_len(nrow(cents)))
   out[["setfillvec"]] <- lapply(rs, function(r) list(coords=unname(r@coords),
     data=unname(as.numeric(r@.Data)), ci=r@center_index, pi=r@parent_index))
+  rsn <- spherical_roi_set(spc, cents, 4, fill = c(a=1))
+  out[["setfillnamed"]] <- lapply(rsn, function(r) list(data=unname(as.numeric(r@.Data)),
+    attrs=sort(names(attributes(r))), tp=typeof(r@.Data)))
   rs <- spherical_roi_set(spc, cents, 4, fill = 9)
   out[["setfillscalar"]] <- lapply(rs, function(r) list(coords=unname(r@coords),
     data=unname(as.numeric(r@.Data)), ci=r@center_index, pi=r@parent_index))

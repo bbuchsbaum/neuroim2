@@ -2,7 +2,7 @@
 NULL
 #' @include all_generic.R
 NULL
-#' @importFrom methods new validObject
+#' @importFrom methods new
 NULL
 
 
@@ -41,13 +41,37 @@ NULL
     ROIVolWindow = new("ROIVolWindow", numeric(0), space = sp,
                        coords = matrix(0, nrow = 0, ncol = 3),
                        center_index = integer(0), parent_index = NA_integer_),
-    ROIVol       = new("ROIVol", numeric(0), space = sp,
-                       coords = matrix(0, nrow = 0, ncol = 3)),
     cli::cli_abort("No ROI prototype for {.cls {class_name}}.")
   )
 
   assign(class_name, proto, envir = .roi_proto_cache)
   proto
+}
+
+#' Prepare a value for the .Data part the way new() would
+#'
+#' \code{new()} coerces whatever it is handed into the basic type the class
+#' extends and drops the attributes -- including \code{names} -- that the data
+#' part must not carry. Slot assignment does neither, so an ROI built by the
+#' fast constructor from, say, \code{fill = TRUE} or \code{fill = c(a = 1)}
+#' would otherwise differ from one built by \code{new()}. Integer storage is
+#' left alone because \code{new()} preserves it too.
+#'
+#' @keywords internal
+#' @noRd
+.as_roi_data <- function(data) {
+  if (is.null(data)) {
+    stop("cannot use object of class \"NULL\" in new()")
+  }
+  tp <- typeof(data)
+  # is.object() keeps classed values (notably factors, which are integer
+  # underneath) out of the pass-through branch: as.vector() on a factor yields
+  # its labels, whereas new() coerces through the integer codes.
+  if (!is.object(data) && (tp == "double" || tp == "integer")) {
+    as.vector(data)                 # strips names/attributes, keeps the type
+  } else {
+    as.vector(data, "numeric")      # logical, character, complex, list, factor
+  }
 }
 
 #' Construct a ROIVolWindow without paying for the default initialize()
@@ -59,6 +83,8 @@ NULL
 #' @keywords internal
 #' @noRd
 .new_roi_vol_window <- function(data, space, coords, center_index, parent_index) {
+  data <- .as_roi_data(data)
+
   # The invariants the class validity function checks.
   if (!is.matrix(coords) || ncol(coords) != 3L) {
     stop("coords slot must be a matrix with 3 columns")
@@ -76,27 +102,6 @@ NULL
   obj@coords <- coords
   obj@center_index <- center_index
   obj@parent_index <- parent_index
-  obj
-}
-
-#' @rdname dot-new_roi_vol_window
-#' @keywords internal
-#' @noRd
-.new_roi_vol <- function(data, space, coords) {
-  if (!is.matrix(coords) || ncol(coords) != 3L) {
-    stop("coords slot must be a matrix with 3 columns")
-  }
-  if (!is.vector(data)) {
-    stop("'data' must be a vector")
-  }
-  if (length(data) != nrow(coords)) {
-    stop("length of data vector must equal 'nrow(coords)'")
-  }
-
-  obj <- .roi_prototype("ROIVol")
-  obj@.Data <- data
-  obj@space <- space
-  obj@coords <- coords
   obj
 }
 
@@ -671,6 +676,9 @@ cuboid_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE) {
 #' @keywords internal
 #' @noRd
 .sphere_offsets <- function(radius, spacing) {
+  if (length(radius) != 1L) {
+    stop("'radius' must be a single value")
+  }
   spacing <- as.numeric(spacing)[1:3]
   key <- paste0(sprintf("%.17g", radius), "|",
                 paste(sprintf("%.17g", spacing), collapse = ","))

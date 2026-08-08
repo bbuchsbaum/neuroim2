@@ -30,6 +30,40 @@ test_that(".new_roi_vol_window is identical to new('ROIVolWindow', ...)", {
   }
 })
 
+test_that("the constructor coerces .Data the way new() does", {
+  # new() coerces the data part to the basic type the class extends and drops
+  # attributes; slot assignment does neither. Without .as_roi_data() a named or
+  # logical `fill` produced an object that was NOT identical() to new()'s.
+  sp <- NeuroSpace(c(10L, 10L, 10L))
+  cds <- matrix(as.numeric(1:9), ncol = 3)
+
+  for (d in list(c(a = 1, b = 2, c = 3), c(TRUE, FALSE, TRUE), 1:3,
+                 c(1.5, 2.5, 3.5), list(1, 2, 3))) {
+    a <- suppressWarnings(new("ROIVolWindow", d, space = sp, coords = cds,
+                              center_index = 2L, parent_index = 5L))
+    b <- suppressWarnings(neuroim2:::.new_roi_vol_window(d, sp, cds, 2L, 5L))
+    expect_identical(a, b, info = paste(class(d), collapse = "/"))
+  }
+
+  # names must not leak through the public API either
+  bvol <- NeuroVol(array(1, c(10, 10, 10)), NeuroSpace(c(10L, 10L, 10L)))
+  r <- spherical_roi(bvol, c(5, 5, 5), radius = 2, fill = c(a = 1))
+  expect_null(names(r@.Data))
+
+  # non-double fills still work, as they did before the fast path
+  expect_silent(rl <- spherical_roi(bvol, c(5, 5, 5), 2, fill = TRUE))
+  expect_true(all(rl@.Data == 1))
+  expect_identical(typeof(rl@.Data), "double")
+
+  # factor fill: the old new()-based path was inconsistent about this
+  # (sometimes an integer .Data carrying a stray "levels" attribute). Pin the
+  # deterministic behaviour: integer codes, as a clean double, no extra attrs.
+  rf <- suppressWarnings(spherical_roi(bvol, c(5, 5, 5), 2, fill = factor("x")))
+  expect_identical(typeof(rf@.Data), "double")
+  expect_true(all(rf@.Data == 1))
+  expect_false("levels" %in% names(attributes(rf)))
+})
+
 test_that(".new_roi_vol_window enforces the class invariants", {
   sp <- NeuroSpace(c(10L, 10L, 10L))
   expect_error(neuroim2:::.new_roi_vol_window(c(1, 2), sp, matrix(1, 3, 3), 1L, 1L),
