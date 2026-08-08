@@ -20,6 +20,8 @@ docs/reference
 .aider*
 inst/doc
 vignettes/*.html
+!vignettes/albers-header.html
+vignettes/figure/
 vignettes/*.md
 man/neuroim2.Rcheck/
 *.Rcheck/
