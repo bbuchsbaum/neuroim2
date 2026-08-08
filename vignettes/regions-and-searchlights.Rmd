@@ -1,0 +1,311 @@
+---
+title: Regions and searchlights
+output:
+  rmarkdown::html_vignette:
+    css: albers.css
+    includes:
+      in_header: albers-header.html
+vignette: |
+  %\VignetteIndexEntry{Regions and searchlights}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+resource_files:
+- albers.css
+- albers.js
+- albers-header.html
+---
+
+```{r setup, include = FALSE}
+source("_common.R")
+```
+
+```{r load}
+library(neuroim2)
+```
+
+Nearly every analysis in this package has the same three steps: **define a
+spatial support, extract values from it, reduce them to something smaller.** What
+changes is the support — one sphere, an atlas of parcels, or a sphere centred on
+every voxel in turn. This article covers all three, and ends with a searchlight
+analysis whose answer we can check.
+
+```{r data}
+mask <- demo_mask()
+brain <- as.mask(mask > 0)
+bold <- demo_bold(n_time = 40)
+
+sum(brain)
+```
+
+## One region
+
+`spherical_roi()` is the constructor most others build on. The centre is a voxel
+index, the radius is in millimetres, and `nonzero = TRUE` discards anything
+outside the mask:
+
+```{r sphere}
+roi <- spherical_roi(mask, c(32, 32, 12), radius = 8, nonzero = TRUE)
+
+length(roi)
+head(coords(roi), 3)
+```
+
+An ROI knows three things: where its voxels are (`coords()`), their linear
+positions (`indices()`), and what is stored in them (`values()`). Pulling a
+region's time courses out of a 4D image is `series_roi()`:
+
+```{r series-roi}
+rts <- series_roi(bold, roi)
+dim(values(rts))
+```
+
+That matrix is **scans by voxels** — the transpose of `as.matrix()` on a
+`NeuroVec`, so check which one you have before reducing.
+
+Two other shapes are available. `cuboid_roi()` gives a box, `square_roi()` a
+plane within one slice:
+
+```{r other-shapes}
+sp <- NeuroSpace(c(20L, 20L, 20L), c(1, 1, 1))
+
+length(cuboid_roi(sp, c(10, 10, 10), surround = 3))
+length(square_roi(sp, c(10, 10, 10), surround = 2, fixdim = 3))
+```
+
+Building many spheres at once is much faster through `spherical_roi_set()` than
+a loop:
+
+```{r roi-set}
+centres <- rbind(c(20, 20, 10), c(40, 40, 14), c(32, 32, 12))
+rois <- spherical_roi_set(bvol = mask, centroids = centres, radius = 8, fill = 1)
+
+lengths(lapply(rois, indices))
+```
+
+### Combining regions
+
+ROIs combine through their indices, so the ordinary set operations apply:
+
+```{r set-ops}
+a <- spherical_roi(mask, c(32, 32, 12), radius = 8, nonzero = TRUE)
+b <- spherical_roi(mask, c(35, 32, 12), radius = 8, nonzero = TRUE)
+
+c(
+  intersection = length(intersect(indices(a), indices(b))),
+  union = length(union(indices(a), indices(b))),
+  only_a = length(setdiff(indices(a), indices(b)))
+)
+```
+
+## Many regions: parcels
+
+When the support comes from an atlas, a `ClusteredNeuroVol` holds the
+assignment: one label per in-mask voxel.
+
+```{r parcels}
+set.seed(1)
+parcels <- ClusteredNeuroVol(brain, sample(1:12, sum(brain), replace = TRUE))
+
+num_clusters(parcels)
+```
+
+`split_clusters()` cuts a 4D image into one object per parcel:
+
+```{r split-clusters}
+parts <- split_clusters(bold, parcels)
+
+length(parts)
+dim(values(parts[[1]]))
+```
+
+`split_reduce()` goes straight to the summary, returning parcels by time in one
+step — the usual way to get an atlas time-series matrix:
+
+```{r split-reduce}
+labels <- integer(prod(dim(mask)))
+labels[which(as.vector(brain))] <- parcels@clusters
+
+parcel_ts <- split_reduce(bold, factor(labels))
+dim(parcel_ts)
+rownames(parcel_ts)
+```
+
+`split_reduce()` wants one label per voxel in the whole grid, so out-of-mask
+voxels become a group of their own — row `"0"` above, which you drop. Build the
+label vector as integers and factor it at the end: assigning into an existing
+factor silently produces `NA`s instead.
+
+The default reduction is the mean; pass `FUN` for anything else.
+
+## Every region: searchlights
+
+A searchlight puts a sphere at every voxel in the mask. There are three
+flavours, and the difference is coverage, not shape.
+
+`searchlight()` centres one on each voxel — complete but overlapping. Built
+lazily, neighbourhoods are realised only when touched:
+
+```{r searchlight}
+sl <- searchlight(brain, radius = 8, eager = FALSE, nonzero = TRUE)
+
+length(sl)
+nrow(coords(sl[[1]]))
+```
+
+`random_searchlight()` partitions the mask into *non-overlapping* spheres, which
+covers every voxel exactly once for a fraction of the work:
+
+```{r random-searchlight}
+rsl <- random_searchlight(brain, radius = 8)
+
+length(rsl)
+```
+
+`clustered_searchlight()` uses a parcellation instead of spheres, giving one
+neighbourhood per parcel:
+
+```{r clustered-searchlight}
+length(clustered_searchlight(brain, cvol = parcels))
+```
+
+## A searchlight analysis that finds something
+
+Averaging noise proves nothing, so here is a searchlight with a right answer.
+We plant a task response in one sphere, then ask a searchlight to find it.
+
+```{r plant}
+design <- demo_design(40)
+target <- spherical_roi(mask, c(20, 34, 12), radius = 12, nonzero = TRUE)
+
+Y <- as.matrix(bold)
+Y[indices(target), ] <- Y[indices(target), ] +
+  1.3 * rep(design, each = length(target))
+planted <- DenseNeuroVec(Y, space(bold))
+
+length(target)
+```
+
+Now score each searchlight by how well its voxels track the design. This is the
+map step, and it is an ordinary `sapply()` over the neighbourhoods:
+
+```{r score}
+score <- sapply(rsl, function(r) mean(cor(values(series_roi(planted, r)), design)))
+
+range(score)
+```
+
+Writing the scores back to their voxels turns a list of numbers into an image
+again:
+
+```{r score-map}
+arr <- array(0, dim(mask))
+for (i in seq_along(rsl)) arr[coords(rsl[[i]])] <- score[i]
+score_map <- NeuroVol(arr, space(mask))
+```
+
+Because `random_searchlight()` tiles the brain with disjoint spheres, this map is
+piecewise constant — every voxel in a sphere carries its sphere's score. Use
+`searchlight()` instead when you want a smoothly varying map, at the cost of one
+neighbourhood per voxel rather than one per sphere.
+
+Did it work? The peak should land inside the sphere we planted:
+
+```{r verify}
+peak <- which.max(as.vector(score_map))
+peak %in% indices(target)
+
+c(
+  inside = mean(as.vector(score_map)[indices(target)]),
+  outside = mean(as.vector(score_map)[setdiff(which(as.vector(brain)), indices(target))])
+)
+```
+
+The peak is inside the target and mean score there is an order of magnitude
+above background.
+
+```{r score-fig, fig.cap = "Searchlight score map. The bright region is where the signal was planted.", fig.alt = "Axial slices of a searchlight correlation map with one bright cluster.", fig.height = 3.0}
+plot(score_map, zlevels = c(9, 12, 15), irange = c(0, max(score)))
+```
+
+## From a map back to regions
+
+`conn_comp()` turns a thresholded map into labelled clusters, which closes the
+loop — a result becomes the support for the next analysis. Ask for
+`cluster_table = TRUE` to get one row per cluster:
+
+```{r conn-comp}
+cc <- conn_comp(score_map, threshold = 0.35, cluster_table = TRUE)
+
+head(cc$cluster_table[order(-cc$cluster_table$N), ], 4)
+```
+
+The largest cluster is an order of magnitude bigger than anything else and its
+peak sits beside the centre we planted at `(20, 34, 12)`. `cc$voxels` holds the
+coordinates of each one, so a cluster can become an ROI immediately.
+
+Note that `cc$size` is a *volume*, not a per-cluster vector: every voxel holds
+the size of the cluster it belongs to. Use `cluster_table$N` when you want one
+number per cluster.
+
+## Iterating without ROIs
+
+Sometimes the pieces are the container's own: slices of a volume, volumes of a
+series, or the time course at every voxel. `slices()`, `vols()` and `vectors()`
+give you those directly.
+
+```{r iterate}
+anat <- demo_anatomy()
+
+slice_means <- vapply(slices(anat), mean, numeric(1))
+length(slice_means)
+
+vol_means <- vapply(vols(bold), mean, numeric(1))
+length(vol_means)
+```
+
+`vectors()` iterates voxel time courses, so mapping over it and rewrapping gives
+a volume:
+
+```{r vectors}
+mean_vol <- NeuroVol(vapply(vectors(bold), mean, numeric(1)), space(mask))
+dim(mean_vol)
+```
+
+## Doing it in parallel
+
+Searchlight scoring is embarrassingly parallel. neuroim2 imports **future**, so
+the change is one line of setup and `future_sapply()` in place of `sapply()`:
+
+```{r parallel, eval = FALSE}
+library(future.apply)
+plan(multisession, workers = 4)
+
+score <- future_sapply(rsl, function(r) {
+  mean(cor(values(series_roi(planted, r)), design))
+})
+
+plan(sequential)
+```
+
+Keep the per-neighbourhood function self-contained — workers do not share your
+session — and prefer fewer, larger tasks over many tiny ones.
+
+## Which support should you use?
+
+| Situation | Use |
+|:--|:--|
+| One hypothesis-driven region | `spherical_roi()` |
+| Many known coordinates | `spherical_roi_set()` |
+| A box or a single plane | `cuboid_roi()`, `square_roi()` |
+| An atlas or clustering | `ClusteredNeuroVol` + `split_clusters()` |
+| An atlas time-series matrix | `split_reduce()` |
+| Whole-brain, overlapping | `searchlight()` |
+| Whole-brain, one pass, cheaper | `random_searchlight()` |
+| Whole-brain at parcel resolution | `clustered_searchlight()` |
+| Clusters from a thresholded map | `conn_comp()` |
+
+## Where to go next
+
+- `vignette("visualization")` — drawing maps like the one above
+- `vignette("large-data")` — parcel-level representations when voxelwise is too big
+- `?spherical_roi`, `?searchlight`, `?split_reduce`, `?conn_comp`

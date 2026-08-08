@@ -26,11 +26,17 @@
 # it is isotropic either way). Every millimetre-coordinate example uses
 # demo_mask(), whose affine is consistent: 3.5 x 3.5 x 3.7 mm, LAS.
 
+# Warnings are deliberately NOT suppressed. A warning from a vignette chunk
+# almost always means the example is wrong -- an earlier draft of the regions
+# article silently produced NAs from a bad factor assignment, and `warning =
+# FALSE` hid it. The articles are expected to knit with zero warnings, which is
+# a check worth keeping rather than a nuisance worth muting. Messages stay off:
+# those are package startup chatter, not signal.
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   message = FALSE,
-  warning = FALSE,
+  warning = TRUE,
   fig.width = 7,
   fig.height = 4.2,
   dpi = 110,
