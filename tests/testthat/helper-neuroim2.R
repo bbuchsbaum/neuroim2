@@ -63,3 +63,36 @@ make_temp_nifti <- function(vol, ext = ".nii.gz") {
   write_vol(vol, tmp)
   tmp
 }
+
+# --- test helpers for version- and environment-dependent plotting -------------
+
+#' Read a ggplot's title across ggplot2 versions.
+#'
+#' ggplot2 gained the exported `get_labs()` accessor in 3.5.2; before that the
+#' labels are read off the plot object directly. DESCRIPTION sets no ggplot2
+#' version floor, so tests must work either way.
+plot_title <- function(p) {
+  if ("get_labs" %in% getNamespaceExports("ggplot2")) {
+    ggplot2::get_labs(p)$title
+  } else {
+    p$labels$title
+  }
+}
+
+#' Skip visual snapshot comparisons outside the environment that produced them.
+#'
+#' vdiffr golden images are SVGs that encode the font metrics of the machine
+#' that generated them, so byte-comparing them only succeeds on that machine.
+#' The R-CMD-check matrix spans Windows, macOS and Linux, which cannot all
+#' match one stored SVG, so on the other platforms these report failures that
+#' say nothing about the package.
+#'
+#' Set NEUROIM2_SNAPSHOT_TESTS=true to run them -- do that on the reference
+#' machine when reviewing intentional visual changes, and regenerate with
+#' testthat::snapshot_accept() there.
+skip_unless_snapshot_env <- function() {
+  testthat::skip_if_not_installed("vdiffr")
+  if (!identical(Sys.getenv("NEUROIM2_SNAPSHOT_TESTS"), "true")) {
+    testthat::skip("visual snapshots: set NEUROIM2_SNAPSHOT_TESTS=true to compare")
+  }
+}

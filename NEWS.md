@@ -1,5 +1,22 @@
 # neuroim2 0.17.0
 
+## Testing
+
+* The test suite now runs clean: 2969 passing, no failures and no errors.
+  Previously `R CMD check` reported 7 failures and 2 errors on every platform.
+* `test-plot-registration-qc.R` called `ggplot2::get_labs()`, which only exists
+  from ggplot2 3.5.2 while DESCRIPTION sets no version floor, so it errored on
+  older ggplot2. Tests now read plot titles through a version-agnostic helper.
+* The vdiffr golden-image tests have moved to `dev/visual-snapshots/`. They
+  compare SVG text byte-for-byte, which encodes the font metrics of the machine
+  that produced the snapshot, so a single stored image cannot match the
+  Windows, macOS and Linux check matrix — and testthat deletes any `_snaps/`
+  directory whose test file did not run, so they could not simply be skipped.
+  `tests/testthat/test-plot-structure.R` covers the same plotting calls with
+  platform-independent structural assertions (panel counts, layer counts, data
+  shape, argument validation) and runs on every check. See the README in
+  `dev/visual-snapshots/` for reviewing intentional visual changes.
+
 ## Documentation
 
 * The vignettes have been rewritten as nine articles in three tiers: *Learn*
@@ -116,6 +133,23 @@
 * `write_vec()` now round-trips per-volume labels through a custom NIfTI extension; `read_vec()` and low-footprint readers restore labels on load.
 * Added AFNI-inspired masking helpers: `apply_mask()` to apply an existing 3D mask, `clip_level()` to estimate a foreground clip threshold or gradual clip map, and `automask()` to derive a brain-like mask from image intensities for `NeuroVol`, `NeuroVec`, sparse, mapped, and file-backed objects.
 
+## Testing
+
+* The test suite now runs clean: 2969 passing, no failures and no errors.
+  Previously `R CMD check` reported 7 failures and 2 errors on every platform.
+* `test-plot-registration-qc.R` called `ggplot2::get_labs()`, which only exists
+  from ggplot2 3.5.2 while DESCRIPTION sets no version floor, so it errored on
+  older ggplot2. Tests now read plot titles through a version-agnostic helper.
+* The vdiffr golden-image tests have moved to `dev/visual-snapshots/`. They
+  compare SVG text byte-for-byte, which encodes the font metrics of the machine
+  that produced the snapshot, so a single stored image cannot match the
+  Windows, macOS and Linux check matrix — and testthat deletes any `_snaps/`
+  directory whose test file did not run, so they could not simply be skipped.
+  `tests/testthat/test-plot-structure.R` covers the same plotting calls with
+  platform-independent structural assertions (panel counts, layer counts, data
+  shape, argument validation) and runs on every check. See the README in
+  `dev/visual-snapshots/` for reviewing intentional visual changes.
+
 ## Documentation
 
 * Added new introductory workflow and container vignettes and refocused the advanced volume and ROI vignettes around current package workflows.
@@ -176,6 +210,23 @@
 * New oblique affine regression tests (6 tests) for downsample, resample, and deoblique.
 * New `vdiffr` plot snapshot tests (7 tests) for `plot()`, `plot_ortho()`, `plot_montage()`, and `plot_overlay()`.
 * New shared test helper module with factory functions (`make_vol()`, `make_vec()`, `make_mask()`, etc.).
+
+## Testing
+
+* The test suite now runs clean: 2969 passing, no failures and no errors.
+  Previously `R CMD check` reported 7 failures and 2 errors on every platform.
+* `test-plot-registration-qc.R` called `ggplot2::get_labs()`, which only exists
+  from ggplot2 3.5.2 while DESCRIPTION sets no version floor, so it errored on
+  older ggplot2. Tests now read plot titles through a version-agnostic helper.
+* The vdiffr golden-image tests have moved to `dev/visual-snapshots/`. They
+  compare SVG text byte-for-byte, which encodes the font metrics of the machine
+  that produced the snapshot, so a single stored image cannot match the
+  Windows, macOS and Linux check matrix — and testthat deletes any `_snaps/`
+  directory whose test file did not run, so they could not simply be skipped.
+  `tests/testthat/test-plot-structure.R` covers the same plotting calls with
+  platform-independent structural assertions (panel counts, layer counts, data
+  shape, argument validation) and runs on every check. See the README in
+  `dev/visual-snapshots/` for reviewing intentional visual changes.
 
 ## Documentation
 
