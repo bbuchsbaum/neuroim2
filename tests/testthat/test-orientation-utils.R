@@ -52,7 +52,41 @@ test_that("reorient updates NeuroSpace axes to requested orientation", {
   sp <- NeuroSpace(c(6L, 7L, 8L), spacing = c(1, 1, 1))
   sp_ras <- reorient(sp, c("R", "A", "S"))
 
-  expect_identical(axes(sp_ras)@i, RIGHT_LEFT)
-  expect_identical(axes(sp_ras)@j, ANT_POST)
-  expect_identical(axes(sp_ras)@k, SUP_INF)
+  # An axis code names the direction the axis increases *towards*, so "RAS"
+  # means the axes run left-to-right, posterior-to-anterior, inferior-to-
+  # superior. This test previously asserted the reverse of each, matching a
+  # reorient() that inverted every code it was given.
+  expect_identical(axes(sp_ras)@i, LEFT_RIGHT)
+  expect_identical(axes(sp_ras)@j, POST_ANT)
+  expect_identical(axes(sp_ras)@k, INF_SUP)
+
+  # The codes read back off the affine must be the ones that were requested.
+  expect_identical(affine_to_axcodes(trans(sp_ras)), c("R", "A", "S"))
+})
+
+test_that("reorient reaches every requested orientation, from any starting one", {
+  starts <- list(
+    NeuroSpace(c(6L, 7L, 8L), spacing = c(1, 1, 1)),
+    space(read_vol(system.file("extdata", "global_mask2.nii.gz", package = "neuroim2")))
+  )
+  targets <- list(
+    c("R", "A", "S"), c("L", "P", "I"), c("L", "A", "S"),
+    c("R", "P", "S"), c("A", "R", "S")
+  )
+  for (sp in starts) {
+    for (tgt in targets) {
+      expect_identical(affine_to_axcodes(trans(reorient(sp, tgt))), tgt)
+    }
+  }
+})
+
+test_that("reorient to an image's existing orientation is a no-op", {
+  sp <- space(read_vol(system.file("extdata", "global_mask2.nii.gz", package = "neuroim2")))
+  same <- reorient(sp, affine_to_axcodes(trans(sp)))
+  expect_equal(trans(same), trans(sp))
+})
+
+test_that("reorient rejects codes that are not axis letters", {
+  sp <- NeuroSpace(c(4L, 4L, 4L), spacing = c(1, 1, 1))
+  expect_error(reorient(sp, c("R", "A", "Q")))
 })

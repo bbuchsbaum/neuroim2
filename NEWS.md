@@ -1,7 +1,42 @@
 # neuroim2 0.17.0
 
+## Documentation
+
+* The vignettes have been rewritten as nine articles in three tiers: *Learn*
+  (`neuroim2`, `spaces-and-coordinates`, `volumes-and-vectors`,
+  `reading-and-writing`), *Do* (`regions-and-searchlights`,
+  `resampling-and-orientation`, `smoothing-and-filtering`, `visualization`) and
+  *Scale* (`large-data`), replacing the previous fourteen. Old article URLs
+  redirect to their successors on the package website; `vignette()` calls using
+  the old names will need updating.
+* Vignette examples no longer take time series from `global_mask_v4.nii`, which
+  is a binary mask repeated across four timepoints — every "time series" drawn
+  from it was a constant vector. Anything with a time axis now uses
+  `simulate_fmri()`, so time courses have real temporal structure and the
+  smoothing, searchlight and ROI examples demonstrate measurable effects.
+* Vignette YAML placed `css` and `includes` at the document root, where
+  `html_vignette` ignores them, so the package stylesheet never reached the
+  rendered articles. They are now nested under the output format.
+
 ## Bug Fixes
 
+* **Breaking:** Fixed `reorient()`, which never returned the orientation it was
+  asked for. It applied a transform derived only from the target axis codes,
+  ignoring the space's current orientation, and it interpreted those codes with
+  the sense inverted, so `reorient(sp, c("R", "A", "S"))` produced an `LPI`
+  space and asking for an image's existing orientation was not a no-op.
+  Orientation codes are now read the way `affine_to_axcodes()` reports them —
+  naming the direction each axis increases *towards* — and the transform is
+  computed relative to the current orientation. Code that compensated for the
+  old inversion by requesting the opposite codes will need updating.
+* **Breaking:** Fixed a half-voxel offset in `index_to_coord()` and
+  `coord_to_index()`. Both used a 0.5-voxel shift where `grid_to_coord()` and
+  `coord_to_grid()` use the 1-based-to-0-based offset of 1, so the shortcut
+  conversions disagreed with the equivalent two-step path by half a voxel and
+  `coord_to_index()` could return a neighbouring voxel. Voxel `(1, 1, 1)` now
+  maps exactly to `origin()` by either route. Raster extents produced by the
+  plotting helpers shift by half a voxel as a consequence, placing voxel
+  centres on their affine positions.
 * Fixed `linear_access()` on sparse `NeuroVec` objects, which could return wrong values or error when there were more masked voxels than time points. The sparse data matrix is stored as `[time × voxel]`; the linear-index path now indexes rows and columns in the correct order.
 * Fixed `ROIVol` arithmetic so values are aligned by voxel index, not by the original coordinate order, and fixed sparse `Summary` group methods so reductions include implicit structural zeros. `ROIVol` arithmetic now documents and enforces a same-support contract (identical space and voxel set; order may differ); missing voxels are not treated as zero.
 * Hardened `simulate_fmri()` edge cases: zero FWHM values now disable the corresponding smoothing step, `n_time = 1` no longer trips AR loops, tiny or constant masks no longer produce `NA` heteroscedasticity fields, and scalar arguments now receive explicit validation.

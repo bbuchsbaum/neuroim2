@@ -40,7 +40,7 @@ test_that("orient_slice_for_raster places voxel (1,1) at bottom-left for identit
   vol <- neuroim2::NeuroVol(array(0, dim = c(4, 5, 2)), sp)
   sl  <- neuroim2::slice(vol, 1, along = 3)
 
-  # Marker at voxel (1,1): world coords (0.5, 0.5) → lower-left of ggplot panel
+  # Marker at voxel (1,1): world coords (0, 0) → lower-left of ggplot panel
   mat <- matrix(0, nrow = 4, ncol = 5)
   mat[1, 1] <- 1
   # Second marker at voxel (4, 5): upper-right
@@ -52,11 +52,12 @@ test_that("orient_slice_for_raster places voxel (1,1) at bottom-left for identit
   expect_equal(out$mat[nrow(out$mat), 1], 1)
   # voxel (4,5) is upper-right, so out$mat[1, ncol]
   expect_equal(out$mat[1, ncol(out$mat)], 2)
-  # Extent spans pixel edges: (0, dim) since spacing=1 and origin=0
-  expect_equal(out$xmin, 0)
-  expect_equal(out$xmax, 4)
-  expect_equal(out$ymin, 0)
-  expect_equal(out$ymax, 5)
+  # Extent spans pixel edges. Voxel (1,1) is centred on the origin, so the
+  # edges fall half a voxel either side: (-0.5, dim - 0.5).
+  expect_equal(out$xmin, -0.5)
+  expect_equal(out$xmax, 3.5)
+  expect_equal(out$ymin, -0.5)
+  expect_equal(out$ymax, 4.5)
 })
 
 test_that("orient_slice_for_raster handles flipped x-axis (radiological LPI-like)", {
