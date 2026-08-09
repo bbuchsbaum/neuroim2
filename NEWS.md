@@ -18,7 +18,91 @@
   `html_vignette` ignores them, so the package stylesheet never reached the
   rendered articles. They are now nested under the output format.
 
+## Performance
+
+* Searchlight and ROI extraction are substantially faster. Each of the three
+  changes below was landed and verified as output-preserving on its own —
+  compared against a build of the previous version across 8,625 configurations
+  of `spherical_roi()`, `spherical_roi_set()`, `series()` and the four
+  searchlight iterators — before the correctness fixes listed under *Bug Fixes*
+  deliberately changed some of those outputs. The speed-ups and the behaviour
+  changes are independent.
+
+  - ROI objects are no longer built with `new()`. `ROIVolWindow` reaches a basic
+    type through two levels of `contains=`, so the default `initialize()` walked
+    that chain with `callNextMethod()` and ran `validObject()` at each level,
+    recursing into the `NeuroSpace` slot's nested axis tree — about 450 us per
+    object regardless of ROI size, which was roughly 70% of an exhaustive
+    searchlight's runtime. An internal constructor clones a cached prototype and
+    asserts the class invariants once, producing an `identical()` object about
+    11x cheaper.
+  - The voxel offsets of a spherical neighbourhood depend only on the radius and
+    the voxel spacing, so they are computed once per `(radius, spacing)` pair and
+    reused; per centre the work is a translate-and-clip. Candidate windows are
+    also sized per axis rather than from `min(spacing)`, which scanned about 3x
+    too many candidates on anisotropic voxels.
+  - `series()` gathers in a single compiled pass.
+    `series(DenseNeuroVec, matrix)` previously looped over timepoints,
+    rebuilding a double index vector each pass (~17x faster);
+    `series(AbstractSparseNeuroVec, integer)` allocated a zero matrix and
+    scattered into it (~1.8x faster, close to memory-bandwidth-bound). The
+    sparse fast path is gated on the concrete `SparseNeuroVec` class so
+    subclasses that override `matricized_access()` keep their hook.
+
+  On a 91x109x91 volume at 2 mm with a 290,137-voxel mask and radius-8 mm
+  searchlights, `spherical_roi()` goes from 660 us to about 130 us per ROI, and
+  a whole-brain searchlight from roughly 191 s of enumeration to 38 s.
+
+
 ## Bug Fixes
+
+* **Breaking:** `spherical_roi()`, `cuboid_roi()` and `square_roi()` now share
+  one definition of centroid handling, `nonzero` filtering and the
+  centre/parent bookkeeping. Each previously implemented these separately and
+  the three disagreed with one another; where they disagreed, at least one was
+  wrong.
+
+  - `nonzero = TRUE` now means what it documents. `cuboid_roi()` and
+    `square_roi()` used to force the centre voxel back into the ROI after
+    filtering, so a "nonzero" region could contain a zero value; they had done
+    this only so that `parent_index` could be read back off the coordinate
+    matrix. `parent_index` is now derived from the requested centroid directly,
+    so the workaround is gone and a zero-valued centre is dropped like any
+    other zero voxel.
+  - `center_index` is the row of the centre voxel in `coords`, or `NA_integer_`
+    when the centre is not part of the ROI. `spherical_roi()` used to fall back
+    to `1L`, silently pointing at an unrelated voxel, and then computed
+    `parent_index` *from that voxel* — so a filtered ROI reported the wrong
+    parent index entirely.
+  - `parent_index` is always the linear index of the requested centroid in the
+    parent space, whatever the filtering, matching what the slot documents.
+  - All three now validate the centroid identically: length 3 (or a 1x3
+    matrix), `>= 1`, and within the volume. `cuboid_roi()` and `square_roi()`
+    previously accepted out-of-bounds centroids and proceeded with a warning
+    from `matrix()`.
+  - A fractional centroid such as `c(5.7, 5, 5)` is truncated once and the same
+    value is used both to build the neighbourhood and to locate the centre
+    within it. Previously the grid was built from the truncated value while the
+    centre was matched against the original, so the centre was never found.
+  - `coords` is now an integer matrix with no dimnames, and rows are ordered
+    lexicographically by `(x, y, z)` in every builder. `cuboid_roi()` and
+    `square_roi()` returned `expand.grid()` output, which varies `x` fastest
+    and so was ordered the opposite way, and carried `x`/`y`/`z` dimnames.
+
+* **Breaking:** The `use_cpp` argument of `spherical_roi()` is deprecated and
+  ignored; the compiled implementation is always used, and passing `FALSE`
+  warns. The `use_cpp = FALSE` branch was wrong in two independent ways: it
+  returned coordinates offset by **+1 voxel on every axis** (it produced
+  1-based coordinates where the internal contract is 0-based, and the caller
+  then added 1 regardless), and it sized its candidate cube with `round()`
+  rather than `ceiling()` while comparing distances exclusively at the
+  boundary, so it also dropped legitimate boundary voxels. Checked against
+  brute-force enumeration over 384 geometries — every in-bounds voxel within
+  the radius, computed directly — the compiled path was correct in all 384 and
+  the fallback wrong in 35. The offset also made `spherical_roi()` throw
+  `subscript out of bounds` for centroids near the volume edge; those calls now
+  succeed.
+
 
 * **Breaking:** Fixed `reorient()`, which never returned the orientation it was
   asked for. It applied a transform derived only from the target axis codes,

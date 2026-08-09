@@ -116,20 +116,13 @@ random_searchlight <- function(mask, radius, nonzero = TRUE) {
     kept <- active_mask | (!mask_hits & !nonzero)
     kept_vox <- vox[kept, , drop = FALSE]
 
-    # Row position of the center voxel inside the kept ROI coordinates
-    center_row <- which(rowSums(kept_vox == matrix(center_coord, nrow(kept_vox), 3, byrow = TRUE)) == 3)
-    center_row <- if (length(center_row) == 0) NA_integer_ else center_row[1]
-
-    parent_idx <- grid_to_index(mask, center_coord)
-
-    search2 <- .new_roi_vol_window(rep(1, nrow(kept_vox)),
-                                   space(mask),
-                                   kept_vox,
-                                   as.integer(center_row),
-                                   as.integer(parent_idx))
+    # Centre/parent bookkeeping and coord normalisation are shared with the ROI
+    # builders. `nonzero` was already applied above, so pass FALSE here.
+    search2 <- .build_roi_window(mask, drop(center_coord), kept_vox,
+                                 rep(1, nrow(kept_vox)), FALSE)
 
     # Expose row index within the ROI coordinates for downstream consumers
-    attr(search2, "center_row_index") <- as.integer(center_row)
+    attr(search2, "center_row_index") <- search2@center_index
     # Index of the center voxel within the mask's nonzero ordering
     attr(search2, "mask_index") <- as.integer(center_idx)
 
@@ -325,31 +318,20 @@ resampled_searchlight <- function(mask,
   force(mask)
   # helper to coerce arbitrary shape output into a ROIVolWindow
   to_roi_window <- function(obj, center_coord) {
-    center_vec <- drop(center_coord)
-    parent_index <- grid_to_index(mask, center_vec)
+    center_vec <- .roi_centroid(center_coord, dim(mask))
 
     # User supplied a ROIVolWindow already; optionally filter nonzero voxels
     if (inherits(obj, "ROIVolWindow")) {
       coords <- obj@coords
       vals   <- obj@.Data
 
-      if (nonzero) {
+      if (nonzero && nrow(coords) > 0) {
         keep <- mask[coords] != 0
         coords <- coords[keep, , drop = FALSE]
         vals   <- vals[keep]
       }
 
-      # recompute center row in case filtering changed indexing
-      center_row <- if (nrow(coords) == 0) {
-        NA_integer_
-      } else {
-        which(rowSums(coords == matrix(center_vec, nrow(coords), 3, byrow = TRUE)) == 3)
-      }
-      center_row <- if (length(center_row) == 0) NA_integer_ else center_row[1]
-
-      return(.new_roi_vol_window(vals, space(mask), coords,
-                                 as.integer(center_row),
-                                 as.integer(parent_index)))
+      return(.build_roi_window(mask, center_vec, coords, vals, FALSE))
     }
 
     # Allow a bare matrix of voxel coordinates (integer, 3 cols)
@@ -369,20 +351,7 @@ resampled_searchlight <- function(mask,
         coords <- coords[keep, , drop = FALSE]
       }
 
-      if (nrow(coords) == 0) {
-        return(.new_roi_vol_window(numeric(0), space(mask),
-                                   matrix(ncol = 3, nrow = 0),
-                                   NA_integer_,
-                                   as.integer(parent_index)))
-      }
-
-      # identify where (if anywhere) the sampled center lives in coords
-      center_row <- which(rowSums(coords == matrix(center_coord, nrow(coords), 3, byrow = TRUE)) == 3)
-      center_row <- if (length(center_row) == 0) NA_integer_ else center_row[1]
-
-      return(.new_roi_vol_window(rep(1, nrow(coords)), space(mask), coords,
-                                 as.integer(center_row),
-                                 as.integer(parent_index)))
+      return(.build_roi_window(mask, center_vec, coords, rep(1, nrow(coords)), FALSE))
     }
 
     stop("shape_fun must return a ROIVolWindow or an n x 3 matrix of voxel coordinates")

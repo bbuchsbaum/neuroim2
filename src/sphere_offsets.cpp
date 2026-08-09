@@ -89,11 +89,11 @@ IntegerMatrix sphere_offsets_cpp(double radius, NumericVector spacing) {
 
 // Translate a template to one centre and drop out-of-bounds voxels.
 // `centre` and `dim` are 1-based; the result is 0-based when `base0` is TRUE,
-// which is the convention local_sphere() used. The result is a NumericMatrix so
-// that the storage mode matches what local_sphere() has always produced
-// downstream.
+// which is the convention local_sphere() used. Voxel coordinates are integers,
+// so the result is an IntegerMatrix -- callers assembling a ROIVolWindow need
+// integer coords and would otherwise pay for a copy to convert.
 // [[Rcpp::export]]
-NumericMatrix sphere_at_cpp(IntegerMatrix off, IntegerVector centre, IntegerVector dim,
+IntegerMatrix sphere_at_cpp(IntegerMatrix off, IntegerVector centre, IntegerVector dim,
                             bool base0 = true) {
     if (centre.size() < 3 || dim.size() < 3) {
         stop("sphere_at_cpp: 'centre' and 'dim' must have at least 3 elements");
@@ -120,12 +120,12 @@ NumericMatrix sphere_at_cpp(IntegerMatrix off, IntegerVector centre, IntegerVect
     }
 
     const int shift = base0 ? 1 : 0;
-    NumericMatrix out(keep.size(), 3);
+    IntegerMatrix out(keep.size(), 3);
     for (size_t r = 0; r < keep.size(); r++) {
         const int i = keep[r];
-        out(r, 0) = (double)(cx + off(i, 0) - shift);
-        out(r, 1) = (double)(cy + off(i, 1) - shift);
-        out(r, 2) = (double)(cz + off(i, 2) - shift);
+        out(r, 0) = cx + off(i, 0) - shift;
+        out(r, 1) = cy + off(i, 1) - shift;
+        out(r, 2) = cz + off(i, 2) - shift;
     }
     return out;
 }

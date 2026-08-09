@@ -432,7 +432,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // sphere_at_cpp
-NumericMatrix sphere_at_cpp(IntegerMatrix off, IntegerVector centre, IntegerVector dim, bool base0);
+IntegerMatrix sphere_at_cpp(IntegerMatrix off, IntegerVector centre, IntegerVector dim, bool base0);
 RcppExport SEXP _neuroim2_sphere_at_cpp(SEXP offSEXP, SEXP centreSEXP, SEXP dimSEXP, SEXP base0SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;

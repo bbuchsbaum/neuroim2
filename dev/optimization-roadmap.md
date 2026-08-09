@@ -169,47 +169,31 @@ Independent of everything above; each is small and self-contained.
 
 ---
 
-## Separate finding: the `use_cpp = FALSE` fallback is wrong
+## Resolved: the `use_cpp = FALSE` fallback (now deprecated)
 
-Not a performance issue, but it surfaced while verifying Phase 2's ordering
-claim and should be recorded.
+Recorded here because the diagnosis is worth keeping. The legacy branch was
+wrong in two independent ways:
 
-`spherical_roi(..., use_cpp = FALSE)` returns a neighbourhood shifted by
-**exactly +1 voxel on every axis** relative to `use_cpp = TRUE`:
+1. **Off by +1 on every axis.** `make_spherical_grid()` documents a 0-based
+   contract; the `dbscan` branch returned `cube`, built from
+   `seq(centroid - w, centroid + w)` and therefore already 1-based, and
+   `spherical_roi()` added 1 regardless. This also made `spherical_roi()` throw
+   `subscript out of bounds` for centroids near the volume edge, because the
+   shifted coordinates fell outside the volume.
+2. **Missing boundary voxels.** It sized the candidate cube with `round()`
+   rather than `ceiling()` and compared distances exclusively at the boundary.
 
-```r
-sp1 <- NeuroSpace(c(10,10,10), c(1,1,1))
-range(coords(spherical_roi(sp1, c(5,5,5), 3.5, use_cpp = TRUE))[,1])   # 2 8
-range(coords(spherical_roi(sp1, c(5,5,5), 3.5, use_cpp = FALSE))[,1])  # 3 9
-all.equal(coords(spherical_roi(sp1, c(5,5,5), 3.5, use_cpp = FALSE)) - 1L,
-          coords(spherical_roi(sp1, c(5,5,5), 3.5, use_cpp = TRUE)))    # TRUE
-```
+Checked against brute-force enumeration — every in-bounds voxel whose centre
+lies within `radius` mm of the centroid, computed directly — over 384 geometries
+spanning isotropic and anisotropic spacing, corner/edge/interior centroids and
+boundary radii: **the compiled path was correct in all 384; the fallback was
+wrong in 35.**
 
-**Root cause.** `make_spherical_grid()` documents a 0-based contract, and the
-compiled branch honours it. The `dbscan` branch returns `cube`, which is built
-from `seq(centroid - w, centroid + w)` and is therefore already **1-based**.
-`spherical_roi()` then applies `grid <- grid + 1L` unconditionally, so the
-fallback comes out one voxel high on each axis.
-
-This predates the optimisation work — both branches reproduce their own
-pre-change output byte-for-byte across the golden sweep, so nothing here
-introduced it. `use_cpp = TRUE` is the default and is the correct one.
-
-Options, in order of preference:
-
-1. **Delete the fallback.** It exists only as a pre-C++ legacy path; nothing in
-   the package or its tests uses `use_cpp = FALSE`. This also drops the
-   `dbscan::frNN` dependency from this file.
-2. **Fix it**: subtract 1 from `cube` in the `dbscan` branch so it satisfies the
-   0-based contract, then assert branch equivalence in a test.
-
-Either is a small change, but both alter output for anyone passing
-`use_cpp = FALSE`, so it is the maintainer's call rather than something to fold
-into a performance commit. The discrepancy is pinned by a test in
-`tests/testthat/test-roi-series-fastpaths.R` so it cannot drift further
-unnoticed.
-
----
+Fixing it would have meant maintaining a second implementation of something the
+compiled path already gets right, so `use_cpp` is now deprecated and ignored:
+passing `FALSE` warns and returns the compiled result. The brute-force
+comparison is now a permanent test, which is a stronger guarantee than
+branch-to-branch equivalence ever was.
 
 ## Sequencing and effort
 

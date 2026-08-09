@@ -48,8 +48,10 @@ capture_spherical <- function() {
             key <- sprintf("sph|d%d|s%d|r%g|nz%d|cpp%d|%s|c%d",
                            di, si, radius, nonzero, use_cpp, target, ci)
             val <- tryCatch({
-              r <- spherical_roi(bvol, cents[ci,], radius, fill = fill,
-                                 nonzero = nonzero, use_cpp = use_cpp)
+              # use_cpp = FALSE is deprecated and warns; still swept so the
+              # deprecation path stays covered.
+              r <- suppressWarnings(spherical_roi(bvol, cents[ci,], radius, fill = fill,
+                                 nonzero = nonzero, use_cpp = use_cpp))
               list(ok = TRUE,
                    coords = unname(r@coords),
                    data = unname(as.numeric(r@.Data)),

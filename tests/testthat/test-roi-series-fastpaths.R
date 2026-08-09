@@ -139,46 +139,46 @@ test_that("the compiled sphere path emits lexicographically sorted rows", {
   }
 })
 
-test_that("spherical_roi keeps sorting the dbscan fallback path", {
-  # The compiled path emits sorted rows natively, so spherical_roi() only
-  # re-sorts when use_cpp = FALSE. That sort must still happen: dbscan::frNN
-  # returns neighbours in its own order.
-  sp1 <- NeuroSpace(c(12L, 12L, 12L), c(2, 2, 2))
-  b <- spherical_roi(sp1, c(6L, 6L, 6L), 4, use_cpp = FALSE)
-  g <- b@coords
-  expect_identical(order(g[, 1], g[, 2], g[, 3]), seq_len(nrow(g)))
+test_that("spherical_roi agrees with brute-force enumeration, and use_cpp is inert", {
+  # Ground truth: every in-bounds voxel whose centre lies within `radius` mm of
+  # the centroid. This is the definition the function claims to implement.
+  truth <- function(d, sp, ctr, radius) {
+    g <- as.matrix(expand.grid(x = seq_len(d[1]), y = seq_len(d[2]), z = seq_len(d[3])))
+    dm <- sqrt(rowSums(((g - matrix(ctr, nrow(g), 3, byrow = TRUE)) *
+                          matrix(sp, nrow(g), 3, byrow = TRUE))^2))
+    k <- g[dm <= radius, , drop = FALSE]
+    unname(k[order(k[, 1], k[, 2], k[, 3]), , drop = FALSE])
+  }
 
-  # NOTE: the fallback is shifted by exactly +1 voxel on every axis.
-  # make_spherical_grid() documents a 0-based contract and the compiled branch
-  # honours it, but the dbscan branch returns an already-1-based cube, and
-  # spherical_roi() adds 1 unconditionally. Long-standing and unrelated to the
-  # offset template -- both branches reproduce their own pre-optimisation
-  # output exactly. Pinned so it stays visible; use_cpp = TRUE is the default
-  # and the one to trust.
-  a <- spherical_roi(sp1, c(6L, 6L, 6L), 4, use_cpp = TRUE)
-  expect_equal(nrow(a@coords), nrow(b@coords))
-  expect_equal(unname(b@coords) - 1L, unname(a@coords))
-})
+  set.seed(31)
+  for (sp in list(c(1, 1, 1), c(2, 2, 2), c(1, 1, 4), c(0.8, 0.8, 3), c(0.7, 1.3, 2.9))) {
+    for (d in list(c(12L, 12L, 12L), c(9L, 14L, 7L))) {
+      spc <- NeuroSpace(d, sp)
+      cents <- rbind(c(1L, 1L, 1L), d, pmax(1L, d %/% 2L),
+                     cbind(sample.int(d[1], 3, TRUE),
+                           sample.int(d[2], 3, TRUE),
+                           sample.int(d[3], 3, TRUE)))
+      storage.mode(cents) <- "integer"
+      for (radius in c(min(sp), 2.5, 4)) {
+        if (radius < min(sp)) next
+        for (i in seq_len(nrow(cents))) {
+          ctr <- cents[i, ]
+          info <- sprintf("spacing %s dim %s r %g centroid %s",
+                          paste(sp, collapse = "/"), paste(d, collapse = "x"),
+                          radius, paste(ctr, collapse = ","))
+          got <- unname(spherical_roi(spc, ctr, radius)@coords)
+          expect_equal(got, truth(d, sp, ctr, radius), info = info)
+        }
+      }
+    }
+  }
 
-test_that("the sphere primitives reject hostile inputs instead of misbehaving", {
-  # (int) of a ratio past INT_MAX is UB and yields INT_MIN on x86-64, which is
-  # NA_integer_ -- the template would silently be full of NA offsets.
-  expect_error(neuroim2:::sphere_offsets_cpp(5, c(1e-9, 1, 1)),
-               "exceeds the representable")
-  expect_error(neuroim2:::sphere_offsets_cpp(Inf, c(1, 1, 1)),
-               "non-negative and finite|exceeds the representable")
-
-  # Rcpp's operator() is unchecked: a 2-column template read past the SEXP and
-  # returned nondeterministic coordinates.
-  expect_error(neuroim2:::sphere_at_cpp(matrix(1L, 4, 2), c(3L, 3L, 3L), c(5L, 5L, 5L)),
-               "exactly 3 columns")
-
-  expect_error(neuroim2:::sphere_offsets_cpp(4, c(0, 1, 1)), "positive and finite")
-  expect_error(neuroim2:::sphere_offsets_cpp(-1, c(1, 1, 1)), "non-negative")
-  expect_error(neuroim2:::.sphere_offsets(c(1, 2), c(1, 1, 1)), "single value")
-
-  # and the normal path is untouched
-  expect_equal(nrow(neuroim2:::sphere_offsets_cpp(4, c(2, 2, 2))), 33L)
+  # use_cpp is deprecated: it warns and produces the compiled result anyway.
+  spc <- NeuroSpace(c(12L, 12L, 12L), c(0.8, 0.8, 3))
+  a <- spherical_roi(spc, c(6L, 6L, 6L), 4, use_cpp = TRUE)
+  expect_warning(b <- spherical_roi(spc, c(6L, 6L, 6L), 4, use_cpp = FALSE),
+                 "deprecated and ignored")
+  expect_identical(a, b)
 })
 
 test_that("the offset cache does not confuse distinct radii or spacings", {
