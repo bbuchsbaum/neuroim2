@@ -226,3 +226,44 @@ test_that("grid_to_grid permutes grid coordinates", {
   expect_equal(nrow(g2), 2)
   expect_equal(ncol(g2), 3)
 })
+
+# --- coordinate conversion consistency ---------------------------------------
+
+test_that("index_to_coord agrees with the grid path", {
+  # index_to_coord() and coord_to_index() previously used a half-voxel offset
+  # where grid_to_coord()/coord_to_grid() use a whole one, so the shortcut and
+  # the two-step path disagreed by spacing/2 and coord_to_index() could return
+  # a neighbouring voxel.
+  sp <- NeuroSpace(c(64L, 64L, 40L), spacing = c(2, 2, 2), origin = c(-90, -126, -72))
+  for (idx in c(1L, 12345L, 50000L, prod(dim(sp)))) {
+    expect_equal(
+      as.vector(index_to_coord(sp, as.integer(idx))),
+      as.vector(grid_to_coord(sp, index_to_grid(sp, as.integer(idx))))
+    )
+  }
+})
+
+test_that("coord_to_index inverts index_to_coord exactly", {
+  sp <- NeuroSpace(c(64L, 64L, 40L), spacing = c(2, 2, 2), origin = c(-90, -126, -72))
+  for (idx in c(1L, 12345L, 50000L)) {
+    world <- index_to_coord(sp, idx)
+    expect_equal(coord_to_index(sp, matrix(as.vector(world), nrow = 1)), idx)
+  }
+})
+
+test_that("coord_to_index agrees with grid_to_index on anisotropic real data", {
+  vol <- read_vol(system.file("extdata", "global_mask2.nii.gz", package = "neuroim2"))
+  sp <- space(vol)
+  idx <- c(1L, 999L, 40000L)
+  world <- index_to_coord(sp, idx)
+  expect_equal(
+    as.vector(coord_to_index(sp, world)),
+    as.vector(grid_to_index(sp, coord_to_grid(sp, world)))
+  )
+})
+
+test_that("voxel (1,1,1) sits exactly on the origin", {
+  sp <- NeuroSpace(c(10L, 10L, 10L), spacing = c(3, 3, 4), origin = c(-30, -40, -50))
+  expect_equal(as.vector(index_to_coord(sp, 1L)), origin(sp))
+  expect_equal(as.vector(grid_to_coord(sp, matrix(c(1, 1, 1), nrow = 1))), origin(sp))
+})

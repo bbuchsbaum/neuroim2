@@ -6,6 +6,287 @@ NULL
 NULL
 
 
+# ---------------------------------------------------------------------------
+# Fast ROI construction
+#
+# `new("ROIVolWindow", ...)` costs ~450us and the cost is independent of ROI
+# size: the class reaches a basic type ("numeric") through two levels of
+# contains=, so the default initialize() walks that chain with callNextMethod()
+# and runs validObject() at each level -- and validObject() recurses into the
+# NeuroSpace slot and its nested AxisSet/NamedAxis tree. In an exhaustive
+# searchlight that fixed overhead is ~70% of total runtime.
+#
+# An object of such a class *is* the underlying vector, with the slots as
+# attributes and the S4 bit set, so setting the attributes and calling asS4()
+# yields an identical() object. The mechanism itself costs ~3us; with the
+# argument checks below the constructor measures ~10us against new()'s ~450-790us
+# (~30-60x), and unlike new() it does not scale with the number of slots
+# touched. The class invariants
+# that validObject() would have checked are asserted directly here instead, so
+# nothing is silently skipped -- they are just checked once, cheaply, in the one
+# place these objects are built.
+# ---------------------------------------------------------------------------
+
+#' @keywords internal
+#' @noRd
+.roi_proto_cache <- new.env(parent = emptyenv())
+
+#' The class attribute ROIVolWindow objects must carry
+#'
+#' Cached because building it means touching the class table; it is a length-1
+#' character vector with a "package" attribute, and \code{identical()} on the
+#' finished object compares it.
+#'
+#' @keywords internal
+#' @noRd
+.roi_class_attr <- function(class_name) {
+  hit <- .roi_proto_cache[[class_name]]
+  if (!is.null(hit)) {
+    return(hit)
+  }
+
+  proto <- switch(
+    class_name,
+    ROIVolWindow = new("ROIVolWindow", numeric(0), space = NeuroSpace(c(1L, 1L, 1L)),
+                       coords = matrix(0, nrow = 0, ncol = 3),
+                       center_index = integer(0), parent_index = NA_integer_),
+    cli::cli_abort("No ROI prototype for {.cls {class_name}}.")
+  )
+
+  cls <- attr(proto, "class")
+  assign(class_name, cls, envir = .roi_proto_cache)
+  cls
+}
+
+#' Prepare a value for the .Data part the way new() would
+#'
+#' \code{new()} coerces whatever it is handed into the basic type the class
+#' extends and drops the attributes -- including \code{names} -- that the data
+#' part must not carry. Slot assignment does neither, so an ROI built by the
+#' fast constructor from, say, \code{fill = TRUE} or \code{fill = c(a = 1)}
+#' would otherwise differ from one built by \code{new()}. Integer storage is
+#' left alone because \code{new()} preserves it too.
+#'
+#' Factors are routed through the coercion branch deliberately. \code{new()} is
+#' not self-consistent for them -- depending on what has already primed the
+#' methods package's coercion cache in the session it yields either a clean
+#' double or an integer carrying a stray \code{levels} attribute -- so there is
+#' no stable behaviour to match. This always produces a clean double of the
+#' integer codes.
+#'
+#' @keywords internal
+#' @noRd
+.as_roi_data <- function(data) {
+  if (is.null(data)) {
+    stop("cannot use object of class \"NULL\" in new()")
+  }
+  tp <- typeof(data)
+  # is.object() keeps classed values (notably factors, which are integer
+  # underneath) out of the pass-through branch: as.vector() on a factor yields
+  # its labels, whereas new() coerces through the integer codes.
+  if (!is.object(data) && (tp == "double" || tp == "integer")) {
+    as.vector(data)                 # strips names/attributes, keeps the type
+  } else {
+    as.vector(data, "numeric")      # logical, character, complex, list, factor
+  }
+}
+
+#' Construct a ROIVolWindow without paying for the default initialize()
+#'
+#' An S4 object that extends a basic type *is* that vector, with the slots as
+#' attributes and the S4 bit set. Setting the attributes and then \code{asS4()}
+#' produces an object \code{identical()} to \code{new()}'s -- verified across
+#' sizes, storage modes, non-finite data and serialisation round-trips in
+#' \code{test-roi-series-fastpaths.R} -- for about 3 us instead of 450 us.
+#'
+#' Nothing is silently skipped: the invariants \code{validObject()} would have
+#' checked, and the slot types \code{@<-} would have checked, are asserted
+#' below. They are simply checked once here rather than re-derived per slot per
+#' object, which is what made \code{new()} cost the same for a 1-voxel ROI as
+#' for a 2000-voxel one.
+#'
+#' @keywords internal
+#' @noRd
+.new_roi_vol_window <- function(data, space, coords, center_index, parent_index) {
+  data <- .as_roi_data(data)
+
+  # The invariants the class validity function checks (kept in step with
+  # setClass("ROIVolWindow", validity = ) in all_class.R -- see the note there)...
+  if (!is.matrix(coords) || is.object(coords) || ncol(coords) != 3L) {
+    stop("coords slot must be a matrix with 3 columns")
+  }
+  if (!is.vector(data)) {
+    stop("'data' must be a vector")
+  }
+  # is.vector() is TRUE for lists, and as.vector() is an internal generic whose
+  # S3 methods may return anything, so the storage type has to be checked too --
+  # otherwise a list could end up as the .Data part of a "numeric" object.
+  if (!is.double(data) && !is.integer(data)) {
+    stop("'data' must be a double or integer vector")
+  }
+  if (length(data) != nrow(coords)) {
+    stop("length of data vector must equal 'nrow(coords)'")
+  }
+  # ...plus the slot types that `@<-` would otherwise check on each assignment.
+  # is.object() rejects classed values, which the plain predicates accept but
+  # the slot definitions do not. inherits() first because it is ~9x cheaper than
+  # is(); is() still runs when it fails, so a NeuroSpace subclass is accepted.
+  if (!inherits(space, "NeuroSpace") && !is(space, "NeuroSpace")) {
+    stop("space slot must be a NeuroSpace object")
+  }
+  if (!is.integer(center_index) || is.object(center_index) ||
+      !is.integer(parent_index) || is.object(parent_index)) {
+    stop("center_index and parent_index must be plain integer vectors")
+  }
+
+  cls <- .roi_proto_cache[["ROIVolWindow"]]
+  if (is.null(cls)) cls <- .roi_class_attr("ROIVolWindow")
+
+  attributes(data) <- list(space = space, coords = coords,
+                           parent_index = parent_index,
+                           center_index = center_index,
+                           class = cls)
+  asS4(data)
+}
+
+# ---------------------------------------------------------------------------
+# Shared semantics for the windowed ROI builders
+#
+# spherical_roi(), cuboid_roi() and square_roi() used to each implement centroid
+# validation, `nonzero` filtering and the centre/parent bookkeeping separately,
+# and disagreed with one another on all three. The two helpers below define it
+# once so the three builders cannot drift apart again.
+# ---------------------------------------------------------------------------
+
+#' Validate and normalise an ROI centroid
+#'
+#' Accepts a length-3 vector or a 1x3 matrix, requires it to lie inside the
+#' volume, and returns it as an integer voxel coordinate. Non-integer input is
+#' truncated (as \code{as.integer()} does) so that the returned value is the one
+#' actually used both to build the neighbourhood and to locate the centre within
+#' it -- previously the grid was built from the truncated value while the centre
+#' was matched against the original, so a fractional centroid never matched.
+#'
+#' @keywords internal
+#' @noRd
+.roi_centroid <- function(centroid, vdim, what = "centroid") {
+  if (is.matrix(centroid)) {
+    if (ncol(centroid) != 3 || nrow(centroid) != 1) {
+      cli::cli_abort("{.arg {what}} matrix must have exactly 1 row and 3 columns.")
+    }
+    centroid <- drop(centroid)
+  }
+
+  if (length(centroid) != 3) {
+    cli::cli_abort("{.arg {what}} must have length 3, not {length(centroid)}.")
+  }
+  if (!is.numeric(centroid) || anyNA(centroid) || any(!is.finite(centroid))) {
+    cli::cli_abort("{.arg {what}} must contain finite numeric values.")
+  }
+  if (!all(centroid >= 1)) {
+    cli::cli_abort("All {.arg {what}} values must be >= 1.")
+  }
+
+  centroid <- as.integer(centroid)
+  if (centroid[1] > vdim[1] || centroid[2] > vdim[2] || centroid[3] > vdim[3]) {
+    cli::cli_abort("{.arg {what}} ({.val {centroid}}) exceeds volume dimensions ({.val {vdim[1:3]}}).")
+  }
+
+  centroid
+}
+
+#' Validate and normalise many ROI centroids at once
+#'
+#' Vectorised equivalent of applying \code{.roi_centroid()} to each row, so that
+#' building a large ROI set does not pay a function call and several scalar
+#' checks per centroid. Error messages name the offending row.
+#'
+#' @keywords internal
+#' @noRd
+.roi_centroids <- function(centroids, vdim, what = "centroids") {
+  if (!is.matrix(centroids) || ncol(centroids) != 3) {
+    cli::cli_abort("{.arg {what}} must be a matrix with 3 columns (i,j,k).")
+  }
+  if (!is.numeric(centroids)) {
+    cli::cli_abort("{.arg {what}} must be numeric.")
+  }
+  if (anyNA(centroids) || any(!is.finite(centroids))) {
+    bad <- which(is.na(centroids) | !is.finite(centroids), arr.ind = TRUE)[1, 1]
+    cli::cli_abort("{.arg {what}} row {bad} must contain finite numeric values.")
+  }
+
+  low <- centroids < 1
+  if (any(low)) {
+    cli::cli_abort("All {.arg {what}} values must be >= 1 (row {which(low, arr.ind = TRUE)[1, 1]}).")
+  }
+
+  out <- centroids
+  storage.mode(out) <- "integer"
+
+  over <- out[, 1] > vdim[1] | out[, 2] > vdim[2] | out[, 3] > vdim[3]
+  if (any(over)) {
+    bad <- which(over)[1]
+    cli::cli_abort("{.arg {what}} row {bad} ({.val {out[bad, ]}}) exceeds volume dimensions ({.val {vdim[1:3]}}).")
+  }
+
+  out
+}
+
+#' Assemble a ROIVolWindow from a candidate grid
+#'
+#' Applies the \code{nonzero} filter and fills in the centre/parent bookkeeping
+#' with one definition shared by every windowed ROI builder:
+#'
+#' \itemize{
+#'   \item \code{nonzero = TRUE} means what it says. The centre voxel is dropped
+#'     along with any other zero-valued voxel; it is not forced back in.
+#'   \item \code{center_index} is the row of the centre voxel within
+#'     \code{coords}, or \code{NA_integer_} when the centre is not part of the
+#'     ROI. It is never a fallback row, which would silently point at an
+#'     unrelated voxel.
+#'   \item \code{parent_index} is always the linear index of the requested
+#'     centroid in the parent space, independent of any filtering -- that is
+#'     what the slot documents.
+#'   \item \code{coords} is an integer matrix without dimnames.
+#' }
+#'
+#' @keywords internal
+#' @noRd
+.build_roi_window <- function(bvol, centroid, grid, vals, nonzero) {
+  bspace <- space(bvol)
+  bdim <- dim(bspace)
+  parent_index <- as.integer((centroid[3] - 1L) * bdim[1] * bdim[2] +
+                             (centroid[2] - 1L) * bdim[1] + centroid[1])
+
+  if (nrow(grid) > 0L && isTRUE(nonzero)) {
+    # `vals != 0` alone yields NA for NA/NaN voxels, and an NA logical subscript
+    # emits an all-NA coordinate row -- an ROI with NA coordinates. "Nonzero"
+    # cannot be established for a missing value, so drop it, which is also what
+    # the compiled searchlight core does.
+    keep <- !is.na(vals) & vals != 0
+    grid <- grid[keep, , drop = FALSE]
+    vals <- vals[keep]
+  }
+
+  # The compiled sphere path already yields undecorated integer coords; the
+  # expand.grid-based builders do not, so normalise only when needed.
+  if (storage.mode(grid) != "integer") storage.mode(grid) <- "integer"
+  if (!is.null(dimnames(grid))) dimnames(grid) <- NULL
+
+  if (nrow(grid) == 0L) {
+    return(.new_roi_vol_window(numeric(0), bspace, matrix(integer(0), ncol = 3, nrow = 0),
+                               NA_integer_, parent_index))
+  }
+
+  center_index <- which(grid[, 1] == centroid[1] &
+                        grid[, 2] == centroid[2] &
+                        grid[, 3] == centroid[3])
+  center_index <- if (length(center_index) == 0L) NA_integer_ else as.integer(center_index[1])
+
+  .new_roi_vol_window(vals, bspace, grid, center_index, parent_index)
+}
+
+
 #' ROI Coordinates
 #'
 #' @title Create ROI Coordinates Object
@@ -376,15 +657,19 @@ setMethod(f="as.matrix", signature=signature(x = "ROIVec"), def=function(x) {
     stop(paste("invalid cube for centroid", centroid, " with surround", surround, ": volume is zero"))
   }
 
+  # expand.grid() varies its FIRST argument fastest, so listing z first and then
+  # reordering the columns yields rows in (x, y, z) lexicographic order -- the
+  # same order the compiled spherical path emits. Every ROI builder therefore
+  # returns coordinates in one canonical order, at no cost.
   if (fixdim == 3) {
-    grid <- as.matrix(expand.grid(x=coords[[1]],y=coords[[2]],z=centroid[3]))
+    grid <- as.matrix(expand.grid(z=centroid[3], y=coords[[2]], x=coords[[1]]))
   } else if (fixdim == 2) {
-    grid <- as.matrix(expand.grid(x=coords[[1]],y=centroid[2],z=coords[[2]]))
+    grid <- as.matrix(expand.grid(z=coords[[2]], y=centroid[2], x=coords[[1]]))
   } else if (fixdim == 1) {
-    grid <- as.matrix(expand.grid(x=centroid[1],y=coords[[1]],z=coords[[2]]))
+    grid <- as.matrix(expand.grid(z=coords[[2]], y=coords[[1]], x=centroid[1]))
   }
 
-  grid
+  grid[, c("x", "y", "z"), drop = FALSE]
 
 }
 
@@ -406,7 +691,10 @@ setMethod(f="as.matrix", signature=signature(x = "ROIVec"), def=function(x) {
     stop(paste("invalid cube for centroid", centroid, " with surround", surround, ": volume is zero"))
   }
 
-  grid <- as.matrix(expand.grid(x=coords[[1]],y=coords[[2]],z=coords[[3]]))
+  # See .makeSquareGrid(): reversed argument order gives (x, y, z) lexicographic
+  # rows, matching every other ROI builder.
+  grid <- as.matrix(expand.grid(z=coords[[3]], y=coords[[2]], x=coords[[1]]))
+  grid[, c("x", "y", "z"), drop = FALSE]
 }
 
 
@@ -432,13 +720,7 @@ setMethod(f="as.matrix", signature=signature(x = "ROIVec"), def=function(x) {
 #' nrow(vox) == 9
 #' @export
 square_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE, fixdim=3) {
-  if (is.matrix(centroid)) {
-    centroid <- drop(centroid)
-  }
-
-  if (length(centroid) != 3) {
-    stop("square_roi: centroid must have length of 3 (x,y,z coordinates)")
-  }
+  centroid <- .roi_centroid(centroid, dim(bvol))
 
   if (surround < 0) {
     stop("'surround' argument cannot be negative")
@@ -456,36 +738,7 @@ square_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE, fixdi
     as.numeric(bvol[grid])
   }
 
-  center_match <- rowSums(grid == matrix(centroid, nrow(grid), 3, byrow = TRUE)) == 3
-
-  keep <- if (nonzero) vals != 0 else rep(TRUE, length(vals))
-  # Ensure centroid remains so parent_index can be computed
-  keep[center_match] <- TRUE
-
-  grid <- grid[keep, , drop = FALSE]
-  vals <- vals[keep]
-
-  if (nrow(grid) == 0) {
-    return(new("ROIVolWindow",
-               numeric(0),
-               space = space(bvol),
-               coords = matrix(ncol = 3, nrow = 0),
-               center_index = integer(0),
-               parent_index = as.integer(NA)))
-  }
-
-  center_index <- which(center_match[keep])
-  if (length(center_index) == 0) center_index <- as.integer(NA)
-
-  parent_index <- grid_to_index(bvol, matrix(centroid, ncol = 3))
-  ### add central voxel
-  new("ROIVolWindow",
-      space = space(bvol),
-      coords = grid,
-      center_index = as.integer(center_index),
-      parent_index = as.integer(parent_index),
-      vals)
-
+  .build_roi_window(bvol, centroid, grid, vals, nonzero)
 }
 
 
@@ -506,13 +759,7 @@ square_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE, fixdi
 #'
 #' @export
 cuboid_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE) {
-  if (is.matrix(centroid)) {
-    centroid <- drop(centroid)
-  }
-
-  if (length(centroid) != 3) {
-    stop("cuboid_roi: centroid must have length of 3 (x,y,z coordinates)")
-  }
+  centroid <- .roi_centroid(centroid, dim(bvol))
 
   if (surround < 0) {
     stop("'surround' argument cannot be negative")
@@ -530,41 +777,66 @@ cuboid_roi <- function(bvol, centroid, surround, fill=NULL, nonzero=FALSE) {
     as.numeric(bvol[grid])
   }
 
-  center_match <- rowSums(grid == matrix(centroid, nrow(grid), 3, byrow = TRUE)) == 3
-
-  keep <- if (nonzero) vals != 0 else rep(TRUE, length(vals))
-  keep[center_match] <- TRUE
-
-  grid <- grid[keep, , drop = FALSE]
-  vals <- vals[keep]
-
-  if (nrow(grid) == 0) {
-    return(new("ROIVolWindow",
-               numeric(0),
-               space = space(bvol),
-               coords = matrix(ncol = 3, nrow = 0),
-               center_index = integer(0),
-               parent_index = as.integer(NA)))
-  }
-
-  center_index <- which(center_match[keep])
-  if (length(center_index) == 0) center_index <- as.integer(NA)
-
-  parent_index <- grid_to_index(bvol, matrix(centroid, ncol = 3))
-
-  new("ROIVolWindow",
-      vals,
-      space = space(bvol),
-      coords = grid,
-      center_index = as.integer(center_index),
-      parent_index = as.integer(parent_index))
+  .build_roi_window(bvol, centroid, grid, vals, nonzero)
 
 }
 
-#' @importFrom dbscan frNN
+#' Cached spherical offset template
+#'
+#' The voxel offsets forming a spherical neighbourhood depend only on the
+#' radius and the voxel spacing, so they are computed once per
+#' \code{(radius, spacing)} pair and reused across centres. This is what makes
+#' an exhaustive searchlight cheap: per centre the work drops to translating
+#' the template and clipping it to the volume bounds.
+#'
 #' @keywords internal
 #' @noRd
-make_spherical_grid <- function(bvol, centroid, radius, use_cpp=TRUE) {
+.sphere_offset_cache <- new.env(parent = emptyenv())
+
+#' @keywords internal
+#' @noRd
+.sphere_offsets <- function(radius, spacing) {
+  if (length(radius) != 1L) {
+    stop("'radius' must be a single value")
+  }
+  spacing <- as.numeric(spacing)[1:3]
+  key <- paste0(sprintf("%.17g", radius), "|",
+                paste(sprintf("%.17g", spacing), collapse = ","))
+
+  hit <- .sphere_offset_cache[[key]]
+  if (!is.null(hit)) {
+    return(hit)
+  }
+
+  # Bound the cache: analyses sweep a handful of radii, not thousands.
+  if (length(ls(.sphere_offset_cache, all.names = TRUE)) >= 64L) {
+    rm(list = ls(.sphere_offset_cache, all.names = TRUE), envir = .sphere_offset_cache)
+  }
+
+  off <- sphere_offsets_cpp(radius, spacing)
+  assign(key, off, envir = .sphere_offset_cache)
+  off
+}
+
+#' Voxel coordinates of a spherical neighbourhood, 1-based integers
+#'
+#' @param use_cpp Deprecated and ignored. The former \code{FALSE} branch used
+#'   \code{dbscan::frNN} over a candidate cube sized with \code{round()} rather
+#'   than \code{ceil()}, and compared distances exclusively at the boundary. It
+#'   therefore returned neighbourhoods that were both offset by one voxel and
+#'   missing boundary voxels: checked against brute-force enumeration over 384
+#'   geometries, the compiled path was correct in all of them and the fallback
+#'   wrong in 35. Passing \code{FALSE} now warns and uses the compiled path.
+#'
+#' @keywords internal
+#' @noRd
+make_spherical_grid <- function(bvol, centroid, radius, use_cpp = TRUE) {
+
+  if (!isTRUE(use_cpp)) {
+    warning("'use_cpp = FALSE' is deprecated and ignored: the dbscan fallback ",
+            "returned incorrect neighbourhoods. The compiled path is always used.",
+            call. = FALSE)
+  }
 
   vspacing <- spacing(bvol)
 
@@ -575,35 +847,15 @@ make_spherical_grid <- function(bvol, centroid, radius, use_cpp=TRUE) {
   vdim <- dim(bvol)
   centroid <- as.integer(centroid)
 
-  out <- if (use_cpp) {
-    # local_sphere expects 0-based voxel indices; convert from 1-based
-    local_sphere(centroid[1] - 1L,
-                 centroid[2] - 1L,
-                 centroid[3] - 1L,
-                 radius, vspacing, vdim)
-  } else {
-    deltas <- map_dbl(vspacing, function(x) round(radius/x))
-
-    cube <- as.matrix(expand.grid(
-      seq(centroid[1] - round(radius/vspacing[1]), centroid[1] + round(radius/vspacing[1])),
-      seq(centroid[2] - round(radius/vspacing[2]), centroid[2] + round(radius/vspacing[2])),
-      seq(centroid[3] - round(radius/vspacing[3]), centroid[3] + round(radius/vspacing[3]))))
-
-    rs <- rowSums(sapply(1:ncol(cube), function(i) cube[,i] > 0 & cube[,i] <= vdim[i]))
-    keep <- which(rs == 3)
-    cube <- cube[keep,]
-
-    coords <- t(t(cube) * vspacing)
-
-
-    #res <- rflann::RadiusSearch(matrix(centroid * vspacing, ncol=3), coords, radius=radius^2,
-    #                          max_neighbour=nrow(cube), build="kdtree", cores=0, checks=1)
-
-    res <- dbscan::frNN(coords, eps=radius, query=matrix(centroid * vspacing, ncol=3))
-
-    cube[res$id[[1]],,drop=FALSE]
-  }
-
+  # Translate the cached offset template to this centre and clip to bounds.
+  # Equivalent to local_sphere() -- same membership test, same emission order --
+  # but the sphere itself is built once per (radius, spacing). Emitted 1-based
+  # so callers need no arithmetic on the result; the 0-based convention only
+  # existed for the retired dbscan branch.
+  sphere_at_cpp(.sphere_offsets(radius, vspacing),
+                as.integer(centroid[1:3]),
+                as.integer(vdim[1:3]),
+                base0 = FALSE)
 }
 
 # masked_roi <- function(mask, vox, vox_offset) {
@@ -624,7 +876,9 @@ make_spherical_grid <- function(bvol, centroid, radius, use_cpp=TRUE) {
 #' @param radius the radius in real units (e.g. millimeters) of the spherical ROI
 #' @param fill optional value(s) to store as data
 #' @param nonzero if \code{TRUE}, keep only nonzero elements from \code{bvol}
-#' @param use_cpp whether to use compiled c++ code
+#' @param use_cpp Deprecated and ignored; the compiled implementation is always
+#'   used. Passing \code{FALSE} warns. The former fallback returned
+#'   neighbourhoods offset by one voxel and missing boundary voxels.
 #' @return an instance of class \code{ROIVol}
 #' @seealso [spherical_roi_set()] for efficiently creating many spherical ROIs,
 #'   [series_roi()] and [coords()] for extracting time series and coordinates from ROIs,
@@ -655,47 +909,18 @@ make_spherical_grid <- function(bvol, centroid, radius, use_cpp=TRUE) {
 #'  cube <- spherical_roi(sp1, vox, 3.5)
 #' @export
 spherical_roi <- function(bvol, centroid, radius, fill=NULL, nonzero=FALSE, use_cpp=TRUE) {
-  # If centroid is provided as a 1x3 matrix, drop to vector
-  if (is.matrix(centroid)) {
-    if (ncol(centroid) != 3 || nrow(centroid) != 1) {
-      cli::cli_abort("{.arg centroid} matrix must have exactly 1 row and 3 columns.")
-    }
-    centroid <- drop(centroid)
-  }
-
-  vdim <- dim(bvol)
-  if (length(centroid) != 3) {
-    cli::cli_abort("{.arg centroid} must have length 3, not {length(centroid)}.")
-  }
-  if (!all(centroid > 0)) {
-    cli::cli_abort("All {.arg centroid} values must be positive.")
-  }
-  if (centroid[1] > vdim[1] || centroid[2] > vdim[2] || centroid[3] > vdim[3]) {
-    cli::cli_abort("{.arg centroid} ({.val {centroid}}) exceeds volume dimensions ({.val {vdim[1:3]}}).")
-  }
+  centroid <- .roi_centroid(centroid, dim(bvol))
 
   if (is.null(fill) && is(bvol, "NeuroSpace")) {
     fill <- 1
   }
 
-  bspace <- space(bvol)
-  # make_spherical_grid returns zero-based coords
-  grid <- make_spherical_grid(bvol, as.integer(centroid), radius, use_cpp=use_cpp)
+  # 1-based integer coords, already ordered by (x, y, z).
+  grid <- make_spherical_grid(bvol, centroid, radius, use_cpp=use_cpp)
 
-  # If no voxels returned, return an empty ROIVolWindow
   if (nrow(grid) == 0) {
-    return(new("ROIVolWindow",
-               numeric(0),
-               space=bspace,
-               coords=matrix(ncol=3, nrow=0),
-               center_index=integer(0),
-               parent_index=as.integer(NA)))
+    return(.build_roi_window(bvol, centroid, grid, numeric(0), nonzero))
   }
-
-  # Convert to 1-based indexing
-  grid <- grid + 1L
-  # Sort for consistency
-  grid <- grid[order(grid[,1], grid[,2], grid[,3]), , drop=FALSE]
 
   vals <- if (!is.null(fill)) {
     rep(fill, nrow(grid))
@@ -703,40 +928,7 @@ spherical_roi <- function(bvol, centroid, radius, fill=NULL, nonzero=FALSE, use_
     as.numeric(bvol[grid])
   }
 
-  if (nonzero) {
-    keep <- vals != 0
-    grid <- grid[keep, , drop=FALSE]
-    vals <- vals[keep]
-
-    # If filtering leaves no voxels, return empty
-    if (nrow(grid) == 0) {
-      return(new("ROIVolWindow",
-                 numeric(0),
-                 space=bspace,
-                 coords=matrix(ncol=3, nrow=0),
-                 center_index=integer(0),
-                 parent_index=as.integer(NA)))
-    }
-  }
-
-  # Find the center voxel in the grid
-  # Compare each row in grid to centroid
-  # If grid is non-empty, this is safe
-  match_count <- rowSums(grid == matrix(centroid, nrow(grid), 3, byrow=TRUE))
-  center_index <- which(match_count == 3)
-  if (length(center_index) == 0) {
-    # No exact match found, choose first voxel or handle gracefully
-    center_index <- 1L
-  }
-
-  parent_index <- grid_to_index(bvol, grid[center_index, , drop=FALSE])
-
-  new("ROIVolWindow",
-      vals,
-      space=bspace,
-      coords=grid,
-      center_index = as.integer(center_index),
-      parent_index = as.integer(parent_index))
+  .build_roi_window(bvol, centroid, grid, vals, nonzero)
 }
 
 # spherical_basis <- function(bvol, coord, kernel, weight=1) {
@@ -1106,20 +1298,69 @@ setMethod(f="voxels", signature=signature(x="Kernel"),
 #'
 #' @export
 spherical_roi_set <- function(bvol, centroids, radius, fill=NULL, nonzero=FALSE) {
-  # Pre-allocate result list
-  n <- nrow(centroids)
-  result_list <- vector("list", n)
+  bspace <- space(bvol)
+  vdim <- as.integer(dim(bspace)[1:3])
 
-  # Just loop and call spherical_roi() for each centroid
+  # Validate every centroid up front, with the same rules the single-ROI
+  # builders use, so a bad row fails before any work is done.
+  cents <- .roi_centroids(centroids, vdim)
+  n <- nrow(cents)
+
+  if (!is.null(fill) && length(fill) != 1L && length(fill) != n) {
+    cli::cli_abort("{.arg fill} must be length 1 or {n}, not {length(fill)}.")
+  }
+
+  if (radius < min(spacing(bspace))) {
+    stop("'radius' is too small; must be greater than at least one voxel dimension in image")
+  }
+
+  if (is.null(fill) && is(bvol, "NeuroSpace")) {
+    fill <- 1
+  }
+
+  # One compiled pass expands every centre. `nonzero` still filters on the
+  # values (which are `fill` when supplied, exactly as for a single ROI), so the
+  # mask filter is not folded into the C++ here -- that would change what
+  # `nonzero` means when `fill` is given.
+  batch <- sphere_coords_batch_cpp(.sphere_offsets(radius, spacing(bspace)),
+                                   cents, vdim, numeric(0), FALSE)
+  grids <- batch$coords
+
+  slice <- as.integer(vdim[1]) * as.integer(vdim[2])
+  parent <- as.integer((cents[, 3] - 1L) * slice + (cents[, 2] - 1L) * vdim[1] + cents[, 1])
+
+  # When values come from the volume, flatten it once: `bvol[grid]` is an S4
+  # dispatch per ROI, whereas indexing a plain vector is not.
+  flat <- if (is.null(fill)) as.numeric(as.vector(as.array(bvol))) else NULL
+
+  result_list <- vector("list", n)
   for (i in seq_len(n)) {
-    result_list[[i]] <- spherical_roi(
-      bvol = bvol,
-      centroid = centroids[i,],
-      radius = radius,
-      fill = if (!is.null(fill)) { if (length(fill) == 1) fill else fill[i] } else NULL,
-      nonzero = nonzero,
-      use_cpp = TRUE
-    )
+    grid <- grids[[i]]
+    fi <- if (is.null(fill)) NULL else if (length(fill) == 1L) fill else fill[i]
+
+    vals <- if (!is.null(fi)) {
+      rep(fi, nrow(grid))
+    } else if (nrow(grid) == 0L) {
+      numeric(0)
+    } else {
+      flat[(grid[, 3] - 1L) * slice + (grid[, 2] - 1L) * vdim[1] + grid[, 1]]
+    }
+
+    if (isTRUE(nonzero) && nrow(grid) > 0L) {
+      keep <- !is.na(vals) & vals != 0
+      grid <- grid[keep, , drop = FALSE]
+      vals <- vals[keep]
+      center_index <- if (nrow(grid) == 0L) NA_integer_ else {
+        hit <- which(grid[, 1] == cents[i, 1] & grid[, 2] == cents[i, 2] &
+                     grid[, 3] == cents[i, 3])
+        if (length(hit) == 0L) NA_integer_ else as.integer(hit[1])
+      }
+    } else {
+      center_index <- batch$center_row[i]
+    }
+
+    result_list[[i]] <- .new_roi_vol_window(vals, bspace, grid,
+                                            center_index, parent[i])
   }
 
   result_list

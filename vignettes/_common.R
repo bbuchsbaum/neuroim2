@@ -1,0 +1,190 @@
+# Shared setup for all neuroim2 vignettes.
+#
+# Sourced from the setup chunk of every article so that knitr options, the
+# plotting theme, and the demonstration data are defined in exactly one place.
+#
+# Demonstration data policy
+# -------------------------
+# Three rules, applied everywhere:
+#
+#   * anatomy / intensity / filtering / plotting -> demo_anatomy()
+#   * masks, coordinates and spatial support     -> demo_mask()
+#   * anything with a time axis                  -> demo_bold()
+#
+# Nothing with a time axis is ever taken from the shipped `global_mask_v4.nii`:
+# that file is a binary mask copied across four timepoints, so every "time
+# series" drawn from it is a constant vector. demo_bold() uses simulate_fmri(),
+# which gives voxels genuine AR(1) temporal structure, spatial smoothness and
+# latent components.
+#
+# Caveat on the anatomical image: mni_downsampled.nii.gz has an inconsistent
+# header. Its pixdim records 4.02 mm voxels but its sform -- which is what
+# neuroim2 follows, correctly, because sform_code > 0 -- is the identity with a
+# translation, so spacing(demo_anatomy()) is 1 mm and its world coordinates do
+# not describe a real brain. The image is therefore used for display and
+# intensity work only, where the affine affects nothing but aspect ratio (and
+# it is isotropic either way). Every millimetre-coordinate example uses
+# demo_mask(), whose affine is consistent: 3.5 x 3.5 x 3.7 mm, LAS.
+
+# Warnings are deliberately NOT suppressed. A warning from a vignette chunk
+# almost always means the example is wrong -- an earlier draft of the regions
+# article silently produced NAs from a bad factor assignment, and `warning =
+# FALSE` hid it. The articles are expected to knit with zero warnings, which is
+# a check worth keeping rather than a nuisance worth muting. Messages stay off:
+# those are mostly package startup chatter. Note that a few calls signal through
+# messages rather than warnings -- read_vec(mode = "mmap") announces its
+# memory mapping that way -- so a suppressed message is not always noise.
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = TRUE,
+  fig.width = 7,
+  fig.height = 4.2,
+  dpi = 110,
+  fig.alt = "Plot output"
+)
+
+if (requireNamespace("ggplot2", quietly = TRUE)) {
+  if (requireNamespace("albersdown", quietly = TRUE)) {
+    ggplot2::theme_set(albersdown::theme_albers(family = "red", preset = "homage"))
+  } else {
+    ggplot2::theme_set(neuroim2::theme_neuro())
+  }
+}
+
+# A dark-to-light ramp that suits the shipped anatomical image.
+anatomy_cmap <- c("#242424", "#9a9a9a", "#f4f4f4")
+
+# --- demonstration data ------------------------------------------------------
+
+#' Real anatomical image, 48 x 57 x 48, continuous intensities. Display only:
+#' see the header caveat above.
+demo_anatomy <- function() {
+  neuroim2::read_vol(
+    system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2")
+  )
+}
+
+#' Binary brain mask on a 64 x 64 x 25 EPI grid (29,532 in-mask voxels), with a
+#' consistent 3.5 x 3.5 x 3.7 mm affine.
+demo_mask <- function() {
+  neuroim2::read_vol(
+    system.file("extdata", "global_mask2.nii.gz", package = "neuroim2")
+  )
+}
+
+#' Simulated BOLD series on the mask grid: AR(1) noise, 6 mm spatial
+#' smoothness, latent components. ~3 seconds to generate.
+demo_bold <- function(n_time = 60, seed = 1) {
+  neuroim2::simulate_fmri(demo_mask(), n_time = n_time, seed = seed)
+}
+
+#' A boxcar task regressor for `n_time` scans: `block` on, `block` off. Short
+#' blocks keep the regressor away from the lowest frequencies, where the AR(1)
+#' noise has most of its power.
+demo_design <- function(n_time = 60, block = 10) {
+  rep(rep(c(0, 1), each = block), length.out = n_time)
+}
+
+#' A brain-shaped mask on the anatomical image's own grid, so that a statistical
+#' map and the anatomy it is drawn on share a NeuroSpace.
+demo_anatomy_mask <- function(anat = demo_anatomy()) {
+  arr <- as.array(anat)
+  neuroim2::as.mask(neuroim2::NeuroVol(
+    array(arr > stats::quantile(arr[arr > 0], 0.15), dim(anat)),
+    neuroim2::space(anat)
+  ))
+}
+
+#' A signed t-statistic map on the grid of `mask`.
+#'
+#' Simulates a series, plants task signal in two spheres, then actually fits the
+#' design at every voxel. The result is signed, spatially smooth and noisy --
+#' none of which a hand-drawn blob image would be.
+#'
+#' Its null is over-dispersed (sd around 1.6 rather than 1) because the design
+#' is a low-frequency block regressor while simulate_fmri() supplies AR(1)
+#' noise, and the OLS variance below does not model that autocorrelation. That
+#' is realistic of an unwhitened first-level fit, but it means the t values are
+#' inflated and should not be read as calibrated statistics.
+demo_stat_map <- function(mask = demo_mask(), n_time = 30, seed = 2,
+                          effect = c(1.3, -1.2), radius_mm = 12) {
+  # Express smoothness in voxels rather than millimetres so the cost does not
+  # explode on fine grids.
+  fwhm <- 2.5 * min(neuroim2::spacing(mask))
+  bold <- neuroim2::simulate_fmri(mask,
+    n_time = n_time, seed = seed,
+    spatial_fwhm = fwhm, hetero_fwhm = 4 * fwhm, factor_fwhm = 2 * fwhm
+  )
+  design <- demo_design(n_time)
+
+  # Two centres placed either side of the mask's centroid, so this works on any
+  # grid without hand-tuned voxel coordinates.
+  inmask <- which(as.vector(mask) > 0)
+  g <- neuroim2::index_to_grid(mask, inmask)
+  mid <- round(colMeans(g))
+  span <- round(0.22 * (apply(g, 2, max) - apply(g, 2, min)))
+  centres <- list(mid + c(span[1], 0, 0), mid - c(span[1], 0, 0))
+
+  Y <- as.matrix(bold)
+  for (i in seq_along(centres)) {
+    roi <- neuroim2::spherical_roi(mask, centres[[i]],
+      radius = radius_mm, nonzero = TRUE
+    )
+    idx <- neuroim2::indices(roi)
+    Y[idx, ] <- Y[idx, ] + effect[i] * rep(design, each = length(idx))
+  }
+
+  X <- cbind(1, design)
+  XtXi <- solve(crossprod(X))
+  B <- Y %*% X %*% XtXi
+  s2 <- rowSums((Y - tcrossprod(B, X))^2) / (ncol(Y) - ncol(X))
+  se <- sqrt(s2 * XtXi[2, 2])
+  tstat <- ifelse(se > 0, B[, 2] / se, 0)
+  tstat[as.vector(mask) == 0] <- 0
+
+  neuroim2::NeuroVol(array(tstat, dim(mask)), neuroim2::space(mask))
+}
+
+# --- registration-QC demo data -----------------------------------------------
+# The visualization article needs a deliberately misaligned copy of an image and
+# a pair of edge maps. These live here rather than in a 90-line hidden chunk at
+# the top of that article.
+
+#' Shift a volume by whole voxels along one axis, keeping its space.
+demo_shifted <- function(vol, by = 3L, axis = 1L) {
+  a <- as.array(vol)
+  out <- array(0, dim(a))
+  d <- dim(a)
+  src <- lapply(d, seq_len)
+  dst <- src
+  src[[axis]] <- seq_len(d[axis] - by)
+  dst[[axis]] <- seq.int(by + 1L, d[axis])
+  out[dst[[1]], dst[[2]], dst[[3]]] <- a[src[[1]], src[[2]], src[[3]]]
+  neuroim2::NeuroVol(out, neuroim2::space(vol))
+}
+
+#' A one-voxel-thick boundary of a mask, as a NeuroVol on the same grid.
+demo_edges <- function(mask_vol) {
+  m <- as.array(mask_vol) > 0
+  d <- dim(m)
+  edge <- array(FALSE, d)
+  for (ax in 1:3) {
+    for (step in c(-1L, 1L)) {
+      nb <- array(FALSE, d)
+      src <- lapply(d, seq_len)
+      dst <- src
+      if (step > 0) {
+        src[[ax]] <- seq_len(d[ax] - 1L)
+        dst[[ax]] <- seq.int(2L, d[ax])
+      } else {
+        src[[ax]] <- seq.int(2L, d[ax])
+        dst[[ax]] <- seq_len(d[ax] - 1L)
+      }
+      nb[dst[[1]], dst[[2]], dst[[3]]] <- m[src[[1]], src[[2]], src[[3]]]
+      edge <- edge | (m & !nb)
+    }
+  }
+  neuroim2::NeuroVol(array(as.numeric(edge), d), neuroim2::space(mask_vol))
+}

@@ -1547,6 +1547,11 @@ setClass("ROIVol",
 #'
 #' @name ROIVolWindow-class
 #' @export
+# NOTE: these invariants are also asserted directly in .new_roi_vol_window()
+# (R/roi.R), which is how every ROI in the package is actually built -- it sets
+# the slots as attributes and flips the S4 bit, so this validity function does
+# not run. Any change here must be mirrored there;
+# tests/testthat/test-roi-series-fastpaths.R asserts the two agree.
 setClass("ROIVolWindow",
          representation=representation(parent_index="integer", center_index="integer"),
          contains=c("ROIVol"),

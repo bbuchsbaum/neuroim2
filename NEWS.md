@@ -10,8 +10,242 @@
 
 # neuroim2 0.17.0
 
+## Documentation
+
+* The vignettes have been rewritten as nine articles in three tiers: *Learn*
+  (`neuroim2`, `spaces-and-coordinates`, `volumes-and-vectors`,
+  `reading-and-writing`), *Do* (`regions-and-searchlights`,
+  `resampling-and-orientation`, `smoothing-and-filtering`, `visualization`) and
+  *Scale* (`large-data`), replacing the previous fourteen. Old article URLs
+  redirect to their successors on the package website; `vignette()` calls using
+  the old names will need updating.
+* Vignette examples no longer take time series from `global_mask_v4.nii`, which
+  is a binary mask repeated across four timepoints — every "time series" drawn
+  from it was a constant vector. Anything with a time axis now uses
+  `simulate_fmri()`, so time courses have real temporal structure and the
+  smoothing, searchlight and ROI examples demonstrate measurable effects.
+* Vignette YAML placed `css` and `includes` at the document root, where
+  `html_vignette` ignores them, so the package stylesheet never reached the
+  rendered articles. They are now nested under the output format.
+
+## Performance
+
+* Searchlight and ROI extraction are substantially faster. Each of the three
+  changes below was landed and verified as output-preserving on its own —
+  compared against a build of the previous version across 8,625 configurations
+  of `spherical_roi()`, `spherical_roi_set()`, `series()` and the four
+  searchlight iterators — before the correctness fixes listed under *Bug Fixes*
+  deliberately changed some of those outputs. The speed-ups and the behaviour
+  changes are independent.
+
+  - ROI objects are no longer built with `new()`. `ROIVolWindow` reaches a basic
+    type through two levels of `contains=`, so the default `initialize()` walked
+    that chain with `callNextMethod()` and ran `validObject()` at each level,
+    recursing into the `NeuroSpace` slot's nested axis tree — about 450 us per
+    object regardless of ROI size, which was roughly 70% of an exhaustive
+    searchlight's runtime. An internal constructor clones a cached prototype and
+    asserts the class invariants once, producing an `identical()` object about
+    11x cheaper.
+  - The voxel offsets of a spherical neighbourhood depend only on the radius and
+    the voxel spacing, so they are computed once per `(radius, spacing)` pair and
+    reused; per centre the work is a translate-and-clip. Candidate windows are
+    also sized per axis rather than from `min(spacing)`, which scanned about 3x
+    too many candidates on anisotropic voxels.
+  - `series()` gathers in a single compiled pass.
+    `series(DenseNeuroVec, matrix)` previously looped over timepoints,
+    rebuilding a double index vector each pass (~17x faster);
+    `series(AbstractSparseNeuroVec, integer)` allocated a zero matrix and
+    scattered into it (~1.8x faster, close to memory-bandwidth-bound). The
+    sparse fast path is gated on the concrete `SparseNeuroVec` class so
+    subclasses that override `matricized_access()` keep their hook.
+
+  - The searchlight iterators do the whole per-centre job in one compiled pass --
+    translate the cached offset template, clip to the volume, apply the mask,
+    gather values, locate the centre row -- with everything invariant hoisted out
+    of the iterator closure. `searchlight_coords()` in particular used to build a
+    full `ROIVolWindow` per centre and then discard all but its coordinates.
+    `spherical_roi_set()` expands every centre in one batched call, so
+    `searchlight(eager = TRUE)` benefits too.
+  - The iterators remain lazy. Materialising a whole-brain radius-8 mm
+    searchlight at once would be about 0.9 GB of coordinates, or 1.5 GB as ROI
+    objects, so the work went into making the per-element call cheap rather than
+    into emitting everything up front.
+
+  On a 91x109x91 volume at 2 mm with a 290,137-voxel mask and radius-8 mm
+  searchlights, per element and projected over the whole brain:
+
+  ```
+  searchlight_coords()        97.0 -> 7.7 us     28.1 s -> 2.2 s
+  searchlight(eager = FALSE)  92.3 -> 28.0 us    26.8 s -> 8.1 s
+  spherical_roi()            660.0 -> 85.0 us   191.5 s -> 24.7 s
+  ```
+
+* `gaussian_blur()` now evaluates the kernel separably where that is cheaper. A
+  Gaussian is a tensor product, so the full `(2 * window + 1)^3` kernel is
+  equivalent to three 1-D passes --- 15x fewer multiplies at `window = 3`. The
+  masked default (`normalize = TRUE`) is separable too, as the ratio of two
+  separable convolutions: the mask-insulated blur is `blur(x * m) / blur(m)`,
+  where `m` is the mask indicator.
+
+  Which form is cheaper depends on both the window and the mask fraction --- the
+  separable passes cover the whole volume, while the dense kernel visits mask
+  voxels only --- so the two implementations are both kept and the cost is
+  estimated per call. Measured on a 91x109x91 volume at 2 mm across mask
+  fractions from 2% to 100%, the dispatch rule picks the slower kernel by more
+  than 5% in 7 of 224 cases and never by more than 1.4x, and its total time is
+  within 0.6% of always choosing the per-case winner.
+
+  For a brain-mask-shaped input (about a quarter of the bounding box) and for
+  unmasked whole-volume smoothing:
+
+  ```
+                       mask 25%   whole volume
+  window = 1              1.7x         6.8x
+  window = 2              2.9x         9.6x
+  window = 3              5.0x        17.3x
+  ```
+
+  Speed-ups are larger with `normalize = FALSE` (3.9x / 5.5x / 9.4x masked,
+  15x / 19x / 32x unmasked), which needs half as many passes. The whole-volume
+  column is the case `gaussian_blur(vol)` hits when no mask is supplied.
+
+  Results are unchanged to within floating-point summation order: over 3,200
+  configurations of dimension, spacing, sigma, window, mask shape and
+  `normalize`, the largest absolute difference from the previous kernel was
+  2.6e-16, and where the two differ most in relative terms the separable result
+  is the closer of the two to a high-precision reference. Code comparing blurred
+  volumes with `identical()` rather than `all.equal()` may see the difference.
+  The separable path needs working memory the dense one did not: two vectors of
+  `prod(dim)` doubles, or three plus a byte per voxel when normalizing. Measured
+  peak-RSS delta on a 200x200x200 volume at `window = 1`, `normalize = TRUE`:
+  153 MB against the dense path's 77 MB at a 20% mask, 167 against 139 at 50%,
+  and 190 against 230 at a full mask --- where the separable form is the cheaper
+  of the two, because the dense path's voxel-coordinate matrix costs 24 bytes per
+  mask voxel. The scratch is `malloc`ed rather than allocated by R, so it is not
+  counted against `mem.maxVSize` and exhaustion surfaces as a C++ allocation
+  failure rather than R's "cannot allocate vector of size".
+
+  One input does change materially, and only there: at `window >= 23` the dense
+  kernel's three-axis weight product underflows to exactly zero in the far
+  corners, so an `Inf` in the data multiplied to `NaN` and poisoned the output.
+  The separable form applies the three factors in separate passes, none of which
+  underflow, and propagates the `Inf`. Neither answer is meaningful --- the input
+  is not finite --- but they differ.
+
+
 ## Bug Fixes
 
+* **Breaking:** `nonzero = TRUE` now drops voxels whose value is `NA` or `NaN`,
+  in every ROI builder and every searchlight iterator. Previously the filter was
+  written `vals != 0`, which evaluates to `NA` for a missing voxel; an `NA`
+  logical subscript emits an all-`NA` row, so a `ROIVolWindow` could come back
+  with `NA NA NA` coordinates. Missing values also made the eager and lazy
+  searchlight iterators disagree with each other: on a 3x3x3 volume with one `NA`
+  voxel they differed on 21 of 25 searchlights. "Nonzero" cannot be established
+  for a missing value, so it is dropped. The rule now lives in one place, in the
+  compiled searchlight core.
+
+* Fixed a `SIGFPE` crash in `index_to_grid()` for spaces whose running product of
+  dimensions exceeds `int`: `index_to_grid(NeuroSpace(c(65536L, 65536L, 2L)), 1:3)`
+  killed the R session. The stride accumulator wrapped to zero and the next
+  division faulted. It is now 64-bit.
+
+* `searchlight()` and `searchlight_coords()` again reject a `radius` smaller than
+  the finest voxel dimension, as the single-ROI builders always have. The lazy
+  iterators had stopped validating it and returned degenerate one-voxel windows
+  instead.
+
+
+* Fixed a segfault in `gaussian_blur()` when `mask` and `vol` had different
+  dimensions. Nothing checked that they matched, and the kernel built its
+  membership lookup by writing at `mask_idx` into a vector sized for the volume,
+  so an index past the end was an unbounded write. `gaussian_blur()` now requires
+  matching dimensions, and the kernel bounds-checks the index regardless.
+  `enhance_stat_map()` gained the same dimension check.
+
+* Fixed `gaussian_blur()` returning an all-zero volume for `sigma` above about
+  1e203. The kernel carried a per-axis `sqrt(2 * pi * sigma)` factor that
+  cancelled exactly in the normalization but cubed to `Inf` first, and `Inf/Inf`
+  made every weight `NaN`. The factor is no longer formed, which leaves the
+  normalized kernel unchanged for every finite `sigma`.
+
+* Fixed a session-killing crash in `gaussian_weights()` for `window >= 645`,
+  where `(2 * window + 1)^3` wrapped negative in `int` and allocated a vector of
+  negative length.
+
+* `gaussian_blur()` now rejects a `sigma` or `window` that is missing,
+  non-finite, or not length one; previously `window = Inf` and `sigma = Inf` were
+  accepted and produced an all-zero volume. A `window` larger than the volume is
+  clamped to `max(dim(vol))`, which changes no result --- every tap that far out
+  is out of bounds from every voxel --- and keeps absurd values out of the kernel
+  builders. `enhance_stat_map()` now validates `spatial_sigma` and
+  `intensity_sigma`, which were the two numeric arguments it did not check.
+
+* **Breaking:** `spherical_roi()`, `cuboid_roi()` and `square_roi()` now share
+  one definition of centroid handling, `nonzero` filtering and the
+  centre/parent bookkeeping. Each previously implemented these separately and
+  the three disagreed with one another; where they disagreed, at least one was
+  wrong.
+
+  - `nonzero = TRUE` now means what it documents. `cuboid_roi()` and
+    `square_roi()` used to force the centre voxel back into the ROI after
+    filtering, so a "nonzero" region could contain a zero value; they had done
+    this only so that `parent_index` could be read back off the coordinate
+    matrix. `parent_index` is now derived from the requested centroid directly,
+    so the workaround is gone and a zero-valued centre is dropped like any
+    other zero voxel.
+  - `center_index` is the row of the centre voxel in `coords`, or `NA_integer_`
+    when the centre is not part of the ROI. `spherical_roi()` used to fall back
+    to `1L`, silently pointing at an unrelated voxel, and then computed
+    `parent_index` *from that voxel* — so a filtered ROI reported the wrong
+    parent index entirely.
+  - `parent_index` is always the linear index of the requested centroid in the
+    parent space, whatever the filtering, matching what the slot documents.
+  - All three now validate the centroid identically: length 3 (or a 1x3
+    matrix), `>= 1`, and within the volume. `cuboid_roi()` and `square_roi()`
+    previously accepted out-of-bounds centroids and proceeded with a warning
+    from `matrix()`.
+  - A fractional centroid such as `c(5.7, 5, 5)` is truncated once and the same
+    value is used both to build the neighbourhood and to locate the centre
+    within it. Previously the grid was built from the truncated value while the
+    centre was matched against the original, so the centre was never found.
+  - `coords` is now an integer matrix with no dimnames, and rows are ordered
+    lexicographically by `(x, y, z)` in every builder. `cuboid_roi()` and
+    `square_roi()` returned `expand.grid()` output, which varies `x` fastest
+    and so was ordered the opposite way, and carried `x`/`y`/`z` dimnames.
+
+* **Breaking:** The `use_cpp` argument of `spherical_roi()` is deprecated and
+  ignored; the compiled implementation is always used, and passing `FALSE`
+  warns. The `use_cpp = FALSE` branch was wrong in two independent ways: it
+  returned coordinates offset by **+1 voxel on every axis** (it produced
+  1-based coordinates where the internal contract is 0-based, and the caller
+  then added 1 regardless), and it sized its candidate cube with `round()`
+  rather than `ceiling()` while comparing distances exclusively at the
+  boundary, so it also dropped legitimate boundary voxels. Checked against
+  brute-force enumeration over 384 geometries — every in-bounds voxel within
+  the radius, computed directly — the compiled path was correct in all 384 and
+  the fallback wrong in 35. The offset also made `spherical_roi()` throw
+  `subscript out of bounds` for centroids near the volume edge; those calls now
+  succeed.
+
+
+* **Breaking:** Fixed `reorient()`, which never returned the orientation it was
+  asked for. It applied a transform derived only from the target axis codes,
+  ignoring the space's current orientation, and it interpreted those codes with
+  the sense inverted, so `reorient(sp, c("R", "A", "S"))` produced an `LPI`
+  space and asking for an image's existing orientation was not a no-op.
+  Orientation codes are now read the way `affine_to_axcodes()` reports them —
+  naming the direction each axis increases *towards* — and the transform is
+  computed relative to the current orientation. Code that compensated for the
+  old inversion by requesting the opposite codes will need updating.
+* **Breaking:** Fixed a half-voxel offset in `index_to_coord()` and
+  `coord_to_index()`. Both used a 0.5-voxel shift where `grid_to_coord()` and
+  `coord_to_grid()` use the 1-based-to-0-based offset of 1, so the shortcut
+  conversions disagreed with the equivalent two-step path by half a voxel and
+  `coord_to_index()` could return a neighbouring voxel. Voxel `(1, 1, 1)` now
+  maps exactly to `origin()` by either route. Raster extents produced by the
+  plotting helpers shift by half a voxel as a consequence, placing voxel
+  centres on their affine positions.
 * Fixed `linear_access()` on sparse `NeuroVec` objects, which could return wrong values or error when there were more masked voxels than time points. The sparse data matrix is stored as `[time × voxel]`; the linear-index path now indexes rows and columns in the correct order.
 * Fixed `ROIVol` arithmetic so values are aligned by voxel index, not by the original coordinate order, and fixed sparse `Summary` group methods so reductions include implicit structural zeros. `ROIVol` arithmetic now documents and enforces a same-support contract (identical space and voxel set; order may differ); missing voxels are not treated as zero.
 * Hardened `simulate_fmri()` edge cases: zero FWHM values now disable the corresponding smoothing step, `n_time = 1` no longer trips AR loops, tiny or constant masks no longer produce `NA` heteroscedasticity fields, and scalar arguments now receive explicit validation.

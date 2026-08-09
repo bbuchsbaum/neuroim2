@@ -326,10 +326,11 @@ setMethod(f="index_to_grid", signature=signature(x="NeuroSpace", idx="numeric"),
 setMethod(f="index_to_coord", signature=signature(x="NeuroSpace", idx="numeric"),
           def=function(x, idx) {
             d <- min(3, ndim(x))
-            grid <- index_to_grid(x, idx) - .5
+            # Grid indices are 1-based; the affine expects 0-based positions,
+            # so subtract 1 -- matching grid_to_coord(). Subtracting 0.5 here
+            # would place every result half a voxel off that path.
+            grid <- index_to_grid(x, idx) - 1
             res <- trans(x) %*% t(cbind(grid[,1:d], rep(1,nrow(grid))))
-
-
             t(res[1:d,])
           })
 
@@ -337,7 +338,7 @@ setMethod(f="index_to_coord", signature=signature(x="NeuroSpace", idx="numeric")
 #' @rdname index_to_coord-methods
 setMethod(f="index_to_coord", signature=signature(x="NeuroSpace", idx="integer"),
           def=function(x, idx) {
-            grid <- index_to_grid(x, idx) - .5
+            grid <- index_to_grid(x, idx) - 1
             res <- trans(x) %*% t(cbind(grid, rep(1,nrow(grid))))
             t(res[1:ndim(x),])
           })
@@ -362,8 +363,11 @@ setMethod(f="index_to_coord", signature=signature(x="NeuroVec", idx="integer"),
 #' @rdname coord_to_index-methods
 setMethod(f="coord_to_index", signature=signature(x="NeuroSpace", coords="matrix"),
           def=function(x, coords) {
+            # The inverse affine yields 0-based positions; add 1 to get the
+            # 1-based grid, matching coord_to_grid(). Adding 0.5 instead shifts
+            # the result into a neighbouring voxel.
             grid = t(inverse_trans(x) %*% t(cbind(coords, rep(1, nrow(coords)))))
-            grid_to_index(x, grid[,1:3] + .5)
+            grid_to_index(x, grid[,1:3] + 1)
           })
 
 #' @export
@@ -605,16 +609,36 @@ setMethod(f="reorient", signature=signature(x = "NeuroSpace", orient="character"
           def=function(x, orient) {
 
             stopifnot(length(orient) == 3)
-            anat <- findAnatomy3D(orient[1], orient[2], orient[3])
+            codes <- toupper(as.character(orient))
+
+            # `orient` names the direction each axis increases *towards*, the
+            # NIfTI convention that affine_to_axcodes() reports. findAnatomy3D()
+            # names an axis by where it starts ("R" means Right-to-Left), so the
+            # codes are inverted before the lookup.
+            opposite <- c(R = "L", L = "R", A = "P", P = "A", S = "I", I = "S")
+            if (!all(codes %in% names(opposite))) {
+              cli::cli_abort(c(
+                "{.arg orient} must be three axis codes drawn from R, L, A, P, S, I.",
+                "x" = "Got {.val {codes}}."
+              ))
+            }
+            anat <- findAnatomy3D(opposite[[codes[1]]],
+                                  opposite[[codes[2]]],
+                                  opposite[[codes[3]]])
+
+            # Reorienting is relative: map the space's current axis directions
+            # onto the requested ones. Asking for the orientation an image
+            # already has must therefore be a no-op, which it is when the two
+            # permutation matrices agree and their product is the identity.
+            pmat_cur <- perm_mat(x@axes)
             pmat_new <- perm_mat(anat)
+            rot <- pmat_new %*% t(pmat_cur)
 
-
-            tx <- t(pmat_new) %*% trans(x)[1:ndim(x),]
-            tx <- rbind(tx,c(rep(0, ndim(x)),1))
-            #itx <- zapsmall(MASS::ginv(tx))
+            tx <- rot %*% trans(x)[1:3, , drop = FALSE]
+            tx <- rbind(tx, c(0, 0, 0, 1))
 
             NeuroSpace(dim(x), spacing=spacing(x), axes=anat, trans=tx,
-                          origin=tx[1:(ndim(x)) ,ndim(x)+1])
+                          origin=tx[1:3, 4])
 
         }
 )

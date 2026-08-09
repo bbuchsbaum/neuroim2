@@ -79,11 +79,14 @@ namespace indexfuns {
             int tmp = 1 + wh1 % array_dim(0);
             IntegerVector wh = IntegerVector(rank, tmp);
             if (rank >= 2) {
-                int denom = 1;
+                // int64: the running product of dimensions overflows int for
+                // volumes past ~2^31 voxels, and once it wraps to 0 the division
+                // below raises SIGFPE and kills the session.
+                int64_t denom = 1;
                 for (int j = 1; j < rank; j++) {
-                    denom = denom * array_dim(j-1);
-                    int nextd1 = (int)wh1/denom;
-                    wh(j) = 1 + nextd1 % array_dim(j);
+                    denom = denom * (int64_t) array_dim(j-1);
+                    int64_t nextd1 = (int64_t) wh1 / denom;
+                    wh(j) = (int)(1 + nextd1 % (int64_t) array_dim(j));
                 }
             }
             omat.row(i) = wh;
@@ -172,17 +175,26 @@ namespace indexfuns {
     }
 
     NumericVector gaussian_weights_impl(int window, double sigma, NumericVector spacing) {
-        int sz = (2*window + 1);
+        if (window < 0) stop("gaussian_weights: 'window' must be non-negative");
+        // sz^3 in int wrapped negative past window 644, and NumericVector of a
+        // negative length crashed the session.
+        const R_xlen_t sz = 2 * (R_xlen_t) window + 1;
+        if (sz > 2642245L || sz * sz > R_XLEN_T_MAX / sz)
+            stop("gaussian_weights: 'window' is too large");
         NumericVector out(sz*sz*sz);
         double denom = 2.0 * sigma * sigma;
-        int ind = 0;
+        R_xlen_t ind = 0;
 
+        // The three-axis product is divided by its own total below, so the
+        // per-axis sqrt(2*pi*sigma) constant this used to carry cancelled
+        // exactly -- but its cube overflowed to Inf above sigma ~1e203, and
+        // Inf/Inf made every weight NaN. It is simply not formed.
         for (int k = -window; k <= window; k++) {
             for (int j = -window; j <= window; j++) {
                 for (int i = -window; i <= window; i++) {
-                    out[ind] = std::exp(-std::pow(i * spacing[0],2)/denom)*std::sqrt(2 * M_PI * sigma) *
-                              std::exp(-std::pow(j * spacing[1],2)/denom)*std::sqrt(2 * M_PI * sigma) *
-                              std::exp(-std::pow(k * spacing[2],2)/denom)*std::sqrt(2 * M_PI * sigma);
+                    out[ind] = std::exp(-std::pow(i * spacing[0],2)/denom) *
+                               std::exp(-std::pow(j * spacing[1],2)/denom) *
+                               std::exp(-std::pow(k * spacing[2],2)/denom);
                     ind++;
                 }
             }
@@ -194,32 +206,43 @@ namespace indexfuns {
 
     NumericVector gaussian_blur_cpp_impl(NumericVector arr, IntegerVector mask_idx, int window,
                                        double sigma, NumericVector spacing, bool normalize) {
-        IntegerVector dims = arr.attr("dim");
+        SEXP dim_attr = arr.attr("dim");
+        if (Rf_isNull(dim_attr) || Rf_xlength(dim_attr) < 3)
+            stop("gaussian_blur_cpp: 'arr' must have a 3-D dim attribute");
+        IntegerVector dims = dim_attr;
+        if (spacing.size() < 3) stop("gaussian_blur_cpp: 'spacing' must have 3 elements");
         R_xlen_t n = arr.length();
         NumericVector out = NumericVector(n);
 
         NumericVector wts = gaussian_weights(window, sigma, spacing);
         NumericMatrix cds = indexToGridCpp(mask_idx, dims);
         int dim0 = dims[0], dim1 = dims[1], dim2 = dims[2];
-        int slicedim = dim0 * dim1;
+        R_xlen_t slicedim = (R_xlen_t) dim0 * dim1;
 
         // Membership lookup so the convolution can be insulated to the mask:
         // out-of-mask neighbours are skipped entirely (their values are never
         // read), making out-of-mask NaN/Inf irrelevant, and the kernel is
         // renormalised by the in-mask weight so edge voxels are not biased.
+        //
+        // The bounds check is not decoration: gaussian_blur() does not require
+        // mask and volume to have the same dimensions, so an oversized mask
+        // reached this write with an index past the end of the volume and
+        // segfaulted.
         std::vector<char> in_mask(n, 0);
-        for (int i = 0; i < mask_idx.length(); i++) {
-            in_mask[mask_idx[i] - 1] = 1;
+        for (R_xlen_t i = 0; i < mask_idx.length(); i++) {
+            R_xlen_t v = (R_xlen_t) mask_idx[i] - 1;
+            if (v < 0 || v >= n) stop("gaussian_blur_cpp: 'mask_idx' out of bounds");
+            in_mask[v] = 1;
         }
 
-        for (int m = 0; m < mask_idx.length(); m++) {
+        for (R_xlen_t m = 0; m < mask_idx.length(); m++) {
             int cx = cds(m, 0) - 1;
             int cy = cds(m, 1) - 1;
             int cz = cds(m, 2) - 1;
 
             double acc = 0.0;
             double wsum = 0.0;
-            int ind = 0;
+            R_xlen_t ind = 0;
             for (int k = cz - window; k <= cz + window; k++) {
                 for (int j = cy - window; j <= cy + window; j++) {
                     for (int i = cx - window; i <= cx + window; i++) {

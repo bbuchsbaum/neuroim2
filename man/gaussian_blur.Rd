@@ -10,17 +10,21 @@ gaussian_blur(vol, mask, sigma = 2, window = 1, normalize = TRUE)
 \item{vol}{A \code{\linkS4class{NeuroVol}} object representing the image volume to be smoothed.}
 
 \item{mask}{An optional \code{\linkS4class{LogicalNeuroVol}} object representing the image mask.
-This mask defines the region where the blurring is applied. If not provided, the entire volume is processed.}
+This mask defines the region where the blurring is applied. If not provided, the entire volume is processed.
+It must have the same dimensions as \code{vol}.}
 
-\item{sigma}{A numeric value specifying the standard deviation of the Gaussian kernel, expressed
+\item{sigma}{A single finite positive number specifying the standard deviation of the Gaussian kernel, expressed
 in the \strong{spatial units of the image} (millimetres for a typical NIfTI) --- \strong{not
 voxels}. The kernel is evaluated in physical distance using \code{spacing(vol)}, so the same
 \code{sigma} produces the same physical smoothing regardless of voxel size. Default is 2.}
 
-\item{window}{An integer specifying the kernel size. It represents the number of voxels to include
-on each side of the center voxel. For example, window=1 results in a 3x3x3 kernel. Default is 1.
-Note that \code{window} is a half-width in \strong{voxels} while \code{sigma} is in
-\strong{millimetres}; see Details for how to size one against the other.}
+\item{window}{A single finite number >= 1 specifying the kernel size. It represents the number
+of voxels to include on each side of the center voxel. For example, window=1 results in a
+3x3x3 kernel. Thus, \code{window} is a half-width in \strong{voxels}, while \code{sigma} is in
+the image's spatial units; see Details for how to size one against the other. Default is 1.
+A window larger than the volume is clamped to
+\code{max(dim(vol))}, which changes no result: every kernel tap that far out is out of
+bounds from every voxel.}
 
 \item{normalize}{A logical value controlling how the mask boundary is handled. When \code{TRUE}
 (the default), the blur is \emph{insulated} to the mask: each in-mask output voxel is computed

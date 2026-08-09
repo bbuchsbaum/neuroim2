@@ -68,8 +68,11 @@ test_that("orient_slice_for_raster maps slice indices into raster order", {
   expect_identical(dim(result$mat), c(3L, 4L))
   expect_equal(result$mat, t(mat[, 3:1, drop = FALSE]))
   expect_equal(result$alpha_map, t(amap[, 3:1, drop = FALSE]))
-  expect_equal(result$x, c(0.5, 1.5, 2.5, 3.5))
-  expect_equal(result$y, c(2.5, 1.5, 0.5))
+  # Voxel centres sit at the affine positions, so voxel (1,1) is at the origin.
+  # These were 0.5 apart from the grid before index_to_coord() was corrected to
+  # use the same 1-based offset as grid_to_coord().
+  expect_equal(result$x, c(0, 1, 2, 3))
+  expect_equal(result$y, c(2, 1, 0))
 })
 
 # ---- raster_extent_from_centers ----

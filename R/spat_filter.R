@@ -13,6 +13,90 @@ NULL
 #' @importFrom stats dnorm
 NULL
 
+# ---------------------------------------------------------------------------
+# Gaussian blur engine choice
+#
+# Two implementations, identical up to floating-point accumulation order:
+#   * gaussian_blur_cpp()     -- the full (2w+1)^3 kernel, evaluated only at mask
+#                                voxels. No working memory.
+#   * gaussian_blur_sep_cpp() -- three 1-D passes over the whole volume, which is
+#                                3(2w+1) taps instead of (2w+1)^3, but touches
+#                                every voxel and needs 2-3 scratch vectors of
+#                                prod(dim) doubles.
+#
+# Which is cheaper depends on the window *and* the mask fraction, so estimate
+# both rather than gating on the window alone. Tap counts alone give
+#
+#   dense       ~ (2w+1)^3 * n_mask
+#   separable   ~ passes * (2w+1) * n_vox     (passes = 3, or 6 when normalising,
+#                                              which needs blur(y) and blur(m))
+#
+# which would put the crossover at  n_mask/n_vox  =  passes / (2w+1)^2. That is
+# far too conservative in practice, because the two kernels do not cost the same
+# per tap: the separable passes walk contiguous memory with no per-tap branch,
+# while the dense kernel pays a bounds test and a mask lookup on every tap, and
+# that gap widens with the window. Measuring the actual crossover on a 91x109x91
+# volume over mask fractions 0.02-1.00 (both contiguous and scattered masks) put
+# it at roughly
+#
+#   normalize = TRUE   w = 1: 0.15   w = 2: 0.09   w = 3: 0.05   w = 4: 0.04
+#   normalize = FALSE  w = 1: 0.08   w = 2: 0.05   w = 3: 0.04   w = 4: 0.02
+#
+# i.e. ~ 0.15 * passes / (2w+1)^1.5. Over that 224-cell grid this rule picks the
+# slower kernel by more than 5% in 7 cells and never by more than 1.40x (on a
+# call costing 14ms), while its total time is within 0.6% of always choosing the
+# per-cell winner -- against 28% for the tap-count rule, which gives away
+# speedups of up to 5x on ordinary brain-mask-sized inputs, and 8.8x for always
+# taking the dense path.
+#
+# The constant is a calibration, not a law: it is a ratio of per-tap costs, so it
+# drifts with the compiler and the machine. An independent measurement on other
+# hardware put the w = 1, normalize = TRUE crossover nearer 0.20 than the 0.15
+# above, against a threshold of 0.173 -- so a typical brain mask can land in a
+# band where this fires ~1.2x early. That spread is the honest width of the fit,
+# and it is tolerable because near the crossover the two kernels cost nearly the
+# same by construction. The thresholds are pinned in
+# tests/testthat/test-gaussian-blur-separable.R so re-calibrating is deliberate.
+# ---------------------------------------------------------------------------
+
+#' @keywords internal
+#' @noRd
+.gaussian_blur_prefers_separable <- function(window, n_mask, n_vox, normalize) {
+  # Total in its arguments: this only chooses an engine, so a degenerate window
+  # or an empty volume must fall through to the kernel's own validation rather
+  # than error here.
+  if (!isTRUE(n_vox > 0) || length(window) != 1L ||
+      !isTRUE(is.finite(window)) || !isTRUE(window >= 1)) {
+    return(FALSE)
+  }
+  passes <- if (isTRUE(normalize)) 6 else 3
+  (n_mask / n_vox) > (0.15 * passes / (2 * window + 1)^1.5)
+}
+
+#' Gaussian blur, dispatching to whichever kernel is cheaper
+#'
+#' @keywords internal
+#' @noRd
+.gaussian_blur_engine <- function(arr, mask_idx, window, sigma, spacing,
+                                  normalize = TRUE) {
+  window <- as.integer(window)
+  mask_idx <- as.integer(mask_idx)
+  n_vox <- length(arr)
+
+  # The separable kernel requires exactly three dimensions; the dense one blurs
+  # the first volume of a higher-dimensional array. Nothing reachable from an
+  # exported function passes one, but the engine must not turn that into an
+  # error where it used to be a result.
+  is_3d <- length(dim(arr)) == 3L
+
+  if (is_3d &&
+      .gaussian_blur_prefers_separable(window, length(mask_idx), n_vox, normalize)) {
+    gaussian_blur_sep_cpp(arr, mask_idx, window, sigma, spacing, normalize)
+  } else {
+    gaussian_blur_cpp(arr, mask_idx, window, sigma, spacing, normalize)
+  }
+}
+
 #' Gaussian Blur for Volumetric Images
 #'
 #' @description
@@ -22,14 +106,18 @@ NULL
 #' @param vol A \code{\linkS4class{NeuroVol}} object representing the image volume to be smoothed.
 #' @param mask An optional \code{\linkS4class{LogicalNeuroVol}} object representing the image mask.
 #'   This mask defines the region where the blurring is applied. If not provided, the entire volume is processed.
-#' @param sigma A numeric value specifying the standard deviation of the Gaussian kernel, expressed
+#'   It must have the same dimensions as \code{vol}.
+#' @param sigma A single finite positive number specifying the standard deviation of the Gaussian kernel, expressed
 #'   in the \strong{spatial units of the image} (millimetres for a typical NIfTI) --- \strong{not
 #'   voxels}. The kernel is evaluated in physical distance using \code{spacing(vol)}, so the same
 #'   \code{sigma} produces the same physical smoothing regardless of voxel size. Default is 2.
-#' @param window An integer specifying the kernel size. It represents the number of voxels to include
-#'   on each side of the center voxel. For example, window=1 results in a 3x3x3 kernel. Default is 1.
-#'   Note that \code{window} is a half-width in \strong{voxels} while \code{sigma} is in
-#'   \strong{millimetres}; see Details for how to size one against the other.
+#' @param window A single finite number >= 1 specifying the kernel size. It represents the number
+#'   of voxels to include on each side of the center voxel. For example, window=1 results in a
+#'   3x3x3 kernel. Thus, \code{window} is a half-width in \strong{voxels}, while \code{sigma} is in
+#'   the image's spatial units; see Details for how to size one against the other. Default is 1.
+#'   A window larger than the volume is clamped to
+#'   \code{max(dim(vol))}, which changes no result: every kernel tap that far out is out of
+#'   bounds from every voxel.
 #' @param normalize A logical value controlling how the mask boundary is handled. When \code{TRUE}
 #'   (the default), the blur is \emph{insulated} to the mask: each in-mask output voxel is computed
 #'   from in-mask neighbours only and the kernel is renormalized by the in-mask weight (a
@@ -97,11 +185,12 @@ gaussian_blur <- function(vol, mask, sigma = 2, window = 1, normalize = TRUE) {
   if (!inherits(vol, "NeuroVol")) {
     cli::cli_abort("{.arg vol} must be a {.cls NeuroVol} object.")
   }
-  if (window < 1) {
-    cli::cli_abort("{.arg window} must be >= 1, not {.val {window}}.")
+  if (!is.numeric(window) || length(window) != 1L || !is.finite(window) ||
+      window < 1) {
+    cli::cli_abort("{.arg window} must be a single finite number >= 1, not {.val {window}}.")
   }
-  if (sigma <= 0) {
-    cli::cli_abort("{.arg sigma} must be positive, not {.val {sigma}}.")
+  if (!is.numeric(sigma) || length(sigma) != 1L || !is.finite(sigma) || sigma <= 0) {
+    cli::cli_abort("{.arg sigma} must be a single finite positive number, not {.val {sigma}}.")
   }
   if (!is.logical(normalize) || length(normalize) != 1L || is.na(normalize)) {
     cli::cli_abort("{.arg normalize} must be a single {.cls logical} (TRUE or FALSE).")
@@ -110,7 +199,19 @@ gaussian_blur <- function(vol, mask, sigma = 2, window = 1, normalize = TRUE) {
     if (!inherits(mask, "NeuroVol")) {
       cli::cli_abort("{.arg mask} must be a {.cls NeuroVol} object.")
     }
+    if (!identical(as.integer(dim(mask)), as.integer(dim(vol)))) {
+      cli::cli_abort(c(
+        "{.arg mask} and {.arg vol} must have the same dimensions.",
+        i = "{.arg vol} is {.val {dim(vol)}}, {.arg mask} is {.val {dim(mask)}}."
+      ))
+    }
   }
+
+  # Every kernel tap at least max(dim) voxels away is out of bounds from every
+  # voxel, so clipping the window here changes no result. It does keep absurd
+  # windows out of the kernel builders, where (2w+1)^3 used to overflow.
+  # min() first: as.integer(1e10) is NA, not a clamped value.
+  window <- as.integer(min(window, max(dim(vol)[1:3])))
 
   if (missing(mask)) {
     mask.idx <- seq_len(prod(dim(vol)))
@@ -121,8 +222,8 @@ gaussian_blur <- function(vol, mask, sigma = 2, window = 1, normalize = TRUE) {
   }
 
   arr <- as.array(vol)
-  farr <- gaussian_blur_cpp(arr, as.integer(mask.idx), as.integer(window), sigma,
-                            spacing(vol), normalize)
+  farr <- .gaussian_blur_engine(arr, mask.idx, window, sigma,
+                                spacing(vol), normalize)
 
   out <- NeuroVol(farr, target_space)
   out
@@ -734,6 +835,12 @@ enhance_stat_map <- function(vol, mask,
   if (!is.numeric(detail_gain) || length(detail_gain) != 1L || detail_gain < 0) {
     cli::cli_abort("{.arg detail_gain} must be a single non-negative number.")
   }
+  for (nm in c("spatial_sigma", "intensity_sigma")) {
+    v <- get(nm)
+    if (!is.numeric(v) || length(v) != 1L || !is.finite(v) || v <= 0) {
+      cli::cli_abort("{.arg {nm}} must be a single finite positive number, not {.val {v}}.")
+    }
+  }
   if (!is.null(epsilon) &&
       (!is.numeric(epsilon) || length(epsilon) != 1L || !is.finite(epsilon) || epsilon <= 0)) {
     cli::cli_abort("{.arg epsilon} must be {.code NULL} or a single positive finite number.")
@@ -749,6 +856,12 @@ enhance_stat_map <- function(vol, mask,
   } else {
     if (!inherits(mask, "NeuroVol")) {
       cli::cli_abort("{.arg mask} must be a {.cls NeuroVol} object.")
+    }
+    if (!identical(as.integer(dim(mask)), as.integer(d))) {
+      cli::cli_abort(c(
+        "{.arg mask} and {.arg vol} must have the same dimensions.",
+        i = "{.arg vol} is {.val {d}}, {.arg mask} is {.val {dim(mask)}}."
+      ))
     }
     mask.idx <- which(mask != 0)
     target_space <- space(mask)
@@ -786,8 +899,8 @@ enhance_stat_map <- function(vol, mask,
     bilateral = bilateral_filter_cpp(despiked, idx, max(1L, radius),
                                      spatial_sigma, intensity_sigma,
                                      spacing(vol), NA_real_),
-    gaussian = gaussian_blur_cpp(despiked, idx, max(1L, radius),
-                                 spatial_sigma, spacing(vol))
+    gaussian = .gaussian_blur_engine(despiked, idx, max(1L, radius),
+                                     spatial_sigma, spacing(vol))
   )
 
   # ---- Stage 3: signal-gated unsharp ----------------------------------------
