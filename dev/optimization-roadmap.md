@@ -27,11 +27,21 @@ Three layers, all already in place:
    errors (all attributable to offline dependency shims, see "Environment").
    Any new entry in the failing set is a regression.
 3. **Permanent regression tests** — `tests/testthat/test-roi-series-fastpaths.R`
-   (624 assertions), which pin equivalence rather than performance: the cheap
-   constructor against `new()`, the offset template against `local_sphere()`,
-   the compiled gathers against the R loops they replaced, the accessor-hook
-   contract for lazy sparse subclasses, and a scaling guard that fails if a
-   whole-volume copy is ever reintroduced into `series()`.
+   (1,470 assertions), which pin equivalence rather than performance: the cheap
+   constructor against `new()` (and against the class validity function, so the
+   duplicated invariants cannot drift), the offset template against
+   `local_sphere()`, `spherical_roi()` against brute-force enumeration, the
+   compiled gathers against the R loops they replaced, the accessor-hook contract
+   for lazy sparse subclasses, hostile-input handling for every compiled entry
+   point, and a scaling guard that fails if a whole-volume copy is ever
+   reintroduced into `series()`.
+4. **GC torture** — not part of the suite (it is far too slow), but run by hand
+   against every compiled entry point whenever the C++ changes. The last run
+   covered `sphere_coords_cpp`, `sphere_roi_at_cpp`, `sphere_coords_batch_cpp`
+   and the `.searchlight_plan()` path, with `NA`-bearing volumes and both
+   `use_mask` settings, under `gctorture(TRUE)`: all results bit-identical, no
+   crash. Re-run it after touching `src/` — a reviewer's earlier pass is not
+   transferable once the signatures change.
 
 **Adversarial review is part of the process, not a courtesy.** Each phase gets
 independent reviewers briefed to refute the equivalence claim, with distinct
