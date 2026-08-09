@@ -70,6 +70,58 @@
   spherical_roi()            660.0 -> 85.0 us   191.5 s -> 24.7 s
   ```
 
+* `gaussian_blur()` now evaluates the kernel separably where that is cheaper. A
+  Gaussian is a tensor product, so the full `(2 * window + 1)^3` kernel is
+  equivalent to three 1-D passes --- 15x fewer multiplies at `window = 3`. The
+  masked default (`normalize = TRUE`) is separable too, as the ratio of two
+  separable convolutions: the mask-insulated blur is `blur(x * m) / blur(m)`,
+  where `m` is the mask indicator.
+
+  Which form is cheaper depends on both the window and the mask fraction --- the
+  separable passes cover the whole volume, while the dense kernel visits mask
+  voxels only --- so the two implementations are both kept and the cost is
+  estimated per call. Measured on a 91x109x91 volume at 2 mm across mask
+  fractions from 2% to 100%, the dispatch rule picks the slower kernel by more
+  than 5% in 7 of 224 cases and never by more than 1.4x, and its total time is
+  within 0.6% of always choosing the per-case winner.
+
+  For a brain-mask-shaped input (about a quarter of the bounding box) and for
+  unmasked whole-volume smoothing:
+
+  ```
+                       mask 25%   whole volume
+  window = 1              1.7x         6.8x
+  window = 2              2.9x         9.6x
+  window = 3              5.0x        17.3x
+  ```
+
+  Speed-ups are larger with `normalize = FALSE` (3.9x / 5.5x / 9.4x masked,
+  15x / 19x / 32x unmasked), which needs half as many passes. The whole-volume
+  column is the case `gaussian_blur(vol)` hits when no mask is supplied.
+
+  Results are unchanged to within floating-point summation order: over 3,200
+  configurations of dimension, spacing, sigma, window, mask shape and
+  `normalize`, the largest absolute difference from the previous kernel was
+  2.6e-16, and where the two differ most in relative terms the separable result
+  is the closer of the two to a high-precision reference. Code comparing blurred
+  volumes with `identical()` rather than `all.equal()` may see the difference.
+  The separable path needs working memory the dense one did not: two vectors of
+  `prod(dim)` doubles, or three plus a byte per voxel when normalizing. Measured
+  peak-RSS delta on a 200x200x200 volume at `window = 1`, `normalize = TRUE`:
+  153 MB against the dense path's 77 MB at a 20% mask, 167 against 139 at 50%,
+  and 190 against 230 at a full mask --- where the separable form is the cheaper
+  of the two, because the dense path's voxel-coordinate matrix costs 24 bytes per
+  mask voxel. The scratch is `malloc`ed rather than allocated by R, so it is not
+  counted against `mem.maxVSize` and exhaustion surfaces as a C++ allocation
+  failure rather than R's "cannot allocate vector of size".
+
+  One input does change materially, and only there: at `window >= 23` the dense
+  kernel's three-axis weight product underflows to exactly zero in the far
+  corners, so an `Inf` in the data multiplied to `NaN` and poisoned the output.
+  The separable form applies the three factors in separate passes, none of which
+  underflow, and propagates the `Inf`. Neither answer is meaningful --- the input
+  is not finite --- but they differ.
+
 
 ## Bug Fixes
 
@@ -93,6 +145,31 @@
   iterators had stopped validating it and returned degenerate one-voxel windows
   instead.
 
+
+* Fixed a segfault in `gaussian_blur()` when `mask` and `vol` had different
+  dimensions. Nothing checked that they matched, and the kernel built its
+  membership lookup by writing at `mask_idx` into a vector sized for the volume,
+  so an index past the end was an unbounded write. `gaussian_blur()` now requires
+  matching dimensions, and the kernel bounds-checks the index regardless.
+  `enhance_stat_map()` gained the same dimension check.
+
+* Fixed `gaussian_blur()` returning an all-zero volume for `sigma` above about
+  1e203. The kernel carried a per-axis `sqrt(2 * pi * sigma)` factor that
+  cancelled exactly in the normalization but cubed to `Inf` first, and `Inf/Inf`
+  made every weight `NaN`. The factor is no longer formed, which leaves the
+  normalized kernel unchanged for every finite `sigma`.
+
+* Fixed a session-killing crash in `gaussian_weights()` for `window >= 645`,
+  where `(2 * window + 1)^3` wrapped negative in `int` and allocated a vector of
+  negative length.
+
+* `gaussian_blur()` now rejects a `sigma` or `window` that is missing,
+  non-finite, or not length one; previously `window = Inf` and `sigma = Inf` were
+  accepted and produced an all-zero volume. A `window` larger than the volume is
+  clamped to `max(dim(vol))`, which changes no result --- every tap that far out
+  is out of bounds from every voxel --- and keeps absurd values out of the kernel
+  builders. `enhance_stat_map()` now validates `spatial_sigma` and
+  `intensity_sigma`, which were the two numeric arguments it did not check.
 
 * **Breaking:** `spherical_roi()`, `cuboid_roi()` and `square_roi()` now share
   one definition of centroid handling, `nonzero` filtering and the

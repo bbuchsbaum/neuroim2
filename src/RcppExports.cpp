@@ -169,6 +169,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// gaussian_blur_sep_cpp
+NumericVector gaussian_blur_sep_cpp(NumericVector arr, IntegerVector mask_idx, int window, double sigma, NumericVector spacing, bool normalize);
+RcppExport SEXP _neuroim2_gaussian_blur_sep_cpp(SEXP arrSEXP, SEXP mask_idxSEXP, SEXP windowSEXP, SEXP sigmaSEXP, SEXP spacingSEXP, SEXP normalizeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type arr(arrSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type mask_idx(mask_idxSEXP);
+    Rcpp::traits::input_parameter< int >::type window(windowSEXP);
+    Rcpp::traits::input_parameter< double >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type spacing(spacingSEXP);
+    Rcpp::traits::input_parameter< bool >::type normalize(normalizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(gaussian_blur_sep_cpp(arr, mask_idx, window, sigma, spacing, normalize));
+    return rcpp_result_gen;
+END_RCPP
+}
 // indexToGridCpp
 NumericMatrix indexToGridCpp(IntegerVector idx, IntegerVector array_dim);
 RcppExport SEXP _neuroim2_indexToGridCpp(SEXP idxSEXP, SEXP array_dimSEXP) {
@@ -501,6 +517,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_neuroim2_downsample_3d_cpp", (DL_FUNC) &_neuroim2_downsample_3d_cpp, 3},
     {"_neuroim2_downsample_4d_cpp", (DL_FUNC) &_neuroim2_downsample_4d_cpp, 3},
     {"_neuroim2_fast_multilayer_laplacian_enhancement_masked", (DL_FUNC) &_neuroim2_fast_multilayer_laplacian_enhancement_masked, 8},
+    {"_neuroim2_gaussian_blur_sep_cpp", (DL_FUNC) &_neuroim2_gaussian_blur_sep_cpp, 6},
     {"_neuroim2_indexToGridCpp", (DL_FUNC) &_neuroim2_indexToGridCpp, 2},
     {"_neuroim2_gridToIndex3DCpp", (DL_FUNC) &_neuroim2_gridToIndex3DCpp, 2},
     {"_neuroim2_gridToIndexCpp", (DL_FUNC) &_neuroim2_gridToIndexCpp, 2},

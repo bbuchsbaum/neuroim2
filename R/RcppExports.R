@@ -37,6 +37,10 @@ fast_multilayer_laplacian_enhancement_masked <- function(img, mask, k = 2L, patc
     .Call(`_neuroim2_fast_multilayer_laplacian_enhancement_masked`, img, mask, k, patch_size, search_radius, h, mapping_params, use_normalization_free)
 }
 
+gaussian_blur_sep_cpp <- function(arr, mask_idx, window, sigma, spacing, normalize = TRUE) {
+    .Call(`_neuroim2_gaussian_blur_sep_cpp`, arr, mask_idx, window, sigma, spacing, normalize)
+}
+
 indexToGridCpp <- function(idx, array_dim) {
     .Call(`_neuroim2_indexToGridCpp`, idx, array_dim)
 }

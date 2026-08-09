@@ -139,33 +139,128 @@ in the namespace). Bounding by total size rather than entry count would fix it.
 
 ---
 
-## Phase 3 — separable Gaussian blur
+## Phase 3 — done: separable Gaussian blur
 
 **Why.** `gaussian_blur_cpp` applies the full `(2w+1)³` kernel. A Gaussian is a
-tensor product, so three 1-D passes give the same answer in `3(2w+1)` taps.
-Measured, agreeing to machine epsilon (max |diff| ~1e-15):
-
-```
-normalize = FALSE:  w=1  1.9x   w=2  6.6x   w=3 15.2x   w=4 15.2x
-normalize = TRUE:   w=1  0.4x   w=2  1.3x   w=3  2.9x
-```
-
-The masked default (`normalize = TRUE`) is also separable, as the ratio of two
+tensor product, so three 1-D passes give the same answer in `3(2w+1)` taps. The
+masked default (`normalize = TRUE`) is separable too, as the ratio of two
 separable convolutions — `blur(x·m) / blur(m)` — because the numerator and
-denominator the current code accumulates are exactly those two convolutions.
+denominator the dense code accumulates are exactly those two convolutions.
 
-**What to build.** A separable kernel in `src/`, with `gaussian_blur()` choosing
-by `window`: keep the current kernel at `window = 1` (where the separable version
-loses, because it sweeps the whole volume while the current code visits only mask
-voxels), switch above it. Gate on `window`, not on mask fraction — a simple,
-predictable rule.
+**What was built.** `src/gaussian_blur_sep.cpp`, and a dispatcher
+(`.gaussian_blur_engine()` / `.gaussian_blur_prefers_separable()` in
+`R/spat_filter.R`) in front of both former `gaussian_blur_cpp()` call sites.
+`x·m` is formed with an explicit branch, not a multiply: out-of-mask voxels are
+documented to be allowed to hold `NaN`, and `0 * NaN` is `NaN`, which would leak
+missingness into every in-mask neighbour.
 
-**Verification.** Golden capture of `gaussian_blur` over a grid of
-(sigma, window, normalize, mask) and assert agreement to `1e-12` absolute. Add
-the masked-NaN case from the docs: out-of-mask `NaN` must not leak in-mask.
+Working memory is two vectors of `prod(dim)` doubles, or three plus a byte per
+voxel when normalizing. The first 1-D pass reads the masked source through the
+mask rather than materialising it, and the denominator pass is ordered to land
+in its own buffer, which removed two full-volume sweeps and two of six vectors
+from the first working version.
 
-**Risk.** Low, and the payoff is bounded by how often users raise `window` above
-the default of 1. Worth doing, but it is not the searchlight.
+**The plan said to gate on `window` alone. That was wrong.** Keeping the dense
+kernel at `window = 1` gives away 1.7-6.8x there, because the crossover depends
+on the mask fraction as much as on the window. The first cost model was wrong in
+the other direction: gating on tap counts alone
+(`n_mask/n_vox > passes/(2w+1)²`) assumes the two kernels cost the same per tap,
+and they do not — the separable passes walk contiguous memory with no per-tap
+branch, while the dense kernel pays a bounds test and a mask lookup on every
+tap. Measuring the crossover on a 91x109x91 volume over mask fractions
+0.02-1.00, both contiguous and scattered, put it near
+`0.15 * passes / (2w+1)^1.5`. Over that 224-cell grid:
+
+```
+rule                        worst case   >5% off   total time
+tap counts, passes/(2w+1)^2     4.9x     59/224      7.02 s
+0.15 * passes/(2w+1)^1.5        1.4x      7/224      5.51 s
+always separable                4.9x     38/224      5.64 s
+always dense (status quo)          -          -     48.64 s
+per-cell oracle                    -          -      5.48 s
+```
+
+The constant is a calibration, not a law — it is a ratio of per-tap costs and
+drifts with compiler and machine. It only has to be right near the crossover,
+where by construction the two kernels cost nearly the same.
+
+**Measured** (91x109x91 at 2 mm, contiguous mask, `normalize = TRUE`):
+
+```
+                     mask 20%  mask 25%  mask 32%  whole volume
+window = 1              1.5x      1.7x      2.2x       6.8x
+window = 2              2.3x      2.9x      3.7x       9.6x
+window = 3              4.0x      5.0x      6.3x      17.3x
+```
+
+`normalize = FALSE` roughly doubles those (15x/19x/32x unmasked). The
+whole-volume column is what `gaussian_blur(vol)` hits with no mask supplied.
+
+**Verification.** 3,200 configurations of dimension (including degenerate axes),
+spacing, sigma, window, mask shape (all / half / single voxel / `NaN` outside)
+and `normalize`, compared against the dense kernel: 0 failures, max absolute
+difference 2.6e-16. Where the relative difference is largest the output is a
+near-zero value produced by cancellation, and against a brute-force reference
+the separable result is the *closer* of the two. Golden harness 8,665/0; full
+suite unchanged (same 10 pre-existing stub-package I/O errors);
+`tests/testthat/test-gaussian-blur-separable.R` adds ~780 assertions covering
+equivalence, the mask-insulation guarantee, dispatch monotonicity and argument
+rejection.
+
+**What the review found.** The kernel math survived a ~3,400-case differential
+fuzz and 18 source mutations. What did not survive was the weaker claim that *the
+dispatcher only changes which kernel runs, never the answer* — five reachable
+counterexamples, every one a pre-existing defect that the dispatcher turned into
+a data-dependent one, because the new kernel validates arguments the old one did
+not:
+
+- **A segfault, now mask-fraction dependent.** `gaussian_blur()` never checked
+  that `mask` and `vol` had the same dimensions, and the dense kernel built its
+  membership lookup with an unbounded `in_mask[mask_idx[i] - 1] = 1`. An
+  oversized mask crashed the session — but only below the dispatch threshold,
+  since above it the separable kernel's bounds check caught the same index.
+  Fixed at both ends: `gaussian_blur()` and `enhance_stat_map()` require matching
+  dimensions, and the dense kernel bounds-checks regardless.
+- **`sigma` above ~1e203 returned zeros.** `gaussian_weights_impl` multiplied in
+  a per-axis `sqrt(2*pi*sigma)` that cancelled exactly in its own normalisation
+  but cubed to `Inf` first, making every weight `NaN`. Not formed any more.
+- **`gaussian_weights(window >= 645)` killed the session** — `(2w+1)^3` wrapped
+  negative in `int`. Guarded; `gaussian_blur()` also clamps the window to
+  `max(dim)`, which is result-preserving because every tap that far out is
+  already out of bounds.
+- **`window = Inf` / `sigma = Inf` were accepted** and produced an all-zero
+  volume; after the change they hit an internal error with a message from
+  `as.integer()`. Both are now validated at the door with `cli_abort`.
+- **`enhance_stat_map()` never validated `spatial_sigma`**, the one numeric
+  argument it skipped, so `spatial_sigma = 0` silently returned zeros on one
+  path and errored on the other. Validated, along with `intensity_sigma`.
+
+Two divergences were left in place deliberately. A 4-D array is now kept on the
+dense path by the dispatcher rather than rejected, so behaviour is unchanged
+there. And at `window >= 23` with a non-finite value in the data, the dense
+kernel's three-axis weight product underflows to exactly zero, so `0 * Inf`
+poisoned the output to `NaN` while the separable form propagates the `Inf`;
+neither answer means anything and reproducing an underflow artefact would be
+wrong. It is in NEWS.
+
+The review also found the test file's weak spots: the mask-insulation test used a
+*constant* in-mask signal, which any normalised kernel reproduces regardless of
+its shape, padding or axis order, and 404 of its assertions were algebraic
+identities of the dispatch formula that would hold for any formula of that shape
+— including one with a badly wrong constant. The signal is now structured and
+swept over `NaN`/`NA`/`Inf`/`-Inf` outside the mask, and the dispatch test pins
+the fitted thresholds numerically so re-calibration has to be deliberate. Cases
+the mutation testing showed were unreachable — `window > 4`, windows larger than
+the volume, integer `arr`, duplicated/unsorted/double `mask_idx`, the legacy
+branch with non-finite input, and `.gaussian_blur_engine` itself — are now
+covered.
+
+**Risk.** The remaining exposure is the calibration constant, which costs at most
+~1.4x on calls in the tens of milliseconds when it is wrong. The reviewer's
+independent measurement put the `window = 1`, `normalize = TRUE` crossover nearer
+0.20 than the 0.15 measured here, against a threshold of 0.173 — so a typical
+brain mask can land in a band where the rule fires up to ~1.2x early. That spread
+between two machines is the honest width of the calibration.
 
 ---
 
@@ -212,15 +307,15 @@ branch-to-branch equivalence ever was.
 
 ## Sequencing and effort
 
-1. **Phase 2** — highest remaining value by a wide margin. ~1 day including the
-   golden extension and adversarial review.
-2. **Phase 4 scalar loops** — cheap, independent, each ~1 hour with a targeted
+Phases 1, 2 and 3 are done, and `use_cpp = FALSE` is resolved (deprecated).
+What remains:
+
+1. **Phase 4 scalar loops** — cheap, independent, each ~1 hour with a targeted
    equivalence test. Do the `ClusteredNeuroVec` one first; it is measured and
    trivially verifiable.
-3. **Phase 3 separable blur** — ~half a day; the payoff depends on user smoothing
-   parameters.
-4. **`use_cpp = FALSE`** — decide delete vs fix. Deleting is ~10 minutes.
-5. **Dead C++** — ~10 minutes, do it alongside anything else touching `src/`.
+2. **Dead C++** — ~10 minutes, do it alongside anything else touching `src/`.
+3. **`.sphere_offset_cache` sizing** — bound by total bytes rather than entry
+   count. Low value; see the note at the end of Phase 2.
 
 Phase 2 alone takes a whole-brain searchlight from ~40 s of enumeration to
 roughly 1 s; combined with Phase 1's `series()` work, the end-to-end MVPA
@@ -236,10 +331,12 @@ CRAN is unreachable from the container this was developed in, so `RNifti`,
 `RNiftyReg`, `bigstatsr`, `mmap`, and `deflist` were replaced with local shims to
 make the package installable: `deflist` and `mmap` are functional
 reimplementations (they sit on the code paths under test), the other three are
-signature-only stubs that error when called. That accounts for all 25 errors in
-the baseline — every one is `RNifti::writeNifti`, `RNifti::niftiHeader`, or
-`bigstatsr::as_FBM`, and none touch `roi.R`, `searchlight.R`, or `series()`.
+signature-only stubs that error when called. That accounts for all 10 failing
+tests in the baseline — 8 `RNifti::writeNifti`, 1 `RNifti::niftiHeader`, 1
+`bigstatsr::as_FBM` — and none touch `roi.R`, `searchlight.R`, `series()` or
+`spat_filter.R`. The set is byte-identical before and after every change on this
+branch, which is how "no regressions" was checked.
 
 Before merging, re-run the golden sweep and the full suite against real
-dependencies. Nothing in Phase 1 depends on the shimmed packages, but the
-baseline's 25 errors should drop to 0 and that is worth confirming.
+dependencies. Nothing here depends on the shimmed packages, but those 10 errors
+should drop to 0 and that is worth confirming.

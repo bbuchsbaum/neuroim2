@@ -10,12 +10,17 @@ gaussian_blur(vol, mask, sigma = 2, window = 1, normalize = TRUE)
 \item{vol}{A \code{\linkS4class{NeuroVol}} object representing the image volume to be smoothed.}
 
 \item{mask}{An optional \code{\linkS4class{LogicalNeuroVol}} object representing the image mask.
-This mask defines the region where the blurring is applied. If not provided, the entire volume is processed.}
+This mask defines the region where the blurring is applied. If not provided, the entire volume is processed.
+It must have the same dimensions as \code{vol}.}
 
-\item{sigma}{A numeric value specifying the standard deviation of the Gaussian kernel. Default is 2.}
+\item{sigma}{A single finite positive number specifying the standard deviation of the
+Gaussian kernel. Default is 2.}
 
-\item{window}{An integer specifying the kernel size. It represents the number of voxels to include
-on each side of the center voxel. For example, window=1 results in a 3x3x3 kernel. Default is 1.}
+\item{window}{A single finite number >= 1 specifying the kernel size. It represents the number
+of voxels to include on each side of the center voxel. For example, window=1 results in a
+3x3x3 kernel. Default is 1. A window larger than the volume is clamped to
+\code{max(dim(vol))}, which changes no result: every kernel tap that far out is out of
+bounds from every voxel.}
 
 \item{normalize}{A logical value controlling how the mask boundary is handled. When \code{TRUE}
 (the default), the blur is \emph{insulated} to the mask: each in-mask output voxel is computed
