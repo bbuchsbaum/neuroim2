@@ -116,21 +116,13 @@ random_searchlight <- function(mask, radius, nonzero = TRUE) {
     kept <- active_mask | (!mask_hits & !nonzero)
     kept_vox <- vox[kept, , drop = FALSE]
 
-    # Row position of the center voxel inside the kept ROI coordinates
-    center_row <- which(rowSums(kept_vox == matrix(center_coord, nrow(kept_vox), 3, byrow = TRUE)) == 3)
-    center_row <- if (length(center_row) == 0) NA_integer_ else center_row[1]
-
-    parent_idx <- grid_to_index(mask, center_coord)
-
-    search2 <- new("ROIVolWindow",
-                   rep(1, nrow(kept_vox)),
-                   space=space(mask),
-                   coords=kept_vox,
-                   center_index=as.integer(center_row),
-                   parent_index=as.integer(parent_idx))
+    # Centre/parent bookkeeping and coord normalisation are shared with the ROI
+    # builders. `nonzero` was already applied above, so pass FALSE here.
+    search2 <- .build_roi_window(mask, drop(center_coord), kept_vox,
+                                 rep(1, nrow(kept_vox)), FALSE)
 
     # Expose row index within the ROI coordinates for downstream consumers
-    attr(search2, "center_row_index") <- as.integer(center_row)
+    attr(search2, "center_row_index") <- search2@center_index
     # Index of the center voxel within the mask's nonzero ordering
     attr(search2, "mask_index") <- as.integer(center_idx)
 
@@ -326,34 +318,20 @@ resampled_searchlight <- function(mask,
   force(mask)
   # helper to coerce arbitrary shape output into a ROIVolWindow
   to_roi_window <- function(obj, center_coord) {
-    center_vec <- drop(center_coord)
-    parent_index <- grid_to_index(mask, center_vec)
+    center_vec <- .roi_centroid(center_coord, dim(mask))
 
     # User supplied a ROIVolWindow already; optionally filter nonzero voxels
     if (inherits(obj, "ROIVolWindow")) {
       coords <- obj@coords
       vals   <- obj@.Data
 
-      if (nonzero) {
+      if (nonzero && nrow(coords) > 0) {
         keep <- mask[coords] != 0
         coords <- coords[keep, , drop = FALSE]
         vals   <- vals[keep]
       }
 
-      # recompute center row in case filtering changed indexing
-      center_row <- if (nrow(coords) == 0) {
-        NA_integer_
-      } else {
-        which(rowSums(coords == matrix(center_vec, nrow(coords), 3, byrow = TRUE)) == 3)
-      }
-      center_row <- if (length(center_row) == 0) NA_integer_ else center_row[1]
-
-      return(new("ROIVolWindow",
-                 vals,
-                 space = space(mask),
-                 coords = coords,
-                 center_index = as.integer(center_row),
-                 parent_index = as.integer(parent_index)))
+      return(.build_roi_window(mask, center_vec, coords, vals, FALSE))
     }
 
     # Allow a bare matrix of voxel coordinates (integer, 3 cols)
@@ -373,25 +351,7 @@ resampled_searchlight <- function(mask,
         coords <- coords[keep, , drop = FALSE]
       }
 
-      if (nrow(coords) == 0) {
-        return(new("ROIVolWindow",
-                   numeric(0),
-                   space = space(mask),
-                   coords = matrix(ncol = 3, nrow = 0),
-                   center_index = as.integer(NA),
-                   parent_index = as.integer(parent_index)))
-      }
-
-      # identify where (if anywhere) the sampled center lives in coords
-      center_row <- which(rowSums(coords == matrix(center_coord, nrow(coords), 3, byrow = TRUE)) == 3)
-      center_row <- if (length(center_row) == 0) NA_integer_ else center_row[1]
-
-      return(new("ROIVolWindow",
-                 rep(1, nrow(coords)),
-                 space = space(mask),
-                 coords = coords,
-                 center_index = as.integer(center_row),
-                 parent_index = as.integer(parent_index)))
+      return(.build_roi_window(mask, center_vec, coords, rep(1, nrow(coords)), FALSE))
     }
 
     stop("shape_fun must return a ROIVolWindow or an n x 3 matrix of voxel coordinates")
@@ -539,6 +499,73 @@ blobby_shape <- function(drop = 0.3, edge_fraction = 0.7) {
 }
 
 
+# ---------------------------------------------------------------------------
+# Searchlight core
+#
+# The iterators are lazy by design: a whole-brain radius-8 mm searchlight over a
+# 290k-voxel mask holds ~257 voxels per centre, which is about 0.9 GB of
+# coordinates -- 1.5 GB as ROIVolWindow objects -- if materialised at once. So
+# the win is not in emitting everything up front, it is in making the per-element
+# call cheap: hoist everything invariant out of the closure and leave one
+# compiled call inside it.
+# ---------------------------------------------------------------------------
+
+#' Invariant parts of a spherical searchlight
+#'
+#' Bundles the offset template, the volume dimensions, the mask-membership
+#' vector and the linear-index strides so that an iterator closure recomputes
+#' none of them. `keep` is `logical(0)` when `nonzero = FALSE`, which the
+#' compiled core reads as "no mask filtering".
+#'
+#' @keywords internal
+#' @noRd
+.searchlight_plan <- function(mask, radius, nonzero) {
+  vspacing <- spacing(mask)
+  # The single-ROI builders reject this via make_spherical_grid(); the lazy
+  # iterators must too, or they silently return degenerate one-voxel windows.
+  if (radius < min(vspacing)) {
+    stop("'radius' is too small; must be greater than at least one voxel dimension in image")
+  }
+
+  vdim <- as.integer(dim(mask)[1:3])
+  # The volume is flattened once so that per-centre value lookup and mask
+  # filtering are plain pointer reads in the compiled core rather than an S4 `[`
+  # dispatch per ROI. One buffer serves both, so there is no second copy and no
+  # second place for the `nonzero` rule to be defined.
+  list(
+    off      = .sphere_offsets(radius, vspacing),
+    vdim     = vdim,
+    vals     = as.numeric(as.vector(as.array(mask))),
+    use_mask = isTRUE(nonzero),
+    space    = space(mask)
+  )
+}
+
+#' Coordinates of one searchlight, using a prepared plan
+#'
+#' @keywords internal
+#' @noRd
+.searchlight_coords_at <- function(plan, centroid) {
+  sphere_coords_cpp(plan$off, as.integer(centroid[1:3]), plan$vdim,
+                    plan$vals, plan$use_mask)
+}
+
+#' A ROIVolWindow for one searchlight, using a prepared plan
+#'
+#' Values are sampled from the mask, matching `spherical_roi(mask, ...)` with no
+#' `fill`: with `nonzero = FALSE` the ROI therefore carries the mask's zeros for
+#' out-of-mask voxels, not an indicator of 1s. Coordinates, values, the centre
+#' row and the parent index all come from one compiled pass.
+#'
+#' @keywords internal
+#' @noRd
+.searchlight_roi_at <- function(plan, centroid) {
+  parts <- sphere_roi_at_cpp(plan$off, as.integer(centroid[1:3]), plan$vdim,
+                             plan$vals, plan$use_mask)
+  .new_roi_vol_window(parts$values, plan$space, parts$coords,
+                      parts$center_row, parts$parent_index)
+}
+
 #' Internal helper for parallel searchlight evaluation
 #'
 #' @noRd
@@ -588,13 +615,18 @@ searchlight_coords <- function(mask, radius, nonzero=FALSE, cores=0) {
 
   # Convert voxel indices to coordinates
   grid <- index_to_grid(mask, mask.idx) # Nx3 integer voxel coords
+  storage.mode(grid) <- "integer"
 
-  # Define a function to get the spherical neighborhood for a single voxel
-  f <- function(i) {
-    centroid <- grid[i, , drop=FALSE]
-    roi <- spherical_roi(mask, centroid, radius=radius, nonzero=nonzero)
-    coords(roi) # returns an Nx3 matrix of voxel coordinates
-  }
+  # Everything invariant across centres is computed once here; the closure is
+  # then a single compiled call. Building a full ROIVolWindow per centre and
+  # discarding all but its coords, as this used to, cost ~25x more.
+  # Built in its own environment so the closure retains only what it uses --
+  # not `mask`, `mask.idx`, `cores` and friends from this frame.
+  f <- local({
+    plan <- .searchlight_plan(mask, radius, nonzero)
+    g <- grid
+    function(i) .searchlight_coords_at(plan, g[i, ])
+  })
 
   if (cores > 1) {
     .future_lapply_with_cores(seq_len(length(mask.idx)), f, cores)
@@ -656,34 +688,28 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
 
   mask.idx <- which(mask != 0)
   grid <- index_to_grid(mask, mask.idx)
+  storage.mode(grid) <- "integer"
+
+  f <- local({
+    plan <- .searchlight_plan(mask, radius, nonzero)
+    g <- grid
+    function(i) {
+      roi <- .searchlight_roi_at(plan, g[i, ])
+      attr(roi, "mask_index") <- as.integer(i)
+      roi
+    }
+  })
 
   if (!eager) {
     if (cores > 1) {
-      f <- function(i) {
-        roi <- spherical_roi(mask, grid[i, ], radius, nonzero = nonzero)
-        attr(roi, "mask_index") <- as.integer(i)
-        roi
-      }
       return(.future_lapply_with_cores(seq_len(nrow(grid)), f, cores))
-    }
-    force(mask)
-    force(radius)
-    f <- function(i) { 
-      roi <- spherical_roi(mask, grid[i,], radius, nonzero=nonzero)
-      attr(roi, "mask_index") <- as.integer(i)
-      roi
     }
     deflist::deflist(f, nrow(grid))
   } else {
     if (cores > 1) {
-      f <- function(i) {
-        roi <- spherical_roi(mask, grid[i, ], radius, nonzero = nonzero)
-        attr(roi, "mask_index") <- as.integer(i)
-        roi
-      }
       result_list <- .future_lapply_with_cores(seq_len(nrow(grid)), f, cores)
     } else {
-      # Use spherical_roi_set to get all ROIs at once
+      # Eager by contract, so expand every centre in one compiled pass.
       result_list <- spherical_roi_set(
         bvol = mask,
         centroids = grid,

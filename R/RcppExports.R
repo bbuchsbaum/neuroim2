@@ -37,6 +37,10 @@ fast_multilayer_laplacian_enhancement_masked <- function(img, mask, k = 2L, patc
     .Call(`_neuroim2_fast_multilayer_laplacian_enhancement_masked`, img, mask, k, patch_size, search_radius, h, mapping_params, use_normalization_free)
 }
 
+gaussian_blur_sep_cpp <- function(arr, mask_idx, window, sigma, spacing, normalize = TRUE) {
+    .Call(`_neuroim2_gaussian_blur_sep_cpp`, arr, mask_idx, window, sigma, spacing, normalize)
+}
+
 indexToGridCpp <- function(idx, array_dim) {
     .Call(`_neuroim2_indexToGridCpp`, idx, array_dim)
 }
@@ -95,5 +99,33 @@ radius_search_3d_precomputed <- function(cds_vox, cds_mm, queries_mm, radius_mm,
 
 representative_volume_cpp <- function(mat, representative) {
     .Call(`_neuroim2_representative_volume_cpp`, mat, representative)
+}
+
+sphere_coords_cpp <- function(off, centre, dim, vals, use_mask) {
+    .Call(`_neuroim2_sphere_coords_cpp`, off, centre, dim, vals, use_mask)
+}
+
+sphere_coords_batch_cpp <- function(off, centres, dim, vals, use_mask) {
+    .Call(`_neuroim2_sphere_coords_batch_cpp`, off, centres, dim, vals, use_mask)
+}
+
+sphere_roi_at_cpp <- function(off, centre, dim, vals, use_mask) {
+    .Call(`_neuroim2_sphere_roi_at_cpp`, off, centre, dim, vals, use_mask)
+}
+
+series_gather_dense <- function(data, dim, coords) {
+    .Call(`_neuroim2_series_gather_dense`, data, dim, coords)
+}
+
+series_gather_sparse <- function(data, mapped) {
+    .Call(`_neuroim2_series_gather_sparse`, data, mapped)
+}
+
+sphere_offsets_cpp <- function(radius, spacing) {
+    .Call(`_neuroim2_sphere_offsets_cpp`, radius, spacing)
+}
+
+sphere_at_cpp <- function(off, centre, dim, base0 = TRUE) {
+    .Call(`_neuroim2_sphere_at_cpp`, off, centre, dim, base0)
 }
 

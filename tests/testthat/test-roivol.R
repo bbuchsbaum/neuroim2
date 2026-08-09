@@ -89,7 +89,12 @@ test_that("can convert ROIVec to matrix", {
 })
 
 
-test_that("square_roi keeps center voxel when nonzero=TRUE even if center is zero", {
+# nonzero = TRUE means what it says: a zero-valued centre is dropped like any
+# other zero voxel. It used to be forced back in so that parent_index could be
+# read off the coordinate matrix; parent_index is now derived from the requested
+# centroid directly, so the workaround is no longer needed -- and forcing a zero
+# voxel into a "nonzero" ROI contradicted the argument's documentation.
+test_that("square_roi drops a zero-valued center when nonzero=TRUE", {
   sp <- NeuroSpace(c(3,3,3), c(1,1,1))
   arr <- array(0, dim=c(3,3,3))
   arr[1,1,1] <- 5  # one nonzero voxel
@@ -98,16 +103,16 @@ test_that("square_roi keeps center voxel when nonzero=TRUE even if center is zer
 
   roi <- square_roi(vol, centroid, surround=1, nonzero=TRUE)
 
-  # center voxel is retained
-  expect_true(any(apply(coords(roi), 1, function(r) all(r == centroid))))
+  expect_false(any(apply(coords(roi), 1, function(r) all(r == centroid))))
   expect_length(roi@center_index, 1)
-  expect_false(is.na(roi@center_index))
+  expect_true(is.na(roi@center_index))
+  # parent_index still points at the requested centroid, filtering or not
   expect_equal(roi@parent_index, grid_to_index(vol, matrix(centroid, ncol=3)))
-  # zero-valued center should remain despite nonzero filter
-  expect_true(any(values(roi) == 0))
+  # and no zero-valued voxel survives the filter
+  expect_false(any(values(roi) == 0))
 })
 
-test_that("cuboid_roi keeps center voxel when nonzero=TRUE even if center is zero", {
+test_that("cuboid_roi drops a zero-valued center when nonzero=TRUE", {
   sp <- NeuroSpace(c(3,3,3), c(1,1,1))
   arr <- array(0, dim=c(3,3,3))
   arr[1,1,1] <- 5  # one nonzero voxel
@@ -116,11 +121,58 @@ test_that("cuboid_roi keeps center voxel when nonzero=TRUE even if center is zer
 
   roi <- cuboid_roi(vol, centroid, surround=1, nonzero=TRUE)
 
-  expect_true(any(apply(coords(roi), 1, function(r) all(r == centroid))))
+  expect_false(any(apply(coords(roi), 1, function(r) all(r == centroid))))
   expect_length(roi@center_index, 1)
-  expect_false(is.na(roi@center_index))
+  expect_true(is.na(roi@center_index))
   expect_equal(roi@parent_index, grid_to_index(vol, matrix(centroid, ncol=3)))
-  expect_true(any(values(roi) == 0))
+  expect_false(any(values(roi) == 0))
+})
+
+test_that("the windowed ROI builders agree on centre and parent semantics", {
+  sp <- NeuroSpace(c(10,10,10), c(1,1,1))
+  arr <- array(1, dim=c(10,10,10))
+  arr[5,5,5] <- 0
+  vol <- NeuroVol(arr, sp)
+  ctr <- c(5,5,5)
+  pidx <- grid_to_index(vol, matrix(ctr, ncol=3))
+
+  builders <- list(
+    spherical = function(nz) spherical_roi(vol, ctr, 2.5, nonzero = nz),
+    cuboid    = function(nz) cuboid_roi(vol, ctr, 2, nonzero = nz),
+    square    = function(nz) square_roi(vol, ctr, 2, nonzero = nz)
+  )
+
+  for (nm in names(builders)) {
+    keep <- builders[[nm]](FALSE)
+    drop <- builders[[nm]](TRUE)
+
+    # centre present when unfiltered, absent once its zero value is filtered
+    expect_false(is.na(keep@center_index), info = nm)
+    expect_true(is.na(drop@center_index), info = nm)
+    expect_equal(nrow(drop@coords), nrow(keep@coords) - 1L, info = nm)
+
+    # parent_index is the centroid either way
+    expect_equal(keep@parent_index, pidx, info = nm)
+    expect_equal(drop@parent_index, pidx, info = nm)
+
+    # coords are integer, undecorated, and lexicographically ordered
+    for (r in list(keep, drop)) {
+      expect_identical(storage.mode(r@coords), "integer", info = nm)
+      expect_null(dimnames(r@coords), info = nm)
+      expect_identical(order(r@coords[,1], r@coords[,2], r@coords[,3]),
+                       seq_len(nrow(r@coords)), info = nm)
+    }
+  }
+
+  # and they all validate the centroid the same way
+  for (nm in names(builders)) {
+    f <- switch(nm, spherical = function(c) spherical_roi(vol, c, 2.5),
+                    cuboid    = function(c) cuboid_roi(vol, c, 2),
+                    square    = function(c) square_roi(vol, c, 2))
+    expect_error(f(c(99, 5, 5)), "exceeds volume dimensions", info = nm)
+    expect_error(f(c(0, 5, 5)), ">= 1", info = nm)
+    expect_error(f(c(5, 5)), "length 3", info = nm)
+  }
 })
 
 

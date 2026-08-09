@@ -776,13 +776,29 @@ setMethod("series", signature(x="DenseNeuroVec", i="matrix"),
             d <- dim(x)
             validate_indices(d[1:3], list(i[,1], i[,2], i[,3]), c("i", "j", "k"))
             i <- matrix(as.integer(i), ncol = 3)
-            # Direct linear indexing into .Data — avoids S4 dispatch overhead
+
+            # Single compiled pass over (voxel, timepoint). The R fallback below
+            # loops over timepoints and rebuilds a double index vector each
+            # iteration, which dominates for ROI-sized requests.
+            #
+            # `x` is handed to the gather directly rather than `x@.Data`: a
+            # DenseNeuroVec *is* the REALSXP (typeof(x) == "double"), and
+            # materialising the data part as a .Call argument duplicates the
+            # whole volume -- 165 ms for a 48x56x40x200 image, which would make
+            # this path far slower than the loop it replaces.
+            if (typeof(x) == "double") {
+              return(series_gather_dense(x, as.integer(d[1:4]), i))
+            }
+
+            # Non-double storage (e.g. an integer array): stay in R rather than
+            # forcing a copy of the whole volume to double.
+            dat <- x@.Data
             lin <- (i[,3] - 1L) * d[1] * d[2] + (i[,2] - 1L) * d[1] + i[,1]
             nt <- d[4]
             nels <- prod(d[1:3])
             out <- matrix(0, nt, nrow(i))
             for (t in seq_len(nt)) {
-              out[t, ] <- x@.Data[lin + (t - 1L) * nels]
+              out[t, ] <- dat[lin + (t - 1L) * nels]
             }
             out
           })
