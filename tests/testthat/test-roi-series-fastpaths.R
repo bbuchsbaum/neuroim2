@@ -518,6 +518,17 @@ test_that("the searchlight core rejects hostile inputs", {
   # a `vals` vector shorter than the volume must error, not read past the end
   expect_error(neuroim2:::sphere_roi_at_cpp(off, c(2L, 2L, 2L), d, logical(0), numeric(5)),
                "shorter than prod\\(dim\\)")
-  # a short `keep` must not read past the end either
-  expect_silent(neuroim2:::sphere_coords_cpp(off, c(2L, 2L, 2L), d, logical(3)))
+  # a short `keep` is a programming error, not something to skip over
+  expect_error(neuroim2:::sphere_coords_cpp(off, c(2L, 2L, 2L), d, logical(3)),
+               "shorter than prod\\(dim\\)")
+
+  # dim whose product overflows R_xlen_t must be rejected before any indexing.
+  # This is reachable: dim() on a NeuroVol reports the NeuroSpace slot, which is
+  # not kept in sync with the data array.
+  D <- 2097152L                      # D^3 == 2^63
+  big <- c(D, D, D)
+  expect_error(neuroim2:::sphere_roi_at_cpp(off, c(1L, 1L, 1L), big, logical(0), as.numeric(1:8)),
+               "shorter than prod\\(dim\\)|not representable|more voxels")
+  expect_error(neuroim2:::sphere_coords_cpp(off, c(1L, 1L, 1L), big, c(TRUE, FALSE)),
+               "shorter than prod\\(dim\\)|not representable|more voxels")
 })

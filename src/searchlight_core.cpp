@@ -87,8 +87,35 @@ inline void check_args(const IntegerMatrix& off, const IntegerVector& dim) {
     if (dim.size() < 3) {
         stop("searchlight core: 'dim' must have at least 3 elements");
     }
+    // NA_INTEGER is INT_MIN, so it is caught here too.
     if (dim[0] <= 0 || dim[1] <= 0 || dim[2] <= 0) {
         stop("searchlight core: 'dim' must be positive");
+    }
+}
+
+// Number of voxels implied by `dim`, computed with division-based checks so the
+// product can never wrap. It matters: dim() on a NeuroVol reports the NeuroSpace
+// slot, which R does not keep in sync with the data array, so a bogus dim can
+// reach here. Forming d0*d1*d2 first would overflow R_xlen_t, wrap negative,
+// slip past a `length < nvox` test and index far outside the buffer.
+inline R_xlen_t checked_nvox(int d0, int d1, int d2) {
+    const R_xlen_t lim = R_XLEN_T_MAX;
+    if ((R_xlen_t) d1 > lim / (R_xlen_t) d0) {
+        stop("searchlight core: 'dim' implies more voxels than are representable");
+    }
+    const R_xlen_t slice = (R_xlen_t) d0 * d1;
+    if ((R_xlen_t) d2 > lim / slice) {
+        stop("searchlight core: 'dim' implies more voxels than are representable");
+    }
+    return slice * (R_xlen_t) d2;
+}
+
+// A membership/value buffer must either be absent (length 0, meaning "not
+// supplied") or cover the whole volume. A short buffer is a programming error,
+// not something to silently skip over.
+inline void check_buffer(R_xlen_t len, R_xlen_t nvox, const char* what) {
+    if (len > 0 && len < nvox) {
+        stop("searchlight core: '%s' is shorter than prod(dim)", what);
     }
 }
 
@@ -104,6 +131,7 @@ IntegerMatrix sphere_coords_cpp(IntegerMatrix off, IntegerVector centre,
     if (centre.size() < 3) {
         stop("searchlight core: 'centre' must have at least 3 elements");
     }
+    check_buffer(keep.size(), checked_nvox(dim[0], dim[1], dim[2]), "keep");
 
     std::vector<int> xs, ys, zs;
     xs.reserve(off.nrow()); ys.reserve(off.nrow()); zs.reserve(off.nrow());
@@ -126,6 +154,7 @@ List sphere_coords_batch_cpp(IntegerMatrix off, IntegerMatrix centres,
 
     const int m = centres.nrow();
     const int d0 = dim[0], d1 = dim[1], d2 = dim[2];
+    check_buffer(keep.size(), checked_nvox(d0, d1, d2), "keep");
     const int* kp = LOGICAL(keep);
     const R_xlen_t klen = keep.size();
 
@@ -159,13 +188,12 @@ List sphere_roi_at_cpp(IntegerMatrix off, IntegerVector centre, IntegerVector di
 
     const int cx = centre[0], cy = centre[1], cz = centre[2];
     const int d0 = dim[0], d1 = dim[1], d2 = dim[2];
+    const R_xlen_t nvox = checked_nvox(d0, d1, d2);
     const R_xlen_t slice = (R_xlen_t) d0 * d1;
-    const R_xlen_t nvox = slice * d2;
 
     const R_xlen_t vlen = vals.size();
-    if (vlen > 0 && vlen < nvox) {
-        stop("searchlight core: 'vals' is shorter than prod(dim)");
-    }
+    check_buffer(vlen, nvox, "vals");
+    check_buffer(keep.size(), nvox, "keep");
     const double* vp = vlen > 0 ? REAL(vals) : NULL;
 
     const int* kp = LOGICAL(keep);
