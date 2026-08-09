@@ -72,20 +72,43 @@ test_that(".new_roi_vol_window enforces the class invariants", {
                "3 columns")
 })
 
-test_that("the cached ROI prototype is never mutated by construction", {
+test_that("the cached class attribute is never mutated by construction", {
   sp <- NeuroSpace(c(10L, 10L, 10L))
-  before <- neuroim2:::.roi_prototype("ROIVolWindow")
+  before <- neuroim2:::.roi_class_attr("ROIVolWindow")
 
   for (i in 1:20) {
-    obj <- neuroim2:::.new_roi_vol_window(rep(1, 4), sp, matrix(1, 4, 3), 1L, 2L)
+    obj <- neuroim2:::.new_roi_vol_window(rep(1, 4), sp, matrix(1L, 4, 3), 1L, 2L)
     obj@.Data <- rep(99, 4)          # mutate the result
     attr(obj, "scribble") <- i
   }
 
-  after <- neuroim2:::.roi_prototype("ROIVolWindow")
+  after <- neuroim2:::.roi_class_attr("ROIVolWindow")
   expect_identical(before, after)
-  expect_length(after@.Data, 0L)
-  expect_equal(nrow(after@coords), 0L)
+  expect_identical(as.character(after), "ROIVolWindow")
+  expect_identical(attr(after, "package"), "neuroim2")
+})
+
+test_that("asS4-built ROIs survive serialisation and odd payloads", {
+  sp <- NeuroSpace(c(20L, 20L, 20L), c(2, 2, 2))
+  cases <- list(
+    list(nm = "n=0",         d = numeric(0),         c = matrix(integer(0), 0, 3), ci = NA_integer_),
+    list(nm = "n=1",         d = 1,                  c = matrix(1L, 1, 3),         ci = 1L),
+    list(nm = "integer data",d = 1:4,                c = matrix(1L, 4, 3),         ci = 2L),
+    list(nm = "NA/NaN/Inf",  d = c(NA, NaN, Inf, 1), c = matrix(1L, 4, 3),         ci = NA_integer_),
+    list(nm = "double coords", d = rep(1, 4),        c = matrix(1, 4, 3),          ci = 1L)
+  )
+  for (k in cases) {
+    ref <- new("ROIVolWindow", k$d, space = sp, coords = k$c,
+               center_index = k$ci, parent_index = 7L)
+    got <- neuroim2:::.new_roi_vol_window(k$d, sp, k$c, k$ci, 7L)
+    expect_identical(ref, got, info = k$nm)
+    expect_true(validObject(got), info = k$nm)
+    expect_true(is(got, "ROIVol") && is(got, "ROICoords") && is(got, "ROI"), info = k$nm)
+
+    tf <- tempfile(); on.exit(unlink(tf), add = TRUE)
+    saveRDS(got, tf)
+    expect_identical(got, readRDS(tf), info = k$nm)
+  }
 })
 
 # ------------------------------------------------------------ sphere geometry
@@ -378,4 +401,123 @@ test_that("the dense gather does not scale with volume size", {
 
   # Allow generous slack for noise, but a full copy would be ~64x slower.
   expect_lt(large, max(small * 10, 0.01))
+})
+
+# ------------------------------------------------------------ searchlight core
+
+test_that("the searchlight core reproduces spherical_roi element for element", {
+  set.seed(41)
+  for (sp in list(c(1, 1, 1), c(2, 2, 2), c(1, 1, 4), c(0.8, 0.8, 3))) {
+    d <- c(11L, 9L, 8L)
+    m <- array(runif(prod(d)) > 0.35, d)
+    mask <- LogicalNeuroVol(m, NeuroSpace(d, sp))
+    radius <- max(3, min(sp))
+
+    grid <- index_to_grid(mask, which(m))
+    storage.mode(grid) <- "integer"
+
+    for (nz in c(FALSE, TRUE)) {
+      plan <- neuroim2:::.searchlight_plan(mask, radius, nz)
+      idx <- unique(c(1L, 2L, nrow(grid), sample.int(nrow(grid), 8)))
+
+      for (i in idx) {
+        ctr <- grid[i, ]
+        ref <- spherical_roi(mask, ctr, radius, nonzero = nz)
+        info <- sprintf("spacing %s nonzero %s centroid %s",
+                        paste(sp, collapse = "/"), nz, paste(ctr, collapse = ","))
+
+        # coords-only path
+        expect_identical(neuroim2:::.searchlight_coords_at(plan, ctr),
+                         ref@coords, info = info)
+        # full ROI path -- identical object, not merely equal
+        expect_identical(neuroim2:::.searchlight_roi_at(plan, ctr), ref, info = info)
+      }
+    }
+  }
+})
+
+test_that("batched and per-centre expansion agree", {
+  set.seed(43)
+  d <- c(12L, 10L, 9L); sp <- c(1, 1, 3)
+  m <- array(runif(prod(d)) > 0.3, d)
+  mask <- LogicalNeuroVol(m, NeuroSpace(d, sp))
+  off <- neuroim2:::.sphere_offsets(4, sp)
+  vdim <- as.integer(d)
+  cents <- rbind(c(1L, 1L, 1L), d, pmax(1L, d %/% 2L),
+                 cbind(sample.int(d[1], 6, TRUE), sample.int(d[2], 6, TRUE),
+                       sample.int(d[3], 6, TRUE)))
+  storage.mode(cents) <- "integer"
+
+  for (keep in list(logical(0), as.vector(m))) {
+    batch <- neuroim2:::sphere_coords_batch_cpp(off, cents, vdim, keep)
+    for (i in seq_len(nrow(cents))) {
+      one <- neuroim2:::sphere_coords_cpp(off, cents[i, ], vdim, keep)
+      expect_identical(batch$coords[[i]], one, info = paste("row", i))
+      hit <- which(one[, 1] == cents[i, 1] & one[, 2] == cents[i, 2] &
+                     one[, 3] == cents[i, 3])
+      expect_identical(batch$center_row[i],
+                       if (length(hit) == 0L) NA_integer_ else as.integer(hit[1]),
+                       info = paste("row", i))
+    }
+  }
+})
+
+test_that("spherical_roi_set is identical to per-centroid spherical_roi", {
+  set.seed(44)
+  d <- c(11L, 10L, 8L)
+  for (sp in list(c(1, 1, 1), c(2, 2, 2), c(0.8, 0.8, 3))) {
+    arr <- array(rnorm(prod(d)), d); arr[arr < -0.3] <- 0
+    vol <- NeuroVol(arr, NeuroSpace(d, sp))
+    spc <- NeuroSpace(d, sp)
+    cents <- rbind(c(1L, 1L, 1L), d, pmax(1L, d %/% 2L),
+                   cbind(sample.int(d[1], 5, TRUE), sample.int(d[2], 5, TRUE),
+                         sample.int(d[3], 5, TRUE)))
+    storage.mode(cents) <- "integer"
+    radius <- max(3, min(sp))
+
+    for (bv in list(spc, vol)) {
+      for (nz in c(FALSE, TRUE)) {
+        for (fl in list(NULL, 1, seq_len(nrow(cents)))) {
+          got <- spherical_roi_set(bv, cents, radius, fill = fl, nonzero = nz)
+          for (i in seq_len(nrow(cents))) {
+            fi <- if (is.null(fl)) NULL else if (length(fl) == 1L) fl else fl[i]
+            ref <- spherical_roi(bv, cents[i, ], radius, fill = fi, nonzero = nz)
+            expect_identical(got[[i]], ref,
+                             info = sprintf("spacing %s nz %s fill %s row %d",
+                                            paste(sp, collapse = "/"), nz,
+                                            if (is.null(fl)) "NULL" else length(fl), i))
+          }
+        }
+      }
+    }
+  }
+})
+
+test_that("spherical_roi_set validates centroids like the single-ROI builders", {
+  spc <- NeuroSpace(c(10L, 10L, 10L), c(1, 1, 1))
+  expect_error(spherical_roi_set(spc, rbind(c(5, 5, 5), c(99, 5, 5)), 3),
+               "row 2.*exceeds volume dimensions")
+  expect_error(spherical_roi_set(spc, rbind(c(5, 5, 5), c(0, 5, 5)), 3), ">= 1")
+  expect_error(spherical_roi_set(spc, rbind(c(5, 5), c(1, 1)), 3), "3 columns")
+  expect_error(spherical_roi_set(spc, cbind(5, 5, NA), 3), "finite")
+  expect_error(spherical_roi_set(spc, rbind(c(5, 5, 5)), 3, fill = c(1, 2)),
+               "length 1 or 1")
+})
+
+test_that("the searchlight core rejects hostile inputs", {
+  off <- neuroim2:::.sphere_offsets(3, c(1, 1, 1))
+  d <- c(8L, 8L, 8L)
+  expect_error(neuroim2:::sphere_coords_cpp(matrix(1L, 4, 2), c(2L, 2L, 2L), d, logical(0)),
+               "exactly 3 columns")
+  expect_error(neuroim2:::sphere_coords_cpp(off, c(2L, 2L), d, logical(0)),
+               "at least 3 elements")
+  expect_error(neuroim2:::sphere_coords_cpp(off, c(2L, 2L, 2L), c(0L, 8L, 8L), logical(0)),
+               "must be positive")
+  expect_error(neuroim2:::sphere_coords_batch_cpp(off, matrix(1L, 4, 2), d, logical(0)),
+               "exactly 3 columns")
+  # a `vals` vector shorter than the volume must error, not read past the end
+  expect_error(neuroim2:::sphere_roi_at_cpp(off, c(2L, 2L, 2L), d, logical(0), numeric(5)),
+               "shorter than prod\\(dim\\)")
+  # a short `keep` must not read past the end either
+  expect_silent(neuroim2:::sphere_coords_cpp(off, c(2L, 2L, 2L), d, logical(3)))
 })
