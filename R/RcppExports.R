@@ -97,16 +97,16 @@ representative_volume_cpp <- function(mat, representative) {
     .Call(`_neuroim2_representative_volume_cpp`, mat, representative)
 }
 
-sphere_coords_cpp <- function(off, centre, dim, keep) {
-    .Call(`_neuroim2_sphere_coords_cpp`, off, centre, dim, keep)
+sphere_coords_cpp <- function(off, centre, dim, vals, use_mask) {
+    .Call(`_neuroim2_sphere_coords_cpp`, off, centre, dim, vals, use_mask)
 }
 
-sphere_coords_batch_cpp <- function(off, centres, dim, keep) {
-    .Call(`_neuroim2_sphere_coords_batch_cpp`, off, centres, dim, keep)
+sphere_coords_batch_cpp <- function(off, centres, dim, vals, use_mask) {
+    .Call(`_neuroim2_sphere_coords_batch_cpp`, off, centres, dim, vals, use_mask)
 }
 
-sphere_roi_at_cpp <- function(off, centre, dim, keep, vals) {
-    .Call(`_neuroim2_sphere_roi_at_cpp`, off, centre, dim, keep, vals)
+sphere_roi_at_cpp <- function(off, centre, dim, vals, use_mask) {
+    .Call(`_neuroim2_sphere_roi_at_cpp`, off, centre, dim, vals, use_mask)
 }
 
 series_gather_dense <- function(data, dim, coords) {

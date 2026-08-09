@@ -225,7 +225,49 @@ capture_searchlight <- function() {
   out
 }
 
-golden <- list(spherical = capture_spherical(),
+## ------------------------------------------------- NA / NaN volume sweep
+## `nonzero` must drop missing voxels rather than emit NA coordinate rows, and
+## every builder and iterator must agree about it.
+capture_na <- function() {
+  out <- list()
+  for (si in seq_along(spacings)) {
+    sp <- spacings[[si]]; d <- c(7L, 6L, 5L)
+    set.seed(700 + si)
+    a <- array(rnorm(prod(d)), d)
+    a[sample.int(prod(d), 5)] <- NA
+    a[sample.int(prod(d), 3)] <- NaN
+    a[sample.int(prod(d), 6)] <- 0
+    vol <- NeuroVol(a, NeuroSpace(d, sp))
+    radius <- max(2.5, min(sp))
+    cents <- centroid_set(d)
+
+    for (nz in c(FALSE, TRUE)) {
+      key <- sprintf("na|s%d|nz%d", si, nz)
+      out[[key]] <- lapply(seq_len(nrow(cents)), function(ci) {
+        r <- spherical_roi(vol, cents[ci, ], radius, nonzero = nz)
+        list(coords = unname(r@coords), data = unname(as.numeric(r@.Data)),
+             ci = r@center_index, pi = r@parent_index,
+             anyNAcoord = anyNA(r@coords))
+      })
+      rs <- spherical_roi_set(vol, cents, radius, nonzero = nz)
+      out[[paste0(key, "|set")]] <- lapply(rs, function(r)
+        list(coords = unname(r@coords), data = unname(as.numeric(r@.Data)),
+             ci = r@center_index, pi = r@parent_index))
+      lz <- searchlight(vol, radius = radius, nonzero = nz, eager = FALSE)
+      eg <- searchlight(vol, radius = radius, nonzero = nz, eager = TRUE)
+      out[[paste0(key, "|lazy")]] <- lapply(seq_len(min(20, length(lz))), function(i) {
+        r <- lz[[i]]; list(coords = unname(r@coords), data = unname(as.numeric(r@.Data)),
+                           ci = r@center_index, pi = r@parent_index) })
+      out[[paste0(key, "|eager")]] <- lapply(seq_len(min(20, length(eg))), function(i) {
+        r <- eg[[i]]; list(coords = unname(r@coords), data = unname(as.numeric(r@.Data)),
+                           ci = r@center_index, pi = r@parent_index) })
+    }
+  }
+  out
+}
+
+golden <- list(na = capture_na(),
+               spherical = capture_spherical(),
                roi_set   = capture_roi_set(),
                series    = capture_series(),
                searchlight = capture_searchlight())

@@ -29,21 +29,30 @@ using namespace Rcpp;
 
 namespace {
 
-// Shared inner loop. `keep` of length 0 means "no mask filtering". Writes the
-// surviving 1-based coordinates into `out_*` and returns the 1-based row of the
-// centre voxel, or NA_INTEGER when the centre is not among the survivors.
+// Shared inner loop.
+//
+// `vp` is the flattened volume, or NULL when no values are available. When
+// `use_mask` is true a voxel is kept only if its value is present and non-zero
+// -- NA and NaN are dropped, because "nonzero" cannot be established for them.
+// That single rule is why filtering lives here rather than being reimplemented
+// per caller: the R and C++ versions of it used to disagree about NA.
+//
+// `vv` collects the kept values (1.0 when no volume was supplied). Returns the
+// 1-based row of the centre voxel, or NA_INTEGER when the centre is not kept.
 inline int expand_one(const IntegerMatrix& off,
                       int cx, int cy, int cz,
                       int d0, int d1, int d2,
-                      const int* keep, R_xlen_t keep_len,
+                      const double* vp, bool use_mask,
                       std::vector<int>& xs,
                       std::vector<int>& ys,
-                      std::vector<int>& zs) {
+                      std::vector<int>& zs,
+                      std::vector<double>* vv) {
     const int n = off.nrow();
     const R_xlen_t slice = (R_xlen_t) d0 * d1;
     int centre_row = NA_INTEGER;
 
     xs.clear(); ys.clear(); zs.clear();
+    if (vv) vv->clear();
 
     for (int i = 0; i < n; i++) {
         const int ox = off(i, 0), oy = off(i, 1), oz = off(i, 2);
@@ -54,16 +63,19 @@ inline int expand_one(const IntegerMatrix& off,
         const int z = cz + oz;
         if (z < 1 || z > d2) continue;
 
-        if (keep_len > 0) {
+        double v = 1.0;
+        if (vp) {
             const R_xlen_t lin = (R_xlen_t)(x - 1) + (R_xlen_t)(y - 1) * d0
                                  + (R_xlen_t)(z - 1) * slice;
-            if (lin >= keep_len || keep[lin] == NA_LOGICAL || !keep[lin]) continue;
+            v = vp[lin];
+            if (use_mask && (ISNAN(v) || v == 0.0)) continue;
         }
 
         if (ox == 0 && oy == 0 && oz == 0) {
             centre_row = (int) xs.size() + 1;
         }
         xs.push_back(x); ys.push_back(y); zs.push_back(z);
+        if (vv) vv->push_back(v);
     }
     return centre_row;
 }
@@ -110,7 +122,7 @@ inline R_xlen_t checked_nvox(int d0, int d1, int d2) {
     return slice * (R_xlen_t) d2;
 }
 
-// A membership/value buffer must either be absent (length 0, meaning "not
+// The value buffer must either be absent (length 0, meaning "no volume
 // supplied") or cover the whole volume. A short buffer is a programming error,
 // not something to silently skip over.
 inline void check_buffer(R_xlen_t len, R_xlen_t nvox, const char* what) {
@@ -126,17 +138,19 @@ inline void check_buffer(R_xlen_t len, R_xlen_t nvox, const char* what) {
 // clipping and filtering preserve.
 // [[Rcpp::export]]
 IntegerMatrix sphere_coords_cpp(IntegerMatrix off, IntegerVector centre,
-                                IntegerVector dim, LogicalVector keep) {
+                                IntegerVector dim, NumericVector vals,
+                                bool use_mask) {
     check_args(off, dim);
     if (centre.size() < 3) {
         stop("searchlight core: 'centre' must have at least 3 elements");
     }
-    check_buffer(keep.size(), checked_nvox(dim[0], dim[1], dim[2]), "keep");
+    check_buffer(vals.size(), checked_nvox(dim[0], dim[1], dim[2]), "vals");
+    const double* vp = vals.size() > 0 ? REAL(vals) : NULL;
 
     std::vector<int> xs, ys, zs;
     xs.reserve(off.nrow()); ys.reserve(off.nrow()); zs.reserve(off.nrow());
     expand_one(off, centre[0], centre[1], centre[2], dim[0], dim[1], dim[2],
-               LOGICAL(keep), keep.size(), xs, ys, zs);
+               vp, use_mask, xs, ys, zs, NULL);
     return to_matrix(xs, ys, zs);
 }
 
@@ -146,7 +160,8 @@ IntegerMatrix sphere_coords_cpp(IntegerMatrix off, IntegerVector centre,
 // filtering).
 // [[Rcpp::export]]
 List sphere_coords_batch_cpp(IntegerMatrix off, IntegerMatrix centres,
-                             IntegerVector dim, LogicalVector keep) {
+                             IntegerVector dim, NumericVector vals,
+                             bool use_mask) {
     check_args(off, dim);
     if (centres.ncol() != 3) {
         stop("searchlight core: 'centres' must have exactly 3 columns");
@@ -154,9 +169,8 @@ List sphere_coords_batch_cpp(IntegerMatrix off, IntegerMatrix centres,
 
     const int m = centres.nrow();
     const int d0 = dim[0], d1 = dim[1], d2 = dim[2];
-    check_buffer(keep.size(), checked_nvox(d0, d1, d2), "keep");
-    const int* kp = LOGICAL(keep);
-    const R_xlen_t klen = keep.size();
+    check_buffer(vals.size(), checked_nvox(d0, d1, d2), "vals");
+    const double* vp = vals.size() > 0 ? REAL(vals) : NULL;
 
     List coords(m);
     IntegerVector centre_row(m);
@@ -166,7 +180,7 @@ List sphere_coords_batch_cpp(IntegerMatrix off, IntegerMatrix centres,
 
     for (int c = 0; c < m; c++) {
         centre_row[c] = expand_one(off, centres(c, 0), centres(c, 1), centres(c, 2),
-                                   d0, d1, d2, kp, klen, xs, ys, zs);
+                                   d0, d1, d2, vp, use_mask, xs, ys, zs, NULL);
         coords[c] = to_matrix(xs, ys, zs);
     }
 
@@ -180,7 +194,7 @@ List sphere_coords_batch_cpp(IntegerMatrix off, IntegerMatrix centres,
 // `vals` is the flattened volume; length 0 means "emit indicator 1s".
 // [[Rcpp::export]]
 List sphere_roi_at_cpp(IntegerMatrix off, IntegerVector centre, IntegerVector dim,
-                       LogicalVector keep, NumericVector vals) {
+                       NumericVector vals, bool use_mask) {
     check_args(off, dim);
     if (centre.size() < 3) {
         stop("searchlight core: 'centre' must have at least 3 elements");
@@ -189,49 +203,26 @@ List sphere_roi_at_cpp(IntegerMatrix off, IntegerVector centre, IntegerVector di
     const int cx = centre[0], cy = centre[1], cz = centre[2];
     const int d0 = dim[0], d1 = dim[1], d2 = dim[2];
     const R_xlen_t nvox = checked_nvox(d0, d1, d2);
-    const R_xlen_t slice = (R_xlen_t) d0 * d1;
-
-    const R_xlen_t vlen = vals.size();
-    check_buffer(vlen, nvox, "vals");
-    check_buffer(keep.size(), nvox, "keep");
-    const double* vp = vlen > 0 ? REAL(vals) : NULL;
-
-    const int* kp = LOGICAL(keep);
-    const R_xlen_t klen = keep.size();
+    check_buffer(vals.size(), nvox, "vals");
+    const double* vp = vals.size() > 0 ? REAL(vals) : NULL;
 
     std::vector<int> xs, ys, zs;
-    xs.reserve(off.nrow()); ys.reserve(off.nrow()); zs.reserve(off.nrow());
     std::vector<double> vv;
+    xs.reserve(off.nrow()); ys.reserve(off.nrow()); zs.reserve(off.nrow());
     vv.reserve(off.nrow());
 
-    int centre_row = NA_INTEGER;
-    const int n = off.nrow();
+    const int centre_row = expand_one(off, cx, cy, cz, d0, d1, d2,
+                                      vp, use_mask, xs, ys, zs, &vv);
 
-    for (int i = 0; i < n; i++) {
-        const int ox = off(i, 0), oy = off(i, 1), oz = off(i, 2);
-        const int x = cx + ox;
-        if (x < 1 || x > d0) continue;
-        const int y = cy + oy;
-        if (y < 1 || y > d1) continue;
-        const int z = cz + oz;
-        if (z < 1 || z > d2) continue;
-
-        const R_xlen_t lin = (R_xlen_t)(x - 1) + (R_xlen_t)(y - 1) * d0
-                             + (R_xlen_t)(z - 1) * slice;
-        if (klen > 0 && (lin >= klen || kp[lin] == NA_LOGICAL || !kp[lin])) continue;
-
-        if (ox == 0 && oy == 0 && oz == 0) {
-            centre_row = (int) xs.size() + 1;
-        }
-        xs.push_back(x); ys.push_back(y); zs.push_back(z);
-        vv.push_back(vp ? vp[lin] : 1.0);
-    }
-
+    // Parent index can exceed INT_MAX for volumes above 2^31 voxels; report NA
+    // rather than narrowing, which is what the R builders do.
+    const R_xlen_t slice = (R_xlen_t) d0 * d1;
     const R_xlen_t parent = (R_xlen_t)(cz - 1) * slice + (R_xlen_t)(cy - 1) * d0 + cx;
+    const int parent_i = (parent > INT_MAX) ? NA_INTEGER : (int) parent;
 
     return List::create(
         _["coords"]       = to_matrix(xs, ys, zs),
         _["values"]       = NumericVector(vv.begin(), vv.end()),
         _["center_row"]   = centre_row,
-        _["parent_index"] = (int) parent);
+        _["parent_index"] = parent_i);
 }

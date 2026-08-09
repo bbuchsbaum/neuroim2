@@ -18,7 +18,10 @@ NULL
 #
 # An object of such a class *is* the underlying vector, with the slots as
 # attributes and the S4 bit set, so setting the attributes and calling asS4()
-# yields an identical() object for ~3us instead of ~450us. The class invariants
+# yields an identical() object. The mechanism itself costs ~3us; with the
+# argument checks below the constructor measures ~10us against new()'s ~450-790us
+# (~30-60x), and unlike new() it does not scale with the number of slots
+# touched. The class invariants
 # that validObject() would have checked are asserted directly here instead, so
 # nothing is silently skipped -- they are just checked once, cheaply, in the one
 # place these objects are built.
@@ -64,6 +67,13 @@ NULL
 #' would otherwise differ from one built by \code{new()}. Integer storage is
 #' left alone because \code{new()} preserves it too.
 #'
+#' Factors are routed through the coercion branch deliberately. \code{new()} is
+#' not self-consistent for them -- depending on what has already primed the
+#' methods package's coercion cache in the session it yields either a clean
+#' double or an integer carrying a stray \code{levels} attribute -- so there is
+#' no stable behaviour to match. This always produces a clean double of the
+#' integer codes.
+#'
 #' @keywords internal
 #' @noRd
 .as_roi_data <- function(data) {
@@ -100,28 +110,42 @@ NULL
 .new_roi_vol_window <- function(data, space, coords, center_index, parent_index) {
   data <- .as_roi_data(data)
 
-  # The invariants the class validity function checks...
-  if (!is.matrix(coords) || ncol(coords) != 3L) {
+  # The invariants the class validity function checks (kept in step with
+  # setClass("ROIVolWindow", validity = ) in all_class.R -- see the note there)...
+  if (!is.matrix(coords) || is.object(coords) || ncol(coords) != 3L) {
     stop("coords slot must be a matrix with 3 columns")
   }
   if (!is.vector(data)) {
     stop("'data' must be a vector")
   }
+  # is.vector() is TRUE for lists, and as.vector() is an internal generic whose
+  # S3 methods may return anything, so the storage type has to be checked too --
+  # otherwise a list could end up as the .Data part of a "numeric" object.
+  if (!is.double(data) && !is.integer(data)) {
+    stop("'data' must be a double or integer vector")
+  }
   if (length(data) != nrow(coords)) {
     stop("length of data vector must equal 'nrow(coords)'")
   }
   # ...plus the slot types that `@<-` would otherwise check on each assignment.
-  if (!is(space, "NeuroSpace")) {
+  # is.object() rejects classed values, which the plain predicates accept but
+  # the slot definitions do not. inherits() first because it is ~9x cheaper than
+  # is(); is() still runs when it fails, so a NeuroSpace subclass is accepted.
+  if (!inherits(space, "NeuroSpace") && !is(space, "NeuroSpace")) {
     stop("space slot must be a NeuroSpace object")
   }
-  if (!is.integer(center_index) || !is.integer(parent_index)) {
-    stop("center_index and parent_index must be integer")
+  if (!is.integer(center_index) || is.object(center_index) ||
+      !is.integer(parent_index) || is.object(parent_index)) {
+    stop("center_index and parent_index must be plain integer vectors")
   }
+
+  cls <- .roi_proto_cache[["ROIVolWindow"]]
+  if (is.null(cls)) cls <- .roi_class_attr("ROIVolWindow")
 
   attributes(data) <- list(space = space, coords = coords,
                            parent_index = parent_index,
                            center_index = center_index,
-                           class = .roi_class_attr("ROIVolWindow"))
+                           class = cls)
   asS4(data)
 }
 
@@ -235,7 +259,11 @@ NULL
                              (centroid[2] - 1L) * bdim[1] + centroid[1])
 
   if (nrow(grid) > 0L && isTRUE(nonzero)) {
-    keep <- vals != 0
+    # `vals != 0` alone yields NA for NA/NaN voxels, and an NA logical subscript
+    # emits an all-NA coordinate row -- an ROI with NA coordinates. "Nonzero"
+    # cannot be established for a missing value, so drop it, which is also what
+    # the compiled searchlight core does.
+    keep <- !is.na(vals) & vals != 0
     grid <- grid[keep, , drop = FALSE]
     vals <- vals[keep]
   }
@@ -1295,7 +1323,7 @@ spherical_roi_set <- function(bvol, centroids, radius, fill=NULL, nonzero=FALSE)
   # mask filter is not folded into the C++ here -- that would change what
   # `nonzero` means when `fill` is given.
   batch <- sphere_coords_batch_cpp(.sphere_offsets(radius, spacing(bspace)),
-                                   cents, vdim, logical(0))
+                                   cents, vdim, numeric(0), FALSE)
   grids <- batch$coords
 
   slice <- as.integer(vdim[1]) * as.integer(vdim[2])
@@ -1319,7 +1347,7 @@ spherical_roi_set <- function(bvol, centroids, radius, fill=NULL, nonzero=FALSE)
     }
 
     if (isTRUE(nonzero) && nrow(grid) > 0L) {
-      keep <- vals != 0
+      keep <- !is.na(vals) & vals != 0
       grid <- grid[keep, , drop = FALSE]
       vals <- vals[keep]
       center_index <- if (nrow(grid) == 0L) NA_integer_ else {

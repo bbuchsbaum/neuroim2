@@ -448,10 +448,11 @@ test_that("batched and per-centre expansion agree", {
                        sample.int(d[3], 6, TRUE)))
   storage.mode(cents) <- "integer"
 
-  for (keep in list(logical(0), as.vector(m))) {
-    batch <- neuroim2:::sphere_coords_batch_cpp(off, cents, vdim, keep)
+  for (um in c(FALSE, TRUE)) {
+    vv <- as.numeric(as.vector(m))
+    batch <- neuroim2:::sphere_coords_batch_cpp(off, cents, vdim, vv, um)
     for (i in seq_len(nrow(cents))) {
-      one <- neuroim2:::sphere_coords_cpp(off, cents[i, ], vdim, keep)
+      one <- neuroim2:::sphere_coords_cpp(off, cents[i, ], vdim, vv, um)
       expect_identical(batch$coords[[i]], one, info = paste("row", i))
       hit <- which(one[, 1] == cents[i, 1] & one[, 2] == cents[i, 2] &
                      one[, 3] == cents[i, 3])
@@ -507,28 +508,155 @@ test_that("spherical_roi_set validates centroids like the single-ROI builders", 
 test_that("the searchlight core rejects hostile inputs", {
   off <- neuroim2:::.sphere_offsets(3, c(1, 1, 1))
   d <- c(8L, 8L, 8L)
-  expect_error(neuroim2:::sphere_coords_cpp(matrix(1L, 4, 2), c(2L, 2L, 2L), d, logical(0)),
+  expect_error(neuroim2:::sphere_coords_cpp(matrix(1L, 4, 2), c(2L, 2L, 2L), d, numeric(0), FALSE),
                "exactly 3 columns")
-  expect_error(neuroim2:::sphere_coords_cpp(off, c(2L, 2L), d, logical(0)),
+  expect_error(neuroim2:::sphere_coords_cpp(off, c(2L, 2L), d, numeric(0), FALSE),
                "at least 3 elements")
-  expect_error(neuroim2:::sphere_coords_cpp(off, c(2L, 2L, 2L), c(0L, 8L, 8L), logical(0)),
+  expect_error(neuroim2:::sphere_coords_cpp(off, c(2L, 2L, 2L), c(0L, 8L, 8L), numeric(0), FALSE),
                "must be positive")
-  expect_error(neuroim2:::sphere_coords_batch_cpp(off, matrix(1L, 4, 2), d, logical(0)),
+  expect_error(neuroim2:::sphere_coords_batch_cpp(off, matrix(1L, 4, 2), d, numeric(0), FALSE),
                "exactly 3 columns")
   # a `vals` vector shorter than the volume must error, not read past the end
-  expect_error(neuroim2:::sphere_roi_at_cpp(off, c(2L, 2L, 2L), d, logical(0), numeric(5)),
+  expect_error(neuroim2:::sphere_roi_at_cpp(off, c(2L, 2L, 2L), d, numeric(5), FALSE),
                "shorter than prod\\(dim\\)")
-  # a short `keep` is a programming error, not something to skip over
-  expect_error(neuroim2:::sphere_coords_cpp(off, c(2L, 2L, 2L), d, logical(3)),
+  expect_error(neuroim2:::sphere_coords_cpp(off, c(2L, 2L, 2L), d, numeric(3), TRUE),
                "shorter than prod\\(dim\\)")
 
   # dim whose product overflows R_xlen_t must be rejected before any indexing.
-  # This is reachable: dim() on a NeuroVol reports the NeuroSpace slot, which is
-  # not kept in sync with the data array.
+  # Reachable: dim() on a NeuroVol reports the NeuroSpace slot, which is not
+  # kept in sync with the data array. Several shapes overflow at different steps.
   D <- 2097152L                      # D^3 == 2^63
-  big <- c(D, D, D)
-  expect_error(neuroim2:::sphere_roi_at_cpp(off, c(1L, 1L, 1L), big, logical(0), as.numeric(1:8)),
-               "shorter than prod\\(dim\\)|not representable|more voxels")
-  expect_error(neuroim2:::sphere_coords_cpp(off, c(1L, 1L, 1L), big, c(TRUE, FALSE)),
-               "shorter than prod\\(dim\\)|not representable|more voxels")
+  for (big in list(c(D, D, D), c(D, D, D + 1L), c(1626L, 1626L, 1626L))) {
+    expect_error(neuroim2:::sphere_roi_at_cpp(off, c(1L, 1L, 1L), big, as.numeric(1:8), FALSE),
+                 "shorter than prod\\(dim\\)|more voxels")
+    expect_error(neuroim2:::sphere_coords_cpp(off, c(1L, 1L, 1L), big, c(1, 0), TRUE),
+                 "shorter than prod\\(dim\\)|more voxels")
+  }
+
+  # parent_index must be NA rather than a narrowed int past 2^31 voxels
+  big2 <- c(2000L, 2000L, 1000L)
+  expect_true(is.na(neuroim2:::sphere_roi_at_cpp(off, c(1500L, 1500L, 900L), big2,
+                                                 numeric(0), FALSE)$parent_index))
+})
+
+test_that("the constructor's assertions agree with the class validity function", {
+  # .new_roi_vol_window() asserts the ROIVolWindow invariants itself, because
+  # asS4() does not run validity. That duplication can drift, so pin it: for
+  # every violation, new() and the fast constructor must BOTH reject.
+  sp <- NeuroSpace(c(10L, 10L, 10L))
+  ok_coords <- matrix(1L, 3, 3)
+
+  violations <- list(
+    list(nm = "coords 2 cols",      d = c(1, 2, 3),   c = matrix(1L, 3, 2), ci = 1L, pi = 1L),
+    list(nm = "length mismatch",    d = c(1, 2),      c = ok_coords,        ci = 1L, pi = 1L),
+    list(nm = "coords not matrix",  d = c(1, 2, 3),   c = 1:9,              ci = 1L, pi = 1L),
+    list(nm = "space wrong class",  d = c(1, 2, 3),   c = ok_coords,        ci = 1L, pi = 1L, sp = list()),
+    list(nm = "double center",      d = c(1, 2, 3),   c = ok_coords,        ci = 1,  pi = 1L),
+    list(nm = "double parent",      d = c(1, 2, 3),   c = ok_coords,        ci = 1L, pi = 1),
+    list(nm = "classed center",     d = c(1, 2, 3),   c = ok_coords,
+         ci = structure(1L, class = "weird"), pi = 1L),
+    list(nm = "classed coords",     d = c(1, 2, 3),   ci = 1L, pi = 1L,
+         c = structure(matrix(1L, 3, 3), class = c("mycoords", "matrix")))
+  )
+
+  for (v in violations) {
+    space_arg <- if (is.null(v$sp)) sp else v$sp
+    fast <- tryCatch({
+      neuroim2:::.new_roi_vol_window(v$d, space_arg, v$c, v$ci, v$pi); "built"
+    }, error = function(e) "rejected")
+    slow <- tryCatch({
+      obj <- new("ROIVolWindow", v$d, space = space_arg, coords = v$c,
+                 center_index = v$ci, parent_index = v$pi)
+      validObject(obj)
+      "built"
+    }, error = function(e) "rejected")
+
+    expect_identical(fast, "rejected", info = paste(v$nm, "(fast constructor)"))
+    expect_identical(slow, "rejected", info = paste(v$nm, "(new + validObject)"))
+  }
+
+  # A list of numbers IS legitimately coercible, and both paths accept it --
+  # that is not a violation. What must be rejected is a value whose as.vector()
+  # S3 method returns a non-numeric type, since is.vector() is TRUE for lists.
+  expect_equal(neuroim2:::.new_roi_vol_window(list(1, 2, 3), sp, ok_coords, 1L, 1L)@.Data,
+               c(1, 2, 3))
+  as.vector.roiProbeEvil <- function(x, mode = "any") list("a", "b", "c")
+  registerS3method("as.vector", "roiProbeEvil", as.vector.roiProbeEvil)
+  evil <- structure(c(1, 2, 3), class = "roiProbeEvil")
+  expect_error(neuroim2:::.new_roi_vol_window(evil, sp, ok_coords, 1L, 1L),
+               "double or integer")
+  expect_error(new("ROIVolWindow", evil, space = sp, coords = ok_coords,
+                   center_index = 1L, parent_index = 1L))
+
+  # and a well-formed object is accepted by both, identically
+  a <- new("ROIVolWindow", c(1, 2, 3), space = sp, coords = ok_coords,
+           center_index = 1L, parent_index = 5L)
+  b <- neuroim2:::.new_roi_vol_window(c(1, 2, 3), sp, ok_coords, 1L, 5L)
+  expect_identical(a, b)
+  expect_true(validObject(b))
+})
+
+test_that("a NeuroSpace subclass is still accepted for the space slot", {
+  # the fast path checks inherits() first for speed, then falls back to is(),
+  # so S4 inheritance must still work
+  setClass("ProbeSpace", contains = "NeuroSpace")
+  on.exit(try(removeClass("ProbeSpace"), silent = TRUE), add = TRUE)
+  base <- NeuroSpace(c(10L, 10L, 10L))
+  sub <- new("ProbeSpace", dim = base@dim, origin = base@origin,
+             spacing = base@spacing, axes = base@axes,
+             trans = base@trans, inverse = base@inverse)
+  expect_true(is(sub, "NeuroSpace"))
+  obj <- neuroim2:::.new_roi_vol_window(c(1, 2), sub, matrix(1L, 2, 3), 1L, 1L)
+  expect_true(is(obj@space, "NeuroSpace"))
+})
+
+test_that("nonzero drops NA/NaN voxels identically everywhere", {
+  # `vals != 0` yields NA for a missing voxel, and an NA logical subscript emits
+  # an all-NA coordinate row -- an ROI with NA coordinates. "Nonzero" cannot be
+  # established for a missing value, so every path must drop it.
+  a <- array(1, c(3, 3, 3))
+  a[1, 2, 2] <- NA
+  a[3, 3, 3] <- NaN
+  v <- DenseNeuroVol(a, NeuroSpace(c(3, 3, 3), c(1, 1, 1)))
+
+  sr <- spherical_roi(v, c(2, 2, 2), 1.5, nonzero = TRUE)
+  expect_false(anyNA(sr@coords))
+  expect_false(anyNA(sr@.Data))
+
+  st <- spherical_roi_set(v, rbind(c(2L, 2L, 2L)), 1.5, nonzero = TRUE)[[1]]
+  expect_identical(st, sr)
+
+  # every searchlight, eager and lazy, must agree with spherical_roi
+  lazy  <- searchlight(v, radius = 1.5, nonzero = TRUE, eager = FALSE)
+  eager <- searchlight(v, radius = 1.5, nonzero = TRUE, eager = TRUE)
+  expect_equal(length(lazy), length(eager))
+  for (i in seq_along(eager)) {
+    expect_identical(lazy[[i]], eager[[i]], info = paste("searchlight", i))
+    expect_false(anyNA(eager[[i]]@coords), info = paste("searchlight", i))
+  }
+
+  # and the coords-only iterator
+  cds <- searchlight_coords(v, radius = 1.5, nonzero = TRUE)
+  for (i in seq_along(cds)) expect_false(anyNA(cds[[i]]), info = paste("coords", i))
+})
+
+test_that("radius smaller than the finest voxel dimension is rejected everywhere", {
+  w <- LogicalNeuroVol(array(TRUE, c(5, 5, 5)), NeuroSpace(c(5, 5, 5), c(2, 2, 2)))
+  msg <- "radius' is too small"
+  expect_error(spherical_roi(w, c(3, 3, 3), 1), msg)
+  expect_error(spherical_roi_set(w, rbind(c(3L, 3L, 3L)), 1), msg)
+  expect_error(searchlight(w, radius = 1, eager = TRUE), msg)
+  # the lazy iterators must fail at construction, not silently yield 1-voxel windows
+  expect_error(searchlight(w, radius = 1, eager = FALSE), msg)
+  expect_error(searchlight_coords(w, radius = 1), msg)
+})
+
+test_that("index_to_grid survives dimensions whose running product exceeds int", {
+  # denom was int, so 65536*65536 wrapped to 0 and the next division raised
+  # SIGFPE, killing the session.
+  g <- index_to_grid(NeuroSpace(c(65536L, 65536L, 2L)), 1:3)
+  expect_equal(unname(g[, 1]), c(1, 2, 3))
+  expect_true(all(g[, 2] == 1) && all(g[, 3] == 1))
+  expect_equal(unname(index_to_grid(NeuroSpace(c(65536L, 65536L, 2L)), 65537)[1, ]),
+               c(1, 2, 1))
 })

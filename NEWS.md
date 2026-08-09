@@ -49,12 +49,50 @@
     sparse fast path is gated on the concrete `SparseNeuroVec` class so
     subclasses that override `matricized_access()` keep their hook.
 
+  - The searchlight iterators do the whole per-centre job in one compiled pass --
+    translate the cached offset template, clip to the volume, apply the mask,
+    gather values, locate the centre row -- with everything invariant hoisted out
+    of the iterator closure. `searchlight_coords()` in particular used to build a
+    full `ROIVolWindow` per centre and then discard all but its coordinates.
+    `spherical_roi_set()` expands every centre in one batched call, so
+    `searchlight(eager = TRUE)` benefits too.
+  - The iterators remain lazy. Materialising a whole-brain radius-8 mm
+    searchlight at once would be about 0.9 GB of coordinates, or 1.5 GB as ROI
+    objects, so the work went into making the per-element call cheap rather than
+    into emitting everything up front.
+
   On a 91x109x91 volume at 2 mm with a 290,137-voxel mask and radius-8 mm
-  searchlights, `spherical_roi()` goes from 660 us to about 130 us per ROI, and
-  a whole-brain searchlight from roughly 191 s of enumeration to 38 s.
+  searchlights, per element and projected over the whole brain:
+
+  ```
+  searchlight_coords()        97.0 -> 7.7 us     28.1 s -> 2.2 s
+  searchlight(eager = FALSE)  92.3 -> 28.0 us    26.8 s -> 8.1 s
+  spherical_roi()            660.0 -> 85.0 us   191.5 s -> 24.7 s
+  ```
 
 
 ## Bug Fixes
+
+* **Breaking:** `nonzero = TRUE` now drops voxels whose value is `NA` or `NaN`,
+  in every ROI builder and every searchlight iterator. Previously the filter was
+  written `vals != 0`, which evaluates to `NA` for a missing voxel; an `NA`
+  logical subscript emits an all-`NA` row, so a `ROIVolWindow` could come back
+  with `NA NA NA` coordinates. Missing values also made the eager and lazy
+  searchlight iterators disagree with each other: on a 3x3x3 volume with one `NA`
+  voxel they differed on 21 of 25 searchlights. "Nonzero" cannot be established
+  for a missing value, so it is dropped. The rule now lives in one place, in the
+  compiled searchlight core.
+
+* Fixed a `SIGFPE` crash in `index_to_grid()` for spaces whose running product of
+  dimensions exceeds `int`: `index_to_grid(NeuroSpace(c(65536L, 65536L, 2L)), 1:3)`
+  killed the R session. The stride accumulator wrapped to zero and the next
+  division faulted. It is now 64-bit.
+
+* `searchlight()` and `searchlight_coords()` again reject a `radius` smaller than
+  the finest voxel dimension, as the single-ROI builders always have. The lazy
+  iterators had stopped validating it and returned degenerate one-voxel windows
+  instead.
+
 
 * **Breaking:** `spherical_roi()`, `cuboid_roi()` and `square_roi()` now share
   one definition of centroid handling, `nonzero` filtering and the

@@ -520,17 +520,24 @@ blobby_shape <- function(drop = 0.3, edge_fraction = 0.7) {
 #' @keywords internal
 #' @noRd
 .searchlight_plan <- function(mask, radius, nonzero) {
+  vspacing <- spacing(mask)
+  # The single-ROI builders reject this via make_spherical_grid(); the lazy
+  # iterators must too, or they silently return degenerate one-voxel windows.
+  if (radius < min(vspacing)) {
+    stop("'radius' is too small; must be greater than at least one voxel dimension in image")
+  }
+
   vdim <- as.integer(dim(mask)[1:3])
-  # The volume is flattened once so that per-centre value lookup is plain vector
-  # indexing rather than an S4 `[` dispatch per ROI.
-  flat <- as.numeric(as.vector(as.array(mask)))
+  # The volume is flattened once so that per-centre value lookup and mask
+  # filtering are plain pointer reads in the compiled core rather than an S4 `[`
+  # dispatch per ROI. One buffer serves both, so there is no second copy and no
+  # second place for the `nonzero` rule to be defined.
   list(
-    off   = .sphere_offsets(radius, spacing(mask)),
-    vdim  = vdim,
-    vals  = flat,
-    keep  = if (isTRUE(nonzero)) flat != 0 else logical(0),
-    space = space(mask),
-    slice = as.integer(vdim[1]) * as.integer(vdim[2])
+    off      = .sphere_offsets(radius, vspacing),
+    vdim     = vdim,
+    vals     = as.numeric(as.vector(as.array(mask))),
+    use_mask = isTRUE(nonzero),
+    space    = space(mask)
   )
 }
 
@@ -539,7 +546,8 @@ blobby_shape <- function(drop = 0.3, edge_fraction = 0.7) {
 #' @keywords internal
 #' @noRd
 .searchlight_coords_at <- function(plan, centroid) {
-  sphere_coords_cpp(plan$off, as.integer(centroid[1:3]), plan$vdim, plan$keep)
+  sphere_coords_cpp(plan$off, as.integer(centroid[1:3]), plan$vdim,
+                    plan$vals, plan$use_mask)
 }
 
 #' A ROIVolWindow for one searchlight, using a prepared plan
@@ -553,7 +561,7 @@ blobby_shape <- function(drop = 0.3, edge_fraction = 0.7) {
 #' @noRd
 .searchlight_roi_at <- function(plan, centroid) {
   parts <- sphere_roi_at_cpp(plan$off, as.integer(centroid[1:3]), plan$vdim,
-                             plan$keep, plan$vals)
+                             plan$vals, plan$use_mask)
   .new_roi_vol_window(parts$values, plan$space, parts$coords,
                       parts$center_row, parts$parent_index)
 }
@@ -612,8 +620,13 @@ searchlight_coords <- function(mask, radius, nonzero=FALSE, cores=0) {
   # Everything invariant across centres is computed once here; the closure is
   # then a single compiled call. Building a full ROIVolWindow per centre and
   # discarding all but its coords, as this used to, cost ~25x more.
-  plan <- .searchlight_plan(mask, radius, nonzero)
-  f <- function(i) .searchlight_coords_at(plan, grid[i, ])
+  # Built in its own environment so the closure retains only what it uses --
+  # not `mask`, `mask.idx`, `cores` and friends from this frame.
+  f <- local({
+    plan <- .searchlight_plan(mask, radius, nonzero)
+    g <- grid
+    function(i) .searchlight_coords_at(plan, g[i, ])
+  })
 
   if (cores > 1) {
     .future_lapply_with_cores(seq_len(length(mask.idx)), f, cores)
@@ -677,12 +690,15 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
   grid <- index_to_grid(mask, mask.idx)
   storage.mode(grid) <- "integer"
 
-  plan <- .searchlight_plan(mask, radius, nonzero)
-  f <- function(i) {
-    roi <- .searchlight_roi_at(plan, grid[i, ])
-    attr(roi, "mask_index") <- as.integer(i)
-    roi
-  }
+  f <- local({
+    plan <- .searchlight_plan(mask, radius, nonzero)
+    g <- grid
+    function(i) {
+      roi <- .searchlight_roi_at(plan, g[i, ])
+      attr(roi, "mask_index") <- as.integer(i)
+      roi
+    }
+  })
 
   if (!eager) {
     if (cores > 1) {

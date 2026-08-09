@@ -80,47 +80,52 @@ Phase 2 removes by not going through per-ROI R code at all.
 
 ---
 
-## Phase 2 — fused searchlight core (the large win)
+## Phase 2 — done: thin the searchlight iterators
 
-**Why.** After Phase 1, enumerating a whole-brain searchlight still costs ~40 s,
-essentially all of it per-ROI R and S4 overhead. Most consumers call
-`series(vec, coords(sl))` and never use the `ROIVolWindow` as an object — they
-want the voxel set. Emitting index sets for all centres in one compiled pass
-measured **1.3 µs/ROI (0.4 s whole brain)** in the standalone harness.
+**What was actually built, and why it differs from the plan.** The plan projected
+495x from emitting index sets for all centres in one pass. Measured first: a
+whole-brain radius-8 mm searchlight over a 290k-voxel mask is ~0.9 GB of
+coordinates, 1.5 GB as ROI objects. That is exactly why these iterators are lazy,
+so bulk emission would have traded a memory hazard for a benchmark. The work went
+instead into making the per-element call cheap:
 
-**What to build.**
+- `src/searchlight_core.cpp` does the whole per-centre job in one pass: translate
+  the cached template, clip, apply the mask, gather values, find the centre row.
+- `.searchlight_plan()` hoists every invariant out of the iterator closures,
+  which are built with `local()` so they retain only the plan and the centre grid.
+- `spherical_roi_set()` expands all centres in one batched call;
+  `searchlight(eager = TRUE)` inherits it.
 
-1. `searchlight_index_set(mask, radius, nonzero, centres)` in C++: one pass over
-   centres, translating the cached offset template, clipping to bounds, applying
-   the mask, emitting 1-based linear indices plus the centre's row. Returns a
-   list of integer vectors.
-2. Rewrite `spherical_roi_set()` on top of it. Its docstring already claims to be
-   "more efficient than calling `spherical_roi` multiple times"; today its body
-   is a `for` loop calling `spherical_roi`. This makes the documentation true.
-3. Route `searchlight(eager = TRUE)` and `searchlight_coords()` through the same
-   core. `searchlight_coords()` currently builds a full `ROIVolWindow` per voxel
-   and then throws it away to return `coords(roi)` — pure waste.
-4. Keep the lazy `deflist` API returning `ROIVolWindow` objects, now built with
-   the Phase 1 constructor, for callers that need them.
+```
+searchlight_coords()        97.0 -> 7.7 us/elem    28.1 s -> 2.2 s   12.6x
+searchlight(eager = FALSE)  92.3 -> 28.0 us/elem   26.8 s -> 8.1 s    3.3x
+spherical_roi_set()                 31.5 us/ROI             9.1 s
+```
 
-**Parallelism.** `RcppParallel` is already in `LinkingTo` (currently used only by
-the 4-D bilateral filter). The loop over centres is embarrassingly parallel and
-allocation-free if each worker writes into a preallocated buffer. Do this only
-*after* the serial version is verified — and note that `RcppParallel` workers
-must not touch R objects, so the offset template has to be copied to a plain
-`std::vector` first.
+ROI construction dropped again on the way: an S4 object extending a basic type
+*is* that vector with the slots as attributes, so setting the attributes and
+calling `asS4()` gives an `identical()` object. The mechanism costs ~3 us; with
+the argument checks the constructor is ~11 us against `new()`'s 450-790 us.
 
-**Verification.** The existing golden sweep already covers all four searchlight
-iterators; extend it with the index-set entry points. The equivalence claim is
-"same voxel sets, same order, same centre row, same `mask_index` attribute."
+**What the review found.** Four defects, all fixed:
 
-**Risk.** Medium. The searchlight iterators have subtly different contracts
-(`random_searchlight` mutates a remaining-set; `resampled_searchlight` samples
-with replacement and accepts custom `shape_fun`s). Do not try to fuse those two
-into the same core — give them the index-set primitive and leave their
-bookkeeping in R.
+- A **segfault** from `R_xlen_t` overflow in the length guards -- the same defect
+  a previous review found in `series_gather.cpp`, reintroduced. Guards now use
+  division-based checks.
+- **`nonzero` disagreed about NA.** The compiled filter dropped missing voxels;
+  the R filter (`vals != 0`) produced an `NA` logical subscript and emitted
+  `NA NA NA` coordinate rows. Eager and lazy searchlights differed on 21 of 25
+  windows on a volume with one `NA`. The rule now exists once, in C++.
+- The lazy iterators had **stopped validating `radius < min(spacing)`** and
+  silently returned one-voxel windows.
+- `parent_index` was narrowed with a C cast past 2^31 voxels; now `NA`.
 
-**Expected.** Enumeration 40 s → ~1 s serial; `searchlight_coords()` similar.
+Also fixed while in the area: a pre-existing **SIGFPE** in `index_to_grid()` for
+spaces whose running product of dimensions exceeds `int`.
+
+**Still open, low value:** the `.sphere_offset_cache` is unbounded in entry *size*
+(templates scale as radius cubed, and a pathological radius parks hundreds of MB
+in the namespace). Bounding by total size rather than entry count would fix it.
 
 ---
 

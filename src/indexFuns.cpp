@@ -79,11 +79,14 @@ namespace indexfuns {
             int tmp = 1 + wh1 % array_dim(0);
             IntegerVector wh = IntegerVector(rank, tmp);
             if (rank >= 2) {
-                int denom = 1;
+                // int64: the running product of dimensions overflows int for
+                // volumes past ~2^31 voxels, and once it wraps to 0 the division
+                // below raises SIGFPE and kills the session.
+                int64_t denom = 1;
                 for (int j = 1; j < rank; j++) {
-                    denom = denom * array_dim(j-1);
-                    int nextd1 = (int)wh1/denom;
-                    wh(j) = 1 + nextd1 % array_dim(j);
+                    denom = denom * (int64_t) array_dim(j-1);
+                    int64_t nextd1 = (int64_t) wh1 / denom;
+                    wh(j) = (int)(1 + nextd1 % (int64_t) array_dim(j));
                 }
             }
             omat.row(i) = wh;
