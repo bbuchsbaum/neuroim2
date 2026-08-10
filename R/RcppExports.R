@@ -37,8 +37,8 @@ fast_multilayer_laplacian_enhancement_masked <- function(img, mask, k = 2L, patc
     .Call(`_neuroim2_fast_multilayer_laplacian_enhancement_masked`, img, mask, k, patch_size, search_radius, h, mapping_params, use_normalization_free)
 }
 
-gaussian_blur_sep_cpp <- function(arr, mask_idx, window, sigma, spacing, normalize = TRUE) {
-    .Call(`_neuroim2_gaussian_blur_sep_cpp`, arr, mask_idx, window, sigma, spacing, normalize)
+gaussian_blur_sep_cpp <- function(arr, mask_idx, window, sigma, spacing, normalize = TRUE, full_mask = FALSE) {
+    .Call(`_neuroim2_gaussian_blur_sep_cpp`, arr, mask_idx, window, sigma, spacing, normalize, full_mask)
 }
 
 indexToGridCpp <- function(idx, array_dim) {
@@ -83,6 +83,58 @@ local_spheres <- function(centers, radius, spacing, dim) {
 
 kernel_filt_3d_cpp <- function(data, kernel) {
     .Call(`_neuroim2_kernel_filt_3d_cpp`, data, kernel)
+}
+
+#' Read a raw block of image data into a double vector
+#'
+#' @param path file to read from
+#' @param offset byte offset of the first element
+#' @param n number of elements to read
+#' @param dtype_code NIfTI datatype code of the stored elements
+#' @param swap TRUE when the file's byte order differs from the platform's
+#' @param gzipped TRUE when the file is a gzip stream
+#' @return a numeric vector of length \code{n}
+#' @keywords internal
+#' @noRd
+nifti_read_data_cpp <- function(path, offset, n, dtype_code, swap, gzipped) {
+    .Call(`_neuroim2_nifti_read_data_cpp`, path, offset, n, dtype_code, swap, gzipped)
+}
+
+#' Write a header block followed by image data
+#'
+#' @param path file to create
+#' @param header raw vector written verbatim before the data
+#' @param data numeric values to encode
+#' @param dtype_code NIfTI datatype code to encode as
+#' @param slope,inter scaling to invert before encoding, i.e. the stored value
+#'   is \code{(x - inter) / slope}
+#' @param swap TRUE to write in the opposite byte order from the platform's
+#' @param gzipped TRUE to gzip the output
+#' @return the number of data elements written, invisibly
+#' @keywords internal
+#' @noRd
+nifti_write_data_cpp <- function(path, header, data, dtype_code, slope, inter, swap, gzipped) {
+    .Call(`_neuroim2_nifti_write_data_cpp`, path, header, data, dtype_code, slope, inter, swap, gzipped)
+}
+
+#' Gather a set of volumes from a 4-D image file
+#'
+#' Reads whole volumes rather than an arbitrary index set, so a contiguous
+#' request costs one sequential pass. Returns a
+#' \code{prod(dim[1:3]) x length(vols)} matrix, which is the layout
+#' \code{DenseNeuroVec} wants, so no transpose is needed on either side.
+#'
+#' @param path file to read from
+#' @param offset byte offset of the first element of the first volume
+#' @param nels voxels per volume
+#' @param vols 1-based volume indices, in the order they should appear
+#' @param dtype_code NIfTI datatype code of the stored elements
+#' @param swap TRUE when the file's byte order differs from the platform's
+#' @param gzipped TRUE when the file is a gzip stream
+#' @keywords internal
+#' @noRd
+nifti_read_volumes_cpp <- function(path, offset, nels, vols, dtype_code, swap, gzipped) {
+    .Call(`_neuroim2_nifti_read_volumes_cpp`, path, offset, nels, vols, dtype_code, swap, gzipped)
 }
 
 radius_search_3d_nonisotropic <- function(cds_vox, cds_mm, queries_mm, radius_mm, sx, sy, sz, ox_mm, oy_mm, oz_mm) {

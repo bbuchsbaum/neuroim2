@@ -104,7 +104,12 @@ setGeneric("meta_info", function(x) standardGeneric("meta_info"))
 ## scale factors (slope, intercept). We normalize those here so I/O code can
 ## apply scaling consistently across readers.
 ##
-## NIfTI convention: scl_slope == 0 implies "no scaling" (treat as 1).
+## "No scaling" has three spellings in the wild and all of them are legal:
+## scl_slope == 0 (what the NIfTI-1 standard says), an absent field, and NaN
+## (what nibabel's in-memory header carries by default, and what several
+## converters write to disk). A non-finite slope or intercept therefore means
+## "identity", not "corrupt file" -- refusing to open such an image would be
+## refusing to open files that the reference implementation writes.
 ## -------------------------------------------------------------------------
 
 .data_scale_params <- function(mi, index = 1L) {
@@ -122,15 +127,14 @@ setGeneric("meta_info", function(x) standardGeneric("meta_info"))
   slope_i <- if (length(slope) >= index) slope[[index]] else slope[[1]]
   intercept_i <- if (length(intercept) >= index) intercept[[index]] else intercept[[1]]
 
-  if (is.na(slope_i) || is.infinite(slope_i)) {
-    stop(sprintf("Invalid scale slope for volume %d: %s", index, slope_i))
+  # slope == 0, NA, NaN and +/-Inf all mean "this file is not scaled", and an
+  # intercept recorded alongside a dead slope is not scaling either -- it is a
+  # leftover. nibabel drops the pair together and so do we.
+  if (!is.finite(slope_i) || slope_i == 0) {
+    slope_i <- 1
+    intercept_i <- 0
   }
-  if (is.na(intercept_i) || is.infinite(intercept_i)) {
-    stop(sprintf("Invalid scale intercept for volume %d: %s", index, intercept_i))
-  }
-
-  # NIfTI spec: slope==0 means "no scaling" (identity)
-  if (slope_i == 0) slope_i <- 1
+  if (!is.finite(intercept_i)) intercept_i <- 0
 
   list(
     slope = as.numeric(slope_i),
@@ -140,24 +144,28 @@ setGeneric("meta_info", function(x) standardGeneric("meta_info"))
 
 .apply_data_scaling <- function(x, mi, index = 1L) {
   pars <- .data_scale_params(mi, index = index)
+  if (pars$slope == 1 && pars$intercept == 0) return(as.numeric(x))
   # Ensure numeric to avoid overflow when scaling integer storage.
   as.numeric(x) * pars$slope + pars$intercept
 }
 
+#' Apply per-volume scaling to a voxels-by-volumes matrix, in place where legal.
+#' @keywords internal
+#' @noRd
 .apply_data_scaling_matrix <- function(mat, mi, indices) {
   indices <- as.integer(indices)
   if (!is.matrix(mat)) {
     stop("'mat' must be a matrix")
   }
-  if (nrow(mat) != length(indices)) {
-    stop("Scaling: nrow(mat) must equal length(indices)")
+  if (ncol(mat) != length(indices)) {
+    stop("Scaling: ncol(mat) must equal length(indices)")
   }
-  out <- mat
   for (i in seq_along(indices)) {
     pars <- .data_scale_params(mi, index = indices[[i]])
-    out[i, ] <- as.numeric(out[i, ]) * pars$slope + pars$intercept
+    if (pars$slope == 1 && pars$intercept == 0) next
+    mat[, i] <- mat[, i] * pars$slope + pars$intercept
   }
-  out
+  mat
 }
 
 

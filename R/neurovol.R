@@ -236,6 +236,26 @@ setMethod("as.array", signature(x = "SparseNeuroVol"), function(x, ...) {
   as(x, "array")
 })
 
+#' Convert a dense image to a plain base array
+#'
+#' The S4 slots of an object that extends \code{array} are stored as attributes
+#' on that array, so the default coercion handed back the voxel data still
+#' carrying \code{space}, \code{header} and \code{class}. Anyone calling
+#' \code{as.array()} wants the numbers without the wrapper; these methods give
+#' exactly that.
+#'
+#' @param x A \code{\linkS4class{DenseNeuroVol}}, \code{\linkS4class{DenseNeuroVec}}
+#'   or \code{\linkS4class{NeuroSlice}}.
+#' @param ... Additional arguments (currently ignored).
+#' @return A base array with only a \code{dim} attribute.
+#' @rdname as.array-methods
+#' @export
+setMethod("as.array", signature(x = "DenseNeuroVol"), function(x, ...) x@.Data)
+
+#' @rdname as.array-methods
+#' @export
+setMethod("as.array", signature(x = "NeuroSlice"), function(x, ...) x@.Data)
+
 #' Convert SparseNeuroVol to a base vector
 #'
 #' Supplies an `as.vector` S4 method that flattens sparse volumes to a dense
@@ -370,20 +390,15 @@ setMethod(f="load_data", signature=c(x="NeuroVolSource"),
 			meta <- x@meta_info
 			nels <- prod(meta@dims[1:3])
 
-			### for brain buckets, this offset needs to be precomputed ....
-			offset <- (nels * (x@index-1)) * meta@bytes_per_element
+			### for brain buckets, the sub-volume is selected by element offset
+			dat <- .read_data_block(meta, first = nels * (x@index - 1) + 1, n = nels)
 
-				reader <- data_reader(meta, offset)
-				dat <- read_elements(reader, nels)
-
-				# Apply per-volume scaling (slope/intercept) when present
-				dat <- .apply_data_scaling(dat, meta, index = x@index)
-
-				close(reader)
-				arr <- array(dat, meta@dims[1:3])
+			# Apply per-volume scaling (slope/intercept) when present
+			dat <- .apply_data_scaling(dat, meta, index = x@index)
 
 			bspace <- NeuroSpace(meta@dims[1:3], meta@spacing, meta@origin, meta@spatial_axes, trans(meta))
-			DenseNeuroVol(arr, bspace, x)
+			# `dat` came straight from the compiled reader; adopt it in place.
+			.dense_neurovol_inplace(dat, bspace, header = meta@header)
 
 		})
 
@@ -1000,16 +1015,16 @@ setMethod(f="conn_comp", signature=signature(x="NeuroVol"),
 #' @export
 #' @rdname write_vol-methods
 setMethod(f="write_vol",signature=signature(x="NeuroVol", file_name="character", format="missing", data_type="missing"),
-		def=function(x, file_name) {
-			write_nifti_volume(x, file_name)
+		def=function(x, file_name, ...) {
+			write_nifti_volume(x, file_name, ...)
 		})
 
 
 #' @export
 #' @rdname write_vol-methods
 setMethod(f="write_vol",signature=signature(x="ClusteredNeuroVol", file_name="character", format="missing", data_type="missing"),
-          def=function(x, file_name) {
-            callGeneric(as(x, "DenseNeuroVol"), file_name)
+          def=function(x, file_name, ...) {
+            callGeneric(as(x, "DenseNeuroVol"), file_name, ...)
           })
 
 
@@ -1018,9 +1033,11 @@ setMethod(f="write_vol",signature=signature(x="ClusteredNeuroVol", file_name="ch
 #' @export
 #' @rdname write_vol-methods
 setMethod(f="write_vol",signature=signature(x="NeuroVol", file_name="character", format="character", data_type="missing"),
-		def=function(x, file_name, format) {
-			if (toupper(format) == "NIFTI" || toupper(format) == "NIFTI1" || toupper(format) == "NIFTI-1") {
-				callGeneric(x, file_name)
+		def=function(x, file_name, format, ...) {
+			if (toupper(format) %in% c("NIFTI", "NIFTI1", "NIFTI-1")) {
+				callGeneric(x, file_name, ...)
+			} else if (toupper(format) %in% c("NIFTI2", "NIFTI-2")) {
+				callGeneric(x, file_name, version = 2, ...)
 			} else {
 				stop(paste("sorry, cannot write format: ", format))
 			}
@@ -1030,9 +1047,11 @@ setMethod(f="write_vol",signature=signature(x="NeuroVol", file_name="character",
 #' @export
 #' @rdname write_vol-methods
 setMethod(f="write_vol",signature=signature(x="ROIVol", file_name="character", format="character", data_type="missing"),
-          def=function(x, file_name, format) {
-            if (toupper(format) == "NIFTI" || toupper(format) == "NIFTI1" || toupper(format) == "NIFTI-1") {
-              callGeneric(as.dense(x), file_name)
+          def=function(x, file_name, format, ...) {
+            if (toupper(format) %in% c("NIFTI", "NIFTI1", "NIFTI-1")) {
+              callGeneric(as.dense(x), file_name, ...)
+            } else if (toupper(format) %in% c("NIFTI2", "NIFTI-2")) {
+              callGeneric(as.dense(x), file_name, version = 2, ...)
             } else {
               stop(paste("sorry, cannot write format: ", format))
             }
@@ -1043,8 +1062,8 @@ setMethod(f="write_vol",signature=signature(x="ROIVol", file_name="character", f
 #' @export write_vol
 #' @rdname write_vol-methods
 setMethod(f="write_vol",signature=signature(x="NeuroVol", file_name="character", format="missing", data_type="character"),
-		def=function(x, file_name, data_type) {
-			write_nifti_volume(x, file_name, data_type)
+		def=function(x, file_name, data_type, ...) {
+			write_nifti_volume(x, file_name, data_type, ...)
 
 		})
 

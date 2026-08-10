@@ -1,3 +1,169 @@
+# neuroim2 0.18.0
+
+## NIfTI I/O rewritten on a compiled core
+
+The read and write paths no longer go through `readBin`/`writeBin`. A single
+translation unit (`src/nifti_data_io.cpp`) converts between the file's stored
+type and `double` in one pass, for plain and gzipped files alike, and both
+`read_vol()`/`read_vec()` and `write_vol()`/`write_vec()` now call it. On this
+machine, against `nibabel` 5.4.2 reading the same files:
+
+```
+                                   before     after    nibabel
+read 3-D int16 .nii  (14 MB)        0.46 s    0.049 s    0.027 s
+read 3-D float32 .nii.gz            0.45 s    0.220 s    0.247 s
+read 4-D int16 .nii  (56 MB)        3.09 s    0.371 s    0.107 s
+read 4-D int16 .nii.gz              2.81 s    0.750 s    0.585 s
+```
+
+Two things were behind the 4-D case in particular. `read_mapped_vols()` built a
+236 MB vector of `double` indices via `outer()` simply to enumerate a
+*contiguous* range, gathered it element by element through the memory map, and
+handed back a time-by-voxel matrix that `DenseNeuroVec()` then transposed
+straight back. It now reads whole volumes sequentially and returns them
+voxels-by-volumes, the layout the object stores. And building the object no
+longer copies the payload: an S4 class extending `array` *is* that array with
+the slots as attributes, so the read path sets them in place, the same
+technique the ROI constructors already used. The equivalence to `new()` is
+pinned by `identical()` in the test suite.
+
+`read_mapped_vols()` is internal, but its return layout changed from
+`[volumes x voxels]` to `[voxels x volumes]`. Two callers were also missing
+`scl_slope`/`scl_inter` scaling entirely; both are fixed.
+
+## Every NIfTI datatype the standard defines
+
+`int8`, `uint16`, `uint32`, `int64` and `uint64` are read and written. They
+were rejected before with *"Unsupported NIfTI data-type code"* — `uint16` in
+particular is not exotic.
+
+`int32` images no longer lose voxels holding `-2147483648`. That bit pattern is
+R's `NA_integer_`, so routing the payload through an R integer vector turned it
+into `NA` and dropped it from every downstream statistic; the compiled reader
+lands in `double` and never sees an R integer.
+
+Complex (`DT_COMPLEX64/128/256`), colour (`DT_RGB24`, `DT_RGBA32`),
+`DT_FLOAT128` and 1-bit `DT_BINARY` are still not read, but the error now names
+the type and says why: a `NeuroVol` holds one real number per voxel, and
+inventing a projection — a modulus, a luminance — would be answering a question
+the caller did not ask.
+
+## Writing preserves the header
+
+`as_nifti_header()` built every header from defaults plus the object's
+geometry, so a read-write round trip silently discarded everything else. It now
+starts from the header the image was read from. Concretely, a round trip used
+to lose:
+
+* **the repetition time** (`pixdim[4]` reset to 0) and `xyzt_units`,
+* **`sform_code`**, rewritten from whatever it was to 1 — so an image in MNI
+  space came back labelled scanner-anatomical,
+* `descrip`, `aux_file`, `intent_code`, `intent_name`, `cal_min`/`cal_max`, the
+  slice-timing fields and `toffset`.
+
+All of them survive now. The source header travels on a new `header` slot on
+`NeuroObj`, which every image class inherits; `header(x)` reads it, and that
+method now accepts images as its documentation always claimed.
+
+`write_vol()`/`write_vec()` also default to the source file's datatype rather
+than `FLOAT`, when the values are still exactly representable in it. An
+unmodified `int16` image round-trips byte for byte instead of doubling in size;
+computed data that no longer fits is promoted to `FLOAT` rather than quietly
+quantised.
+
+### Integer output is scaled, not truncated
+
+`write_vol(x, f, data_type = "SHORT")` went through
+`writeBin(as.integer(x), ...)`, which truncates toward zero without a warning:
+data spanning ±3.7 came back with a maximum error of **0.998**. `scl_slope` and
+`scl_inter` are now derived to fit the target type, giving **5.4e-05** on the
+same data — the same precision `nibabel` produces. Data that is already
+integral and in range is still written unscaled, so masks, label volumes and
+atlases stay exact.
+
+## NIfTI-2
+
+Read and written, plain or gzipped. `write_vol()`/`write_vec()` take
+`version = 2` or `format = "NIFTI2"`, and
+select it automatically when a dimension exceeds 32767, which NIfTI-1's 16-bit
+`dim` field cannot represent. Files written this way are read correctly by
+`nibabel`, including the affine, TR and units.
+
+## Conformance and diagnostics
+
+* **`scl_slope = NaN` no longer aborts the read.** It is one of the three legal
+  spellings of "this file is not scaled", alongside `0` and an absent field, and
+  it is what `nibabel`'s in-memory header carries by default — so neuroim2 was
+  refusing to open files the reference implementation writes. An intercept
+  recorded next to a dead slope is dropped with it.
+* **Singleton axes are preserved.** The number of axes is taken from `dim[0]`,
+  as the standard says, instead of being inferred by stopping at the first
+  extent equal to 1. A 64 × 64 × 1 single-slice volume used to load as 64 × 64,
+  and a one-volume run as a 3-D volume.
+* **5-D files keep their shape.** `read_nifti_header()` used to fold a
+  degenerate fourth axis and warn, so `read_header()` and `read_hyper_vec()`
+  could not see what the file actually declared. The fold now happens only
+  inside `read_vec()`, where it is a documented convenience; a genuinely 5-D
+  file is refused there with a pointer to `read_hyper_vec()`.
+* **`qform_code == 0` and `sform_code == 0` now follow METHOD 1.** Both
+  transforms being marked unknown means the quaternion is not a statement about
+  where the image is; the affine is derived from `pixdim` with the image centred
+  on the origin, which is what the standard specifies and what `nibabel`
+  returns. This also gives ANALYZE 7.5 files their correct affine instead of
+  `diag(2, 2, 2)` with a zero translation.
+* **A truncated file says what is missing**: how many elements the header
+  describes, at what offset, and how many bytes the file actually supplies. It
+  used to fail with `argument is of length zero`. A file that is not an image at
+  all now reports its leading `sizeof_hdr` field and what that field must be.
+* `intent_name` is read as the fixed-width byte field it is. Reading it as a C
+  string ran past the field whenever those 16 bytes held no null terminator.
+
+## Filtering
+
+`gaussian_blur()` accepts a `NeuroVec` and smooths it volume by volume, with
+the argument checks, kernel and mask resolved once instead of per volume.
+
+The separable kernel also got two exact optimisations. Its `y` and `z` passes
+accumulate over whole contiguous rows and slices rather than walking a column
+with stride `d0` (or `d0 * d1`), which touched a fresh cache line per
+iteration; the additions for each output element still happen in the same
+order, so the result is bit-identical. And when the mask covers every voxel —
+what `gaussian_blur(vol)` with no mask means — the mask-insulation denominator
+is the zero-padded convolution of a constant, which factorises into three
+per-axis edge corrections, replacing three full-volume passes with `d0 + d1 +
+d2` additions.
+
+```
+                                          before     after   nibabel/scipy
+3-D, FWHM 6 mm, no mask                   0.60 s    0.21 s      0.13 s
+4-D, FWHM 6 mm, 200 volumes               2.04 s    0.97 s      0.57 s
+```
+
+Equivalence to the dense kernel is checked over 432 configurations of
+dimension, window, sigma, spacing, mask and `normalize` in the test suite.
+
+## Documentation
+
+* `vignette("large-data")` and `?read_vec` now recommend the masked and
+  memory-mapped paths for anything large, rather than presenting them as a
+  fallback for when memory runs out. For the scattered access that searchlight,
+  ROI and connectivity work perform they are also *faster*: 5,000 voxel time
+  courses from a 64 × 64 × 36 × 200 run measured 44 ms with `mask=` and 144 ms
+  via `mode = "mmap"`, against 4.8 s for loading the image and then indexing it.
+
+## Other changes
+
+* `as.array()` on a dense image returns a plain array. It used to hand back the
+  payload still carrying the `space`, `header` and `class` attributes, because
+  the slots of an S4 class extending `array` *are* attributes on that array.
+* `linear_access()` on a `FileBackedNeuroVec` gathers in one vectorised step
+  instead of looping over the request in R, and applies data scaling, which it
+  previously ignored.
+* `dev/bench/nibabel/` holds the conformance and timing harnesses these numbers
+  come from; `dev/nibabel-gap-analysis.md` is the write-up. 30 probes covering
+  the standard now agree with `nibabel` on 28, with the remaining two refused by
+  design.
+
 # neuroim2 0.17.0
 
 ## Documentation

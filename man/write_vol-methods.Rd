@@ -9,17 +9,17 @@
 \alias{write_vol,NeuroVol,character,missing,character-method}
 \title{Write a 3d image volume to disk}
 \usage{
-write_vol(x, file_name, format, data_type)
+write_vol(x, file_name, format, data_type, ...)
 
-\S4method{write_vol}{NeuroVol,character,missing,missing}(x, file_name)
+\S4method{write_vol}{NeuroVol,character,missing,missing}(x, file_name, format, data_type, ...)
 
-\S4method{write_vol}{ClusteredNeuroVol,character,missing,missing}(x, file_name)
+\S4method{write_vol}{ClusteredNeuroVol,character,missing,missing}(x, file_name, format, data_type, ...)
 
-\S4method{write_vol}{NeuroVol,character,character,missing}(x, file_name, format)
+\S4method{write_vol}{NeuroVol,character,character,missing}(x, file_name, format, data_type, ...)
 
-\S4method{write_vol}{ROIVol,character,character,missing}(x, file_name, format)
+\S4method{write_vol}{ROIVol,character,character,missing}(x, file_name, format, data_type, ...)
 
-\S4method{write_vol}{NeuroVol,character,missing,character}(x, file_name, data_type)
+\S4method{write_vol}{NeuroVol,character,missing,character}(x, file_name, format, data_type, ...)
 }
 \arguments{
 \item{x}{an image object, typically a \code{\linkS4class{NeuroVol}} instance.}
@@ -28,7 +28,11 @@ write_vol(x, file_name, format, data_type)
 
 \item{format}{file format string. Since "NIFTI" is the only currently supported format, this parameter can be safely ignored and omitted.}
 
-\item{data_type}{output data type, If specified should be a \code{character} vector of: "BINARY", "UBYTE", "SHORT", "INT", "FLOAT", "DOUBLE".
+\item{data_type}{output data type, If specified should be one of "UBYTE", "BYTE", "SHORT", "USHORT", "INT", "UINT", "LONG",
+  "ULONG", "FLOAT" or "DOUBLE". Defaults to the datatype of the file the image
+  was read from when its values are still exactly representable in it, and to
+  "FLOAT" otherwise; integer targets are fitted with \code{scl_slope} /
+  \code{scl_inter} rather than truncated.
 Otherwise output format will be inferred from R the datatype of the image.}
 }
 \value{

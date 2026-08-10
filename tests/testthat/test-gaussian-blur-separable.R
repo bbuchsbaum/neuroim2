@@ -262,7 +262,7 @@ test_that("gaussian_blur() validates its arguments and clamps absurd windows", {
   # A mask of the wrong shape used to reach an unbounded write and segfault.
   big <- LogicalNeuroVol(array(TRUE, c(20L, 20L, 20L)),
                          NeuroSpace(c(20L, 20L, 20L), spacing = c(1, 1, 1)))
-  expect_error(gaussian_blur(vol, big), "same dimensions")
+  expect_error(gaussian_blur(vol, big), "same spatial dimensions")
 
   # Any tap at least max(dim) away is out of bounds from every voxel, so
   # clamping the window there changes no result.

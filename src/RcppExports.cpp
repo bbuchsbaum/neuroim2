@@ -170,8 +170,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // gaussian_blur_sep_cpp
-NumericVector gaussian_blur_sep_cpp(NumericVector arr, IntegerVector mask_idx, int window, double sigma, NumericVector spacing, bool normalize);
-RcppExport SEXP _neuroim2_gaussian_blur_sep_cpp(SEXP arrSEXP, SEXP mask_idxSEXP, SEXP windowSEXP, SEXP sigmaSEXP, SEXP spacingSEXP, SEXP normalizeSEXP) {
+NumericVector gaussian_blur_sep_cpp(NumericVector arr, IntegerVector mask_idx, int window, double sigma, NumericVector spacing, bool normalize, bool full_mask);
+RcppExport SEXP _neuroim2_gaussian_blur_sep_cpp(SEXP arrSEXP, SEXP mask_idxSEXP, SEXP windowSEXP, SEXP sigmaSEXP, SEXP spacingSEXP, SEXP normalizeSEXP, SEXP full_maskSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -181,7 +181,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type sigma(sigmaSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type spacing(spacingSEXP);
     Rcpp::traits::input_parameter< bool >::type normalize(normalizeSEXP);
-    rcpp_result_gen = Rcpp::wrap(gaussian_blur_sep_cpp(arr, mask_idx, window, sigma, spacing, normalize));
+    Rcpp::traits::input_parameter< bool >::type full_mask(full_maskSEXP);
+    rcpp_result_gen = Rcpp::wrap(gaussian_blur_sep_cpp(arr, mask_idx, window, sigma, spacing, normalize, full_mask));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -335,6 +336,57 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericMatrix >::type data(dataSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type kernel(kernelSEXP);
     rcpp_result_gen = Rcpp::wrap(kernel_filt_3d_cpp(data, kernel));
+    return rcpp_result_gen;
+END_RCPP
+}
+// nifti_read_data_cpp
+NumericVector nifti_read_data_cpp(std::string path, double offset, double n, int dtype_code, bool swap, bool gzipped);
+RcppExport SEXP _neuroim2_nifti_read_data_cpp(SEXP pathSEXP, SEXP offsetSEXP, SEXP nSEXP, SEXP dtype_codeSEXP, SEXP swapSEXP, SEXP gzippedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
+    Rcpp::traits::input_parameter< double >::type offset(offsetSEXP);
+    Rcpp::traits::input_parameter< double >::type n(nSEXP);
+    Rcpp::traits::input_parameter< int >::type dtype_code(dtype_codeSEXP);
+    Rcpp::traits::input_parameter< bool >::type swap(swapSEXP);
+    Rcpp::traits::input_parameter< bool >::type gzipped(gzippedSEXP);
+    rcpp_result_gen = Rcpp::wrap(nifti_read_data_cpp(path, offset, n, dtype_code, swap, gzipped));
+    return rcpp_result_gen;
+END_RCPP
+}
+// nifti_write_data_cpp
+double nifti_write_data_cpp(std::string path, RawVector header, NumericVector data, int dtype_code, double slope, double inter, bool swap, bool gzipped);
+RcppExport SEXP _neuroim2_nifti_write_data_cpp(SEXP pathSEXP, SEXP headerSEXP, SEXP dataSEXP, SEXP dtype_codeSEXP, SEXP slopeSEXP, SEXP interSEXP, SEXP swapSEXP, SEXP gzippedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
+    Rcpp::traits::input_parameter< RawVector >::type header(headerSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< int >::type dtype_code(dtype_codeSEXP);
+    Rcpp::traits::input_parameter< double >::type slope(slopeSEXP);
+    Rcpp::traits::input_parameter< double >::type inter(interSEXP);
+    Rcpp::traits::input_parameter< bool >::type swap(swapSEXP);
+    Rcpp::traits::input_parameter< bool >::type gzipped(gzippedSEXP);
+    rcpp_result_gen = Rcpp::wrap(nifti_write_data_cpp(path, header, data, dtype_code, slope, inter, swap, gzipped));
+    return rcpp_result_gen;
+END_RCPP
+}
+// nifti_read_volumes_cpp
+NumericMatrix nifti_read_volumes_cpp(std::string path, double offset, double nels, NumericVector vols, int dtype_code, bool swap, bool gzipped);
+RcppExport SEXP _neuroim2_nifti_read_volumes_cpp(SEXP pathSEXP, SEXP offsetSEXP, SEXP nelsSEXP, SEXP volsSEXP, SEXP dtype_codeSEXP, SEXP swapSEXP, SEXP gzippedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
+    Rcpp::traits::input_parameter< double >::type offset(offsetSEXP);
+    Rcpp::traits::input_parameter< double >::type nels(nelsSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type vols(volsSEXP);
+    Rcpp::traits::input_parameter< int >::type dtype_code(dtype_codeSEXP);
+    Rcpp::traits::input_parameter< bool >::type swap(swapSEXP);
+    Rcpp::traits::input_parameter< bool >::type gzipped(gzippedSEXP);
+    rcpp_result_gen = Rcpp::wrap(nifti_read_volumes_cpp(path, offset, nels, vols, dtype_code, swap, gzipped));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -517,7 +569,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_neuroim2_downsample_3d_cpp", (DL_FUNC) &_neuroim2_downsample_3d_cpp, 3},
     {"_neuroim2_downsample_4d_cpp", (DL_FUNC) &_neuroim2_downsample_4d_cpp, 3},
     {"_neuroim2_fast_multilayer_laplacian_enhancement_masked", (DL_FUNC) &_neuroim2_fast_multilayer_laplacian_enhancement_masked, 8},
-    {"_neuroim2_gaussian_blur_sep_cpp", (DL_FUNC) &_neuroim2_gaussian_blur_sep_cpp, 6},
+    {"_neuroim2_gaussian_blur_sep_cpp", (DL_FUNC) &_neuroim2_gaussian_blur_sep_cpp, 7},
     {"_neuroim2_indexToGridCpp", (DL_FUNC) &_neuroim2_indexToGridCpp, 2},
     {"_neuroim2_gridToIndex3DCpp", (DL_FUNC) &_neuroim2_gridToIndex3DCpp, 2},
     {"_neuroim2_gridToIndexCpp", (DL_FUNC) &_neuroim2_gridToIndexCpp, 2},
@@ -529,6 +581,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_neuroim2_local_sphere", (DL_FUNC) &_neuroim2_local_sphere, 6},
     {"_neuroim2_local_spheres", (DL_FUNC) &_neuroim2_local_spheres, 4},
     {"_neuroim2_kernel_filt_3d_cpp", (DL_FUNC) &_neuroim2_kernel_filt_3d_cpp, 2},
+    {"_neuroim2_nifti_read_data_cpp", (DL_FUNC) &_neuroim2_nifti_read_data_cpp, 6},
+    {"_neuroim2_nifti_write_data_cpp", (DL_FUNC) &_neuroim2_nifti_write_data_cpp, 8},
+    {"_neuroim2_nifti_read_volumes_cpp", (DL_FUNC) &_neuroim2_nifti_read_volumes_cpp, 7},
     {"_neuroim2_radius_search_3d_nonisotropic", (DL_FUNC) &_neuroim2_radius_search_3d_nonisotropic, 10},
     {"_neuroim2_radius_search_3d_direct", (DL_FUNC) &_neuroim2_radius_search_3d_direct, 10},
     {"_neuroim2_radius_search_3d_precomputed", (DL_FUNC) &_neuroim2_radius_search_3d_precomputed, 10},
