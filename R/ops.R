@@ -399,8 +399,10 @@ setMethod(f="Summary", signature=signature(x="DenseNeuroVol"),
 #' @export
 setMethod("mean", signature(x = "DenseNeuroVec"), function(x, ..., na.rm = FALSE) {
   d <- dim(x)
-  M <- matrix(x@.Data, nrow = prod(d[1:3]), ncol = d[4])
-  DenseNeuroVol(rowMeans(M, na.rm = na.rm), drop_dim(space(x)))
+  # .rowMeans takes the dimensions as arguments, so nothing is reshaped and
+  # nothing is copied; matrix() duplicated the entire payload first.
+  DenseNeuroVol(.rowMeans(x@.Data, prod(d[1:3]), d[4], na.rm = na.rm),
+                drop_dim(space(x)))
 })
 
 #' @rdname mean-methods

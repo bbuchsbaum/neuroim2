@@ -4,7 +4,15 @@
 \alias{gaussian_blur}
 \title{Gaussian Blur for Volumetric Images}
 \usage{
-gaussian_blur(vol, mask, sigma = 2, window = 1, normalize = TRUE)
+gaussian_blur(
+  vol,
+  mask,
+  sigma = 2,
+  window = NULL,
+  normalize = TRUE,
+  fwhm = NULL,
+  truncate = 4
+)
 }
 \arguments{
 \item{vol}{A \code{\linkS4class{NeuroVol}} object representing the image volume to be smoothed.}
@@ -14,13 +22,15 @@ This mask defines the region where the blurring is applied. If not provided, the
 It must have the same dimensions as \code{vol}.}
 
 \item{sigma}{A single finite positive number specifying the standard deviation of the
-Gaussian kernel. Default is 2.}
+Gaussian kernel, \strong{in millimetres}. Default is 2. Ignored when \code{fwhm} is given.}
 
-\item{window}{A single finite number >= 1 specifying the kernel size. It represents the number
-of voxels to include on each side of the center voxel. For example, window=1 results in a
-3x3x3 kernel. Default is 1. A window larger than the volume is clamped to
-\code{max(dim(vol))}, which changes no result: every kernel tap that far out is out of
-bounds from every voxel.}
+\item{window}{Kernel half-width in \emph{voxels}: the number of voxels included on each side
+of the centre, so \code{window = 1} is a 3x3x3 kernel. \code{NULL} (the default) derives it
+from \code{sigma} and the voxel size as \code{ceiling(truncate * sigma / spacing)}, taking
+the largest value over the three axes so no axis is clipped early. Supplying a number instead
+truncates the kernel there, which under-smooths --- see \emph{Details}. A window larger than
+the volume is clamped to \code{max(dim(vol))}, which changes no result: every kernel tap that
+far out is out of bounds from every voxel.}
 
 \item{normalize}{A logical value controlling how the mask boundary is handled. When \code{TRUE}
 (the default), the blur is \emph{insulated} to the mask: each in-mask output voxel is computed
@@ -30,6 +40,14 @@ not (including \code{NaN}/\code{Inf}) --- never influence in-mask outputs, and e
 not biased toward the mask exterior. When \code{FALSE}, the legacy behavior is used: the full
 kernel is applied with zero padding outside the volume and out-of-mask neighbour values are
 read into the convolution (retained only for backward compatibility).}
+
+\item{fwhm}{Full width at half maximum of the kernel in millimetres, the unit smoothing is
+usually specified in. Supplying it sets \code{sigma} to
+\code{fwhm / (2 * sqrt(2 * log(2)))}; giving both is an error.}
+
+\item{truncate}{How many standard deviations of the Gaussian to keep when \code{window} is
+derived. Default 4, matching \code{scipy.ndimage.gaussian_filter}. Smaller values are faster
+and smooth less than requested.}
 }
 \value{
 A \code{\linkS4class{NeuroVol}} object representing the smoothed image.
@@ -41,7 +59,24 @@ The blurring is performed within a specified image mask, with customizable kerne
 \details{
 The function uses a C++ implementation for efficient Gaussian blurring. The blurring is applied
 only to voxels within the specified mask (or the entire volume if no mask is provided).
-The kernel size is determined by the 'window' parameter, and its shape by the 'sigma' parameter.
+
+\strong{Kernel width.} A Gaussian has infinite support, so it has to be cut off somewhere, and
+where it is cut off changes the smoothing that is actually applied. \code{window} is measured
+in voxels while \code{sigma} is in millimetres, so a fixed \code{window} truncates at a
+different point on every acquisition. The old default of \code{window = 1} cut a
+\code{sigma = 2} mm kernel off at one standard deviation on 2 mm voxels and delivered 3.5 mm
+FWHM where 4.7 mm was asked for --- and 1.9 mm on 1 mm voxels. Leaving \code{window = NULL}
+derives it from \code{sigma} instead, so the smoothing you ask for is the smoothing you get:
+
+\tabular{lrrr}{
+  \strong{call} \tab \strong{delivered} \tab \strong{requested} \tab \strong{shortfall} \cr
+  \code{sigma = 2, window = 1} \tab 3.49 mm \tab 4.71 mm \tab 26\% \cr
+  \code{sigma = 4, window = 1} \tab 3.76 mm \tab 9.42 mm \tab 60\% \cr
+  \code{sigma = 4} (derived)   \tab 9.42 mm \tab 9.42 mm \tab 0\% \cr
+}
+
+Passing \code{window} explicitly still truncates exactly as before, so old calls are
+reproducible; it is only the default that changed.
 
 With the default \code{normalize = TRUE}, smoothing a masked statistical map (e.g. a first-level
 fMRI coefficient map written as \code{NaN} outside the brain) within its brain mask preserves the

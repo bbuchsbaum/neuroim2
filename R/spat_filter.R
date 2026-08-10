@@ -103,6 +103,25 @@ NULL
   }
 }
 
+#' Kernel half-width, in voxels, that keeps `truncate` standard deviations
+#'
+#' `sigma` is in millimetres and `window` counts voxels, so the conversion needs
+#' the voxel size. The largest value over the three axes is used rather than a
+#' per-axis width: the kernel builders take one window, and the extra taps a
+#' coarse axis then evaluates lie beyond `truncate` sigma and carry negligible
+#' weight. The rounding is `scipy.ndimage.gaussian_filter`'s -- it takes
+#' `int(truncate * sd + 0.5)` voxels, with its default `truncate = 4.0` -- so
+#' the kernel matches the reference implementation tap for tap on isotropic
+#' data rather than overshooting it.
+#' @keywords internal
+#' @noRd
+.gaussian_window <- function(sigma, spacing, truncate = 4) {
+  sp <- as.numeric(spacing)
+  sp <- sp[is.finite(sp) & sp > 0]
+  if (!length(sp)) sp <- 1
+  max(1L, as.integer(floor(truncate * sigma / min(sp) + 0.5)))
+}
+
 #' Gaussian Blur for Volumetric Images
 #'
 #' @description
@@ -114,12 +133,20 @@ NULL
 #'   This mask defines the region where the blurring is applied. If not provided, the entire volume is processed.
 #'   It must have the same dimensions as \code{vol}.
 #' @param sigma A single finite positive number specifying the standard deviation of the
-#'   Gaussian kernel. Default is 2.
-#' @param window A single finite number >= 1 specifying the kernel size. It represents the number
-#'   of voxels to include on each side of the center voxel. For example, window=1 results in a
-#'   3x3x3 kernel. Default is 1. A window larger than the volume is clamped to
-#'   \code{max(dim(vol))}, which changes no result: every kernel tap that far out is out of
-#'   bounds from every voxel.
+#'   Gaussian kernel, \strong{in millimetres}. Default is 2. Ignored when \code{fwhm} is given.
+#' @param fwhm Full width at half maximum of the kernel in millimetres, the unit smoothing is
+#'   usually specified in. Supplying it sets \code{sigma} to
+#'   \code{fwhm / (2 * sqrt(2 * log(2)))}; giving both is an error.
+#' @param window Kernel half-width in \emph{voxels}: the number of voxels included on each side
+#'   of the centre, so \code{window = 1} is a 3x3x3 kernel. \code{NULL} (the default) derives it
+#'   from \code{sigma} and the voxel size as \code{ceiling(truncate * sigma / spacing)}, taking
+#'   the largest value over the three axes so no axis is clipped early. Supplying a number instead
+#'   truncates the kernel there, which under-smooths --- see \emph{Details}. A window larger than
+#'   the volume is clamped to \code{max(dim(vol))}, which changes no result: every kernel tap that
+#'   far out is out of bounds from every voxel.
+#' @param truncate How many standard deviations of the Gaussian to keep when \code{window} is
+#'   derived. Default 4, matching \code{scipy.ndimage.gaussian_filter}. Smaller values are faster
+#'   and smooth less than requested.
 #' @param normalize A logical value controlling how the mask boundary is handled. When \code{TRUE}
 #'   (the default), the blur is \emph{insulated} to the mask: each in-mask output voxel is computed
 #'   from in-mask neighbours only and the kernel is renormalized by the in-mask weight (a
@@ -134,7 +161,24 @@ NULL
 #' @details
 #' The function uses a C++ implementation for efficient Gaussian blurring. The blurring is applied
 #' only to voxels within the specified mask (or the entire volume if no mask is provided).
-#' The kernel size is determined by the 'window' parameter, and its shape by the 'sigma' parameter.
+#'
+#' \strong{Kernel width.} A Gaussian has infinite support, so it has to be cut off somewhere, and
+#' where it is cut off changes the smoothing that is actually applied. \code{window} is measured
+#' in voxels while \code{sigma} is in millimetres, so a fixed \code{window} truncates at a
+#' different point on every acquisition. The old default of \code{window = 1} cut a
+#' \code{sigma = 2} mm kernel off at one standard deviation on 2 mm voxels and delivered 3.5 mm
+#' FWHM where 4.7 mm was asked for --- and 1.9 mm on 1 mm voxels. Leaving \code{window = NULL}
+#' derives it from \code{sigma} instead, so the smoothing you ask for is the smoothing you get:
+#'
+#' \tabular{lrrr}{
+#'   \strong{call} \tab \strong{delivered} \tab \strong{requested} \tab \strong{shortfall} \cr
+#'   \code{sigma = 2, window = 1} \tab 3.49 mm \tab 4.71 mm \tab 26\% \cr
+#'   \code{sigma = 4, window = 1} \tab 3.76 mm \tab 9.42 mm \tab 60\% \cr
+#'   \code{sigma = 4} (derived)   \tab 9.42 mm \tab 9.42 mm \tab 0\% \cr
+#' }
+#'
+#' Passing \code{window} explicitly still truncates exactly as before, so old calls are
+#' reproducible; it is only the default that changed.
 #'
 #' With the default \code{normalize = TRUE}, smoothing a masked statistical map (e.g. a first-level
 #' fMRI coefficient map written as \code{NaN} outside the brain) within its brain mask preserves the
@@ -159,16 +203,34 @@ NULL
 #' Gaussian blur: https://en.wikipedia.org/wiki/Gaussian_blur
 #'
 #' @export
-gaussian_blur <- function(vol, mask, sigma = 2, window = 1, normalize = TRUE) {
+gaussian_blur <- function(vol, mask, sigma = 2, window = NULL, normalize = TRUE,
+                          fwhm = NULL, truncate = 4) {
   if (!inherits(vol, "NeuroVol") && !inherits(vol, "NeuroVec")) {
     cli::cli_abort("{.arg vol} must be a {.cls NeuroVol} or {.cls NeuroVec} object.")
+  }
+  if (!is.null(fwhm)) {
+    if (!missing(sigma)) {
+      cli::cli_abort(c("Give either {.arg sigma} or {.arg fwhm}, not both.",
+                       "i" = "{.arg fwhm} is {.code sigma * 2 * sqrt(2 * log(2))}."))
+    }
+    if (!is.numeric(fwhm) || length(fwhm) != 1L || !is.finite(fwhm) || fwhm <= 0) {
+      cli::cli_abort("{.arg fwhm} must be a single finite positive number, not {.val {fwhm}}.")
+    }
+    sigma <- fwhm / (2 * sqrt(2 * log(2)))
+  }
+  if (!is.numeric(sigma) || length(sigma) != 1L || !is.finite(sigma) || sigma <= 0) {
+    cli::cli_abort("{.arg sigma} must be a single finite positive number, not {.val {sigma}}.")
+  }
+  if (!is.numeric(truncate) || length(truncate) != 1L || !is.finite(truncate) ||
+      truncate <= 0) {
+    cli::cli_abort("{.arg truncate} must be a single finite positive number, not {.val {truncate}}.")
+  }
+  if (is.null(window)) {
+    window <- .gaussian_window(sigma, spacing(vol)[1:3], truncate)
   }
   if (!is.numeric(window) || length(window) != 1L || !is.finite(window) ||
       window < 1) {
     cli::cli_abort("{.arg window} must be a single finite number >= 1, not {.val {window}}.")
-  }
-  if (!is.numeric(sigma) || length(sigma) != 1L || !is.finite(sigma) || sigma <= 0) {
-    cli::cli_abort("{.arg sigma} must be a single finite positive number, not {.val {sigma}}.")
   }
   if (!is.logical(normalize) || length(normalize) != 1L || is.na(normalize)) {
     cli::cli_abort("{.arg normalize} must be a single {.cls logical} (TRUE or FALSE).")

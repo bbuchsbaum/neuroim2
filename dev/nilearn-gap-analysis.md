@@ -1,9 +1,13 @@
 # Where neuroim2 stands against nilearn
 
 Measured against `nilearn` 0.14.0 / scipy 1.17.1 / scikit-learn 1.8.0, with
-neuroim2 at `ca0045a` built from source under R 4.3.3 with a real `RNiftyReg`
-2.8.5. The harness is in `dev/bench/nilearn/` and re-runs from scratch.
-Absolute times are specific to this machine; the ratios are what transfer.
+neuroim2 built from source under R 4.3.3 with a real `RNiftyReg` 2.8.5. The
+harness is in `dev/bench/nilearn/` and re-runs from scratch. Absolute times are
+specific to this machine; the ratios are what transfer.
+
+**Status.** All six defects below have been fixed; see `NEWS.md` for what
+changed and which changes alter results. Each section keeps the original finding
+and adds the measurement after the fix, so the before/after is visible.
 
 This is the companion to `dev/nibabel-gap-analysis.md`. nibabel is the
 reference for file I/O and does no image processing; nilearn is the reference
@@ -24,9 +28,10 @@ searchlights.
 Nine such areas were compared. Reference volume: 60x72x56 at 2 mm with an
 83,563-voxel brain; run: the same grid, 60 timepoints.
 
-**Summary: neuroim2 is correct almost everywhere it overlaps, and faster than
-nilearn on the signal-extraction paths it was built for. It has three real
-correctness defects and one very large performance hole.**
+**Summary as first measured: neuroim2 was correct almost everywhere it
+overlaps, and faster than nilearn on the signal-extraction paths it was built
+for, but had three real correctness defects and one very large performance
+hole. All are now fixed.**
 
 ---
 
@@ -59,8 +64,16 @@ Three things make this worse than a documentation problem:
   saturates around 3.5–3.8 mm no matter how large `sigma` is.
 
 scipy sizes the kernel from sigma (`truncate = 4.0`), so the requested
-smoothing is what is applied. neuroim2 also has no FWHM interface, which is the
+smoothing is what is applied. neuroim2 also had no FWHM interface, which is the
 unit the field actually specifies smoothing in.
+
+**Fixed.** `window` defaults to `NULL`, meaning "derive the half-width from
+sigma and the voxel size", using scipy's own rounding. `fwhm` and `truncate` are
+accepted. Requests are now honoured to better than 1% of FWHM on isotropic and
+anisotropic grids alike, and matched-kernel timing is at parity (0.007 s against
+nilearn's 0.008 s in 3-D). Passing `window` explicitly still truncates exactly
+as before, so old analyses reproduce. This changes results for anyone who relied
+on the old default.
 
 ### 2. `as_canonical()` silently discards data
 
@@ -87,6 +100,14 @@ pure axis permutation by calling `resample()`, i.e. by going through an image
 nibabel and nilearn do this with an integer axis permutation and flip: exact,
 and 0.001 s.
 
+**Fixed.** `as_canonical()` permutes and flips the array and rebuilds the affine
+using the orientation primitives the package already exported, which reproduce
+`nibabel::as_closest_canonical` voxel for voxel. 100% of the data is retained,
+the output is a permutation of the input (checked with `identical()`), the
+four-voxel minimum is gone, and it runs in 0.009 s instead of 0.376 s.
+`reorient()` on a `NeuroSpace` permutes `dim` and `spacing` with the affine,
+which was the bug underneath.
+
 ### 3. `searchlight()` and `searchlight_coords()` disagree about the centres
 
 Same mask, same radius, on the 83,563-voxel brain:
@@ -103,6 +124,11 @@ that function means "centre on every voxel", so the documented behaviour needs
 set *and* filters the returned coordinates, where in `searchlight()` it only
 does the latter. A user who writes the same arguments for both gets 2.9x the
 work and most of the searchlights centred outside the brain.
+
+**Fixed.** `searchlight_coords()` centres on nonzero mask voxels like every
+other iterator in the package, and `nonzero` decides only what each searchlight
+contains. Both now return 83,563 elements with identical contents. This changes
+results for callers who did not pass `nonzero = TRUE`.
 
 ### 4. `NeuroSpace(dim, spacing, origin)` is a trap as a resample target
 
@@ -186,100 +212,85 @@ equivalents. `mean()` on a 4-D image and `concat()` are slower (below).
 
 ---
 
-## Performance: one very large hole
+## Performance: one very large hole (fixed)
 
-### `conn_comp()` is 1000x slower than scipy, and super-linear
+### `conn_comp()` was 1000x slower than scipy, and super-linear
 
-`conn_comp_3D()` (`R/conncomp.R:71`) is a pure-R two-pass union-find: a loop
-over in-mask voxels, each iteration building a 26x3 neighbour matrix with `t()`,
+`conn_comp_3D()` (`R/conncomp.R`) was a pure-R two-pass union-find: a loop over
+in-mask voxels, each iteration building a 26x3 neighbour matrix with `t()`,
 indexing the label array with a coordinate matrix, and running an R-level
-`find()`. `src/conncomp.cpp` exists but contains only a commented-out sketch of
-that R code — nothing in it is compiled or called.
+`find()`. `src/conncomp.cpp` existed but contained only a commented-out sketch
+of that R code.
 
-Profiling confirms where the time goes: `conn_comp_3D` accounts for 98.8% of
-`conn_comp()`, and inside it the R-level `find()` and the neighbour closure are
-85%. The cluster sizes and voxel lists `conn_comp()` returns beyond what
-`scipy.ndimage.label()` does are about 1% of the total, so they do not explain
-the gap.
+| volume | in-mask voxels | components | scipy | was | now |
+|---|---:|---:|---:|---:|---:|
+| 40x48x38 | 7,312 | 1,171 | 0.002 s | 1.4 s | **0.35 s** |
+| 91x109x91 | 90,357 | 12,396 | 0.021 s | 38.4 s | **2.10 s** |
+| 182x218x182 | 720,916 | 94,328 | 0.206 s | **916 s** | **16.1 s** |
+| *labelling alone*, 91x109x91 | 90,357 | 12,396 | 0.021 s | -- | **0.027 s** |
 
-| volume | in-mask voxels | components | scipy | neuroim2 | |
-|---|---:|---:|---:|---:|---|
-| 40x48x38 | 7,312 | 1,171 | 0.002 s | 1.4 s | 690x |
-| 91x109x91 | 90,357 | 12,396 | 0.021 s | 38.4 s | **1,830x** |
-| 182x218x182 | 720,916 | 94,328 | 0.206 s | **916 s** | **4,450x** |
+Counts match exactly at every size, before and after. The compiled labeller is
+at parity with scipy; what remains in `conn_comp()` is the cluster table and
+local maxima it computes and `scipy.ndimage.label()` does not. Two other things
+came out of the same work: `conn_comp()`'s wrapper re-derived a coordinate
+matrix per component with `as.matrix()`, and `ClusteredNeuroVol()` filled its
+cluster map with a name-by-name list lookup that was quadratic in the cluster
+count (2.2 s at 12,396 clusters). Output is unchanged throughout, pinned against
+the previous implementation in `tests/testthat/test-conncomp-equivalence.R`.
 
-Counts match exactly at every size. The ratio grows with size — 8x the voxels
-costs 24-28x the time — so this is not a constant-factor interpretation
-penalty; something in the union-find is behaving worse than linearly. **A
-whole-brain 1 mm connected-component labelling takes fifteen minutes.**
-
-### `automask()` inherits it
+### `automask()` inherited it
 
 | | voxels | Dice | time |
 |---|---:|---:|---:|
 | `compute_epi_mask` | 83,547 | 0.9999 | 0.031 s |
-| `automask` | 83,563 | **1.0000** | 14.0 s (**448x**) |
+| `automask` (was) | 83,563 | **1.0000** | 14.0 s (448x) |
+| `automask` (now) | 83,563 | **1.0000** | **0.39 s** (12x) |
 
-Profiling `automask()` puts **92% of its runtime inside `conn_comp_3D`**. It
-calls it up to four times: `.largest_component_mask()` three times and
-`.fill_holes_mask()` once, and the latter labels the *complement* of the mask,
-which is the larger set. The mask it produces is the better one; it just takes
-450x as long to produce it.
-
-So the two worst performance results in this comparison are the same defect.
+92% of its runtime was in the labeller, which it calls up to four times.
 
 ### Smaller gaps
 
-| operation | neuroim2 | nilearn | |
-|---|---:|---:|---|
-| `mean()` on a 4-D image | 0.197 s | 0.012 s | 16x |
-| `concat()` 3 x 20 volumes | 0.447 s | 0.243 s | 1.8x |
-| Gaussian smooth, matched kernel, 3-D | 0.009 s | 0.008 s | 1.2x |
-| Gaussian smooth, matched kernel, 4-D | 0.546 s | 0.707 s | **0.8x** |
+| operation | was | now | nilearn |
+|---|---:|---:|---:|
+| `as.matrix()` on a 4-D image | 0.180 s | **~0 s** | -- |
+| `mean()` on a 4-D image | 0.197 s | **0.126 s** | 0.012 s |
+| `resample()` 2mm -> 3mm | 0.066 s | **0.018 s** | 0.006 s |
+| Gaussian smooth, matched kernel, 3-D | 0.009 s | **0.007 s** | 0.008 s |
 
-`mean()` on a `DenseNeuroVec` (`R/ops.R`) calls `matrix(x@.Data, ...)`, which
-copies the entire payload before `rowMeans` reads it. Switching to `.rowMeans()`,
-which takes the dimensions as arguments and needs no reshape, measured 0.215 s ->
-0.118 s with an identical result — worth doing, but only half the gap. The rest
-is structural: an R image holds `double` where numpy reads the file's `float32`,
-so the reduction moves twice the bytes. Smoothing is at parity now that the
-separable kernel work has landed — faster than nilearn on 4-D.
+`as.matrix()` on a `DenseNeuroVec` duplicated the payload to reshape it to
+voxels-by-time; a reshape is a change of `dim`, and R copies on the first write
+anyway. `mean()` now goes through `.rowMeans()` with no reshape at all -- the
+residual 10x is structural, since an R image holds `double` where numpy reads
+the file's `float32`. `resample()` was scanning the image to infer an output
+datatype for headers whose geometry is all it uses.
 
----
+## What is left
 
-## What to do, in order
+The six defects are fixed. What the harness still shows, in the order it would
+be worth looking at:
 
-**1. Size the smoothing kernel from sigma, and take FWHM.** Make `window`
-default to something like `ceiling(4 * sigma / spacing)` per axis rather than
-1, so a request is honoured; add an `fwhm` argument, since that is the unit the
-field specifies. Both are behaviour changes and need a NEWS entry, but the
-current behaviour is quietly wrong in a way that changes results.
+**1. 4-D Gaussian smoothing is 2.3x off nilearn** (1.66 s against 0.71 s for 60
+volumes), where 3-D is at parity. The 4-D path loops volumes in R, and each
+iteration copies a volume out of the run and the result back in, plus the kernel
+reallocates its scratch buffers. A compiled driver that walks the 4-D array
+directly would close it.
 
-**2. Compile the connected-component labeller.** A two-pass union-find with
-path compression and union-by-rank in C++ is a well-understood 150 lines, and
-`src/conncomp.cpp` is already in the build. This is the single largest
-performance defect in the package, and it fixes `automask()` at the same time.
-Correctness is already pinned: the R version agrees with scipy exactly, so the
-compiled one can be checked against it.
+**2. `conn_comp()` is 15-164x off `scipy.ndimage.label()`** even though the
+labelling itself is at parity, because it also builds a cluster table and a
+local-maxima list that scipy does not. The ratio is worst when there are many
+small components (164x at 4,989 of them), which is where the per-component R
+work in the wrapper dominates. Whether those extras should be computed by
+default is worth revisiting.
 
-**3. Reorient by permuting, not resampling.** `as_canonical()` should permute
-and flip the array and rebuild the affine — exact, instant, no minimum size, no
-data loss. `reorient(NeuroSpace, target)` must permute `dim` along with the
-affine; that is the bug underneath.
+**3. `mean()` and other 4-D reductions are ~10x off numpy** for the structural
+reason above: `double` against `float32`. Not fixable without changing what a
+`NeuroVec` stores.
 
-**4. Make the two searchlight iterators agree**, and decide what `nonzero`
-means in each — ideally splitting the "which voxels are centres" question from
-the "which voxels are returned" question, which is what the overloading
-conflates.
+**4. `concat()` is ~4x off `concat_imgs`**, and was not investigated.
 
-**5. Warn when a resample target barely overlaps its source**, and reconsider
-what `NeuroSpace(dim, spacing, origin)` should produce.
-
-**6. `mean()` without the copy** — a one-line change to `.rowMeans()`, worth
-about 1.8x.
-
-Items 1–3 are the ones that change answers or make a function usable at
-whole-brain scale.
+**5. `bilateral_filter`, `guided_filter`, `enhance_stat_map` and the `cgb_*`
+graph-smoothing functions** were never profiled or probed -- none has a close
+nilearn counterpart, so the harness says nothing about them.
 
 ## Reproducing
 

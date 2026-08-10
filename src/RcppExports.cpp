@@ -125,6 +125,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// conn_comp_labels_cpp
+List conn_comp_labels_cpp(LogicalVector mask, IntegerVector dims, int connectivity);
+RcppExport SEXP _neuroim2_conn_comp_labels_cpp(SEXP maskSEXP, SEXP dimsSEXP, SEXP connectivitySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< LogicalVector >::type mask(maskSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type dims(dimsSEXP);
+    Rcpp::traits::input_parameter< int >::type connectivity(connectivitySEXP);
+    rcpp_result_gen = Rcpp::wrap(conn_comp_labels_cpp(mask, dims, connectivity));
+    return rcpp_result_gen;
+END_RCPP
+}
 // downsample_3d_cpp
 NumericVector downsample_3d_cpp(NumericVector arr, IntegerVector new_dims, IntegerVector old_dims);
 RcppExport SEXP _neuroim2_downsample_3d_cpp(SEXP arrSEXP, SEXP new_dimsSEXP, SEXP old_dimsSEXP) {
@@ -566,6 +579,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_neuroim2_build_cgb_graph_cpp", (DL_FUNC) &_neuroim2_build_cgb_graph_cpp, 12},
     {"_neuroim2_build_cgb_graph_nuis_cpp", (DL_FUNC) &_neuroim2_build_cgb_graph_nuis_cpp, 14},
     {"_neuroim2_apply_cgb_graph_cpp", (DL_FUNC) &_neuroim2_apply_cgb_graph_cpp, 7},
+    {"_neuroim2_conn_comp_labels_cpp", (DL_FUNC) &_neuroim2_conn_comp_labels_cpp, 3},
     {"_neuroim2_downsample_3d_cpp", (DL_FUNC) &_neuroim2_downsample_3d_cpp, 3},
     {"_neuroim2_downsample_4d_cpp", (DL_FUNC) &_neuroim2_downsample_4d_cpp, 3},
     {"_neuroim2_fast_multilayer_laplacian_enhancement_masked", (DL_FUNC) &_neuroim2_fast_multilayer_laplacian_enhancement_masked, 8},

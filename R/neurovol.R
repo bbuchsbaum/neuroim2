@@ -954,42 +954,54 @@ setMethod(f="conn_comp", signature=signature(x="NeuroVol"),
 
 		comps <- conn_comp_3D(mask,...)
 
-		grid <- as.data.frame(index_to_grid(mask, which(mask>0)))
-		colnames(grid) <- c("x", "y", "z")
-		locations <- split(grid, comps$index[comps$index>0])
+		# Keep the voxel coordinates and values as matrices/vectors alongside the
+		# data frames the result exposes. Everything below used to re-derive them
+		# per component with as.matrix(loc), which was the largest remaining cost
+		# once the labelling itself was compiled.
+		lin_idx <- which(mask > 0)
+		gridm <- index_to_grid(mask, lin_idx)
+		colnames(gridm) <- c("x", "y", "z")
+		cid <- comps$index[lin_idx]
+		vals_in <- x[lin_idx]
+
+		grid <- as.data.frame(gridm)
+		rows <- split(seq_along(cid), cid)
+		locations <- lapply(rows, function(r) grid[r, , drop = FALSE])
 
 		ret <- list(index=ClusteredNeuroVol(mask, clusters=comps$index[mask>0]), size=NeuroVol(comps$size, space(x)), voxels=locations)
 
 		if (cluster_table) {
-			maxima <- do.call(rbind, lapply(locations, function(loc) {
-				if (nrow(loc) == 1) {
-					loc
-				} else {
-					vals <- x[as.matrix(loc)]
-					loc[which.max(vals),]
-				}
-			}))
-			N <- comps$size[as.matrix(maxima)]
+			# One grouped arg-max instead of a which.max per component. Ordering by
+			# (component, decreasing value) and taking the first row of each group
+			# picks the same voxel which.max would, including its tie-break on the
+			# first occurrence. `vals_in` cannot contain NA: a voxel with an NA
+			# value fails `x > threshold` and is not in the mask.
+			o <- order(cid, -vals_in)
+			sel <- o[!duplicated(cid[o])]
+			maxima <- gridm[sel, , drop = FALSE]
+			N <- comps$size[lin_idx[sel]]
 			Area <- N * prod(spacing(x))
-			maxvals <- x[as.matrix(maxima)]
+			maxvals <- vals_in[sel]
+			# as.vector() strips the dimnames a matrix column carries: with a
+			# single cluster `maxima[, 1]` comes back named "x", and data.frame()
+			# would turn that into a character row name where it used to be 1.
 			ret$cluster_table <- data.frame(index=1:NROW(maxima),
-			                                x=maxima[,1], y=maxima[,2], z=maxima[,3],
+			                                x=as.vector(maxima[,1]),
+			                                y=as.vector(maxima[,2]),
+			                                z=as.vector(maxima[,3]),
 			                                N=N, Area=Area, value=maxvals)
 		}
 
 		if (local_maxima) {
-			#if (all(map_int(locations, NROW) == 1)) {
-      #
-			#}
-			coord.sets <- lapply(locations, function(loc) {
-				sweep(as.matrix(loc), 2, spacing(x), "*")
-			})
+			# Scale to millimetres once for the whole mask rather than per component.
+			sp <- spacing(x)
+			gridw <- gridm * rep(sp, each = nrow(gridm))
 
-			loc.max <- do.call(rbind, mapply(function(cset, i) {
-				idx <- .pruneCoords(as.matrix(cset), x[as.matrix(locations[[i]])], mindist=local_maxima_dist)
-				maxvox <- as.matrix(locations[[i]])[idx,,drop=F]
-				cbind(i, maxvox)
-			}, coord.sets, 1:length(coord.sets), SIMPLIFY=FALSE))
+			loc.max <- do.call(rbind, lapply(seq_along(rows), function(i) {
+				r <- rows[[i]]
+				keep <- .pruneCoords(gridw[r, , drop=FALSE], vals_in[r], mindist=local_maxima_dist)
+				cbind(i, gridm[r[keep], , drop=FALSE])
+			}))
 
 
 			loc.max <- cbind(loc.max, x[loc.max[, 2:4, drop=F]])

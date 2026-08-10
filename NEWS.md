@@ -1,3 +1,133 @@
+# neuroim2 0.19.0
+
+Six defects found by measuring the image-processing layer against `nilearn`
+0.14.0 / scipy, which is the reference for the processing neuroim2 also does.
+The harness is in `dev/bench/nilearn/` and the findings in
+`dev/nilearn-gap-analysis.md`.
+
+Two of these change results. Read the first two sections.
+
+## `gaussian_blur()` now applies the smoothing it is asked for
+
+`window` truncates the Gaussian at a fixed number of *voxels* while `sigma` is
+in *millimetres*, so the old default of `window = 1` cut the kernel off at one
+voxel either side regardless of how wide the kernel was meant to be. Measured by
+smoothing an impulse and reading the width back out:
+
+```
+                                  delivered   requested   shortfall
+gaussian_blur(sigma = 2, window = 1)  3.49 mm    4.71 mm     26%
+gaussian_blur(sigma = 3, window = 1)  3.70 mm    7.06 mm     48%
+gaussian_blur(sigma = 4, window = 1)  3.76 mm    9.42 mm     60%
+```
+
+Worse, the shortfall depended on the voxel size -- `sigma = 2, window = 1`
+delivered 3.49 mm FWHM on 2 mm voxels and 1.88 mm on 1 mm voxels, so the same
+call smoothed two acquisitions of the same brain differently -- and nothing
+warned.
+
+`window` now defaults to `NULL`, meaning "derive the half-width from `sigma` and
+the voxel size", using `scipy.ndimage.gaussian_filter`'s rule
+(`int(truncate * sigma / spacing + 0.5)`, `truncate = 4`). Requests are now
+honoured to better than 1% of FWHM on isotropic and anisotropic grids alike.
+
+* **This changes results.** Any call that relied on the old default is now
+  applying more smoothing -- the amount it was asking for. Passing `window`
+  explicitly reproduces the old kernel exactly, so old analyses remain
+  reproducible.
+* `fwhm` is accepted as an alternative to `sigma`, in millimetres, which is the
+  unit smoothing is normally specified in. Giving both is an error.
+* `truncate` controls how many standard deviations are kept when the window is
+  derived.
+
+## `as_canonical()` no longer discards data
+
+Reorienting to RAS is a permutation and a flip of the array: the voxels are the
+same voxels, relabelled. It was implemented by building a target space and
+handing it to `resample()`, and `reorient()` rotated the affine while keeping
+the *source* dimensions. When the reorientation permuted axes -- which is the
+whole point -- the output grid did not contain the data:
+
+```
+                     in                 out            nonzero kept
+nilearn reorder_img  AIR 60x72x56  ->   RAS 56x60x72      100%
+as_canonical (was)   AIR 60x72x56  ->   RAS 60x72x56       76.4%
+```
+
+Nearly a quarter of the image was thrown away silently. Going through a
+registration library also meant values were interpolated where they should
+merely have moved, and that images smaller than four voxels on any axis were
+refused outright.
+
+`as_canonical()` now permutes and flips the array and rebuilds the affine. It is
+exact (the output is a permutation of the input, checked with `identical()`),
+works at any size, matches `nibabel::as_closest_canonical` voxel for voxel, and
+is about 40x faster. `reorient()` on a `NeuroSpace` permutes `dim` and `spacing`
+along with the affine.
+
+## Connected components in compiled code
+
+`conn_comp_3D()` was a two-pass union-find written in interpreted R, building a
+26x3 neighbour matrix per voxel and running `find()` as an R closure.
+`src/conncomp.cpp` existed but held only a commented-out sketch of it. Against
+`scipy.ndimage.label()` it was 690x slower on a small volume and 4,450x slower
+on a 1 mm brain -- fifteen minutes for one labelling -- and the ratio grew with
+size.
+
+```
+                                     scipy    before     after
+40x48x38    (7,312 in-mask)         0.002 s    1.4 s     0.35 s
+91x109x91  (90,357 in-mask)         0.021 s   38.4 s     2.10 s
+182x218x182 (720,916 in-mask)       0.206 s  916 s      16.1 s
+labelling alone, 91x109x91          0.021 s      --      0.027 s
+```
+
+Output is unchanged: the compiled version reproduces the R one's labels, sizes
+and size-descending numbering including its tie-break, pinned in
+`tests/testthat/test-conncomp-equivalence.R` against the previous
+implementation, which is kept there as the reference.
+
+`conn_comp()`'s wrapper was rewritten alongside it -- it re-derived a coordinate
+matrix per component with `as.matrix()` -- and `ClusteredNeuroVol()` no longer
+fills its cluster map with a name-by-name list lookup, which was quadratic in
+the cluster count and cost 2.2 s at 12,396 clusters.
+
+`automask()` spent 92% of its time in the labeller and is **23x faster**
+(14.0 s to 0.62 s on a 60-volume run) with an unchanged result.
+
+## The two searchlight iterators agree on their centres
+
+`searchlight_coords(mask, radius)` returned one element per voxel *in the grid*
+where `searchlight(mask, radius)` returned one per *nonzero mask voxel* --
+241,920 against 83,563 on an ordinary brain mask -- although both documented the
+latter. `searchlight_coords()` now centres on nonzero mask voxels like every
+other iterator in the package, and `nonzero` decides only what each searchlight
+contains, as it does in `searchlight()`. It also validates its arguments.
+
+* **This changes results** for anyone who called `searchlight_coords()` without
+  `nonzero = TRUE`: the iterator is now about a third as long, and no longer
+  yields searchlights centred outside the mask.
+
+## A resample target that misses its source says so
+
+`NeuroSpace(dim, spacing, origin)` builds a positive-diagonal affine, which
+mirrors the usual LAS-to-RAS source. Handing one to `resample()` as a target
+produced a near-empty image with no warning. `resample()` now compares the two
+world bounding boxes and warns when they barely overlap, naming the likely
+cause.
+
+## Reshapes that copied the payload
+
+`as.matrix()` on a `DenseNeuroVec` duplicated the whole image to reshape it to
+voxels-by-time -- 116 MB for a 60-volume run, and over half of `automask()`'s
+runtime. A reshape is a change of `dim`, not of memory, and R still copies on
+the first write, so the source is untouched either way. `as.matrix()` is now
+effectively free, `mean()` goes through `.rowMeans()` with no reshape at all
+(0.21 s to 0.12 s), and `scale_series()` uses the same route.
+
+`resample()` no longer scans the image to infer an output datatype for headers
+whose geometry is all it uses.
+
 # neuroim2 0.18.0
 
 ## NIfTI I/O rewritten on a compiled core

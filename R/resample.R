@@ -88,8 +88,11 @@ convert_hd <- function(hd) {
 #' @export
 setMethod(f="resample", signature=signature("NeuroVol", "NeuroVol"),
           def=function(source, target, interpolation=3L) {
-            hd_target <- as_nifti_header(target, file_name="target.nii")
-            hd_source <- as_nifti_header(source, file_name="source.nii")
+            .warn_if_disjoint(space(source), space(target))
+            # Only the geometry of these headers is used, so name the datatype
+            # rather than letting as_nifti_header() scan the values to infer one.
+            hd_target <- as_nifti_header(target, file_name="target.nii", data_type="FLOAT")
+            hd_source <- as_nifti_header(source, file_name="source.nii", data_type="FLOAT")
 
             hdt <- convert_hd(hd_target)
             hds <- convert_hd(hd_source)
@@ -102,6 +105,52 @@ setMethod(f="resample", signature=signature("NeuroVol", "NeuroVol"),
 
             NeuroVol(unclass(out), space(target))
           })
+
+#' Warn when a resample target barely covers its source
+#'
+#' A target grid is only useful if it lands on the image. The commonest way to
+#' get one that does not is to build it from dimensions, spacing and origin
+#' alone -- \code{NeuroSpace(dim, spacing, origin)} gives a positive-diagonal
+#' affine, which mirrors the usual LAS-to-RAS source and leaves the two boxes
+#' almost disjoint. The resample then succeeds and returns a near-empty image,
+#' which is a hard thing to notice.
+#'
+#' The test is on the axis-aligned world bounding boxes, which is loose: it
+#' cannot tell a rotated overlap from a real one, so it is a warning about an
+#' obviously wrong target rather than a validity check.
+#'
+#' @keywords internal
+#' @noRd
+.warn_if_disjoint <- function(source_space, target_space, threshold = 0.05) {
+  box <- function(sp) {
+    d <- dim(sp)[1:3]
+    corners <- as.matrix(expand.grid(c(0, d[1] - 1), c(0, d[2] - 1), c(0, d[3] - 1)))
+    w <- cbind(corners, 1) %*% t(trans(sp))
+    rbind(apply(w[, 1:3, drop = FALSE], 2, min), apply(w[, 1:3, drop = FALSE], 2, max))
+  }
+  bs <- tryCatch(box(source_space), error = function(e) NULL)
+  bt <- tryCatch(box(target_space), error = function(e) NULL)
+  if (is.null(bs) || is.null(bt)) return(invisible(NULL))
+
+  overlap <- pmax(0, pmin(bs[2, ], bt[2, ]) - pmax(bs[1, ], bt[1, ]))
+  extent <- pmax(bt[2, ] - bt[1, ], .Machine$double.eps)
+  frac <- prod(overlap) / prod(extent)
+
+  if (!is.finite(frac) || frac >= threshold) return(invisible(NULL))
+
+  cli::cli_warn(c(
+    "The resample target covers little of the source image.",
+    "!" = "Their world bounding boxes overlap over {round(100 * frac, 1)}% of the
+           target, so most of the output will be background.",
+    "i" = "Source spans {paste(sprintf('[%.1f, %.1f]', bs[1, ], bs[2, ]), collapse = ' ')}
+           and the target {paste(sprintf('[%.1f, %.1f]', bt[1, ], bt[2, ]), collapse = ' ')}.",
+    "i" = "A target built with {.code NeuroSpace(dim, spacing, origin)} gets a
+           positive-diagonal affine, which mirrors a source whose x axis runs the
+           other way. Pass {.code trans =} explicitly, or use
+           {.fn resample_to} with the image you want to match."
+  ))
+  invisible(NULL)
+}
 
 #' Resample a NeuroVol object to match a NeuroSpace object
 #'

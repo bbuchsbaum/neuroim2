@@ -25,6 +25,20 @@ apply_cgb_graph_cpp <- function(arr, row_ptr, col_ind, val, mask_idx, passes = 1
     .Call(`_neuroim2_apply_cgb_graph_cpp`, arr, row_ptr, col_ind, val, mask_idx, passes, lambda)
 }
 
+#' Label the connected components of a 3-D logical mask
+#'
+#' @param mask logical vector holding the mask in column-major order
+#' @param dims integer vector of length 3
+#' @param connectivity 6, 18 or 26
+#' @return a list with \code{index} (components numbered by decreasing size)
+#'   and \code{size} (the size of the component each voxel belongs to), both
+#'   integer vectors of \code{prod(dims)}, and \code{n} the component count
+#' @keywords internal
+#' @noRd
+conn_comp_labels_cpp <- function(mask, dims, connectivity) {
+    .Call(`_neuroim2_conn_comp_labels_cpp`, mask, dims, connectivity)
+}
+
 downsample_3d_cpp <- function(arr, new_dims, old_dims) {
     .Call(`_neuroim2_downsample_3d_cpp`, arr, new_dims, old_dims)
 }

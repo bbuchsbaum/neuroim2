@@ -46,22 +46,22 @@ psf_fwhm <- function(o, spacing, centre) {
 }
 psf <- list()
 for (sg in c(2, 3, 4)) {
-  for (w in 1:4) {
-    key <- sprintf("sigma%g_window%d", sg, w)
-    psf[[key]] <- list(
+  # The default derives the kernel half-width from sigma; window = 1 and 2 are
+  # kept so the truncation this replaced stays visible and pinned.
+  psf[[sprintf("sigma%g_default", sg)]] <- list(
+    fwhm = psf_fwhm(gaussian_blur(imp_vol, sigma = sg, normalize = FALSE), 2, 21),
+    requested = 2 * sqrt(2 * log(2)) * sg)
+  for (w in 1:2) {
+    psf[[sprintf("sigma%g_window%d", sg, w)]] <- list(
       fwhm = psf_fwhm(gaussian_blur(imp_vol, sigma = sg, window = w, normalize = FALSE), 2, 21),
       requested = 2 * sqrt(2 * log(2)) * sg)
   }
 }
 res$psf <- psf
-# Two timings, because the default kernel is not the one nilearn evaluates:
-# window = 2 is what a user typically writes, window = 4 is the window that
-# actually delivers the requested FWHM on 2 mm voxels. Comparing the first
-# against nilearn flatters neuroim2, since it is doing less work.
-res$t_smooth_3d <- tm(gaussian_blur(vol, sigma = 6 / 2.3548, window = 2))
-res$t_smooth_3d_matched <- tm(gaussian_blur(vol, sigma = 6 / 2.3548, window = 4))
-res$t_smooth_4d <- tm(gaussian_blur(run, sigma = 6 / 2.3548, window = 2), 1)
-res$t_smooth_4d_matched <- tm(gaussian_blur(run, sigma = 6 / 2.3548, window = 4), 1)
+# The default kernel now evaluates the same extent nilearn does, so this is a
+# like-for-like comparison. `truncate = 4` matches scipy's default.
+res$t_smooth_3d <- tm(gaussian_blur(vol, fwhm = 6))
+res$t_smooth_4d <- tm(gaussian_blur(run, fwhm = 6), 1)
 
 ## ----------------------------------------------------------------- resampling
 res$identity_resample_maxdiff <- max(abs(as.array(resample(vol, space(vol))) - as.array(vol)))
@@ -86,9 +86,16 @@ res$nearest_labels_in <- length(unique(as.vector(as.array(labels))))
 res$nearest_labels_out <- length(unique(as.vector(as.array(rl))))
 
 # The target space people reach for first, built from dims/spacing/origin alone.
+# It mirrors an LAS source, so the result is near-empty; the point of the probe
+# is that this is now said out loud rather than returned silently.
 naive <- NeuroSpace(as.integer(ceiling(dim(vol) * 2 / 3)), c(3, 3, 3), origin = origin(vol))
+warned <- FALSE
+naive_out <- withCallingHandlers(
+  resample(vol, naive),
+  warning = function(w) { warned <<- TRUE; invokeRestart("muffleWarning") })
 res$naive_target <- list(source_mean = mean(as.array(vol)),
-                         resampled_mean = mean(as.array(resample(vol, naive))))
+                         resampled_mean = mean(as.array(naive_out)),
+                         warned = warned)
 
 ## --------------------------------------------------------------- reorientation
 odd <- read_vol(file.path(B, "odd.nii"))
