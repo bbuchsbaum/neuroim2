@@ -8,8 +8,10 @@ as_nifti_header(
   vol,
   file_name,
   oneFile = TRUE,
-  data_type = "FLOAT",
-  extensions = NULL
+  data_type = NULL,
+  extensions = NULL,
+  values = NULL,
+  version = NULL
 )
 }
 \arguments{
@@ -24,13 +26,24 @@ implying a single-file format (\code{.nii}). If \code{FALSE}, uses
 \code{"ni1"} (header+image).}
 
 \item{data_type}{Character specifying the data representation, e.g. \code{"FLOAT"},
-\code{"DOUBLE"}. The internal code picks an integer NIfTI code.}
+\code{"DOUBLE"}, \code{"SHORT"}. \code{NULL} (the default) keeps the source
+file's datatype when \code{vol} came from one and its values are still
+exactly representable in it, and uses \code{"FLOAT"} otherwise.}
 
 \item{extensions}{Optional \code{\link{NiftiExtensionList-class}} object or list
 of \code{\link{NiftiExtension-class}} objects to include in the header.}
+
+\item{values}{Optional numeric vector of the voxel values that will be
+written. Used to pick a datatype and to derive \code{scl_slope} /
+\code{scl_inter} for integer output; taken from \code{vol} when omitted.}
+
+\item{version}{Either \code{1} or \code{2}, selecting the NIfTI version to
+describe. \code{NULL} (the default) uses NIfTI-1 unless a dimension exceeds
+what its 16-bit \code{dim} field can hold, in which case NIfTI-2 is used
+because NIfTI-1 physically cannot represent the image.}
 }
 \value{
-A \code{list} representing the NIfTI-1 header fields, containing
+A \code{list} representing the NIfTI header fields, containing
   elements like \code{dimensions}, \code{pixdim}, \code{datatype}, \code{qform},
   \code{quaternion}, \code{qfac}, \code{extensions}, etc. This can be passed to
   other functions that write or manipulate the header.
@@ -51,6 +64,16 @@ transform matrix via \code{\link{matrixToQuatern}}.
 Note: This function primarily sets up a minimal header suitable for writing
 standard single-file NIfTI-1. If you need a more comprehensive or advanced
 usage, consider manually editing the returned list.
+
+When \code{vol} was read from a NIfTI file, the fields that describe the
+acquisition rather than the array -- repetition time (\code{pixdim[5]}),
+\code{xyzt_units}, \code{qform_code} and \code{sform_code}, \code{descrip},
+\code{aux_file}, the intent fields, \code{cal_min}/\code{cal_max}, the slice
+timing fields and \code{toffset} -- are carried over from that file. Only the
+fields the object itself determines (geometry, dimensions, datatype, offsets)
+are recomputed. Before this behaviour existed, a read-write round trip reset
+all of them, which silently dropped the TR and relabelled an MNI-space image
+as scanner-space.
 }
 \seealso{
 \code{\link{createNIfTIHeader}} for the base constructor of an empty NIfTI header.

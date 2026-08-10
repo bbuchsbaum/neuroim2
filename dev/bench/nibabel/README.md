@@ -7,7 +7,10 @@ implementation for neuroimaging file I/O:
   same numbers and the same affine?
 - **timing** — how long do the equivalent read/write calls take?
 
-Findings from the first run are written up in `dev/nibabel-gap-analysis.md`.
+Findings are written up in `dev/nibabel-gap-analysis.md`. As of 0.18.0 the
+conformance run is 28 of 30 matching, with the remaining two (complex and
+colour voxels) refused by design; `compare.py` exits non-zero if anything else
+regresses, so it can be run as a check.
 
 ## Requirements
 

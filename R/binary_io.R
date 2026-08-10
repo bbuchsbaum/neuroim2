@@ -120,6 +120,154 @@ ensure_writer_seekable <- function(con, byte_offset) {
   ret[idx_off]
 }
 
+## -------------------------------------------------------------------------
+## Building a dense image without copying the payload
+##
+## `new("DenseNeuroVec", .Data = <array>, ...)` duplicates the array, because
+## by the time the slot is assigned the value is referenced from more than one
+## place. On a 200-volume run that is a 236 MB copy, and it measured as much as
+## the compiled read that produced the data. An S4 object extending a basic
+## type *is* that vector with the slots as attributes and the S4 bit set, so
+## setting the attributes in place and calling asS4() gives an identical()
+## object -- the same technique the ROI constructors use, and verified against
+## new() in tests/testthat/test-io-conformance.R.
+## -------------------------------------------------------------------------
+
+#' @keywords internal
+#' @noRd
+.dense_proto_cache <- new.env(parent = emptyenv())
+
+#' @keywords internal
+#' @noRd
+.dense_class_attr <- function(class_name) {
+  hit <- .dense_proto_cache[[class_name]]
+  if (!is.null(hit)) return(hit)
+  proto <- switch(
+    class_name,
+    DenseNeuroVec = new("DenseNeuroVec", .Data = array(0, c(1L, 1L, 1L, 1L)),
+                        space = NeuroSpace(c(1L, 1L, 1L, 1L)), label = "",
+                        volume_labels = ""),
+    DenseNeuroVol = new("DenseNeuroVol", .Data = array(0, c(1L, 1L, 1L)),
+                        space = NeuroSpace(c(1L, 1L, 1L))),
+    cli::cli_abort("No prototype for {.cls {class_name}}.")
+  )
+  cls <- attr(proto, "class")
+  .dense_proto_cache[[class_name]] <- cls
+  cls
+}
+
+#' Build a DenseNeuroVec around `data` without duplicating it.
+#'
+#' `data` must be a plain double vector or array of the right length, not
+#' referenced elsewhere by the caller.
+#' @keywords internal
+#' @noRd
+.dense_neurovec_inplace <- function(data, space, label, volume_labels, header = list()) {
+  if (!is.double(data) || is.object(data)) {
+    cli::cli_abort("Internal: dense payload must be a plain double vector.")
+  }
+  d <- dim(space)
+  if (length(d) != 4L) {
+    cli::cli_abort("Internal: a DenseNeuroVec needs a 4-dimensional space.")
+  }
+  if (length(data) != prod(d)) {
+    cli::cli_abort("Internal: payload length {length(data)} does not match
+                    space {paste(d, collapse = ' x ')}.")
+  }
+  attributes(data) <- list(dim = as.integer(d),
+                           label = label,
+                           volume_labels = volume_labels,
+                           space = space,
+                           header = header,
+                           class = .dense_class_attr("DenseNeuroVec"))
+  asS4(data)
+}
+
+#' @keywords internal
+#' @noRd
+.dense_neurovol_inplace <- function(data, space, header = list()) {
+  if (!is.double(data) || is.object(data)) {
+    cli::cli_abort("Internal: dense payload must be a plain double vector.")
+  }
+  d <- dim(space)
+  if (length(d) != 3L) {
+    cli::cli_abort("Internal: a DenseNeuroVol needs a 3-dimensional space.")
+  }
+  if (length(data) != prod(d)) {
+    cli::cli_abort("Internal: payload length {length(data)} does not match
+                    space {paste(d, collapse = ' x ')}.")
+  }
+  attributes(data) <- list(dim = as.integer(d),
+                           space = space,
+                           header = header,
+                           class = .dense_class_attr("DenseNeuroVol"))
+  asS4(data)
+}
+
+## -------------------------------------------------------------------------
+## Compiled payload access
+##
+## These are the entry points every bulk read and write goes through.
+## `readBin`/`writeBin` walk R's connection layer and convert element by
+## element; on 7.2M int16 values that measured ~9x the cost of the equivalent
+## fread-and-convert loop, and the gap is the same shape for every datatype.
+## Reading always lands in `double`, which is also what keeps an int32 voxel
+## holding INT_MIN from becoming NA on the way through an R integer vector.
+## -------------------------------------------------------------------------
+
+#' @keywords internal
+#' @noRd
+.meta_is_gzipped <- function(meta) {
+  identical(meta@descriptor@data_encoding, "gzip") || endsWith(meta@data_file, ".gz")
+}
+
+#' @keywords internal
+#' @noRd
+.meta_needs_swap <- function(meta) {
+  !identical(meta@endian, .Platform$endian)
+}
+
+#' Read `n` elements of image data starting at element `first` (1-based).
+#' @keywords internal
+#' @noRd
+.read_data_block <- function(meta, first = 1, n) {
+  code <- .getDataCode(meta@data_type)
+  width <- .getDataSize(meta@data_type)
+  offset <- as.numeric(meta@data_offset) + (as.numeric(first) - 1) * width
+  nifti_read_data_cpp(meta@data_file, offset, as.numeric(n), code,
+                      .meta_needs_swap(meta), .meta_is_gzipped(meta))
+}
+
+#' Read whole volumes from a 4-D image
+#'
+#' @param meta a \linkS4class{FileMetaInfo}
+#' @param idx 1-based volume indices, in output order
+#' @return a \code{prod(dim[1:3])} x \code{length(idx)} matrix of scaled values,
+#'   i.e. voxels down the columns -- the layout \code{DenseNeuroVec} stores.
+#' @keywords internal
+#' @noRd
+read_mapped_vols <- function(meta, idx) {
+  if (length(meta@dims) != 4) {
+    cli::cli_abort("File must refer to a 4-dimensional image, not {length(meta@dims)}D.")
+  }
+  idx <- as.numeric(idx)
+  nels <- prod(meta@dims[1:3])
+  nimages <- meta@dims[4]
+
+  if (length(idx) == 0L) {
+    return(matrix(numeric(0), nels, 0L))
+  }
+  if (min(idx) < 1 || max(idx) > nimages) {
+    cli::cli_abort("{.arg idx} must be in range [1, {nimages}], got [{min(idx)}, {max(idx)}].")
+  }
+
+  mat <- nifti_read_volumes_cpp(meta@data_file, as.numeric(meta@data_offset),
+                                as.numeric(nels), idx,
+                                .getDataCode(meta@data_type),
+                                .meta_needs_swap(meta), .meta_is_gzipped(meta))
+  .apply_data_scaling_matrix(mat, meta, idx)
+}
+
 #' Read Mapped Series from 4D Image
 #'
 #' Read a time series of data from a memory-mapped 4D image file.
@@ -141,7 +289,14 @@ read_mapped_series <- function(meta, idx) {
 
   idx_set <- as.vector(outer(idx, (seq_len(meta@dims[4]) - 1L) * nels, "+"))
   ret <- .read_mmap(meta, idx_set)
-  t(matrix(ret, length(idx), meta@dims[4]))
+  mat <- t(matrix(ret, length(idx), meta@dims[4]))
+  # `mat` is [time x voxels]; scaling is per volume, i.e. per row here.
+  for (t in seq_len(nrow(mat))) {
+    pars <- .data_scale_params(meta, index = t)
+    if (pars$slope == 1 && pars$intercept == 0) next
+    mat[t, ] <- mat[t, ] * pars$slope + pars$intercept
+  }
+  mat
 }
 
 #' Read Mapped Data from 4D Image
@@ -162,36 +317,6 @@ read_mapped_data <- function(meta, idx) {
     cli::cli_abort("File must refer to a 4-dimensional image, not {length(meta@dims)}D.")
   }
   ret <- .read_mmap(meta, idx)
-}
-
-#' Read Mapped Volumes from 4D Image
-#'
-#' Read volume data from a memory-mapped 4D image file.
-#'
-#' @param meta An object of class \linkS4class{ImageMetadata} containing file metadata
-#' @param idx Integer vector of indices specifying volumes to read
-#' @return A numeric matrix with dimensions [time, voxels]
-#' @keywords internal
-#' @noRd
-read_mapped_vols <- function(meta, idx) {
-  if (endsWith(meta@data_file, ".gz")) {
-    stop(paste("Cannot create series_reader with gzipped file", meta@data_file))
-  }
-
-  if (length(meta@dims) != 4) {
-    cli::cli_abort("File must refer to a 4-dimensional image, not {length(meta@dims)}D.")
-  }
-  nels <- prod(meta@dims[1:3])
-  nimages <- meta@dims[4]
-
-  if (min(idx) < 1 || max(idx) > nimages) {
-    cli::cli_abort("{.arg idx} must be in range [1, {nimages}], got [{min(idx)}, {max(idx)}].")
-  }
-
-  idx_set <- as.vector(outer(seq_len(nels), (idx - 1L) * nels, "+"))
-  ret <- .read_mmap(meta, idx_set)
-  mat <- matrix(ret, nels, length(idx))
-  t(mat)  # Transpose to get [time, voxels]
 }
 
 #' Create Series Reader for 4D Image

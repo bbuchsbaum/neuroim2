@@ -7,7 +7,11 @@ OUT <- file.path(dirname(sub("--file=", "", grep("--file=", commandArgs(), value
 files <- list.files(OUT, pattern = "\\.(nii|nii\\.gz|hdr)$", full.names = TRUE)
 files <- files[!grepl("\\.img$", files)]
 
-esc <- function(s) gsub('"', '\\\\"', s)
+esc <- function(s) {
+  s <- gsub('\\\\', '\\\\\\\\', s)
+  s <- gsub('"', '\\\\"', s)
+  gsub('[[:space:]]+', ' ', s)
+}
 cat("[\n")
 first <- TRUE
 for (f in sort(files)) {
@@ -15,9 +19,12 @@ for (f in sort(files)) {
   res <- tryCatch({
     hdr <- read_header(f)
     nd <- length(dim(hdr))
-    x <- if (nd >= 4) read_vec(f) else read_vol(f)
+    x <- if (nd >= 5) read_hyper_vec(f) else if (nd == 4) read_vec(f) else read_vol(f)
     dm <- dim(x)
-    a <- as.numeric(as.vector(x@.Data))
+    # NeuroVol/NeuroVec keep their values in .Data; NeuroHyperVec keeps a
+    # masked [feature x trial x voxel] block and materialises on demand.
+    a <- if (methods::.hasSlot(x, ".Data")) as.numeric(as.vector(x@.Data))
+         else as.numeric(as.vector(neuroim2:::dense_array_5d(x)))
     fin <- a[is.finite(a)]
     list(ok = TRUE,
          shape = dm,

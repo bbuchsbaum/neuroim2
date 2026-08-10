@@ -167,6 +167,12 @@ setMethod("header", signature(x = "character"), function(x) {
   .build_neuro_header(mi)
 })
 
+#' @rdname header-methods
+#' @export
+setMethod("header", signature(x = "NeuroObj"), function(x) {
+  .build_neuro_header(x)
+})
+
 #' @method print NeuroHeader
 #' @export
 print.NeuroHeader <- function(x, ...) {

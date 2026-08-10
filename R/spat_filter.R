@@ -78,10 +78,13 @@ NULL
 #' @keywords internal
 #' @noRd
 .gaussian_blur_engine <- function(arr, mask_idx, window, sigma, spacing,
-                                  normalize = TRUE) {
+                                  normalize = TRUE, full_mask = FALSE) {
   window <- as.integer(window)
-  mask_idx <- as.integer(mask_idx)
   n_vox <- length(arr)
+  # `full_mask = TRUE` means "every voxel", and lets the caller skip building an
+  # n_vox-long index vector it does not otherwise need.
+  n_mask <- if (isTRUE(full_mask)) n_vox else length(mask_idx)
+  mask_idx <- if (isTRUE(full_mask)) integer(0) else as.integer(mask_idx)
 
   # The separable kernel requires exactly three dimensions; the dense one blurs
   # the first volume of a higher-dimensional array. Nothing reachable from an
@@ -90,9 +93,12 @@ NULL
   is_3d <- length(dim(arr)) == 3L
 
   if (is_3d &&
-      .gaussian_blur_prefers_separable(window, length(mask_idx), n_vox, normalize)) {
-    gaussian_blur_sep_cpp(arr, mask_idx, window, sigma, spacing, normalize)
+      .gaussian_blur_prefers_separable(window, n_mask, n_vox, normalize)) {
+    gaussian_blur_sep_cpp(arr, mask_idx, window, sigma, spacing, normalize,
+                          isTRUE(full_mask))
   } else {
+    # The dense kernel has no full-mask convention, so hand it the indices.
+    if (isTRUE(full_mask)) mask_idx <- seq_len(n_vox)
     gaussian_blur_cpp(arr, mask_idx, window, sigma, spacing, normalize)
   }
 }
@@ -154,8 +160,8 @@ NULL
 #'
 #' @export
 gaussian_blur <- function(vol, mask, sigma = 2, window = 1, normalize = TRUE) {
-  if (!inherits(vol, "NeuroVol")) {
-    cli::cli_abort("{.arg vol} must be a {.cls NeuroVol} object.")
+  if (!inherits(vol, "NeuroVol") && !inherits(vol, "NeuroVec")) {
+    cli::cli_abort("{.arg vol} must be a {.cls NeuroVol} or {.cls NeuroVec} object.")
   }
   if (!is.numeric(window) || length(window) != 1L || !is.finite(window) ||
       window < 1) {
@@ -167,13 +173,15 @@ gaussian_blur <- function(vol, mask, sigma = 2, window = 1, normalize = TRUE) {
   if (!is.logical(normalize) || length(normalize) != 1L || is.na(normalize)) {
     cli::cli_abort("{.arg normalize} must be a single {.cls logical} (TRUE or FALSE).")
   }
+  spatial_dim <- as.integer(dim(vol)[1:3])
   if (!missing(mask)) {
     if (!inherits(mask, "NeuroVol")) {
       cli::cli_abort("{.arg mask} must be a {.cls NeuroVol} object.")
     }
-    if (!identical(as.integer(dim(mask)), as.integer(dim(vol)))) {
+    # A 4-D image is smoothed volume by volume, so the mask is 3-D either way.
+    if (!identical(as.integer(dim(mask)), spatial_dim)) {
       cli::cli_abort(c(
-        "{.arg mask} and {.arg vol} must have the same dimensions.",
+        "{.arg mask} and {.arg vol} must have the same spatial dimensions.",
         i = "{.arg vol} is {.val {dim(vol)}}, {.arg mask} is {.val {dim(mask)}}."
       ))
     }
@@ -183,22 +191,40 @@ gaussian_blur <- function(vol, mask, sigma = 2, window = 1, normalize = TRUE) {
   # voxel, so clipping the window here changes no result. It does keep absurd
   # windows out of the kernel builders, where (2w+1)^3 used to overflow.
   # min() first: as.integer(1e10) is NA, not a clamped value.
-  window <- as.integer(min(window, max(dim(vol)[1:3])))
+  window <- as.integer(min(window, max(spatial_dim)))
 
-  if (missing(mask)) {
-    mask.idx <- seq_len(prod(dim(vol)))
-    target_space <- space(vol)
-  } else {
-    mask.idx <- which(mask != 0)
-    target_space <- space(mask)
+  nvox <- prod(spatial_dim)
+  full_mask <- missing(mask)
+  mask.idx <- if (full_mask) integer(0) else which(mask != 0)
+  vox_spacing <- spacing(vol)[1:3]
+
+  if (inherits(vol, "NeuroVol")) {
+    target_space <- if (missing(mask)) space(vol) else space(mask)
+    farr <- .gaussian_blur_engine(.image_array(vol), mask.idx, window, sigma,
+                                  vox_spacing, normalize, full_mask)
+    return(NeuroVol(farr, target_space))
   }
 
-  arr <- as.array(vol)
-  farr <- .gaussian_blur_engine(arr, mask.idx, window, sigma,
-                                spacing(vol), normalize)
-
-  out <- NeuroVol(farr, target_space)
-  out
+  # 4-D: smooth each volume with the same kernel. Everything above is invariant
+  # across volumes, so it is hoisted out of the loop and the only per-volume
+  # work is the compiled kernel plus a contiguous column copy. Doing this in
+  # user code instead -- gaussian_blur(x[[i]], ...) in a loop -- re-ran the
+  # argument checks, rebuilt a NeuroVol and re-derived the mask 200 times.
+  nvols <- dim(vol)[4]
+  flat <- .image_array(vol)
+  dim(flat) <- c(nvox, nvols)
+  out <- numeric(nvox * nvols)
+  dim(out) <- c(nvox, nvols)
+  buf_dim <- spatial_dim
+  for (i in seq_len(nvols)) {
+    buf <- flat[, i]
+    dim(buf) <- buf_dim
+    out[, i] <- .gaussian_blur_engine(buf, mask.idx, window, sigma,
+                                      vox_spacing, normalize, full_mask)
+  }
+  dim(out) <- c(spatial_dim, nvols)
+  DenseNeuroVec(out, space(vol), label = vol@label,
+                volume_labels = volume_labels(vol))
 }
 
 #' Edge-Preserving Guided Filter for Volumetric Images

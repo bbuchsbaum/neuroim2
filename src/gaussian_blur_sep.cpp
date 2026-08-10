@@ -39,6 +39,7 @@
 #endif
 #include <memory>
 #include <climits>
+#include <cstring>
 
 using namespace Rcpp;
 
@@ -106,18 +107,28 @@ void pass_x(const double* in, double* out, int d0, int d1, int d2,
     }
 }
 
+// The y and z passes accumulate over whole contiguous runs rather than one
+// voxel at a time. Walking a column with stride d0 (or d0*d1) touches a fresh
+// cache line on every iteration; adding tap i into an entire x-row at once
+// reads and writes contiguous memory and vectorises. The additions for a given
+// output element still happen in the same order (i ascending), so the result is
+// bit-identical to the per-voxel form this replaces.
 void pass_y(const double* in, double* out, int d0, int d1, int d2,
             const std::vector<double>& k, int w) {
     const R_xlen_t slice = (R_xlen_t) d0 * d1;
     for (int z = 0; z < d2; z++) {
-        for (int x = 0; x < d0; x++) {
-            const R_xlen_t base = (R_xlen_t) x + (R_xlen_t) z * slice;
-            for (int y = 0; y < d1; y++) {
-                double acc = 0.0;
-                const int lo = std::max(-w, -y), hi = std::min(w, d1 - 1 - y);
-                for (int i = lo; i <= hi; i++)
-                    acc += k[i + w] * in[base + (R_xlen_t)(y + i) * d0];
-                out[base + (R_xlen_t) y * d0] = acc;
+        const double* inz = in + (R_xlen_t) z * slice;
+        double* outz = out + (R_xlen_t) z * slice;
+        for (int y = 0; y < d1; y++) {
+            double* orow = outz + (R_xlen_t) y * d0;
+            const int lo = std::max(-w, -y), hi = std::min(w, d1 - 1 - y);
+            const double* irow0 = inz + (R_xlen_t)(y + lo) * d0;
+            const double k0 = k[lo + w];
+            for (int x = 0; x < d0; x++) orow[x] = k0 * irow0[x];
+            for (int i = lo + 1; i <= hi; i++) {
+                const double kw = k[i + w];
+                const double* irow = inz + (R_xlen_t)(y + i) * d0;
+                for (int x = 0; x < d0; x++) orow[x] += kw * irow[x];
             }
         }
     }
@@ -126,16 +137,16 @@ void pass_y(const double* in, double* out, int d0, int d1, int d2,
 void pass_z(const double* in, double* out, int d0, int d1, int d2,
             const std::vector<double>& k, int w) {
     const R_xlen_t slice = (R_xlen_t) d0 * d1;
-    for (int y = 0; y < d1; y++) {
-        for (int x = 0; x < d0; x++) {
-            const R_xlen_t base = (R_xlen_t) x + (R_xlen_t) y * d0;
-            for (int z = 0; z < d2; z++) {
-                double acc = 0.0;
-                const int lo = std::max(-w, -z), hi = std::min(w, d2 - 1 - z);
-                for (int i = lo; i <= hi; i++)
-                    acc += k[i + w] * in[base + (R_xlen_t)(z + i) * slice];
-                out[base + (R_xlen_t) z * slice] = acc;
-            }
+    for (int z = 0; z < d2; z++) {
+        double* oslice = out + (R_xlen_t) z * slice;
+        const int lo = std::max(-w, -z), hi = std::min(w, d2 - 1 - z);
+        const double* islice0 = in + (R_xlen_t)(z + lo) * slice;
+        const double k0 = k[lo + w];
+        for (R_xlen_t p = 0; p < slice; p++) oslice[p] = k0 * islice0[p];
+        for (int i = lo + 1; i <= hi; i++) {
+            const double kw = k[i + w];
+            const double* islice = in + (R_xlen_t)(z + i) * slice;
+            for (R_xlen_t p = 0; p < slice; p++) oslice[p] += kw * islice[p];
         }
     }
 }
@@ -162,7 +173,8 @@ double* separable3(const double* src, double* a, double* b,
 // [[Rcpp::export]]
 NumericVector gaussian_blur_sep_cpp(NumericVector arr, IntegerVector mask_idx,
                                     int window, double sigma,
-                                    NumericVector spacing, bool normalize = true) {
+                                    NumericVector spacing, bool normalize = true,
+                                    bool full_mask = false) {
     // Read the attribute as a bare SEXP: converting a missing dim straight to
     // IntegerVector throws Rcpp's "Not compatible with requested type" instead
     // of saying what is actually wrong.
@@ -202,6 +214,10 @@ NumericVector gaussian_blur_sep_cpp(NumericVector arr, IntegerVector mask_idx,
         // only at mask positions. Out-of-mask values are read, as before.
         const double* res = separable3(ap, bufA, bufB,
                                        d0, d1, d2, kx, ky, kz, window);
+        if (full_mask) {
+            std::memcpy(op, res, (size_t) nvox * sizeof(double));
+            return out;
+        }
         for (R_xlen_t i = 0; i < nm; i++) {
             const R_xlen_t v = (R_xlen_t) mask_idx[i] - 1;
             if (v < 0 || v >= nvox) stop("gaussian_blur_sep_cpp: 'mask_idx' out of bounds");
@@ -211,11 +227,59 @@ NumericVector gaussian_blur_sep_cpp(NumericVector arr, IntegerVector mask_idx,
     }
 
     // Mask-insulated path: out = blur(y) / blur(m).
-    std::vector<char> in_mask(nvox, 0);
-    for (R_xlen_t i = 0; i < nm; i++) {
-        const R_xlen_t v = (R_xlen_t) mask_idx[i] - 1;
-        if (v < 0 || v >= nvox) stop("gaussian_blur_sep_cpp: 'mask_idx' out of bounds");
-        in_mask[v] = 1;
+    //
+    // `full_mask` is the caller asserting that every voxel is in the mask, which
+    // is what gaussian_blur(vol) with no mask means. Taking its word for it
+    // skips materialising an nvox-long index vector in R and the indicator
+    // scan here; when it is not set the indicator is built and counted as
+    // before, and a full mask discovered that way takes the same shortcut.
+    std::vector<char> in_mask;
+    R_xlen_t n_distinct = nvox;
+    if (!full_mask) {
+        in_mask.assign((size_t) nvox, 0);
+        n_distinct = 0;
+        for (R_xlen_t i = 0; i < nm; i++) {
+            const R_xlen_t v = (R_xlen_t) mask_idx[i] - 1;
+            if (v < 0 || v >= nvox) stop("gaussian_blur_sep_cpp: 'mask_idx' out of bounds");
+            if (!in_mask[v]) { in_mask[v] = 1; n_distinct++; }
+        }
+    }
+
+    // When every voxel is in the mask -- which is what gaussian_blur(vol) with
+    // no mask hands us, and the single most common call -- blur(m) is the
+    // zero-padded convolution of the constant 1. That is separable in closed
+    // form: the correction is a product of three per-axis factors, each just
+    // the kernel weight that stays in bounds at that coordinate. So three
+    // full-volume passes and an nvox buffer collapse to d0 + d1 + d2 additions,
+    // and the numerator no longer needs the per-tap mask test either.
+    if (n_distinct == nvox) {
+        auto edge_factor = [&](int d, const std::vector<double>& k) {
+            std::vector<double> c(d);
+            for (int i = 0; i < d; i++) {
+                double s = 0.0;
+                const int lo = std::max(-window, -i), hi = std::min(window, d - 1 - i);
+                for (int t = lo; t <= hi; t++) s += k[t + window];
+                c[i] = s;
+            }
+            return c;
+        };
+        const std::vector<double> cx = edge_factor(d0, kx);
+        const std::vector<double> cy = edge_factor(d1, ky);
+        const std::vector<double> cz = edge_factor(d2, kz);
+
+        const double* num = separable3(ap, bufA, bufB, d0, d1, d2, kx, ky, kz, window);
+        const R_xlen_t slice = (R_xlen_t) d0 * d1;
+        for (int z = 0; z < d2; z++) {
+            for (int y = 0; y < d1; y++) {
+                const double cyz = cy[y] * cz[z];
+                const R_xlen_t base = (R_xlen_t) y * d0 + (R_xlen_t) z * slice;
+                for (int x = 0; x < d0; x++) {
+                    const double den = cx[x] * cyz;
+                    op[base + x] = (den > 0.0) ? (num[base + x] / den) : 0.0;
+                }
+            }
+        }
+        return out;
     }
 
     // blur(m), landing in `denom`. The x pass reads the indicator directly, so

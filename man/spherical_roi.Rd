@@ -24,7 +24,9 @@ spherical_roi(
 
 \item{nonzero}{if \code{TRUE}, keep only nonzero elements from \code{bvol}}
 
-\item{use_cpp}{whether to use compiled c++ code}
+\item{use_cpp}{Deprecated and ignored; the compiled implementation is always
+used. Passing \code{FALSE} warns. The former fallback returned
+neighbourhoods offset by one voxel and missing boundary voxels.}
 }
 \value{
 an instance of class \code{ROIVol}

@@ -25,7 +25,10 @@ test_that("memory-mapped reads reuse a cached handle for the same file", {
   expect_equal(dim(read_series(meta1, c(1L, 2L))), c(meta1@dims[4], 2L))
   expect_equal(cache_size(), 1L)
 
-  expect_equal(dim(read_vols(meta2, 1:2)), c(2L, prod(meta2@dims[1:3])))
+  # read_mapped_vols returns [voxels x volumes] -- the layout DenseNeuroVec
+  # stores, so neither side transposes. It reads through the compiled path
+  # rather than the mmap handle, so it does not add a cache entry.
+  expect_equal(dim(read_vols(meta2, 1:2)), c(prod(meta2@dims[1:3]), 2L))
   expect_equal(cache_size(), 1L)
 
   clear_cache()

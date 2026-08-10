@@ -4,6 +4,7 @@
 \alias{header}
 \alias{header,FileMetaInfo-method}
 \alias{header,character-method}
+\alias{header,NeuroObj-method}
 \title{Access NIfTI Header Information}
 \usage{
 header(x)
@@ -11,6 +12,8 @@ header(x)
 \S4method{header}{FileMetaInfo}(x)
 
 \S4method{header}{character}(x)
+
+\S4method{header}{NeuroObj}(x)
 }
 \arguments{
 \item{x}{A \code{\linkS4class{NeuroVol}}, \code{\linkS4class{NeuroVec}},
