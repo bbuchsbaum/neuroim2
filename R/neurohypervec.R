@@ -286,12 +286,19 @@ dense_array_5d <- function(x) {
   mask_idx <- which(x@mask@.Data)
   nels <- prod(spatial_dims)
 
+  # One scatter per feature, covering all trials at once, rather than building a
+  # fresh nels-long vector and a fresh 3-D array per (feature, trial) pair.
+  #
+  # Only the in-mask positions are written -- `dense` is already zero elsewhere
+  # -- so this touches length(mask_idx) * ntrials elements per feature instead
+  # of the whole nels * ntrials slab. x@data is [feature, trial, voxel]; the
+  # transpose gives [voxel, trial], which flattens voxel-fastest to match the
+  # destination index. The matrix() wrapper restores the shape that `[f, , ]`
+  # drops when there is a single trial or a single mask voxel.
+  trial_off <- rep((seq_len(ntrials) - 1L) * nels, each = length(mask_idx))
   for (f in seq_len(nfeatures)) {
-    for (t in seq_len(ntrials)) {
-      vol <- numeric(nels)
-      vol[mask_idx] <- x@data[f, t, ]
-      dense[, , , t, f] <- array(vol, dim = spatial_dims)
-    }
+    dense[mask_idx + trial_off + (f - 1L) * nels * ntrials] <-
+      as.vector(t(matrix(x@data[f, , ], nrow = ntrials)))
   }
 
   dense
@@ -438,24 +445,26 @@ setMethod("[", signature(x = "NeuroHyperVec"),
       # Get positions where data should be filled
       non_zero_positions <- which(non_zero)
 
-      # Map to multi-dimensional indices
-      array_indices <- arrayInd(non_zero_positions, .dim = c(length(i), length(j), length(k)))
-
       # Retrieve data from x@data
       voxel_indices <- lookup_indices[non_zero]
 
-      # For each non-zero position
-      for (idx in seq_along(voxel_indices)) {
-        ii <- array_indices[idx, 1]
-        jj <- array_indices[idx, 2]
-        kk <- array_indices[idx, 3]
-
-        # Get the data for this voxel
-        voxel_data <- x@data[m, l, voxel_indices[idx], drop = FALSE]  # dims: features x trials x 1
-        voxel_data <- aperm(voxel_data, c(2,1,3))[,,1,drop=FALSE]       # trials x features
-
-        out_array[ii, jj, kk, , ] <- voxel_data
-      }
+      # One gather and one scatter for every voxel at once, rather than a
+      # per-voxel subset plus a per-voxel aperm.
+      #
+      # x@data[m, l, v] is [feature, trial, voxel]; the output wants
+      # [voxel, trial, feature] within its trailing axes, so permute once for
+      # the whole block. The spatial position of a voxel is already its linear
+      # index inside the leading i*j*k block of out_array, so the destination
+      # index is that position plus a fixed stride per (trial, feature).
+      block <- aperm(x@data[m, l, voxel_indices, drop = FALSE], c(3, 2, 1))
+      nspatial <- length(i) * length(j) * length(k)
+      np <- length(non_zero_positions)
+      dest <- rep(non_zero_positions, times = length(l) * length(m)) +
+              rep(rep((seq_along(l) - 1L) * nspatial, each = np),
+                  times = length(m)) +
+              rep((seq_along(m) - 1L) * nspatial * length(l),
+                  each = np * length(l))
+      out_array[dest] <- as.vector(block)
     }
 
     if (isTRUE(drop)) {

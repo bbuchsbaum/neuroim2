@@ -122,8 +122,73 @@
   underflow, and propagates the `Inf`. Neither answer is meaningful --- the input
   is not finite --- but they differ.
 
+* Five scalar R loops over voxels are now vectorised. Each was verified against
+  a reference that reproduces the loop it replaced, and against a build of the
+  previous version across 9,163 recorded outputs.
+
+  ```
+                                                       before    after
+  ClusteredNeuroVec [i, j, k, m]   10,000 voxels     0.194 s   0.005 s   39x
+  mapf(NeuroVol, Kernel)           64^3, 3x3x3        3.81 s   0.096 s   40x
+                                   64^3, 5x5x5        4.10 s   0.288 s   14x
+  random_searchlight()             289,148 voxels    16.8 s    3.6 s      4.7x
+  NeuroHyperVec [i, j, k, l, m]    64,000 voxels      0.342 s  0.195 s    1.8x
+  as.dense(NeuroHyperVec)          40^3 x 40 x 10     1.10 s   0.653 s    1.7x
+  ```
+
+  - `mapf()` evaluated `sum(x[cbind(ii, jj, kk)] * weights)` once per centre. A
+    kernel tap is a fixed coordinate offset, so in linear-index terms it is a
+    fixed scalar offset: the convolution is now one vectorised pass per tap ---
+    a few dozen --- rather than one R iteration per centre, of which there can be
+    a million. Whether a tap can leave the volume at all is decided by the
+    extreme centres, so that is a scalar test per tap and not a per-centre one.
+  - `random_searchlight()` rebuilt its list of unclaimed voxels with
+    `remain_indices[remaining[remain_indices]]` on every iteration, which is
+    quadratic in the mask size. It now keeps a free list whose removals cost
+    O(batch): survivors from the tail are swapped into the holes left behind.
+  - `as.dense()` on a `NeuroHyperVec` built a fresh volume-sized vector and a
+    fresh 3-D array for every (feature, trial) pair; it now writes the in-mask
+    positions of all trials of a feature in one scatter. What is left is
+    allocating and filling the dense result itself, which is why the speed-up is
+    modest --- that result is 195 MB for the largest case above.
+
 
 ## Bug Fixes
+
+* **Breaking:** `random_searchlight()` returns a different set of searchlights
+  for a given random seed. Sampling is still uniform over the unclaimed voxels,
+  so the distribution of results is unchanged --- over 60 seeds the number of
+  searchlights was 466.7 +/- 8.6 before and 463.6 +/- 9.0 after, with exactly the
+  same voxels claimed in every run --- but the realized sequence differs because
+  the free list is no longer held in ascending order. The first searchlight of a
+  run is unaffected. Analyses that recorded a seed and expect the identical
+  partition will need to re-run.
+
+* **Breaking:** `mapf()` now clips the kernel at the volume boundary instead of
+  failing there. Taps falling outside the volume contribute nothing. Previously
+  a coordinate past the far face raised `subscript out of bounds`, and one before
+  the near face made the gather return a *shorter* vector, which then recycled
+  against the weights and produced a silently wrong value with only a recycling
+  warning. Two cases are affected: any `mask` reaching within the kernel's radius
+  of a face, which made the masked form unusable; and an unmasked volume thinner
+  than twice the kernel half-width, because the centre range
+  `hwidth:(dim - hwidth)` counts *backwards* when `dim < 2 * hwidth` and so
+  yields centres inside the margin rather than none --- on a 10 x 3 x 10 slab with
+  a 3x3x3 kernel, 86 voxels change. Interior results are unchanged.
+
+* `mapf()`'s mask dimension check was written `!all.equal(dim(mask), dim(ovol))`.
+  `all.equal()` returns a character description rather than `FALSE` on a
+  mismatch, so the guard raised `invalid argument type` instead of its own
+  message. It now reports "mask must have same dimensions as input volume".
+
+* `ClusteredNeuroVec[i, j, k, m]` now rejects voxel coordinates outside the
+  volume. They previously reached an `if (NA > 0)` and failed with "missing value
+  where TRUE/FALSE needed".
+
+* Removed `radius_search_3d_nonisotropic()`, `radius_search_3d_direct()`,
+  `radius_search_3d_precomputed()`, `local_spheres()` and `kernel_filt_3d_cpp()`.
+  All five were compiled and registered but called from nowhere in the package;
+  `kernel_filt_3d_cpp()` was in any case a 2-D filter despite its name.
 
 * **Breaking:** `nonzero = TRUE` now drops voxels whose value is `NA` or `NaN`,
   in every ROI builder and every searchlight iterator. Previously the filter was
