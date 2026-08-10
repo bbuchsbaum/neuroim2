@@ -198,3 +198,146 @@ List conn_comp_labels_cpp(LogicalVector mask, IntegerVector dims, int connectivi
   return List::create(_["index"] = index, _["size"] = size_out,
                       _["n"] = (int) roots.size());
 }
+
+// ---------------------------------------------------------------------------
+// Local-maxima pruning
+//
+// conn_comp(local_maxima = TRUE) thins each component down to peaks that are at
+// least `mindist` apart. A point is kept when no other point within mindist has
+// a larger value; that is the property `local_maxima_dist` names, and it holds
+// after a single pass, because a kept point is defined against the whole input
+// rather than against whatever survived alongside it.
+//
+// What this replaces did something weaker and did it in R: it compared each
+// point only against its single nearest neighbour, via a dbscan::kNN() call per
+// component per round. Two things were wrong with that. It does not deliver the
+// minimum distance it promises -- with mindist = 15, points at 0, 5 and 12 mm
+// valued 5, 1 and 9 keep the 5 and the 9, twelve millimetres apart, because the
+// 5's *nearest* neighbour is the 1 -- and "the nearest neighbour" is not even
+// well defined on a voxel grid, where more than half of all points have several
+// neighbours at exactly the same distance and which one came back depended on
+// the kd-tree's traversal order.
+//
+// Cost: points are bucketed into a uniform grid of cells `mindist` wide, so
+// anything within mindist of a point lies in one of the 27 cells around it.
+// Each point scans those cells and stops at the first larger-valued point close
+// enough to knock it out, which is immediate for the many points that are not
+// peaks; the full scan is paid only by the few that survive.
+// ---------------------------------------------------------------------------
+
+// [[Rcpp::export]]
+IntegerVector prune_local_maxima_cpp(NumericMatrix coords, NumericVector vals,
+                                     double mindist) {
+  const int n = coords.nrow();
+  const int ndim = coords.ncol();
+  if (vals.size() != n) stop("prune_local_maxima_cpp: 'vals' must have nrow(coords) entries");
+  if (ISNA(mindist)) stop("prune_local_maxima_cpp: 'mindist' must not be NA");
+
+  // Nothing can be strictly closer than a non-positive distance, so every point
+  // is a maximum by default.
+  if (n <= 1 || !(mindist > 0.0)) {
+    IntegerVector all(n);
+    for (int i = 0; i < n; i++) all[i] = i + 1;
+    return all;
+  }
+
+  // Cell coordinates, one per axis, in cells of side `mindist`. Origin at the
+  // bounding-box corner so the indices are non-negative.
+  std::vector<double> lo((size_t) ndim, R_PosInf);
+  for (int c = 0; c < ndim; c++)
+    for (int i = 0; i < n; i++)
+      if (coords(i, c) < lo[c]) lo[c] = coords(i, c);
+
+  std::vector<int> cell((size_t) n * ndim);
+  std::vector<int> ncell((size_t) ndim, 1);
+  for (int c = 0; c < ndim; c++) {
+    double hi = 0.0;
+    for (int i = 0; i < n; i++) {
+      const double t = (coords(i, c) - lo[c]) / mindist;
+      if (!R_finite(t)) stop("prune_local_maxima_cpp: 'coords' must be finite");
+      cell[(size_t) i * ndim + c] = (int) t;
+      if (t > hi) hi = t;
+    }
+    ncell[c] = (int) hi + 1;
+  }
+
+  // A dense cell array would be (span/mindist)^ndim, which a long thin
+  // component makes far larger than the point count, so the cells are hashed
+  // into n buckets and held as a CSR-style list: `start` indexes `order`.
+  const size_t nbuck = (size_t) n;
+  std::vector<int> bucket((size_t) n);
+  auto hash_cell = [&](const int* cc) {
+    unsigned long long h = 1469598103934665603ULL;
+    for (int c = 0; c < ndim; c++) {
+      h ^= (unsigned long long)(unsigned int) cc[c];
+      h *= 1099511628211ULL;
+    }
+    return (size_t)(h % nbuck);
+  };
+  std::vector<int> start(nbuck + 1, 0);
+  for (int i = 0; i < n; i++) {
+    bucket[i] = (int) hash_cell(&cell[(size_t) i * ndim]);
+    start[(size_t) bucket[i] + 1]++;
+  }
+  for (size_t b = 0; b < nbuck; b++) start[b + 1] += start[b];
+  std::vector<int> order((size_t) n);
+  {
+    std::vector<int> fill(start.begin(), start.end() - 1);
+    for (int i = 0; i < n; i++) order[(size_t) fill[(size_t) bucket[i]]++] = i;
+  }
+
+  // Offsets over the 3^ndim cells around a point.
+  std::vector<int> shifts;
+  {
+    std::vector<int> cur((size_t) ndim, -1);
+    for (;;) {
+      shifts.insert(shifts.end(), cur.begin(), cur.end());
+      int c = ndim - 1;
+      while (c >= 0 && cur[(size_t) c] == 1) { cur[(size_t) c] = -1; c--; }
+      if (c < 0) break;
+      cur[(size_t) c]++;
+    }
+  }
+  const size_t nshift = shifts.size() / (size_t) ndim;
+
+  const double md2 = mindist * mindist;
+  std::vector<int> keep;
+  std::vector<int> probe((size_t) ndim);
+
+  for (int i = 0; i < n; i++) {
+    const double vi = vals[i];
+    const int* ci = &cell[(size_t) i * ndim];
+    bool beaten = false;
+
+    for (size_t s = 0; s < nshift && !beaten; s++) {
+      bool inside = true;
+      for (int c = 0; c < ndim; c++) {
+        const int p = ci[c] + shifts[s * (size_t) ndim + (size_t) c];
+        if (p < 0 || p >= ncell[(size_t) c]) { inside = false; break; }
+        probe[(size_t) c] = p;
+      }
+      if (!inside) continue;
+
+      const size_t b = hash_cell(probe.data());
+      for (int k = start[b]; k < start[b + 1] && !beaten; k++) {
+        const int j = order[(size_t) k];
+        if (j == i || !(vals[j] > vi)) continue;
+        // Buckets collide, so confirm the cell before trusting the bucket.
+        bool same = true;
+        for (int c = 0; c < ndim; c++)
+          if (cell[(size_t) j * ndim + c] != probe[(size_t) c]) { same = false; break; }
+        if (!same) continue;
+        double d2 = 0.0;
+        for (int c = 0; c < ndim; c++) {
+          const double dd = coords(i, c) - coords(j, c);
+          d2 += dd * dd;
+        }
+        if (d2 < md2) beaten = true;
+      }
+    }
+
+    if (!beaten) keep.push_back(i + 1);
+  }
+
+  return IntegerVector(keep.begin(), keep.end());
+}

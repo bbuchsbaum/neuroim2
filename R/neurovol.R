@@ -756,47 +756,42 @@ setMethod(f="coord_to_grid", signature=signature(x="NeuroVol", coords="numeric")
           })
 
 
-#' @importFrom dbscan kNN
+# Local maxima of a component: the voxels kept as peaks by conn_comp().
+#
+# Two things were wrong with what this did before, and both were invisible from
+# the outside because the second one hid the first.
+#
+# It read the neighbour distances from `dbscan::kNN()`'s `$distances`. That
+# component is called `dist`, and `$` does not partially match a name longer
+# than the one it is looking for, so the lookup returned NULL, `NULL[, 2]`
+# returned NULL, `NULL < mindist & ...` was logical(0), and `any(pruneSet)` was
+# therefore always FALSE. Nothing was ever pruned: `conn_comp()`'s
+# `local_maxima` table listed every in-mask voxel -- 25,538 rows for 12
+# components on a 3 mm map, 25,527 of them from a single component and every one
+# of them a voxel away from the next -- whatever `local_maxima_dist` was set to.
+#
+# Underneath that, the rule itself did not deliver the minimum distance it
+# promises. It compared each point only against its single nearest neighbour, so
+# with `mindist = 15` three points at 0, 5 and 12 mm valued 5, 1 and 9 keep the
+# 5 and the 9: the 5 survives because its *nearest* neighbour is the 1, and the
+# result is two "local maxima" twelve millimetres apart. "The nearest neighbour"
+# is not well defined here either -- on a voxel grid more than half of all
+# points have several neighbours at exactly the same distance, and which one
+# came back depended on the kd-tree's traversal order.
+#
+# The rule now is the one `local_maxima_dist` describes: keep a point when no
+# other point within `mindist` has a larger value. It is deterministic, it holds
+# the minimum distance by construction, and it needs a single pass.
 #' @keywords internal
 #' @noRd
-.pruneCoords <- function(coord.set,  vals,  mindist=10) {
-
-	if (NROW(coord.set) == 1) {
-		1
+.pruneCoords <- function(coord.set, vals, mindist = 10) {
+	n <- NROW(coord.set)
+	if (n <= 1L) {
+		return(seq_len(n))
 	}
-
-	.prune <- function(keepIndices) {
-		if (length(keepIndices) <= 2) {
-			keepIndices
-		} else {
-		  ret <- try(dbscan::kNN(coord.set[keepIndices,], coord.set[keepIndices,], k=2))
-
-			#ret <- rflann::Neighbour(coord.set[keepIndices,], coord.set[keepIndices,], k=2, build="kdtree", cores=0, checks=1)
-			#ind <- ret$indices[, 2]
-			#ds <- sqrt(ret$distances[, 2])
-
-		  ind <- ret$id[,2]
-		  ds <- ret$distances[,2]
-
-			v <- vals[keepIndices]
-			ovals <- v[ind]
-			pruneSet <- ifelse(ds < mindist & ovals > v,  TRUE, FALSE)
-
-			if (any(pruneSet)) {
-				Recall(keepIndices[!pruneSet])
-			} else {
-				keepIndices
-			}
-		}
-
-
-	}
-
-	.prune(1:NROW(coord.set))
-
-
-
+	prune_local_maxima_cpp(as.matrix(coord.set), as.numeric(vals), mindist)
 }
+
 
 
 #' @title Create a patch set from a NeuroVol object
@@ -945,7 +940,10 @@ setMethod("show", "Kernel", function(object) {
 #' @param threshold threshold defining lower intensity bound for image mask
 #' @param cluster_table return cluster_table
 #' @param local_maxima return table of local maxima
-#' @param local_maxima_dist the distance used to define minum distance between local maxima
+#' @param local_maxima_dist Minimum distance, in the units of \code{spacing(x)},
+#'   between reported local maxima. A voxel is reported when no other voxel of
+#'   its component within this distance has a larger value, so the maxima of a
+#'   component are at least \code{local_maxima_dist} apart. Default 15.
 #' @rdname conn_comp-methods
 setMethod(f="conn_comp", signature=signature(x="NeuroVol"),
 	def=function(x, threshold=0, cluster_table=TRUE, local_maxima=TRUE, local_maxima_dist=15,...) {
@@ -964,11 +962,19 @@ setMethod(f="conn_comp", signature=signature(x="NeuroVol"),
 		cid <- comps$index[lin_idx]
 		vals_in <- x[lin_idx]
 
-		grid <- as.data.frame(gridm)
 		rows <- split(seq_along(cid), cid)
-		locations <- lapply(rows, function(r) grid[r, , drop = FALSE])
+		# One data frame per component, assembled from column slices rather than
+		# by subsetting a data frame. `grid[r, , drop = FALSE]` re-dispatches
+		# `[.data.frame` and rebuilds the row names for every component, which at
+		# 4,989 components cost 0.39 s against 0.03 s for the labelling itself.
+		# The pieces below are what that call produces: same column types, same
+		# integer row names (the positions selected), same order.
+		gx <- gridm[, 1L]; gy <- gridm[, 2L]; gz <- gridm[, 3L]
+		locations <- lapply(rows, function(r)
+			structure(list(x = gx[r], y = gy[r], z = gz[r]),
+			          class = "data.frame", row.names = r))
 
-		ret <- list(index=ClusteredNeuroVol(mask, clusters=comps$index[mask>0]), size=NeuroVol(comps$size, space(x)), voxels=locations)
+		ret <- list(index=ClusteredNeuroVol(mask, clusters=cid), size=NeuroVol(comps$size, space(x)), voxels=locations)
 
 		if (cluster_table) {
 			# One grouped arg-max instead of a which.max per component. Ordering by
@@ -997,14 +1003,20 @@ setMethod(f="conn_comp", signature=signature(x="NeuroVol"),
 			sp <- spacing(x)
 			gridw <- gridm * rep(sp, each = nrow(gridm))
 
-			loc.max <- do.call(rbind, lapply(seq_along(rows), function(i) {
-				r <- rows[[i]]
-				keep <- .pruneCoords(gridw[r, , drop=FALSE], vals_in[r], mindist=local_maxima_dist)
-				cbind(i, gridm[r[keep], , drop=FALSE])
-			}))
-
-
-			loc.max <- cbind(loc.max, x[loc.max[, 2:4, drop=F]])
+			# A one-voxel component is its own maximum, so it skips the call and
+			# the coordinate subsetting behind it -- at 4,989 components more than
+			# half are single voxels. The kept positions are collected as one
+			# integer vector and indexed once, which also replaces a
+			# do.call(rbind, .) over thousands of one- and two-row matrices.
+			keep <- lapply(rows, function(r) {
+				if (length(r) == 1L) r
+				else r[.pruneCoords(gridw[r, , drop=FALSE], vals_in[r], mindist=local_maxima_dist)]
+			})
+			sel <- unlist(keep, use.names = FALSE)
+			# vals_in[sel] is x at those voxels: `sel` indexes into the in-mask
+			# voxels, whose values vals_in already holds.
+			loc.max <- cbind(rep(seq_along(keep), lengths(keep)),
+			                 gridm[sel, , drop=FALSE], vals_in[sel])
 
 			row.names(loc.max) <- 1:NROW(loc.max)
 			colnames(loc.max) <- c("index", "x", "y", "z", "value")

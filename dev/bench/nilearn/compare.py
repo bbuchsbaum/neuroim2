@@ -64,13 +64,21 @@ for k in ref["cc"]:
     print(f"  {k:<12} scipy {r['n']:>6} comps / largest {r['largest']:>7} / {r['seconds']:7.3f}s"
           f"   neuroim2 {int(g['n']):>6} / {int(g['largest']):>7} / {g['seconds']:8.3f}s"
           f"   {agree}  ({ratio(g['seconds'], r['seconds'])})")
+print("\n  scipy.ndimage.label() only labels. conn_comp() also returns the")
+print("  per-cluster voxel lists, the cluster table and the local maxima, so")
+print("  the labelling alone is the like-for-like comparison:")
+for k in ref["cc"]:
+    r, g = ref["cc"][k], got["cc"][k]
+    print(f"    {k:<12} labelling only: neuroim2 {g['labels_only']:.3f}s   scipy {r['seconds']:.3f}s"
+          f"   ({ratio(g['labels_only'], r['seconds'])})"
+          f"   [+ {int(g['maxima'])} local maxima]")
 if "cc_scaling" in ref and "cc_scaling" in got:
     print(f"\n  {'size':<10}{'in-mask':>10}{'comps':>9}{'scipy':>10}{'neuroim2':>12}{'ratio':>9}")
     for k in ref["cc_scaling"]:
         r, g = ref["cc_scaling"][k], got["cc_scaling"][k]
         ok = "" if r["n"] == g["n"] else "  MISMATCH"
         print(f"  {k:<10}{r['in_mask']:>10}{r['n']:>9}{r['seconds']:>9.3f}s"
-              f"{g['seconds']:>11.1f}s{ratio(g['seconds'], r['seconds']):>9}{ok}")
+              f"{g['seconds']:>11.3f}s{ratio(g['seconds'], r['seconds']):>9}{ok}")
 
 head("Brain masking from the data")
 r, g = ref["epi_mask"], got["epi_mask"]

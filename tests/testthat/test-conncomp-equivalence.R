@@ -317,3 +317,88 @@ test_that("ClusteredNeuroVol builds the same cluster map as the name-by-name loo
   expect_setequal(ls(cv@cluster_map), names(want))
   for (k in names(want)) expect_identical(cv@cluster_map[[k]], want[[k]])
 })
+
+# ---------------------------------------------------------------------------
+# Local maxima. `local_maxima_dist` had no effect at all: .pruneCoords() read
+# dbscan::kNN()'s distances from `$distances`, which is called `dist`, so the
+# comparison was against NULL and nothing was ever pruned. Underneath that, the
+# nearest-neighbour rule it used did not deliver the minimum distance the
+# argument documents even when it ran.
+# ---------------------------------------------------------------------------
+
+# The rule, stated directly: keep a point when no other point strictly within
+# mindist has a larger value.
+ref_prune <- function(cs, vals, mindist) {
+  D <- as.matrix(stats::dist(cs))
+  which(vapply(seq_len(nrow(cs)),
+               function(i) !any(D[i, -i] < mindist & vals[-i] > vals[i]),
+               logical(1)))
+}
+
+test_that(".pruneCoords() keeps exactly the points no larger neighbour suppresses", {
+  prune <- get(".pruneCoords", envir = asNamespace("neuroim2"))
+  set.seed(5)
+  for (trial in 1:300) {
+    n <- sample(2:60, 1)
+    ext <- sample(2:12, 1)
+    sp <- sample(c(1, 2, 3, 2.5), 3, replace = TRUE)
+    # A scaled voxel lattice, where equidistant neighbours are the rule rather
+    # than the exception -- which is what made "the nearest neighbour" ambiguous.
+    g <- unique(cbind(sample(ext, n, TRUE), sample(ext, n, TRUE), sample(ext, n, TRUE)))
+    cs <- g * rep(sp, each = nrow(g))
+    # Rounded values on every third trial, so exact ties in value occur too.
+    vals <- if (trial %% 3 == 0) round(stats::rnorm(nrow(g)), 1) else stats::rnorm(nrow(g))
+    md <- sample(c(0.5, 2, 5, 10, 15, 3 * sp[1]), 1)
+
+    got <- prune(cs, vals, mindist = md)
+    expect_identical(as.integer(got), as.integer(ref_prune(cs, vals, md)))
+
+    # The property the argument promises: kept points are at least mindist
+    # apart, unless they carry the same value and neither can suppress the other.
+    if (length(got) > 1) {
+      D <- as.matrix(stats::dist(cs[got, , drop = FALSE]))
+      diag(D) <- Inf
+      expect_true(all(D >= md | outer(vals[got], vals[got], "==")))
+    }
+  }
+})
+
+test_that(".pruneCoords() handles degenerate inputs", {
+  prune <- get(".pruneCoords", envir = asNamespace("neuroim2"))
+  expect_identical(prune(cbind(1, 1, 1), 7, 15), 1L)
+  expect_identical(prune(matrix(numeric(0), 0, 3), numeric(0), 15), integer(0))
+  # Nothing is strictly closer than zero, so every point survives.
+  expect_identical(prune(cbind(0:4, 0, 0), c(1, 2, 3, 2, 1), 0), 1:5)
+  # One point per axis count: the search is not hard-wired to three dimensions.
+  expect_identical(prune(cbind(c(0, 4)), c(1, 2), 10), 2L)
+  # A point whose *nearest* neighbour is smaller, but which a larger point 12mm
+  # away suppresses. The old rule kept both, 12mm apart, with mindist = 15.
+  expect_identical(prune(cbind(c(0, 5, 12), 0, 0), c(5, 1, 9), 15), 3L)
+})
+
+test_that("conn_comp() local maxima honour local_maxima_dist", {
+  set.seed(21)
+  dm <- c(20L, 20L, 20L)
+  sp <- NeuroSpace(dm, c(3, 3, 3))
+  d <- array(0, dm)
+  d[4:17, 4:17, 4:17] <- 1 + stats::runif(14^3)
+  v <- NeuroVol(d, sp)
+
+  for (md in c(9, 15, 24)) {
+    cc <- suppressWarnings(conn_comp(v, threshold = 0.5, local_maxima_dist = md))
+    lm <- cc$local_maxima
+    # One component, so every pair here is a pair of maxima of the same cluster.
+    expect_equal(length(unique(lm[, "index"])), 1L)
+    expect_lt(nrow(lm), sum(d > 0.5))            # something was actually pruned
+    world <- lm[, c("x", "y", "z"), drop = FALSE] * rep(spacing(v), each = nrow(lm))
+    D <- as.matrix(stats::dist(world))
+    diag(D) <- Inf
+    expect_gte(min(D), md)
+  }
+
+  # Fewer maxima as the required separation grows.
+  counts <- vapply(c(9, 15, 24), function(md)
+    nrow(suppressWarnings(conn_comp(v, threshold = 0.5, local_maxima_dist = md))$local_maxima),
+    numeric(1))
+  expect_true(all(diff(counts) < 0))
+})

@@ -39,6 +39,10 @@ conn_comp_labels_cpp <- function(mask, dims, connectivity) {
     .Call(`_neuroim2_conn_comp_labels_cpp`, mask, dims, connectivity)
 }
 
+prune_local_maxima_cpp <- function(coords, vals, mindist) {
+    .Call(`_neuroim2_prune_local_maxima_cpp`, coords, vals, mindist)
+}
+
 downsample_3d_cpp <- function(arr, new_dims, old_dims) {
     .Call(`_neuroim2_downsample_3d_cpp`, arr, new_dims, old_dims)
 }
@@ -53,6 +57,10 @@ fast_multilayer_laplacian_enhancement_masked <- function(img, mask, k = 2L, patc
 
 gaussian_blur_sep_cpp <- function(arr, mask_idx, window, sigma, spacing, normalize = TRUE, full_mask = FALSE) {
     .Call(`_neuroim2_gaussian_blur_sep_cpp`, arr, mask_idx, window, sigma, spacing, normalize, full_mask)
+}
+
+gaussian_blur_sep_4d_cpp <- function(arr, mask_idx, window, sigma, spacing, normalize = TRUE, full_mask = FALSE) {
+    .Call(`_neuroim2_gaussian_blur_sep_4d_cpp`, arr, mask_idx, window, sigma, spacing, normalize, full_mask)
 }
 
 indexToGridCpp <- function(idx, array_dim) {

@@ -14,10 +14,18 @@ res <- list()
 # `expr` must be re-evaluated on every repetition. Wrapping it in a closure
 # would evaluate the promise once and then hand back the cached value, timing
 # nothing; substitute/eval.parent forces the work each time.
+#
+# gc() runs *outside* the timed region. R's collector is not reference-counted,
+# so the cost of reclaiming one repetition's result lands on whichever later
+# repetition happens to trip the trigger: smoothing a 60-volume run returns a
+# 116 MB image, and back-to-back calls alternated 0.19 s and 0.86 s depending on
+# which one paid for the previous one's garbage. Collecting between repetitions
+# charges that to nobody and reports what a single call costs.
 tm <- function(expr, reps = 3) {
   invisible(eval.parent(substitute(expr)))
   ts <- numeric(reps)
   for (i in seq_len(reps)) {
+    gc(FALSE)
     t0 <- proc.time()[["elapsed"]]
     invisible(eval.parent(substitute(expr)))
     ts[i] <- proc.time()[["elapsed"]] - t0
@@ -115,9 +123,14 @@ for (cn_ in c("6-connect", "18-connect", "26-connect")) {
   t0 <- proc.time()[["elapsed"]]
   cc <- suppressWarnings(conn_comp(vol, threshold = 110, connect = cn_))
   el <- proc.time()[["elapsed"]] - t0
+  # scipy.ndimage.label() only labels. conn_comp() also returns the per-cluster
+  # voxel lists, the cluster table and the local maxima, so the labelling is
+  # timed separately -- that is the part the two libraries both do.
   res$cc[[cn_]] <- list(n = num_clusters(cc$index),
                         largest = max(as.vector(as.array(cc$size))),
-                        seconds = el)
+                        seconds = el,
+                        labels_only = tm(conn_comp_3D(vol > 110, connect = cn_)),
+                        maxima = nrow(cc$local_maxima))
 }
 res$cc_in_mask <- sum(as.array(vol) > 110)
 

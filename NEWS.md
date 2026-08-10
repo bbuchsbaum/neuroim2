@@ -1,11 +1,11 @@
 # neuroim2 0.19.0
 
-Six defects found by measuring the image-processing layer against `nilearn`
+Seven defects found by measuring the image-processing layer against `nilearn`
 0.14.0 / scipy, which is the reference for the processing neuroim2 also does.
 The harness is in `dev/bench/nilearn/` and the findings in
 `dev/nilearn-gap-analysis.md`.
 
-Two of these change results. Read the first two sections.
+Four of these change results; the sections that do say so explicitly.
 
 ## `gaussian_blur()` now applies the smoothing it is asked for
 
@@ -65,6 +65,45 @@ works at any size, matches `nibabel::as_closest_canonical` voxel for voxel, and
 is about 40x faster. `reorient()` on a `NeuroSpace` permutes `dim` and `spacing`
 along with the affine.
 
+## `conn_comp()`'s local maxima were never pruned
+
+`local_maxima_dist` had no effect at any value. `.pruneCoords()` read the
+neighbour distances out of `dbscan::kNN()`'s result as `ret$distances`; that
+component is called `dist`, and `$` does not partially match a name longer than
+the one it is looking for, so the lookup returned `NULL`, the comparison became
+`logical(0)`, and the pruning loop exited on its first pass every time. The
+`local_maxima` table listed every in-mask voxel -- 25,538 rows for 12
+components on a 3 mm map, 25,527 of them from a single component, each one voxel
+from the next.
+
+Underneath that, the rule did not deliver the minimum distance the argument
+documents even when it ran. It compared each voxel only against its single
+nearest neighbour, so three points at 0, 5 and 12 mm valued 5, 1 and 9 kept the
+5 *and* the 9 at `local_maxima_dist = 15`: the 5 survived because its nearest
+neighbour was the 1. "The nearest neighbour" was not well defined either -- on a
+voxel grid more than half of all points have several neighbours at exactly the
+same distance, and which one came back depended on the kd-tree's traversal
+order.
+
+The rule is now the one the argument names: a voxel is reported when no other
+voxel of its component within `local_maxima_dist` has a larger value. It is
+deterministic and the reported maxima are at least `local_maxima_dist` apart by
+construction.
+
+```
+                        local_maxima rows    closest pair of maxima
+26-connect   was              25,538              3 mm (one voxel)
+             now                  73              15.1 mm
+6-connect    was              25,538              3 mm (one voxel)
+             now               5,039              15.1 mm
+```
+
+* **This changes results** for anyone reading `conn_comp(...)$local_maxima`.
+  What it returned before was the component's voxel list, not its maxima.
+* The search is now a single compiled pass over a uniform grid rather than a
+  `dbscan::kNN()` call per component per round, which is also what made the rest
+  of `conn_comp()` worth speeding up. `dbscan` is no longer used here.
+
 ## Connected components in compiled code
 
 `conn_comp_3D()` was a two-pass union-find written in interpreted R, building a
@@ -76,24 +115,32 @@ size.
 
 ```
                                      scipy    before     after
-40x48x38    (7,312 in-mask)         0.002 s    1.4 s     0.35 s
-91x109x91  (90,357 in-mask)         0.021 s   38.4 s     2.10 s
-182x218x182 (720,916 in-mask)       0.206 s  916 s      16.1 s
-labelling alone, 91x109x91          0.021 s      --      0.027 s
+40x48x38    (7,312 in-mask)         0.001 s    1.4 s     0.024 s
+91x109x91  (90,357 in-mask)         0.016 s   38.4 s     0.31 s
+182x218x182 (720,916 in-mask)       0.152 s  916 s       3.37 s
+labelling alone, 91x109x91          0.016 s      --      0.027 s
 ```
 
-Output is unchanged: the compiled version reproduces the R one's labels, sizes
-and size-descending numbering including its tie-break, pinned in
+The ratio to scipy no longer grows with size: it is flat at 18-22x across a
+100x range in voxel count, and the labelling itself is at parity. What is left
+is the per-cluster voxel lists, the cluster table and the local maxima that
+`conn_comp()` returns and `scipy.ndimage.label()` does not; `cluster_table =
+FALSE, local_maxima = FALSE` halves the remainder.
+
+The labelling is unchanged: the compiled version reproduces the R one's labels,
+sizes and size-descending numbering including its tie-break, pinned in
 `tests/testthat/test-conncomp-equivalence.R` against the previous
 implementation, which is kept there as the reference.
 
-`conn_comp()`'s wrapper was rewritten alongside it -- it re-derived a coordinate
-matrix per component with `as.matrix()` -- and `ClusteredNeuroVol()` no longer
-fills its cluster map with a name-by-name list lookup, which was quadratic in
-the cluster count and cost 2.2 s at 12,396 clusters.
+`conn_comp()`'s wrapper was rewritten alongside it. It re-derived a coordinate
+matrix per component with `as.matrix()`, and then subset a data frame once per
+component to build the voxel lists, which cost 0.39 s at 4,989 components
+against 0.03 s for the labelling. `ClusteredNeuroVol()` no longer fills its
+cluster map with a name-by-name list lookup, which was quadratic in the cluster
+count and cost 2.2 s at 12,396 clusters.
 
-`automask()` spent 92% of its time in the labeller and is **23x faster**
-(14.0 s to 0.62 s on a 60-volume run) with an unchanged result.
+`automask()` spent 92% of its time in the labeller and is **53x faster**
+(14.0 s to 0.26 s on a 60-volume run) with an unchanged result.
 
 ## The two searchlight iterators agree on their centres
 
@@ -127,6 +174,28 @@ effectively free, `mean()` goes through `.rowMeans()` with no reshape at all
 
 `resample()` no longer scans the image to infer an output datatype for headers
 whose geometry is all it uses.
+
+## Smoothing a 4-D image runs in compiled code
+
+`gaussian_blur()` on a `NeuroVec` looped its volumes in R. Each iteration copied
+a volume out of the run and the result back in, re-allocated the kernel's two
+scratch buffers, and -- with a mask -- recomputed the in-mask weight volume,
+which is the same for every volume. Smoothing 60 volumes cost 1.66 s against
+nilearn's 0.51-0.71 s.
+
+The separable kernel now has a 4-D driver that walks the run itself: nothing is
+copied per volume, the scratch buffers are allocated per worker, the in-mask
+weights are computed once, and volumes run in parallel (`RcppParallel`, so
+`RcppParallel::setThreadOptions()` controls it). **0.20 s**, which is 2.6-3.6x
+faster than nilearn rather than 2.3x slower. The arithmetic per volume is
+unchanged and happens in the same order, so the result is bit-identical to
+smoothing the volumes one at a time -- pinned in
+`tests/testthat/test-processing-defects.R` over both engines, both mask
+conventions and both `normalize` settings.
+
+The dense kernel, which `gaussian_blur()` chooses when the mask is a small
+fraction of the volume, has no 4-D form and still loops; everything invariant
+across volumes is hoisted out of that loop.
 
 # neuroim2 0.18.0
 

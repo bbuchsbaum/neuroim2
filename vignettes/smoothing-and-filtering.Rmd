@@ -121,6 +121,11 @@ structural and a 3 mm EPI differently. Leave `window` alone unless you have a
 specific reason to clip the kernel; `truncate` (default 4 standard deviations)
 is the knob for trading accuracy against speed.
 
+Handing `gaussian_blur()` a `NeuroVec` smooths every volume with the same
+kernel, and does it in one compiled call over the whole run rather than a loop
+in R — so pass the run, do not loop over `x[[i]]` yourself. Volumes are smoothed
+in parallel; `RcppParallel::setThreadOptions()` sets how many at a time.
+
 ## Edge-preserving filters
 
 Gaussian blur does not know where anatomy stops. `guided_filter()` fits local

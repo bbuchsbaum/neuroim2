@@ -274,3 +274,47 @@ test_that("scale_series still centres and scales without touching the source", {
   expect_equal(as.numeric(s@.Data), as.numeric(M / rsd))
   expect_identical(as.numeric(as.array(x)), vals)
 })
+
+test_that("the compiled 4-D driver is bit-identical to smoothing volume by volume", {
+  # Both engines: a nearly-full mask takes the separable path, a sparse one the
+  # dense kernel, which has no 4-D form and still loops.
+  set.seed(19)
+  for (dm in list(c(9L, 11L, 8L), c(13L, 7L, 10L))) {
+    sp3 <- NeuroSpace(dm, c(2, 2, 2.5))
+    for (nt in c(1L, 4L)) {
+      a <- array(rnorm(prod(dm) * nt), c(dm, nt))
+      v4 <- DenseNeuroVec(a, add_dim(sp3, nt))
+      for (frac in c(0.6, 0.03)) {
+        mk <- LogicalNeuroVol(array(runif(prod(dm)) < frac, dm), sp3)
+        for (norm in c(TRUE, FALSE)) {
+          for (w in c(1, 3)) {
+            for (masked in c(TRUE, FALSE)) {
+              got <- as.array(if (masked) gaussian_blur(v4, mk, sigma = 2, window = w, normalize = norm)
+                              else gaussian_blur(v4, sigma = 2, window = w, normalize = norm))
+              want <- vapply(seq_len(nt), function(i) {
+                vi <- NeuroVol(array(a[, , , i], dm), sp3)
+                as.array(if (masked) gaussian_blur(vi, mk, sigma = 2, window = w, normalize = norm)
+                         else gaussian_blur(vi, sigma = 2, window = w, normalize = norm))
+              }, array(0, dm))
+              dim(want) <- c(dm, nt)
+              expect_identical(got, want,
+                               info = paste(paste(dm, collapse = "x"), nt, frac, norm, w, masked))
+            }
+          }
+        }
+      }
+    }
+  }
+})
+
+test_that("the 4-D driver rejects what it cannot smooth", {
+  ns <- asNamespace("neuroim2")
+  a <- array(1, c(3L, 3L, 3L))
+  expect_error(ns$gaussian_blur_sep_4d_cpp(a, integer(0), 1L, 1, c(1, 1, 1), TRUE, TRUE),
+               "4-D dim attribute")
+  a4 <- array(1, c(3L, 3L, 3L, 2L))
+  expect_error(ns$gaussian_blur_sep_4d_cpp(a4, 99L, 1L, 1, c(1, 1, 1), TRUE, FALSE),
+               "out of bounds")
+  expect_error(ns$gaussian_blur_sep_4d_cpp(a4, 1L, 1L, 0, c(1, 1, 1), TRUE, FALSE),
+               "positive")
+})

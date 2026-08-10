@@ -267,12 +267,29 @@ gaussian_blur <- function(vol, mask, sigma = 2, window = NULL, normalize = TRUE,
     return(NeuroVol(farr, target_space))
   }
 
-  # 4-D: smooth each volume with the same kernel. Everything above is invariant
-  # across volumes, so it is hoisted out of the loop and the only per-volume
-  # work is the compiled kernel plus a contiguous column copy. Doing this in
-  # user code instead -- gaussian_blur(x[[i]], ...) in a loop -- re-ran the
-  # argument checks, rebuilt a NeuroVol and re-derived the mask 200 times.
+  # 4-D: smooth each volume with the same kernel. Which engine is cheaper does
+  # not depend on the volume, so it is decided once here rather than re-derived
+  # on every iteration.
   nvols <- dim(vol)[4]
+  n_mask <- if (full_mask) nvox else length(mask.idx)
+  if (.gaussian_blur_prefers_separable(window, n_mask, nvox, normalize)) {
+    # The compiled driver walks the run itself: no volume is copied out and no
+    # result copied back, the scratch buffers are allocated per worker instead
+    # of per volume, and blur(m) -- which is the same for every volume -- is
+    # computed once. It also runs volumes in parallel.
+    arr <- .image_array(vol)
+    if (length(dim(arr)) != 4L) dim(arr) <- c(spatial_dim, nvols)
+    out <- gaussian_blur_sep_4d_cpp(arr, if (full_mask) integer(0) else as.integer(mask.idx),
+                                    window, sigma, vox_spacing, normalize, full_mask)
+    return(DenseNeuroVec(out, space(vol), label = vol@label,
+                         volume_labels = volume_labels(vol)))
+  }
+
+  # The dense kernel is chosen when the mask is a small fraction of the volume.
+  # It has no 4-D form, so the loop stays -- but everything invariant across
+  # volumes is still hoisted out of it. Doing this in user code instead --
+  # gaussian_blur(x[[i]], ...) in a loop -- would re-run the argument checks,
+  # rebuild a NeuroVol and re-derive the mask once per volume.
   flat <- .image_array(vol)
   dim(flat) <- c(nvox, nvols)
   out <- numeric(nvox * nvols)

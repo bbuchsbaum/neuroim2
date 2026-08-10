@@ -138,6 +138,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// prune_local_maxima_cpp
+IntegerVector prune_local_maxima_cpp(NumericMatrix coords, NumericVector vals, double mindist);
+RcppExport SEXP _neuroim2_prune_local_maxima_cpp(SEXP coordsSEXP, SEXP valsSEXP, SEXP mindistSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type coords(coordsSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type vals(valsSEXP);
+    Rcpp::traits::input_parameter< double >::type mindist(mindistSEXP);
+    rcpp_result_gen = Rcpp::wrap(prune_local_maxima_cpp(coords, vals, mindist));
+    return rcpp_result_gen;
+END_RCPP
+}
 // downsample_3d_cpp
 NumericVector downsample_3d_cpp(NumericVector arr, IntegerVector new_dims, IntegerVector old_dims);
 RcppExport SEXP _neuroim2_downsample_3d_cpp(SEXP arrSEXP, SEXP new_dimsSEXP, SEXP old_dimsSEXP) {
@@ -196,6 +209,23 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type normalize(normalizeSEXP);
     Rcpp::traits::input_parameter< bool >::type full_mask(full_maskSEXP);
     rcpp_result_gen = Rcpp::wrap(gaussian_blur_sep_cpp(arr, mask_idx, window, sigma, spacing, normalize, full_mask));
+    return rcpp_result_gen;
+END_RCPP
+}
+// gaussian_blur_sep_4d_cpp
+NumericVector gaussian_blur_sep_4d_cpp(NumericVector arr, IntegerVector mask_idx, int window, double sigma, NumericVector spacing, bool normalize, bool full_mask);
+RcppExport SEXP _neuroim2_gaussian_blur_sep_4d_cpp(SEXP arrSEXP, SEXP mask_idxSEXP, SEXP windowSEXP, SEXP sigmaSEXP, SEXP spacingSEXP, SEXP normalizeSEXP, SEXP full_maskSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type arr(arrSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type mask_idx(mask_idxSEXP);
+    Rcpp::traits::input_parameter< int >::type window(windowSEXP);
+    Rcpp::traits::input_parameter< double >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type spacing(spacingSEXP);
+    Rcpp::traits::input_parameter< bool >::type normalize(normalizeSEXP);
+    Rcpp::traits::input_parameter< bool >::type full_mask(full_maskSEXP);
+    rcpp_result_gen = Rcpp::wrap(gaussian_blur_sep_4d_cpp(arr, mask_idx, window, sigma, spacing, normalize, full_mask));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -580,10 +610,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_neuroim2_build_cgb_graph_nuis_cpp", (DL_FUNC) &_neuroim2_build_cgb_graph_nuis_cpp, 14},
     {"_neuroim2_apply_cgb_graph_cpp", (DL_FUNC) &_neuroim2_apply_cgb_graph_cpp, 7},
     {"_neuroim2_conn_comp_labels_cpp", (DL_FUNC) &_neuroim2_conn_comp_labels_cpp, 3},
+    {"_neuroim2_prune_local_maxima_cpp", (DL_FUNC) &_neuroim2_prune_local_maxima_cpp, 3},
     {"_neuroim2_downsample_3d_cpp", (DL_FUNC) &_neuroim2_downsample_3d_cpp, 3},
     {"_neuroim2_downsample_4d_cpp", (DL_FUNC) &_neuroim2_downsample_4d_cpp, 3},
     {"_neuroim2_fast_multilayer_laplacian_enhancement_masked", (DL_FUNC) &_neuroim2_fast_multilayer_laplacian_enhancement_masked, 8},
     {"_neuroim2_gaussian_blur_sep_cpp", (DL_FUNC) &_neuroim2_gaussian_blur_sep_cpp, 7},
+    {"_neuroim2_gaussian_blur_sep_4d_cpp", (DL_FUNC) &_neuroim2_gaussian_blur_sep_4d_cpp, 7},
     {"_neuroim2_indexToGridCpp", (DL_FUNC) &_neuroim2_indexToGridCpp, 2},
     {"_neuroim2_gridToIndex3DCpp", (DL_FUNC) &_neuroim2_gridToIndex3DCpp, 2},
     {"_neuroim2_gridToIndexCpp", (DL_FUNC) &_neuroim2_gridToIndexCpp, 2},
