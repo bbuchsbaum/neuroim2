@@ -674,7 +674,10 @@ searchlight_coords <- function(mask, radius, nonzero=FALSE, cores=0) {
   f <- local({
     plan <- .searchlight_plan(mask, radius, nonzero)
     g <- grid
-    function(i) .searchlight_coords_at(plan, g[i, ])
+    # Multisession workers do not inherit this namespace's private bindings.
+    # Resolve the helper from the installed package on the worker instead of
+    # relying on future's globals scan to discover its transitive C++ wrapper.
+    function(i) neuroim2:::.searchlight_coords_at(plan, g[i, ])
   })
 
   if (cores > 1) {
@@ -743,7 +746,7 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
     plan <- .searchlight_plan(mask, radius, nonzero)
     g <- grid
     function(i) {
-      roi <- .searchlight_roi_at(plan, g[i, ])
+      roi <- neuroim2:::.searchlight_roi_at(plan, g[i, ])
       attr(roi, "mask_index") <- as.integer(i)
       roi
     }
