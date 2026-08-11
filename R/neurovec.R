@@ -1767,7 +1767,14 @@ setMethod("show", "NeuroVecSeq", function(object) {
 setMethod("as.matrix", "DenseNeuroVec",
   function(x) {
     d <- dim(x)
-    matrix(as.array(x@.Data), nrow = prod(d[1:3]), ncol = d[4])
+    # A voxels-by-time matrix is the same memory with a different `dim`, so
+    # reshape rather than copy. `matrix(as.array(x@.Data), ...)` duplicated the
+    # whole payload -- 116 MB for a 60-volume run, and it was over half of
+    # automask()'s runtime. R still copies on the first write to the result, so
+    # the source object is untouched.
+    m <- x@.Data
+    dim(m) <- c(prod(d[1:3]), d[4])
+    m
   }
 )
 

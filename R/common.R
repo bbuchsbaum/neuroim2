@@ -599,8 +599,11 @@ setMethod(f="scale_series", signature=signature(x="DenseNeuroVec", center="logic
             d <- dim(x)
             nv <- prod(d[1:3])
             nt <- d[4]
-            # Reshape directly to voxels x time — no transpose needed
-            M <- matrix(x@.Data, nrow = nv, ncol = nt)
+            # Reshape directly to voxels x time -- no transpose, and no copy:
+            # setting `dim` on the data part is free, and R duplicates on the
+            # first write below rather than here.
+            M <- x@.Data
+            dim(M) <- c(nv, nt)
             if (center) {
               M <- M - rowMeans(M)
             }

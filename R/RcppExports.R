@@ -25,6 +25,24 @@ apply_cgb_graph_cpp <- function(arr, row_ptr, col_ind, val, mask_idx, passes = 1
     .Call(`_neuroim2_apply_cgb_graph_cpp`, arr, row_ptr, col_ind, val, mask_idx, passes, lambda)
 }
 
+#' Label the connected components of a 3-D logical mask
+#'
+#' @param mask logical vector holding the mask in column-major order
+#' @param dims integer vector of length 3
+#' @param connectivity 6, 18 or 26
+#' @return a list with \code{index} (components numbered by decreasing size)
+#'   and \code{size} (the size of the component each voxel belongs to), both
+#'   integer vectors of \code{prod(dims)}, and \code{n} the component count
+#' @keywords internal
+#' @noRd
+conn_comp_labels_cpp <- function(mask, dims, connectivity) {
+    .Call(`_neuroim2_conn_comp_labels_cpp`, mask, dims, connectivity)
+}
+
+prune_local_maxima_cpp <- function(coords, vals, mindist) {
+    .Call(`_neuroim2_prune_local_maxima_cpp`, coords, vals, mindist)
+}
+
 downsample_3d_cpp <- function(arr, new_dims, old_dims) {
     .Call(`_neuroim2_downsample_3d_cpp`, arr, new_dims, old_dims)
 }
@@ -39,6 +57,10 @@ fast_multilayer_laplacian_enhancement_masked <- function(img, mask, k = 2L, patc
 
 gaussian_blur_sep_cpp <- function(arr, mask_idx, window, sigma, spacing, normalize = TRUE, full_mask = FALSE) {
     .Call(`_neuroim2_gaussian_blur_sep_cpp`, arr, mask_idx, window, sigma, spacing, normalize, full_mask)
+}
+
+gaussian_blur_sep_4d_cpp <- function(arr, mask_idx, window, sigma, spacing, normalize = TRUE, full_mask = FALSE) {
+    .Call(`_neuroim2_gaussian_blur_sep_4d_cpp`, arr, mask_idx, window, sigma, spacing, normalize, full_mask)
 }
 
 indexToGridCpp <- function(idx, array_dim) {

@@ -617,13 +617,17 @@ blobby_shape <- function(drop = 0.3, edge_fraction = 0.7) {
 #'
 #' @param mask A \code{\linkS4class{NeuroVol}} object representing the brain mask.
 #' @param radius A numeric value specifying the radius (in mm) of the spherical searchlight.
-#' @param nonzero A logical value indicating whether to include only coordinates
-#'   with nonzero values in the supplied mask. Default is FALSE.
+#' @param nonzero A logical value indicating whether each searchlight should be
+#'   restricted to voxels with nonzero values in the supplied mask. Default is
+#'   FALSE. It does not affect which voxels are used as centres: every nonzero
+#'   voxel of the mask is a centre, as in \code{\link{searchlight}}.
 #' @param cores An integer specifying the number of cores to use for parallel
 #'   computation. Default is 0, which uses a single core.
 #'
 #' @return A \code{deferred_list} object containing matrices of integer-valued
-#'   voxel coordinates, each representing a searchlight region.
+#'   voxel coordinates, each representing a searchlight region. Its length is the
+#'   number of nonzero voxels in \code{mask}, matching \code{\link{searchlight}}
+#'   called with the same arguments.
 #'
 #' @examples
 #' # Load an example brain mask
@@ -636,12 +640,27 @@ blobby_shape <- function(drop = 0.3, edge_fraction = 0.7) {
 #'
 #' @export
 searchlight_coords <- function(mask, radius, nonzero=FALSE, cores=0) {
-  # Decide which voxels to consider
-  if (nonzero) {
-    mask.idx <- which(mask != 0)
-  } else {
-    mask.idx <- seq_len(prod(dim(mask)))
+  if (!inherits(mask, "NeuroVol")) {
+    cli::cli_abort("{.arg mask} must be a {.cls NeuroVol} object.")
   }
+  if (radius <= 0) {
+    cli::cli_abort("{.arg radius} must be positive, not {.val {radius}}.")
+  }
+  if (!is.logical(nonzero) || length(nonzero) != 1) {
+    cli::cli_abort("{.arg nonzero} must be TRUE or FALSE.")
+  }
+  if (cores < 0) {
+    cli::cli_abort("{.arg cores} must be non-negative, not {.val {cores}}.")
+  }
+
+  # Every voxel the mask admits is a centre -- the same rule searchlight(),
+  # random_searchlight(), resampled_searchlight() and clustered_searchlight()
+  # use, and the one this function has always documented. It used to centre on
+  # every voxel in the grid unless `nonzero = TRUE`, so on an ordinary brain
+  # mask it produced ~3x as many searchlights as its siblings, most of them
+  # outside the brain. `nonzero` now only decides what each searchlight
+  # *contains*, exactly as it does in searchlight().
+  mask.idx <- which(mask != 0)
 
   # Convert voxel indices to coordinates
   grid <- index_to_grid(mask, mask.idx) # Nx3 integer voxel coords

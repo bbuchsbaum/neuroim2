@@ -253,7 +253,11 @@ test_that("gaussian_blur() validates its arguments and clamps absurd windows", {
 
   expect_error(gaussian_blur(vol, mk, sigma = 2, window = Inf), "finite")
   expect_error(gaussian_blur(vol, mk, sigma = 2, window = c(1, 2)), "single")
-  expect_error(gaussian_blur(vol, mk, sigma = 2, window = NULL), "single")
+  # window = NULL is no longer an error: it is the default, and means "derive
+  # the half-width from sigma and the voxel size".
+  expect_silent(gaussian_blur(vol, mk, sigma = 2, window = NULL))
+  expect_equal(as.numeric(gaussian_blur(vol, mk, sigma = 2, window = NULL)),
+               as.numeric(gaussian_blur(vol, mk, sigma = 2, window = 8)))
   expect_error(gaussian_blur(vol, mk, sigma = 2, window = NA), "single")
   expect_error(gaussian_blur(vol, mk, sigma = Inf), "finite")
   expect_error(gaussian_blur(vol, mk, sigma = NA), "finite")
