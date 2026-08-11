@@ -171,6 +171,23 @@ dimension, window, sigma, spacing, mask and `normalize` in the test suite.
 
 # neuroim2 0.17.0
 
+## Testing
+
+* The test suite now runs clean: 2969 passing, no failures and no errors.
+  Previously `R CMD check` reported 7 failures and 2 errors on every platform.
+* `test-plot-registration-qc.R` called `ggplot2::get_labs()`, which only exists
+  from ggplot2 3.5.2 while DESCRIPTION sets no version floor, so it errored on
+  older ggplot2. Tests now read plot titles through a version-agnostic helper.
+* The vdiffr golden-image tests have moved to `dev/visual-snapshots/`. They
+  compare SVG text byte-for-byte, which encodes the font metrics of the machine
+  that produced the snapshot, so a single stored image cannot match the
+  Windows, macOS and Linux check matrix — and testthat deletes any `_snaps/`
+  directory whose test file did not run, so they could not simply be skipped.
+  `tests/testthat/test-plot-structure.R` covers the same plotting calls with
+  platform-independent structural assertions (panel counts, layer counts, data
+  shape, argument validation) and runs on every check. See the README in
+  `dev/visual-snapshots/` for reviewing intentional visual changes.
+
 ## Documentation
 
 * The vignettes have been rewritten as nine articles in three tiers: *Learn*
@@ -407,6 +424,16 @@ dimension, window, sigma, spacing, mask and `normalize` in the test suite.
   maps exactly to `origin()` by either route. Raster extents produced by the
   plotting helpers shift by half a voxel as a consequence, placing voxel
   centres on their affine positions.
+* Fixed an off-by-one in world-to-index conversion on anisotropic and
+  large-origin grids. `grid_to_index()` truncates, and `NeuroSpace` stores
+  affines to 7 significant figures, so a coordinate that is arithmetically an
+  exact voxel centre could arrive as `2.9999985` and truncate to the voxel
+  below — on the shipped EPI mask the error reached 1.6e-6 grid units.
+  `coord_to_index()` now rounds to the nearest voxel centre, and
+  `grid_to_index()` snaps values within 1e-4 of an integer. Genuinely
+  fractional grid coordinates still truncate, matching R's array indexing.
+  (The previous 0.5-voxel offset was partly masking this, since `trunc(x + 0.5)`
+  rounds; correcting the offset alone exposed it.)
 * Fixed `linear_access()` on sparse `NeuroVec` objects, which could return wrong values or error when there were more masked voxels than time points. The sparse data matrix is stored as `[time × voxel]`; the linear-index path now indexes rows and columns in the correct order.
 * Fixed `ROIVol` arithmetic so values are aligned by voxel index, not by the original coordinate order, and fixed sparse `Summary` group methods so reductions include implicit structural zeros. `ROIVol` arithmetic now documents and enforces a same-support contract (identical space and voxel set; order may differ); missing voxels are not treated as zero.
 * Hardened `simulate_fmri()` edge cases: zero FWHM values now disable the corresponding smoothing step, `n_time = 1` no longer trips AR loops, tiny or constant masks no longer produce `NA` heteroscedasticity fields, and scalar arguments now receive explicit validation.
@@ -476,6 +503,23 @@ dimension, window, sigma, spacing, mask and `normalize` in the test suite.
 * `write_vec()` now round-trips per-volume labels through a custom NIfTI extension; `read_vec()` and low-footprint readers restore labels on load.
 * Added AFNI-inspired masking helpers: `apply_mask()` to apply an existing 3D mask, `clip_level()` to estimate a foreground clip threshold or gradual clip map, and `automask()` to derive a brain-like mask from image intensities for `NeuroVol`, `NeuroVec`, sparse, mapped, and file-backed objects.
 
+## Testing
+
+* The test suite now runs clean: 2969 passing, no failures and no errors.
+  Previously `R CMD check` reported 7 failures and 2 errors on every platform.
+* `test-plot-registration-qc.R` called `ggplot2::get_labs()`, which only exists
+  from ggplot2 3.5.2 while DESCRIPTION sets no version floor, so it errored on
+  older ggplot2. Tests now read plot titles through a version-agnostic helper.
+* The vdiffr golden-image tests have moved to `dev/visual-snapshots/`. They
+  compare SVG text byte-for-byte, which encodes the font metrics of the machine
+  that produced the snapshot, so a single stored image cannot match the
+  Windows, macOS and Linux check matrix — and testthat deletes any `_snaps/`
+  directory whose test file did not run, so they could not simply be skipped.
+  `tests/testthat/test-plot-structure.R` covers the same plotting calls with
+  platform-independent structural assertions (panel counts, layer counts, data
+  shape, argument validation) and runs on every check. See the README in
+  `dev/visual-snapshots/` for reviewing intentional visual changes.
+
 ## Documentation
 
 * Added new introductory workflow and container vignettes and refocused the advanced volume and ROI vignettes around current package workflows.
@@ -536,6 +580,23 @@ dimension, window, sigma, spacing, mask and `normalize` in the test suite.
 * New oblique affine regression tests (6 tests) for downsample, resample, and deoblique.
 * New `vdiffr` plot snapshot tests (7 tests) for `plot()`, `plot_ortho()`, `plot_montage()`, and `plot_overlay()`.
 * New shared test helper module with factory functions (`make_vol()`, `make_vec()`, `make_mask()`, etc.).
+
+## Testing
+
+* The test suite now runs clean: 2969 passing, no failures and no errors.
+  Previously `R CMD check` reported 7 failures and 2 errors on every platform.
+* `test-plot-registration-qc.R` called `ggplot2::get_labs()`, which only exists
+  from ggplot2 3.5.2 while DESCRIPTION sets no version floor, so it errored on
+  older ggplot2. Tests now read plot titles through a version-agnostic helper.
+* The vdiffr golden-image tests have moved to `dev/visual-snapshots/`. They
+  compare SVG text byte-for-byte, which encodes the font metrics of the machine
+  that produced the snapshot, so a single stored image cannot match the
+  Windows, macOS and Linux check matrix — and testthat deletes any `_snaps/`
+  directory whose test file did not run, so they could not simply be skipped.
+  `tests/testthat/test-plot-structure.R` covers the same plotting calls with
+  platform-independent structural assertions (panel counts, layer counts, data
+  shape, argument validation) and runs on every check. See the README in
+  `dev/visual-snapshots/` for reviewing intentional visual changes.
 
 ## Documentation
 
