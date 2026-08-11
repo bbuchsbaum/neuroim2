@@ -72,12 +72,12 @@ jobs:
       - name: Render authoritative vignette subset
         run: |
           files <- c(
-            "vignettes/Overview.Rmd",
-            "vignettes/ChoosingBackends.Rmd",
-            "vignettes/coordinate-systems.Rmd",
-            "vignettes/VolumesAndVectors.Rmd",
-            "vignettes/Resampling.Rmd",
-            "vignettes/AnalysisWorkflows.Rmd"
+            "vignettes/neuroim2.Rmd",
+            "vignettes/large-data.Rmd",
+            "vignettes/spaces-and-coordinates.Rmd",
+            "vignettes/volumes-and-vectors.Rmd",
+            "vignettes/resampling-and-orientation.Rmd",
+            "vignettes/regions-and-searchlights.Rmd"
           )
           out_dir <- file.path(tempdir(), "docs-check")
           dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
