@@ -4,7 +4,7 @@ output:
   rmarkdown::html_vignette:
     css: albers.css
     includes:
-      in_header: albers-header.html
+      in_header: albers-header.inc
 vignette: |
   %\VignetteIndexEntry{Smoothing and filtering}
   %\VignetteEngine{knitr::rmarkdown}
@@ -12,7 +12,7 @@ vignette: |
 resource_files:
 - albers.css
 - albers.js
-- albers-header.html
+- albers-header.inc
 ---
 
 ```{r setup, include = FALSE}
