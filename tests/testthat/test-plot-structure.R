@@ -34,6 +34,16 @@ test_that("plot(vol) builds a multi-slice montage", {
   expect_gt(nrow(ggplot2::ggplot_build(p)$data[[1]]), 0)
 })
 
+test_that("plot(vol) honours the slicing axis", {
+  vol <- make_vol(c(8L, 10L, 12L))
+  p <- plot(vol, zlevels = c(2L, 6L), along = 1L)
+
+  expect_equal(built_panels(p), 2L)
+  # Sagittal slices contain the other two spatial dimensions.
+  expect_equal(nrow(ggplot2::ggplot_build(p)$data[[1]]), 2L * 10L * 12L)
+  expect_error(plot(vol, along = 4L), "along")
+})
+
 test_that("plot(NeuroSlice) builds a single 2D panel", {
   sl <- slice(demo_volume(), 10L, along = 3L)
   p <- plot(sl)

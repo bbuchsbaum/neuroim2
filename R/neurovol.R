@@ -1263,8 +1263,7 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 
 #' Plot a NeuroVol
 #'
-#' Display axial slices of a \code{\linkS4class{NeuroVol}} as a faceted
-#' montage.
+#' Display slices of a \code{\linkS4class{NeuroVol}} as a faceted montage.
 #'
 #' When a second volume \code{y} is supplied it is treated as an overlay
 #' (e.g.\ a statistical map) composited on top of \code{x} with
@@ -1280,6 +1279,8 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 #'   (default \code{"grays"}).  See \code{\link{resolve_cmap}}.
 #' @param zlevels integer slice indices to display.
 #'   Default: 9 evenly-spaced slices (3 \eqn{\times}{x} 3 grid).
+#' @param along axis along which to slice: 1 = sagittal, 2 = coronal,
+#'   3 = axial (the default).
 #' @param irange numeric length-2 intensity range for the color scale.
 #' @param thresh a 2-element vector indicating the lower and upper
 #'   transparency thresholds.
@@ -1301,7 +1302,8 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 setMethod("plot", signature=signature(x="NeuroVol", y="missing"),
           def=function(x, y,
                        cmap="grays",
-                       zlevels=unique(round(seq(1, dim(x)[3], length.out=9))),
+                       zlevels=NULL,
+                       along=3L,
                        irange=range(x, na.rm=TRUE),
                        thresh=c(0,0),
                        alpha=1,
@@ -1312,10 +1314,21 @@ setMethod("plot", signature=signature(x="NeuroVol", y="missing"),
                    call. = FALSE)
             }
 
+            along <- as.integer(along)
+            if (length(along) != 1L || is.na(along) || along < 1L || along > 3L) {
+              stop("`along` must be one of 1, 2, or 3.", call. = FALSE)
+            }
+            if (is.null(zlevels)) {
+              zlevels <- unique(round(seq(1, dim(x)[along], length.out=9)))
+            }
+            panel_args <- validate_slice_panel_args(zlevels, along, dim(x), 3L)
+            zlevels <- panel_args$zlevels
+            along <- panel_args$along
             colors <- resolve_cmap(cmap)
+            slice_axis <- c("x", "y", "z")[[along]]
 
             df1 <- do.call(rbind, purrr::map(zlevels, function(i) {
-              imslice <- slice(x, zlevel = i, along = 3)
+              imslice <- slice(x, zlevel = i, along = along)
               df <- slice_df(imslice)
 
               if (diff(thresh) > 0) {
@@ -1335,7 +1348,7 @@ setMethod("plot", signature=signature(x="NeuroVol", y="missing"),
                                            na.value = "transparent") +
               ggplot2::facet_wrap(~ z, ncol = 3L,
                                  labeller = ggplot2::labeller(
-                                   z = function(z) paste("z =", z))) +
+                                   z = function(z) paste(slice_axis, "=", z))) +
               coord_neuro_fixed() +
               theme_neuro()
 
@@ -1347,12 +1360,13 @@ setMethod("plot", signature=signature(x="NeuroVol", y="missing"),
 setMethod("plot", signature=signature(x="NeuroVol", y="NeuroVol"),
           def=function(x, y,
                        cmap="grays",
-                       zlevels=unique(round(seq(1, dim(x)[3], length.out=9))),
+                       zlevels=NULL,
+                       along=3L,
                        ov_cmap="inferno",
                        ov_alpha=0.5,
                        ov_thresh=0) {
             plot_overlay(bgvol = x, overlay = y,
-                         zlevels = zlevels, along = 3L,
+                         zlevels = zlevels, along = along,
                          bg_cmap = cmap, ov_cmap = ov_cmap,
                          ov_alpha = ov_alpha, ov_thresh = ov_thresh,
                          ncol = 3L)
