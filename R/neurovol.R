@@ -890,7 +890,7 @@ setMethod(f="mapf", signature=signature(x="NeuroVol", m="Kernel"),
             dims <- dim(x)
 
             if (!is.null(mask)) {
-              if (!all.equal(dim(mask), dim(ovol))) {
+              if (!isTRUE(all.equal(dim(mask), dim(ovol)))) {
                 stop("mask must have same dimensions as input volume")
               }
               grid <- index_to_grid(mask, which(mask != 0))
@@ -900,25 +900,67 @@ setMethod(f="mapf", signature=signature(x="NeuroVol", m="Kernel"),
                                             k=hwidth[3]:(dims[3] - hwidth[3])))
             }
 
-            # precompute kernel voxel offsets
             kern_vox <- m@voxels
-            kv_i <- kern_vox[,1]
-            kv_j <- kern_vox[,2]
-            kv_k <- kern_vox[,3]
             wts <- m@weights
 
-            # vectorised convolution over selected centers
-            centers_i <- grid[,1]
-            centers_j <- grid[,2]
-            centers_k <- grid[,3]
+            # A kernel tap is a fixed coordinate offset, so in linear index
+            # terms it is a fixed *scalar* offset -- the same translate-a-
+            # template trick the spherical ROI builders use. That turns the
+            # convolution into one vectorised pass per tap (a few dozen) rather
+            # than a scalar R iteration per centre (up to a million).
+            # as.numeric: `grid` and `dim(x)` are both integer, so an
+            # all-integer product overflows to NA past 2^31 voxels.
+            slice <- as.numeric(dims[1]) * dims[2]
+            centre_lin <- grid[,1] + (grid[,2] - 1) * as.numeric(dims[1]) +
+                          (grid[,3] - 1) * slice
+            tap_lin <- kern_vox[,1] + kern_vox[,2] * as.numeric(dims[1]) +
+                       kern_vox[,3] * slice
 
-            # allocate output vector
+            # Taps that fall outside the volume contribute nothing. The old
+            # per-centre `x[cbind(ii, jj, kk)]` gather could not express that:
+            # a coordinate past the far face raised "subscript out of bounds",
+            # and one before the near face silently returned a *shorter* vector
+            # that then recycled against the weights, giving a wrong number with
+            # only a recycling warning. Out-of-volume taps are now skipped.
+            #
+            # Every interior result is unchanged. Two cases are not interior and
+            # do change: a `mask` reaching within the kernel's radius of a face,
+            # and -- less obviously -- an unmasked volume thinner than twice the
+            # kernel half-width, because `hwidth:(dims - hwidth)` counts
+            # *backwards* when `dims < 2 * hwidth` and so yields centres inside
+            # the margin rather than none. On a 10 x 3 x 10 slab with a 3x3x3
+            # kernel the j range is `2:1`. Those centres previously recycled;
+            # they now get the clipped convolution.
+            xdata <- as.vector(as.array(x))
             res <- numeric(nrow(grid))
-            for (idx in seq_len(nrow(grid))) {
-              ii <- centers_i[idx] + kv_i
-              jj <- centers_j[idx] + kv_j
-              kk <- centers_k[idx] + kv_k
-              res[idx] <- sum(x[cbind(ii, jj, kk)] * wts)
+
+            # Whether a tap can leave the volume at all is decided by the
+            # extreme centres, so test that per tap with three scalar
+            # comparisons and only fall back to a per-centre test when the tap
+            # actually straddles a face. Unmasked centres are held clear of the
+            # border, so that fallback never runs for them.
+            #
+            # An empty mask leaves nothing to convolve; min()/max() below would
+            # warn on the empty grid.
+            if (nrow(grid) == 0L) {
+              return(NeuroVol(ovol, space(x)))
+            }
+            lo <- c(min(grid[,1]), min(grid[,2]), min(grid[,3]))
+            hi <- c(max(grid[,1]), max(grid[,2]), max(grid[,3]))
+
+            for (t in seq_along(tap_lin)) {
+              off <- kern_vox[t,]
+              if (all(lo + off >= 1L) && all(hi + off <= dims[1:3])) {
+                res <- res + wts[t] * xdata[centre_lin + tap_lin[t]]
+              } else {
+                ii <- grid[,1] + off[1]; jj <- grid[,2] + off[2]
+                kk <- grid[,3] + off[3]
+                ok <- ii >= 1L & ii <= dims[1] & jj >= 1L & jj <= dims[2] &
+                      kk >= 1L & kk <= dims[3]
+                if (any(ok)) {
+                  res[ok] <- res[ok] + wts[t] * xdata[centre_lin[ok] + tap_lin[t]]
+                }
+              }
             }
 
             ovol[grid] <- res

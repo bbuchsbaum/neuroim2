@@ -77,14 +77,6 @@ local_sphere <- function(vx, vy, vz, radius, spacing, dim) {
     .Call(`_neuroim2_local_sphere`, vx, vy, vz, radius, spacing, dim)
 }
 
-local_spheres <- function(centers, radius, spacing, dim) {
-    .Call(`_neuroim2_local_spheres`, centers, radius, spacing, dim)
-}
-
-kernel_filt_3d_cpp <- function(data, kernel) {
-    .Call(`_neuroim2_kernel_filt_3d_cpp`, data, kernel)
-}
-
 #' Read a raw block of image data into a double vector
 #'
 #' @param path file to read from
@@ -135,18 +127,6 @@ nifti_write_data_cpp <- function(path, header, data, dtype_code, slope, inter, s
 #' @noRd
 nifti_read_volumes_cpp <- function(path, offset, nels, vols, dtype_code, swap, gzipped) {
     .Call(`_neuroim2_nifti_read_volumes_cpp`, path, offset, nels, vols, dtype_code, swap, gzipped)
-}
-
-radius_search_3d_nonisotropic <- function(cds_vox, cds_mm, queries_mm, radius_mm, sx, sy, sz, ox_mm, oy_mm, oz_mm) {
-    .Call(`_neuroim2_radius_search_3d_nonisotropic`, cds_vox, cds_mm, queries_mm, radius_mm, sx, sy, sz, ox_mm, oy_mm, oz_mm)
-}
-
-radius_search_3d_direct <- function(cds_vox, cds_mm, queries_mm, radius_mm, sx, sy, sz, ox_mm, oy_mm, oz_mm) {
-    .Call(`_neuroim2_radius_search_3d_direct`, cds_vox, cds_mm, queries_mm, radius_mm, sx, sy, sz, ox_mm, oy_mm, oz_mm)
-}
-
-radius_search_3d_precomputed <- function(cds_vox, cds_mm, queries_mm, radius_mm, sx, sy, sz, ox_mm, oy_mm, oz_mm) {
-    .Call(`_neuroim2_radius_search_3d_precomputed`, cds_vox, cds_mm, queries_mm, radius_mm, sx, sy, sz, ox_mm, oy_mm, oz_mm)
 }
 
 representative_volume_cpp <- function(mat, representative) {

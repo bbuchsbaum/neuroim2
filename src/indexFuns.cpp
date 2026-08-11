@@ -60,12 +60,6 @@ NumericMatrix local_sphere(int vx, int vy, int vz, double radius,
     return indexfuns::local_sphere_impl(vx, vy, vz, radius, spacing, dim);
 }
 
-// [[Rcpp::export]]
-List local_spheres(NumericMatrix centers, double radius, 
-                  NumericVector spacing, IntegerVector dim) {
-    return indexfuns::local_spheres_impl(centers, radius, spacing, dim);
-}
-
 // Implementation namespace
 namespace indexfuns {
 
@@ -326,16 +320,6 @@ namespace indexfuns {
             out(i,0) = xs[i];
             out(i,1) = ys[i];
             out(i,2) = zs[i];
-        }
-        return out;
-    }
-
-    List local_spheres_impl(NumericMatrix centers, double radius, 
-                           NumericVector spacing, IntegerVector dim) {
-        List out(centers.nrow());
-        for(int i = 0; i < centers.nrow(); i++) {
-            out[i] = local_sphere(centers(i,0)-1, centers(i,1)-1, centers(i,2)-1,
-                                radius, spacing, dim);
         }
         return out;
     }

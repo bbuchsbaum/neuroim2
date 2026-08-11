@@ -57,9 +57,6 @@ random_searchlight <- function(mask, radius, nonzero = TRUE) {
   grid <- index_to_grid(mask, mask.idx)
   n_total <- length(mask.idx)
 
-  # Logical vector tracking remaining voxels
-  remaining <- rep(TRUE, n_total)
-
   # Lookup array: maps voxel coords to index in mask.idx
   lookup <- array(0, dim(mask))
   lookup[mask.idx] <- seq_along(mask.idx)
@@ -68,8 +65,46 @@ random_searchlight <- function(mask, radius, nonzero = TRUE) {
   slist <- vector("list", n_total)
   counter <- 1
 
-  # Vector of voxel indices that remain
-  remain_indices <- seq_along(mask.idx)
+  # Free list of voxels not yet claimed by a searchlight.
+  #
+  # `free[seq_len(n_free)]` holds the remaining voxels and `pos[v]` is where v
+  # sits in it, 0 once removed. Removing a batch overwrites the holes it leaves
+  # in the surviving prefix with survivors taken from the tail, so it costs
+  # O(batch) rather than O(remaining). The previous free list was rebuilt with
+  # `remain_indices[remaining[remain_indices]]` on every iteration, which is
+  # quadratic in the mask size overall and measured at about half the runtime of
+  # a whole-brain call.
+  free <- seq_len(n_total)
+  pos <- seq_len(n_total)
+  n_free <- n_total
+
+  # v must be live and duplicate-free. Both callers satisfy that -- ROI
+  # coordinates are distinct and are filtered to the still-available ones -- but
+  # unlike the logical vector this replaced, a swap-with-last list is neither
+  # idempotent nor duplicate-safe: violating either silently desynchronises
+  # `n_free` from the live set, after which voxels go unclaimed. The contract is
+  # load-bearing, so it is checked rather than assumed. Cost is O(batch).
+  drop_voxels <- function(v) {
+    if (anyDuplicated(v) || any(pos[v] == 0L)) {
+      cli::cli_abort(c(
+        "Internal error: searchlight free list given a repeated or already-claimed voxel.",
+        i = "Please report this with the mask and radius that triggered it."
+      ))
+    }
+    p <- pos[v]
+    pos[v] <<- 0L
+    keep_n <- n_free - length(v)
+    holes <- p[p <= keep_n]
+    if (length(holes)) {
+      # Exactly as many live voxels sit in the tail as there are holes in the
+      # surviving prefix, so this pairs them off.
+      tail_pos <- seq.int(keep_n + 1L, n_free)
+      movers <- free[tail_pos[pos[free[tail_pos]] != 0L]]
+      free[holes] <<- movers
+      pos[movers] <<- holes
+    }
+    n_free <<- keep_n
+  }
 
   # Progress reporting
   use_pb <- interactive() && n_total >= 100
@@ -78,10 +113,10 @@ random_searchlight <- function(mask, radius, nonzero = TRUE) {
                           .auto_close = TRUE, .envir = environment())
   }
 
-  while (length(remain_indices) > 0) {
-    # sample a center index from remain_indices
-    sel <- sample.int(length(remain_indices), 1)
-    center_idx <- remain_indices[sel]
+  while (n_free > 0L) {
+    # sample a center index from the remaining voxels
+    sel <- sample.int(n_free, 1)
+    center_idx <- free[sel]
     center_coord <- grid[center_idx, , drop=FALSE]
 
     # Compute spherical ROI
@@ -91,8 +126,7 @@ random_searchlight <- function(mask, radius, nonzero = TRUE) {
     # If no voxels in ROI, remove center_idx to avoid infinite loop
     if (nrow(vox) == 0) {
       # Mark center voxel as used to progress
-      remaining[center_idx] <- FALSE
-      remain_indices <- remain_indices[remaining[remain_indices]]
+      drop_voxels(center_idx)
       # continue to next iteration without adding to slist
       next
     }
@@ -102,12 +136,11 @@ random_searchlight <- function(mask, radius, nonzero = TRUE) {
     mask_hits <- idx_lookup > 0
 
     active_mask <- rep(FALSE, nrow(vox))
-    active_mask[mask_hits] <- remaining[idx_lookup[mask_hits]]
+    active_mask[mask_hits] <- pos[idx_lookup[mask_hits]] > 0L
 
     # If none of the masked voxels are available, drop current center and move on
     if (!any(active_mask)) {
-      remaining[center_idx] <- FALSE
-      remain_indices <- remain_indices[remaining[remain_indices]]
+      drop_voxels(center_idx)
       next
     }
 
@@ -128,16 +161,13 @@ random_searchlight <- function(mask, radius, nonzero = TRUE) {
 
     # Mark chosen voxels (that are in the mask) as used
     idx_keep <- idx_lookup[mask_hits & active_mask]
-    remaining[idx_keep] <- FALSE
-
-    # Update remain_indices to reflect removed voxels
-    remain_indices <- remain_indices[remaining[remain_indices]]
+    drop_voxels(idx_keep)
 
     slist[[counter]] <- search2
     counter <- counter + 1
 
     if (use_pb) {
-      cli::cli_progress_update(set = n_total - length(remain_indices),
+      cli::cli_progress_update(set = n_total - n_free,
                                .envir = environment())
     }
   }
