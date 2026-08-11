@@ -417,7 +417,7 @@ test_that("a truncated file says what was expected and what arrived", {
 test_that("a file that is not an image is rejected with the reason", {
   f <- tempfile(fileext = ".nii")
   writeBin(as.raw(rep(0L, 400)), f)
-  expect_error(read_header(f), "does not start with a NIfTI")
+  expect_error(read_header(f), "does not\\s+start with a NIfTI")
 
   g <- tempfile(fileext = ".nii")
   writeBin(as.raw(rep(0L, 3)), g)
