@@ -56,10 +56,17 @@ setMethod("axcodes", "matrix", function(x) {
 #' @return A reoriented object of the same class as \code{x}.
 #'
 #' @details
-#' The function works by computing the orientation transform from the
-#' current axis codes to the target codes, then applying the necessary
-#' axis permutations and flips. The affine matrix is updated to reflect
-#' the new orientation while preserving world-coordinate mapping.
+#' Reorienting to a target that differs only in which anatomical direction each
+#' axis runs is a relabelling of the grid, not a resampling: the voxels are the
+#' same voxels, permuted and flipped. This function does exactly that, so it is
+#' exact, works on images of any size, and costs a single \code{aperm()}.
+#'
+#' It used to build the target space and hand it to \code{\link{resample}},
+#' which had three consequences: values were interpolated where they should
+#' merely have moved, the registration backend refused images smaller than four
+#' voxels on any axis, and -- because the target space kept the source's
+#' dimensions -- an axis-permuting reorientation wrote into a grid that did not
+#' contain the data and silently lost about a quarter of it.
 #'
 #' @examples
 #' sp <- NeuroSpace(c(10L, 10L, 10L), c(2, 2, 2))
@@ -67,30 +74,30 @@ setMethod("axcodes", "matrix", function(x) {
 #' ras_vol <- as_canonical(vol)
 #' axcodes(ras_vol)  # "R" "A" "S"
 #'
-#' @seealso \code{\link{axcodes}}, \code{\link{reorient}}
+#' @seealso \code{\link{axcodes}}, \code{\link{reorient}},
+#'   \code{\link{apply_orientation}}
 #' @export
 as_canonical <- function(x, target = c("R", "A", "S")) {
   stopifnot(length(target) == 3)
+  if (!inherits(x, "NeuroVol") && !inherits(x, "NeuroVec")) {
+    cli::cli_abort("{.fn as_canonical} requires a {.cls NeuroVol} or {.cls NeuroVec} object.")
+  }
   current <- axcodes(x)
   if (identical(current, target)) {
     return(x)
   }
 
-  # Use existing reorient infrastructure
+  ornt <- .reorient_transform(space(x), target)
+  # apply_orientation() permutes and flips the leading three axes and leaves
+  # any trailing one (time) alone, so the same call serves both classes.
+  arr <- apply_orientation(as.array(x), ornt)
+
   if (inherits(x, "NeuroVol")) {
-    new_space <- reorient(space(x), target)
-    resample(x, new_space)
-  } else if (inherits(x, "NeuroVec")) {
-    new_space <- reorient(space(x), target)
-    # Resample each volume and reconstruct
-    d <- dim(x)
-    vols <- lapply(seq_len(d[4]), function(i) {
-      resample(x[[i]], new_space)
-    })
-    mat <- do.call(cbind, lapply(vols, function(v) as.numeric(v@.Data)))
-    dspace <- add_dim(new_space, d[4])
-    DenseNeuroVec(mat, dspace)
+    DenseNeuroVol(arr, reorient(space(x), target))
   } else {
-    cli::cli_abort("{.fn as_canonical} requires a {.cls NeuroVol} or {.cls NeuroVec} object.")
+    d <- dim(x)
+    sp3 <- reorient(drop_dim(space(x)), target)
+    DenseNeuroVec(arr, add_dim(sp3, d[4]),
+                  label = x@label, volume_labels = volume_labels(x))
   }
 }

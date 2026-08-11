@@ -756,47 +756,42 @@ setMethod(f="coord_to_grid", signature=signature(x="NeuroVol", coords="numeric")
           })
 
 
-#' @importFrom dbscan kNN
+# Local maxima of a component: the voxels kept as peaks by conn_comp().
+#
+# Two things were wrong with what this did before, and both were invisible from
+# the outside because the second one hid the first.
+#
+# It read the neighbour distances from `dbscan::kNN()`'s `$distances`. That
+# component is called `dist`, and `$` does not partially match a name longer
+# than the one it is looking for, so the lookup returned NULL, `NULL[, 2]`
+# returned NULL, `NULL < mindist & ...` was logical(0), and `any(pruneSet)` was
+# therefore always FALSE. Nothing was ever pruned: `conn_comp()`'s
+# `local_maxima` table listed every in-mask voxel -- 25,538 rows for 12
+# components on a 3 mm map, 25,527 of them from a single component and every one
+# of them a voxel away from the next -- whatever `local_maxima_dist` was set to.
+#
+# Underneath that, the rule itself did not deliver the minimum distance it
+# promises. It compared each point only against its single nearest neighbour, so
+# with `mindist = 15` three points at 0, 5 and 12 mm valued 5, 1 and 9 keep the
+# 5 and the 9: the 5 survives because its *nearest* neighbour is the 1, and the
+# result is two "local maxima" twelve millimetres apart. "The nearest neighbour"
+# is not well defined here either -- on a voxel grid more than half of all
+# points have several neighbours at exactly the same distance, and which one
+# came back depended on the kd-tree's traversal order.
+#
+# The rule now is the one `local_maxima_dist` describes: keep a point when no
+# other point within `mindist` has a larger value. It is deterministic, it holds
+# the minimum distance by construction, and it needs a single pass.
 #' @keywords internal
 #' @noRd
-.pruneCoords <- function(coord.set,  vals,  mindist=10) {
-
-	if (NROW(coord.set) == 1) {
-		1
+.pruneCoords <- function(coord.set, vals, mindist = 10) {
+	n <- NROW(coord.set)
+	if (n <= 1L) {
+		return(seq_len(n))
 	}
-
-	.prune <- function(keepIndices) {
-		if (length(keepIndices) <= 2) {
-			keepIndices
-		} else {
-		  ret <- try(dbscan::kNN(coord.set[keepIndices,], coord.set[keepIndices,], k=2))
-
-			#ret <- rflann::Neighbour(coord.set[keepIndices,], coord.set[keepIndices,], k=2, build="kdtree", cores=0, checks=1)
-			#ind <- ret$indices[, 2]
-			#ds <- sqrt(ret$distances[, 2])
-
-		  ind <- ret$id[,2]
-		  ds <- ret$distances[,2]
-
-			v <- vals[keepIndices]
-			ovals <- v[ind]
-			pruneSet <- ifelse(ds < mindist & ovals > v,  TRUE, FALSE)
-
-			if (any(pruneSet)) {
-				Recall(keepIndices[!pruneSet])
-			} else {
-				keepIndices
-			}
-		}
-
-
-	}
-
-	.prune(1:NROW(coord.set))
-
-
-
+	prune_local_maxima_cpp(as.matrix(coord.set), as.numeric(vals), mindist)
 }
+
 
 
 #' @title Create a patch set from a NeuroVol object
@@ -890,7 +885,7 @@ setMethod(f="mapf", signature=signature(x="NeuroVol", m="Kernel"),
             dims <- dim(x)
 
             if (!is.null(mask)) {
-              if (!all.equal(dim(mask), dim(ovol))) {
+              if (!isTRUE(all.equal(dim(mask), dim(ovol)))) {
                 stop("mask must have same dimensions as input volume")
               }
               grid <- index_to_grid(mask, which(mask != 0))
@@ -900,25 +895,67 @@ setMethod(f="mapf", signature=signature(x="NeuroVol", m="Kernel"),
                                             k=hwidth[3]:(dims[3] - hwidth[3])))
             }
 
-            # precompute kernel voxel offsets
             kern_vox <- m@voxels
-            kv_i <- kern_vox[,1]
-            kv_j <- kern_vox[,2]
-            kv_k <- kern_vox[,3]
             wts <- m@weights
 
-            # vectorised convolution over selected centers
-            centers_i <- grid[,1]
-            centers_j <- grid[,2]
-            centers_k <- grid[,3]
+            # A kernel tap is a fixed coordinate offset, so in linear index
+            # terms it is a fixed *scalar* offset -- the same translate-a-
+            # template trick the spherical ROI builders use. That turns the
+            # convolution into one vectorised pass per tap (a few dozen) rather
+            # than a scalar R iteration per centre (up to a million).
+            # as.numeric: `grid` and `dim(x)` are both integer, so an
+            # all-integer product overflows to NA past 2^31 voxels.
+            slice <- as.numeric(dims[1]) * dims[2]
+            centre_lin <- grid[,1] + (grid[,2] - 1) * as.numeric(dims[1]) +
+                          (grid[,3] - 1) * slice
+            tap_lin <- kern_vox[,1] + kern_vox[,2] * as.numeric(dims[1]) +
+                       kern_vox[,3] * slice
 
-            # allocate output vector
+            # Taps that fall outside the volume contribute nothing. The old
+            # per-centre `x[cbind(ii, jj, kk)]` gather could not express that:
+            # a coordinate past the far face raised "subscript out of bounds",
+            # and one before the near face silently returned a *shorter* vector
+            # that then recycled against the weights, giving a wrong number with
+            # only a recycling warning. Out-of-volume taps are now skipped.
+            #
+            # Every interior result is unchanged. Two cases are not interior and
+            # do change: a `mask` reaching within the kernel's radius of a face,
+            # and -- less obviously -- an unmasked volume thinner than twice the
+            # kernel half-width, because `hwidth:(dims - hwidth)` counts
+            # *backwards* when `dims < 2 * hwidth` and so yields centres inside
+            # the margin rather than none. On a 10 x 3 x 10 slab with a 3x3x3
+            # kernel the j range is `2:1`. Those centres previously recycled;
+            # they now get the clipped convolution.
+            xdata <- as.vector(as.array(x))
             res <- numeric(nrow(grid))
-            for (idx in seq_len(nrow(grid))) {
-              ii <- centers_i[idx] + kv_i
-              jj <- centers_j[idx] + kv_j
-              kk <- centers_k[idx] + kv_k
-              res[idx] <- sum(x[cbind(ii, jj, kk)] * wts)
+
+            # Whether a tap can leave the volume at all is decided by the
+            # extreme centres, so test that per tap with three scalar
+            # comparisons and only fall back to a per-centre test when the tap
+            # actually straddles a face. Unmasked centres are held clear of the
+            # border, so that fallback never runs for them.
+            #
+            # An empty mask leaves nothing to convolve; min()/max() below would
+            # warn on the empty grid.
+            if (nrow(grid) == 0L) {
+              return(NeuroVol(ovol, space(x)))
+            }
+            lo <- c(min(grid[,1]), min(grid[,2]), min(grid[,3]))
+            hi <- c(max(grid[,1]), max(grid[,2]), max(grid[,3]))
+
+            for (t in seq_along(tap_lin)) {
+              off <- kern_vox[t,]
+              if (all(lo + off >= 1L) && all(hi + off <= dims[1:3])) {
+                res <- res + wts[t] * xdata[centre_lin + tap_lin[t]]
+              } else {
+                ii <- grid[,1] + off[1]; jj <- grid[,2] + off[2]
+                kk <- grid[,3] + off[3]
+                ok <- ii >= 1L & ii <= dims[1] & jj >= 1L & jj <= dims[2] &
+                      kk >= 1L & kk <= dims[3]
+                if (any(ok)) {
+                  res[ok] <- res[ok] + wts[t] * xdata[centre_lin[ok] + tap_lin[t]]
+                }
+              }
             }
 
             ovol[grid] <- res
@@ -945,7 +982,10 @@ setMethod("show", "Kernel", function(object) {
 #' @param threshold threshold defining lower intensity bound for image mask
 #' @param cluster_table return cluster_table
 #' @param local_maxima return table of local maxima
-#' @param local_maxima_dist the distance used to define minum distance between local maxima
+#' @param local_maxima_dist Minimum distance, in the units of \code{spacing(x)},
+#'   between reported local maxima. A voxel is reported when no other voxel of
+#'   its component within this distance has a larger value, so the maxima of a
+#'   component are at least \code{local_maxima_dist} apart. Default 15.
 #' @rdname conn_comp-methods
 setMethod(f="conn_comp", signature=signature(x="NeuroVol"),
 	def=function(x, threshold=0, cluster_table=TRUE, local_maxima=TRUE, local_maxima_dist=15,...) {
@@ -954,45 +994,71 @@ setMethod(f="conn_comp", signature=signature(x="NeuroVol"),
 
 		comps <- conn_comp_3D(mask,...)
 
-		grid <- as.data.frame(index_to_grid(mask, which(mask>0)))
-		colnames(grid) <- c("x", "y", "z")
-		locations <- split(grid, comps$index[comps$index>0])
+		# Keep the voxel coordinates and values as matrices/vectors alongside the
+		# data frames the result exposes. Everything below used to re-derive them
+		# per component with as.matrix(loc), which was the largest remaining cost
+		# once the labelling itself was compiled.
+		lin_idx <- which(mask > 0)
+		gridm <- index_to_grid(mask, lin_idx)
+		colnames(gridm) <- c("x", "y", "z")
+		cid <- comps$index[lin_idx]
+		vals_in <- x[lin_idx]
 
-		ret <- list(index=ClusteredNeuroVol(mask, clusters=comps$index[mask>0]), size=NeuroVol(comps$size, space(x)), voxels=locations)
+		rows <- split(seq_along(cid), cid)
+		# One data frame per component, assembled from column slices rather than
+		# by subsetting a data frame. `grid[r, , drop = FALSE]` re-dispatches
+		# `[.data.frame` and rebuilds the row names for every component, which at
+		# 4,989 components cost 0.39 s against 0.03 s for the labelling itself.
+		# The pieces below are what that call produces: same column types, same
+		# integer row names (the positions selected), same order.
+		gx <- gridm[, 1L]; gy <- gridm[, 2L]; gz <- gridm[, 3L]
+		locations <- lapply(rows, function(r)
+			structure(list(x = gx[r], y = gy[r], z = gz[r]),
+			          class = "data.frame", row.names = r))
+
+		ret <- list(index=ClusteredNeuroVol(mask, clusters=cid), size=NeuroVol(comps$size, space(x)), voxels=locations)
 
 		if (cluster_table) {
-			maxima <- do.call(rbind, lapply(locations, function(loc) {
-				if (nrow(loc) == 1) {
-					loc
-				} else {
-					vals <- x[as.matrix(loc)]
-					loc[which.max(vals),]
-				}
-			}))
-			N <- comps$size[as.matrix(maxima)]
+			# One grouped arg-max instead of a which.max per component. Ordering by
+			# (component, decreasing value) and taking the first row of each group
+			# picks the same voxel which.max would, including its tie-break on the
+			# first occurrence. `vals_in` cannot contain NA: a voxel with an NA
+			# value fails `x > threshold` and is not in the mask.
+			o <- order(cid, -vals_in)
+			sel <- o[!duplicated(cid[o])]
+			maxima <- gridm[sel, , drop = FALSE]
+			N <- comps$size[lin_idx[sel]]
 			Area <- N * prod(spacing(x))
-			maxvals <- x[as.matrix(maxima)]
+			maxvals <- vals_in[sel]
+			# as.vector() strips the dimnames a matrix column carries: with a
+			# single cluster `maxima[, 1]` comes back named "x", and data.frame()
+			# would turn that into a character row name where it used to be 1.
 			ret$cluster_table <- data.frame(index=1:NROW(maxima),
-			                                x=maxima[,1], y=maxima[,2], z=maxima[,3],
+			                                x=as.vector(maxima[,1]),
+			                                y=as.vector(maxima[,2]),
+			                                z=as.vector(maxima[,3]),
 			                                N=N, Area=Area, value=maxvals)
 		}
 
 		if (local_maxima) {
-			#if (all(map_int(locations, NROW) == 1)) {
-      #
-			#}
-			coord.sets <- lapply(locations, function(loc) {
-				sweep(as.matrix(loc), 2, spacing(x), "*")
+			# Scale to millimetres once for the whole mask rather than per component.
+			sp <- spacing(x)
+			gridw <- gridm * rep(sp, each = nrow(gridm))
+
+			# A one-voxel component is its own maximum, so it skips the call and
+			# the coordinate subsetting behind it -- at 4,989 components more than
+			# half are single voxels. The kept positions are collected as one
+			# integer vector and indexed once, which also replaces a
+			# do.call(rbind, .) over thousands of one- and two-row matrices.
+			keep <- lapply(rows, function(r) {
+				if (length(r) == 1L) r
+				else r[.pruneCoords(gridw[r, , drop=FALSE], vals_in[r], mindist=local_maxima_dist)]
 			})
-
-			loc.max <- do.call(rbind, mapply(function(cset, i) {
-				idx <- .pruneCoords(as.matrix(cset), x[as.matrix(locations[[i]])], mindist=local_maxima_dist)
-				maxvox <- as.matrix(locations[[i]])[idx,,drop=F]
-				cbind(i, maxvox)
-			}, coord.sets, 1:length(coord.sets), SIMPLIFY=FALSE))
-
-
-			loc.max <- cbind(loc.max, x[loc.max[, 2:4, drop=F]])
+			sel <- unlist(keep, use.names = FALSE)
+			# vals_in[sel] is x at those voxels: `sel` indexes into the in-mask
+			# voxels, whose values vals_in already holds.
+			loc.max <- cbind(rep(seq_along(keep), lengths(keep)),
+			                 gridm[sel, , drop=FALSE], vals_in[sel])
 
 			row.names(loc.max) <- 1:NROW(loc.max)
 			colnames(loc.max) <- c("index", "x", "y", "z", "value")
@@ -1197,8 +1263,7 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 
 #' Plot a NeuroVol
 #'
-#' Display axial slices of a \code{\linkS4class{NeuroVol}} as a faceted
-#' montage.
+#' Display slices of a \code{\linkS4class{NeuroVol}} as a faceted montage.
 #'
 #' When a second volume \code{y} is supplied it is treated as an overlay
 #' (e.g.\ a statistical map) composited on top of \code{x} with
@@ -1214,6 +1279,8 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 #'   (default \code{"grays"}).  See \code{\link{resolve_cmap}}.
 #' @param zlevels integer slice indices to display.
 #'   Default: 9 evenly-spaced slices (3 \eqn{\times}{x} 3 grid).
+#' @param along axis along which to slice: 1 = sagittal, 2 = coronal,
+#'   3 = axial (the default).
 #' @param irange numeric length-2 intensity range for the color scale.
 #' @param thresh a 2-element vector indicating the lower and upper
 #'   transparency thresholds.
@@ -1223,6 +1290,7 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 #' @param ov_thresh overlay threshold; values with
 #'   \eqn{|v| < } \code{ov_thresh} become transparent (default 0).
 #' @param legend logical; show the colour bar?
+#' @seealso \code{\link{as.raster}}
 #' @importFrom graphics plot
 #' @examples
 #'
@@ -1235,7 +1303,8 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 setMethod("plot", signature=signature(x="NeuroVol", y="missing"),
           def=function(x, y,
                        cmap="grays",
-                       zlevels=unique(round(seq(1, dim(x)[3], length.out=9))),
+                       zlevels=NULL,
+                       along=3L,
                        irange=range(x, na.rm=TRUE),
                        thresh=c(0,0),
                        alpha=1,
@@ -1246,10 +1315,21 @@ setMethod("plot", signature=signature(x="NeuroVol", y="missing"),
                    call. = FALSE)
             }
 
+            along <- as.integer(along)
+            if (length(along) != 1L || is.na(along) || along < 1L || along > 3L) {
+              stop("`along` must be one of 1, 2, or 3.", call. = FALSE)
+            }
+            if (is.null(zlevels)) {
+              zlevels <- unique(round(seq(1, dim(x)[along], length.out=9)))
+            }
+            panel_args <- validate_slice_panel_args(zlevels, along, dim(x), 3L)
+            zlevels <- panel_args$zlevels
+            along <- panel_args$along
             colors <- resolve_cmap(cmap)
+            slice_axis <- c("x", "y", "z")[[along]]
 
             df1 <- do.call(rbind, purrr::map(zlevels, function(i) {
-              imslice <- slice(x, zlevel = i, along = 3)
+              imslice <- slice(x, zlevel = i, along = along)
               df <- slice_df(imslice)
 
               if (diff(thresh) > 0) {
@@ -1269,7 +1349,7 @@ setMethod("plot", signature=signature(x="NeuroVol", y="missing"),
                                            na.value = "transparent") +
               ggplot2::facet_wrap(~ z, ncol = 3L,
                                  labeller = ggplot2::labeller(
-                                   z = function(z) paste("z =", z))) +
+                                   z = function(z) paste(slice_axis, "=", z))) +
               coord_neuro_fixed() +
               theme_neuro()
 
@@ -1281,12 +1361,13 @@ setMethod("plot", signature=signature(x="NeuroVol", y="missing"),
 setMethod("plot", signature=signature(x="NeuroVol", y="NeuroVol"),
           def=function(x, y,
                        cmap="grays",
-                       zlevels=unique(round(seq(1, dim(x)[3], length.out=9))),
+                       zlevels=NULL,
+                       along=3L,
                        ov_cmap="inferno",
                        ov_alpha=0.5,
                        ov_thresh=0) {
             plot_overlay(bgvol = x, overlay = y,
-                         zlevels = zlevels, along = 3L,
+                         zlevels = zlevels, along = along,
                          bg_cmap = cmap, ov_cmap = ov_cmap,
                          ov_alpha = ov_alpha, ov_thresh = ov_thresh,
                          ncol = 3L)

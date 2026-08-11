@@ -19,7 +19,8 @@
   x,
   y,
   cmap = "grays",
-  zlevels = unique(round(seq(1, dim(x)[3], length.out = 9))),
+  zlevels = NULL,
+  along = 3L,
   irange = range(x, na.rm = TRUE),
   thresh = c(0, 0),
   alpha = 1,
@@ -30,7 +31,8 @@
   x,
   y,
   cmap = "grays",
-  zlevels = unique(round(seq(1, dim(x)[3], length.out = 9))),
+  zlevels = NULL,
+  along = 3L,
   ov_cmap = "inferno",
   ov_alpha = 0.5,
   ov_thresh = 0
@@ -52,6 +54,9 @@ When supplied, the plot is rendered as a background + overlay composite.}
 \item{zlevels}{integer slice indices to display.
 Default: 9 evenly-spaced slices (3 \eqn{\times}{x} 3 grid).}
 
+\item{along}{axis along which to slice: 1 = sagittal, 2 = coronal,
+3 = axial (the default).}
+
 \item{thresh}{a 2-element vector indicating the lower and upper
 transparency thresholds.}
 
@@ -68,8 +73,7 @@ transparency thresholds.}
 a ggplot2 object
 }
 \description{
-Display axial slices of a \code{\linkS4class{NeuroVol}} as a faceted
-montage.
+Display slices of a \code{\linkS4class{NeuroVol}} as a faceted montage.
 }
 \details{
 The plot method uses \code{ggplot2} to create a raster visualization of the slice data.
@@ -98,4 +102,9 @@ slice <- NeuroSlice(dat, NeuroSpace(c(100,100)))
 \donttest{
 plot(slice)
 }
+}
+\seealso{
+\code{\link{as.raster}}
+
+\code{\link{as.raster}}
 }

@@ -34,7 +34,10 @@ conn_comp(x, ...)
 
 \item{local_maxima}{return table of local maxima}
 
-\item{local_maxima_dist}{the distance used to define minum distance between local maxima}
+\item{local_maxima_dist}{Minimum distance, in the units of \code{spacing(x)},
+between reported local maxima. A voxel is reported when no other voxel of
+its component within this distance has a larger value, so the maxima of a
+component are at least \code{local_maxima_dist} apart. Default 15.}
 }
 \value{
 A list containing:

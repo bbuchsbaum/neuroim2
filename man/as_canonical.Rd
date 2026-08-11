@@ -22,10 +22,17 @@ Reorients a neuroimaging volume or vector to the canonical RAS+
 This is equivalent to nibabel's \code{as_closest_canonical()}.
 }
 \details{
-The function works by computing the orientation transform from the
-current axis codes to the target codes, then applying the necessary
-axis permutations and flips. The affine matrix is updated to reflect
-the new orientation while preserving world-coordinate mapping.
+Reorienting to a target that differs only in which anatomical direction each
+axis runs is a relabelling of the grid, not a resampling: the voxels are the
+same voxels, permuted and flipped. This function does exactly that, so it is
+exact, works on images of any size, and costs a single \code{aperm()}.
+
+It used to build the target space and hand it to \code{\link{resample}},
+which had three consequences: values were interpolated where they should
+merely have moved, the registration backend refused images smaller than four
+voxels on any axis, and -- because the target space kept the source's
+dimensions -- an axis-permuting reorientation wrote into a grid that did not
+contain the data and silently lost about a quarter of it.
 }
 \examples{
 sp <- NeuroSpace(c(10L, 10L, 10L), c(2, 2, 2))
@@ -35,5 +42,6 @@ axcodes(ras_vol)  # "R" "A" "S"
 
 }
 \seealso{
-\code{\link{axcodes}}, \code{\link{reorient}}
+\code{\link{axcodes}}, \code{\link{reorient}},
+  \code{\link{apply_orientation}}
 }

@@ -11,15 +11,19 @@ searchlight_coords(mask, radius, nonzero = FALSE, cores = 0)
 
 \item{radius}{A numeric value specifying the radius (in mm) of the spherical searchlight.}
 
-\item{nonzero}{A logical value indicating whether to include only coordinates
-with nonzero values in the supplied mask. Default is FALSE.}
+\item{nonzero}{A logical value indicating whether each searchlight should be
+restricted to voxels with nonzero values in the supplied mask. Default is
+FALSE. It does not affect which voxels are used as centres: every nonzero
+voxel of the mask is a centre, as in \code{\link{searchlight}}.}
 
 \item{cores}{An integer specifying the number of cores to use for parallel
 computation. Default is 0, which uses a single core.}
 }
 \value{
 A \code{deferred_list} object containing matrices of integer-valued
-  voxel coordinates, each representing a searchlight region.
+  voxel coordinates, each representing a searchlight region. Its length is the
+  number of nonzero voxels in \code{mask}, matching \code{\link{searchlight}}
+  called with the same arguments.
 }
 \description{
 This function generates an exhaustive searchlight iterator that returns voxel

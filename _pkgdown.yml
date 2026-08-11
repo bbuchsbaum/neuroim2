@@ -49,6 +49,7 @@ reference:
   - plot_montage
   - plot_ortho
   - plot_overlay
+  - enhance_stat_map
   - mapToColors
 - title: Constructors
   desc: |

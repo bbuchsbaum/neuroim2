@@ -4,7 +4,7 @@
 library(neuroim2)
 
 test_that("plot(vol) produces expected multi-slice output", {
-  skip_if_not_installed("vdiffr")
+  skip_unless_snapshot_env()
   set.seed(42)
   vol <- make_vol(c(20L, 20L, 20L))
   vdiffr::expect_doppelganger("vol-basic", function() {
@@ -14,7 +14,7 @@ test_that("plot(vol) produces expected multi-slice output", {
 })
 
 test_that("plot_ortho produces expected three-plane view", {
-  skip_if_not_installed("vdiffr")
+  skip_unless_snapshot_env()
   set.seed(42)
   vol <- make_vol(c(20L, 20L, 20L))
   vdiffr::expect_doppelganger("ortho-basic", function() {
@@ -23,7 +23,7 @@ test_that("plot_ortho produces expected three-plane view", {
 })
 
 test_that("plot_ortho without crosshairs and annotations", {
-  skip_if_not_installed("vdiffr")
+  skip_unless_snapshot_env()
   set.seed(42)
   vol <- make_vol(c(20L, 20L, 20L))
   vdiffr::expect_doppelganger("ortho-no-crosshair", function() {
@@ -32,7 +32,7 @@ test_that("plot_ortho without crosshairs and annotations", {
 })
 
 test_that("plot_montage produces expected faceted output", {
-  skip_if_not_installed("vdiffr")
+  skip_unless_snapshot_env()
   set.seed(42)
   vol <- make_vol(c(20L, 20L, 20L))
   vdiffr::expect_doppelganger("montage-basic", function() {
@@ -42,7 +42,7 @@ test_that("plot_montage produces expected faceted output", {
 })
 
 test_that("plot_overlay with binary alpha mode produces expected output", {
-  skip_if_not_installed("vdiffr")
+  skip_unless_snapshot_env()
   set.seed(42)
   bg  <- make_vol(c(20L, 20L, 20L))
   ov  <- make_vol(c(20L, 20L, 20L))
@@ -52,7 +52,7 @@ test_that("plot_overlay with binary alpha mode produces expected output", {
 })
 
 test_that("plot_overlay with proportional alpha mode produces expected output", {
-  skip_if_not_installed("vdiffr")
+  skip_unless_snapshot_env()
   set.seed(42)
   bg  <- make_vol(c(20L, 20L, 20L))
   ov  <- make_vol(c(20L, 20L, 20L))
@@ -63,7 +63,7 @@ test_that("plot_overlay with proportional alpha mode produces expected output", 
 })
 
 test_that("plot(NeuroSlice) produces expected 2D output", {
-  skip_if_not_installed("vdiffr")
+  skip_unless_snapshot_env()
   set.seed(42)
   vol <- make_vol(c(20L, 20L, 20L))
   sl  <- slice(vol, 10L, along = 3L)

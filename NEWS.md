@@ -1,3 +1,202 @@
+# neuroim2 0.19.0
+
+Seven defects found by measuring the image-processing layer against `nilearn`
+0.14.0 / scipy, which is the reference for the processing neuroim2 also does.
+The harness is in `dev/bench/nilearn/` and the findings in
+`dev/nilearn-gap-analysis.md`.
+
+Four of these change results; the sections that do say so explicitly.
+
+## `gaussian_blur()` now applies the smoothing it is asked for
+
+`window` truncates the Gaussian at a fixed number of *voxels* while `sigma` is
+in *millimetres*, so the old default of `window = 1` cut the kernel off at one
+voxel either side regardless of how wide the kernel was meant to be. Measured by
+smoothing an impulse and reading the width back out:
+
+```
+                                  delivered   requested   shortfall
+gaussian_blur(sigma = 2, window = 1)  3.49 mm    4.71 mm     26%
+gaussian_blur(sigma = 3, window = 1)  3.70 mm    7.06 mm     48%
+gaussian_blur(sigma = 4, window = 1)  3.76 mm    9.42 mm     60%
+```
+
+Worse, the shortfall depended on the voxel size -- `sigma = 2, window = 1`
+delivered 3.49 mm FWHM on 2 mm voxels and 1.88 mm on 1 mm voxels, so the same
+call smoothed two acquisitions of the same brain differently -- and nothing
+warned.
+
+`window` now defaults to `NULL`, meaning "derive the half-width from `sigma` and
+the voxel size", using `scipy.ndimage.gaussian_filter`'s rule
+(`int(truncate * sigma / spacing + 0.5)`, `truncate = 4`). Requests are now
+honoured to better than 1% of FWHM on isotropic and anisotropic grids alike.
+
+* **This changes results.** Any call that relied on the old default is now
+  applying more smoothing -- the amount it was asking for. Passing `window`
+  explicitly reproduces the old kernel exactly, so old analyses remain
+  reproducible.
+* `fwhm` is accepted as an alternative to `sigma`, in millimetres, which is the
+  unit smoothing is normally specified in. Giving both is an error.
+* `truncate` controls how many standard deviations are kept when the window is
+  derived.
+
+## `as_canonical()` no longer discards data
+
+Reorienting to RAS is a permutation and a flip of the array: the voxels are the
+same voxels, relabelled. It was implemented by building a target space and
+handing it to `resample()`, and `reorient()` rotated the affine while keeping
+the *source* dimensions. When the reorientation permuted axes -- which is the
+whole point -- the output grid did not contain the data:
+
+```
+                     in                 out            nonzero kept
+nilearn reorder_img  AIR 60x72x56  ->   RAS 56x60x72      100%
+as_canonical (was)   AIR 60x72x56  ->   RAS 60x72x56       76.4%
+```
+
+Nearly a quarter of the image was thrown away silently. Going through a
+registration library also meant values were interpolated where they should
+merely have moved, and that images smaller than four voxels on any axis were
+refused outright.
+
+`as_canonical()` now permutes and flips the array and rebuilds the affine. It is
+exact (the output is a permutation of the input, checked with `identical()`),
+works at any size, matches `nibabel::as_closest_canonical` voxel for voxel, and
+is about 40x faster. `reorient()` on a `NeuroSpace` permutes `dim` and `spacing`
+along with the affine.
+
+## `conn_comp()`'s local maxima were never pruned
+
+`local_maxima_dist` had no effect at any value. `.pruneCoords()` read the
+neighbour distances out of `dbscan::kNN()`'s result as `ret$distances`; that
+component is called `dist`, and `$` does not partially match a name longer than
+the one it is looking for, so the lookup returned `NULL`, the comparison became
+`logical(0)`, and the pruning loop exited on its first pass every time. The
+`local_maxima` table listed every in-mask voxel -- 25,538 rows for 12
+components on a 3 mm map, 25,527 of them from a single component, each one voxel
+from the next.
+
+Underneath that, the rule did not deliver the minimum distance the argument
+documents even when it ran. It compared each voxel only against its single
+nearest neighbour, so three points at 0, 5 and 12 mm valued 5, 1 and 9 kept the
+5 *and* the 9 at `local_maxima_dist = 15`: the 5 survived because its nearest
+neighbour was the 1. "The nearest neighbour" was not well defined either -- on a
+voxel grid more than half of all points have several neighbours at exactly the
+same distance, and which one came back depended on the kd-tree's traversal
+order.
+
+The rule is now the one the argument names: a voxel is reported when no other
+voxel of its component within `local_maxima_dist` has a larger value. It is
+deterministic and the reported maxima are at least `local_maxima_dist` apart by
+construction.
+
+```
+                        local_maxima rows    closest pair of maxima
+26-connect   was              25,538              3 mm (one voxel)
+             now                  73              15.1 mm
+6-connect    was              25,538              3 mm (one voxel)
+             now               5,039              15.1 mm
+```
+
+* **This changes results** for anyone reading `conn_comp(...)$local_maxima`.
+  What it returned before was the component's voxel list, not its maxima.
+* The search is now a single compiled pass over a uniform grid rather than a
+  `dbscan::kNN()` call per component per round, which is also what made the rest
+  of `conn_comp()` worth speeding up. `dbscan` is no longer used here.
+
+## Connected components in compiled code
+
+`conn_comp_3D()` was a two-pass union-find written in interpreted R, building a
+26x3 neighbour matrix per voxel and running `find()` as an R closure.
+`src/conncomp.cpp` existed but held only a commented-out sketch of it. Against
+`scipy.ndimage.label()` it was 690x slower on a small volume and 4,450x slower
+on a 1 mm brain -- fifteen minutes for one labelling -- and the ratio grew with
+size.
+
+```
+                                     scipy    before     after
+40x48x38    (7,312 in-mask)         0.001 s    1.4 s     0.024 s
+91x109x91  (90,357 in-mask)         0.016 s   38.4 s     0.31 s
+182x218x182 (720,916 in-mask)       0.152 s  916 s       3.37 s
+labelling alone, 91x109x91          0.016 s      --      0.027 s
+```
+
+The ratio to scipy no longer grows with size: it is flat at 18-22x across a
+100x range in voxel count, and the labelling itself is at parity. What is left
+is the per-cluster voxel lists, the cluster table and the local maxima that
+`conn_comp()` returns and `scipy.ndimage.label()` does not; `cluster_table =
+FALSE, local_maxima = FALSE` halves the remainder.
+
+The labelling is unchanged: the compiled version reproduces the R one's labels,
+sizes and size-descending numbering including its tie-break, pinned in
+`tests/testthat/test-conncomp-equivalence.R` against the previous
+implementation, which is kept there as the reference.
+
+`conn_comp()`'s wrapper was rewritten alongside it. It re-derived a coordinate
+matrix per component with `as.matrix()`, and then subset a data frame once per
+component to build the voxel lists, which cost 0.39 s at 4,989 components
+against 0.03 s for the labelling. `ClusteredNeuroVol()` no longer fills its
+cluster map with a name-by-name list lookup, which was quadratic in the cluster
+count and cost 2.2 s at 12,396 clusters.
+
+`automask()` spent 92% of its time in the labeller and is **53x faster**
+(14.0 s to 0.26 s on a 60-volume run) with an unchanged result.
+
+## The two searchlight iterators agree on their centres
+
+`searchlight_coords(mask, radius)` returned one element per voxel *in the grid*
+where `searchlight(mask, radius)` returned one per *nonzero mask voxel* --
+241,920 against 83,563 on an ordinary brain mask -- although both documented the
+latter. `searchlight_coords()` now centres on nonzero mask voxels like every
+other iterator in the package, and `nonzero` decides only what each searchlight
+contains, as it does in `searchlight()`. It also validates its arguments.
+
+* **This changes results** for anyone who called `searchlight_coords()` without
+  `nonzero = TRUE`: the iterator is now about a third as long, and no longer
+  yields searchlights centred outside the mask.
+
+## A resample target that misses its source says so
+
+`NeuroSpace(dim, spacing, origin)` builds a positive-diagonal affine, which
+mirrors the usual LAS-to-RAS source. Handing one to `resample()` as a target
+produced a near-empty image with no warning. `resample()` now compares the two
+world bounding boxes and warns when they barely overlap, naming the likely
+cause.
+
+## Reshapes that copied the payload
+
+`as.matrix()` on a `DenseNeuroVec` duplicated the whole image to reshape it to
+voxels-by-time -- 116 MB for a 60-volume run, and over half of `automask()`'s
+runtime. A reshape is a change of `dim`, not of memory, and R still copies on
+the first write, so the source is untouched either way. `as.matrix()` is now
+effectively free, `mean()` goes through `.rowMeans()` with no reshape at all
+(0.21 s to 0.12 s), and `scale_series()` uses the same route.
+
+`resample()` no longer scans the image to infer an output datatype for headers
+whose geometry is all it uses.
+
+## Smoothing a 4-D image runs in compiled code
+
+`gaussian_blur()` on a `NeuroVec` looped its volumes in R. Each iteration copied
+a volume out of the run and the result back in, re-allocated the kernel's two
+scratch buffers, and -- with a mask -- recomputed the in-mask weight volume,
+which is the same for every volume. Smoothing 60 volumes cost 1.66 s against
+nilearn's 0.51-0.71 s.
+
+The separable kernel now has a 4-D driver that walks the run itself: nothing is
+copied per volume, the scratch buffers are allocated per worker, the in-mask
+weights are computed once, and volumes run in parallel (`RcppParallel`, so
+`RcppParallel::setThreadOptions()` controls it). **0.20 s**, which is 2.6-3.6x
+faster than nilearn rather than 2.3x slower. The arithmetic per volume is
+unchanged and happens in the same order, so the result is bit-identical to
+smoothing the volumes one at a time -- pinned in
+`tests/testthat/test-processing-defects.R` over both engines, both mask
+conventions and both `normalize` settings.
+
+The dense kernel, which `gaussian_blur()` chooses when the mask is a small
+fraction of the volume, has no 4-D form and still loops; everything invariant
+across volumes is hoisted out of that loop.
+
 # neuroim2 0.18.0
 
 ## Bug Fixes
@@ -171,6 +370,23 @@ dimension, window, sigma, spacing, mask and `normalize` in the test suite.
 
 # neuroim2 0.17.0
 
+## Testing
+
+* The test suite now runs clean: 2969 passing, no failures and no errors.
+  Previously `R CMD check` reported 7 failures and 2 errors on every platform.
+* `test-plot-registration-qc.R` called `ggplot2::get_labs()`, which only exists
+  from ggplot2 3.5.2 while DESCRIPTION sets no version floor, so it errored on
+  older ggplot2. Tests now read plot titles through a version-agnostic helper.
+* The vdiffr golden-image tests have moved to `dev/visual-snapshots/`. They
+  compare SVG text byte-for-byte, which encodes the font metrics of the machine
+  that produced the snapshot, so a single stored image cannot match the
+  Windows, macOS and Linux check matrix — and testthat deletes any `_snaps/`
+  directory whose test file did not run, so they could not simply be skipped.
+  `tests/testthat/test-plot-structure.R` covers the same plotting calls with
+  platform-independent structural assertions (panel counts, layer counts, data
+  shape, argument validation) and runs on every check. See the README in
+  `dev/visual-snapshots/` for reviewing intentional visual changes.
+
 ## Documentation
 
 * The vignettes have been rewritten as nine articles in three tiers: *Learn*
@@ -293,8 +509,73 @@ dimension, window, sigma, spacing, mask and `normalize` in the test suite.
   underflow, and propagates the `Inf`. Neither answer is meaningful --- the input
   is not finite --- but they differ.
 
+* Five scalar R loops over voxels are now vectorised. Each was verified against
+  a reference that reproduces the loop it replaced, and against a build of the
+  previous version across 9,163 recorded outputs.
+
+  ```
+                                                       before    after
+  ClusteredNeuroVec [i, j, k, m]   10,000 voxels     0.194 s   0.005 s   39x
+  mapf(NeuroVol, Kernel)           64^3, 3x3x3        3.81 s   0.096 s   40x
+                                   64^3, 5x5x5        4.10 s   0.288 s   14x
+  random_searchlight()             289,148 voxels    16.8 s    3.6 s      4.7x
+  NeuroHyperVec [i, j, k, l, m]    64,000 voxels      0.342 s  0.195 s    1.8x
+  as.dense(NeuroHyperVec)          40^3 x 40 x 10     1.10 s   0.653 s    1.7x
+  ```
+
+  - `mapf()` evaluated `sum(x[cbind(ii, jj, kk)] * weights)` once per centre. A
+    kernel tap is a fixed coordinate offset, so in linear-index terms it is a
+    fixed scalar offset: the convolution is now one vectorised pass per tap ---
+    a few dozen --- rather than one R iteration per centre, of which there can be
+    a million. Whether a tap can leave the volume at all is decided by the
+    extreme centres, so that is a scalar test per tap and not a per-centre one.
+  - `random_searchlight()` rebuilt its list of unclaimed voxels with
+    `remain_indices[remaining[remain_indices]]` on every iteration, which is
+    quadratic in the mask size. It now keeps a free list whose removals cost
+    O(batch): survivors from the tail are swapped into the holes left behind.
+  - `as.dense()` on a `NeuroHyperVec` built a fresh volume-sized vector and a
+    fresh 3-D array for every (feature, trial) pair; it now writes the in-mask
+    positions of all trials of a feature in one scatter. What is left is
+    allocating and filling the dense result itself, which is why the speed-up is
+    modest --- that result is 195 MB for the largest case above.
+
 
 ## Bug Fixes
+
+* **Breaking:** `random_searchlight()` returns a different set of searchlights
+  for a given random seed. Sampling is still uniform over the unclaimed voxels,
+  so the distribution of results is unchanged --- over 60 seeds the number of
+  searchlights was 466.7 +/- 8.6 before and 463.6 +/- 9.0 after, with exactly the
+  same voxels claimed in every run --- but the realized sequence differs because
+  the free list is no longer held in ascending order. The first searchlight of a
+  run is unaffected. Analyses that recorded a seed and expect the identical
+  partition will need to re-run.
+
+* **Breaking:** `mapf()` now clips the kernel at the volume boundary instead of
+  failing there. Taps falling outside the volume contribute nothing. Previously
+  a coordinate past the far face raised `subscript out of bounds`, and one before
+  the near face made the gather return a *shorter* vector, which then recycled
+  against the weights and produced a silently wrong value with only a recycling
+  warning. Two cases are affected: any `mask` reaching within the kernel's radius
+  of a face, which made the masked form unusable; and an unmasked volume thinner
+  than twice the kernel half-width, because the centre range
+  `hwidth:(dim - hwidth)` counts *backwards* when `dim < 2 * hwidth` and so
+  yields centres inside the margin rather than none --- on a 10 x 3 x 10 slab with
+  a 3x3x3 kernel, 86 voxels change. Interior results are unchanged.
+
+* `mapf()`'s mask dimension check was written `!all.equal(dim(mask), dim(ovol))`.
+  `all.equal()` returns a character description rather than `FALSE` on a
+  mismatch, so the guard raised `invalid argument type` instead of its own
+  message. It now reports "mask must have same dimensions as input volume".
+
+* `ClusteredNeuroVec[i, j, k, m]` now rejects voxel coordinates outside the
+  volume. They previously reached an `if (NA > 0)` and failed with "missing value
+  where TRUE/FALSE needed".
+
+* Removed `radius_search_3d_nonisotropic()`, `radius_search_3d_direct()`,
+  `radius_search_3d_precomputed()`, `local_spheres()` and `kernel_filt_3d_cpp()`.
+  All five were compiled and registered but called from nowhere in the package;
+  `kernel_filt_3d_cpp()` was in any case a 2-D filter despite its name.
 
 * **Breaking:** `nonzero = TRUE` now drops voxels whose value is `NA` or `NaN`,
   in every ROI builder and every searchlight iterator. Previously the filter was
@@ -407,6 +688,16 @@ dimension, window, sigma, spacing, mask and `normalize` in the test suite.
   maps exactly to `origin()` by either route. Raster extents produced by the
   plotting helpers shift by half a voxel as a consequence, placing voxel
   centres on their affine positions.
+* Fixed an off-by-one in world-to-index conversion on anisotropic and
+  large-origin grids. `grid_to_index()` truncates, and `NeuroSpace` stores
+  affines to 7 significant figures, so a coordinate that is arithmetically an
+  exact voxel centre could arrive as `2.9999985` and truncate to the voxel
+  below — on the shipped EPI mask the error reached 1.6e-6 grid units.
+  `coord_to_index()` now rounds to the nearest voxel centre, and
+  `grid_to_index()` snaps values within 1e-4 of an integer. Genuinely
+  fractional grid coordinates still truncate, matching R's array indexing.
+  (The previous 0.5-voxel offset was partly masking this, since `trunc(x + 0.5)`
+  rounds; correcting the offset alone exposed it.)
 * Fixed `linear_access()` on sparse `NeuroVec` objects, which could return wrong values or error when there were more masked voxels than time points. The sparse data matrix is stored as `[time × voxel]`; the linear-index path now indexes rows and columns in the correct order.
 * Fixed `ROIVol` arithmetic so values are aligned by voxel index, not by the original coordinate order, and fixed sparse `Summary` group methods so reductions include implicit structural zeros. `ROIVol` arithmetic now documents and enforces a same-support contract (identical space and voxel set; order may differ); missing voxels are not treated as zero.
 * Hardened `simulate_fmri()` edge cases: zero FWHM values now disable the corresponding smoothing step, `n_time = 1` no longer trips AR loops, tiny or constant masks no longer produce `NA` heteroscedasticity fields, and scalar arguments now receive explicit validation.
@@ -476,6 +767,23 @@ dimension, window, sigma, spacing, mask and `normalize` in the test suite.
 * `write_vec()` now round-trips per-volume labels through a custom NIfTI extension; `read_vec()` and low-footprint readers restore labels on load.
 * Added AFNI-inspired masking helpers: `apply_mask()` to apply an existing 3D mask, `clip_level()` to estimate a foreground clip threshold or gradual clip map, and `automask()` to derive a brain-like mask from image intensities for `NeuroVol`, `NeuroVec`, sparse, mapped, and file-backed objects.
 
+## Testing
+
+* The test suite now runs clean: 2969 passing, no failures and no errors.
+  Previously `R CMD check` reported 7 failures and 2 errors on every platform.
+* `test-plot-registration-qc.R` called `ggplot2::get_labs()`, which only exists
+  from ggplot2 3.5.2 while DESCRIPTION sets no version floor, so it errored on
+  older ggplot2. Tests now read plot titles through a version-agnostic helper.
+* The vdiffr golden-image tests have moved to `dev/visual-snapshots/`. They
+  compare SVG text byte-for-byte, which encodes the font metrics of the machine
+  that produced the snapshot, so a single stored image cannot match the
+  Windows, macOS and Linux check matrix — and testthat deletes any `_snaps/`
+  directory whose test file did not run, so they could not simply be skipped.
+  `tests/testthat/test-plot-structure.R` covers the same plotting calls with
+  platform-independent structural assertions (panel counts, layer counts, data
+  shape, argument validation) and runs on every check. See the README in
+  `dev/visual-snapshots/` for reviewing intentional visual changes.
+
 ## Documentation
 
 * Added new introductory workflow and container vignettes and refocused the advanced volume and ROI vignettes around current package workflows.
@@ -536,6 +844,23 @@ dimension, window, sigma, spacing, mask and `normalize` in the test suite.
 * New oblique affine regression tests (6 tests) for downsample, resample, and deoblique.
 * New `vdiffr` plot snapshot tests (7 tests) for `plot()`, `plot_ortho()`, `plot_montage()`, and `plot_overlay()`.
 * New shared test helper module with factory functions (`make_vol()`, `make_vec()`, `make_mask()`, etc.).
+
+## Testing
+
+* The test suite now runs clean: 2969 passing, no failures and no errors.
+  Previously `R CMD check` reported 7 failures and 2 errors on every platform.
+* `test-plot-registration-qc.R` called `ggplot2::get_labs()`, which only exists
+  from ggplot2 3.5.2 while DESCRIPTION sets no version floor, so it errored on
+  older ggplot2. Tests now read plot titles through a version-agnostic helper.
+* The vdiffr golden-image tests have moved to `dev/visual-snapshots/`. They
+  compare SVG text byte-for-byte, which encodes the font metrics of the machine
+  that produced the snapshot, so a single stored image cannot match the
+  Windows, macOS and Linux check matrix — and testthat deletes any `_snaps/`
+  directory whose test file did not run, so they could not simply be skipped.
+  `tests/testthat/test-plot-structure.R` covers the same plotting calls with
+  platform-independent structural assertions (panel counts, layer counts, data
+  shape, argument validation) and runs on every check. See the README in
+  `dev/visual-snapshots/` for reviewing intentional visual changes.
 
 ## Documentation
 

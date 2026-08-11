@@ -20,6 +20,8 @@ docs/reference
 .aider*
 inst/doc
 vignettes/*.html
+!vignettes/albers-header.html
+vignettes/figure/
 vignettes/*.md
 man/neuroim2.Rcheck/
 *.Rcheck/
@@ -30,3 +32,4 @@ tools/visual-qc-output/
 # Generated benchmark outputs
 dev/bench_after.txt
 dev/bench_baseline.txt
+vignettes/Rplots.pdf

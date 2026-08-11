@@ -264,18 +264,113 @@ between two machines is the honest width of the calibration.
 
 ---
 
-## Phase 4 — scalar R loops and hygiene
+## Phase 4 — done: scalar R loops and hygiene
 
-Independent of everything above; each is small and self-contained.
+Five independent loops, each replaced by a vectorised equivalent and pinned
+against a reference that reproduces the loop it replaced.
 
-| Item | File | Fix | Measured / expected |
+| Item | File | What it was | Measured |
 |---|---|---|---|
-| `series(ClusteredNeuroVec, i, j, k)` | `R/clustered_neurovec.R:278` | replace the nested timepoint × voxel loop with one vectorised subset (`ts[m, cids, drop=FALSE]`, NA for `cids == 0`) | **16×** measured, `identical()` output |
-| `mapf(NeuroVol, Kernel)` | `R/neurovol.R:906` | per-voxel `sum(x[cbind(ii,jj,kk)] * wts)` in R; `kernel_filt_3d_cpp` already exists in `src/kernel_filter.cpp` and is never called — wire it up | large, unmeasured |
-| `NeuroHyperVec` `[` | `R/neurohypervec.R:448` | per-voxel loop with an `aperm` per voxel; gather in one pass | large, unmeasured |
-| `as.dense(NeuroHyperVec)` | `R/neurohypervec.R:289` | loops features × trials rebuilding a volume each time | moderate |
-| `random_searchlight()` free list | `R/searchlight.R` | `remain_indices` is rebuilt with an O(n) filter every iteration; a swap-with-last free list makes it O(1) amortised | moderate |
-| Dead compiled code | `src/radius_search_3d.cpp`, `src/kernel_filter.cpp` | `radius_search_3d_{nonisotropic,direct,precomputed}` and `local_spheres` are compiled and exported but called from nowhere in `R/` or `tests/` (~17 KB). Drop them, or wire `kernel_filt_3d_cpp` into `mapf()` | build time only |
+| `ClusteredNeuroVec[i,j,k,m]` | `R/clustered_neurovec.R` | nested loop over timepoints × voxels | **39×** at 10,000 voxels × 100 timepoints |
+| `mapf(NeuroVol, Kernel)` | `R/neurovol.R` | `sum(x[cbind(ii,jj,kk)] * wts)` per centre | **40×** (64³, 3×3×3), **14×** (5×5×5) |
+| `random_searchlight()` | `R/searchlight.R` | O(remaining) free-list rebuild per iteration | **4.7×** on a 289,148-voxel mask |
+| `NeuroHyperVec[i,j,k,l,m]` | `R/neurohypervec.R` | per-voxel subset + `aperm` | **1.8×** at 64,000 voxels |
+| `as.dense(NeuroHyperVec)` | `R/neurohypervec.R` | fresh vector + array per (feature, trial) | **1.7×** |
+| Dead compiled code | `src/` | 5 registered-but-uncalled entry points | ~29 KB of source gone |
+
+**The roadmap's plan for `mapf` was wrong.** It said to wire up the existing
+unused `kernel_filt_3d_cpp`. That function is a **2-D** filter — `NumericMatrix`
+data, `NumericMatrix` kernel — despite the `3d` in its name, so it cannot express
+a 3-D kernel convolution at all. It was deleted instead. The real fix needed no
+C++: a kernel tap is a fixed coordinate offset, so in linear-index terms it is a
+fixed *scalar* offset, and the convolution becomes one vectorised pass per tap
+(a few dozen) instead of one R iteration per centre (up to a million) — the same
+translate-a-template identity the ROI builders use. A first version tested the
+per-centre bounds on every tap, which cost most of the win back at a 5×5×5 kernel
+(2.9× rather than 14×); whether a tap can leave the volume is decided by the
+extreme centres, so it is three scalar comparisons per tap.
+
+**`mapf`'s boundary handling was broken and nobody had noticed.** With any mask
+reaching within the kernel's radius of the boundary, a coordinate past the far
+face raised `subscript out of bounds`, and one before the near face made
+`x[cbind(ii,jj,kk)]` return a *shorter* vector — R drops zero subscripts silently
+— which then recycled against the weights and produced a wrong number with only
+a recycling warning. Verified on a `1 4 4` centre: 0.557 returned against 0.371
+correct. Out-of-volume taps are now skipped. Its dimension check was also
+`!all.equal(...)`, which raises `invalid argument type` on a mismatch because
+`all.equal` returns a character description rather than `FALSE`.
+
+I first claimed this affected only the masked path, "since unmasked centres are
+held clear of the border". **That was wrong, and the reviewer disproved it.**
+`hwidth[d]:(dims[d] - hwidth[d])` counts *backwards* when `dims[d] < 2*hwidth[d]`,
+so for a volume thinner than the kernel the unmasked grid contains centres inside
+the margin — on a 10 × 3 × 10 slab with a 3×3×3 kernel the j range is `2:1` — and
+86 voxels change value there too. The new values are the correct clipped ones (the
+old ones were recycled garbage), but the claim was false and is now stated
+properly in NEWS, with a slab case in the test file. The descending range is a
+pre-existing wart in `mapf`'s grid construction, independent of this change: the
+honest reading is that such a volume has *no* valid interior centres. Left alone
+because changing which voxels get written is a larger behaviour change than the
+one being made here.
+
+**`random_searchlight` could not be fixed without changing its output**, and that
+is worth stating plainly. To keep the realized sequence for a given seed you must
+sample `sample.int(length(remain_indices), 1)` from an *ascending* free list, and
+removing from a sorted R vector is O(n) however you do it — the asymptotics are
+inherent to the ordering, not to the implementation. The swap-with-last free list
+gives O(batch) removal but leaves the list unordered, so a given seed picks
+different centres from the second iteration onward. Sampling remains uniform over
+the unclaimed voxels, so this is a re-realisation, not a behaviour change: over 60
+seeds the searchlight count was 466.7 ± 8.6 before and 463.6 ± 9.0 after, with
+*exactly* the same voxels claimed in every run, and no defect (duplicate centre,
+double-claimed voxel, out-of-mask coordinate) in either. The first searchlight of
+a run is identical, since no removals have happened yet — which is why the
+existing seeded test keeps passing. Logged as breaking in NEWS.
+
+**What else the review found.** `drop_voxels` had unasserted preconditions: the
+logical vector it replaced was idempotent and duplicate-safe, a swap-with-last
+list is neither, and violating either silently desynchronises `n_free` from the
+live set so that voxels go unclaimed. Live callers do satisfy the contract — the
+reviewer verified the full invariant set over 2,616 randomised runs across ten
+mask shapes — but it now rests on `sphere_at_cpp` never emitting a duplicate
+coordinate, so the contract is checked rather than assumed. Also fixed: the new
+`ClusteredNeuroVec[` bounds check rejected `6.5` while accepting `2.7` on a
+6-voxel axis, since it tested before truncating (it now truncates first, as R's
+own array indexing does); the matrix subset passed a negative `m` through to R's
+drop-these-rows semantics where the scalar loop errored; and `mapf`'s all-integer
+`centre_lin` arithmetic would overflow to `NA` past 2^31 voxels, where the old
+coordinate gather had no ceiling.
+
+The review's mutation testing caught 23 of 23 genuine mutations across all five
+sites, but flagged four weak assertions, all since replaced: a reproducibility
+test that could not fail (same seed twice passes for any RNG-driven
+implementation — it now also asserts that a *different* seed gives a different
+partition), a `skip_if` that would silently retire the cluster-0 case, a
+dead-code check that only tested the R wrappers and not the native registration
+table, and the slab case above.
+
+**Verification.** The golden harness was extended to 9,163 recorded outputs
+covering all five sites and captured against the pre-change build: 9,149 identical,
+and all 14 differences are `random_searchlight` realisations (`n`, `n_covered`,
+`total_voxels`) — the invariant components matched. The free-list data structure
+was separately fuzzed over 14,992 removal steps against a naive set reference,
+checking set equality, the live count, that `pos` is a bijection onto
+`1..n_free`, and that `free[pos[v]] == v`. `tests/testthat/test-vectorized-loops.R`
+adds ~410 assertions, each comparing against a reference implementation of the
+replaced loop.
+
+Two measurement traps caught here, both from timing large allocations:
+`dense_array_5d` first appeared to be 15–22× faster and `ClusteredNeuroVec[` only
+1.9×; with `gcFirst = TRUE` and a median of seven runs the honest figures are 1.7×
+and 39×. The reference implementation even measured *faster* at a larger size in
+one run, which is the tell. Anything allocating hundreds of MB needs gc control
+before its ratio means anything.
+
+**Dead code.** `radius_search_3d_{nonisotropic,direct,precomputed}`,
+`local_spheres` and `kernel_filt_3d_cpp` were compiled and registered but called
+from nowhere in `R/`, `tests/` or `inst/`. Removed. `local_sphere` (singular) was
+**kept**: it is the reference implementation that the offset-template equivalence
+test in `test-roi-series-fastpaths.R` compares against.
 
 ---
 
@@ -305,17 +400,14 @@ passing `FALSE` warns and returns the compiled result. The brute-force
 comparison is now a permanent test, which is a stronger guarantee than
 branch-to-branch equivalence ever was.
 
-## Sequencing and effort
+## Status
 
-Phases 1, 2 and 3 are done, and `use_cpp = FALSE` is resolved (deprecated).
-What remains:
+All four phases are done, `use_cpp = FALSE` is resolved (deprecated), and the
+dead compiled code is gone. What remains is one low-value item:
 
-1. **Phase 4 scalar loops** — cheap, independent, each ~1 hour with a targeted
-   equivalence test. Do the `ClusteredNeuroVec` one first; it is measured and
-   trivially verifiable.
-2. **Dead C++** — ~10 minutes, do it alongside anything else touching `src/`.
-3. **`.sphere_offset_cache` sizing** — bound by total bytes rather than entry
-   count. Low value; see the note at the end of Phase 2.
+1. **`.sphere_offset_cache` sizing** — bound by total bytes rather than entry
+   count. A pathological radius can park hundreds of MB in the namespace; see
+   the note at the end of Phase 2.
 
 Phase 2 alone takes a whole-brain searchlight from ~40 s of enumeration to
 roughly 1 s; combined with Phase 1's `series()` work, the end-to-end MVPA

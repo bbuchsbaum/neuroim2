@@ -366,8 +366,15 @@ setMethod(f="coord_to_index", signature=signature(x="NeuroSpace", coords="matrix
             # The inverse affine yields 0-based positions; add 1 to get the
             # 1-based grid, matching coord_to_grid(). Adding 0.5 instead shifts
             # the result into a neighbouring voxel.
+            #
+            # Round before handing over: grid_to_index() truncates, and the
+            # affine is stored to 7 significant figures, so an exact voxel
+            # centre can come back as 2.9999998 and truncate to the voxel
+            # below. A world coordinate names the nearest voxel centre, so
+            # round-to-nearest is also the right semantics for points that do
+            # not land on a centre at all.
             grid = t(inverse_trans(x) %*% t(cbind(coords, rep(1, nrow(coords)))))
-            grid_to_index(x, grid[,1:3] + 1)
+            grid_to_index(x, round(grid[,1:3, drop=FALSE] + 1))
           })
 
 #' @export
@@ -626,22 +633,37 @@ setMethod(f="reorient", signature=signature(x = "NeuroSpace", orient="character"
                                   opposite[[codes[2]]],
                                   opposite[[codes[3]]])
 
-            # Reorienting is relative: map the space's current axis directions
-            # onto the requested ones. Asking for the orientation an image
-            # already has must therefore be a no-op, which it is when the two
-            # permutation matrices agree and their product is the identity.
-            pmat_cur <- perm_mat(x@axes)
-            pmat_new <- perm_mat(anat)
-            rot <- pmat_new %*% t(pmat_cur)
+            # Reorienting to a target that permutes the axes permutes the grid
+            # too: an image whose axes run A, I, R becomes, in R, A, S, a grid
+            # of the *permuted* extents. Rotating the affine while keeping the
+            # source dimensions -- which this used to do -- describes a box that
+            # no longer contains the data, and as_canonical() then resampled
+            # into it and silently discarded about a quarter of the image.
+            ornt <- orientation_transform(affine_to_orientation(trans(x)),
+                                          axcodes_to_orientation(codes))
+            perm <- order(ornt[, 1])
+            tx <- trans(x) %*% orientation_inverse_affine(ornt, dim(x)[1:3])
 
-            tx <- rot %*% trans(x)[1:3, , drop = FALSE]
-            tx <- rbind(tx, c(0, 0, 0, 1))
+            new_dim <- dim(x)
+            new_dim[1:3] <- new_dim[perm]
+            new_spacing <- spacing(x)
+            new_spacing[1:3] <- new_spacing[perm]
 
-            NeuroSpace(dim(x), spacing=spacing(x), axes=anat, trans=tx,
-                          origin=tx[1:3, 4])
+            NeuroSpace(new_dim, spacing = new_spacing, axes = anat, trans = tx,
+                       origin = tx[1:3, 4])
 
         }
 )
+
+#' The axis permutation and flips that take `x` to the orientation `codes`
+#'
+#' @return an orientation matrix suitable for \code{\link{apply_orientation}}
+#' @keywords internal
+#' @noRd
+.reorient_transform <- function(x, codes) {
+  orientation_transform(affine_to_orientation(trans(x)),
+                        axcodes_to_orientation(toupper(as.character(codes))))
+}
 
 #' @export
 #' @rdname origin-methods

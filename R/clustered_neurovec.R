@@ -267,21 +267,44 @@ setMethod("[", signature(x = "ClusteredNeuroVec", i = "numeric", j = "numeric"),
             sp3 <- space(x@cvol)
             dims <- dim(sp3)
             
+            # Truncate toward zero first, as R's own array indexing does, so
+            # that a fractional coordinate is handled the same way wherever it
+            # lands: 2.7 and 6.5 both name voxel 2 and 6, and only the truncated
+            # value is bounds-checked. Checking before truncating would have
+            # accepted 2.7 and rejected 6.5 on a 6-voxel axis.
+            i <- as.integer(i); j <- as.integer(j); k <- as.integer(k)
+            if (anyNA(i) || anyNA(j) || anyNA(k) ||
+                any(i < 1L | i > dims[1]) || any(j < 1L | j > dims[2]) ||
+                any(k < 1L | k > dims[3])) {
+              cli::cli_abort(c(
+                "Voxel coordinates fall outside the volume.",
+                i = "The volume is {.val {dims}}."
+              ))
+            }
+            # A negative or zero `m` would be read as R's drop-these-rows
+            # indexing by the matrix subset below, where the scalar loop it
+            # replaced would have errored.
+            if (length(m) && (anyNA(m) || any(m < 1) || any(m > nrow(x@ts)))) {
+              cli::cli_abort(c(
+                "{.arg m} must index timepoints of the series.",
+                i = "There {?is/are} {nrow(x@ts)} timepoint{?s}."
+              ))
+            }
+
             # Convert grid coordinates to linear indices
             idx <- ((k-1) * dims[1] * dims[2]) + ((j-1) * dims[1]) + i
-            
+
             # Get cluster IDs
             cids <- x@cl_map[idx]
-            
-            # Extract values for each time point
+
+            # One matrix subset rather than a scalar loop over timepoints x
+            # voxels. Voxels belonging to no cluster (id 0) keep their NA
+            # column; `m` and `cids` may each contain repeats, which matrix
+            # indexing handles directly.
             result <- matrix(NA_real_, length(m), length(idx))
-            for (t_idx in seq_along(m)) {
-              t <- m[t_idx]
-              for (v_idx in seq_along(idx)) {
-                if (cids[v_idx] > 0) {
-                  result[t_idx, v_idx] <- x@ts[t, cids[v_idx]]
-                }
-              }
+            in_cluster <- which(cids > 0)
+            if (length(in_cluster)) {
+              result[, in_cluster] <- x@ts[m, cids[in_cluster], drop = FALSE]
             }
             
             if (drop) {

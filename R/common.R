@@ -599,8 +599,11 @@ setMethod(f="scale_series", signature=signature(x="DenseNeuroVec", center="logic
             d <- dim(x)
             nv <- prod(d[1:3])
             nt <- d[4]
-            # Reshape directly to voxels x time — no transpose needed
-            M <- matrix(x@.Data, nrow = nv, ncol = nt)
+            # Reshape directly to voxels x time -- no transpose, and no copy:
+            # setting `dim` on the data part is free, and R duplicates on the
+            # first write below rather than here.
+            M <- x@.Data
+            dim(M) <- c(nv, nt)
             if (center) {
               M <- M - rowMeans(M)
             }
@@ -752,6 +755,20 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
   if (ncol(voxmat) != 3) {
     cli::cli_abort("{.arg voxmat} matrix must have 3 columns, not {ncol(voxmat)}.")
   }
+
+  # The C++ path truncates, and NeuroSpace stores affines to 7 significant
+  # figures, so a coordinate that is arithmetically an exact voxel centre can
+  # arrive as 2.9999985 and truncate to the voxel below. The size of that error
+  # grows with the magnitude of the world coordinates -- on the shipped EPI mask
+  # (origin 112mm, 3.5mm voxels) it reaches 1.6e-6 grid units -- so the
+  # tolerance has to sit above the affine's own precision.
+  #
+  # 1e-4 of a voxel is four orders of magnitude finer than any spatial intent a
+  # caller could have, so genuinely fractional input (2.6) is untouched and
+  # still truncates, matching R's own array-indexing behaviour.
+  near <- abs(voxmat - round(voxmat)) < 1e-4
+  voxmat[near] <- round(voxmat[near])
+
   gridToIndex3DCpp(dimensions, voxmat)
 
 }

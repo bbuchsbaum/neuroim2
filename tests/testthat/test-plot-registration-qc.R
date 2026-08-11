@@ -24,7 +24,7 @@ test_that("plot_checkerboard returns ggplot panels invisibly", {
 
   expect_length(result, 2L)
   expect_true(all(vapply(result, inherits, logical(1), what = "ggplot")))
-  expect_equal(ggplot2::get_labs(result[[1L]])$title, "z = 2")
+  expect_equal(plot_title(result[[1L]]), "z = 2")
   expect_equal(attr(result, "labels")$title, "Checker")
 })
 
@@ -44,7 +44,7 @@ test_that("plot_edge_overlay returns ggplot panels invisibly", {
 
   expect_length(result, 2L)
   expect_true(all(vapply(result, inherits, logical(1), what = "ggplot")))
-  expect_equal(ggplot2::get_labs(result[[1L]])$title, "z = 2")
+  expect_equal(plot_title(result[[1L]]), "z = 2")
   expect_equal(attr(result, "labels")$title, "Edges")
 })
 

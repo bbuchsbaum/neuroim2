@@ -64,10 +64,6 @@ namespace indexfuns {
                                          Rcpp::NumericVector spacing, 
                                          Rcpp::IntegerVector dim);
     
-    Rcpp::List local_spheres_impl(Rcpp::NumericMatrix centers, 
-                                 double radius, 
-                                 Rcpp::NumericVector spacing, 
-                                 Rcpp::IntegerVector dim);
 
     // Helper functions
     inline double masked_sd(Rcpp::NumericVector arr, Rcpp::IntegerVector mask_idx) {
