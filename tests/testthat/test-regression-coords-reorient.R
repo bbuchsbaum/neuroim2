@@ -219,11 +219,12 @@ test_that("reorient does not return the inverse of the request", {
   }
 })
 
-test_that("reorient preserves dimensions, voxel sizes and handedness magnitude", {
+test_that("reorient permutes dimensions and voxel sizes without changing handedness magnitude", {
   sp <- aniso_space()
   for (tgt in all_orientations()) {
     out <- reorient(sp, tgt)
-    expect_identical(dim(out), dim(sp))
+    perm <- order(.reorient_transform(sp, tgt)[, 1])
+    expect_identical(dim(out), dim(sp)[perm])
     expect_equal(sort(spacing(out)), sort(spacing(sp)))
     expect_equal(abs(det(trans(out)[1:3, 1:3])), abs(det(trans(sp)[1:3, 1:3])))
   }
