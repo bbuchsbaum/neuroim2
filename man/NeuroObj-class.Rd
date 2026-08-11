@@ -12,6 +12,13 @@ This class provides a foundation for more specific neuroimaging data structures.
 
 \describe{
 \item{\code{space}}{An object of class \code{\linkS4class{NeuroSpace}} representing the geometry of the image object.}
+
+\item{\code{header}}{A \code{list} holding the raw header of the file the object was
+read from, empty for objects built in memory. \code{NeuroSpace} records the
+geometry; this records everything else the file said -- repetition time,
+units, intent, description, slice timing, the qform/sform codes -- so that
+writing the object back does not have to invent it. Use
+\code{\link{header}} to read it rather than touching the slot.}
 }}
 
 \seealso{

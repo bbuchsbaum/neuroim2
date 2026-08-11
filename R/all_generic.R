@@ -787,7 +787,11 @@ setGeneric(name="write_elements", def=function(x, els) standardGeneric("write_el
 #' @param x an image object, typically a \code{\linkS4class{NeuroVol}} instance.
 #' @param file_name output file name
 #' @param format file format string. Since "NIFTI" is the only currently supported format, this parameter can be safely ignored and omitted.
-#' @param data_type output data type, If specified should be a \code{character} vector of: "BINARY", "UBYTE", "SHORT", "INT", "FLOAT", "DOUBLE".
+#' @param data_type output data type, If specified should be one of "UBYTE", "BYTE", "SHORT", "USHORT", "INT", "UINT", "LONG",
+#'   "ULONG", "FLOAT" or "DOUBLE". Defaults to the datatype of the file the image
+#'   was read from when its values are still exactly representable in it, and to
+#'   "FLOAT" otherwise; integer targets are fitted with \code{scl_slope} /
+#'   \code{scl_inter} rather than truncated.
 #' Otherwise output format will be inferred from R the datatype of the image.
 #' @return Invisibly returns \code{NULL} after writing the volume to disk.
 #' @export
@@ -809,7 +813,7 @@ setGeneric(name="write_elements", def=function(x, els) standardGeneric("write_el
 #' unlink(tmp1)
 #' }
 #' @rdname write_vol-methods
-setGeneric(name="write_vol",  def=function(x, file_name, format, data_type) standardGeneric("write_vol"))
+setGeneric(name="write_vol",  def=function(x, file_name, format, data_type, ...) standardGeneric("write_vol"))
 
 
 #' Write a 4d image vector to disk
@@ -817,7 +821,11 @@ setGeneric(name="write_vol",  def=function(x, file_name, format, data_type) stan
 #' @param x an image object, typically a \code{NeuroVec} instance.
 #' @param file_name output file name.
 #' @param format file format string. Since "NIFTI" is the only currently supported format, this parameter can be safely ignored and omitted.
-#' @param data_type the numeric data type. If specified should be a \code{character} vector of: "BINARY", "UBYTE", "SHORT", "INT", "FLOAT", "DOUBLE".
+#' @param data_type the numeric data type. If specified should be one of "UBYTE", "BYTE", "SHORT", "USHORT", "INT", "UINT", "LONG",
+#'   "ULONG", "FLOAT" or "DOUBLE". Defaults to the datatype of the file the image
+#'   was read from when its values are still exactly representable in it, and to
+#'   "FLOAT" otherwise; integer targets are fitted with \code{scl_slope} /
+#'   \code{scl_inter} rather than truncated.
 #' Otherwise output format will be inferred from R the datatype of the image.
 #' @param ... extra args
 #' @return Invisibly returns \code{NULL} after writing the vector to disk.
@@ -849,8 +857,8 @@ setGeneric(name="write_vec",  def=function(x, file_name, format, data_type, ...)
 #' @param file Optional output file name for the backing image. If \code{NULL},
 #'   a temporary \code{.nii} file is created.
 #' @param data_type Character string specifying the output data type for the
-#'   NIfTI file. Should be one of: "BINARY", "UBYTE", "SHORT", "INT", "FLOAT",
-#'   "DOUBLE". Default is "FLOAT".
+#'   NIfTI file. Should be one of "UBYTE", "BYTE", "SHORT", "USHORT", "INT",
+#'   "UINT", "LONG", "ULONG", "FLOAT" or "DOUBLE". Default is "FLOAT".
 #' @param overwrite Logical; if \code{TRUE}, overwrite an existing file at the
 #'   specified path. Default is \code{FALSE}.
 #' @param ... Additional arguments passed to methods.

@@ -789,7 +789,8 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 #' @noRd
 .getRStorage <- function(data_type) {
   dtype_upper <- toupper(data_type)
-  if (any(dtype_upper == c("BINARY", "BYTE", "UBYTE", "SHORT", "INTEGER", "INT", "LONG"))) {
+  if (any(dtype_upper == c("BINARY", "BYTE", "UBYTE", "SHORT", "USHORT",
+                           "INTEGER", "INT", "UINT", "LONG", "ULONG"))) {
     "integer"
   } else if (any(dtype_upper == c("FLOAT", "DOUBLE"))) {
     "double"
@@ -801,11 +802,7 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 
 #' @noRd
 .isSigned <- function(data_type) {
-  if (data_type == "UBYTE") {
-    FALSE
-  } else {
-    TRUE
-  }
+  !(toupper(data_type) %in% c("UBYTE", "USHORT", "UINT", "ULONG"))
 }
 
 
@@ -815,45 +812,83 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 #' @importFrom mmap mmap char mmapFlags munmap
 #' @noRd
 .getMMapMode <- function(code) {
-	if (code == "UNKNOWN") {
-		stop(paste(".getMMapMode: no memory map mode for UNKNOWN data type: ", code))
-	} else if (code == "BINARY") {
-		mmap::int8()
-	} else if (code == "UBYTE") {
-	  mmap::uint8()
-	} else if(code == "SHORT") {
-	  mmap::int16()
-	} else if(code == "INT") {
-	  mmap::int32()
-	} else if (code == "FLOAT") {
-	  mmap::real32()
-	} else if (code == "DOUBLE") {
-	  mmap::real64()
-	} else {
-		stop(paste(".getMMapMode: unsupported data type: ", code))
-	}
+  code <- toupper(code)
+  switch(code,
+    BYTE   = mmap::int8(),
+    UBYTE  = mmap::uint8(),
+    SHORT  = mmap::int16(),
+    INT    = mmap::int32(),
+    FLOAT  = mmap::real32(),
+    DOUBLE = mmap::real64(),
+    # `mmap` has no vector type for the remaining widths, so memory mapping is
+    # simply unavailable for them; the compiled reader handles them all.
+    cli::cli_abort(c(
+      "Memory mapping is not available for {.val {code}} data.",
+      "i" = "Read the image normally instead (drop {.code mode = \"mmap\"});
+             every NIfTI data type is supported on that path."
+    ))
+  )
+}
+
+#' Can this image be memory mapped at all?
+#' @keywords internal
+#' @noRd
+.can_mmap <- function(meta) {
+  identical(.Platform$endian, meta@endian) &&
+    !endsWith(meta@data_file, ".gz") &&
+    !identical(meta@descriptor@data_encoding, "gzip") &&
+    toupper(meta@data_type) %in% c("BYTE", "UBYTE", "SHORT", "INT", "FLOAT", "DOUBLE")
 }
 
 
 # ---- Data-type lookup tables ------------------------------------------------
 
 #' Named vectors mapping between NIfTI data-type codes, names, and byte sizes.
+#'
+#' Every fixed-width real datatype in the NIfTI-1/2 standard is here. The names
+#' are neuroim2's own labels, not the NIfTI macro names: the historical spellings
+#' \code{BYTE}/\code{UBYTE}/\code{SHORT}/\code{INT}/\code{LONG} are signed,
+#' unsigned, 16-, 32- and 64-bit respectively, and the \code{U}-prefixed forms
+#' are their unsigned counterparts.
 #' @keywords internal
 #' @noRd
 .DATA_CODE_TO_STORAGE <- c(
-  "0"  = "UNKNOWN", "1"  = "BINARY", "2"  = "UBYTE",
-  "4"  = "SHORT",   "8"  = "INT",    "16" = "FLOAT",
-  "64" = "DOUBLE"
+  "0"    = "UNKNOWN", "1"    = "BINARY", "2"   = "UBYTE",
+  "4"    = "SHORT",   "8"    = "INT",    "16"  = "FLOAT",
+  "64"   = "DOUBLE",  "256"  = "BYTE",   "512" = "USHORT",
+  "768"  = "UINT",    "1024" = "LONG",   "1280" = "ULONG"
 )
 
+# BINARY (code 1) is deliberately absent: 1-bit packed data is not read, so
+# offering it as an output type would produce files this package cannot open.
 .DATA_STORAGE_TO_CODE <- c(
-  UNKNOWN = 0L, BINARY = 1L, UBYTE = 2L, SHORT = 4L,
-  INT = 8L,     FLOAT = 16L, DOUBLE = 64L
+  UNKNOWN = 0L,   UBYTE = 2L,   SHORT  = 4L,
+  INT     = 8L,   FLOAT = 16L,  DOUBLE = 64L, BYTE = 256L,
+  USHORT  = 512L, UINT  = 768L, LONG   = 1024L, ULONG = 1280L
 )
 
 .DATA_TYPE_SIZE <- c(
-  BINARY = 1L, BYTE = 1L, UBYTE = 1L, SHORT = 2L,
-  INTEGER = 4L, INT = 4L, FLOAT = 4L, DOUBLE = 8L, LONG = 8L
+  BINARY = 1L, BYTE = 1L, UBYTE = 1L, SHORT = 2L, USHORT = 2L,
+  INTEGER = 4L, INT = 4L, UINT = 4L, FLOAT = 4L, DOUBLE = 8L,
+  LONG = 8L, ULONG = 8L
+)
+
+#' Datatype codes the standard defines but neuroim2 deliberately does not read.
+#'
+#' A \code{NeuroVol} is an array of doubles, so there is nowhere to put a complex
+#' or a multi-channel voxel without changing what the class means. Erroring with
+#' the reason is better than inventing a projection (a modulus, a luminance) that
+#' the caller did not ask for.
+#' @keywords internal
+#' @noRd
+.DATA_CODE_UNSUPPORTED <- c(
+  "32"   = "complex-valued (DT_COMPLEX64, two float32 per voxel)",
+  "1792" = "complex-valued (DT_COMPLEX128, two float64 per voxel)",
+  "2048" = "complex-valued (DT_COMPLEX256, two float128 per voxel)",
+  "128"  = "three-channel colour (DT_RGB24)",
+  "2304" = "four-channel colour (DT_RGBA32)",
+  "1536" = "128-bit floating point (DT_FLOAT128)",
+  "1"    = "1-bit packed (DT_BINARY)"
 )
 
 #' .getDataStorage
@@ -861,6 +896,16 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 #' @noRd
 .getDataStorage <- function(code) {
   key <- as.character(code)
+  reason <- .DATA_CODE_UNSUPPORTED[key]
+  if (!is.na(reason)) {
+    cli::cli_abort(c(
+      "NIfTI data-type code {.val {code}} is {unname(reason)}.",
+      "x" = "neuroim2 images hold real-valued voxels, so there is no faithful
+             representation for this type.",
+      "i" = "Convert the file first, e.g. with {.code nibabel} or
+             {.code 3dcalc}, and read the result."
+    ))
+  }
   res <- .DATA_CODE_TO_STORAGE[key]
   if (is.na(res)) {
     cli::cli_abort("Unsupported NIfTI data-type code: {.val {code}}.")
@@ -872,9 +917,13 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 #' @keywords internal
 #' @noRd
 .getDataCode <- function(data_type) {
-  res <- .DATA_STORAGE_TO_CODE[data_type]
+  res <- .DATA_STORAGE_TO_CODE[toupper(data_type)]
   if (is.na(res)) {
-    cli::cli_abort("Unsupported data type: {.val {data_type}}.")
+    cli::cli_abort(c(
+      "Unsupported data type: {.val {data_type}}.",
+      "i" = "Supported types are
+             {.val {setdiff(names(.DATA_STORAGE_TO_CODE), 'UNKNOWN')}}."
+    ))
   }
   unname(res)
 }

@@ -70,6 +70,26 @@ Memory management modes:
   Requires a mask to specify which voxels to load.
 * "filebacked": Similar to mmap but with more flexible caching strategies.
 
+\strong{Which mode to use.} \code{"normal"} is the default because it is the
+simplest thing that works, but it is the wrong default once the data stops
+being small. An R image always holds \code{double}s, so a 56 MB int16 run
+becomes 236 MB in memory and a session-worth of runs will not fit. Two
+cheaper routes exist and both are usually \emph{faster}, not just smaller:
+
+* \strong{Pass a \code{mask}} when the analysis only touches part of the brain
+  -- which is nearly every analysis. Only the in-mask voxels are read, and the
+  result is a sparse \code{NeuroVec} that \code{\link{series}} and the
+  searchlight iterators consume directly.
+* \strong{Use \code{mode = "mmap"}} when voxels are visited in a scattered
+  order, as in searchlight, ROI and connectivity work. The file is not read up
+  front and pages are served on demand.
+
+On an ordinary single run (64 x 64 x 36 x 200), extracting 5,000 scattered
+voxel time series measured 44 ms with \code{mask=}, 144 ms via \code{"mmap"}
+including the open, and 4.8 s by loading the whole image first. Reach for
+\code{"normal"} when you genuinely need every voxel of a small image in
+memory at once.
+
 \strong{3D inputs:} A path pointing at a 3D image is not rejected. It is promoted
 to a 4D \code{NeuroVec} whose fourth dimension has length 1, so the return type is
 always a \code{NeuroVec}, never a \code{\linkS4class{NeuroVol}}. If you want a true

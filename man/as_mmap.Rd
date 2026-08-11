@@ -31,8 +31,8 @@ with extension \code{.nii} is created.}
 \code{overwrite}).}
 
 \item{data_type}{Character string specifying the output data type for the
-NIfTI file. Should be one of: "BINARY", "UBYTE", "SHORT", "INT", "FLOAT",
-"DOUBLE". Default is "FLOAT".}
+NIfTI file. Should be one of "UBYTE", "BYTE", "SHORT", "USHORT", "INT",
+"UINT", "LONG", "ULONG", "FLOAT" or "DOUBLE". Default is "FLOAT".}
 
 \item{overwrite}{Logical; if \code{TRUE}, overwrite an existing file at the
 specified path. Default is \code{FALSE}.}

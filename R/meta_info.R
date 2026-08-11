@@ -170,11 +170,44 @@ niftiDim <- function(nifti_header) {
   if (!is.numeric(dimarray)) {
     cli::cli_abort("Invalid dimension array in NIFTI header: must be numeric.")
   }
-  lastidx <- min(which(dimarray == 1)) - 1
-  if (lastidx < 1) {
+  # dim[0] is the axis count. Deriving it instead -- by stopping at the first
+  # entry equal to 1 -- discarded a trailing singleton and, worse, truncated a
+  # legitimate single-slice image such as 64 x 64 x 1.
+  nd <- as.integer(dimarray[1])
+  if (!is.finite(nd) || nd < 1L || nd > 7L || length(dimarray) < nd + 1L) {
     cli::cli_abort("Invalid dimension specification in NIFTI header.")
   }
-  dimarray[2:lastidx]
+  dimarray[2:(nd + 1L)]
+}
+
+#' Fold a 5-D image whose 4th axis is degenerate down to 4-D
+#'
+#' Files written as \code{x y z 1 t} carry their series on the fifth axis. That
+#' is a 4-D time series in every respect that matters to \code{read_vec}, so
+#' collapse it there -- but only there. It used to be done inside
+#' \code{read_nifti_header}, which meant \code{read_header} and
+#' \code{read_hyper_vec} could not see the shape the file actually declares.
+#'
+#' @param meta a \linkS4class{FileMetaInfo}
+#' @return the same object, with \code{dims} reduced when the fold applies
+#' @keywords internal
+#' @noRd
+.collapse_degenerate_4th_axis <- function(meta) {
+  d <- meta@dims
+  if (length(d) == 5L && d[4] == 1L) {
+    meta@dims <- c(d[1:3], d[5])
+    hdr <- meta@header
+    if (is.list(hdr) && length(hdr$dimensions) >= 6L) {
+      hdr$dimensions <- c(4, d[1:3], d[5], 1, 1, 1)
+      hdr$num_dimensions <- 4L
+      if (length(hdr$pixdim) == 8L) {
+        # pixdim follows dim, so the time step moves with the axis
+        hdr$pixdim <- c(hdr$pixdim[1:4], hdr$pixdim[6], 1, 1, 1)
+      }
+      meta@header <- hdr
+    }
+  }
+  meta
 }
 
 #' Create MetaInfo Object
@@ -462,16 +495,17 @@ AFNIMetaInfo <- function(descriptor, afni_header) {
   TLPI <- rbind(TLPI, c(0, 0, 0, 1))
 
   # Determine data type and size
+  # AFNI's MRI_TYPE enum. MRI_byte is *unsigned*; mapping it to the signed
+  # 8-bit type turned every value above 127 negative.
   data_type <- switch(as.character(afni_header$BRICK_TYPES$content[1]),
-                     "0" = "BYTE",
+                     "0" = "UBYTE",
                      "1" = "SHORT",
+                     "2" = "INT",
                      "3" = "FLOAT",
+                     "4" = "DOUBLE",
                      stop("Unsupported BRICK_TYPE in AFNI header"))
 
-  bytes_per_element <- switch(as.character(afni_header$BRICK_TYPES$content[1]),
-                            "0" = 1L,
-                            "1" = 2L,
-                            "3" = 4L)
+  bytes_per_element <- .getDataSize(data_type)
 
   # Create object with validation
   tryCatch({

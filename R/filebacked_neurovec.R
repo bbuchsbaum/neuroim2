@@ -208,20 +208,13 @@ setMethod(
     
     # Get unique timepoints to minimize file reads
     unique_timepoints <- sort(unique(timepoints))
-    
-    # Read the required volumes
-    mat <- read_mapped_vols(x@meta, unique_timepoints)  # Returns [time, voxels]
-    
-    # Create lookup table for timepoint indices
+
+    # Read the required volumes: [voxels x volumes], already scaled
+    mat <- read_mapped_vols(x@meta, unique_timepoints)
+
+    # One vectorised gather rather than a scalar loop over the request
     time_lookup <- match(timepoints, unique_timepoints)
-    
-    # Extract values using the computed indices
-    values <- numeric(length(i))
-    for (idx in seq_along(i)) {
-      values[idx] <- mat[time_lookup[idx], spatial_offsets[idx]]
-    }
-    
-    values
+    mat[cbind(spatial_offsets, time_lookup)]
   }
 )
 
