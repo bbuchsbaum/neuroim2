@@ -1009,8 +1009,9 @@ suite.
   [`grDevices::hcl.pals()`](https://rdrr.io/r/grDevices/palettes.html)
   (e.g. `"RdBu"`, `"Spectral"`, `"Reds"`) and the `"coolwarm"` diverging
   alias, instead of silently returning a viridis-like ramp. Unknown
-  palette names now emit a warning rather than mis-coloring silently.
-  Added the internal `is_diverging_cmap()` classifier.
+  palette names now emit a warning rather than silently returning
+  incorrect colours. Added the internal `is_diverging_cmap()`
+  classifier.
 - The 3D bilateral backend now guards zero or non-finite auto-estimated
   range scales, avoiding `NaN` outputs for singleton or constant masks.
 
@@ -1032,7 +1033,7 @@ suite.
   overlay scenarios (signed diverging vs. the sequential-palette bug,
   alpha modes, colorbar, and
   [`enhance_stat_map()`](https://bbuchsbaum.github.io/neuroim2/reference/enhance_stat_map.md)
-  de-speckling) over the bundled MNI template for human visual QC.
+  despeckling) over the bundled MNI template for human visual QC.
 - Added regression tests for mask-normalized bilateral filtering,
   volume-boundary behavior, fixed `range_scale` parity with the default
   auto scale, singleton-mask stability, and 4D mask-normalized

@@ -954,6 +954,7 @@ Miscellaneous methods and functions
   : Convert to a LogicalNeuroVol
 
 - [`as.matrix(`*`<ClusteredNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.matrix-methods.md)
+  [`as.matrix(`*`<FileBackedNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.matrix-methods.md)
   [`as.matrix(`*`<MappedNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.matrix-methods.md)
   [`as.matrix(`*`<NeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.matrix-methods.md)
   [`as.matrix(`*`<DenseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.matrix-methods.md)

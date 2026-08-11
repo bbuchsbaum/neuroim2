@@ -1,8 +1,8 @@
 # Enhance an unsmoothed statistical map for visualization
 
-De-speckles a noisy ("salt-and-pepper") statistical map so it renders
-cleanly as an overlay, *without* the peak-depressing and
-cluster-smearing that a plain Gaussian blur causes. This is a
+Removes isolated speckles from a noisy ("salt-and-pepper") statistical
+map so it renders cleanly as an overlay, *without* the peak-depressing
+and cluster-smearing that a plain Gaussian blur causes. This is a
 display-oriented preprocessor: it is not intended to produce maps for
 statistical inference (it deliberately sharpens for visual punch and
 does not preserve the null distribution).

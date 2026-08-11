@@ -65,9 +65,9 @@ affine_to_axcodes(trans(mask))
 
 [`spacing()`](https://bbuchsbaum.github.io/neuroim2/reference/spacing-methods.md)
 says these voxels are 3.5 x 3.5 x 3.7 mm. The axis codes say the first
-array axis increases towards the **L**eft, the second towards the
-**A**nterior, the third towards the **S**uperior. `space(mask)` prints
-all of it at once, and
+array axis increases towards the left (`L`), the second towards the
+anterior (`A`), and the third towards the superior (`S`). `space(mask)`
+prints all of it at once, and
 [`origin()`](https://bbuchsbaum.github.io/neuroim2/reference/origin-methods.md)
 and
 [`trans()`](https://bbuchsbaum.github.io/neuroim2/reference/trans-methods.md)

@@ -10,6 +10,9 @@ to a dense voxel-by-time matrix.
 # S4 method for class 'ClusteredNeuroVec'
 as.matrix(x, by = c("cluster", "voxel"))
 
+# S4 method for class 'FileBackedNeuroVec'
+as.matrix(x, ...)
+
 # S4 method for class 'MappedNeuroVec'
 as.matrix(x)
 
