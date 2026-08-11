@@ -355,12 +355,12 @@ it and rewrapping gives a volume:</p>
 </h2>
 <p>Searchlight scoring is embarrassingly parallel. neuroim2 imports
 <strong>future</strong>, so the change is one line of setup and
-<code><a href="https://rdrr.io/pkg/future.apply/man/future_lapply.html" class="external-link">future_sapply()</a></code> in place of <code><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply()</a></code>:</p>
+<code><a href="https://future.apply.futureverse.org/reference/future_lapply.html" class="external-link">future_sapply()</a></code> in place of <code><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply()</a></code>:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.apply.futureverse.org" class="external-link">future.apply</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span>, workers <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">score</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/future.apply/man/future_lapply.html" class="external-link">future_sapply</a></span><span class="op">(</span><span class="va">rsl</span>, <span class="kw">function</span><span class="op">(</span><span class="va">r</span><span class="op">)</span> <span class="op">{</span></span>
+<span><span class="va">score</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://future.apply.futureverse.org/reference/future_lapply.html" class="external-link">future_sapply</a></span><span class="op">(</span><span class="va">rsl</span>, <span class="kw">function</span><span class="op">(</span><span class="va">r</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="fu"><a href="../reference/values-methods.html">values</a></span><span class="op">(</span><span class="fu"><a href="../reference/series_roi.html">series_roi</a></span><span class="op">(</span><span class="va">planted</span>, <span class="va">r</span><span class="op">)</span><span class="op">)</span>, <span class="va">design</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span></span>

@@ -52,7 +52,7 @@ an instance of class `ROIVol`
 \[spherical_roi_set()\] for efficiently creating many spherical ROIs,
 \[series_roi()\] and \[coords()\] for extracting time series and
 coordinates from ROIs, and the vignette:
-[`vignette("regionOfInterest", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/regionOfInterest.html).
+`vignette("regionOfInterest", package = "neuroim2")`.
 
 ## Examples
 

@@ -387,7 +387,7 @@ dim(mean_vol)
 
 Searchlight scoring is embarrassingly parallel. neuroim2 imports
 **future**, so the change is one line of setup and
-[`future_sapply()`](https://rdrr.io/pkg/future.apply/man/future_lapply.html)
+[`future_sapply()`](https://future.apply.futureverse.org/reference/future_lapply.html)
 in place of [`sapply()`](https://rdrr.io/r/base/lapply.html):
 
 ``` r
