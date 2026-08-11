@@ -723,14 +723,14 @@ dimension, window, sigma, spacing, mask and `normalize` in the test suite.
 
 ## Improvements
 
-* `resolve_cmap()` now resolves any palette in `grDevices::hcl.pals()` (e.g. `"RdBu"`, `"Spectral"`, `"Reds"`) and the `"coolwarm"` diverging alias, instead of silently returning a viridis-like ramp. Unknown palette names now emit a warning rather than mis-coloring silently. Added the internal `is_diverging_cmap()` classifier.
+* `resolve_cmap()` now resolves any palette in `grDevices::hcl.pals()` (e.g. `"RdBu"`, `"Spectral"`, `"Reds"`) and the `"coolwarm"` diverging alias, instead of silently returning a viridis-like ramp. Unknown palette names now emit a warning rather than silently returning incorrect colours. Added the internal `is_diverging_cmap()` classifier.
 * The 3D bilateral backend now guards zero or non-finite auto-estimated range scales, avoiding `NaN` outputs for singleton or constant masks.
 
 ## Testing
 
 * Added tests for `enhance_stat_map()` covering impulse (salt-and-pepper) suppression, signal-peak preservation, noise-floor denoising, mask restriction, all three base methods, and the `enhance` plot arguments.
 * Added tests for `resolve_cmap()` palette resolution and warnings, `is_diverging_cmap()`, numeric display ranges across `plot_overlay()`/`plot_ortho()`/`plot_montage()`, signed-map diverging defaults, `ov_alpha_mode = "ramp"`, and `assemble`/`colorbar` (including `ggsave()` round-trip).
-* Added `tools/visual-qc-plots.R`, which renders labelled PNGs of the overlay scenarios (signed diverging vs. the sequential-palette bug, alpha modes, colorbar, and `enhance_stat_map()` de-speckling) over the bundled MNI template for human visual QC.
+* Added `tools/visual-qc-plots.R`, which renders labelled PNGs of the overlay scenarios (signed diverging vs. the sequential-palette bug, alpha modes, colorbar, and `enhance_stat_map()` despeckling) over the bundled MNI template for human visual QC.
 * Added regression tests for mask-normalized bilateral filtering, volume-boundary behavior, fixed `range_scale` parity with the default auto scale, singleton-mask stability, and 4D mask-normalized filtering.
 
 # neuroim2 0.15.0
