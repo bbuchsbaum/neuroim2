@@ -8,19 +8,19 @@ Write a 4d image vector to disk
 write_vec(x, file_name, format, data_type, ...)
 
 # S4 method for class 'NeuroHyperVec,character,missing,missing'
-write_vec(x, file_name)
+write_vec(x, file_name, format, data_type, ...)
 
 # S4 method for class 'NeuroHyperVec,character,character,missing'
 write_vec(x, file_name, format, data_type, ...)
 
 # S4 method for class 'NeuroHyperVec,character,missing,character'
-write_vec(x, file_name, data_type)
+write_vec(x, file_name, format, data_type, ...)
 
 # S4 method for class 'ROIVec,character,missing,missing'
-write_vec(x, file_name)
+write_vec(x, file_name, format, data_type, ...)
 
 # S4 method for class 'NeuroVec,character,missing,missing'
-write_vec(x, file_name)
+write_vec(x, file_name, format, data_type, ...)
 
 # S4 method for class 'NeuroVec,character,character,missing'
 write_vec(
@@ -29,17 +29,18 @@ write_vec(
   format,
   nbit = FALSE,
   compression = 5,
-  chunk_dim = c(10, 10, 10, dim(x)[4])
+  chunk_dim = c(10, 10, 10, dim(x)[4]),
+  ...
 )
 
 # S4 method for class 'NeuroVec,character,missing,character'
-write_vec(x, file_name, data_type)
+write_vec(x, file_name, format, data_type, ...)
 
 # S4 method for class 'ROIVec,character,missing,missing'
-write_vec(x, file_name)
+write_vec(x, file_name, format, data_type, ...)
 
 # S4 method for class 'NeuroVec,character,missing,missing'
-write_vec(x, file_name)
+write_vec(x, file_name, format, data_type, ...)
 
 # S4 method for class 'NeuroVec,character,character,missing'
 write_vec(
@@ -48,11 +49,12 @@ write_vec(
   format,
   nbit = FALSE,
   compression = 5,
-  chunk_dim = c(10, 10, 10, dim(x)[4])
+  chunk_dim = c(10, 10, 10, dim(x)[4]),
+  ...
 )
 
 # S4 method for class 'NeuroVec,character,missing,character'
-write_vec(x, file_name, data_type)
+write_vec(x, file_name, format, data_type, ...)
 ```
 
 ## Arguments
@@ -72,9 +74,13 @@ write_vec(x, file_name, data_type)
 
 - data_type:
 
-  the numeric data type. If specified should be a `character` vector of:
-  "BINARY", "UBYTE", "SHORT", "INT", "FLOAT", "DOUBLE". Otherwise output
-  format will be inferred from R the datatype of the image.
+  the numeric data type. If specified should be one of "UBYTE", "BYTE",
+  "SHORT", "USHORT", "INT", "UINT", "LONG", "ULONG", "FLOAT" or
+  "DOUBLE". Defaults to the datatype of the file the image was read from
+  when its values are still exactly representable in it, and to "FLOAT"
+  otherwise; integer targets are fitted with `scl_slope` / `scl_inter`
+  rather than truncated. Otherwise output format will be inferred from R
+  the datatype of the image.
 
 - ...:
 

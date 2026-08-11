@@ -1,9 +1,981 @@
 # Changelog
 
+## neuroim2 0.19.0
+
+Seven defects found by measuring the image-processing layer against
+`nilearn` 0.14.0 / scipy, which is the reference for the processing
+neuroim2 also does. The harness is in `dev/bench/nilearn/` and the
+findings in `dev/nilearn-gap-analysis.md`.
+
+Four of these change results; the sections that do say so explicitly.
+
+### `gaussian_blur()` now applies the smoothing it is asked for
+
+`window` truncates the Gaussian at a fixed number of *voxels* while
+`sigma` is in *millimetres*, so the old default of `window = 1` cut the
+kernel off at one voxel either side regardless of how wide the kernel
+was meant to be. Measured by smoothing an impulse and reading the width
+back out:
+
+                                      delivered   requested   shortfall
+    gaussian_blur(sigma = 2, window = 1)  3.49 mm    4.71 mm     26%
+    gaussian_blur(sigma = 3, window = 1)  3.70 mm    7.06 mm     48%
+    gaussian_blur(sigma = 4, window = 1)  3.76 mm    9.42 mm     60%
+
+Worse, the shortfall depended on the voxel size –
+`sigma = 2, window = 1` delivered 3.49 mm FWHM on 2 mm voxels and 1.88
+mm on 1 mm voxels, so the same call smoothed two acquisitions of the
+same brain differently – and nothing warned.
+
+`window` now defaults to `NULL`, meaning “derive the half-width from
+`sigma` and the voxel size”, using `scipy.ndimage.gaussian_filter`’s
+rule (`int(truncate * sigma / spacing + 0.5)`, `truncate = 4`). Requests
+are now honoured to better than 1% of FWHM on isotropic and anisotropic
+grids alike.
+
+- **This changes results.** Any call that relied on the old default is
+  now applying more smoothing – the amount it was asking for. Passing
+  `window` explicitly reproduces the old kernel exactly, so old analyses
+  remain reproducible.
+- `fwhm` is accepted as an alternative to `sigma`, in millimetres, which
+  is the unit smoothing is normally specified in. Giving both is an
+  error.
+- `truncate` controls how many standard deviations are kept when the
+  window is derived.
+
+### `as_canonical()` no longer discards data
+
+Reorienting to RAS is a permutation and a flip of the array: the voxels
+are the same voxels, relabelled. It was implemented by building a target
+space and handing it to
+[`resample()`](https://bbuchsbaum.github.io/neuroim2/reference/resample-methods.md),
+and
+[`reorient()`](https://bbuchsbaum.github.io/neuroim2/reference/reorient-methods.md)
+rotated the affine while keeping the *source* dimensions. When the
+reorientation permuted axes – which is the whole point – the output grid
+did not contain the data:
+
+                         in                 out            nonzero kept
+    nilearn reorder_img  AIR 60x72x56  ->   RAS 56x60x72      100%
+    as_canonical (was)   AIR 60x72x56  ->   RAS 60x72x56       76.4%
+
+Nearly a quarter of the image was thrown away silently. Going through a
+registration library also meant values were interpolated where they
+should merely have moved, and that images smaller than four voxels on
+any axis were refused outright.
+
+[`as_canonical()`](https://bbuchsbaum.github.io/neuroim2/reference/as_canonical.md)
+now permutes and flips the array and rebuilds the affine. It is exact
+(the output is a permutation of the input, checked with
+[`identical()`](https://rdrr.io/r/base/identical.html)), works at any
+size, matches `nibabel::as_closest_canonical` voxel for voxel, and is
+about 40x faster.
+[`reorient()`](https://bbuchsbaum.github.io/neuroim2/reference/reorient-methods.md)
+on a `NeuroSpace` permutes `dim` and `spacing` along with the affine.
+
+### `conn_comp()`’s local maxima were never pruned
+
+`local_maxima_dist` had no effect at any value. `.pruneCoords()` read
+the neighbour distances out of
+[`dbscan::kNN()`](https://rdrr.io/pkg/dbscan/man/kNN.html)’s result as
+`ret$distances`; that component is called `dist`, and `$` does not
+partially match a name longer than the one it is looking for, so the
+lookup returned `NULL`, the comparison became `logical(0)`, and the
+pruning loop exited on its first pass every time. The `local_maxima`
+table listed every in-mask voxel – 25,538 rows for 12 components on a 3
+mm map, 25,527 of them from a single component, each one voxel from the
+next.
+
+Underneath that, the rule did not deliver the minimum distance the
+argument documents even when it ran. It compared each voxel only against
+its single nearest neighbour, so three points at 0, 5 and 12 mm valued
+5, 1 and 9 kept the 5 *and* the 9 at `local_maxima_dist = 15`: the 5
+survived because its nearest neighbour was the 1. “The nearest
+neighbour” was not well defined either – on a voxel grid more than half
+of all points have several neighbours at exactly the same distance, and
+which one came back depended on the kd-tree’s traversal order.
+
+The rule is now the one the argument names: a voxel is reported when no
+other voxel of its component within `local_maxima_dist` has a larger
+value. It is deterministic and the reported maxima are at least
+`local_maxima_dist` apart by construction.
+
+                            local_maxima rows    closest pair of maxima
+    26-connect   was              25,538              3 mm (one voxel)
+                 now                  73              15.1 mm
+    6-connect    was              25,538              3 mm (one voxel)
+                 now               5,039              15.1 mm
+
+- **This changes results** for anyone reading
+  `conn_comp(...)$local_maxima`. What it returned before was the
+  component’s voxel list, not its maxima.
+- The search is now a single compiled pass over a uniform grid rather
+  than a [`dbscan::kNN()`](https://rdrr.io/pkg/dbscan/man/kNN.html) call
+  per component per round, which is also what made the rest of
+  [`conn_comp()`](https://bbuchsbaum.github.io/neuroim2/reference/conn_comp-methods.md)
+  worth speeding up. `dbscan` is no longer used here.
+
+### Connected components in compiled code
+
+[`conn_comp_3D()`](https://bbuchsbaum.github.io/neuroim2/reference/conn_comp_3D.md)
+was a two-pass union-find written in interpreted R, building a 26x3
+neighbour matrix per voxel and running
+[`find()`](https://rdrr.io/r/utils/apropos.html) as an R closure.
+`src/conncomp.cpp` existed but held only a commented-out sketch of it.
+Against `scipy.ndimage.label()` it was 690x slower on a small volume and
+4,450x slower on a 1 mm brain – fifteen minutes for one labelling – and
+the ratio grew with size.
+
+                                         scipy    before     after
+    40x48x38    (7,312 in-mask)         0.001 s    1.4 s     0.024 s
+    91x109x91  (90,357 in-mask)         0.016 s   38.4 s     0.31 s
+    182x218x182 (720,916 in-mask)       0.152 s  916 s       3.37 s
+    labelling alone, 91x109x91          0.016 s      --      0.027 s
+
+The ratio to scipy no longer grows with size: it is flat at 18-22x
+across a 100x range in voxel count, and the labelling itself is at
+parity. What is left is the per-cluster voxel lists, the cluster table
+and the local maxima that
+[`conn_comp()`](https://bbuchsbaum.github.io/neuroim2/reference/conn_comp-methods.md)
+returns and `scipy.ndimage.label()` does not;
+`cluster_table = FALSE, local_maxima = FALSE` halves the remainder.
+
+The labelling is unchanged: the compiled version reproduces the R one’s
+labels, sizes and size-descending numbering including its tie-break,
+pinned in `tests/testthat/test-conncomp-equivalence.R` against the
+previous implementation, which is kept there as the reference.
+
+[`conn_comp()`](https://bbuchsbaum.github.io/neuroim2/reference/conn_comp-methods.md)’s
+wrapper was rewritten alongside it. It re-derived a coordinate matrix
+per component with
+[`as.matrix()`](https://bbuchsbaum.github.io/neuroim2/reference/as.matrix.md),
+and then subset a data frame once per component to build the voxel
+lists, which cost 0.39 s at 4,989 components against 0.03 s for the
+labelling.
+[`ClusteredNeuroVol()`](https://bbuchsbaum.github.io/neuroim2/reference/ClusteredNeuroVol-class.md)
+no longer fills its cluster map with a name-by-name list lookup, which
+was quadratic in the cluster count and cost 2.2 s at 12,396 clusters.
+
+[`automask()`](https://bbuchsbaum.github.io/neuroim2/reference/automask-methods.md)
+spent 92% of its time in the labeller and is **53x faster** (14.0 s to
+0.26 s on a 60-volume run) with an unchanged result.
+
+### The two searchlight iterators agree on their centres
+
+`searchlight_coords(mask, radius)` returned one element per voxel *in
+the grid* where `searchlight(mask, radius)` returned one per *nonzero
+mask voxel* – 241,920 against 83,563 on an ordinary brain mask –
+although both documented the latter.
+[`searchlight_coords()`](https://bbuchsbaum.github.io/neuroim2/reference/searchlight_coords.md)
+now centres on nonzero mask voxels like every other iterator in the
+package, and `nonzero` decides only what each searchlight contains, as
+it does in
+[`searchlight()`](https://bbuchsbaum.github.io/neuroim2/reference/searchlight.md).
+It also validates its arguments.
+
+- **This changes results** for anyone who called
+  [`searchlight_coords()`](https://bbuchsbaum.github.io/neuroim2/reference/searchlight_coords.md)
+  without `nonzero = TRUE`: the iterator is now about a third as long,
+  and no longer yields searchlights centred outside the mask.
+
+### A resample target that misses its source says so
+
+`NeuroSpace(dim, spacing, origin)` builds a positive-diagonal affine,
+which mirrors the usual LAS-to-RAS source. Handing one to
+[`resample()`](https://bbuchsbaum.github.io/neuroim2/reference/resample-methods.md)
+as a target produced a near-empty image with no warning.
+[`resample()`](https://bbuchsbaum.github.io/neuroim2/reference/resample-methods.md)
+now compares the two world bounding boxes and warns when they barely
+overlap, naming the likely cause.
+
+### Reshapes that copied the payload
+
+[`as.matrix()`](https://bbuchsbaum.github.io/neuroim2/reference/as.matrix.md)
+on a `DenseNeuroVec` duplicated the whole image to reshape it to
+voxels-by-time – 116 MB for a 60-volume run, and over half of
+[`automask()`](https://bbuchsbaum.github.io/neuroim2/reference/automask-methods.md)’s
+runtime. A reshape is a change of `dim`, not of memory, and R still
+copies on the first write, so the source is untouched either way.
+[`as.matrix()`](https://bbuchsbaum.github.io/neuroim2/reference/as.matrix.md)
+is now effectively free, [`mean()`](https://rdrr.io/r/base/mean.html)
+goes through [`.rowMeans()`](https://rdrr.io/r/base/colSums.html) with
+no reshape at all (0.21 s to 0.12 s), and
+[`scale_series()`](https://bbuchsbaum.github.io/neuroim2/reference/scale_series-methods.md)
+uses the same route.
+
+[`resample()`](https://bbuchsbaum.github.io/neuroim2/reference/resample-methods.md)
+no longer scans the image to infer an output datatype for headers whose
+geometry is all it uses.
+
+### Smoothing a 4-D image runs in compiled code
+
+[`gaussian_blur()`](https://bbuchsbaum.github.io/neuroim2/reference/gaussian_blur.md)
+on a `NeuroVec` looped its volumes in R. Each iteration copied a volume
+out of the run and the result back in, re-allocated the kernel’s two
+scratch buffers, and – with a mask – recomputed the in-mask weight
+volume, which is the same for every volume. Smoothing 60 volumes cost
+1.66 s against nilearn’s 0.51-0.71 s.
+
+The separable kernel now has a 4-D driver that walks the run itself:
+nothing is copied per volume, the scratch buffers are allocated per
+worker, the in-mask weights are computed once, and volumes run in
+parallel (`RcppParallel`, so
+[`RcppParallel::setThreadOptions()`](https://rdrr.io/pkg/RcppParallel/man/setThreadOptions.html)
+controls it). **0.20 s**, which is 2.6-3.6x faster than nilearn rather
+than 2.3x slower. The arithmetic per volume is unchanged and happens in
+the same order, so the result is bit-identical to smoothing the volumes
+one at a time – pinned in `tests/testthat/test-processing-defects.R`
+over both engines, both mask conventions and both `normalize` settings.
+
+The dense kernel, which
+[`gaussian_blur()`](https://bbuchsbaum.github.io/neuroim2/reference/gaussian_blur.md)
+chooses when the mask is a small fraction of the volume, has no 4-D form
+and still loops; everything invariant across volumes is hoisted out of
+that loop.
+
+## neuroim2 0.18.0
+
+### Bug Fixes
+
+- **Breaking:** Removed the exported S4 generic
+  [`scale()`](https://rdrr.io/r/base/scale.html). It had no methods
+  whatsoever, so attaching neuroim2 masked
+  [`base::scale()`](https://rdrr.io/r/base/scale.html) and broke it for
+  *every* input, not just neuroimaging objects (`scale(c(1, 2, 3))`
+  errored with “unable to find an inherited method”). The package itself
+  already called [`base::scale()`](https://rdrr.io/r/base/scale.html)
+  internally to work around the mask.
+  [`scale()`](https://rdrr.io/r/base/scale.html) now resolves to base R
+  again; use
+  [`scale_series()`](https://bbuchsbaum.github.io/neuroim2/reference/scale_series-methods.md)
+  for the neuroimaging-specific scaling generic (GitHub
+  [\#16](https://github.com/bbuchsbaum/neuroim2/issues/16)).
+
+### NIfTI I/O rewritten on a compiled core
+
+The read and write paths no longer go through `readBin`/`writeBin`. A
+single translation unit (`src/nifti_data_io.cpp`) converts between the
+file’s stored type and `double` in one pass, for plain and gzipped files
+alike, and both
+[`read_vol()`](https://bbuchsbaum.github.io/neuroim2/reference/read_vol.md)/[`read_vec()`](https://bbuchsbaum.github.io/neuroim2/reference/read_vec.md)
+and
+[`write_vol()`](https://bbuchsbaum.github.io/neuroim2/reference/write_vol-methods.md)/[`write_vec()`](https://bbuchsbaum.github.io/neuroim2/reference/write_vec-methods.md)
+now call it. On this machine, against `nibabel` 5.4.2 reading the same
+files:
+
+                                       before     after    nibabel
+    read 3-D int16 .nii  (14 MB)        0.46 s    0.049 s    0.027 s
+    read 3-D float32 .nii.gz            0.45 s    0.220 s    0.247 s
+    read 4-D int16 .nii  (56 MB)        3.09 s    0.371 s    0.107 s
+    read 4-D int16 .nii.gz              2.81 s    0.750 s    0.585 s
+
+Two things were behind the 4-D case in particular. `read_mapped_vols()`
+built a 236 MB vector of `double` indices via
+[`outer()`](https://rdrr.io/r/base/outer.html) simply to enumerate a
+*contiguous* range, gathered it element by element through the memory
+map, and handed back a time-by-voxel matrix that
+[`DenseNeuroVec()`](https://bbuchsbaum.github.io/neuroim2/reference/DenseNeuroVec-class.md)
+then transposed straight back. It now reads whole volumes sequentially
+and returns them voxels-by-volumes, the layout the object stores. And
+building the object no longer copies the payload: an S4 class extending
+`array` *is* that array with the slots as attributes, so the read path
+sets them in place, the same technique the ROI constructors already
+used. The equivalence to `new()` is pinned by
+[`identical()`](https://rdrr.io/r/base/identical.html) in the test
+suite.
+
+`read_mapped_vols()` is internal, but its return layout changed from
+`[volumes x voxels]` to `[voxels x volumes]`. Two callers were also
+missing `scl_slope`/`scl_inter` scaling entirely; both are fixed.
+
+### Every NIfTI datatype the standard defines
+
+`int8`, `uint16`, `uint32`, `int64` and `uint64` are read and written.
+They were rejected before with *“Unsupported NIfTI data-type code”* —
+`uint16` in particular is not exotic.
+
+`int32` images no longer lose voxels holding `-2147483648`. That bit
+pattern is R’s `NA_integer_`, so routing the payload through an R
+integer vector turned it into `NA` and dropped it from every downstream
+statistic; the compiled reader lands in `double` and never sees an R
+integer.
+
+Complex (`DT_COMPLEX64/128/256`), colour (`DT_RGB24`, `DT_RGBA32`),
+`DT_FLOAT128` and 1-bit `DT_BINARY` are still not read, but the error
+now names the type and says why: a `NeuroVol` holds one real number per
+voxel, and inventing a projection — a modulus, a luminance — would be
+answering a question the caller did not ask.
+
+### Writing preserves the header
+
+[`as_nifti_header()`](https://bbuchsbaum.github.io/neuroim2/reference/as_nifti_header.md)
+built every header from defaults plus the object’s geometry, so a
+read-write round trip silently discarded everything else. It now starts
+from the header the image was read from. Concretely, a round trip used
+to lose:
+
+- **the repetition time** (`pixdim[4]` reset to 0) and `xyzt_units`,
+- **`sform_code`**, rewritten from whatever it was to 1 — so an image in
+  MNI space came back labelled scanner-anatomical,
+- `descrip`, `aux_file`, `intent_code`, `intent_name`,
+  `cal_min`/`cal_max`, the slice-timing fields and `toffset`.
+
+All of them survive now. The source header travels on a new `header`
+slot on `NeuroObj`, which every image class inherits; `header(x)` reads
+it, and that method now accepts images as its documentation always
+claimed.
+
+[`write_vol()`](https://bbuchsbaum.github.io/neuroim2/reference/write_vol-methods.md)/[`write_vec()`](https://bbuchsbaum.github.io/neuroim2/reference/write_vec-methods.md)
+also default to the source file’s datatype rather than `FLOAT`, when the
+values are still exactly representable in it. An unmodified `int16`
+image round-trips byte for byte instead of doubling in size; computed
+data that no longer fits is promoted to `FLOAT` rather than quietly
+quantised.
+
+#### Integer output is scaled, not truncated
+
+`write_vol(x, f, data_type = "SHORT")` went through
+`writeBin(as.integer(x), ...)`, which truncates toward zero without a
+warning: data spanning ±3.7 came back with a maximum error of **0.998**.
+`scl_slope` and `scl_inter` are now derived to fit the target type,
+giving **5.4e-05** on the same data — the same precision `nibabel`
+produces. Data that is already integral and in range is still written
+unscaled, so masks, label volumes and atlases stay exact.
+
+### NIfTI-2
+
+Read and written, plain or gzipped.
+[`write_vol()`](https://bbuchsbaum.github.io/neuroim2/reference/write_vol-methods.md)/[`write_vec()`](https://bbuchsbaum.github.io/neuroim2/reference/write_vec-methods.md)
+take `version = 2` or `format = "NIFTI2"`, and select it automatically
+when a dimension exceeds 32767, which NIfTI-1’s 16-bit `dim` field
+cannot represent. Files written this way are read correctly by
+`nibabel`, including the affine, TR and units.
+
+### Conformance and diagnostics
+
+- **`scl_slope = NaN` no longer aborts the read.** It is one of the
+  three legal spellings of “this file is not scaled”, alongside `0` and
+  an absent field, and it is what `nibabel`’s in-memory header carries
+  by default — so neuroim2 was refusing to open files the reference
+  implementation writes. An intercept recorded next to a dead slope is
+  dropped with it.
+- **Singleton axes are preserved.** The number of axes is taken from
+  `dim[0]`, as the standard says, instead of being inferred by stopping
+  at the first extent equal to 1. A 64 × 64 × 1 single-slice volume used
+  to load as 64 × 64, and a one-volume run as a 3-D volume.
+- **5-D files keep their shape.** `read_nifti_header()` used to fold a
+  degenerate fourth axis and warn, so
+  [`read_header()`](https://bbuchsbaum.github.io/neuroim2/reference/read_header.md)
+  and
+  [`read_hyper_vec()`](https://bbuchsbaum.github.io/neuroim2/reference/read_hyper_vec.md)
+  could not see what the file actually declared. The fold now happens
+  only inside
+  [`read_vec()`](https://bbuchsbaum.github.io/neuroim2/reference/read_vec.md),
+  where it is a documented convenience; a genuinely 5-D file is refused
+  there with a pointer to
+  [`read_hyper_vec()`](https://bbuchsbaum.github.io/neuroim2/reference/read_hyper_vec.md).
+- **`qform_code == 0` and `sform_code == 0` now follow METHOD 1.** Both
+  transforms being marked unknown means the quaternion is not a
+  statement about where the image is; the affine is derived from
+  `pixdim` with the image centred on the origin, which is what the
+  standard specifies and what `nibabel` returns. This also gives ANALYZE
+  7.5 files their correct affine instead of `diag(2, 2, 2)` with a zero
+  translation.
+- **A truncated file says what is missing**: how many elements the
+  header describes, at what offset, and how many bytes the file actually
+  supplies. It used to fail with `argument is of length zero`. A file
+  that is not an image at all now reports its leading `sizeof_hdr` field
+  and what that field must be.
+- `intent_name` is read as the fixed-width byte field it is. Reading it
+  as a C string ran past the field whenever those 16 bytes held no null
+  terminator.
+
+### Filtering
+
+[`gaussian_blur()`](https://bbuchsbaum.github.io/neuroim2/reference/gaussian_blur.md)
+accepts a `NeuroVec` and smooths it volume by volume, with the argument
+checks, kernel and mask resolved once instead of per volume.
+
+The separable kernel also got two exact optimisations. Its `y` and `z`
+passes accumulate over whole contiguous rows and slices rather than
+walking a column with stride `d0` (or `d0 * d1`), which touched a fresh
+cache line per iteration; the additions for each output element still
+happen in the same order, so the result is bit-identical. And when the
+mask covers every voxel — what `gaussian_blur(vol)` with no mask means —
+the mask-insulation denominator is the zero-padded convolution of a
+constant, which factorises into three per-axis edge corrections,
+replacing three full-volume passes with `d0 + d1 + d2` additions.
+
+                                              before     after   nibabel/scipy
+    3-D, FWHM 6 mm, no mask                   0.60 s    0.21 s      0.13 s
+    4-D, FWHM 6 mm, 200 volumes               2.04 s    0.97 s      0.57 s
+
+Equivalence to the dense kernel is checked over 432 configurations of
+dimension, window, sigma, spacing, mask and `normalize` in the test
+suite.
+
+### Documentation
+
+- Clarified that
+  [`gaussian_blur()`](https://bbuchsbaum.github.io/neuroim2/reference/gaussian_blur.md)’s
+  `sigma` is expressed in the spatial units of the image (millimetres
+  for typical NIfTI data), **not** voxels, while `window` remains a
+  voxel half-width. Mixing the two silently under-smooths: an FWHM
+  converted to sigma in voxels applies roughly half the intended
+  smoothing with no error or warning. Added a Details section on units
+  and an FWHM → sigma conversion example (GitHub
+  [\#23](https://github.com/bbuchsbaum/neuroim2/issues/23)).
+- [`vignette("large-data")`](https://bbuchsbaum.github.io/neuroim2/articles/large-data.md)
+  and
+  [`?read_vec`](https://bbuchsbaum.github.io/neuroim2/reference/read_vec.md)
+  now recommend the masked and memory-mapped paths for anything large,
+  rather than presenting them as a fallback for when memory runs out.
+  For the scattered access that searchlight, ROI and connectivity work
+  perform they are also *faster*: 5,000 voxel time courses from a 64 ×
+  64 × 36 × 200 run measured 44 ms with `mask=` and 144 ms via
+  `mode = "mmap"`, against 4.8 s for loading the image and then indexing
+  it.
+
+### Other changes
+
+- [`as.array()`](https://bbuchsbaum.github.io/neuroim2/reference/as.array.md)
+  on a dense image returns a plain array. It used to hand back the
+  payload still carrying the `space`, `header` and `class` attributes,
+  because the slots of an S4 class extending `array` *are* attributes on
+  that array.
+- [`linear_access()`](https://bbuchsbaum.github.io/neuroim2/reference/linear_access.md)
+  on a `FileBackedNeuroVec` gathers in one vectorised step instead of
+  looping over the request in R, and applies data scaling, which it
+  previously ignored.
+- `dev/bench/nibabel/` holds the conformance and timing harnesses these
+  numbers come from; `dev/nibabel-gap-analysis.md` is the write-up. 30
+  probes covering the standard now agree with `nibabel` on 28, with the
+  remaining two refused by design.
+
+## neuroim2 0.17.0
+
+### Testing
+
+- The test suite now runs clean: 2969 passing, no failures and no
+  errors. Previously `R CMD check` reported 7 failures and 2 errors on
+  every platform.
+- `test-plot-registration-qc.R` called
+  [`ggplot2::get_labs()`](https://ggplot2.tidyverse.org/reference/labs.html),
+  which only exists from ggplot2 3.5.2 while DESCRIPTION sets no version
+  floor, so it errored on older ggplot2. Tests now read plot titles
+  through a version-agnostic helper.
+- The vdiffr golden-image tests have moved to `dev/visual-snapshots/`.
+  They compare SVG text byte-for-byte, which encodes the font metrics of
+  the machine that produced the snapshot, so a single stored image
+  cannot match the Windows, macOS and Linux check matrix — and testthat
+  deletes any `_snaps/` directory whose test file did not run, so they
+  could not simply be skipped. `tests/testthat/test-plot-structure.R`
+  covers the same plotting calls with platform-independent structural
+  assertions (panel counts, layer counts, data shape, argument
+  validation) and runs on every check. See the README in
+  `dev/visual-snapshots/` for reviewing intentional visual changes.
+
+### Documentation
+
+- The vignettes have been rewritten as nine articles in three tiers:
+  *Learn* (`neuroim2`, `spaces-and-coordinates`, `volumes-and-vectors`,
+  `reading-and-writing`), *Do* (`regions-and-searchlights`,
+  `resampling-and-orientation`, `smoothing-and-filtering`,
+  `visualization`) and *Scale* (`large-data`), replacing the previous
+  fourteen. Old article URLs redirect to their successors on the package
+  website; [`vignette()`](https://rdrr.io/r/utils/vignette.html) calls
+  using the old names will need updating.
+- Vignette examples no longer take time series from
+  `global_mask_v4.nii`, which is a binary mask repeated across four
+  timepoints — every “time series” drawn from it was a constant vector.
+  Anything with a time axis now uses
+  [`simulate_fmri()`](https://bbuchsbaum.github.io/neuroim2/reference/simulate_fmri.md),
+  so time courses have real temporal structure and the smoothing,
+  searchlight and ROI examples demonstrate measurable effects.
+- Vignette YAML placed `css` and `includes` at the document root, where
+  `html_vignette` ignores them, so the package stylesheet never reached
+  the rendered articles. They are now nested under the output format.
+
+### Performance
+
+- Searchlight and ROI extraction are substantially faster. Each of the
+  three changes below was landed and verified as output-preserving on
+  its own — compared against a build of the previous version across
+  8,625 configurations of
+  [`spherical_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/spherical_roi.md),
+  [`spherical_roi_set()`](https://bbuchsbaum.github.io/neuroim2/reference/spherical_roi_set.md),
+  [`series()`](https://bbuchsbaum.github.io/neuroim2/reference/series-methods.md)
+  and the four searchlight iterators — before the correctness fixes
+  listed under *Bug Fixes* deliberately changed some of those outputs.
+  The speed-ups and the behaviour changes are independent.
+
+  - ROI objects are no longer built with `new()`. `ROIVolWindow` reaches
+    a basic type through two levels of `contains=`, so the default
+    `initialize()` walked that chain with `callNextMethod()` and ran
+    `validObject()` at each level, recursing into the `NeuroSpace`
+    slot’s nested axis tree — about 450 us per object regardless of ROI
+    size, which was roughly 70% of an exhaustive searchlight’s runtime.
+    An internal constructor clones a cached prototype and asserts the
+    class invariants once, producing an
+    [`identical()`](https://rdrr.io/r/base/identical.html) object about
+    11x cheaper.
+
+  - The voxel offsets of a spherical neighbourhood depend only on the
+    radius and the voxel spacing, so they are computed once per
+    `(radius, spacing)` pair and reused; per centre the work is a
+    translate-and-clip. Candidate windows are also sized per axis rather
+    than from `min(spacing)`, which scanned about 3x too many candidates
+    on anisotropic voxels.
+
+  - [`series()`](https://bbuchsbaum.github.io/neuroim2/reference/series-methods.md)
+    gathers in a single compiled pass. `series(DenseNeuroVec, matrix)`
+    previously looped over timepoints, rebuilding a double index vector
+    each pass (~17x faster); `series(AbstractSparseNeuroVec, integer)`
+    allocated a zero matrix and scattered into it (~1.8x faster, close
+    to memory-bandwidth-bound). The sparse fast path is gated on the
+    concrete `SparseNeuroVec` class so subclasses that override
+    [`matricized_access()`](https://bbuchsbaum.github.io/neuroim2/reference/matricized_access-methods.md)
+    keep their hook.
+
+  - The searchlight iterators do the whole per-centre job in one
+    compiled pass – translate the cached offset template, clip to the
+    volume, apply the mask, gather values, locate the centre row – with
+    everything invariant hoisted out of the iterator closure.
+    [`searchlight_coords()`](https://bbuchsbaum.github.io/neuroim2/reference/searchlight_coords.md)
+    in particular used to build a full `ROIVolWindow` per centre and
+    then discard all but its coordinates.
+    [`spherical_roi_set()`](https://bbuchsbaum.github.io/neuroim2/reference/spherical_roi_set.md)
+    expands every centre in one batched call, so
+    `searchlight(eager = TRUE)` benefits too.
+
+  - The iterators remain lazy. Materialising a whole-brain radius-8 mm
+    searchlight at once would be about 0.9 GB of coordinates, or 1.5 GB
+    as ROI objects, so the work went into making the per-element call
+    cheap rather than into emitting everything up front.
+
+  On a 91x109x91 volume at 2 mm with a 290,137-voxel mask and radius-8
+  mm searchlights, per element and projected over the whole brain:
+
+      searchlight_coords()        97.0 -> 7.7 us     28.1 s -> 2.2 s
+      searchlight(eager = FALSE)  92.3 -> 28.0 us    26.8 s -> 8.1 s
+      spherical_roi()            660.0 -> 85.0 us   191.5 s -> 24.7 s
+
+- [`gaussian_blur()`](https://bbuchsbaum.github.io/neuroim2/reference/gaussian_blur.md)
+  now evaluates the kernel separably where that is cheaper. A Gaussian
+  is a tensor product, so the full `(2 * window + 1)^3` kernel is
+  equivalent to three 1-D passes — 15x fewer multiplies at `window = 3`.
+  The masked default (`normalize = TRUE`) is separable too, as the ratio
+  of two separable convolutions: the mask-insulated blur is
+  `blur(x * m) / blur(m)`, where `m` is the mask indicator.
+
+  Which form is cheaper depends on both the window and the mask fraction
+  — the separable passes cover the whole volume, while the dense kernel
+  visits mask voxels only — so the two implementations are both kept and
+  the cost is estimated per call. Measured on a 91x109x91 volume at 2 mm
+  across mask fractions from 2% to 100%, the dispatch rule picks the
+  slower kernel by more than 5% in 7 of 224 cases and never by more than
+  1.4x, and its total time is within 0.6% of always choosing the
+  per-case winner.
+
+  For a brain-mask-shaped input (about a quarter of the bounding box)
+  and for unmasked whole-volume smoothing:
+
+                           mask 25%   whole volume
+      window = 1              1.7x         6.8x
+      window = 2              2.9x         9.6x
+      window = 3              5.0x        17.3x
+
+  Speed-ups are larger with `normalize = FALSE` (3.9x / 5.5x / 9.4x
+  masked, 15x / 19x / 32x unmasked), which needs half as many passes.
+  The whole-volume column is the case `gaussian_blur(vol)` hits when no
+  mask is supplied.
+
+  Results are unchanged to within floating-point summation order: over
+  3,200 configurations of dimension, spacing, sigma, window, mask shape
+  and `normalize`, the largest absolute difference from the previous
+  kernel was 2.6e-16, and where the two differ most in relative terms
+  the separable result is the closer of the two to a high-precision
+  reference. Code comparing blurred volumes with
+  [`identical()`](https://rdrr.io/r/base/identical.html) rather than
+  [`all.equal()`](https://rdrr.io/pkg/Matrix/man/all.equal-methods.html)
+  may see the difference. The separable path needs working memory the
+  dense one did not: two vectors of `prod(dim)` doubles, or three plus a
+  byte per voxel when normalizing. Measured peak-RSS delta on a
+  200x200x200 volume at `window = 1`, `normalize = TRUE`: 153 MB against
+  the dense path’s 77 MB at a 20% mask, 167 against 139 at 50%, and 190
+  against 230 at a full mask — where the separable form is the cheaper
+  of the two, because the dense path’s voxel-coordinate matrix costs 24
+  bytes per mask voxel. The scratch is `malloc`ed rather than allocated
+  by R, so it is not counted against `mem.maxVSize` and exhaustion
+  surfaces as a C++ allocation failure rather than R’s “cannot allocate
+  vector of size”.
+
+  One input does change materially, and only there: at `window >= 23`
+  the dense kernel’s three-axis weight product underflows to exactly
+  zero in the far corners, so an `Inf` in the data multiplied to `NaN`
+  and poisoned the output. The separable form applies the three factors
+  in separate passes, none of which underflow, and propagates the `Inf`.
+  Neither answer is meaningful — the input is not finite — but they
+  differ.
+
+- Five scalar R loops over voxels are now vectorised. Each was verified
+  against a reference that reproduces the loop it replaced, and against
+  a build of the previous version across 9,163 recorded outputs.
+
+                                                           before    after
+      ClusteredNeuroVec [i, j, k, m]   10,000 voxels     0.194 s   0.005 s   39x
+      mapf(NeuroVol, Kernel)           64^3, 3x3x3        3.81 s   0.096 s   40x
+                                       64^3, 5x5x5        4.10 s   0.288 s   14x
+      random_searchlight()             289,148 voxels    16.8 s    3.6 s      4.7x
+      NeuroHyperVec [i, j, k, l, m]    64,000 voxels      0.342 s  0.195 s    1.8x
+      as.dense(NeuroHyperVec)          40^3 x 40 x 10     1.10 s   0.653 s    1.7x
+
+  - [`mapf()`](https://bbuchsbaum.github.io/neuroim2/reference/map-methods.md)
+    evaluated `sum(x[cbind(ii, jj, kk)] * weights)` once per centre. A
+    kernel tap is a fixed coordinate offset, so in linear-index terms it
+    is a fixed scalar offset: the convolution is now one vectorised pass
+    per tap — a few dozen — rather than one R iteration per centre, of
+    which there can be a million. Whether a tap can leave the volume at
+    all is decided by the extreme centres, so that is a scalar test per
+    tap and not a per-centre one.
+  - [`random_searchlight()`](https://bbuchsbaum.github.io/neuroim2/reference/random_searchlight.md)
+    rebuilt its list of unclaimed voxels with
+    `remain_indices[remaining[remain_indices]]` on every iteration,
+    which is quadratic in the mask size. It now keeps a free list whose
+    removals cost O(batch): survivors from the tail are swapped into the
+    holes left behind.
+  - [`as.dense()`](https://bbuchsbaum.github.io/neuroim2/reference/as.dense.md)
+    on a `NeuroHyperVec` built a fresh volume-sized vector and a fresh
+    3-D array for every (feature, trial) pair; it now writes the in-mask
+    positions of all trials of a feature in one scatter. What is left is
+    allocating and filling the dense result itself, which is why the
+    speed-up is modest — that result is 195 MB for the largest case
+    above.
+
+### Bug Fixes
+
+- **Breaking:**
+  [`random_searchlight()`](https://bbuchsbaum.github.io/neuroim2/reference/random_searchlight.md)
+  returns a different set of searchlights for a given random seed.
+  Sampling is still uniform over the unclaimed voxels, so the
+  distribution of results is unchanged — over 60 seeds the number of
+  searchlights was 466.7 +/- 8.6 before and 463.6 +/- 9.0 after, with
+  exactly the same voxels claimed in every run — but the realized
+  sequence differs because the free list is no longer held in ascending
+  order. The first searchlight of a run is unaffected. Analyses that
+  recorded a seed and expect the identical partition will need to
+  re-run.
+
+- **Breaking:**
+  [`mapf()`](https://bbuchsbaum.github.io/neuroim2/reference/map-methods.md)
+  now clips the kernel at the volume boundary instead of failing there.
+  Taps falling outside the volume contribute nothing. Previously a
+  coordinate past the far face raised `subscript out of bounds`, and one
+  before the near face made the gather return a *shorter* vector, which
+  then recycled against the weights and produced a silently wrong value
+  with only a recycling warning. Two cases are affected: any `mask`
+  reaching within the kernel’s radius of a face, which made the masked
+  form unusable; and an unmasked volume thinner than twice the kernel
+  half-width, because the centre range `hwidth:(dim - hwidth)` counts
+  *backwards* when `dim < 2 * hwidth` and so yields centres inside the
+  margin rather than none — on a 10 x 3 x 10 slab with a 3x3x3 kernel,
+  86 voxels change. Interior results are unchanged.
+
+- [`mapf()`](https://bbuchsbaum.github.io/neuroim2/reference/map-methods.md)’s
+  mask dimension check was written `!all.equal(dim(mask), dim(ovol))`.
+  [`all.equal()`](https://rdrr.io/pkg/Matrix/man/all.equal-methods.html)
+  returns a character description rather than `FALSE` on a mismatch, so
+  the guard raised `invalid argument type` instead of its own message.
+  It now reports “mask must have same dimensions as input volume”.
+
+- `ClusteredNeuroVec[i, j, k, m]` now rejects voxel coordinates outside
+  the volume. They previously reached an `if (NA > 0)` and failed with
+  “missing value where TRUE/FALSE needed”.
+
+- Removed `radius_search_3d_nonisotropic()`,
+  `radius_search_3d_direct()`, `radius_search_3d_precomputed()`,
+  `local_spheres()` and `kernel_filt_3d_cpp()`. All five were compiled
+  and registered but called from nowhere in the package;
+  `kernel_filt_3d_cpp()` was in any case a 2-D filter despite its name.
+
+- **Breaking:** `nonzero = TRUE` now drops voxels whose value is `NA` or
+  `NaN`, in every ROI builder and every searchlight iterator. Previously
+  the filter was written `vals != 0`, which evaluates to `NA` for a
+  missing voxel; an `NA` logical subscript emits an all-`NA` row, so a
+  `ROIVolWindow` could come back with `NA NA NA` coordinates. Missing
+  values also made the eager and lazy searchlight iterators disagree
+  with each other: on a 3x3x3 volume with one `NA` voxel they differed
+  on 21 of 25 searchlights. “Nonzero” cannot be established for a
+  missing value, so it is dropped. The rule now lives in one place, in
+  the compiled searchlight core.
+
+- Fixed a `SIGFPE` crash in
+  [`index_to_grid()`](https://bbuchsbaum.github.io/neuroim2/reference/index_to_grid-methods.md)
+  for spaces whose running product of dimensions exceeds `int`:
+  `index_to_grid(NeuroSpace(c(65536L, 65536L, 2L)), 1:3)` killed the R
+  session. The stride accumulator wrapped to zero and the next division
+  faulted. It is now 64-bit.
+
+- [`searchlight()`](https://bbuchsbaum.github.io/neuroim2/reference/searchlight.md)
+  and
+  [`searchlight_coords()`](https://bbuchsbaum.github.io/neuroim2/reference/searchlight_coords.md)
+  again reject a `radius` smaller than the finest voxel dimension, as
+  the single-ROI builders always have. The lazy iterators had stopped
+  validating it and returned degenerate one-voxel windows instead.
+
+- Fixed a segfault in
+  [`gaussian_blur()`](https://bbuchsbaum.github.io/neuroim2/reference/gaussian_blur.md)
+  when `mask` and `vol` had different dimensions. Nothing checked that
+  they matched, and the kernel built its membership lookup by writing at
+  `mask_idx` into a vector sized for the volume, so an index past the
+  end was an unbounded write.
+  [`gaussian_blur()`](https://bbuchsbaum.github.io/neuroim2/reference/gaussian_blur.md)
+  now requires matching dimensions, and the kernel bounds-checks the
+  index regardless.
+  [`enhance_stat_map()`](https://bbuchsbaum.github.io/neuroim2/reference/enhance_stat_map.md)
+  gained the same dimension check.
+
+- Fixed
+  [`gaussian_blur()`](https://bbuchsbaum.github.io/neuroim2/reference/gaussian_blur.md)
+  returning an all-zero volume for `sigma` above about 1e203. The kernel
+  carried a per-axis `sqrt(2 * pi * sigma)` factor that cancelled
+  exactly in the normalization but cubed to `Inf` first, and `Inf/Inf`
+  made every weight `NaN`. The factor is no longer formed, which leaves
+  the normalized kernel unchanged for every finite `sigma`.
+
+- Fixed a session-killing crash in `gaussian_weights()` for
+  `window >= 645`, where `(2 * window + 1)^3` wrapped negative in `int`
+  and allocated a vector of negative length.
+
+- [`gaussian_blur()`](https://bbuchsbaum.github.io/neuroim2/reference/gaussian_blur.md)
+  now rejects a `sigma` or `window` that is missing, non-finite, or not
+  length one; previously `window = Inf` and `sigma = Inf` were accepted
+  and produced an all-zero volume. A `window` larger than the volume is
+  clamped to `max(dim(vol))`, which changes no result — every tap that
+  far out is out of bounds from every voxel — and keeps absurd values
+  out of the kernel builders.
+  [`enhance_stat_map()`](https://bbuchsbaum.github.io/neuroim2/reference/enhance_stat_map.md)
+  now validates `spatial_sigma` and `intensity_sigma`, which were the
+  two numeric arguments it did not check.
+
+- **Breaking:**
+  [`spherical_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/spherical_roi.md),
+  [`cuboid_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/cuboid_roi.md)
+  and
+  [`square_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/square_roi.md)
+  now share one definition of centroid handling, `nonzero` filtering and
+  the centre/parent bookkeeping. Each previously implemented these
+  separately and the three disagreed with one another; where they
+  disagreed, at least one was wrong.
+
+  - `nonzero = TRUE` now means what it documents.
+    [`cuboid_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/cuboid_roi.md)
+    and
+    [`square_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/square_roi.md)
+    used to force the centre voxel back into the ROI after filtering, so
+    a “nonzero” region could contain a zero value; they had done this
+    only so that `parent_index` could be read back off the coordinate
+    matrix. `parent_index` is now derived from the requested centroid
+    directly, so the workaround is gone and a zero-valued centre is
+    dropped like any other zero voxel.
+  - `center_index` is the row of the centre voxel in `coords`, or
+    `NA_integer_` when the centre is not part of the ROI.
+    [`spherical_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/spherical_roi.md)
+    used to fall back to `1L`, silently pointing at an unrelated voxel,
+    and then computed `parent_index` *from that voxel* — so a filtered
+    ROI reported the wrong parent index entirely.
+  - `parent_index` is always the linear index of the requested centroid
+    in the parent space, whatever the filtering, matching what the slot
+    documents.
+  - All three now validate the centroid identically: length 3 (or a 1x3
+    matrix), `>= 1`, and within the volume.
+    [`cuboid_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/cuboid_roi.md)
+    and
+    [`square_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/square_roi.md)
+    previously accepted out-of-bounds centroids and proceeded with a
+    warning from [`matrix()`](https://rdrr.io/r/base/matrix.html).
+  - A fractional centroid such as `c(5.7, 5, 5)` is truncated once and
+    the same value is used both to build the neighbourhood and to locate
+    the centre within it. Previously the grid was built from the
+    truncated value while the centre was matched against the original,
+    so the centre was never found.
+  - `coords` is now an integer matrix with no dimnames, and rows are
+    ordered lexicographically by `(x, y, z)` in every builder.
+    [`cuboid_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/cuboid_roi.md)
+    and
+    [`square_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/square_roi.md)
+    returned [`expand.grid()`](https://rdrr.io/r/base/expand.grid.html)
+    output, which varies `x` fastest and so was ordered the opposite
+    way, and carried `x`/`y`/`z` dimnames.
+
+- **Breaking:** The `use_cpp` argument of
+  [`spherical_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/spherical_roi.md)
+  is deprecated and ignored; the compiled implementation is always used,
+  and passing `FALSE` warns. The `use_cpp = FALSE` branch was wrong in
+  two independent ways: it returned coordinates offset by **+1 voxel on
+  every axis** (it produced 1-based coordinates where the internal
+  contract is 0-based, and the caller then added 1 regardless), and it
+  sized its candidate cube with
+  [`round()`](https://rdrr.io/r/base/Round.html) rather than
+  [`ceiling()`](https://rdrr.io/r/base/Round.html) while comparing
+  distances exclusively at the boundary, so it also dropped legitimate
+  boundary voxels. Checked against brute-force enumeration over 384
+  geometries — every in-bounds voxel within the radius, computed
+  directly — the compiled path was correct in all 384 and the fallback
+  wrong in 35. The offset also made
+  [`spherical_roi()`](https://bbuchsbaum.github.io/neuroim2/reference/spherical_roi.md)
+  throw `subscript out of bounds` for centroids near the volume edge;
+  those calls now succeed.
+
+- **Breaking:** Fixed
+  [`reorient()`](https://bbuchsbaum.github.io/neuroim2/reference/reorient-methods.md),
+  which never returned the orientation it was asked for. It applied a
+  transform derived only from the target axis codes, ignoring the
+  space’s current orientation, and it interpreted those codes with the
+  sense inverted, so `reorient(sp, c("R", "A", "S"))` produced an `LPI`
+  space and asking for an image’s existing orientation was not a no-op.
+  Orientation codes are now read the way
+  [`affine_to_axcodes()`](https://bbuchsbaum.github.io/neuroim2/reference/orientation_utils.md)
+  reports them — naming the direction each axis increases *towards* —
+  and the transform is computed relative to the current orientation.
+  Code that compensated for the old inversion by requesting the opposite
+  codes will need updating.
+
+- **Breaking:** Fixed a half-voxel offset in
+  [`index_to_coord()`](https://bbuchsbaum.github.io/neuroim2/reference/index_to_coord-methods.md)
+  and
+  [`coord_to_index()`](https://bbuchsbaum.github.io/neuroim2/reference/coord_to_index-methods.md).
+  Both used a 0.5-voxel shift where
+  [`grid_to_coord()`](https://bbuchsbaum.github.io/neuroim2/reference/grid_to_coord-methods.md)
+  and
+  [`coord_to_grid()`](https://bbuchsbaum.github.io/neuroim2/reference/coord_to_grid-methods.md)
+  use the 1-based-to-0-based offset of 1, so the shortcut conversions
+  disagreed with the equivalent two-step path by half a voxel and
+  [`coord_to_index()`](https://bbuchsbaum.github.io/neuroim2/reference/coord_to_index-methods.md)
+  could return a neighbouring voxel. Voxel `(1, 1, 1)` now maps exactly
+  to
+  [`origin()`](https://bbuchsbaum.github.io/neuroim2/reference/origin-methods.md)
+  by either route. Raster extents produced by the plotting helpers shift
+  by half a voxel as a consequence, placing voxel centres on their
+  affine positions.
+
+- Fixed an off-by-one in world-to-index conversion on anisotropic and
+  large-origin grids.
+  [`grid_to_index()`](https://bbuchsbaum.github.io/neuroim2/reference/grid_to_index-methods.md)
+  truncates, and `NeuroSpace` stores affines to 7 significant figures,
+  so a coordinate that is arithmetically an exact voxel centre could
+  arrive as `2.9999985` and truncate to the voxel below — on the shipped
+  EPI mask the error reached 1.6e-6 grid units.
+  [`coord_to_index()`](https://bbuchsbaum.github.io/neuroim2/reference/coord_to_index-methods.md)
+  now rounds to the nearest voxel centre, and
+  [`grid_to_index()`](https://bbuchsbaum.github.io/neuroim2/reference/grid_to_index-methods.md)
+  snaps values within 1e-4 of an integer. Genuinely fractional grid
+  coordinates still truncate, matching R’s array indexing. (The previous
+  0.5-voxel offset was partly masking this, since `trunc(x + 0.5)`
+  rounds; correcting the offset alone exposed it.)
+
+- Fixed
+  [`linear_access()`](https://bbuchsbaum.github.io/neuroim2/reference/linear_access.md)
+  on sparse `NeuroVec` objects, which could return wrong values or error
+  when there were more masked voxels than time points. The sparse data
+  matrix is stored as `[time × voxel]`; the linear-index path now
+  indexes rows and columns in the correct order.
+
+- Fixed `ROIVol` arithmetic so values are aligned by voxel index, not by
+  the original coordinate order, and fixed sparse `Summary` group
+  methods so reductions include implicit structural zeros. `ROIVol`
+  arithmetic now documents and enforces a same-support contract
+  (identical space and voxel set; order may differ); missing voxels are
+  not treated as zero.
+
+- Hardened
+  [`simulate_fmri()`](https://bbuchsbaum.github.io/neuroim2/reference/simulate_fmri.md)
+  edge cases: zero FWHM values now disable the corresponding smoothing
+  step, `n_time = 1` no longer trips AR loops, tiny or constant masks no
+  longer produce `NA` heteroscedasticity fields, and scalar arguments
+  now receive explicit validation.
+
+### Improvements
+
+- Faster data access for dense and sparse neuroimaging objects:
+  `DenseNeuroVol` and `DenseNeuroVec` subsetting now indexes the backing
+  array directly instead of materialising full spatial grids via
+  [`expand.grid()`](https://rdrr.io/r/base/expand.grid.html);
+  `ArrayLike3D` builds column-major linear indices with vector
+  arithmetic; and
+  [`linear_access()`](https://bbuchsbaum.github.io/neuroim2/reference/linear_access.md),
+  [`lookup()`](https://bbuchsbaum.github.io/neuroim2/reference/lookup.md),
+  and `validate_indices()` use lighter bounds checks (`anyNA` +
+  [`range()`](https://rdrr.io/r/base/range.html) instead of allocating
+  large logical vectors).
+- `NeuroVec` arithmetic now uses matrix-level operations instead of
+  per-volume S4 dispatch, `NeuroVec` comparisons work for sparse-backed
+  inputs, and temporal [`mean()`](https://rdrr.io/r/base/mean.html)
+  methods now honor `na.rm`.
+
 ## neuroim2 0.16.0
 
 ### New Features
 
+- Added
+  [`enhance_stat_map()`](https://bbuchsbaum.github.io/neuroim2/reference/enhance_stat_map.md),
+  a display-oriented preprocessor for unsmoothed (“salt-and-pepper”)
+  statistical maps. It runs a selective median despike, an
+  edge-preserving base smooth (guided/bilateral/gaussian), and a
+  signal-gated unsharp pass so true clusters keep (or sharpen) their
+  amplitude while the noise floor is denoised.
+  [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
+  and
+  [`plot_ortho()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_ortho.md)
+  gained an `enhance` argument (`TRUE`, `FALSE`, or a list forwarded to
+  [`enhance_stat_map()`](https://bbuchsbaum.github.io/neuroim2/reference/enhance_stat_map.md))
+  to apply it inline.
+- **Breaking:**
+  [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
+  now returns a single assembled patchwork object by default
+  (`assemble = TRUE`), honoring `ncol`/labels and suitable for
+  `ggsave()`, with an overlay statistic colorbar (`colorbar = TRUE`,
+  threshold marked). Pass `assemble = FALSE` for the previous behavior
+  (draw a panel grid and return the per-slice ggplot list invisibly).
+  `patchwork` is now a hard dependency.
+- Added a publication `style = "report"` shared across
+  [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md),
+  [`plot_ortho()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_ortho.md),
+  and
+  [`plot_montage()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_montage.md)
+  for a consistent look (dark brain tiles on a light card, bold/italic
+  typography, a titled colorbar, brain-bounding-box cropping, and a
+  smoothed background);
+  [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
+  additionally adds a positive/negative legend strip. In report mode
+  these functions return a single assembled patchwork object. The
+  underlying features are individually toggleable via `crop` and
+  `interpolate` (and `legend` on
+  [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)).
+- [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
+  now renders signed statistical maps correctly by default: overlays
+  with both positive and negative values use a diverging palette and
+  symmetric limits, so negatives are as visible as positives. Choosing a
+  sequential `ov_cmap` for signed data now warns. A new
+  `ov_alpha_mode = "ramp"` ramps opacity from the threshold to the cap,
+  and `ov_cap` pins the magnitude scale.
+- [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
+  gained `ov_alpha_mode = "soft"`: a nonlinear, self-tuning opacity
+  curve (`alpha = clamp((|v|-lo)/(hi-lo),0,1)^gamma`). The knee `lo`
+  defaults to the threshold, or — when unset — to the median in-mask
+  magnitude (a robust noise-floor proxy), and `gamma` is auto-tuned from
+  the value distribution so opacity rises rapidly away from zero while
+  the noisy bulk stays transparent. Override the exponent with
+  `alpha_gamma`.
+- [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md),
+  [`plot_ortho()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_ortho.md),
+  and
+  [`plot_montage()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_montage.md)
+  now accept explicit numeric display ranges
+  (e.g. `ov_range = c(-6, 6)`, `range = c(0, 1000)`) in addition to
+  `"robust"`/`"data"`, for consistent scaling across panels and
+  subjects. The overlay color limits and proportional-alpha denominator
+  are now computed once over the displayed volume rather than per slice.
 - [`bilateral_filter()`](https://bbuchsbaum.github.io/neuroim2/reference/bilateral_filter.md)
   and
   [`bilateral_filter_4d()`](https://bbuchsbaum.github.io/neuroim2/reference/bilateral_filter_4d.md)
@@ -15,18 +987,109 @@
   [`bilateral_filter_4d()`](https://bbuchsbaum.github.io/neuroim2/reference/bilateral_filter_4d.md)
   now filter each center voxel using only in-mask, in-bounds neighbors
   with weight renormalization.
+- [`gaussian_blur()`](https://bbuchsbaum.github.io/neuroim2/reference/gaussian_blur.md)
+  now insulates the blur to the mask by default (new `normalize = TRUE`
+  argument). Each in-mask output voxel is computed from in-mask
+  neighbors only and the kernel is renormalized by the in-mask weight (a
+  “smooth-in-mask” convolution, cf. AFNI `3dBlurInMask`). Previously the
+  masked path read out-of-mask neighbor values into the convolution and
+  normalized by the full kernel, so (1) out-of-mask `NaN`/`Inf`
+  (e.g. brain-exterior values in first-level statistic maps) silently
+  erased a `~window`-voxel shell of the masked region, and (2) finite
+  exterior values (e.g. zero padding) biased in-mask edge voxels.
+  Out-of-mask values — finite or not — can no longer affect in-mask
+  outputs. Pass `normalize = FALSE` to restore the legacy full-kernel
+  behavior (GitHub
+  [\#22](https://github.com/bbuchsbaum/neuroim2/issues/22)).
 
 ### Improvements
 
+- [`resolve_cmap()`](https://bbuchsbaum.github.io/neuroim2/reference/resolve_cmap.md)
+  now resolves any palette in
+  [`grDevices::hcl.pals()`](https://rdrr.io/r/grDevices/palettes.html)
+  (e.g. `"RdBu"`, `"Spectral"`, `"Reds"`) and the `"coolwarm"` diverging
+  alias, instead of silently returning a viridis-like ramp. Unknown
+  palette names now emit a warning rather than mis-coloring silently.
+  Added the internal `is_diverging_cmap()` classifier.
 - The 3D bilateral backend now guards zero or non-finite auto-estimated
   range scales, avoiding `NaN` outputs for singleton or constant masks.
 
 ### Testing
 
+- Added tests for
+  [`enhance_stat_map()`](https://bbuchsbaum.github.io/neuroim2/reference/enhance_stat_map.md)
+  covering impulse (salt-and-pepper) suppression, signal-peak
+  preservation, noise-floor denoising, mask restriction, all three base
+  methods, and the `enhance` plot arguments.
+- Added tests for
+  [`resolve_cmap()`](https://bbuchsbaum.github.io/neuroim2/reference/resolve_cmap.md)
+  palette resolution and warnings, `is_diverging_cmap()`, numeric
+  display ranges across
+  [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)/[`plot_ortho()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_ortho.md)/[`plot_montage()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_montage.md),
+  signed-map diverging defaults, `ov_alpha_mode = "ramp"`, and
+  `assemble`/`colorbar` (including `ggsave()` round-trip).
+- Added `tools/visual-qc-plots.R`, which renders labelled PNGs of the
+  overlay scenarios (signed diverging vs. the sequential-palette bug,
+  alpha modes, colorbar, and
+  [`enhance_stat_map()`](https://bbuchsbaum.github.io/neuroim2/reference/enhance_stat_map.md)
+  de-speckling) over the bundled MNI template for human visual QC.
 - Added regression tests for mask-normalized bilateral filtering,
   volume-boundary behavior, fixed `range_scale` parity with the default
   auto scale, singleton-mask stability, and 4D mask-normalized
   filtering.
+
+## neuroim2 0.15.0
+
+### New Features
+
+- Added registration QC plotting helpers:
+  [`plot_checkerboard()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_checkerboard.md)
+  for alternating tiles from two registered volumes, and
+  [`plot_edge_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_edge_overlay.md)
+  for comparing fixed and moving edge maps over a structural background.
+- Added a dark plotting style via `theme_neuro(style = "dark")` and
+  matching `style` arguments for montage, overlay, orthogonal,
+  checkerboard, and edge-overlay plots.
+- Added diverging colormap aliases `coldhot` and `blue-red` for signed
+  statistical overlays.
+
+### Improvements
+
+- Registration QC plots now validate that all inputs share the same 3D
+  `NeuroSpace` grid, not just matching array dimensions.
+- QC panel layouts now validate `zlevels`, `along`, and `ncol` before
+  drawing and provide clear errors for empty or invalid layouts.
+- `title`, `subtitle`, and `caption` are now layout-level draw labels,
+  preserving per-slice panel titles such as `z = 12`.
+- [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
+  now validates same-grid inputs, supports `draw = FALSE`, uses
+  consistent intensity limits across selected slices, hides repeated
+  background legends, and supports symmetric overlay limits for signed
+  maps.
+- [`plot_ortho()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_ortho.md)
+  now supports `draw = FALSE`, layout-level labels, dark styling,
+  coordinate validation, and a cleaner no-legend three-plane layout.
+- [`scale_fill_neuro()`](https://bbuchsbaum.github.io/neuroim2/reference/scale_fill_neuro.md)
+  now squishes out-of-range values to the nearest color endpoint instead
+  of censoring them to `NA`, preventing robust intensity limits from
+  creating black/transparent holes in high-intensity anatomy.
+- [`plot_checkerboard()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_checkerboard.md)
+  now accepts `cmap` so registration checkerboards can use the same
+  anatomical display palette as surrounding QC plots.
+- [`plot_edge_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_edge_overlay.md)
+  now keeps all-zero edge slices transparent instead of tinting the full
+  panel when edge limits collapse.
+
+### Testing
+
+- Added focused tests for registration QC plotting, including same-grid
+  validation, invalid layout arguments, invisible `ggplot` return
+  values, and `draw = TRUE` rendering.
+- Added tests for
+  [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
+  grid validation and no-draw return values, `plot_ortho(draw = FALSE)`,
+  invalid orthogonal coordinates, scale squishing, and all-zero edge
+  overlay transparency.
 
 ## neuroim2 0.14.0
 
@@ -54,6 +1117,27 @@
   [`automask()`](https://bbuchsbaum.github.io/neuroim2/reference/automask-methods.md)
   to derive a brain-like mask from image intensities for `NeuroVol`,
   `NeuroVec`, sparse, mapped, and file-backed objects.
+
+### Testing
+
+- The test suite now runs clean: 2969 passing, no failures and no
+  errors. Previously `R CMD check` reported 7 failures and 2 errors on
+  every platform.
+- `test-plot-registration-qc.R` called
+  [`ggplot2::get_labs()`](https://ggplot2.tidyverse.org/reference/labs.html),
+  which only exists from ggplot2 3.5.2 while DESCRIPTION sets no version
+  floor, so it errored on older ggplot2. Tests now read plot titles
+  through a version-agnostic helper.
+- The vdiffr golden-image tests have moved to `dev/visual-snapshots/`.
+  They compare SVG text byte-for-byte, which encodes the font metrics of
+  the machine that produced the snapshot, so a single stored image
+  cannot match the Windows, macOS and Linux check matrix — and testthat
+  deletes any `_snaps/` directory whose test file did not run, so they
+  could not simply be skipped. `tests/testthat/test-plot-structure.R`
+  covers the same plotting calls with platform-independent structural
+  assertions (panel counts, layer counts, data shape, argument
+  validation) and runs on every check. See the README in
+  `dev/visual-snapshots/` for reviewing intentional visual changes.
 
 ### Documentation
 
@@ -192,6 +1276,27 @@
   [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md).
 - New shared test helper module with factory functions (`make_vol()`,
   `make_vec()`, `make_mask()`, etc.).
+
+### Testing
+
+- The test suite now runs clean: 2969 passing, no failures and no
+  errors. Previously `R CMD check` reported 7 failures and 2 errors on
+  every platform.
+- `test-plot-registration-qc.R` called
+  [`ggplot2::get_labs()`](https://ggplot2.tidyverse.org/reference/labs.html),
+  which only exists from ggplot2 3.5.2 while DESCRIPTION sets no version
+  floor, so it errored on older ggplot2. Tests now read plot titles
+  through a version-agnostic helper.
+- The vdiffr golden-image tests have moved to `dev/visual-snapshots/`.
+  They compare SVG text byte-for-byte, which encodes the font metrics of
+  the machine that produced the snapshot, so a single stored image
+  cannot match the Windows, macOS and Linux check matrix — and testthat
+  deletes any `_snaps/` directory whose test file did not run, so they
+  could not simply be skipped. `tests/testthat/test-plot-structure.R`
+  covers the same plotting calls with platform-independent structural
+  assertions (panel counts, layer counts, data shape, argument
+  validation) and runs on every check. See the README in
+  `dev/visual-snapshots/` for reviewing intentional visual changes.
 
 ### Documentation
 

@@ -104,7 +104,7 @@ vs <- NeuroVecSeq(v1, v2, v3)
 length(vs)  # Total time points
 #> [1] 12
 vs[[5]]     # Get the 5th volume
-#> <DenseNeuroVol> [7.6 Kb] 
+#> <DenseNeuroVol> [7.8 Kb] 
 #> ── Spatial ───────────────────────────────────────────────────────────────────── 
 #>   Dimensions    : 5 x 5 x 5
 #>   Spacing       : 1 x 1 x 1 mm

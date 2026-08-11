@@ -18,6 +18,8 @@ Plotting utilities for slices, montages, overlays, and palettes
   : Orthogonal three-plane view with optional crosshairs
 - [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
   : Composite an overlay map on a structural background
+- [`enhance_stat_map()`](https://bbuchsbaum.github.io/neuroim2/reference/enhance_stat_map.md)
+  : Enhance an unsmoothed statistical map for visualization
 - [`mapToColors()`](https://bbuchsbaum.github.io/neuroim2/reference/mapToColors.md)
   : Map intensity values to colors
 
@@ -276,9 +278,6 @@ Methods for loading and manipulating neuroimaging data
 
 - [`image`](https://bbuchsbaum.github.io/neuroim2/reference/image.md) :
   Generic Image Method for Creating Visual Representations
-
-- [`scale()`](https://bbuchsbaum.github.io/neuroim2/reference/scale.md)
-  : Generic Scale Method
 
 - [`simulate_fmri()`](https://bbuchsbaum.github.io/neuroim2/reference/simulate_fmri.md)
   : Simulate fMRI Data
@@ -707,7 +706,8 @@ Miscellaneous methods and functions
 - [`` `[[`( ``*`<AbstractSparseNeuroVec>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/SparseNeuroVec-methods.md)
   : \[\[
 
-- [`` `[`( ``*`<DenseNeuroVol>`*`,`*`<numeric>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+- [`` `[`( ``*`<DenseNeuroVec>`*`,`*`<numeric>`*`,`*`<numeric>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+  [`` `[`( ``*`<DenseNeuroVol>`*`,`*`<numeric>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
   [`` `[`( ``*`<DenseNeuroVol>`*`,`*`<integer>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
   [`` `[[`( ``*`<NeuroVec>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
   [`` `[[`( ``*`<NeuroVec>`*`,`*`<character>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
@@ -811,7 +811,10 @@ Miscellaneous methods and functions
   : Convert ClusteredNeuroVol to DenseNeuroVol
 
 - [`as.array(`*`<ClusteredNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.array-methods.md)
+  [`as.array(`*`<DenseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.array-methods.md)
   [`as.array(`*`<SparseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.array-methods.md)
+  [`as.array(`*`<DenseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.array-methods.md)
+  [`as.array(`*`<NeuroSlice>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.array-methods.md)
   [`as.array(`*`<SparseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.array-methods.md)
   : Convert ClusteredNeuroVol to a base array
 
@@ -863,6 +866,10 @@ Miscellaneous methods and functions
   [`as.numeric(`*`<ROIVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.numeric-methods.md)
   : Convert SparseNeuroVol to numeric
 
+- [`as.raster(`*`<NeuroSlice>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.raster-methods.md)
+  [`as.raster(`*`<NeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.raster-methods.md)
+  : Convert neuroimaging objects to raster images
+
 - [`as.raster`](https://bbuchsbaum.github.io/neuroim2/reference/as.raster.md)
   : Generic Method for Converting Objects to Raster Format
 
@@ -896,6 +903,12 @@ Miscellaneous methods and functions
   [`plot(`*`<NeuroVol>`*`,`*`<missing>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/plot-methods.md)
   [`plot(`*`<NeuroVol>`*`,`*`<NeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/plot-methods.md)
   : Plot a NeuroSlice
+
+- [`plot_checkerboard()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_checkerboard.md)
+  : Checkerboard comparison of two registered volumes
+
+- [`plot_edge_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_edge_overlay.md)
+  : Overlay fixed and moving edge maps on a background volume
 
 - [`plot_montage()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_montage.md)
   : Plot a montage of axial (or any-plane) slices using facetting

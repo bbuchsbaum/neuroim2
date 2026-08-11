@@ -39,5 +39,5 @@ coords <- matrix(c(.5,.5,.5, 1.5,1.5,1.5), ncol=3, byrow=TRUE)
 idx <- coord_to_index(bvol, coords)
 coords2 <- index_to_coord(bvol, idx)
 all.equal(coords, coords2)
-#> [1] TRUE
+#> [1] "Mean relative difference: 0.5"
 ```

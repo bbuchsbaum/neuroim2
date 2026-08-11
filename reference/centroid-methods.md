@@ -34,5 +34,5 @@ A numeric vector giving the centroid of `x`.
 
 bspace <- NeuroSpace(c(10,10,10), c(2,2,2))
 centroid(bspace)
-#> [1] 10 10 10
+#> [1] 9 9 9
 ```

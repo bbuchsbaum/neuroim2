@@ -1,8 +1,8 @@
 # Orthogonal three-plane view with optional crosshairs
 
 Creates axial, coronal, and sagittal panels at a given coordinate with
-harmonized aesthetics. Returns (invisibly) the three ggplot objects
-after printing them in a single row using base grid (no extra deps).
+harmonized aesthetics. Returns the three ggplot objects invisibly after
+drawing, or without drawing when `draw = FALSE`.
 
 ## Usage
 
@@ -16,7 +16,15 @@ plot_ortho(
   probs = c(0.02, 0.98),
   crosshair = TRUE,
   annotate = TRUE,
-  downsample = 1L
+  downsample = 1L,
+  title = NULL,
+  subtitle = NULL,
+  caption = NULL,
+  draw = TRUE,
+  style = c("light", "dark", "report"),
+  enhance = FALSE,
+  crop = NULL,
+  interpolate = NULL
 )
 ```
 
@@ -42,7 +50,8 @@ plot_ortho(
 
 - range:
 
-  "robust" or "data" for intensity limits shared by all panels.
+  Intensity limits shared by all panels: `"robust"`, `"data"`, or an
+  explicit numeric `c(lo, hi)`.
 
 - probs:
 
@@ -59,3 +68,32 @@ plot_ortho(
 - downsample:
 
   Integer decimation for speed.
+
+- title, subtitle, caption:
+
+  Optional layout-level labels used when drawing.
+
+- draw:
+
+  Logical; if \`TRUE\`, draw the panels on the active graphics device.
+  If \`FALSE\`, only return the ggplot objects invisibly.
+
+- style:
+
+  Visual style: `"light"`, `"dark"`, or `"report"` (light card, dark
+  cropped tiles, typography, and a colorbar – matching
+  [`plot_overlay`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)'s
+  report look).
+
+- enhance:
+
+  Display-only enhancement of an unsmoothed statistical `vol`. `FALSE`
+  (default) leaves it untouched; `TRUE` applies
+  [`enhance_stat_map`](https://bbuchsbaum.github.io/neuroim2/reference/enhance_stat_map.md)
+  with defaults; a named `list` is forwarded as arguments to
+  [`enhance_stat_map()`](https://bbuchsbaum.github.io/neuroim2/reference/enhance_stat_map.md).
+
+- crop, interpolate:
+
+  Logical or `NULL`; crop panels to the brain bounding box / smooth the
+  raster. `NULL` (default) enables both for `style = "report"` only.

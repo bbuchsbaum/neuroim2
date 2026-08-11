@@ -1,7 +1,3 @@
-# neuroim2
-
-# neuroim2
-
 Data structures and I/O for volumetric brain imaging with a focus on
 fMRI. This is the successor to
 [`neuroim`](https://github.com/bbuchsbaum/neuroim) with improved S4
@@ -104,7 +100,7 @@ the pkgdown site:
 This package uses the albersdown theme. Existing vignette theme hooks
 are replaced so `albers.css` and local `albers.js` render consistently
 on CRAN and GitHub Pages. The defaults are configured via
-`params$family` and `params$preset` (family = ‘red’, preset = ‘homage’).
+`params$family` and `params$preset` (family = `red`, preset = `homage`).
 The pkgdown site uses `template: { package: albersdown }`.
 
 # Package index
@@ -127,6 +123,8 @@ Plotting utilities for slices, montages, overlays, and palettes
   : Orthogonal three-plane view with optional crosshairs
 - [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
   : Composite an overlay map on a structural background
+- [`enhance_stat_map()`](https://bbuchsbaum.github.io/neuroim2/reference/enhance_stat_map.md)
+  : Enhance an unsmoothed statistical map for visualization
 - [`mapToColors()`](https://bbuchsbaum.github.io/neuroim2/reference/mapToColors.md)
   : Map intensity values to colors
 
@@ -385,9 +383,6 @@ Methods for loading and manipulating neuroimaging data
 
 - [`image`](https://bbuchsbaum.github.io/neuroim2/reference/image.md) :
   Generic Image Method for Creating Visual Representations
-
-- [`scale()`](https://bbuchsbaum.github.io/neuroim2/reference/scale.md)
-  : Generic Scale Method
 
 - [`simulate_fmri()`](https://bbuchsbaum.github.io/neuroim2/reference/simulate_fmri.md)
   : Simulate fMRI Data
@@ -816,7 +811,8 @@ Miscellaneous methods and functions
 - [`` `[[`( ``*`<AbstractSparseNeuroVec>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/SparseNeuroVec-methods.md)
   : \[\[
 
-- [`` `[`( ``*`<DenseNeuroVol>`*`,`*`<numeric>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+- [`` `[`( ``*`<DenseNeuroVec>`*`,`*`<numeric>`*`,`*`<numeric>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
+  [`` `[`( ``*`<DenseNeuroVol>`*`,`*`<numeric>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
   [`` `[`( ``*`<DenseNeuroVol>`*`,`*`<integer>`*`,`*`<missing>`*`,`*`<ANY>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
   [`` `[[`( ``*`<NeuroVec>`*`,`*`<numeric>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
   [`` `[[`( ``*`<NeuroVec>`*`,`*`<character>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/extract-methods.md)
@@ -920,7 +916,10 @@ Miscellaneous methods and functions
   : Convert ClusteredNeuroVol to DenseNeuroVol
 
 - [`as.array(`*`<ClusteredNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.array-methods.md)
+  [`as.array(`*`<DenseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.array-methods.md)
   [`as.array(`*`<SparseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.array-methods.md)
+  [`as.array(`*`<DenseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.array-methods.md)
+  [`as.array(`*`<NeuroSlice>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.array-methods.md)
   [`as.array(`*`<SparseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.array-methods.md)
   : Convert ClusteredNeuroVol to a base array
 
@@ -972,6 +971,10 @@ Miscellaneous methods and functions
   [`as.numeric(`*`<ROIVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.numeric-methods.md)
   : Convert SparseNeuroVol to numeric
 
+- [`as.raster(`*`<NeuroSlice>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.raster-methods.md)
+  [`as.raster(`*`<NeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.raster-methods.md)
+  : Convert neuroimaging objects to raster images
+
 - [`as.raster`](https://bbuchsbaum.github.io/neuroim2/reference/as.raster.md)
   : Generic Method for Converting Objects to Raster Format
 
@@ -1005,6 +1008,12 @@ Miscellaneous methods and functions
   [`plot(`*`<NeuroVol>`*`,`*`<missing>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/plot-methods.md)
   [`plot(`*`<NeuroVol>`*`,`*`<NeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/plot-methods.md)
   : Plot a NeuroSlice
+
+- [`plot_checkerboard()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_checkerboard.md)
+  : Checkerboard comparison of two registered volumes
+
+- [`plot_edge_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_edge_overlay.md)
+  : Overlay fixed and moving edge maps on a background volume
 
 - [`plot_montage()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_montage.md)
   : Plot a montage of axial (or any-plane) slices using facetting
@@ -1358,50 +1367,34 @@ Miscellaneous methods and functions
 
 # Articles
 
-### Start Here
+### Learn
 
-The shortest path from reading data to understanding space and storage
+Four articles, read in order. About 45 minutes end to end.
 
-- [Overview: Getting Started with
-  neuroim2](https://bbuchsbaum.github.io/neuroim2/articles/Overview.md):
-- [Choosing a
-  Backend](https://bbuchsbaum.github.io/neuroim2/articles/ChoosingBackends.md):
-- [Coordinate Systems and Spatial
-  Transforms](https://bbuchsbaum.github.io/neuroim2/articles/coordinate-systems.md):
-- [Working with Volumes and
-  Vectors](https://bbuchsbaum.github.io/neuroim2/articles/VolumesAndVectors.md):
-- [Resampling, downsampling, and
-  reorientation](https://bbuchsbaum.github.io/neuroim2/articles/Resampling.md):
+- [neuroim2: a
+  tour](https://bbuchsbaum.github.io/neuroim2/articles/neuroim2.md):
+- [Spaces and
+  coordinates](https://bbuchsbaum.github.io/neuroim2/articles/spaces-and-coordinates.md):
+- [Volumes and
+  vectors](https://bbuchsbaum.github.io/neuroim2/articles/volumes-and-vectors.md):
+- [Reading and writing
+  images](https://bbuchsbaum.github.io/neuroim2/articles/reading-and-writing.md):
 
-### Analysis Workflows
+### Do
 
-Common analysis patterns built from ROIs, searchlights, and summaries
+Task-focused articles. Read the one you need.
 
-- [ROIs, Searchlights, and
-  Pipelines](https://bbuchsbaum.github.io/neuroim2/articles/AnalysisWorkflows.md):
-- [Slice visualization with
-  neuroim2](https://bbuchsbaum.github.io/neuroim2/articles/slice-visualization.md):
-- [neuroim2
-  Cookbook](https://bbuchsbaum.github.io/neuroim2/articles/Cookbook.md):
+- [Regions and
+  searchlights](https://bbuchsbaum.github.io/neuroim2/articles/regions-and-searchlights.md):
+- [Resampling and
+  orientation](https://bbuchsbaum.github.io/neuroim2/articles/resampling-and-orientation.md):
+- [Smoothing and
+  filtering](https://bbuchsbaum.github.io/neuroim2/articles/smoothing-and-filtering.md):
+- [Visualization](https://bbuchsbaum.github.io/neuroim2/articles/visualization.md):
 
-### Spatial Workflows
+### Scale
 
-Focused spatial methods outside the main onboarding path
+When the data stops fitting in memory.
 
-- [Smoothing and filtering with
-  neuroim2](https://bbuchsbaum.github.io/neuroim2/articles/Smoothing.md):
-
-### Advanced Topics
-
-Deeper or more specialized articles beyond the main reader path
-
-- [Advanced 3D Volume
-  Patterns](https://bbuchsbaum.github.io/neuroim2/articles/ImageVolumes.md):
-- [Advanced NeuroVec
-  Patterns](https://bbuchsbaum.github.io/neuroim2/articles/NeuroVector.md):
-- [Advanced ROI
-  Construction](https://bbuchsbaum.github.io/neuroim2/articles/regionOfInterest.md):
-- [ClusteredNeuroVec: Parcel-based 4D
-  Analysis](https://bbuchsbaum.github.io/neuroim2/articles/clustered-neurovec.md):
-- [Advanced Split, Map, and
-  Reduce](https://bbuchsbaum.github.io/neuroim2/articles/pipelines.md):
+- [Large
+  data](https://bbuchsbaum.github.io/neuroim2/articles/large-data.md):

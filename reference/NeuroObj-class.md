@@ -12,6 +12,16 @@ neuroimaging data structures.
   [`NeuroSpace`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroSpace-class.md)
   representing the geometry of the image object.
 
+- `header`:
+
+  A `list` holding the raw header of the file the object was read from,
+  empty for objects built in memory. `NeuroSpace` records the geometry;
+  this records everything else the file said – repetition time, units,
+  intent, description, slice timing, the qform/sform codes – so that
+  writing the object back does not have to invent it. Use
+  [`header`](https://bbuchsbaum.github.io/neuroim2/reference/header-methods.md)
+  to read it rather than touching the slot.
+
 ## See also
 
 [`NeuroSpace-class`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroSpace-class.md),

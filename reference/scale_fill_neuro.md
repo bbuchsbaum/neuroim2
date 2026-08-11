@@ -45,3 +45,9 @@ scale_fill_neuro(
 ## Value
 
 A ggplot2 scale object.
+
+## Details
+
+Values outside \`limits\` are clamped to the nearest color endpoint
+rather than converted to \`NA\`. This keeps robust display limits from
+creating transparent holes in bright or dark image regions.

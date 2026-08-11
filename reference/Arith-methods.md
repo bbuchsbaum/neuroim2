@@ -2,11 +2,6 @@
 
 Methods for performing arithmetic operations on neuroimaging objects
 
-This method performs arithmetic operations between two ROIVol objects
-(`e1` and `e2`) using a generic arithmetic function. The dimensions of
-both objects are checked for compatibility before performing the
-operation.
-
 Perform an arithmetic operation between two DenseNeuroVec objects. The
 input DenseNeuroVec objects must have the same dimensions and NeuroSpace
 objects. The method computes the elementwise arithmetic operation and
@@ -98,23 +93,17 @@ Arith(e1, e2)
 
 ## Arguments
 
-- e1:
+- e1, e2:
 
-  A NeuroVol object.
-
-- e2:
-
-  A NeuroVec object.
+  Neuroimaging operands or numeric values.
 
 ## Value
 
 A SparseNeuroVol object representing the result of the arithmetic
 operation.
 
-An ROIVol object resulting from the arithmetic operation.
-
-An ROIVol object containing the result of the arithmetic operation
-between `e1` and `e2`.
+For the `ROIVol` method, an `ROIVol` with the same coordinates as `e1`,
+containing the element-wise result.
 
 A DenseNeuroVec object representing the result of the arithmetic
 operation.
@@ -131,3 +120,11 @@ operation.
 A DenseNeuroVec object resulting from the arithmetic operation.
 
 A DenseNeuroVec object resulting from the arithmetic operation.
+
+## Details
+
+**ROIVol contract:** element-wise arithmetic requires the same spatial
+support. Both operands must share the same `NeuroSpace` and the same set
+of voxel coordinates (order may differ). Missing voxels are not treated
+as zero, and the result does not grow to the union of the two ROIs.
+Values are aligned by linear voxel index before the operation.

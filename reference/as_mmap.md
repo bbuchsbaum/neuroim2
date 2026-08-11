@@ -47,8 +47,8 @@ as_mmap(x, file = NULL, data_type = "FLOAT", overwrite = FALSE, ...)
 - data_type:
 
   Character string specifying the output data type for the NIfTI file.
-  Should be one of: "BINARY", "UBYTE", "SHORT", "INT", "FLOAT",
-  "DOUBLE". Default is "FLOAT".
+  Should be one of "UBYTE", "BYTE", "SHORT", "USHORT", "INT", "UINT",
+  "LONG", "ULONG", "FLOAT" or "DOUBLE". Default is "FLOAT".
 
 - overwrite:
 

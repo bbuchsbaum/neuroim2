@@ -134,7 +134,8 @@ The simulation combines several realistic features:
 
 The spatial smoothing uses the package's optimized
 [`gaussian_blur`](https://bbuchsbaum.github.io/neuroim2/reference/gaussian_blur.md)
-function for efficiency.
+function for efficiency. Set any FWHM argument to `0` to disable that
+smoothing step.
 
 ## References
 

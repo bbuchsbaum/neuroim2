@@ -10,13 +10,13 @@ or
 
 ``` r
 # S4 method for class 'DenseNeuroVec'
-mean(x, ...)
+mean(x, ..., na.rm = FALSE)
 
 # S4 method for class 'SparseNeuroVec'
-mean(x, ...)
+mean(x, ..., na.rm = FALSE)
 
 # S4 method for class 'NeuroVec'
-mean(x, ...)
+mean(x, ..., na.rm = FALSE)
 ```
 
 ## Arguments
@@ -29,7 +29,12 @@ mean(x, ...)
 
 - ...:
 
-  Ignored.
+  Additional arguments (currently unused).
+
+- na.rm:
+
+  Logical; if `TRUE`, missing values are omitted before computing the
+  temporal mean at each voxel.
 
 ## Value
 

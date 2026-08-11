@@ -155,5 +155,5 @@ print(clustered_vol)
 #>   Count         : 10
 #>   Sizes         : min=162, median=213, max=271
 #>   Labels        : Clus_1, Clus_2, Clus_3, Clus_4, Clus_5, Clus_6 ...
-#>   Size          : 56.8 Kb
+#>   Size          : 57.1 Kb
 ```

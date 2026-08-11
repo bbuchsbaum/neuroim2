@@ -43,5 +43,5 @@ voxel_coords <- t(matrix(c(1,1,1)))
 new_coords <- grid_to_grid(space_ras, voxel_coords)
 print(new_coords)
 #>      [,1] [,2] [,3]
-#> [1,]   10   10   10
+#> [1,]    1    1    1
 ```

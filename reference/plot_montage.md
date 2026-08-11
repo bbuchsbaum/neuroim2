@@ -17,7 +17,10 @@ plot_montage(
   downsample = 1L,
   title = NULL,
   subtitle = NULL,
-  caption = NULL
+  caption = NULL,
+  style = c("light", "dark", "report"),
+  crop = NULL,
+  interpolate = NULL
 )
 ```
 
@@ -41,7 +44,8 @@ plot_montage(
 
 - range:
 
-  "robust" (quantile-based) or "data" (min/max).
+  "robust" (quantile-based), "data" (min/max), or an explicit numeric
+  `c(lo, hi)`.
 
 - probs:
 
@@ -58,3 +62,16 @@ plot_montage(
 - title, subtitle, caption:
 
   Optional ggplot labels.
+
+- style:
+
+  Visual style: `"light"`, `"dark"`, or `"report"` (light card, dark
+  cropped tiles, typography, and a colorbar – matching
+  [`plot_overlay`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)'s
+  report look).
+
+- crop, interpolate:
+
+  Logical or `NULL`; crop to the brain bounding box / smooth the raster.
+  `NULL` (default) enables both for `style = "report"` only. (Cropping
+  applies to the volume path.)

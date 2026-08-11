@@ -1,6 +1,6 @@
 # Plot a NeuroSlice
 
-Display axial slices of a
+Display slices of a
 [`NeuroVol`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroVol-class.md)
 as a faceted montage.
 
@@ -20,7 +20,8 @@ plot(
   x,
   y,
   cmap = "grays",
-  zlevels = unique(round(seq(1, dim(x)[3], length.out = 9))),
+  zlevels = NULL,
+  along = 3L,
   irange = range(x, na.rm = TRUE),
   thresh = c(0, 0),
   alpha = 1,
@@ -32,7 +33,8 @@ plot(
   x,
   y,
   cmap = "grays",
-  zlevels = unique(round(seq(1, dim(x)[3], length.out = 9))),
+  zlevels = NULL,
+  along = 3L,
   ov_cmap = "inferno",
   ov_alpha = 0.5,
   ov_thresh = 0
@@ -68,6 +70,11 @@ plot(
 
   integer slice indices to display. Default: 9 evenly-spaced slices (3
   \\\times\\ 3 grid).
+
+- along:
+
+  axis along which to slice: 1 = sagittal, 2 = coronal, 3 = axial (the
+  default).
 
 - thresh:
 
@@ -109,6 +116,12 @@ When a second volume `y` is supplied it is treated as an overlay (e.g.\\
 a statistical map) composited on top of `x` with adjustable
 transparency. This delegates to
 [`plot_overlay`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md).
+
+## See also
+
+[`as.raster`](https://bbuchsbaum.github.io/neuroim2/reference/as.raster.md)
+
+[`as.raster`](https://bbuchsbaum.github.io/neuroim2/reference/as.raster.md)
 
 ## Examples
 

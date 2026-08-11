@@ -8,6 +8,9 @@ based on provided indices.
 ## Usage
 
 ``` r
+# S4 method for class 'DenseNeuroVec,numeric,numeric,ANY'
+x[i, j, k, m, ..., drop = TRUE]
+
 # S4 method for class 'DenseNeuroVol,numeric,missing,ANY'
 x[i, j, k, ..., drop = TRUE]
 
@@ -94,6 +97,11 @@ x[i, j, k, m, ..., drop = TRUE]
   Numeric vector specifying the indices for the third dimension
   (optional)
 
+- m:
+
+  Numeric vector specifying the indices for the fourth dimension
+  (optional)
+
 - ...:
 
   Additional arguments passed to methods
@@ -102,11 +110,6 @@ x[i, j, k, m, ..., drop = TRUE]
 
   Logical indicating whether to drop dimensions of length one (default:
   TRUE)
-
-- m:
-
-  Numeric vector specifying the indices for the fourth dimension
-  (optional)
 
 ## Value
 

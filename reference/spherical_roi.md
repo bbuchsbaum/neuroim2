@@ -39,7 +39,9 @@ spherical_roi(
 
 - use_cpp:
 
-  whether to use compiled c++ code
+  Deprecated and ignored; the compiled implementation is always used.
+  Passing `FALSE` warns. The former fallback returned neighbourhoods
+  offset by one voxel and missing boundary voxels.
 
 ## Value
 
@@ -50,7 +52,7 @@ an instance of class `ROIVol`
 \[spherical_roi_set()\] for efficiently creating many spherical ROIs,
 \[series_roi()\] and \[coords()\] for extracting time series and
 coordinates from ROIs, and the vignette:
-[`vignette("regionOfInterest", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/regionOfInterest.md).
+[`vignette("regionOfInterest", package = "neuroim2")`](https://bbuchsbaum.github.io/neuroim2/articles/regionOfInterest.html).
 
 ## Examples
 

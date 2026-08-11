@@ -57,7 +57,10 @@ conn_comp(
 
 - local_maxima_dist:
 
-  the distance used to define minum distance between local maxima
+  Minimum distance, in the units of `spacing(x)`, between reported local
+  maxima. A voxel is reported when no other voxel of its component
+  within this distance has a larger value, so the maxima of a component
+  are at least `local_maxima_dist` apart. Default 15.
 
 ## Value
 

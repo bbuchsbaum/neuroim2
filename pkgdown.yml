@@ -1,22 +1,17 @@
 pandoc: 3.8.3
-pkgdown: 2.2.0
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
-  AnalysisWorkflows: AnalysisWorkflows.html
-  ChoosingBackends: ChoosingBackends.html
-  clustered-neurovec: clustered-neurovec.html
-  Cookbook: Cookbook.html
-  coordinate-systems: coordinate-systems.html
-  ImageVolumes: ImageVolumes.html
-  NeuroVector: NeuroVector.html
-  Overview: Overview.html
-  pipelines: pipelines.html
-  regionOfInterest: regionOfInterest.html
-  Resampling: Resampling.html
-  slice-visualization: slice-visualization.html
-  Smoothing: Smoothing.html
-  VolumesAndVectors: VolumesAndVectors.html
-last_built: 2026-05-11T12:05Z
+  large-data: large-data.html
+  neuroim2: neuroim2.html
+  reading-and-writing: reading-and-writing.html
+  regions-and-searchlights: regions-and-searchlights.html
+  resampling-and-orientation: resampling-and-orientation.html
+  smoothing-and-filtering: smoothing-and-filtering.html
+  spaces-and-coordinates: spaces-and-coordinates.html
+  visualization: visualization.html
+  volumes-and-vectors: volumes-and-vectors.html
+last_built: 2026-08-11T16:03Z
 urls:
   reference: https://bbuchsbaum.github.io/neuroim2/reference
   article: https://bbuchsbaum.github.io/neuroim2/articles

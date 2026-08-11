@@ -100,25 +100,22 @@ str(source@meta_info)
 #>   ..@ bytes_per_element: int 4
 #>   ..@ intercept        : num 0
 #>   ..@ slope            : num 1
-#>   ..@ header           :List of 42
+#>   ..@ header           :List of 44
 #>   .. ..$ file_type     : chr "NIfTI"
 #>   .. ..$ encoding      : chr "binary"
-#>   .. ..$ version       : chr "1"
 #>   .. ..$ file_name     : chr "/home/runner/work/_temp/Library/neuroim2/extdata/global_mask_v4.nii"
 #>   .. ..$ endian        : chr "little"
 #>   .. ..$ diminfo       : int 0
 #>   .. ..$ dimensions    : num [1:8] 4 64 64 25 4 1 1 1
-#>   .. ..$ num_dimensions: num 4
+#>   .. ..$ num_dimensions: int 4
 #>   .. ..$ intent1       : num 0
 #>   .. ..$ intent2       : num 0
 #>   .. ..$ intent3       : num 0
 #>   .. ..$ intent_code   : int 0
 #>   .. ..$ datatype      : int 16
-#>   .. ..$ data_storage  : chr "FLOAT"
 #>   .. ..$ bitpix        : int 32
 #>   .. ..$ slice_start   : int 0
 #>   .. ..$ pixdim        : num [1:8] -1 3.5 3.5 3.7 0 ...
-#>   .. ..$ qfac          : num -1
 #>   .. ..$ vox_offset    : num 352
 #>   .. ..$ scl_slope     : num 1
 #>   .. ..$ scl_intercept : num 0
@@ -137,11 +134,16 @@ str(source@meta_info)
 #>   .. ..$ sform_code    : int 1
 #>   .. ..$ quaternion    : num [1:3] 0 1 0
 #>   .. ..$ qoffset       : num [1:3] 112 -108 -46.2
+#>   .. ..$ srow          : num [1:12] -3.5 0 0 112 0 3.5 0 -108 0 0 ...
+#>   .. ..$ intent_name   : int [1:16] 0 0 0 0 0 0 0 0 0 0 ...
+#>   .. ..$ magic         : chr "n+1"
+#>   .. ..$ data_storage  : chr "FLOAT"
+#>   .. ..$ is_analyze    : logi FALSE
+#>   .. ..$ qfac          : num -1
 #>   .. ..$ qform         : num [1:4, 1:4] -3.5 0 0 0 0 3.5 0 0 0 0 ...
 #>   .. ..$ sform         : num [1:4, 1:4] -3.5 0 0 0 0 3.5 0 0 0 0 ...
-#>   .. ..$ intent_name   : chr [1:16] "" "" "" "" ...
-#>   .. ..$ magic         : chr "n+1"
 #>   .. ..$ onefile       : logi TRUE
+#>   .. ..$ version       : int 1
 #>   .. ..$ extensions    :Formal class 'NiftiExtensionList' [package "neuroim2"] with 1 slot
 #>   .. .. .. ..@ .Data: list()
 #>   ..@ data_type        : chr "FLOAT"

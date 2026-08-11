@@ -1,7 +1,3 @@
-# neuroim2
-
-# neuroim2
-
 Data structures and I/O for volumetric brain imaging with a focus on
 fMRI. This is the successor to
 [`neuroim`](https://github.com/bbuchsbaum/neuroim) with improved S4
@@ -104,5 +100,5 @@ the pkgdown site:
 This package uses the albersdown theme. Existing vignette theme hooks
 are replaced so `albers.css` and local `albers.js` render consistently
 on CRAN and GitHub Pages. The defaults are configured via
-`params$family` and `params$preset` (family = ‘red’, preset = ‘homage’).
+`params$family` and `params$preset` (family = `red`, preset = `homage`).
 The pkgdown site uses `template: { package: albersdown }`.

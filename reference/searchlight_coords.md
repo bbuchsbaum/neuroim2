@@ -26,8 +26,11 @@ searchlight_coords(mask, radius, nonzero = FALSE, cores = 0)
 
 - nonzero:
 
-  A logical value indicating whether to include only coordinates with
-  nonzero values in the supplied mask. Default is FALSE.
+  A logical value indicating whether each searchlight should be
+  restricted to voxels with nonzero values in the supplied mask. Default
+  is FALSE. It does not affect which voxels are used as centres: every
+  nonzero voxel of the mask is a centre, as in
+  [`searchlight`](https://bbuchsbaum.github.io/neuroim2/reference/searchlight.md).
 
 - cores:
 
@@ -37,7 +40,10 @@ searchlight_coords(mask, radius, nonzero = FALSE, cores = 0)
 ## Value
 
 A `deferred_list` object containing matrices of integer-valued voxel
-coordinates, each representing a searchlight region.
+coordinates, each representing a searchlight region. Its length is the
+number of nonzero voxels in `mask`, matching
+[`searchlight`](https://bbuchsbaum.github.io/neuroim2/reference/searchlight.md)
+called with the same arguments.
 
 ## Examples
 

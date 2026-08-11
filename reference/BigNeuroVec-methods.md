@@ -74,7 +74,7 @@ if(requireNamespace("bigstatsr", quietly = TRUE)) {
                          label = "Example BigNeuroVec")
   print(big_vec)
 }
-#> <BigNeuroVec> [936.6 Kb] 
+#> <BigNeuroVec> [937.1 Kb] 
 #> ── Spatial ───────────────────────────────────────────────────────────────────── 
 #>   Dimensions    : 64 x 64 x 25
 #>   Time Points   : 4

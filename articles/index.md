@@ -1,49 +1,33 @@
 # Articles
 
-### Start Here
+### Learn
 
-The shortest path from reading data to understanding space and storage
+Four articles, read in order. About 45 minutes end to end.
 
-- [Overview: Getting Started with
-  neuroim2](https://bbuchsbaum.github.io/neuroim2/articles/Overview.md):
-- [Choosing a
-  Backend](https://bbuchsbaum.github.io/neuroim2/articles/ChoosingBackends.md):
-- [Coordinate Systems and Spatial
-  Transforms](https://bbuchsbaum.github.io/neuroim2/articles/coordinate-systems.md):
-- [Working with Volumes and
-  Vectors](https://bbuchsbaum.github.io/neuroim2/articles/VolumesAndVectors.md):
-- [Resampling, downsampling, and
-  reorientation](https://bbuchsbaum.github.io/neuroim2/articles/Resampling.md):
+- [neuroim2: a
+  tour](https://bbuchsbaum.github.io/neuroim2/articles/neuroim2.md):
+- [Spaces and
+  coordinates](https://bbuchsbaum.github.io/neuroim2/articles/spaces-and-coordinates.md):
+- [Volumes and
+  vectors](https://bbuchsbaum.github.io/neuroim2/articles/volumes-and-vectors.md):
+- [Reading and writing
+  images](https://bbuchsbaum.github.io/neuroim2/articles/reading-and-writing.md):
 
-### Analysis Workflows
+### Do
 
-Common analysis patterns built from ROIs, searchlights, and summaries
+Task-focused articles. Read the one you need.
 
-- [ROIs, Searchlights, and
-  Pipelines](https://bbuchsbaum.github.io/neuroim2/articles/AnalysisWorkflows.md):
-- [Slice visualization with
-  neuroim2](https://bbuchsbaum.github.io/neuroim2/articles/slice-visualization.md):
-- [neuroim2
-  Cookbook](https://bbuchsbaum.github.io/neuroim2/articles/Cookbook.md):
+- [Regions and
+  searchlights](https://bbuchsbaum.github.io/neuroim2/articles/regions-and-searchlights.md):
+- [Resampling and
+  orientation](https://bbuchsbaum.github.io/neuroim2/articles/resampling-and-orientation.md):
+- [Smoothing and
+  filtering](https://bbuchsbaum.github.io/neuroim2/articles/smoothing-and-filtering.md):
+- [Visualization](https://bbuchsbaum.github.io/neuroim2/articles/visualization.md):
 
-### Spatial Workflows
+### Scale
 
-Focused spatial methods outside the main onboarding path
+When the data stops fitting in memory.
 
-- [Smoothing and filtering with
-  neuroim2](https://bbuchsbaum.github.io/neuroim2/articles/Smoothing.md):
-
-### Advanced Topics
-
-Deeper or more specialized articles beyond the main reader path
-
-- [Advanced 3D Volume
-  Patterns](https://bbuchsbaum.github.io/neuroim2/articles/ImageVolumes.md):
-- [Advanced NeuroVec
-  Patterns](https://bbuchsbaum.github.io/neuroim2/articles/NeuroVector.md):
-- [Advanced ROI
-  Construction](https://bbuchsbaum.github.io/neuroim2/articles/regionOfInterest.md):
-- [ClusteredNeuroVec: Parcel-based 4D
-  Analysis](https://bbuchsbaum.github.io/neuroim2/articles/clustered-neurovec.md):
-- [Advanced Split, Map, and
-  Reduce](https://bbuchsbaum.github.io/neuroim2/articles/pipelines.md):
+- [Large
+  data](https://bbuchsbaum.github.io/neuroim2/articles/large-data.md):

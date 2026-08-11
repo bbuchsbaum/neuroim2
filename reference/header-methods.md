@@ -17,6 +17,9 @@ header(x)
 
 # S4 method for class 'character'
 header(x)
+
+# S4 method for class 'NeuroObj'
+header(x)
 ```
 
 ## Arguments

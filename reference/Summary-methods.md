@@ -14,9 +14,6 @@ Summary(x, ..., na.rm = FALSE)
 
 # S4 method for class 'DenseNeuroVol'
 Summary(x, ..., na.rm = FALSE)
-
-# S4 method for class 'DenseNeuroVol'
-Summary(x, ..., na.rm = FALSE)
 ```
 
 ## Arguments
