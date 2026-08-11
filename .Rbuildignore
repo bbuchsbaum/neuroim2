@@ -41,7 +41,7 @@ test_series_bug.R
 ^atlas$
 ^tools$
 ^\.ecosystem\.yml$
-^vignettes/.*\.html$
+^vignettes/(?!albers-header[.]html$).*[.]html$
 ^vignettes/.*\.md$
 ^man/\.omc$
 ^src/.*\.gcno$

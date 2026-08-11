@@ -603,7 +603,8 @@ blobby_shape <- function(drop = 0.3, edge_fraction = 0.7) {
   old_plan <- future::plan()
   on.exit(future::plan(old_plan), add = TRUE)
   future::plan(future::multisession, workers = cores)
-  future.apply::future_lapply(X, FUN, future.seed = TRUE)
+  future.apply::future_lapply(X, FUN, future.seed = TRUE,
+                              future.packages = "neuroim2")
 }
 
 #' Create an exhaustive searchlight iterator for voxel coordinates using spherical_roi
@@ -671,14 +672,10 @@ searchlight_coords <- function(mask, radius, nonzero=FALSE, cores=0) {
   # discarding all but its coords, as this used to, cost ~25x more.
   # Built in its own environment so the closure retains only what it uses --
   # not `mask`, `mask.idx`, `cores` and friends from this frame.
-  f <- local({
-    plan <- .searchlight_plan(mask, radius, nonzero)
-    g <- grid
-    # Multisession workers do not inherit this namespace's private bindings.
-    # Resolve the helper from the installed package on the worker instead of
-    # relying on future's globals scan to discover its transitive C++ wrapper.
-    function(i) neuroim2:::.searchlight_coords_at(plan, g[i, ])
-  })
+  f_env <- new.env(parent = environment(.searchlight_coords_at))
+  f_env$plan <- .searchlight_plan(mask, radius, nonzero)
+  f_env$g <- grid
+  f <- eval(quote(function(i) .searchlight_coords_at(plan, g[i, ])), f_env)
 
   if (cores > 1) {
     .future_lapply_with_cores(seq_len(length(mask.idx)), f, cores)
@@ -742,15 +739,16 @@ searchlight <- function(mask, radius, eager=FALSE, nonzero=FALSE, cores=0) {
   grid <- index_to_grid(mask, mask.idx)
   storage.mode(grid) <- "integer"
 
-  f <- local({
-    plan <- .searchlight_plan(mask, radius, nonzero)
-    g <- grid
+  f_env <- new.env(parent = environment(.searchlight_roi_at))
+  f_env$plan <- .searchlight_plan(mask, radius, nonzero)
+  f_env$g <- grid
+  f <- eval(quote(
     function(i) {
-      roi <- neuroim2:::.searchlight_roi_at(plan, g[i, ])
+      roi <- .searchlight_roi_at(plan, g[i, ])
       attr(roi, "mask_index") <- as.integer(i)
       roi
     }
-  })
+  ), f_env)
 
   if (!eager) {
     if (cores > 1) {

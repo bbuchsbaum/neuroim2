@@ -793,6 +793,7 @@ setGeneric(name="write_elements", def=function(x, els) standardGeneric("write_el
 #'   "FLOAT" otherwise; integer targets are fitted with \code{scl_slope} /
 #'   \code{scl_inter} rather than truncated.
 #' Otherwise output format will be inferred from R the datatype of the image.
+#' @param ... additional arguments passed to the format-specific writer.
 #' @return Invisibly returns \code{NULL} after writing the volume to disk.
 #' @export
 #' @details

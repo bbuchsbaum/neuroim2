@@ -34,6 +34,8 @@ write_vol(x, file_name, format, data_type, ...)
   "FLOAT" otherwise; integer targets are fitted with \code{scl_slope} /
   \code{scl_inter} rather than truncated.
 Otherwise output format will be inferred from R the datatype of the image.}
+
+\item{...}{additional arguments passed to the format-specific writer.}
 }
 \value{
 Invisibly returns \code{NULL} after writing the volume to disk.
