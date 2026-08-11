@@ -103,3 +103,8 @@ slice <- NeuroSlice(dat, NeuroSpace(c(100,100)))
 plot(slice)
 }
 }
+\seealso{
+\code{\link{as.raster}}
+
+\code{\link{as.raster}}
+}

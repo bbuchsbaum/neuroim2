@@ -33,6 +33,7 @@ Collate:
     'affine_utils.R'
     'afni_io.R'
     'array_like.R'
+    'as_raster.R'
     'axis.R'
     'big_neurovec.R'
     'binary_io.R'

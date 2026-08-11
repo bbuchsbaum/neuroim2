@@ -1290,6 +1290,7 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 #' @param ov_thresh overlay threshold; values with
 #'   \eqn{|v| < } \code{ov_thresh} become transparent (default 0).
 #' @param legend logical; show the colour bar?
+#' @seealso \code{\link{as.raster}}
 #' @importFrom graphics plot
 #' @examples
 #'
