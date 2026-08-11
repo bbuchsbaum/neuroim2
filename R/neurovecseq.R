@@ -261,12 +261,6 @@ setAs(from="NeuroVecSeq", to="DenseNeuroVec",
         as.dense(from)
       })
 
-# Coerce NeuroVecSeq to the plain in-memory NeuroVec representation.
-setAs(from="NeuroVecSeq", to="NeuroVec",
-      function(from) {
-        as.dense(from)
-      })
-
 #' Convert a NeuroVecSeq to a matrix
 #'
 #' @description

@@ -144,26 +144,18 @@ setMethod(f = "as.list",
             deflist::deflist(f, D4)
           })
 
-#' Convert FileBackedNeuroVec to Matrix
-#'
-#' @description
-#' This method converts a FileBackedNeuroVec object to a matrix.
-#'
-#' @param from A FileBackedNeuroVec object to be converted.
-#'
-#' @return A matrix representation of the FileBackedNeuroVec object.
-#'
-#' @details
-#' The resulting matrix will have rows representing time points (or the 4th dimension)
-#' and columns representing voxels. The voxels are arranged in a linear order.
-#'
-#'
-#' @keywords internal
-#' @noRd
+#' @rdname as.matrix-methods
+#' @export
+setMethod(f = "as.matrix",
+          signature = signature(x = "FileBackedNeuroVec"),
+          def = function(x, ...) {
+            len <- prod(x@meta@dims[1:3])
+            t(series(x, seq_len(len)))
+          })
+
 setAs(from = "FileBackedNeuroVec", to = "matrix",
       def = function(from) {
-        len <- prod(from@meta@dims[1:3])
-        t(series(from, seq(1, len)))
+        as.matrix(from)
       })
 
 #' Linear Access Method for FileBackedNeuroVec

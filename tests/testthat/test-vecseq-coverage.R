@@ -70,17 +70,13 @@ test_that("NeuroVecSeq can be materialized as DenseNeuroVec", {
 
   dense <- as.dense(vs)
   coerced <- as(vs, "DenseNeuroVec")
-  plain <- as(vs, "NeuroVec")
 
   expect_s4_class(dense, "DenseNeuroVec")
   expect_s4_class(coerced, "DenseNeuroVec")
-  expect_s4_class(plain, "DenseNeuroVec")
-  expect_false(inherits(plain, "NeuroVecSeq"))
   expect_equal(dim(dense), dim(ref))
   expect_equal(space(dense), space(ref))
   expect_equal(as.matrix(dense), as.matrix(ref))
   expect_equal(as.matrix(coerced), as.matrix(ref))
-  expect_equal(as.matrix(plain), as.matrix(ref))
 })
 
 # ---------------------------------------------------------------------------
