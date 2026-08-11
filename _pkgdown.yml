@@ -145,7 +145,6 @@ reference:
   - createNIfTIHeader
   - linear_access
   - image
-  - scale
   - simulate_fmri
 - title: Coordinate and Dimension Operations
   desc: |
