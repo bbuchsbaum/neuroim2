@@ -17,7 +17,8 @@ ordinary whole-brain MVPA setup.
 | 3 | Searchlight enumeration, whole brain | 191 s | 19 s (0.4 s index-only) | **10×** / **495×** |
 | 4 | `series()` on a dense vec | 0.47–0.71 ms/ROI | 0.05 ms | **9–14×** |
 | 5 | `series()` on a sparse vec | 645 µs/ROI | 342 µs | **1.9×** (memory-bound) |
-| 6 | `gaussian_blur`, window ≥ 2 | 0.15–0.38 s | 0.025 s | **6–15×**, exact |
+| 6a | `gaussian_blur`, `normalize = TRUE`, window 2–3 | 0.07–0.16 s | 0.054–0.055 s | **1.3–2.9×**, exact |
+| 6b | `gaussian_blur`, `normalize = FALSE`, window 2–4 | 0.15–0.78 s | 0.023–0.051 s | **6.6–15.2×**, exact |
 | 7 | Scalar R loops (clustered/hyper/kernel) | — | — | **16×+** on the ones measured |
 
 The headline: **enumerating a whole-brain searchlight currently costs ~191 seconds
@@ -203,8 +204,9 @@ whole-brain sweep — but it should not be the first thing fixed.
 
 ## 6. `gaussian_blur` is not exploiting separability
 
-`src/indexFuns.cpp` applies the full `(2w+1)³` kernel. A Gaussian is a tensor product,
-so three 1-D passes give the same answer in `3(2w+1)` taps:
+`src/indexFuns.cpp` applies the full `(2w+1)³` kernel. On the unnormalized dense
+path, a Gaussian is a tensor product, so three 1-D passes give the same answer in
+`3(2w+1)` taps:
 
 ```
 window=1  taps  27 vs  9   dense 0.049s  separable 0.026s  [ 1.9x]  max|diff| 6.7e-16
@@ -214,8 +216,11 @@ window=4  taps 729 vs 27   dense 0.777s  separable 0.051s  [15.2x]  max|diff| 2.
 ```
 
 The mask-insulated default (`normalize = TRUE`) is *also* separable, as a ratio of two
-separable convolutions — `blur(x·m) / blur(m)` — since the numerator and denominator
-the current code accumulates are exactly those two convolutions:
+separable convolutions — `blur(y) / blur(m)` — since the numerator and denominator
+the current code accumulates are exactly those two convolutions. Here `y` must be
+constructed as a zero-filled volume with `x` assigned only at in-mask voxels; it must
+not be formed as `x * m`, because IEEE arithmetic makes `0 * NaN` and `0 * Inf`
+non-finite and would leak those values into nearby in-mask outputs:
 
 ```
 normalize=TRUE window=1: dense 0.020s  separable-ratio 0.048s  [0.4x]  max|diff| 1.1e-15
@@ -237,9 +242,12 @@ Four sites doing per-voxel work in interpreted R:
   loop over timepoints × voxels to copy values out of `x@ts`. The whole thing is one
   vectorized subset. Measured at 3,000 voxels × 250 timepoints: **0.124 s → 0.008 s
   (16×)**, output `identical()`.
-- **`R/neurovol.R:906`** — `mapf(NeuroVol, Kernel)` convolves by looping over centres
-  and doing `sum(x[cbind(ii, jj, kk)] * wts)` per voxel. Note `kernel_filt_3d_cpp`
-  already exists in `src/kernel_filter.cpp` and is never called from R.
+- **`R/neurovol.R:906`** — `mapf(NeuroVol, Kernel)` originally convolved by looping
+  over centres and doing `sum(x[cbind(ii, jj, kk)] * wts)` per voxel. The follow-up
+  implementation uses each genuinely 3-D kernel tap as a fixed linear-index offset
+  and vectorizes over centres. The old `kernel_filt_3d_cpp` was not usable here: it
+  accepted two `NumericMatrix` objects and filtered only rows and columns, so wiring
+  it into `mapf()` would have dropped the z dimension and changed boundary behavior.
 - **`R/neurohypervec.R:448`** — `[` loops over voxels doing an `aperm` per voxel.
 - **`R/neurohypervec.R:289`** — `as.dense` loops over features × trials rebuilding a
   volume each time.
@@ -247,10 +255,9 @@ Four sites doing per-voxel work in interpreted R:
 ## 8. Hygiene
 
 - **Dead compiled code.** `kernel_filt_3d_cpp`, `radius_search_3d_nonisotropic`,
-  `radius_search_3d_direct`, `radius_search_3d_precomputed`, and `local_spheres` are
-  compiled and exported but called from nowhere in `R/` or `tests/` — about 17 KB of
-  source, all of `src/radius_search_3d.cpp`. Either wire `kernel_filt_3d_cpp` into
-  `mapf()` (see #7) or drop them; both shrink build time.
+  `radius_search_3d_direct`, `radius_search_3d_precomputed`, and `local_spheres` were
+  called from nowhere in `R/` or `tests/`. The follow-up implementation drops all five;
+  `local_sphere` (singular) remains as the tested reference implementation.
 - **`random_searchlight()`** (`R/searchlight.R:81`) rebuilds `remain_indices` with an
   O(n) filter on every iteration. With ~1,100 iterations over a 290k-voxel mask that is
   a few hundred million operations. A swap-with-last free list makes it O(1) amortized.
