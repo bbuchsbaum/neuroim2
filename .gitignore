@@ -18,6 +18,7 @@ src/*.gcda
 docs
 docs/reference
 .aider*
+.albersdown.bak/
 inst/doc
 vignettes/*.html
 !vignettes/albers-header.html

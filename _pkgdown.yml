@@ -19,25 +19,36 @@ articles:
   - visualization
 - title: Scale
   desc: When the data stops fitting in memory.
-  contents:
-  - large-data
-
+  contents: large-data
 redirects:
-- ["articles/Overview.html", "articles/neuroim2.html"]
-- ["articles/coordinate-systems.html", "articles/spaces-and-coordinates.html"]
-- ["articles/VolumesAndVectors.html", "articles/volumes-and-vectors.html"]
-- ["articles/ImageVolumes.html", "articles/volumes-and-vectors.html"]
-- ["articles/NeuroVector.html", "articles/volumes-and-vectors.html"]
-- ["articles/AnalysisWorkflows.html", "articles/regions-and-searchlights.html"]
-- ["articles/regionOfInterest.html", "articles/regions-and-searchlights.html"]
-- ["articles/pipelines.html", "articles/regions-and-searchlights.html"]
-- ["articles/Cookbook.html", "articles/regions-and-searchlights.html"]
-- ["articles/Resampling.html", "articles/resampling-and-orientation.html"]
-- ["articles/Smoothing.html", "articles/smoothing-and-filtering.html"]
-- ["articles/slice-visualization.html", "articles/visualization.html"]
-- ["articles/ChoosingBackends.html", "articles/large-data.html"]
-- ["articles/clustered-neurovec.html", "articles/large-data.html"]
-
+- - articles/Overview.html
+  - articles/neuroim2.html
+- - articles/coordinate-systems.html
+  - articles/spaces-and-coordinates.html
+- - articles/VolumesAndVectors.html
+  - articles/volumes-and-vectors.html
+- - articles/ImageVolumes.html
+  - articles/volumes-and-vectors.html
+- - articles/NeuroVector.html
+  - articles/volumes-and-vectors.html
+- - articles/AnalysisWorkflows.html
+  - articles/regions-and-searchlights.html
+- - articles/regionOfInterest.html
+  - articles/regions-and-searchlights.html
+- - articles/pipelines.html
+  - articles/regions-and-searchlights.html
+- - articles/Cookbook.html
+  - articles/regions-and-searchlights.html
+- - articles/Resampling.html
+  - articles/resampling-and-orientation.html
+- - articles/Smoothing.html
+  - articles/smoothing-and-filtering.html
+- - articles/slice-visualization.html
+  - articles/visualization.html
+- - articles/ChoosingBackends.html
+  - articles/large-data.html
+- - articles/clustered-neurovec.html
+  - articles/large-data.html
 reference:
 - title: Visualization Helpers
   desc: Plotting utilities for slices, montages, overlays, and palettes
