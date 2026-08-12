@@ -179,7 +179,9 @@ setMethod(f="index_to_grid",
 #' @return a ggplot2 object
 #'
 #' @details
-#' The plot method uses \code{ggplot2} to create a raster visualization of the slice data.
+#' The plot method uses \code{ggplot2} to create a raster visualization of the
+#' slice data. The slice's anatomical axis metadata determines permutation and
+#' flips, so right/anterior/superior point toward increasing screen coordinates.
 #' The intensity values are mapped to colors using the specified colormap and range.
 #'
 #' @details when `x` is a NeuroSlice object, the plot method returns a \code{ggplot2} object containing the raster visualization of the slice data.
@@ -213,10 +215,11 @@ setMethod("plot",
 
             {y = value = NULL}
 
-            # Use pixel-grid coordinates so geom_raster stays memory-safe even
-            # for oblique/sheared affine spaces where world coordinates are not
-            # axis-aligned on a regular raster grid.
-            df1 <- slice_df(x)
+            # Orient the native pixel grid from its anatomical axis metadata.
+            # Keeping a regular grid avoids geom_raster() shifting oblique or
+            # sheared world coordinates onto artificial axis-aligned positions.
+            oriented <- orient_slice_for_raster(x, slice_to_matrix(x))
+            df1 <- oriented_raster_df(oriented)
 
             ggplot2::ggplot(df1, ggplot2::aes(x = x, y = y, fill = value)) +
               ggplot2::geom_raster() +
@@ -224,7 +227,7 @@ setMethod("plot",
                                            limits = irange,
                                            guide = if (legend) ggplot2::guide_colourbar(barheight = grid::unit(3, "cm")) else "none") +
               ggplot2::xlab("") + ggplot2::ylab("") +
-              coord_neuro_fixed() +
+              ggplot2::coord_fixed() +
               ggplot2::theme_bw()
 
           })

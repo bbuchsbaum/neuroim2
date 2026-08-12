@@ -280,6 +280,9 @@ mask edge, and which voxel wins changes with the tiling.
 plot(score_map, zlevels = c(9, 12, 15))
 ```
 
+`plot()` reads the map's affine before arranging the pixels, so anterior is at
+the top even though this mask is stored with a reversed left-right voxel axis.
+
 The default intensity range matters here. Passing `irange = c(0, max(score))`
 would put the negative half of the map outside the scale limits, where it
 renders transparent — reading as maximum signal rather than as no signal.

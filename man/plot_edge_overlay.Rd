@@ -37,7 +37,8 @@ NeuroSpace grid as `bgvol`.}
 
 \item{zlevels}{Slices to plot. Defaults to nine evenly spaced slices.}
 
-\item{along}{Axis for slicing (1 sagittal, 2 coronal, 3 axial).}
+\item{along}{Native voxel-grid axis for slicing. Display orientation is
+inferred from the image affine.}
 
 \item{bg_cmap}{Background palette.}
 

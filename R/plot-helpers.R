@@ -56,14 +56,61 @@ slice_df <- function(slc, downsample = 1L) {
   df
 }
 
-#' Orient slice-aligned matrices for raster rendering in world coordinates
-#' @param slc A NeuroSlice describing the 2D slice geometry.
-#' @param mat Numeric matrix aligned with \code{slc}.
-#' @param alpha_map Optional numeric matrix aligned with \code{slc}.
+#' Extract a native voxel plane without constructing a NeuroSlice
+#' @param vol A 3D NeuroVol.
+#' @param z Slice index along \code{along}.
+#' @param along Grid axis to hold fixed.
 #' @keywords internal
 #' @noRd
-orient_slice_for_raster <- function(slc, mat, alpha_map = NULL) {
+volume_slice_matrix <- function(vol, z, along = 3L) {
+  along <- as.integer(along)
+  z <- as.integer(z)
+  retained <- setdiff(seq_len(3L), along)
+  out <- switch(
+    as.character(along),
+    "1" = vol[z, , ],
+    "2" = vol[, z, ],
+    "3" = vol[, , z],
+    stop("`along` must be one of 1, 2, or 3.", call. = FALSE)
+  )
+  matrix(
+    as.numeric(out),
+    nrow = dim(vol)[retained[[1L]]],
+    ncol = dim(vol)[retained[[2L]]]
+  )
+}
+
+#' Anatomically orient a regular native slice grid
+#'
+#' The axis metadata provides a signed permutation from the two voxel axes to
+#' their nearest anatomical axes. Values are permuted and flipped so screen x/y
+#' increase toward R/A/S, while coordinates remain a regular native-pixel grid.
+#' This avoids feeding oblique or sheared world coordinates to geom_raster(),
+#' which silently shifts pixels onto an axis-aligned grid.
+#'
+#' @param mat Numeric matrix in native slice-axis order.
+#' @param axis_directions A 3 x 2 signed anatomical-axis matrix.
+#' @param pixel_spacing Physical spacing for the two native slice axes.
+#' @param alpha_map Optional matrix aligned with \code{mat}.
+#' @param downsample Positive integer grid decimation factor.
+#' @keywords internal
+#' @noRd
+orient_matrix_for_raster <- function(mat, axis_directions, pixel_spacing,
+                                     alpha_map = NULL, downsample = 1L) {
   mat <- slice_to_matrix(mat)
+  axis_directions <- as.matrix(axis_directions)
+  if (!identical(dim(axis_directions), c(3L, 2L))) {
+    stop("`axis_directions` must be a 3 x 2 matrix.", call. = FALSE)
+  }
+  pixel_spacing <- as.numeric(pixel_spacing)
+  if (length(pixel_spacing) != 2L || any(!is.finite(pixel_spacing)) ||
+      any(pixel_spacing <= 0)) {
+    stop("`pixel_spacing` must contain two positive finite values.", call. = FALSE)
+  }
+  downsample <- as.integer(downsample)
+  if (length(downsample) != 1L || is.na(downsample) || downsample < 1L) {
+    stop("`downsample` must be a positive integer.", call. = FALSE)
+  }
   if (!is.null(alpha_map)) {
     alpha_map <- slice_to_matrix(alpha_map)
     if (!identical(dim(alpha_map), dim(mat))) {
@@ -71,36 +118,153 @@ orient_slice_for_raster <- function(slc, mat, alpha_map = NULL) {
     }
   }
 
-  coords <- index_to_coord(space(slc), seq_len(length(slc)))
-  xvals <- sort(unique(coords[, 1]))
-  yvals <- sort(unique(coords[, 2]), decreasing = TRUE)
-
-  out_mat <- matrix(NA_real_, nrow = length(yvals), ncol = length(xvals))
-  out_alpha <- if (is.null(alpha_map)) NULL else {
-    matrix(NA_real_, nrow = length(yvals), ncol = length(xvals))
+  # Each native voxel axis has one nearest anatomical direction. Using this
+  # signed permutation, rather than raw affine x/y values, keeps oblique slices
+  # on a regular raster without losing their anatomical display orientation.
+  anatomical_axis <- apply(abs(axis_directions), 2L, which.max)
+  strength <- vapply(
+    seq_len(2L),
+    function(j) abs(axis_directions[anatomical_axis[[j]], j]),
+    numeric(1)
+  )
+  if (any(strength == 0) || anyDuplicated(anatomical_axis)) {
+    stop("Slice axes must map to two distinct anatomical directions.", call. = FALSE)
   }
 
-  col_idx <- match(coords[, 1], xvals)
-  row_idx <- match(coords[, 2], yvals)
-  fill_idx <- cbind(row_idx, col_idx)
+  display_axes <- sort(anatomical_axis)
+  input_order <- match(display_axes, anatomical_axis)
+  direction <- vapply(
+    seq_len(2L),
+    function(j) sign(axis_directions[display_axes[[j]], input_order[[j]]]),
+    numeric(1)
+  )
 
-  out_mat[fill_idx] <- as.numeric(mat)
-  if (!is.null(out_alpha)) {
-    out_alpha[fill_idx] <- as.numeric(alpha_map)
+  canonical <- if (identical(input_order, c(1L, 2L))) mat else t(mat)
+  canonical_alpha <- if (is.null(alpha_map)) NULL else {
+    if (identical(input_order, c(1L, 2L))) alpha_map else t(alpha_map)
   }
 
+  if (direction[[1L]] < 0) {
+    canonical <- canonical[nrow(canonical):1L, , drop = FALSE]
+    if (!is.null(canonical_alpha)) {
+      canonical_alpha <- canonical_alpha[nrow(canonical_alpha):1L, , drop = FALSE]
+    }
+  }
+  if (direction[[2L]] < 0) {
+    canonical <- canonical[, ncol(canonical):1L, drop = FALSE]
+    if (!is.null(canonical_alpha)) {
+      canonical_alpha <- canonical_alpha[, ncol(canonical_alpha):1L, drop = FALSE]
+    }
+  }
+
+  display_spacing <- pixel_spacing[input_order]
+  full_display_dim <- dim(canonical)
+  x_all <- (seq_len(nrow(canonical)) - 1) * display_spacing[[1L]]
+  y_all <- (seq_len(ncol(canonical)) - 1) * display_spacing[[2L]]
+  keep_x <- seq.int(1L, nrow(canonical), by = downsample)
+  keep_y <- seq.int(1L, ncol(canonical), by = downsample)
+  canonical <- canonical[keep_x, keep_y, drop = FALSE]
+  if (!is.null(canonical_alpha)) {
+    canonical_alpha <- canonical_alpha[keep_x, keep_y, drop = FALSE]
+  }
+
+  # rasterGrob and c(t(mat))-backed geom_raster data both expect row 1 at the
+  # top. The canonical matrix stores x in rows and y in columns, so transpose it
+  # and reverse y exactly once here.
+  raster_mat <- t(canonical[, ncol(canonical):1L, drop = FALSE])
+  raster_alpha <- if (is.null(canonical_alpha)) NULL else {
+    t(canonical_alpha[, ncol(canonical_alpha):1L, drop = FALSE])
+  }
+
+  xvals <- x_all[keep_x]
+  yvals <- rev(y_all[keep_y])
   xr <- raster_extent_from_centers(xvals)
   yr <- raster_extent_from_centers(yvals)
+  negative_label <- c("L", "P", "I")
+  positive_label <- c("R", "A", "S")
+  normal_axis <- setdiff(seq_len(3L), display_axes)
+  plane <- c("Sagittal", "Coronal", "Axial")[[normal_axis]]
 
   list(
-    mat = out_mat,
-    alpha_map = out_alpha,
+    mat = raster_mat,
+    alpha_map = raster_alpha,
     x = xvals,
     y = yvals,
-    xmin = xr[1],
-    xmax = xr[2],
-    ymin = yr[1],
-    ymax = yr[2]
+    xmin = xr[[1L]],
+    xmax = xr[[2L]],
+    ymin = yr[[1L]],
+    ymax = yr[[2L]],
+    plane = plane,
+    labels = c(
+      left = negative_label[[display_axes[[1L]]]],
+      right = positive_label[[display_axes[[1L]]]],
+      bottom = negative_label[[display_axes[[2L]]]],
+      top = positive_label[[display_axes[[2L]]]]
+    ),
+    input_order = input_order,
+    flipped = direction < 0,
+    display_dim = full_display_dim,
+    display_spacing = display_spacing
+  )
+}
+
+#' Orient a volume slice for regular raster rendering
+#' @keywords internal
+#' @noRd
+orient_volume_slice_for_raster <- function(vol, z, along = 3L, mat = NULL,
+                                           alpha_map = NULL, downsample = 1L) {
+  along <- as.integer(along)
+  retained <- setdiff(seq_len(3L), along)
+  if (is.null(mat)) {
+    mat <- volume_slice_matrix(vol, z, along)
+  }
+  directions <- perm_mat(axes(space(vol)))[, retained, drop = FALSE]
+  orient_matrix_for_raster(
+    mat,
+    axis_directions = directions,
+    pixel_spacing = spacing(space(vol))[retained],
+    alpha_map = alpha_map,
+    downsample = downsample
+  )
+}
+
+#' Convert an oriented raster description to ggplot data
+#' @keywords internal
+#' @noRd
+oriented_raster_df <- function(oriented) {
+  df <- expand.grid(x = oriented$x, y = oriented$y)
+  df$value <- c(t(oriented$mat))
+  df
+}
+
+#' Map native two-axis grid coordinates into display coordinates
+#' @keywords internal
+#' @noRd
+slice_grid_to_display <- function(oriented, grid) {
+  grid <- as.numeric(grid)
+  if (length(grid) != 2L || any(!is.finite(grid))) {
+    stop("`grid` must contain two finite slice-grid coordinates.", call. = FALSE)
+  }
+  display_grid <- grid[oriented$input_order]
+  display_grid[oriented$flipped] <-
+    oriented$display_dim[oriented$flipped] + 1 - display_grid[oriented$flipped]
+  (display_grid - 1) * oriented$display_spacing
+}
+
+#' Orient slice-aligned matrices for regular raster rendering
+#' @param slc A NeuroSlice describing the 2D slice axes.
+#' @param mat Numeric matrix aligned with \code{slc}.
+#' @param alpha_map Optional numeric matrix aligned with \code{slc}.
+#' @param downsample Positive integer grid decimation factor.
+#' @keywords internal
+#' @noRd
+orient_slice_for_raster <- function(slc, mat, alpha_map = NULL, downsample = 1L) {
+  orient_matrix_for_raster(
+    mat,
+    axis_directions = perm_mat(axes(space(slc))),
+    pixel_spacing = spacing(space(slc)),
+    alpha_map = alpha_map,
+    downsample = downsample
   )
 }
 
@@ -396,13 +560,13 @@ compute_crop_window <- function(bgvol, overlay, zlevels, along, bg_thresh,
     ys <<- range(c(ys, o$y[yi]))
   }
   for (z in zlevels) {
-    sl <- slice(bgvol, z, along = along)
-    o  <- orient_slice_for_raster(sl, slice_to_matrix(sl))
+    bg <- volume_slice_matrix(bgvol, z, along = along)
+    o  <- orient_volume_slice_for_raster(bgvol, z, along = along, mat = bg)
     v  <- c(t(o$mat))
     accumulate(o, which(is.finite(v) & v > bg_thresh))
 
-    slo <- slice(overlay, z, along = along)
-    oo  <- orient_slice_for_raster(slo, slice_to_matrix(slo))
+    ov <- volume_slice_matrix(overlay, z, along = along)
+    oo <- orient_volume_slice_for_raster(overlay, z, along = along, mat = ov)
     vo  <- c(t(oo$mat))
     accumulate(oo, which(is.finite(vo) & abs(vo) > ov_thresh))
   }
@@ -741,19 +905,20 @@ annotate_orientation <- function(plane = c("axial","coronal","sagittal"),
                                  dims, gp = grid::gpar(col = "white", cex = .9, fontface = "bold")) {
   plane <- match.arg(plane)
   nr <- dims[1]; nc <- dims[2]
-  lab_lr <- list(left  = "L", right = "R")
-  lab_tb <- switch(plane,
-                   axial   = list(top = "A", bottom = "P"),
-                   coronal = list(top = "S", bottom = "I"),
-                   sagittal= list(top = "S", bottom = "I"))
+  labels <- switch(
+    plane,
+    axial = list(left = "L", right = "R", top = "A", bottom = "P"),
+    coronal = list(left = "L", right = "R", top = "S", bottom = "I"),
+    sagittal = list(left = "P", right = "A", top = "S", bottom = "I")
+  )
   layers <- list(
-    ggplot2::annotation_custom(grid::textGrob(lab_lr$left,  gp = gp),
+    ggplot2::annotation_custom(grid::textGrob(labels$left,  gp = gp),
                                xmin = 0.5, xmax = 0.5, ymin = nr/2, ymax = nr/2),
-    ggplot2::annotation_custom(grid::textGrob(lab_lr$right, gp = gp),
+    ggplot2::annotation_custom(grid::textGrob(labels$right, gp = gp),
                                xmin = nc + .5, xmax = nc + .5, ymin = nr/2, ymax = nr/2),
-    ggplot2::annotation_custom(grid::textGrob(lab_tb$top,   gp = gp),
+    ggplot2::annotation_custom(grid::textGrob(labels$top,   gp = gp),
                                xmin = nc/2, xmax = nc/2, ymin = .5, ymax = .5),
-    ggplot2::annotation_custom(grid::textGrob(lab_tb$bottom,gp = gp),
+    ggplot2::annotation_custom(grid::textGrob(labels$bottom,gp = gp),
                                xmin = nc/2, xmax = nc/2, ymin = nr + .5, ymax = nr + .5)
   )
   layers

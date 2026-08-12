@@ -69,3 +69,10 @@ Creates axial, coronal, and sagittal panels at a given coordinate with
 harmonized aesthetics. Returns the three ggplot objects invisibly after
 drawing, or without drawing when \code{draw = FALSE}.
 }
+\details{
+The affine determines which native voxel axis is nearest each anatomical
+plane and how that plane must be permuted or flipped for display. Oblique
+images are shown on their regular native voxel planes; values are not silently
+resampled. Use \code{deoblique()} or \code{resample_to()} first when true
+cardinal-plane sections are required.
+}

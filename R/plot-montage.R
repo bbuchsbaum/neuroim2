@@ -5,7 +5,9 @@
 #'
 #' @param x Either a 3D volume object accepted by `slice()` or a list of slices.
 #' @param zlevels Integer indices of slices to plot (if `x` is a volume).
-#' @param along Axis along which to slice (1 = sagittal, 2 = coronal, 3 = axial).
+#' @param along Native voxel-grid axis along which to slice. For canonically
+#'   ordered images, 1 = sagittal, 2 = coronal, and 3 = axial. Display
+#'   orientation is inferred from the image affine.
 #' @param cmap Palette name or vector (see [resolve_cmap()]).
 #' @param range "robust" (quantile-based), "data" (min/max), or an explicit
 #'   numeric \code{c(lo, hi)}.
@@ -33,31 +35,34 @@ plot_montage <- function(
   do_crop   <- if (is.null(crop)) is_report else isTRUE(crop)
   interp_bg <- if (is.null(interpolate)) is_report else isTRUE(interpolate)
 
-  world <- inherits(x, "NeuroVol")
-  if (world) {
-    # World-coordinate aware path (respects anatomical orientation)
+  neuro_volume <- inherits(x, "NeuroVol")
+  neuro_slice_list <- is.list(x) && length(x) &&
+    all(vapply(x, inherits, logical(1), what = "NeuroSlice"))
+  if (neuro_volume) {
+    # Anatomically orient the regular native grid. Raw oblique world
+    # coordinates are not a valid geom_raster grid and would be shifted.
     if (is.null(zlevels)) {
       zlevels <- unique(round(seq(1, dim(x)[along], length.out = 12)))
     }
     dfl <- lapply(zlevels, function(z) {
-      sl <- slice(x, z, along = along)
-      vals <- as.numeric(sl)
-      # Optional downsample by grid decimation
-      if (downsample > 1L) {
-        nr <- dim(sl)[1]; nc <- dim(sl)[2]
-        rr <- seq(1L, nr, by = downsample)
-        cc <- seq(1L, nc, by = downsample)
-        grid <- as.matrix(expand.grid(i = rr, j = cc))
-        cds  <- grid_to_coord(space(sl), grid)
-        idx  <- grid_to_index(space(sl), grid)
-        data.frame(x = cds[,1], y = cds[,2], z = z, value = vals[idx])
-      } else {
-        cds <- index_to_coord(space(sl), seq_len(length(sl)))
-        data.frame(x = cds[,1], y = cds[,2], z = z, value = vals)
-      }
+      oriented <- orient_volume_slice_for_raster(
+        x, z, along = along, downsample = downsample
+      )
+      df <- oriented_raster_df(oriented)
+      df$z <- z
+      df
     })
+  } else if (neuro_slice_list) {
+    dfl <- Map(function(sl, idx) {
+      oriented <- orient_slice_for_raster(
+        sl, slice_to_matrix(sl), downsample = downsample
+      )
+      df <- oriented_raster_df(oriented)
+      df$z <- idx
+      df
+    }, x, seq_along(x))
   } else {
-    # Fallback for lists of slices / plain matrices (pixel grid)
+    # Fallback for plain matrices and other pixel-grid slice providers.
     make_slice <- function(z) {
       sl <- slice(x, z, along = along)
       df <- slice_df(sl, downsample = downsample)
@@ -83,9 +88,9 @@ plot_montage <- function(
     scale_fill_neuro(cmap = cmap, limits = lim,
                      guide = if (is_report) "none" else "colourbar")
 
-  # Crop to the brain bounding box (volume/world path only).
+  # Crop to the brain bounding box (volume path only).
   crop_coord <- NULL
-  if (isTRUE(do_crop) && world) {
+  if (isTRUE(do_crop) && neuro_volume) {
     fin <- df$value[is.finite(df$value)]
     if (length(fin)) {
       thr  <- min(fin) + 0.02 * diff(range(fin))
@@ -100,7 +105,8 @@ plot_montage <- function(
     }
   }
   p <- p + if (!is.null(crop_coord)) crop_coord
-           else if (world) ggplot2::coord_fixed() else coord_neuro_fixed()
+           else if (neuro_volume || neuro_slice_list) ggplot2::coord_fixed()
+           else coord_neuro_fixed()
 
   if (is_report) {
     p <- p + report_facet_theme()

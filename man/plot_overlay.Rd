@@ -39,9 +39,10 @@ plot_overlay(
 
 \item{overlay}{Overlay 3D volume on the same NeuroSpace grid as `bgvol`.}
 
-\item{zlevels}{Slices to plot (indices along the z/3rd axis by default).}
+\item{zlevels}{Slices to plot (indices along the third grid axis by default).}
 
-\item{along}{Axis for slicing (1 sagittal, 2 coronal, 3 axial).}
+\item{along}{Native voxel-grid axis for slicing. Display orientation and
+anatomical plane labels are inferred from the image affine.}
 
 \item{bg_cmap}{Background palette (e.g., "grays").}
 

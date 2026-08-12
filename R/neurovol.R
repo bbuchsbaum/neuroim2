@@ -1279,8 +1279,9 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 #'   (default \code{"grays"}).  See \code{\link{resolve_cmap}}.
 #' @param zlevels integer slice indices to display.
 #'   Default: 9 evenly-spaced slices (3 \eqn{\times}{x} 3 grid).
-#' @param along axis along which to slice: 1 = sagittal, 2 = coronal,
-#'   3 = axial (the default).
+#' @param along native voxel-grid axis along which to slice. For canonically
+#'   ordered images, 1 = sagittal, 2 = coronal, and 3 = axial (the default).
+#'   Display orientation is inferred from the image affine.
 #' @param irange numeric length-2 intensity range for the color scale.
 #' @param thresh a 2-element vector indicating the lower and upper
 #'   transparency thresholds.
@@ -1329,8 +1330,8 @@ setMethod("plot", signature=signature(x="NeuroVol", y="missing"),
             slice_axis <- c("x", "y", "z")[[along]]
 
             df1 <- do.call(rbind, purrr::map(zlevels, function(i) {
-              imslice <- slice(x, zlevel = i, along = along)
-              df <- slice_df(imslice)
+              oriented <- orient_volume_slice_for_raster(x, i, along = along)
+              df <- oriented_raster_df(oriented)
 
               if (diff(thresh) > 0) {
                 df$value[df$value >= thresh[1] & df$value <= thresh[2]] <- NA_real_
@@ -1350,7 +1351,7 @@ setMethod("plot", signature=signature(x="NeuroVol", y="missing"),
               ggplot2::facet_wrap(~ z, ncol = 3L,
                                  labeller = ggplot2::labeller(
                                    z = function(z) paste(slice_axis, "=", z))) +
-              coord_neuro_fixed() +
+              ggplot2::coord_fixed() +
               theme_neuro()
 
             p

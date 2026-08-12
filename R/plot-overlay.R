@@ -5,8 +5,9 @@
 #'
 #' @param bgvol Background 3D volume.
 #' @param overlay Overlay 3D volume on the same NeuroSpace grid as `bgvol`.
-#' @param zlevels Slices to plot (indices along the z/3rd axis by default).
-#' @param along Axis for slicing (1 sagittal, 2 coronal, 3 axial).
+#' @param zlevels Slices to plot (indices along the third grid axis by default).
+#' @param along Native voxel-grid axis for slicing. Display orientation and
+#'   anatomical plane labels are inferred from the image affine.
 #' @param bg_cmap Background palette (e.g., "grays").
 #' @param ov_cmap Overlay palette (e.g., "inferno").
 #' @param bg_range,ov_range Background/overlay scaling. Either a mode string,
@@ -117,7 +118,7 @@ plot_overlay <- function(
   ncol <- panel_args$ncol
 
   selected_values <- function(vol) {
-    unlist(lapply(zlevels, function(z) as.numeric(slice_to_matrix(slice(vol, z, along = along)))))
+    unlist(lapply(zlevels, function(z) as.numeric(volume_slice_matrix(vol, z, along = along))))
   }
   ov_vals <- selected_values(overlay)
   bg_lim <- resolve_display_limits(bg_range, selected_values(bgvol), probs = probs)
@@ -170,22 +171,22 @@ plot_overlay <- function(
   }
 
   build_panel <- function(z) {
-    sl_bg <- slice(bgvol, z, along = along)
-    sl_ov <- slice(overlay, z, along = along)
-
-    bg <- slice_to_matrix(sl_bg)
-    bg_oriented <- orient_slice_for_raster(sl_bg, bg)
-    df_bg <- expand.grid(x = bg_oriented$x, y = bg_oriented$y)
-    df_bg$value <- c(t(bg_oriented$mat))
+    bg <- volume_slice_matrix(bgvol, z, along = along)
+    bg_oriented <- orient_volume_slice_for_raster(
+      bgvol, z, along = along, mat = bg
+    )
+    df_bg <- oriented_raster_df(bg_oriented)
 
     # Overlay data; apply threshold then convert to grob for independent palette
-    mov <- slice_to_matrix(sl_ov)
+    mov <- volume_slice_matrix(overlay, z, along = along)
     if (ov_alpha_mode == "binary") {
       if (isTRUE(ov_thresh > 0)) {
         below <- !is.na(mov) & abs(mov) < ov_thresh
         mov[below] <- NA_real_
       }
-      oriented <- orient_slice_for_raster(sl_ov, mov)
+      oriented <- orient_volume_slice_for_raster(
+        overlay, z, along = along, mat = mov
+      )
       g_ov <- matrix_to_raster_grob(
         oriented$mat,
         cmap = ov_cmap,
@@ -212,7 +213,9 @@ plot_overlay <- function(
         amap[!is.na(abs_mov) & abs_mov < ov_thresh] <- 0
       }
       amap[is.na(abs_mov)] <- 0
-      oriented <- orient_slice_for_raster(sl_ov, mov, alpha_map = amap)
+      oriented <- orient_volume_slice_for_raster(
+        overlay, z, along = along, mat = mov, alpha_map = amap
+      )
       g_ov <- matrix_to_raster_grob(
         oriented$mat,
         cmap = ov_cmap,
@@ -222,7 +225,7 @@ plot_overlay <- function(
       )
     }
 
-    slice_label <- switch(as.character(along), "1" = "x", "2" = "y", "3" = "z")
+    slice_label <- c("x", "y", "z")[[along]]
     xr <- raster_extent_from_centers(bg_oriented$x)
     yr <- raster_extent_from_centers(bg_oriented$y)
 
@@ -252,7 +255,9 @@ plot_overlay <- function(
     leg <- NULL
     if (isTRUE(show_legend)) {
       pal <- resolve_cmap(ov_cmap, 256)
-      plane <- switch(as.character(along), "1" = "Sagittal", "2" = "Coronal", "Axial")
+      plane <- orient_volume_slice_for_raster(
+        bgvol, zlevels[[1L]], along = along
+      )$plane
       leg <- make_overlay_legend(ov_thresh, pal[length(pal)], pal[1L],
                                  symmetric = symmetric, style = style, plane = plane)
     }

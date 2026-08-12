@@ -26,7 +26,9 @@ plot_montage(
 
 \item{zlevels}{Integer indices of slices to plot (if `x` is a volume).}
 
-\item{along}{Axis along which to slice (1 = sagittal, 2 = coronal, 3 = axial).}
+\item{along}{Native voxel-grid axis along which to slice. For canonically
+ordered images, 1 = sagittal, 2 = coronal, and 3 = axial. Display
+orientation is inferred from the image affine.}
 
 \item{cmap}{Palette name or vector (see [resolve_cmap()]).}
 

@@ -10,7 +10,8 @@
 #' @param moving_edges Edge map for the moving/result image on the same
 #'   NeuroSpace grid as `bgvol`.
 #' @param zlevels Slices to plot. Defaults to nine evenly spaced slices.
-#' @param along Axis for slicing (1 sagittal, 2 coronal, 3 axial).
+#' @param along Native voxel-grid axis for slicing. Display orientation is
+#'   inferred from the image affine.
 #' @param bg_cmap Background palette.
 #' @param fixed_color,moving_color Overlay colors for the two edge maps.
 #' @param bg_range,edge_range "robust" or "data" intensity scaling.
@@ -61,24 +62,25 @@ plot_edge_overlay <- function(
   }
 
   build_panel <- function(z) {
-    sl_bg <- slice(bgvol, z, along = along)
-    sl_fix <- slice(fixed_edges, z, along = along)
-    sl_mov <- slice(moving_edges, z, along = along)
-
-    bg <- slice_to_matrix(sl_bg)
-    fix <- abs(slice_to_matrix(sl_fix))
-    mov <- abs(slice_to_matrix(sl_mov))
-    bg_oriented <- orient_slice_for_raster(sl_bg, bg)
-    df <- expand.grid(x = bg_oriented$x, y = bg_oriented$y)
-    df$value <- c(t(bg_oriented$mat))
+    bg <- volume_slice_matrix(bgvol, z, along = along)
+    fix <- abs(volume_slice_matrix(fixed_edges, z, along = along))
+    mov <- abs(volume_slice_matrix(moving_edges, z, along = along))
+    bg_oriented <- orient_volume_slice_for_raster(
+      bgvol, z, along = along, mat = bg
+    )
+    df <- oriented_raster_df(bg_oriented)
 
     bg_lim <- compute_limits(as.numeric(bg), mode = bg_range, probs = probs)
     edge_lim <- compute_limits(c(as.numeric(fix), as.numeric(mov)), mode = edge_range, probs = probs)
 
     fix_alpha <- edge_alpha_map(fix, edge_lim)
     mov_alpha <- edge_alpha_map(mov, edge_lim)
-    fix_oriented <- orient_slice_for_raster(sl_fix, fix, alpha_map = fix_alpha)
-    mov_oriented <- orient_slice_for_raster(sl_mov, mov, alpha_map = mov_alpha)
+    fix_oriented <- orient_volume_slice_for_raster(
+      fixed_edges, z, along = along, mat = fix, alpha_map = fix_alpha
+    )
+    mov_oriented <- orient_volume_slice_for_raster(
+      moving_edges, z, along = along, mat = mov, alpha_map = mov_alpha
+    )
 
     g_fix <- matrix_to_raster_grob(
       fix_oriented$mat,

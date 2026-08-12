@@ -6,7 +6,8 @@
 #' @param bgvol Background/reference 3D volume.
 #' @param overlay Comparison 3D volume on the same NeuroSpace grid as `bgvol`.
 #' @param zlevels Slices to plot. Defaults to nine evenly spaced slices.
-#' @param along Axis for slicing (1 sagittal, 2 coronal, 3 axial).
+#' @param along Native voxel-grid axis for slicing. Display orientation is
+#'   inferred from the image affine.
 #' @param tile Tile width in slice pixels.
 #' @param cmap Palette used to render the normalized checkerboard image.
 #' @param bg_range,ov_range "robust" or "data" intensity scaling.
@@ -42,10 +43,8 @@ plot_checkerboard <- function(
   ncol <- panel_args$ncol
 
   build_panel <- function(z) {
-    sl_bg <- slice(bgvol, z, along = along)
-    sl_ov <- slice(overlay, z, along = along)
-    bg <- slice_to_matrix(sl_bg)
-    ov <- slice_to_matrix(sl_ov)
+    bg <- volume_slice_matrix(bgvol, z, along = along)
+    ov <- volume_slice_matrix(overlay, z, along = along)
     if (!identical(dim(bg), dim(ov))) {
       stop("Sliced volumes must have matching dimensions.", call. = FALSE)
     }
@@ -63,9 +62,10 @@ plot_checkerboard <- function(
     chk <- ov01
     chk[use_bg] <- bg01[use_bg]
 
-    oriented <- orient_slice_for_raster(sl_bg, chk)
-    df <- expand.grid(x = oriented$x, y = oriented$y)
-    df$value <- c(t(oriented$mat))
+    oriented <- orient_volume_slice_for_raster(
+      bgvol, z, along = along, mat = chk
+    )
+    df <- oriented_raster_df(oriented)
     ggplot2::ggplot(df, ggplot2::aes(x, y, fill = value)) +
       ggplot2::geom_raster(interpolate = FALSE) +
       scale_fill_neuro(cmap = cmap, limits = c(0, 1), guide = "none") +
