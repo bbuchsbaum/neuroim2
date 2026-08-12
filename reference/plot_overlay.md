@@ -50,11 +50,12 @@ plot_overlay(
 
 - zlevels:
 
-  Slices to plot (indices along the z/3rd axis by default).
+  Slices to plot (indices along the third grid axis by default).
 
 - along:
 
-  Axis for slicing (1 sagittal, 2 coronal, 3 axial).
+  Native voxel-grid axis for slicing. Display orientation and anatomical
+  plane labels are inferred from the image affine.
 
 - bg_cmap:
 

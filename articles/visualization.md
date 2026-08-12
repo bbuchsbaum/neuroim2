@@ -31,6 +31,14 @@ helper requires.
 zlevels <- round(seq(12, 38, length.out = 6))
 ```
 
+The plotting helpers read anatomical direction from the image affine.
+Axis permutations and left-right, anterior-posterior, or
+inferior-superior flips are corrected for display without changing voxel
+values. An oblique image remains an oblique native slice: use
+[`deoblique()`](https://bbuchsbaum.github.io/neuroim2/reference/deoblique.md)
+first when you need resampled, cardinal-plane sections rather than a
+view of the stored voxel planes.
+
 ## A montage of slices
 
 [`plot_montage()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_montage.md)

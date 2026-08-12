@@ -107,8 +107,9 @@ Default: 9 evenly-spaced slices (3 \(\times\) 3 grid).</p></dd>
 
 
 <dt id="arg-along">along<a class="anchor" aria-label="anchor" href="#arg-along"></a></dt>
-<dd><p>axis along which to slice: 1 = sagittal, 2 = coronal,
-3 = axial (the default).</p></dd>
+<dd><p>native voxel-grid axis along which to slice. For canonically
+ordered images, 1 = sagittal, 2 = coronal, and 3 = axial (the default).
+Display orientation is inferred from the image affine.</p></dd>
 
 
 <dt id="arg-thresh">thresh<a class="anchor" aria-label="anchor" href="#arg-thresh"></a></dt>
@@ -139,7 +140,9 @@ transparency thresholds.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The plot method uses <code>ggplot2</code> to create a raster visualization of the slice data.
+    <p>The plot method uses <code>ggplot2</code> to create a raster visualization of the
+slice data. The slice's anatomical axis metadata determines permutation and
+flips, so right/anterior/superior point toward increasing screen coordinates.
 The intensity values are mapped to colors using the specified colormap and range.</p>
 <p>when `x` is a NeuroSlice object, the plot method returns a <code>ggplot2</code> object containing the raster visualization of the slice data.
         The plot can be further customized using standard ggplot2 functions.</p>

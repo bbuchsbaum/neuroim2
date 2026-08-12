@@ -73,8 +73,9 @@ plot(
 
 - along:
 
-  axis along which to slice: 1 = sagittal, 2 = coronal, 3 = axial (the
-  default).
+  native voxel-grid axis along which to slice. For canonically ordered
+  images, 1 = sagittal, 2 = coronal, and 3 = axial (the default).
+  Display orientation is inferred from the image affine.
 
 - thresh:
 
@@ -105,7 +106,9 @@ a ggplot2 object
 ## Details
 
 The plot method uses `ggplot2` to create a raster visualization of the
-slice data. The intensity values are mapped to colors using the
+slice data. The slice's anatomical axis metadata determines permutation
+and flips, so right/anterior/superior point toward increasing screen
+coordinates. The intensity values are mapped to colors using the
 specified colormap and range.
 
 when \`x\` is a NeuroSlice object, the plot method returns a `ggplot2`

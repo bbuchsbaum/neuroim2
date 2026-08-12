@@ -296,6 +296,9 @@ Searchlight score map. The bright cluster is where the signal was
 planted.
 </p>
 </div>
+<p><code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> reads the map’s affine before arranging the
+pixels, so anterior is at the top even though this mask is stored with a
+reversed left-right voxel axis.</p>
 <p>The default intensity range matters here. Passing
 <code>irange = c(0, max(score))</code> would put the negative half of
 the map outside the scale limits, where it renders transparent — reading

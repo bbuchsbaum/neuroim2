@@ -2,6 +2,20 @@
 
 ## neuroim2 0.19.0
 
+### Slice plots now preserve anatomical orientation
+
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) for `NeuroVol`
+and `NeuroSlice`,
+[`plot_montage()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_montage.md),
+[`plot_ortho()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_ortho.md),
+and the overlay/registration-QC helpers now share one affine-derived
+display transform. Native slice axes are permuted and flipped so right,
+anterior, and superior point toward increasing screen coordinates. This
+fixes axial plots whose anterior direction was rotated toward
+screen-right, corrects sagittal orientation labels from L/R to P/A,
+handles permuted voxel axes, and keeps oblique native slices on a
+regular raster without silently shifting pixels or resampling values.
+
 Seven defects found by measuring the image-processing layer against
 `nilearn` 0.14.0 / scipy, which is the reference for the processing
 neuroim2 also does. The harness is in `dev/bench/nilearn/` and the

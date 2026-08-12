@@ -75,7 +75,9 @@ and a shared colorbar. Supply a list of slice objects or a volume + indices.</p>
 
 
 <dt id="arg-along">along<a class="anchor" aria-label="anchor" href="#arg-along"></a></dt>
-<dd><p>Axis along which to slice (1 = sagittal, 2 = coronal, 3 = axial).</p></dd>
+<dd><p>Native voxel-grid axis along which to slice. For canonically
+ordered images, 1 = sagittal, 2 = coronal, and 3 = axial. Display
+orientation is inferred from the image affine.</p></dd>
 
 
 <dt id="arg-cmap">cmap<a class="anchor" aria-label="anchor" href="#arg-cmap"></a></dt>

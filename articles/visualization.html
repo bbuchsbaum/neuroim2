@@ -82,6 +82,12 @@ voxel. It shares a <code>NeuroSpace</code> with the anatomy, which every
 overlay helper requires.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">zlevels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">12</span>, <span class="fl">38</span>, length.out <span class="op">=</span> <span class="fl">6</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>The plotting helpers read anatomical direction from the image affine.
+Axis permutations and left-right, anterior-posterior, or
+inferior-superior flips are corrected for display without changing voxel
+values. An oblique image remains an oblique native slice: use
+<code><a href="../reference/deoblique.html">deoblique()</a></code> first when you need resampled, cardinal-plane
+sections rather than a view of the stored voxel planes.</p>
 <div class="section level2">
 <h2 id="a-montage-of-slices">A montage of slices<a class="anchor" aria-label="anchor" href="#a-montage-of-slices"></a>
 </h2>

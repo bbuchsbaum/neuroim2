@@ -316,6 +316,10 @@ cluster.](regions-and-searchlights_files/figure-html/score-fig-1.png)
 Searchlight score map. The bright cluster is where the signal was
 planted.
 
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) reads the map’s
+affine before arranging the pixels, so anterior is at the top even
+though this mask is stored with a reversed left-right voxel axis.
+
 The default intensity range matters here. Passing
 `irange = c(0, max(score))` would put the negative half of the map
 outside the scale limits, where it renders transparent — reading as

@@ -97,3 +97,14 @@ plot_ortho(
 
   Logical or `NULL`; crop panels to the brain bounding box / smooth the
   raster. `NULL` (default) enables both for `style = "report"` only.
+
+## Details
+
+The affine determines which native voxel axis is nearest each anatomical
+plane and how that plane must be permuted or flipped for display.
+Oblique images are shown on their regular native voxel planes; values
+are not silently resampled. Use
+[`deoblique()`](https://bbuchsbaum.github.io/neuroim2/reference/deoblique.md)
+or
+[`resample_to()`](https://bbuchsbaum.github.io/neuroim2/reference/resample_to.md)
+first when true cardinal-plane sections are required.

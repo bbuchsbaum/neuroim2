@@ -36,7 +36,9 @@ plot_montage(
 
 - along:
 
-  Axis along which to slice (1 = sagittal, 2 = coronal, 3 = axial).
+  Native voxel-grid axis along which to slice. For canonically ordered
+  images, 1 = sagittal, 2 = coronal, and 3 = axial. Display orientation
+  is inferred from the image affine.
 
 - cmap:
 

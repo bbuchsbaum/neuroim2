@@ -36,8 +36,12 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.19.0" id="neuroim2-0190">neuroim2 0.19.0<a class="anchor" aria-label="anchor" href="#neuroim2-0190"></a></h2>
+<div class="section level3">
+<h3 id="slice-plots-now-preserve-anatomical-orientation-0-19-0">Slice plots now preserve anatomical orientation<a class="anchor" aria-label="anchor" href="#slice-plots-now-preserve-anatomical-orientation-0-19-0"></a></h3>
+<p><code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> for <code>NeuroVol</code> and <code>NeuroSlice</code>, <code><a href="../reference/plot_montage.html">plot_montage()</a></code>, <code><a href="../reference/plot_ortho.html">plot_ortho()</a></code>, and the overlay/registration-QC helpers now share one affine-derived display transform. Native slice axes are permuted and flipped so right, anterior, and superior point toward increasing screen coordinates. This fixes axial plots whose anterior direction was rotated toward screen-right, corrects sagittal orientation labels from L/R to P/A, handles permuted voxel axes, and keeps oblique native slices on a regular raster without silently shifting pixels or resampling values.</p>
 <p>Seven defects found by measuring the image-processing layer against <code>nilearn</code> 0.14.0 / scipy, which is the reference for the processing neuroim2 also does. The harness is in <code>dev/bench/nilearn/</code> and the findings in <code>dev/nilearn-gap-analysis.md</code>.</p>
 <p>Four of these change results; the sections that do say so explicitly.</p>
+</div>
 <div class="section level3">
 <h3 id="gaussian_blur-now-applies-the-smoothing-it-is-asked-for-0-19-0">
 <code>gaussian_blur()</code> now applies the smoothing it is asked for<a class="anchor" aria-label="anchor" href="#gaussian_blur-now-applies-the-smoothing-it-is-asked-for-0-19-0"></a></h3>

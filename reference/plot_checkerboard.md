@@ -41,7 +41,8 @@ plot_checkerboard(
 
 - along:
 
-  Axis for slicing (1 sagittal, 2 coronal, 3 axial).
+  Native voxel-grid axis for slicing. Display orientation is inferred
+  from the image affine.
 
 - tile:
 
