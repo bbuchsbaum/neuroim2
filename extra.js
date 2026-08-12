@@ -1,6 +1,37 @@
+/* albersdown pkgdown/extra.js: site default classes + full albers.js. */
 (function () {
   var FAMILY_CLASSES = ["red", "lapis", "ochre", "teal", "green", "violet"];
-  var PRESET_CLASSES = ["study", "structural", "adobe", "midnight"];
+  var PRESET_CLASSES = ["homage", "interaction", "study", "structural", "adobe", "midnight"];
+  var STYLE_CLASSES = ["minimal", "assertive"];
+
+  function hasAny(prefix, values) {
+    return values.some(function (v) { return document.body.classList.contains(prefix + v); });
+  }
+
+  function applyDefaults() {
+    if (!document.body) return;
+    if (!hasAny("palette-", FAMILY_CLASSES)) document.body.classList.add("palette-red");
+    if (!hasAny("preset-", PRESET_CLASSES)) document.body.classList.add("preset-interaction");
+    if (!hasAny("style-", STYLE_CLASSES)) document.body.classList.add("style-minimal");
+
+    var theme = document.body.classList.contains("preset-midnight") ? "dark" : "light";
+    document.documentElement.setAttribute("data-bs-theme", theme);
+    document.body.setAttribute("data-bs-theme", theme);
+    var nav = document.querySelector("nav.navbar");
+    if (nav) nav.setAttribute("data-bs-theme", theme);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", applyDefaults);
+  } else {
+    applyDefaults();
+  }
+})();
+
+/* ----------------------- full albers.js ----------------------- */
+(function () {
+  var FAMILY_CLASSES = ["red", "lapis", "ochre", "teal", "green", "violet"];
+  var PRESET_CLASSES = ["homage", "interaction", "study", "structural", "adobe", "midnight"];
   var STYLE_CLASSES = ["minimal", "assertive"];
 
   function classes(prefix, values) {
