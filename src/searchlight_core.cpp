@@ -37,22 +37,29 @@ namespace {
 // That single rule is why filtering lives here rather than being reimplemented
 // per caller: the R and C++ versions of it used to disagree about NA.
 //
-// `vv` collects the kept values (1.0 when no volume was supplied). Returns the
-// 1-based row of the centre voxel, or NA_INTEGER when the centre is not kept.
+// `vv` collects the kept values (1.0 when no volume was supplied). `indices`
+// collects 1-based full-volume linear indices without first allocating voxel
+// coordinates. Coordinate collectors may be NULL for that index-only path.
+// Returns the 1-based row of the centre voxel, or NA_INTEGER when the centre is
+// not kept.
 inline int expand_one(const IntegerMatrix& off,
                       int cx, int cy, int cz,
                       int d0, int d1, int d2,
                       const double* vp, bool use_mask,
-                      std::vector<int>& xs,
-                      std::vector<int>& ys,
-                      std::vector<int>& zs,
-                      std::vector<double>* vv) {
+                      std::vector<int>* xs,
+                      std::vector<int>* ys,
+                      std::vector<int>* zs,
+                      std::vector<double>* vv,
+                      std::vector<int>* indices) {
     const int n = off.nrow();
     const R_xlen_t slice = (R_xlen_t) d0 * d1;
     int centre_row = NA_INTEGER;
 
-    xs.clear(); ys.clear(); zs.clear();
+    if (xs) xs->clear();
+    if (ys) ys->clear();
+    if (zs) zs->clear();
     if (vv) vv->clear();
+    if (indices) indices->clear();
 
     for (int i = 0; i < n; i++) {
         const int ox = off(i, 0), oy = off(i, 1), oz = off(i, 2);
@@ -63,19 +70,23 @@ inline int expand_one(const IntegerMatrix& off,
         const int z = cz + oz;
         if (z < 1 || z > d2) continue;
 
+        const R_xlen_t lin = (R_xlen_t)(x - 1) + (R_xlen_t)(y - 1) * d0
+                             + (R_xlen_t)(z - 1) * slice;
         double v = 1.0;
         if (vp) {
-            const R_xlen_t lin = (R_xlen_t)(x - 1) + (R_xlen_t)(y - 1) * d0
-                                 + (R_xlen_t)(z - 1) * slice;
             v = vp[lin];
             if (use_mask && (ISNAN(v) || v == 0.0)) continue;
         }
 
         if (ox == 0 && oy == 0 && oz == 0) {
-            centre_row = (int) xs.size() + 1;
+            const size_t n_kept = indices ? indices->size() : xs->size();
+            centre_row = (int) n_kept + 1;
         }
-        xs.push_back(x); ys.push_back(y); zs.push_back(z);
+        if (xs) xs->push_back(x);
+        if (ys) ys->push_back(y);
+        if (zs) zs->push_back(z);
         if (vv) vv->push_back(v);
+        if (indices) indices->push_back((int) lin + 1);
     }
     return centre_row;
 }
@@ -150,7 +161,7 @@ IntegerMatrix sphere_coords_cpp(IntegerMatrix off, IntegerVector centre,
     std::vector<int> xs, ys, zs;
     xs.reserve(off.nrow()); ys.reserve(off.nrow()); zs.reserve(off.nrow());
     expand_one(off, centre[0], centre[1], centre[2], dim[0], dim[1], dim[2],
-               vp, use_mask, xs, ys, zs, NULL);
+               vp, use_mask, &xs, &ys, &zs, NULL, NULL);
     return to_matrix(xs, ys, zs);
 }
 
@@ -180,11 +191,48 @@ List sphere_coords_batch_cpp(IntegerMatrix off, IntegerMatrix centres,
 
     for (int c = 0; c < m; c++) {
         centre_row[c] = expand_one(off, centres(c, 0), centres(c, 1), centres(c, 2),
-                                   d0, d1, d2, vp, use_mask, xs, ys, zs, NULL);
+                                   d0, d1, d2, vp, use_mask,
+                                   &xs, &ys, &zs, NULL, NULL);
         coords[c] = to_matrix(xs, ys, zs);
     }
 
     return List::create(_["coords"] = coords, _["center_row"] = centre_row);
+}
+
+// Many centres expanded directly to 1-based full-volume linear indices. This
+// is the eager geometry-compilation path: it shares the cached offset template,
+// clipping and mask-membership loop with the coordinate/ROI paths, but never
+// allocates coordinate matrices or samples values into the result.
+// [[Rcpp::export]]
+List sphere_indices_batch_cpp(IntegerMatrix off, IntegerMatrix centres,
+                              IntegerVector dim, NumericVector vals,
+                              bool use_mask) {
+    check_args(off, dim);
+    if (centres.ncol() != 3) {
+        stop("searchlight core: 'centres' must have exactly 3 columns");
+    }
+
+    const int m = centres.nrow();
+    const int d0 = dim[0], d1 = dim[1], d2 = dim[2];
+    const R_xlen_t nvox = checked_nvox(d0, d1, d2);
+    if (nvox > INT_MAX) {
+        stop("searchlight indices require prod(dim) <= .Machine$integer.max");
+    }
+    check_buffer(vals.size(), nvox, "vals");
+    const double* vp = vals.size() > 0 ? REAL(vals) : NULL;
+
+    List out(m);
+    std::vector<int> indices;
+    indices.reserve(off.nrow());
+
+    for (int c = 0; c < m; c++) {
+        expand_one(off, centres(c, 0), centres(c, 1), centres(c, 2),
+                   d0, d1, d2, vp, use_mask,
+                   NULL, NULL, NULL, NULL, &indices);
+        out[c] = IntegerVector(indices.begin(), indices.end());
+    }
+
+    return out;
 }
 
 // One centre, everything a ROIVolWindow needs. Folds the value gather and the
@@ -212,7 +260,7 @@ List sphere_roi_at_cpp(IntegerMatrix off, IntegerVector centre, IntegerVector di
     vv.reserve(off.nrow());
 
     const int centre_row = expand_one(off, cx, cy, cz, d0, d1, d2,
-                                      vp, use_mask, xs, ys, zs, &vv);
+                                      vp, use_mask, &xs, &ys, &zs, &vv, NULL);
 
     // Parent index can exceed INT_MAX for volumes above 2^31 voxels; report NA
     // rather than narrowing, which is what the R builders do.

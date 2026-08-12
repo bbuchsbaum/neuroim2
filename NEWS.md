@@ -1,5 +1,15 @@
 # neuroim2 0.19.0
 
+## Index-only searchlight geometry
+
+`searchlight_indices(mask, radius, nonzero = TRUE)` now compiles spherical
+searchlights directly to 1-based full-volume linear indices. It uses the same
+cached, anisotropic spherical-offset and compiled boundary-clipping machinery
+as the existing searchlight APIs, but constructs no ROI objects or coordinate
+matrices and never changes parallel execution state. The result records centre
+indices and spatial metadata so downstream sparse-measurement builders can use
+the geometry without taking on neuroim2's analysis or execution policy.
+
 ## Slice plots now preserve anatomical orientation
 
 `plot()` for `NeuroVol` and `NeuroSlice`, `plot_montage()`, `plot_ortho()`, and

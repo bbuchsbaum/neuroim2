@@ -686,6 +686,94 @@ searchlight_coords <- function(mask, radius, nonzero=FALSE, cores=0) {
 }
 
 
+#' Compile spherical searchlights to full-volume linear indices
+#'
+#' @description
+#' Returns the geometry of every spherical searchlight centred on a nonzero
+#' voxel of \code{mask}, without constructing ROI objects, extracting analysis
+#' data, or changing parallel execution state. Neighborhoods are compiled
+#' sequentially by the same cached-offset and compiled clipping machinery used
+#' by \code{\link{searchlight_coords}}.
+#'
+#' @param mask A \code{\linkS4class{NeuroVol}} object defining the searchlight
+#'   centres and, when \code{nonzero = TRUE}, the allowed neighborhood members.
+#' @param radius A positive numeric scalar giving the spherical radius in
+#'   millimetres.
+#' @param nonzero A single logical value. If \code{TRUE} (the default), each
+#'   neighborhood is restricted to finite, nonzero voxels of \code{mask}. It
+#'   never changes the centres: every nonzero mask voxel is a centre.
+#'
+#' @return A list-like object of class \code{searchlight_indices} with one
+#'   integer vector per centre. Every value is a stable, 1-based full-volume
+#'   linear index using R's column-major array order. Centre order is
+#'   \code{which(mask != 0)}. The result carries the following documented
+#'   attributes: \code{center_indices}, \code{space}, \code{radius}, and
+#'   \code{nonzero}. The object is eagerly compiled but contains indices only.
+#'
+#' @details
+#' The full-volume index contract means an input whose first three dimensions
+#' contain more than \code{.Machine$integer.max} voxels is rejected. The
+#' function has no \code{cores} argument and never inspects or modifies
+#' \code{future::plan()}.
+#'
+#' @examples
+#' mask_data <- array(FALSE, c(7, 7, 7))
+#' mask_data[2:6, 2:6, 2:6] <- TRUE
+#' mask <- LogicalNeuroVol(mask_data, NeuroSpace(c(7, 7, 7)))
+#'
+#' neighborhoods <- searchlight_indices(mask, radius = 2)
+#' length(neighborhoods)
+#' attr(neighborhoods, "center_indices")
+#' index_to_grid(mask, neighborhoods[[1]])
+#'
+#' @export
+searchlight_indices <- function(mask, radius, nonzero = TRUE) {
+  if (!inherits(mask, "NeuroVol")) {
+    cli::cli_abort("{.arg mask} must be a {.cls NeuroVol} object.")
+  }
+  if (!is.numeric(radius) || length(radius) != 1L || is.na(radius) ||
+      !is.finite(radius) || radius <= 0) {
+    cli::cli_abort("{.arg radius} must be a single positive finite number.")
+  }
+  if (!is.logical(nonzero) || length(nonzero) != 1L || is.na(nonzero)) {
+    cli::cli_abort("{.arg nonzero} must be TRUE or FALSE.")
+  }
+
+  center_indices <- which(mask != 0)
+  centers <- index_to_grid(mask, center_indices)
+  storage.mode(centers) <- "integer"
+  plan <- .searchlight_plan(mask, radius, nonzero)
+
+  out <- sphere_indices_batch_cpp(
+    plan$off,
+    centers,
+    plan$vdim,
+    plan$vals,
+    plan$use_mask
+  )
+
+  structure(
+    out,
+    class = c("searchlight_indices", "list"),
+    center_indices = center_indices,
+    space = space(mask),
+    radius = as.numeric(radius),
+    nonzero = nonzero
+  )
+}
+
+
+#' @method print searchlight_indices
+#' @export
+print.searchlight_indices <- function(x, ...) {
+  cat("<searchlight_indices>\n")
+  cat("  Centres:", length(x), "\n")
+  cat("  Radius:", format(attr(x, "radius")), "mm\n")
+  cat("  Members:", sum(lengths(x)), "\n")
+  invisible(x)
+}
+
+
 #' Create an exhaustive searchlight iterator
 #'
 #' @description

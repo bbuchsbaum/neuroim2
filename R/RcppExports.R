@@ -163,6 +163,10 @@ sphere_coords_batch_cpp <- function(off, centres, dim, vals, use_mask) {
     .Call(`_neuroim2_sphere_coords_batch_cpp`, off, centres, dim, vals, use_mask)
 }
 
+sphere_indices_batch_cpp <- function(off, centres, dim, vals, use_mask) {
+    .Call(`_neuroim2_sphere_indices_batch_cpp`, off, centres, dim, vals, use_mask)
+}
+
 sphere_roi_at_cpp <- function(off, centre, dim, vals, use_mask) {
     .Call(`_neuroim2_sphere_roi_at_cpp`, off, centre, dim, vals, use_mask)
 }

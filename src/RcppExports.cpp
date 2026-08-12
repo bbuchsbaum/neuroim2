@@ -449,6 +449,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// sphere_indices_batch_cpp
+List sphere_indices_batch_cpp(IntegerMatrix off, IntegerMatrix centres, IntegerVector dim, NumericVector vals, bool use_mask);
+RcppExport SEXP _neuroim2_sphere_indices_batch_cpp(SEXP offSEXP, SEXP centresSEXP, SEXP dimSEXP, SEXP valsSEXP, SEXP use_maskSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerMatrix >::type off(offSEXP);
+    Rcpp::traits::input_parameter< IntegerMatrix >::type centres(centresSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type dim(dimSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type vals(valsSEXP);
+    Rcpp::traits::input_parameter< bool >::type use_mask(use_maskSEXP);
+    rcpp_result_gen = Rcpp::wrap(sphere_indices_batch_cpp(off, centres, dim, vals, use_mask));
+    return rcpp_result_gen;
+END_RCPP
+}
 // sphere_roi_at_cpp
 List sphere_roi_at_cpp(IntegerMatrix off, IntegerVector centre, IntegerVector dim, NumericVector vals, bool use_mask);
 RcppExport SEXP _neuroim2_sphere_roi_at_cpp(SEXP offSEXP, SEXP centreSEXP, SEXP dimSEXP, SEXP valsSEXP, SEXP use_maskSEXP) {
@@ -545,6 +560,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_neuroim2_representative_volume_cpp", (DL_FUNC) &_neuroim2_representative_volume_cpp, 2},
     {"_neuroim2_sphere_coords_cpp", (DL_FUNC) &_neuroim2_sphere_coords_cpp, 5},
     {"_neuroim2_sphere_coords_batch_cpp", (DL_FUNC) &_neuroim2_sphere_coords_batch_cpp, 5},
+    {"_neuroim2_sphere_indices_batch_cpp", (DL_FUNC) &_neuroim2_sphere_indices_batch_cpp, 5},
     {"_neuroim2_sphere_roi_at_cpp", (DL_FUNC) &_neuroim2_sphere_roi_at_cpp, 5},
     {"_neuroim2_series_gather_dense", (DL_FUNC) &_neuroim2_series_gather_dense, 3},
     {"_neuroim2_series_gather_sparse", (DL_FUNC) &_neuroim2_series_gather_sparse, 2},
