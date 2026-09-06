@@ -14,6 +14,9 @@
 #'   \code{"robust"} (quantile clip) or \code{"data"} (min/max), or an explicit
 #'   numeric \code{c(lo, hi)} to pin the scale (e.g. \code{ov_range = c(-6, 6)})
 #'   for consistent coloring across panels and subjects.
+#'   Background scaling defaults to \code{"data"} to avoid clipping bright
+#'   tissue in skull-stripped images. Use \code{bg_range = "robust"} explicitly
+#'   for backgrounds with extreme intensity outliers.
 #' @param probs Quantiles for robust scaling.
 #' @param ov_thresh Numeric threshold; values with |v| < thresh become transparent.
 #' @param ov_alpha Global alpha for overlay (0..1).
@@ -30,6 +33,16 @@
 #' @param alpha_gamma Optional exponent for \code{ov_alpha_mode = "soft"}.
 #'   \code{NULL} (default) auto-tunes it from the data; larger values push more
 #'   of the low-value range toward transparency.
+#' @param alpha_knee,alpha_cap Optional nonnegative lower and positive upper
+#'   magnitude anchors for soft alpha, independent of the color limits.
+#'   With \code{NULL}, the knee uses the positive threshold or median magnitude,
+#'   and the cap uses the color scale. Set both and \code{alpha_gamma} to fix
+#'   the opacity mapping across calls.
+#' @param alpha_floor Minimum soft opacity (0..1) before multiplying by
+#'   \code{ov_alpha}. Values below \code{ov_thresh} remain fully transparent.
+#' @param alpha_mid,gamma_min,gamma_max Auto-gamma policy passed to
+#'   \code{\link{soft_alpha_params}}. Defaults target 0.2 at the median
+#'   supra-knee magnitude with gamma clamped to [1.5, 5].
 #' @param ov_symmetric Logical or \code{NULL}. \code{NULL} (default) auto-selects
 #'   symmetric limits around zero when the overlay has both positive and negative
 #'   values; \code{TRUE}/\code{FALSE} forces the choice. Symmetric limits keep
@@ -69,6 +82,9 @@
 #' effect and the return value is the \emph{list of per-slice ggplots}
 #' (invisibly); passing that list to \code{ggsave()} saves only one panel.
 #'
+#' Soft mode records the resolved curve in \code{attr(result, "soft_alpha")}
+#' for either return form. See \code{\link{soft_alpha_params}} to preview it.
+#'
 #' \strong{Signed maps.} For overlays with both signs (t/z/contrast maps), the
 #' default palette switches to a diverging one and limits become symmetric so
 #' negatives are as visible as positives; pass \code{ov_cmap}/\code{ov_symmetric}
@@ -84,13 +100,15 @@
 plot_overlay <- function(
   bgvol, overlay, zlevels = NULL, along = 3L,
   bg_cmap = "grays", ov_cmap = "inferno",
-  bg_range = c("robust","data"), ov_range = c("robust","data"),
+  bg_range = "data", ov_range = c("robust","data"),
   probs = c(.02,.98), ov_thresh = 0, ov_alpha = .7,
   ov_alpha_mode = c("binary", "proportional", "ramp", "soft"), ov_symmetric = NULL,
   alpha_gamma = NULL,
   ov_cap = NULL, ncol = 3L, title = NULL, subtitle = NULL, caption = NULL,
   draw = TRUE, style = c("light", "dark", "report"), enhance = FALSE,
-  assemble = TRUE, colorbar = TRUE, legend = NULL, crop = NULL, interpolate = NULL
+  assemble = TRUE, colorbar = TRUE, legend = NULL, crop = NULL, interpolate = NULL,
+  alpha_knee = NULL, alpha_cap = NULL, alpha_floor = 0,
+  alpha_mid = 0.2, gamma_min = 1.5, gamma_max = 5
 ) {
   ov_cmap_missing <- missing(ov_cmap)
   assert_same_neuro_grid(bgvol, overlay = overlay)
@@ -155,7 +173,10 @@ plot_overlay <- function(
   soft <- NULL
   if (ov_alpha_mode == "soft") {
     soft <- soft_alpha_params(abs(ov_vals), thresh = ov_thresh,
-                              cap = ov_abs_max, gamma = alpha_gamma)
+                              cap = if (is.null(alpha_cap)) ov_abs_max else alpha_cap,
+                              gamma = alpha_gamma, knee = alpha_knee,
+                              alpha_floor = alpha_floor, alpha_mid = alpha_mid,
+                              gamma_min = gamma_min, gamma_max = gamma_max)
   }
 
   # Shared brain bounding box (so every panel is framed identically).
@@ -205,7 +226,7 @@ plot_overlay <- function(
         soft = {                                  # nonlinear, self-tuning gamma curve
           t <- (abs_mov - soft$lo) / (soft$hi - soft$lo)
           t[] <- pmin(pmax(t, 0), 1)
-          t^soft$gamma
+          soft$alpha_floor + (1 - soft$alpha_floor) * t^soft$gamma
         }
       )
       amap[] <- pmin(pmax(amap, 0), 1)
@@ -249,6 +270,7 @@ plot_overlay <- function(
   }
 
   plots <- lapply(zlevels, build_panel)
+  attr(plots, "soft_alpha") <- soft
   attr(plots, "labels") <- list(title = title, subtitle = subtitle, caption = caption)
 
   if (isTRUE(assemble)) {
@@ -267,6 +289,7 @@ plot_overlay <- function(
       colorbar = colorbar, legend = leg,
       title = title, subtitle = subtitle, caption = caption
     )
+    attr(combined, "soft_alpha") <- soft
     if (isTRUE(draw)) print(combined)
     return(invisible(combined))
   }
@@ -283,4 +306,5 @@ plot_overlay <- function(
     caption = caption,
     style = if (is_report) "dark" else style
   )
+  invisible(plots)
 }

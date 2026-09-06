@@ -60,6 +60,7 @@ reference:
   - plot_montage
   - plot_ortho
   - plot_overlay
+  - soft_alpha_params
   - enhance_stat_map
   - mapToColors
 - title: Constructors

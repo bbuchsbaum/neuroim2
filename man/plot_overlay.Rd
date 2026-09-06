@@ -11,7 +11,7 @@ plot_overlay(
   along = 3L,
   bg_cmap = "grays",
   ov_cmap = "inferno",
-  bg_range = c("robust", "data"),
+  bg_range = "data",
   ov_range = c("robust", "data"),
   probs = c(0.02, 0.98),
   ov_thresh = 0,
@@ -31,7 +31,13 @@ plot_overlay(
   colorbar = TRUE,
   legend = NULL,
   crop = NULL,
-  interpolate = NULL
+  interpolate = NULL,
+  alpha_knee = NULL,
+  alpha_cap = NULL,
+  alpha_floor = 0,
+  alpha_mid = 0.2,
+  gamma_min = 1.5,
+  gamma_max = 5
 )
 }
 \arguments{
@@ -51,7 +57,10 @@ anatomical plane labels are inferred from the image affine.}
 \item{bg_range, ov_range}{Background/overlay scaling. Either a mode string,
 \code{"robust"} (quantile clip) or \code{"data"} (min/max), or an explicit
 numeric \code{c(lo, hi)} to pin the scale (e.g. \code{ov_range = c(-6, 6)})
-for consistent coloring across panels and subjects.}
+for consistent coloring across panels and subjects.
+Background scaling defaults to \code{"data"} to avoid clipping bright
+tissue in skull-stripped images. Use \code{bg_range = "robust"} explicitly
+for backgrounds with extreme intensity outliers.}
 
 \item{probs}{Quantiles for robust scaling.}
 
@@ -116,6 +125,19 @@ crops for \code{style = "report"} only.}
 
 \item{interpolate}{Logical or \code{NULL}; smooth the background raster.
 \code{NULL} (default) interpolates for \code{style = "report"} only.}
+
+\item{alpha_knee, alpha_cap}{Optional nonnegative lower and positive upper
+magnitude anchors for soft alpha, independent of the color limits.
+With \code{NULL}, the knee uses the positive threshold or median magnitude,
+and the cap uses the color scale. Set both and \code{alpha_gamma} to fix
+the opacity mapping across calls.}
+
+\item{alpha_floor}{Minimum soft opacity (0..1) before multiplying by
+\code{ov_alpha}. Values below \code{ov_thresh} remain fully transparent.}
+
+\item{alpha_mid, gamma_min, gamma_max}{Auto-gamma policy passed to
+\code{\link{soft_alpha_params}}. Defaults target 0.2 at the median
+supra-knee magnitude with gamma clamped to [1.5, 5].}
 }
 \description{
 Works without extra packages by colorizing both layers to rasters and stacking
@@ -127,6 +149,9 @@ a single \pkg{patchwork} object that can be passed directly to
 \code{ggsave()}. With \code{assemble = FALSE} the montage is drawn as a side
 effect and the return value is the \emph{list of per-slice ggplots}
 (invisibly); passing that list to \code{ggsave()} saves only one panel.
+
+Soft mode records the resolved curve in \code{attr(result, "soft_alpha")}
+for either return form. See \code{\link{soft_alpha_params}} to preview it.
 
 \strong{Signed maps.} For overlays with both signs (t/z/contrast maps), the
 default palette switches to a diverging one and limits become symmetric so

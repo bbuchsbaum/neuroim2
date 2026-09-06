@@ -6,7 +6,14 @@
 \alias{SparseNeuroVec}
 \title{SparseNeuroVec Class}
 \usage{
-SparseNeuroVec(data, space, mask, label = "", volume_labels = character())
+SparseNeuroVec(
+  data,
+  space,
+  mask,
+  label = "",
+  volume_labels = character(),
+  orientation = c("auto", "voxels_x_time", "time_x_voxels")
+)
 }
 \arguments{
 \item{data}{A matrix or a 4-D array containing the neuroimaging data. The dimensions of the data should be consistent with the dimensions of the provided NeuroSpace object and mask.}
@@ -19,6 +26,12 @@ SparseNeuroVec(data, space, mask, label = "", volume_labels = character())
 
 \item{volume_labels}{Optional character vector of length \code{dim(space)[4]}
 giving per-volume labels.}
+
+\item{orientation}{Matrix orientation: \code{"auto"} (default) infers it
+from mask cardinality; a square matrix is interpreted as voxels by time.
+Use \code{"time_x_voxels"} for output from \code{series()}, or
+\code{"voxels_x_time"} to declare rows as voxels explicitly. Ignored for
+4-D arrays, whose axes are always x, y, z, time.}
 }
 \value{
 A SparseNeuroVec object, containing the sparse neuroimaging data, mask, and associated NeuroSpace information.
