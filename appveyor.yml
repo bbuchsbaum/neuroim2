@@ -1,0 +1,31 @@
+# Run an R package check instead of AppVeyor's default MSBuild auto-detection.
+image: Visual Studio 2022
+
+environment:
+  NOT_CRAN: "true"
+  R_KEEP_PKG_SOURCE: "yes"
+
+install:
+  - ps: |
+      $ErrorActionPreference = 'Stop'
+      choco install rig pandoc --no-progress -y
+      if ($LASTEXITCODE -ne 0) { throw 'Installing rig/pandoc failed' }
+      $env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [Environment]::GetEnvironmentVariable('Path', 'User')
+      rig add release
+      if ($LASTEXITCODE -ne 0) { throw 'Installing R and Rtools failed' }
+      rig run -e "pak::pkg_install(c('deps::.', 'any::rcmdcheck', 'bbuchsbaum/albersdown'), dependencies = TRUE, ask = FALSE)"
+      if ($LASTEXITCODE -ne 0) { throw 'Installing R dependencies failed' }
+
+build_script:
+  - rig run -f tools/ci/appveyor-check.R
+
+# R CMD check runs the package tests; do not auto-detect .NET test assemblies.
+test: off
+
+artifacts:
+  - path: 'check\**\*.log'
+    name: check-logs
+  - path: 'check\**\*.out'
+    name: check-output
+  - path: 'check\**\*.fail'
+    name: test-failures
