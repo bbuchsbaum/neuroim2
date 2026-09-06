@@ -1,5 +1,6 @@
 # neuroim2 0.19.0
 
+
 ## Issue triage: explicit data and display controls
 
 - `SparseNeuroVec()` accepts an explicit `orientation` for matrix input. The
@@ -15,6 +16,15 @@
 - Bilateral-filter Details explain per-input bandwidth estimation and fixed
   `range_scale` for batch comparisons, including the distinction between
   per-volume filtering and joint four-dimensional filtering (#20).
+
+## Sparse NIfTI writing
+
+`write_vec()` now writes `SparseNeuroVec` images directly through the public
+API, preserving voxel/time ordering, geometry, volume labels, and zeros outside
+the mask in `.nii` and `.nii.gz` files (#36). Writing still expands the sparse
+values into a full voxel buffer, but no explicit `DenseNeuroVec` conversion is
+required.
+
 
 ## Index-only searchlight geometry
 

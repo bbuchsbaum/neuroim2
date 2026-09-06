@@ -226,6 +226,7 @@ reference:
   - square_roi
   - searchlight
   - searchlight_coords
+  - searchlight_indices
   - random_searchlight
   - resampled_searchlight
   - searchlight_shape_functions

@@ -150,6 +150,12 @@
 #' @keywords internal
 #' @noRd
 .image_values <- function(x) {
+  if (is(x, "AbstractSparseNeuroVec")) {
+    # Sparse matrices expand to spatial voxels x time, with zero outside the
+    # mask. Column-major flattening matches the DenseNeuroVec conversion and
+    # NIfTI ordering without constructing an intermediate image object.
+    return(as.numeric(as.matrix(x)))
+  }
   if (isS4(x) && methods::.hasSlot(x, ".Data")) {
     d <- x@.Data
     if (is.double(d) && !is.object(d)) return(d)
