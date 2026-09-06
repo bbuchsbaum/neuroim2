@@ -11,9 +11,10 @@ install:
       choco install rig pandoc --no-progress -y
       if ($LASTEXITCODE -ne 0) { throw 'Installing rig/pandoc failed' }
       $env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [Environment]::GetEnvironmentVariable('Path', 'User')
-      rig add release
+      # rig logs progress to stderr; cmd keeps PowerShell from treating it as an exception.
+      cmd /c "rig add release 2>&1"
       if ($LASTEXITCODE -ne 0) { throw 'Installing R and Rtools failed' }
-      rig run -e "pak::pkg_install(c('deps::.', 'any::rcmdcheck', 'bbuchsbaum/albersdown'), dependencies = TRUE, ask = FALSE)"
+      cmd /c "rig run -f tools/ci/appveyor-install.R 2>&1"
       if ($LASTEXITCODE -ne 0) { throw 'Installing R dependencies failed' }
 
 build_script:
