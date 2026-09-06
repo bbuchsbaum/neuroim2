@@ -37,6 +37,15 @@ This function smooths a volumetric image (3D brain MRI data) using a bilateral f
 The bilateral filter considers both spatial closeness and intensity similarity for smoothing.
 Only in-mask, in-bounds neighbors contribute to each local weighted average.
 }
+\details{
+With \code{range_scale = NULL}, the intensity bandwidth is estimated separately
+for each input volume. Equal \code{intensity_sigma} values therefore do not
+imply equal bandwidths across subjects, contrasts, or observed/null maps.
+For batch or group workflows, choose one positive finite \code{range_scale}
+from a reference or pooled in-mask intensity distribution and reuse it, along
+with the same \code{intensity_sigma}, for every map in comparable intensity
+units. The effective bandwidth is \code{intensity_sigma * range_scale}.
+}
 \examples{
 brain_mask <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 

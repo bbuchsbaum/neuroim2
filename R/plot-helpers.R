@@ -640,7 +640,7 @@ make_overlay_legend <- function(thresh, pos_col, neg_col, symmetric = TRUE,
 
 #' Self-tuning nonlinear alpha mapping for statistical overlays
 #'
-#' Parameters for the \code{"soft"} alpha mode, where per-voxel opacity is
+#' Parameters for the \code{"soft"} alpha mode. With the default zero floor,
 #' \deqn{alpha(m) = clamp((m - lo) / (hi - lo), 0, 1)^{gamma}.}
 #' The knee \code{lo} (below which alpha is 0) defaults to the threshold, or --
 #' when no threshold is set -- to the median in-mask magnitude, a robust
@@ -649,7 +649,9 @@ make_overlay_legend <- function(thresh, pos_col, neg_col, symmetric = TRUE,
 #' \code{alpha_mid}; this pushes the noisy bulk toward transparency while the
 #' upper tail saturates to opaque, and adapts automatically to the value
 #' distribution. \code{gamma} is clamped to \code{[gamma_min, gamma_max]} so the
-#' curve stays convex (low values are never boosted).
+#' default curve stays convex. An explicit exponent bypasses this clamp; values
+#' below one boost the low end. A positive \code{alpha_floor} raises the curve's
+#' minimum opacity before the plotting threshold is applied.
 #'
 #' @param mags Numeric vector of overlay magnitudes (typically \code{abs(values)}).
 #' @param thresh Hard/soft threshold; used as the knee when \code{> 0}.
@@ -658,13 +660,45 @@ make_overlay_legend <- function(thresh, pos_col, neg_col, symmetric = TRUE,
 #' @param alpha_mid Target alpha for the median displayed magnitude.
 #' @param gamma_min,gamma_max Clamp range for the tuned exponent (>= 1 keeps the
 #'   curve convex; the lower bound guarantees a visible nonlinearity).
-#' @return A list with \code{lo}, \code{hi}, and \code{gamma}.
-#' @keywords internal
-#' @noRd
+#' @param knee Optional nonnegative lower magnitude anchor, overriding the
+#'   threshold/median policy. Set to zero to ramp from zero without a data-derived knee.
+#' @param alpha_floor Minimum opacity before global alpha and hard thresholding.
+#' @return A list with \code{lo}, \code{hi}, \code{gamma}, and \code{alpha_floor}.
+#'   For magnitude m, opacity is
+#'   \code{alpha_floor + (1-alpha_floor) * pmin(pmax((m-lo)/(hi-lo),0),1)^gamma}.
+#'   Plotting then hides values below the hard threshold and multiplies by
+#'   \code{ov_alpha}. Fix knee, cap, and gamma to reuse a curve across datasets.
+#'   Auto-gamma targets \code{alpha_mid} before applying the floor.
+#' @examples
+#' p <- soft_alpha_params(0:8, knee = 0, cap = 3, gamma = 0.7, alpha_floor = 0.15)
+#' m <- c(0, 1.6, 2.1, 3, 8)
+#' p$alpha_floor + (1 - p$alpha_floor) *
+#'   pmin(pmax((m - p$lo) / (p$hi - p$lo), 0), 1)^p$gamma
+#' @export
 soft_alpha_params <- function(mags, thresh = 0, cap = NULL, gamma = NULL,
-                              alpha_mid = 0.2, gamma_min = 1.5, gamma_max = 5) {
+                              alpha_mid = 0.2, gamma_min = 1.5, gamma_max = 5,
+                              knee = NULL, alpha_floor = 0) {
+  scalar <- function(x, name, lower, upper = Inf, strict = FALSE) {
+    if (!is.numeric(x) || length(x) != 1L || !is.finite(x) ||
+        (if (strict) x <= lower else x < lower) || x > upper) {
+      stop(sprintf("Invalid `%s`: expected a finite scalar in the allowed range.", name),
+           call. = FALSE)
+    }
+  }
+  scalar(thresh, "thresh", 0)
+  scalar(alpha_floor, "alpha_floor", 0, 1)
+  scalar(alpha_mid, "alpha_mid", 0, 1, strict = TRUE)
+  if (alpha_mid >= 1) stop("`alpha_mid` must be less than 1.", call. = FALSE)
+  scalar(gamma_min, "gamma_min", 0, strict = TRUE)
+  scalar(gamma_max, "gamma_max", gamma_min)
+  if (!is.null(gamma)) scalar(gamma, "gamma", 0, strict = TRUE)
+  if (!is.null(knee)) scalar(knee, "knee", 0)
+  if (!is.null(cap)) scalar(cap, "cap", 0, strict = TRUE)
+  explicit_knee <- !is.null(knee)
   mags <- mags[is.finite(mags) & mags > 0]
-  knee <- if (isTRUE(thresh > 0)) {
+  knee <- if (explicit_knee) {
+    knee
+  } else if (isTRUE(thresh > 0)) {
     thresh
   } else if (length(mags)) {
     stats::median(mags)
@@ -672,6 +706,9 @@ soft_alpha_params <- function(mags, thresh = 0, cap = NULL, gamma = NULL,
     0
   }
   hi <- if (!is.null(cap) && is.finite(cap)) cap else if (length(mags)) max(mags) else knee + 1
+  if (explicit_knee && !is.null(cap) && hi <= knee) {
+    stop("`cap` must exceed `knee`.", call. = FALSE)
+  }
   if (!is.finite(hi) || hi <= knee) hi <- knee + 1
 
   if (is.null(gamma)) {
@@ -685,7 +722,7 @@ soft_alpha_params <- function(mags, thresh = 0, cap = NULL, gamma = NULL,
     }
     gamma <- min(max(gamma, gamma_min), gamma_max)
   }
-  list(lo = knee, hi = hi, gamma = gamma)
+  list(lo = knee, hi = hi, gamma = gamma, alpha_floor = alpha_floor)
 }
 
 #' Resolve a display-range argument to numeric limits

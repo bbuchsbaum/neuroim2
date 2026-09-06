@@ -1,5 +1,22 @@
 # neuroim2 0.19.0
 
+
+## Issue triage: explicit data and display controls
+
+- `SparseNeuroVec()` accepts an explicit `orientation` for matrix input. The
+  default retains the existing voxels-by-time convention for square matrices;
+  use `orientation = "time_x_voxels"` for a square `series()` result (#31).
+- `plot_overlay()` now defaults background scaling to `"data"`, retaining bright
+  tissue that robust quantile clipping can saturate in skull-stripped images.
+  `bg_range = "robust"` remains available for backgrounds with outliers (#19).
+- Soft overlays accept independent `alpha_knee`, `alpha_cap`, `alpha_floor`, and
+  auto-gamma policy controls. The exported `soft_alpha_params()` helper supports
+  curve previews, and both plot return forms record `soft_alpha` parameters.
+  Set knee, cap, and gamma explicitly for comparable opacity across calls (#21).
+- Bilateral-filter Details explain per-input bandwidth estimation and fixed
+  `range_scale` for batch comparisons, including the distinction between
+  per-volume filtering and joint four-dimensional filtering (#20).
+
 ## Sparse NIfTI writing
 
 `write_vec()` now writes `SparseNeuroVec` images directly through the public
@@ -7,6 +24,7 @@ API, preserving voxel/time ordering, geometry, volume labels, and zeros outside
 the mask in `.nii` and `.nii.gz` files (#36). Writing still expands the sparse
 values into a full voxel buffer, but no explicit `DenseNeuroVec` conversion is
 required.
+
 
 ## Index-only searchlight geometry
 
