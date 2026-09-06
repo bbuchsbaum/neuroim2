@@ -65,7 +65,8 @@ jobs:
 
       - name: Fail on tracked rendered vignette artifacts
         run: |
-          tracked="$(git ls-files 'vignettes/*.html' 'vignettes/*.md')"
+          # This HTML fragment is a source include, not a rendered vignette.
+          tracked="$(git ls-files 'vignettes/*.html' 'vignettes/*.md' ':!:vignettes/albers-header.html')"
           test -z "$tracked" || { echo "$tracked"; exit 1; }
         shell: bash
 
