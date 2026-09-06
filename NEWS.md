@@ -1,5 +1,13 @@
 # neuroim2 0.19.0
 
+## Sparse NIfTI writing
+
+`write_vec()` now writes `SparseNeuroVec` images directly through the public
+API, preserving voxel/time ordering, geometry, volume labels, and zeros outside
+the mask in `.nii` and `.nii.gz` files (#36). Writing still expands the sparse
+values into a full voxel buffer, but no explicit `DenseNeuroVec` conversion is
+required.
+
 ## Index-only searchlight geometry
 
 `searchlight_indices(mask, radius, nonzero = TRUE)` now compiles spherical

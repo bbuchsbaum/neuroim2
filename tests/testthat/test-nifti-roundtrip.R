@@ -1,3 +1,51 @@
+test_that("NIfTI round-trip preserves sparse voxel ordering, geometry and labels", {
+  sp <- NeuroSpace(c(2L, 2L, 2L), spacing = c(2, 3, 4),
+                   origin = c(-5, 7, 11))
+  ix <- c(1L, 3L, 6L)
+  mask_data <- array(FALSE, dim(sp))
+  mask_data[ix] <- TRUE
+  mask <- LogicalNeuroVol(mask_data, sp)
+  paths <- character()
+  on.exit(unlink(paths), add = TRUE)
+
+  # Non-square time x masked-voxel matrices also exercise singleton time and
+  # the 64-volume chunk boundary in sparse expansion.
+  for (nt in c(1L, 4L, 65L)) {
+    values <- matrix(seq_len(nt * length(ix)) / 10, nt, length(ix))
+    expected <- array(0, c(dim(sp), nt))
+    for (t in seq_len(nt)) {
+      for (k in seq_along(ix)) {
+        expected[ix[k] + (t - 1L) * prod(dim(sp))] <- values[t, k]
+      }
+    }
+    for (labels in list(character(), paste("trial", seq_len(nt)))) {
+      vec <- NeuroVec(values, add_dim(sp, nt), mask = mask,
+                      volume_labels = labels)
+      expect_true(methods::validObject(vec))
+      expect_equal(series(vec, ix), values)
+      expect_equal(as.array(methods::as(vec, "DenseNeuroVec")), expected)
+
+      for (suffix in c(".nii", ".nii.gz")) {
+        path <- tempfile(fileext = suffix)
+        paths <- c(paths, path)
+        write_vec(vec, path)
+        back <- read_vec(path)
+
+        expect_equal(dim(back), dim(vec))
+        expect_equal(as.array(back), expected, tolerance = 1e-6)
+        expect_equal(as.numeric(series(back, ix)), as.numeric(values),
+                     tolerance = 1e-6)
+        expect_equal(as.numeric(series(back, setdiff(seq_len(8L), ix))),
+                     rep(0, 5L * nt))
+        expect_equal(spacing(back), spacing(vec), tolerance = 1e-6)
+        expect_equal(origin(back), origin(vec), tolerance = 1e-6)
+        expect_equal(trans(space(back)), trans(space(vec)), tolerance = 1e-6)
+        expect_equal(volume_labels(back), labels)
+      }
+    }
+  }
+})
+
 test_that("NIfTI round-trip preserves DenseNeuroVol data and affine", {
   vol <- make_vol(c(10, 10, 10), spacing = c(2, 2, 2), origin = c(-10, -10, -10))
   tmp <- tempfile(fileext = ".nii.gz")
