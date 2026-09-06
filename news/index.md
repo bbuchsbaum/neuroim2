@@ -2,6 +2,27 @@
 
 ## neuroim2 0.19.0
 
+### Sparse NIfTI writing
+
+[`write_vec()`](https://bbuchsbaum.github.io/neuroim2/reference/write_vec-methods.md)
+now writes `SparseNeuroVec` images directly through the public API,
+preserving voxel/time ordering, geometry, volume labels, and zeros
+outside the mask in `.nii` and `.nii.gz` files
+([\#36](https://github.com/bbuchsbaum/neuroim2/issues/36)). Writing
+still expands the sparse values into a full voxel buffer, but no
+explicit `DenseNeuroVec` conversion is required.
+
+### Index-only searchlight geometry
+
+`searchlight_indices(mask, radius, nonzero = TRUE)` now compiles
+spherical searchlights directly to 1-based full-volume linear indices.
+It uses the same cached, anisotropic spherical-offset and compiled
+boundary-clipping machinery as the existing searchlight APIs, but
+constructs no ROI objects or coordinate matrices and never changes
+parallel execution state. The result records centre indices and spatial
+metadata so downstream sparse-measurement builders can use the geometry
+without taking on neuroim2’s analysis or execution policy.
+
 ### Slice plots now preserve anatomical orientation
 
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) for `NeuroVol`

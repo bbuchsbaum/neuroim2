@@ -486,6 +486,9 @@ Methods for kernel operations and feature extraction
   : Create an exhaustive searchlight iterator for voxel coordinates
   using spherical_roi
 
+- [`searchlight_indices()`](https://bbuchsbaum.github.io/neuroim2/reference/searchlight_indices.md)
+  : Compile spherical searchlights to full-volume linear indices
+
 - [`random_searchlight()`](https://bbuchsbaum.github.io/neuroim2/reference/random_searchlight.md)
   : Create a spherical random searchlight iterator
 
