@@ -17,6 +17,7 @@ plot_montage(
   subtitle = NULL,
   caption = NULL,
   style = c("light", "dark", "report"),
+  cbar_title = "value",
   crop = NULL,
   interpolate = NULL
 )
@@ -46,6 +47,11 @@ numeric \code{c(lo, hi)}.}
 \item{style}{Visual style: \code{"light"}, \code{"dark"}, or \code{"report"}
 (light card, dark cropped tiles, typography, and a colorbar -- matching
 \code{\link{plot_overlay}}'s report look).}
+
+\item{cbar_title}{Character; the quantity label drawn above the colorbar in
+\code{style = "report"}. Defaults to \code{"value"}. Set it to the
+quantity actually being displayed (e.g. \code{"Semipartial r"}) so the
+figure does not assert a quantity it is not showing.}
 
 \item{crop, interpolate}{Logical or \code{NULL}; crop to the brain bounding box
 / smooth the raster. \code{NULL} (default) enables both for
