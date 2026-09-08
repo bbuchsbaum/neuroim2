@@ -1,3 +1,24 @@
+# neuroim2 0.19.0.9000
+
+## Configurable colorbar titles
+
+`plot_overlay()`, `plot_montage()`, and `plot_ortho()` gain a `cbar_title`
+argument naming the quantity drawn above the report-style colorbar. It defaults
+to `"value"`, which is what the colorbar has always shown, so existing figures
+are unchanged. Set it to the statistic actually being displayed --
+`cbar_title = "Semipartial r"`, `"Delay coefficient (% signal change)"` -- so a
+figure does not assert a quantity it is not showing.
+
+## Sign-neutral overlay legend (behavior change)
+
+The `style = "report"` legend strip previously labeled its swatches "Positive
+activation" / "Negative activation", or "Activation" for unsigned maps. An
+overlay is not necessarily a BOLD activation map -- it may be a correlation
+difference, a semipartial r, or a regression coefficient -- so the labels are
+now "Positive" / "Negative" and "Suprathreshold". The accompanying "higher than
+threshold" / "lower than threshold" subtitles are unchanged. Figures using
+`style = "report"` will render with the new wording.
+
 # neuroim2 0.19.0
 
 ## Sparse NIfTI writing

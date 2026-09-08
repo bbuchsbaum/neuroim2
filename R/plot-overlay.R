@@ -40,7 +40,8 @@
 #' @param title,subtitle,caption Optional layout-level labels used when drawing.
 #' @param draw Logical; if `TRUE`, draw on the active graphics device. If
 #'   `FALSE`, return without drawing.
-#' @param style Visual style, either \code{"light"} or \code{"dark"}.
+#' @param style Visual style: \code{"light"}, \code{"dark"}, or
+#'   \code{"report"} (see Details).
 #' @param enhance Display-only enhancement of the (unsmoothed) statistical
 #'   \code{overlay}. \code{FALSE} (default) leaves it untouched; \code{TRUE}
 #'   applies \code{\link{enhance_stat_map}} with defaults; a named \code{list}
@@ -53,6 +54,12 @@
 #'   individual panels).
 #' @param colorbar Logical; when \code{assemble = TRUE}, append a colorbar for
 #'   the overlay statistic (with the threshold marked). Default \code{TRUE}.
+#' @param cbar_title Character; the quantity label drawn above the colorbar
+#'   when \code{assemble = TRUE} and \code{colorbar = TRUE}. Defaults to
+#'   \code{"value"}. Set it to the
+#'   statistic actually being displayed (e.g. \code{"Semipartial r"},
+#'   \code{"Delay coefficient (\% signal change)"}) so the figure does not
+#'   assert a quantity it is not showing.
 #' @param legend Logical or \code{NULL}; when \code{assemble = TRUE}, add a
 #'   bottom legend strip (positive/negative swatches, threshold, plane). \code{NULL}
 #'   (default) shows it for \code{style = "report"} only.
@@ -90,10 +97,12 @@ plot_overlay <- function(
   alpha_gamma = NULL,
   ov_cap = NULL, ncol = 3L, title = NULL, subtitle = NULL, caption = NULL,
   draw = TRUE, style = c("light", "dark", "report"), enhance = FALSE,
-  assemble = TRUE, colorbar = TRUE, legend = NULL, crop = NULL, interpolate = NULL
+  assemble = TRUE, colorbar = TRUE, cbar_title = "value", legend = NULL,
+  crop = NULL, interpolate = NULL
 ) {
   ov_cmap_missing <- missing(ov_cmap)
   assert_same_neuro_grid(bgvol, overlay = overlay)
+  cbar_title <- validate_cbar_title(cbar_title)
   ov_alpha_mode <- match.arg(ov_alpha_mode)
   style <- match.arg(style)
 
@@ -264,7 +273,7 @@ plot_overlay <- function(
     combined <- assemble_figure(
       patchwork::wrap_plots(plots, ncol = ncol),
       lim = ov_lim, cmap = ov_cmap, thresh = ov_thresh, style = style,
-      colorbar = colorbar, legend = leg,
+      colorbar = colorbar, cbar_title = cbar_title, legend = leg,
       title = title, subtitle = subtitle, caption = caption
     )
     if (isTRUE(draw)) print(combined)

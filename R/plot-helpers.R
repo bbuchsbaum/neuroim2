@@ -442,7 +442,7 @@ compute_limits <- function(x, mode = c("robust","data"), probs = c(.02,.98)) {
 #' Shared color tokens for the plotting styles
 #'
 #' \code{"report"} renders dark brain tiles on a light "card" with bold/italic
-#' typography (see the activation-map look); \code{"dark"}/\code{"light"} are the
+#' typography (see the report look); \code{"dark"}/\code{"light"} are the
 #' classic single-tone styles.
 #'
 #' @keywords internal
@@ -578,10 +578,26 @@ compute_crop_window <- function(bgvol, overlay, zlevels, along, bg_thresh,
        ylim = c(ys[1] - pady, ys[2] + pady))
 }
 
+#' Validate a colorbar title
+#'
+#' @param x Candidate title.
+#' @return A length-1 character vector.
+#' @keywords internal
+#' @noRd
+validate_cbar_title <- function(x) {
+  if (!is.character(x) || length(x) != 1L || is.na(x)) {
+    stop("`cbar_title` must be a single non-NA character string.", call. = FALSE)
+  }
+  x
+}
+
 #' Horizontal legend strip for an assembled overlay figure
 #'
 #' @param thresh Threshold value (0 to omit the threshold entry).
-#' @param pos_col,neg_col Swatch colors for positive/negative activation.
+#' @param pos_col,neg_col Swatch colors for positive/negative values. The
+#'   labels are sign-neutral because the overlay is not necessarily an
+#'   activation map -- it may be a correlation, a semipartial r, a regression
+#'   coefficient, or any other signed quantity.
 #' @param symmetric Logical; show both pos/neg (signed) or a single entry.
 #' @param style "light"/"dark"/"report".
 #' @param plane Plane label ("Axial"/"Coronal"/"Sagittal").
@@ -609,10 +625,10 @@ make_overlay_legend <- function(thresh, pos_col, neg_col, symmetric = TRUE,
     ggplot2::coord_cartesian(xlim = c(0, 1), ylim = c(0, 1), expand = FALSE)
 
   if (isTRUE(symmetric)) {
-    p <- swatch(p, 0.02, pos_col, "Positive activation", "higher than threshold")
-    p <- swatch(p, 0.30, neg_col, "Negative activation", "lower than threshold")
+    p <- swatch(p, 0.02, pos_col, "Positive", "higher than threshold")
+    p <- swatch(p, 0.30, neg_col, "Negative", "lower than threshold")
   } else {
-    p <- swatch(p, 0.02, pos_col, "Activation", "above threshold")
+    p <- swatch(p, 0.02, pos_col, "Suprathreshold", "above threshold")
   }
 
   if (is.finite(thresh) && thresh > 0) {
