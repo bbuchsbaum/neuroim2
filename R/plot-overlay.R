@@ -54,12 +54,6 @@
 #'   individual panels).
 #' @param colorbar Logical; when \code{assemble = TRUE}, append a colorbar for
 #'   the overlay statistic (with the threshold marked). Default \code{TRUE}.
-#' @param cbar_title Character; the quantity label drawn above the colorbar
-#'   when \code{assemble = TRUE} and \code{colorbar = TRUE}. Defaults to
-#'   \code{"value"}. Set it to the
-#'   statistic actually being displayed (e.g. \code{"Semipartial r"},
-#'   \code{"Delay coefficient (\% signal change)"}) so the figure does not
-#'   assert a quantity it is not showing.
 #' @param legend Logical or \code{NULL}; when \code{assemble = TRUE}, add a
 #'   bottom legend strip (positive/negative swatches, threshold, plane). \code{NULL}
 #'   (default) shows it for \code{style = "report"} only.
@@ -68,6 +62,12 @@
 #'   crops for \code{style = "report"} only.
 #' @param interpolate Logical or \code{NULL}; smooth the background raster.
 #'   \code{NULL} (default) interpolates for \code{style = "report"} only.
+#' @param cbar_title Character; the quantity label drawn above the colorbar
+#'   when \code{assemble = TRUE} and \code{colorbar = TRUE}. Defaults to
+#'   \code{"value"}. Set it to the
+#'   statistic actually being displayed (e.g. \code{"Semipartial r"},
+#'   \code{"Delay coefficient (\% signal change)"}) so the figure does not
+#'   assert a quantity it is not showing.
 #'
 #' @details
 #' \strong{Return value.} By default (\code{assemble = TRUE}) the return value is
@@ -97,8 +97,8 @@ plot_overlay <- function(
   alpha_gamma = NULL,
   ov_cap = NULL, ncol = 3L, title = NULL, subtitle = NULL, caption = NULL,
   draw = TRUE, style = c("light", "dark", "report"), enhance = FALSE,
-  assemble = TRUE, colorbar = TRUE, cbar_title = "value", legend = NULL,
-  crop = NULL, interpolate = NULL
+  assemble = TRUE, colorbar = TRUE, legend = NULL,
+  crop = NULL, interpolate = NULL, cbar_title = "value"
 ) {
   ov_cmap_missing <- missing(ov_cmap)
   assert_same_neuro_grid(bgvol, overlay = overlay)

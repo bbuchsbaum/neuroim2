@@ -24,6 +24,27 @@ signed_overlay_fixture <- function() {
   list(bg = bg, overlay = neuroim2::NeuroVol(arr, sp))
 }
 
+test_that("cbar_title is appended after existing parameters", {
+  # Inserting cbar_title before legend/crop/interpolate would rebind
+  # positional callers of those arguments (e.g. a logical legend) onto
+  # cbar_title and fail validate_cbar_title(). Keep it last.
+  overlay_names <- names(formals(neuroim2::plot_overlay))
+  expect_identical(
+    overlay_names[match(c("legend", "crop", "interpolate", "cbar_title"), overlay_names)],
+    c("legend", "crop", "interpolate", "cbar_title")
+  )
+  expect_gt(
+    match("cbar_title", overlay_names),
+    match("interpolate", overlay_names)
+  )
+
+  for (fn in list(neuroim2::plot_montage, neuroim2::plot_ortho)) {
+    nm <- names(formals(fn))
+    expect_gt(match("cbar_title", nm), match("interpolate", nm))
+    expect_gt(match("cbar_title", nm), match("crop", nm))
+  }
+})
+
 test_that("plot_overlay forwards cbar_title to the assembled colorbar", {
   fx <- signed_overlay_fixture()
   title <- "Delay coefficient (% signal change)"

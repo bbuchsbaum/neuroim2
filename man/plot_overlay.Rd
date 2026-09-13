@@ -29,10 +29,10 @@ plot_overlay(
   enhance = FALSE,
   assemble = TRUE,
   colorbar = TRUE,
-  cbar_title = "value",
   legend = NULL,
   crop = NULL,
-  interpolate = NULL
+  interpolate = NULL,
+  cbar_title = "value"
 )
 }
 \arguments{
@@ -108,13 +108,6 @@ individual panels).}
 \item{colorbar}{Logical; when \code{assemble = TRUE}, append a colorbar for
 the overlay statistic (with the threshold marked). Default \code{TRUE}.}
 
-\item{cbar_title}{Character; the quantity label drawn above the colorbar
-when \code{assemble = TRUE} and \code{colorbar = TRUE}. Defaults to
-\code{"value"}. Set it to the
-statistic actually being displayed (e.g. \code{"Semipartial r"},
-\code{"Delay coefficient (\% signal change)"}) so the figure does not
-assert a quantity it is not showing.}
-
 \item{legend}{Logical or \code{NULL}; when \code{assemble = TRUE}, add a
 bottom legend strip (positive/negative swatches, threshold, plane). \code{NULL}
 (default) shows it for \code{style = "report"} only.}
@@ -125,6 +118,13 @@ crops for \code{style = "report"} only.}
 
 \item{interpolate}{Logical or \code{NULL}; smooth the background raster.
 \code{NULL} (default) interpolates for \code{style = "report"} only.}
+
+\item{cbar_title}{Character; the quantity label drawn above the colorbar
+when \code{assemble = TRUE} and \code{colorbar = TRUE}. Defaults to
+\code{"value"}. Set it to the
+statistic actually being displayed (e.g. \code{"Semipartial r"},
+\code{"Delay coefficient (\% signal change)"}) so the figure does not
+assert a quantity it is not showing.}
 }
 \description{
 Works without extra packages by colorizing both layers to rasters and stacking

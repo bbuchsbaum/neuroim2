@@ -20,9 +20,9 @@ plot_ortho(
   draw = TRUE,
   style = c("light", "dark", "report"),
   enhance = FALSE,
-  cbar_title = "value",
   crop = NULL,
-  interpolate = NULL
+  interpolate = NULL,
+  cbar_title = "value"
 )
 }
 \arguments{
@@ -61,14 +61,14 @@ device. If `FALSE`, only return the ggplot objects invisibly.}
 \code{\link{enhance_stat_map}} with defaults; a named \code{list} is
 forwarded as arguments to \code{enhance_stat_map()}.}
 
+\item{crop, interpolate}{Logical or \code{NULL}; crop panels to the brain
+bounding box / smooth the raster. \code{NULL} (default) enables both for
+\code{style = "report"} only.}
+
 \item{cbar_title}{Character; the quantity label drawn above the colorbar in
 \code{style = "report"}. Defaults to \code{"value"}. Set it to the
 quantity actually being displayed (e.g. \code{"Semipartial r"}) so the
 figure does not assert a quantity it is not showing.}
-
-\item{crop, interpolate}{Logical or \code{NULL}; crop panels to the brain
-bounding box / smooth the raster. \code{NULL} (default) enables both for
-\code{style = "report"} only.}
 }
 \description{
 Creates axial, coronal, and sagittal panels at a given coordinate with

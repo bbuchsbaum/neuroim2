@@ -26,13 +26,13 @@
 #'   \code{vol}. \code{FALSE} (default) leaves it untouched; \code{TRUE} applies
 #'   \code{\link{enhance_stat_map}} with defaults; a named \code{list} is
 #'   forwarded as arguments to \code{enhance_stat_map()}.
+#' @param crop,interpolate Logical or \code{NULL}; crop panels to the brain
+#'   bounding box / smooth the raster. \code{NULL} (default) enables both for
+#'   \code{style = "report"} only.
 #' @param cbar_title Character; the quantity label drawn above the colorbar in
 #'   \code{style = "report"}. Defaults to \code{"value"}. Set it to the
 #'   quantity actually being displayed (e.g. \code{"Semipartial r"}) so the
 #'   figure does not assert a quantity it is not showing.
-#' @param crop,interpolate Logical or \code{NULL}; crop panels to the brain
-#'   bounding box / smooth the raster. \code{NULL} (default) enables both for
-#'   \code{style = "report"} only.
 #' @details The affine determines which native voxel axis is nearest each
 #'   anatomical plane and how that plane must be permuted or flipped for
 #'   display. Oblique images are shown on their regular native voxel planes;
@@ -45,8 +45,7 @@ plot_ortho <- function(
   crosshair = TRUE, annotate = TRUE, downsample = 1L,
   title = NULL, subtitle = NULL, caption = NULL,
   draw = TRUE, style = c("light", "dark", "report"), enhance = FALSE,
-  cbar_title = "value",
-  crop = NULL, interpolate = NULL
+  crop = NULL, interpolate = NULL, cbar_title = "value"
 ) {
   cbar_title <- validate_cbar_title(cbar_title)
   unit <- match.arg(unit)
