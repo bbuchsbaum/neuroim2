@@ -34,7 +34,8 @@ plot_overlay(
   colorbar = TRUE,
   legend = NULL,
   crop = NULL,
-  interpolate = NULL
+  interpolate = NULL,
+  cbar_title = "value"
 )
 ```
 
@@ -130,7 +131,7 @@ plot_overlay(
 
 - style:
 
-  Visual style, either `"light"` or `"dark"`.
+  Visual style: `"light"`, `"dark"`, or `"report"` (see Details).
 
 - enhance:
 
@@ -170,6 +171,14 @@ plot_overlay(
 
   Logical or `NULL`; smooth the background raster. `NULL` (default)
   interpolates for `style = "report"` only.
+
+- cbar_title:
+
+  Character; the quantity label drawn above the colorbar when
+  `assemble = TRUE` and `colorbar = TRUE`. Defaults to `"value"`. Set it
+  to the statistic actually being displayed (e.g. `"Semipartial r"`,
+  `"Delay coefficient (% signal change)"`) so the figure does not assert
+  a quantity it is not showing.
 
 ## Details
 

@@ -24,7 +24,8 @@ plot_ortho(
   style = c("light", "dark", "report"),
   enhance = FALSE,
   crop = NULL,
-  interpolate = NULL
+  interpolate = NULL,
+  cbar_title = "value"
 )
 ```
 
@@ -97,6 +98,13 @@ plot_ortho(
 
   Logical or `NULL`; crop panels to the brain bounding box / smooth the
   raster. `NULL` (default) enables both for `style = "report"` only.
+
+- cbar_title:
+
+  Character; the quantity label drawn above the colorbar in
+  `style = "report"`. Defaults to `"value"`. Set it to the quantity
+  actually being displayed (e.g. `"Semipartial r"`) so the figure does
+  not assert a quantity it is not showing.
 
 ## Details
 

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">neuroim2</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.19.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.19.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,17 @@
       <small>Source: <a href="https://github.com/bbuchsbaum/neuroim2/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.19.0.9000" id="neuroim2-01909000">neuroim2 0.19.0.9000<a class="anchor" aria-label="anchor" href="#neuroim2-01909000"></a></h2>
+<div class="section level3">
+<h3 id="configurable-colorbar-titles-0-19-0-9000">Configurable colorbar titles<a class="anchor" aria-label="anchor" href="#configurable-colorbar-titles-0-19-0-9000"></a></h3>
+<p><code><a href="../reference/plot_overlay.html">plot_overlay()</a></code>, <code><a href="../reference/plot_montage.html">plot_montage()</a></code>, and <code><a href="../reference/plot_ortho.html">plot_ortho()</a></code> gain a <code>cbar_title</code> argument naming the quantity drawn above the report-style colorbar. It defaults to <code>"value"</code>, which is what the colorbar has always shown, so existing figures are unchanged. The new argument is appended after the existing parameters so positional callers of <code>legend</code> / <code>crop</code> / <code>interpolate</code> keep working. Set it to the statistic actually being displayed – <code>cbar_title = "Semipartial r"</code>, <code>"Delay coefficient (% signal change)"</code> – so a figure does not assert a quantity it is not showing.</p>
+</div>
+<div class="section level3">
+<h3 id="sign-neutral-overlay-legend-behavior-change-0-19-0-9000">Sign-neutral overlay legend (behavior change)<a class="anchor" aria-label="anchor" href="#sign-neutral-overlay-legend-behavior-change-0-19-0-9000"></a></h3>
+<p>The <code>style = "report"</code> legend strip previously labeled its swatches “Positive activation” / “Negative activation”, or “Activation” for unsigned maps. An overlay is not necessarily a BOLD activation map – it may be a correlation difference, a semipartial r, or a regression coefficient – so the labels are now “Positive” / “Negative” and “Suprathreshold”. The accompanying “higher than threshold” / “lower than threshold” subtitles are unchanged. Figures using <code>style = "report"</code> will render with the new wording.</p>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.19.0" id="neuroim2-0190">neuroim2 0.19.0<a class="anchor" aria-label="anchor" href="#neuroim2-0190"></a></h2>
 <div class="section level3">

@@ -20,7 +20,8 @@ plot_montage(
   caption = NULL,
   style = c("light", "dark", "report"),
   crop = NULL,
-  interpolate = NULL
+  interpolate = NULL,
+  cbar_title = "value"
 )
 ```
 
@@ -77,3 +78,10 @@ plot_montage(
   Logical or `NULL`; crop to the brain bounding box / smooth the raster.
   `NULL` (default) enables both for `style = "report"` only. (Cropping
   applies to the volume path.)
+
+- cbar_title:
+
+  Character; the quantity label drawn above the colorbar in
+  `style = "report"`. Defaults to `"value"`. Set it to the quantity
+  actually being displayed (e.g. `"Semipartial r"`) so the figure does
+  not assert a quantity it is not showing.
