@@ -722,7 +722,8 @@ soft_alpha_params <- function(mags, thresh = 0, cap = NULL, gamma = NULL,
     0
   }
   hi <- if (!is.null(cap) && is.finite(cap)) cap else if (length(mags)) max(mags) else knee + 1
-  if (explicit_knee && !is.null(cap) && hi <= knee) {
+  # Honor an explicit cap even when the knee is derived from thresh/median.
+  if (!is.null(cap) && hi <= knee) {
     stop("`cap` must exceed `knee`.", call. = FALSE)
   }
   if (!is.finite(hi) || hi <= knee) hi <- knee + 1

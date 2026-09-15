@@ -52,8 +52,12 @@ test_that("soft alpha controls affect rendered pixels independently of color", {
 
 test_that("soft alpha validates controls and supports transparent empty input", {
   for (args in list(list(gamma=0),list(knee=-1),list(cap=Inf),list(alpha_floor=2),
-                    list(alpha_mid=1),list(gamma_min=2,gamma_max=1),list(knee=3,cap=2))) {
-    expect_error(do.call(soft_alpha_params,c(list(mags=1:10),args)))
+                    list(alpha_mid=1),list(gamma_min=2,gamma_max=1),list(knee=3,cap=2),
+                    # Explicit cap must beat a derived (median) knee, not only an
+                    # explicit one — otherwise soft_alpha_params(1:100, cap=10)
+                    # silently replaces the requested cap with knee+1.
+                    list(cap=10))) {
+    expect_error(do.call(soft_alpha_params,c(list(mags=1:100),args)))
   }
   p <- soft_alpha_params(c(NA,Inf,0))
   expect_true(all(is.finite(unlist(p))))
