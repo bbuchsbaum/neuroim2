@@ -37,7 +37,8 @@ plot_overlay(
   alpha_floor = 0,
   alpha_mid = 0.2,
   gamma_min = 1.5,
-  gamma_max = 5
+  gamma_max = 5,
+  cbar_title = "value"
 )
 }
 \arguments{
@@ -98,7 +99,8 @@ of the low-value range toward transparency.}
 \item{draw}{Logical; if `TRUE`, draw on the active graphics device. If
 `FALSE`, return without drawing.}
 
-\item{style}{Visual style, either \code{"light"} or \code{"dark"}.}
+\item{style}{Visual style: \code{"light"}, \code{"dark"}, or
+\code{"report"} (see Details).}
 
 \item{enhance}{Display-only enhancement of the (unsmoothed) statistical
 \code{overlay}. \code{FALSE} (default) leaves it untouched; \code{TRUE}
@@ -138,6 +140,13 @@ the opacity mapping across calls.}
 \item{alpha_mid, gamma_min, gamma_max}{Auto-gamma policy passed to
 \code{\link{soft_alpha_params}}. Defaults target 0.2 at the median
 supra-knee magnitude with gamma clamped to [1.5, 5].}
+
+\item{cbar_title}{Character; the quantity label drawn above the colorbar
+when \code{assemble = TRUE} and \code{colorbar = TRUE}. Defaults to
+\code{"value"}. Set it to the
+statistic actually being displayed (e.g. \code{"Semipartial r"},
+\code{"Delay coefficient (\% signal change)"}) so the figure does not
+assert a quantity it is not showing.}
 }
 \description{
 Works without extra packages by colorizing both layers to rasters and stacking
