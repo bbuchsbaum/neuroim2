@@ -21,7 +21,8 @@ plot_ortho(
   style = c("light", "dark", "report"),
   enhance = FALSE,
   crop = NULL,
-  interpolate = NULL
+  interpolate = NULL,
+  cbar_title = "value"
 )
 }
 \arguments{
@@ -63,6 +64,11 @@ forwarded as arguments to \code{enhance_stat_map()}.}
 \item{crop, interpolate}{Logical or \code{NULL}; crop panels to the brain
 bounding box / smooth the raster. \code{NULL} (default) enables both for
 \code{style = "report"} only.}
+
+\item{cbar_title}{Character; the quantity label drawn above the colorbar in
+\code{style = "report"}. Defaults to \code{"value"}. Set it to the
+quantity actually being displayed (e.g. \code{"Semipartial r"}) so the
+figure does not assert a quantity it is not showing.}
 }
 \description{
 Creates axial, coronal, and sagittal panels at a given coordinate with
@@ -70,9 +76,9 @@ harmonized aesthetics. Returns the three ggplot objects invisibly after
 drawing, or without drawing when \code{draw = FALSE}.
 }
 \details{
-The affine determines which native voxel axis is nearest each anatomical
-plane and how that plane must be permuted or flipped for display. Oblique
-images are shown on their regular native voxel planes; values are not silently
-resampled. Use \code{deoblique()} or \code{resample_to()} first when true
-cardinal-plane sections are required.
+The affine determines which native voxel axis is nearest each
+  anatomical plane and how that plane must be permuted or flipped for
+  display. Oblique images are shown on their regular native voxel planes;
+  values are not silently resampled. Use \code{deoblique()} or
+  \code{resample_to()} first when true cardinal-plane sections are required.
 }

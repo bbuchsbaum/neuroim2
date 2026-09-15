@@ -18,7 +18,8 @@ plot_montage(
   caption = NULL,
   style = c("light", "dark", "report"),
   crop = NULL,
-  interpolate = NULL
+  interpolate = NULL,
+  cbar_title = "value"
 )
 }
 \arguments{
@@ -50,6 +51,11 @@ numeric \code{c(lo, hi)}.}
 \item{crop, interpolate}{Logical or \code{NULL}; crop to the brain bounding box
 / smooth the raster. \code{NULL} (default) enables both for
 \code{style = "report"} only. (Cropping applies to the volume path.)}
+
+\item{cbar_title}{Character; the quantity label drawn above the colorbar in
+\code{style = "report"}. Defaults to \code{"value"}. Set it to the
+quantity actually being displayed (e.g. \code{"Semipartial r"}) so the
+figure does not assert a quantity it is not showing.}
 }
 \description{
 This avoids extra dependencies by using a single ggplot with facets

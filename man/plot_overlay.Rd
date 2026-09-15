@@ -31,7 +31,8 @@ plot_overlay(
   colorbar = TRUE,
   legend = NULL,
   crop = NULL,
-  interpolate = NULL
+  interpolate = NULL,
+  cbar_title = "value"
 )
 }
 \arguments{
@@ -89,7 +90,8 @@ of the low-value range toward transparency.}
 \item{draw}{Logical; if `TRUE`, draw on the active graphics device. If
 `FALSE`, return without drawing.}
 
-\item{style}{Visual style, either \code{"light"} or \code{"dark"}.}
+\item{style}{Visual style: \code{"light"}, \code{"dark"}, or
+\code{"report"} (see Details).}
 
 \item{enhance}{Display-only enhancement of the (unsmoothed) statistical
 \code{overlay}. \code{FALSE} (default) leaves it untouched; \code{TRUE}
@@ -116,6 +118,13 @@ crops for \code{style = "report"} only.}
 
 \item{interpolate}{Logical or \code{NULL}; smooth the background raster.
 \code{NULL} (default) interpolates for \code{style = "report"} only.}
+
+\item{cbar_title}{Character; the quantity label drawn above the colorbar
+when \code{assemble = TRUE} and \code{colorbar = TRUE}. Defaults to
+\code{"value"}. Set it to the
+statistic actually being displayed (e.g. \code{"Semipartial r"},
+\code{"Delay coefficient (\% signal change)"}) so the figure does not
+assert a quantity it is not showing.}
 }
 \description{
 Works without extra packages by colorizing both layers to rasters and stacking

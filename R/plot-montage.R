@@ -21,6 +21,10 @@
 #' @param crop,interpolate Logical or \code{NULL}; crop to the brain bounding box
 #'   / smooth the raster. \code{NULL} (default) enables both for
 #'   \code{style = "report"} only. (Cropping applies to the volume path.)
+#' @param cbar_title Character; the quantity label drawn above the colorbar in
+#'   \code{style = "report"}. Defaults to \code{"value"}. Set it to the
+#'   quantity actually being displayed (e.g. \code{"Semipartial r"}) so the
+#'   figure does not assert a quantity it is not showing.
 #' @export
 plot_montage <- function(
   x, zlevels = NULL, along = 3L,
@@ -28,8 +32,9 @@ plot_montage <- function(
   ncol = 6L, downsample = 1L,
   title = NULL, subtitle = NULL, caption = NULL,
   style = c("light", "dark", "report"),
-  crop = NULL, interpolate = NULL
+  crop = NULL, interpolate = NULL, cbar_title = "value"
 ) {
+  cbar_title <- validate_cbar_title(cbar_title)
   style <- match.arg(style)
   is_report <- identical(style, "report")
   do_crop   <- if (is.null(crop)) is_report else isTRUE(crop)
@@ -111,7 +116,8 @@ plot_montage <- function(
   if (is_report) {
     p <- p + report_facet_theme()
     return(assemble_figure(p, lim = lim, cmap = cmap, thresh = 0, style = "report",
-                           colorbar = TRUE, title = title, subtitle = subtitle,
+                           colorbar = TRUE, cbar_title = cbar_title,
+                           title = title, subtitle = subtitle,
                            caption = caption))
   }
 
