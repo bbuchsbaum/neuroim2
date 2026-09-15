@@ -722,8 +722,12 @@ soft_alpha_params <- function(mags, thresh = 0, cap = NULL, gamma = NULL,
     0
   }
   hi <- if (!is.null(cap) && is.finite(cap)) cap else if (length(mags)) max(mags) else knee + 1
-  # Honor an explicit cap even when the knee is derived from thresh/median.
-  if (!is.null(cap) && hi <= knee) {
+  # Reject an explicit cap that sits below the resolved knee (including a
+  # derived median/thresh knee). Equality is only fatal when the knee was also
+  # supplied explicitly; otherwise a data-driven color-scale cap that lands on
+  # the median (e.g. constant supra-threshold magnitudes) still falls through
+  # to the knee+1 rescue below so soft overlays keep working.
+  if (!is.null(cap) && (hi < knee || (explicit_knee && hi <= knee))) {
     stop("`cap` must exceed `knee`.", call. = FALSE)
   }
   if (!is.finite(hi) || hi <= knee) hi <- knee + 1
