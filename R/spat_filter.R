@@ -423,6 +423,15 @@ guided_filter <- function(vol, radius = 4, epsilon = 0.7^2) {
 #'   input values inside \code{mask}. Supply a
 #'   fixed value to apply the same range bandwidth across observed and null maps.
 #'
+#' @details
+#' With \code{range_scale = NULL}, the intensity bandwidth is estimated separately
+#' for each input volume. Equal \code{intensity_sigma} values therefore do not
+#' imply equal bandwidths across subjects, contrasts, or observed/null maps.
+#' For batch or group workflows, choose one positive finite \code{range_scale}
+#' from a reference or pooled in-mask intensity distribution and reuse it, along
+#' with the same \code{intensity_sigma}, for every map in comparable intensity
+#' units. The effective bandwidth is \code{intensity_sigma * range_scale}.
+#'
 #' @return A smoothed image of class \code{\linkS4class{NeuroVol}}.
 #'
 #' @examples
@@ -561,6 +570,15 @@ bilateral_filter_vec <- function(vec, mask, spatial_sigma=2, intensity_sigma=1, 
 #'   across observed and null data.
 #'
 #' @details
+#' With \code{range_scale = NULL}, one intensity scale is estimated from all
+#' finite in-mask values across time in this 4-D input. It is not estimated
+#' separately for each time point, but separate calls on different subjects or
+#' contrasts can still use different bandwidths. For batch/group comparisons,
+#' reuse a positive finite \code{range_scale} and the same \code{intensity_sigma}
+#' across inputs in comparable intensity units. In contrast,
+#' \code{bilateral_filter_vec()} estimates a separate scale for each volume
+#' when \code{range_scale = NULL}.
+#'
 #' Parameter guidance and units:
 #' - spatial_sigma: Measured in physical units (millimeters). Distances are
 #'   computed using \code{spacing(vec)[1:3]}, so choose \code{spatial_sigma}
