@@ -37,8 +37,22 @@ jobs:
             install_path = file.path(normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/"), "package")
           )
           print(cov)
+          pct <- round(covr::percent_coverage(cov), 2)
+          cat(sprintf("Overall coverage: %s%%\n", pct))
+          writeLines(as.character(pct), "coverage-percent.txt")
+          # Explicit Cobertura artifact for Codecov (do not rely on auto-search).
           covr::to_cobertura(cov, filename = "cobertura.xml")
+          stopifnot(file.exists("cobertura.xml"), file.info("cobertura.xml")$size > 0)
         shell: Rscript {0}
+
+      - name: Upload Cobertura artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-coverage
+          path: |
+            cobertura.xml
+            coverage-percent.txt
+          if-no-files-found: error
 
       - name: Upload coverage to Codecov
         # Dependabot runs have restricted tokens even for same-repository PRs.
@@ -47,12 +61,112 @@ jobs:
           (github.event_name != 'pull_request' ||
            (github.event.pull_request.head.repo.full_name == github.repository &&
             github.event.pull_request.user.login != 'dependabot[bot]'))
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         with:
           disable_search: true
           fail_ci_if_error: true
           files: ./cobertura.xml
+          plugins: noop
           use_oidc: true
+
+      - name: Report Codecov publication status
+        if: >-
+          github.actor != 'dependabot[bot]' &&
+          (github.event_name != 'pull_request' ||
+           (github.event.pull_request.head.repo.full_name == github.repository &&
+            github.event.pull_request.user.login != 'dependabot[bot]'))
+        env:
+          COVERAGE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+          CODECOV_OWNER: ${{ github.repository_owner }}
+          CODECOV_REPO: ${{ github.event.repository.name }}
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import json
+          import os
+          import urllib.error
+          import urllib.request
+
+          owner = os.environ["CODECOV_OWNER"]
+          repo = os.environ["CODECOV_REPO"]
+          sha = os.environ["COVERAGE_SHA"]
+          repo_api = f"https://codecov.io/api/v2/github/{owner}/repos/{repo}/"
+          commit_api = f"{repo_api}commits/{sha}"
+
+          def get_json(url):
+              req = urllib.request.Request(url, headers={"Accept": "application/json"})
+              with urllib.request.urlopen(req, timeout=30) as resp:
+                  return resp.status, json.load(resp)
+
+          print(f"Checking Codecov repo status at {repo_api}")
+          try:
+              _, repo_json = get_json(repo_api)
+          except Exception as err:
+              print(f"::warning::Unable to query Codecov repo API: {err}")
+              repo_json = None
+
+          if repo_json is None:
+              activated = None
+          else:
+              activated = repo_json.get("activated")
+              active = repo_json.get("active")
+              totals = repo_json.get("totals") or {}
+              print(
+                  f"Codecov active={active} activated={activated} "
+                  f"badge_totals_coverage={totals.get('coverage')}"
+              )
+
+          print(f"Checking exact-SHA report at {commit_api}")
+          try:
+              status, commit_json = get_json(commit_api)
+              commit_totals = commit_json.get("totals") or {}
+              print(
+                  f"Hosted exact-SHA coverage={commit_totals.get('coverage')} "
+                  f"state={commit_json.get('state')} (HTTP {status})"
+              )
+          except urllib.error.HTTPError as err:
+              print(f"No hosted exact-SHA report for {sha} (HTTP {err.code}).")
+              print(
+                  "::warning::Codecov has not published a report for this SHA yet."
+              )
+          except Exception as err:
+              print(f"::warning::Unable to query Codecov commit API: {err}")
+
+          if activated is not True:
+              state = "unknown" if activated is None else "false"
+              print(
+                  "::warning::Codecov repository activation is still required "
+                  f"(API activated={state})."
+              )
+              print(
+                  "Repository administration steps (cannot be completed from this workflow):"
+              )
+              print(
+                  "1. Sign in at https://app.codecov.io/login/gh as a GitHub admin "
+                  f"of {owner}/{repo}."
+              )
+              print(
+                  f"2. Open https://app.codecov.io/gh/{owner}/{repo}/settings "
+                  "and Activate the repository."
+              )
+              print(
+                  "3. Confirm the Codecov GitHub App is installed for this repository "
+                  "(https://github.com/apps/codecov)."
+              )
+              print(
+                  "4. Do not add a long-lived CODECOV_TOKEN; this workflow authenticates "
+                  "with short-lived OIDC."
+              )
+              print(
+                  "5. After activation, re-run test-coverage on the default branch and "
+                  "confirm an exact-SHA report exists."
+              )
+              print(
+                  "Queued uploads and a local coverage percentage are not hosted "
+                  "publication evidence."
+              )
+          PY
+        shell: bash
 
       - name: Show testthat output
         if: always()
