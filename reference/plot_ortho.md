@@ -1,8 +1,9 @@
-# Orthogonal three-plane view with optional crosshairs
+# Orthogonal three-plane view with optional crosshairs and overlay
 
-Creates axial, coronal, and sagittal panels at a given coordinate with
-harmonized aesthetics. Returns the three ggplot objects invisibly after
-drawing, or without drawing when `draw = FALSE`.
+Draws sagittal, coronal and axial sections through one point, optionally
+with a thresholded statistical map on top (the classic "stat map" view).
+All three views share one physical scale and one head-bounding-box crop,
+so the crosshair lines up across views.
 
 ## Usage
 
@@ -20,12 +21,23 @@ plot_ortho(
   title = NULL,
   subtitle = NULL,
   caption = NULL,
-  draw = TRUE,
+  draw = FALSE,
   style = c("light", "dark", "report"),
   enhance = FALSE,
-  crop = NULL,
-  interpolate = NULL,
-  cbar_title = "value"
+  crop = TRUE,
+  interpolate = TRUE,
+  cbar_title = "value",
+  colorbar = NULL,
+  assemble = TRUE,
+  overlay = NULL,
+  ov_thresh = 0,
+  ov_cmap = NULL,
+  ov_range = c("robust", "data"),
+  ov_alpha = 1,
+  ov_alpha_mode = c("binary", "proportional", "ramp", "soft"),
+  ov_symmetric = NULL,
+  ov_cap = NULL,
+  canvas = NULL
 )
 ```
 
@@ -33,38 +45,39 @@ plot_ortho(
 
 - vol:
 
-  A 3D volume handled by \`slice()\`.
+  A 3D background volume.
 
 - coord:
 
-  Length-3 coordinate of the target point. Interpreted as voxel indices
-  by default; set \`unit = "mm"\` to convert using \`coord_to_grid()\`
-  if available in your environment.
+  Length-3 coordinate of the target point: voxel indices
+  (`unit = "index"`, default) or world coordinates in mm
+  (`unit = "mm"`). `NULL` (default) uses the peak absolute value of
+  `overlay` when one is given, otherwise the volume centre.
 
 - unit:
 
-  "index" or "mm".
+  `"index"` or `"mm"`: how `coord` is interpreted.
 
 - cmap:
 
-  Palette for the slices.
+  Palette for the background.
 
 - range:
 
-  Intensity limits shared by all panels: `"robust"`, `"data"`, or an
-  explicit numeric `c(lo, hi)`.
+  Background intensity limits shared by all panels: `"robust"` (computed
+  over head voxels), `"data"`, or numeric `c(lo, hi)`.
 
 - probs:
 
-  Quantiles for robust range.
+  Quantiles for robust scaling.
 
 - crosshair:
 
-  Logical; draw crosshair lines.
+  Logical; draw the (gapped) crosshair.
 
 - annotate:
 
-  Logical; add orientation glyphs.
+  Logical; draw orientation letters on every view.
 
 - downsample:
 
@@ -72,39 +85,69 @@ plot_ortho(
 
 - title, subtitle, caption:
 
-  Optional layout-level labels used when drawing.
+  Optional figure labels.
 
 - draw:
 
-  Logical; if \`TRUE\`, draw the panels on the active graphics device.
-  If \`FALSE\`, only return the ggplot objects invisibly.
+  Logical; if `TRUE`, also print the figure immediately (and return it
+  invisibly). By default the figure is returned visibly.
 
 - style:
 
-  Visual style: `"light"`, `"dark"`, or `"report"` (light card, dark
-  cropped tiles, typography, and a colorbar – matching
-  [`plot_overlay`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)'s
-  report look).
+  Visual style: `"light"`, `"dark"`, or `"report"`.
 
 - enhance:
 
-  Display-only enhancement of an unsmoothed statistical `vol`. `FALSE`
-  (default) leaves it untouched; `TRUE` applies
-  [`enhance_stat_map`](https://bbuchsbaum.github.io/neuroim2/reference/enhance_stat_map.md)
-  with defaults; a named `list` is forwarded as arguments to
-  [`enhance_stat_map()`](https://bbuchsbaum.github.io/neuroim2/reference/enhance_stat_map.md).
+  Display-only enhancement of an unsmoothed statistical `vol`; see
+  [`plot_overlay`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md).
 
-- crop, interpolate:
+- crop:
 
-  Logical or `NULL`; crop panels to the brain bounding box / smooth the
-  raster. `NULL` (default) enables both for `style = "report"` only.
+  Logical; crop views to the head bounding box.
+
+- interpolate:
+
+  Logical; smooth the background raster (default `TRUE`).
 
 - cbar_title:
 
-  Character; the quantity label drawn above the colorbar in
-  `style = "report"`. Defaults to `"value"`. Set it to the quantity
-  actually being displayed (e.g. `"Semipartial r"`) so the figure does
-  not assert a quantity it is not showing.
+  Character; the quantity label drawn above the colorbar. Supplying it
+  explicitly also turns the colorbar on.
+
+- colorbar:
+
+  Logical or `NULL`. `NULL` (default) shows a colorbar when it carries
+  information: an `overlay` is given, the background uses a
+  non-grayscale palette, or `cbar_title` is supplied.
+
+- assemble:
+
+  Logical; if `TRUE` (default) return one assembled patchwork figure; if
+  `FALSE` return the named list of the `axial`, `coronal` and `sagittal`
+  ggplots.
+
+- overlay:
+
+  Optional 3D statistical volume on the same grid as `vol`, drawn over
+  all three views.
+
+- ov_thresh, ov_cmap, ov_range, ov_alpha, ov_alpha_mode, ov_symmetric,
+  ov_cap:
+
+  Overlay threshold, palette, scaling, opacity and opacity mode;
+  identical in meaning to the same arguments of
+  [`plot_overlay`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md).
+
+- canvas:
+
+  Optional `c(width, height)` in inches to fit the layout to (default:
+  the open device).
+
+## Value
+
+A figure (class `neuro_fig`, a patchwork whose layout is re-fitted to
+the device it is drawn on) when `assemble = TRUE` or a named list of
+ggplots (`assemble = FALSE`); invisibly when `draw = TRUE`.
 
 ## Details
 
@@ -116,3 +159,26 @@ are not silently resampled. Use
 or
 [`resample_to()`](https://bbuchsbaum.github.io/neuroim2/reference/resample_to.md)
 first when true cardinal-plane sections are required.
+
+Each view is labelled with the world coordinate of its plane (mm).
+
+## See also
+
+Other plot_neuro:
+[`plot_checkerboard()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_checkerboard.md),
+[`plot_edge_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_edge_overlay.md),
+[`plot_montage()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_montage.md),
+[`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
+
+## Examples
+
+``` r
+# \donttest{
+bg <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
+p <- plot_ortho(bg, coord = c(24, 26, 26))
+#> ℹ `coord` are read as voxel indices; panels are labelled in mm.
+#>   Pass `unit = "mm"` to give positions in world coordinates.
+#> This message is displayed once every 8 hours.
+ggplot2::ggsave(tempfile(fileext = ".png"), p, width = 9, height = 3.5)
+# }
+```

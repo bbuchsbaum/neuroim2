@@ -1,8 +1,9 @@
-# Composite an overlay map on a structural background
+# Composite a statistical map on a structural background
 
-Works without extra packages by colorizing both layers to rasters and
-stacking them as grobs. Great for statistical maps over T1/T2
-backgrounds.
+Draws a grid of slices through a structural background (e.g. a T1) with
+a thresholded statistical map on top, in the style of a journal figure:
+black tiles cropped to the head, world-coordinate slice labels, L/R
+markers, and a compact colorbar that marks the threshold.
 
 ## Usage
 
@@ -13,29 +14,33 @@ plot_overlay(
   zlevels = NULL,
   along = 3L,
   bg_cmap = "grays",
-  ov_cmap = "inferno",
+  ov_cmap = NULL,
   bg_range = c("robust", "data"),
   ov_range = c("robust", "data"),
   probs = c(0.02, 0.98),
   ov_thresh = 0,
-  ov_alpha = 0.7,
+  ov_alpha = 1,
   ov_alpha_mode = c("binary", "proportional", "ramp", "soft"),
   ov_symmetric = NULL,
   alpha_gamma = NULL,
   ov_cap = NULL,
-  ncol = 3L,
+  ncol = NULL,
   title = NULL,
   subtitle = NULL,
   caption = NULL,
-  draw = TRUE,
+  draw = FALSE,
   style = c("light", "dark", "report"),
   enhance = FALSE,
   assemble = TRUE,
   colorbar = TRUE,
   legend = NULL,
-  crop = NULL,
-  interpolate = NULL,
-  cbar_title = "value"
+  crop = TRUE,
+  interpolate = TRUE,
+  cbar_title = "value",
+  unit = c("index", "mm"),
+  annotate = TRUE,
+  n_slices = 12L,
+  canvas = NULL
 )
 ```
 
@@ -51,7 +56,10 @@ plot_overlay(
 
 - zlevels:
 
-  Slices to plot (indices along the third grid axis by default).
+  Slices to plot, as indices along \`along\` (`unit = "index"`, the
+  default) or world coordinates in mm (`unit = "mm"`). `NULL` (default)
+  chooses `n_slices` slices spread over the extent of the
+  supra-threshold overlay.
 
 - along:
 
@@ -64,14 +72,20 @@ plot_overlay(
 
 - ov_cmap:
 
-  Overlay palette (e.g., "inferno").
+  Overlay palette. `NULL` (default) chooses automatically: the two-sided
+  `"cold_hot"` map for signed data, `"hot"` otherwise. Any name accepted
+  by \[resolve_cmap()\] or a vector of colours.
 
 - bg_range, ov_range:
 
-  Background/overlay scaling. Either a mode string, `"robust"` (quantile
-  clip) or `"data"` (min/max), or an explicit numeric `c(lo, hi)` to pin
-  the scale (e.g. `ov_range = c(-6, 6)`) for consistent coloring across
-  panels and subjects.
+  Background/overlay scaling. Either a mode string, `"robust"` or
+  `"data"`, or an explicit numeric `c(lo, hi)` to pin the scale (e.g.
+  `ov_range = c(-6, 6)`) for consistent colouring across figures and
+  subjects. The robust background window is computed over head voxels
+  only; the robust overlay scale is computed once from the whole overlay
+  volume (supra-threshold values when a threshold is set) and rounded to
+  two significant digits, so a given map always gets the same scale
+  whichever slices are shown.
 
 - probs:
 
@@ -79,59 +93,56 @@ plot_overlay(
 
 - ov_thresh:
 
-  Numeric threshold; values with \|v\| \< thresh become transparent.
+  Numeric threshold; values with \|v\| \< thresh are not drawn.
 
 - ov_alpha:
 
-  Global alpha for overlay (0..1).
+  Global opacity of the overlay (0..1).
 
 - ov_alpha_mode:
 
-  One of `"binary"` (default: pixels above threshold get full
-  `ov_alpha`, others transparent), `"proportional"` (per-pixel alpha =
-  \|v\| / cap), `"ramp"` (alpha ramps linearly from 0 at `ov_thresh` to
-  1 at the cap), or `"soft"` (a nonlinear, self-tuning curve,
-  `alpha = clamp((|v|-lo)/(hi-lo),0,1)^gamma`, where the knee `lo`
-  defaults to `ov_thresh` or, if unset, the median in-mask magnitude,
-  and `gamma` adapts to the value distribution so that opacity rises
-  rapidly away from zero and the noisy bulk stays faint). The cap is
-  shared across all panels so identical values get identical opacity
-  everywhere.
+  One of `"binary"` (default: every supra-threshold voxel fully opaque),
+  `"proportional"`, `"ramp"`, or `"soft"` (opacity rises nonlinearly
+  with magnitude; the curve `alpha = floor + (1 - floor) * t^gamma`
+  self-tunes `gamma` from the data). In the graded modes every voxel
+  that passes a threshold keeps at least 60% opacity, and the colorbar
+  is faded with the same curve so it matches the picture.
 
 - ov_symmetric:
 
-  Logical or `NULL`. `NULL` (default) auto-selects symmetric limits
-  around zero when the overlay has both positive and negative values;
-  `TRUE`/`FALSE` forces the choice. Symmetric limits keep negative and
-  positive values equally visible with a diverging palette.
+  Logical or `NULL`. `NULL` (default) uses symmetric limits around zero
+  when the overlay has both signs.
 
 - alpha_gamma:
 
   Optional exponent for `ov_alpha_mode = "soft"`. `NULL` (default)
-  auto-tunes it from the data; larger values push more of the low-value
-  range toward transparency.
+  auto-tunes it from the data.
 
 - ov_cap:
 
-  Optional numeric; the magnitude used as the upper end of the
-  (symmetric) color/alpha scale. Defaults to the data-driven limit.
+  Optional numeric; the magnitude at the upper end of the colour/opacity
+  scale. Defaults to the data-driven limit.
 
 - ncol:
 
-  Number of columns in the panel layout.
+  Number of columns. `NULL` (default) picks the layout that best fills
+  the canvas.
 
 - title, subtitle, caption:
 
-  Optional layout-level labels used when drawing.
+  Optional figure labels, left-aligned with the tiles.
 
 - draw:
 
-  Logical; if \`TRUE\`, draw on the active graphics device. If
-  \`FALSE\`, return without drawing.
+  Logical; if `TRUE`, also print the figure immediately (and return it
+  invisibly). By default the figure is returned visibly, like a ggplot,
+  so it prints at the console or in a knitr chunk.
 
 - style:
 
-  Visual style: `"light"`, `"dark"`, or `"report"` (see Details).
+  Visual style: `"light"` (white card), `"report"` (warm off-white card
+  with the key strip on), or `"dark"` (black card). Tiles are black in
+  every style.
 
 - enhance:
 
@@ -139,62 +150,97 @@ plot_overlay(
   `FALSE` (default) leaves it untouched; `TRUE` applies
   [`enhance_stat_map`](https://bbuchsbaum.github.io/neuroim2/reference/enhance_stat_map.md)
   with defaults; a named `list` is forwarded as arguments to
-  [`enhance_stat_map()`](https://bbuchsbaum.github.io/neuroim2/reference/enhance_stat_map.md)
-  (e.g. `enhance = list(detail_gain = 2, method = "bilateral")`).
+  [`enhance_stat_map()`](https://bbuchsbaum.github.io/neuroim2/reference/enhance_stat_map.md).
 
 - assemble:
 
-  Logical; if `TRUE` (default), return a single assembled patchwork
-  object (honoring `ncol` and the layout labels) suitable for
-  `ggsave()`. If `FALSE`, draw a panel grid and return the per-slice
-  ggplot list invisibly (useful for programmatic access to individual
-  panels).
+  Logical; if `TRUE` (default), return one assembled patchwork figure.
+  If `FALSE`, return the list of per-slice ggplots.
 
 - colorbar:
 
-  Logical; when `assemble = TRUE`, append a colorbar for the overlay
-  statistic (with the threshold marked). Default `TRUE`.
+  Logical; draw the colorbar (default `TRUE`).
 
 - legend:
 
-  Logical or `NULL`; when `assemble = TRUE`, add a bottom legend strip
-  (positive/negative swatches, threshold, plane). `NULL` (default) shows
-  it for `style = "report"` only.
+  Logical or `NULL`; add a one-line key under the tiles (plane,
+  neurological convention, and what the threshold shows). `NULL`
+  (default) shows it for `style = "report"` only.
 
 - crop:
 
-  Logical or `NULL`; crop every panel to the brain bounding box (shared
-  across slices, so framing is consistent). `NULL` (default) crops for
-  `style = "report"` only.
+  Logical; crop every panel to the head bounding box (shared across
+  slices, and always containing every supra-threshold voxel).
 
 - interpolate:
 
-  Logical or `NULL`; smooth the background raster. `NULL` (default)
-  interpolates for `style = "report"` only.
+  Logical; smooth the background raster (default `TRUE`). The overlay
+  itself is always drawn with crisp voxels.
 
 - cbar_title:
 
-  Character; the quantity label drawn above the colorbar when
-  `assemble = TRUE` and `colorbar = TRUE`. Defaults to `"value"`. Set it
-  to the statistic actually being displayed (e.g. `"Semipartial r"`,
-  `"Delay coefficient (% signal change)"`) so the figure does not assert
-  a quantity it is not showing.
+  Character; the quantity label drawn above the colorbar. Defaults to
+  `"value"`; set it to the statistic actually shown (e.g. `"t"`,
+  `"Semipartial r"`).
+
+- unit:
+
+  `"index"` or `"mm"`: how `zlevels` is interpreted. Panels are always
+  labelled in world coordinates (mm).
+
+- annotate:
+
+  Logical; draw L/R orientation letters on the first panel.
+
+- n_slices:
+
+  Number of slices chosen when `zlevels` is `NULL`.
+
+- canvas:
+
+  Optional `c(width, height)` in inches to freeze the layout for one
+  size. By default (`NULL`) the layout is re-fitted to whatever device
+  the figure is drawn on, including `ggsave()`.
+
+## Value
+
+A figure (class `neuro_fig`, a patchwork whose layout is re-fitted to
+the device it is drawn on) when `assemble = TRUE` or a list of ggplots
+(`assemble = FALSE`); invisibly when `draw = TRUE`.
 
 ## Details
 
-**Return value.** By default (`assemble = TRUE`) the return value is a
-single patchwork object that can be passed directly to `ggsave()`. With
-`assemble = FALSE` the montage is drawn as a side effect and the return
-value is the *list of per-slice ggplots* (invisibly); passing that list
-to `ggsave()` saves only one panel.
-
 **Signed maps.** For overlays with both signs (t/z/contrast maps), the
-default palette switches to a diverging one and limits become symmetric
-so negatives are as visible as positives; pass `ov_cmap`/`ov_symmetric`
-to override.
+default palette is two-sided and the limits symmetric, so negative
+values are as visible as positive ones. With a threshold, the colour
+ramp starts at a saturated colour at \\\pm\\threshold and brightens
+toward the cap; the colorbar shows the sub-threshold band in a neutral
+tone and ticks the threshold and cap. When the data exceed the cap, the
+end tick reads \\\ge\\ cap.
 
-**Report style.** `style = "report"` renders dark brain tiles on a light
-card with bold/italic typography, a titled colorbar, a bottom legend
-strip, brain-bbox cropping, and a smoothed background – a
-publication-ready look. The individual features (`legend`, `crop`,
-`interpolate`) can also be toggled on any style.
+**Saving.** The figure's layout is fitted to the device it is drawn on:
+`p <- plot_overlay(...); ggsave("fig.png", p, width = 6, height = 9)`
+re-arranges the tiles for a 6 x 9 in page, and additions such as
+`p + patchwork::plot_annotation(title = "...")` are kept. Pass `canvas`
+only to freeze the layout for one size.
+
+## See also
+
+Other plot_neuro:
+[`plot_checkerboard()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_checkerboard.md),
+[`plot_edge_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_edge_overlay.md),
+[`plot_montage()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_montage.md),
+[`plot_ortho()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_ortho.md)
+
+## Examples
+
+``` r
+# \donttest{
+bg <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
+stat <- bg
+stat[] <- rnorm(length(stat)) * (bg[] > stats::quantile(bg[], 0.6))
+p <- plot_overlay(bg, stat, ov_thresh = 1.5, cbar_title = "z")
+tf <- tempfile(fileext = ".png")
+ggplot2::ggsave(tf, p, width = 7, height = 5)
+# }
+```

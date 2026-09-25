@@ -13,11 +13,11 @@ Plotting utilities for slices, montages, overlays, and palettes
 - [`annotate_orientation()`](https://bbuchsbaum.github.io/neuroim2/reference/annotate_orientation.md)
   : Add L/R and A/P/S/I annotations (optional)
 - [`plot_montage()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_montage.md)
-  : Plot a montage of axial (or any-plane) slices using facetting
+  : Montage of slices through a volume
 - [`plot_ortho()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_ortho.md)
-  : Orthogonal three-plane view with optional crosshairs
+  : Orthogonal three-plane view with optional crosshairs and overlay
 - [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
-  : Composite an overlay map on a structural background
+  : Composite a statistical map on a structural background
 - [`enhance_stat_map()`](https://bbuchsbaum.github.io/neuroim2/reference/enhance_stat_map.md)
   : Enhance an unsmoothed statistical map for visualization
 - [`mapToColors()`](https://bbuchsbaum.github.io/neuroim2/reference/mapToColors.md)
@@ -915,13 +915,13 @@ Miscellaneous methods and functions
   : Overlay fixed and moving edge maps on a background volume
 
 - [`plot_montage()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_montage.md)
-  : Plot a montage of axial (or any-plane) slices using facetting
+  : Montage of slices through a volume
 
 - [`plot_ortho()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_ortho.md)
-  : Orthogonal three-plane view with optional crosshairs
+  : Orthogonal three-plane view with optional crosshairs and overlay
 
 - [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
-  : Composite an overlay map on a structural background
+  : Composite a statistical map on a structural background
 
 - [`Arith(`*`<SparseNeuroVol>`*`,`*`<SparseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Arith-methods.md)
   [`Arith(`*`<ROIVol>`*`,`*`<ROIVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/Arith-methods.md)

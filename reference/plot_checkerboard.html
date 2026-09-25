@@ -49,17 +49,29 @@ slices. This is useful for visual registration QC.</p>
 <span>  <span class="va">overlay</span>,</span>
 <span>  zlevels <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  along <span class="op">=</span> <span class="fl">3L</span>,</span>
-<span>  tile <span class="op">=</span> <span class="fl">16L</span>,</span>
+<span>  tile <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cmap <span class="op">=</span> <span class="st">"grays"</span>,</span>
 <span>  bg_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"robust"</span>, <span class="st">"data"</span><span class="op">)</span>,</span>
 <span>  ov_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"robust"</span>, <span class="st">"data"</span><span class="op">)</span>,</span>
 <span>  probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.02</span>, <span class="fl">0.98</span><span class="op">)</span>,</span>
-<span>  ncol <span class="op">=</span> <span class="fl">3L</span>,</span>
+<span>  ncol <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  title <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  subtitle <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  caption <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  draw <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  style <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"light"</span>, <span class="st">"dark"</span><span class="op">)</span></span>
+<span>  draw <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  style <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"light"</span>, <span class="st">"dark"</span>, <span class="st">"report"</span><span class="op">)</span>,</span>
+<span>  labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fixed"</span>, <span class="st">"moving"</span><span class="op">)</span>,</span>
+<span>  legend <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  crop <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  mask_background <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  unit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"index"</span>, <span class="st">"mm"</span><span class="op">)</span>,</span>
+<span>  annotate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  assemble <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  n_slices <span class="op">=</span> <span class="fl">6L</span>,</span>
+<span>  match_intensity <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  canvas <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  interpolate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  focus_brain <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -76,7 +88,9 @@ slices. This is useful for visual registration QC.</p>
 
 
 <dt id="arg-zlevels">zlevels<a class="anchor" aria-label="anchor" href="#arg-zlevels"></a></dt>
-<dd><p>Slices to plot. Defaults to nine evenly spaced slices.</p></dd>
+<dd><p>Slices to plot: indices along `along` (<code>unit = "index"</code>)
+or world coordinates (<code>unit = "mm"</code>). <code>NULL</code> (default) picks
+<code>n_slices</code> slices spread over the brain.</p></dd>
 
 
 <dt id="arg-along">along<a class="anchor" aria-label="anchor" href="#arg-along"></a></dt>
@@ -85,7 +99,9 @@ inferred from the image affine.</p></dd>
 
 
 <dt id="arg-tile">tile<a class="anchor" aria-label="anchor" href="#arg-tile"></a></dt>
-<dd><p>Tile width in slice pixels.</p></dd>
+<dd><p>Tile width in voxels (the key states the equivalent in mm).
+<code>NULL</code> (default) picks a clean size in mm giving about ten tiles
+across the head.</p></dd>
 
 
 <dt id="arg-cmap">cmap<a class="anchor" aria-label="anchor" href="#arg-cmap"></a></dt>
@@ -93,7 +109,10 @@ inferred from the image affine.</p></dd>
 
 
 <dt id="arg-bg-range-ov-range">bg_range, ov_range<a class="anchor" aria-label="anchor" href="#arg-bg-range-ov-range"></a></dt>
-<dd><p>"robust" or "data" intensity scaling.</p></dd>
+<dd><p>Intensity scaling of each image: <code>"robust"</code>
+(computed over head voxels), <code>"data"</code>, or numeric <code>c(lo, hi)</code>.
+Each image is windowed independently so tissue contrast, not a brightness
+step, is what differs between tiles.</p></dd>
 
 
 <dt id="arg-probs">probs<a class="anchor" aria-label="anchor" href="#arg-probs"></a></dt>
@@ -101,7 +120,7 @@ inferred from the image affine.</p></dd>
 
 
 <dt id="arg-ncol">ncol<a class="anchor" aria-label="anchor" href="#arg-ncol"></a></dt>
-<dd><p>Number of columns in the facet layout.</p></dd>
+<dd><p>Number of columns (<code>NULL</code> = chosen to fill the canvas).</p></dd>
 
 
 <dt id="arg-title-subtitle-caption">title, subtitle, caption<a class="anchor" aria-label="anchor" href="#arg-title-subtitle-caption"></a></dt>
@@ -109,15 +128,101 @@ inferred from the image affine.</p></dd>
 
 
 <dt id="arg-draw">draw<a class="anchor" aria-label="anchor" href="#arg-draw"></a></dt>
-<dd><p>Logical; if `TRUE`, draw the panels on the active graphics
-device. If `FALSE`, only return the ggplot objects invisibly.</p></dd>
+<dd><p>Logical; if <code>TRUE</code>, also print the figure immediately (and
+return it invisibly). By default the figure is returned visibly.</p></dd>
 
 
 <dt id="arg-style">style<a class="anchor" aria-label="anchor" href="#arg-style"></a></dt>
-<dd><p>Visual style, either <code>"light"</code> or <code>"dark"</code>.</p></dd>
+<dd><p>Visual style: <code>"light"</code>, <code>"dark"</code> or <code>"report"</code>.</p></dd>
+
+
+<dt id="arg-labels">labels<a class="anchor" aria-label="anchor" href="#arg-labels"></a></dt>
+<dd><p>Length-2 character vector naming the two images in the key.</p></dd>
+
+
+<dt id="arg-legend">legend<a class="anchor" aria-label="anchor" href="#arg-legend"></a></dt>
+<dd><p>Logical; draw the key under the panels.</p></dd>
+
+
+<dt id="arg-crop">crop<a class="anchor" aria-label="anchor" href="#arg-crop"></a></dt>
+<dd><p>Logical; crop panels to the head bounding box.</p></dd>
+
+
+<dt id="arg-mask-background">mask_background<a class="anchor" aria-label="anchor" href="#arg-mask-background"></a></dt>
+<dd><p>Logical; show the checker pattern only inside the
+head (union of both images' foreground), leaving air black.</p></dd>
+
+
+<dt id="arg-unit">unit<a class="anchor" aria-label="anchor" href="#arg-unit"></a></dt>
+<dd><p><code>"index"</code> or <code>"mm"</code>: how <code>zlevels</code> is
+interpreted. Panels are labelled in world coordinates.</p></dd>
+
+
+<dt id="arg-annotate">annotate<a class="anchor" aria-label="anchor" href="#arg-annotate"></a></dt>
+<dd><p>Logical; draw orientation letters on the first panel.</p></dd>
+
+
+<dt id="arg-assemble">assemble<a class="anchor" aria-label="anchor" href="#arg-assemble"></a></dt>
+<dd><p>Logical; return one <span class="pkg">patchwork</span> figure (default) or the
+list of panel ggplots.</p></dd>
+
+
+<dt id="arg-n-slices">n_slices<a class="anchor" aria-label="anchor" href="#arg-n-slices"></a></dt>
+<dd><p>Number of automatically chosen slices.</p></dd>
+
+
+<dt id="arg-match-intensity">match_intensity<a class="anchor" aria-label="anchor" href="#arg-match-intensity"></a></dt>
+<dd><p>Logical; map the comparison image's intensities onto
+the reference image's distribution (quantile matching over head voxels)
+before interleaving, so a brightness or contrast difference between the
+images does not masquerade as misalignment. Default <code>TRUE</code>.</p></dd>
+
+
+<dt id="arg-canvas">canvas<a class="anchor" aria-label="anchor" href="#arg-canvas"></a></dt>
+<dd><p>Optional <code>c(width, height)</code> in inches to fit the layout
+to (default: the open device).</p></dd>
+
+
+<dt id="arg-interpolate">interpolate<a class="anchor" aria-label="anchor" href="#arg-interpolate"></a></dt>
+<dd><p>Logical; smooth the rendered checkerboard (default
+<code>TRUE</code>), which also softens the head outline.</p></dd>
+
+
+<dt id="arg-focus-brain">focus_brain<a class="anchor" aria-label="anchor" href="#arg-focus-brain"></a></dt>
+<dd><p>Logical; interleave tiles only inside the (dilated)
+bright-tissue mask of <code>bgvol</code> and show the fixed image alone on the
+scalp, so the seams where registration is judged dominate the figure
+instead of the stair-stepped head outline. Default <code>TRUE</code>.</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>A figure (class <code>neuro_fig</code>, a <span class="pkg">patchwork</span> whose
+  layout is re-fitted to the device it is drawn on) when
+  <code>assemble = TRUE</code> or a named list
+  of panel ggplots (<code>assemble = FALSE</code>); invisibly when
+  <code>draw = TRUE</code>.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p>Other plot_neuro:
+<code><a href="plot_edge_overlay.html">plot_edge_overlay()</a></code>,
+<code><a href="plot_montage.html">plot_montage()</a></code>,
+<code><a href="plot_ortho.html">plot_ortho()</a></code>,
+<code><a href="plot_overlay.html">plot_overlay()</a></code></p></div>
+    </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="va">fixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="read_vol.html">read_vol</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"mni_downsampled.nii.gz"</span>, package <span class="op">=</span> <span class="st">"neuroim2"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">moving</span> <span class="op">&lt;-</span> <span class="va">fixed</span></span></span>
+<span class="r-in"><span><span class="va">moving</span><span class="op">[</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">fixed</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">fixed</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="fl">1</span><span class="op">)</span>, , <span class="op">]</span><span class="op">)</span>   <span class="co"># shifted, different contrast</span></span></span>
+<span class="r-in"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">plot_checkerboard</span><span class="op">(</span><span class="va">fixed</span>, <span class="va">moving</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsave.html" class="external-link">ggsave</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".png"</span><span class="op">)</span>, <span class="va">p</span>, width <span class="op">=</span> <span class="fl">8</span>, height <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

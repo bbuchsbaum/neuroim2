@@ -42,7 +42,9 @@ view of the stored voxel planes.
 ## A montage of slices
 
 [`plot_montage()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_montage.md)
-scans several slices at once and returns a single `ggplot` object.
+scans several slices at once. Like every `plot_*` function it returns a
+figure object that prints like a ggplot and can be passed to `ggsave()`;
+its layout is re-fitted to whatever size you save it at.
 
 ``` r
 
@@ -97,12 +99,12 @@ crosshairs.](visualization_files/figure-html/ortho-1.png)
 
 Axial, coronal and sagittal views through one voxel.
 
-`draw = FALSE` returns the panels instead of drawing them, which is what
-you want when composing or saving figures yourself:
+`assemble = FALSE` returns the individual panels instead of one figure,
+which is what you want when arranging them yourself:
 
 ``` r
 
-names(plot_ortho(anat, coord = round(dim(anat) / 2), draw = FALSE))
+names(plot_ortho(anat, coord = round(dim(anat) / 2), assemble = FALSE))
 #> [1] "axial"    "coronal"  "sagittal"
 ```
 
@@ -292,8 +294,8 @@ the `anatomy_cmap` used throughout this article is three greys.
 
 Four habits worth keeping: `range = "robust"` for anatomy,
 `ov_symmetric = TRUE` for signed maps, `style = "dark"` to inspect and
-`"light"` to publish, and `draw = FALSE` whenever you want to arrange
-panels yourself.
+`"light"` to publish, and `assemble = FALSE` whenever you want to
+arrange panels yourself.
 
 ## Where to go next
 

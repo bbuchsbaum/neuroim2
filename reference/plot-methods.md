@@ -35,7 +35,7 @@ plot(
   cmap = "grays",
   zlevels = NULL,
   along = 3L,
-  ov_cmap = "inferno",
+  ov_cmap = NULL,
   ov_alpha = 0.5,
   ov_thresh = 0
 )
@@ -88,7 +88,8 @@ plot(
 
 - ov_cmap:
 
-  overlay palette name (default `"inferno"`).
+  overlay palette; `NULL` (default) chooses a two-sided palette for
+  signed maps and a sequential one otherwise.
 
 - ov_alpha:
 
