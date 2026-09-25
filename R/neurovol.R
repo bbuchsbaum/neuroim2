@@ -1286,7 +1286,8 @@ setMethod(f="[", signature=signature(x = "SparseNeuroVol", i = "numeric", j = "n
 #' @param thresh a 2-element vector indicating the lower and upper
 #'   transparency thresholds.
 #' @param alpha opacity for the background layer (0--1).
-#' @param ov_cmap overlay palette name (default \code{"inferno"}).
+#' @param ov_cmap overlay palette; \code{NULL} (default) chooses a two-sided
+#'   palette for signed maps and a sequential one otherwise.
 #' @param ov_alpha overlay opacity (default 0.5).
 #' @param ov_thresh overlay threshold; values with
 #'   \eqn{|v| < } \code{ov_thresh} become transparent (default 0).
@@ -1364,7 +1365,7 @@ setMethod("plot", signature=signature(x="NeuroVol", y="NeuroVol"),
                        cmap="grays",
                        zlevels=NULL,
                        along=3L,
-                       ov_cmap="inferno",
+                       ov_cmap=NULL,
                        ov_alpha=0.5,
                        ov_thresh=0) {
             plot_overlay(bgvol = x, overlay = y,

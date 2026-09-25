@@ -1,5 +1,52 @@
 # neuroim2 0.19.0.9000
 
+## Redesigned slice figures (behavior change)
+
+`plot_overlay()`, `plot_montage()`, `plot_ortho()`, `plot_edge_overlay()` and
+`plot_checkerboard()` now share one figure engine and look like one family:
+borderless black tiles cropped to the head, world-coordinate slice labels
+(`z = -12 mm`), haloed orientation letters, and a compact fixed-width
+colorbar placed beside the tiles.
+
+* **Defaults that work without tuning.** Slices are chosen inside the brain
+  (or the supra-threshold overlay) instead of evenly across the whole field of
+  view; the background window is computed over head voxels so white matter no
+  longer clips; air renders black.
+* **Honest overlay scales.** The robust overlay scale comes from the whole
+  map's supra-threshold values (so it no longer collapses below the
+  threshold), is identical whichever slices are shown, always contains the
+  threshold, greys out the sub-threshold band on the colorbar, and labels the
+  end tick `>= cap` when data exceed it. Signed maps default to a new
+  threshold-aware `"cold_hot"` palette; unsigned maps to `"hot"`. Graded
+  opacity modes keep every supra-threshold voxel at least 60% opaque and fade
+  the colorbar to match.
+* **Figures fit the page they are saved on.** Every function returns a figure
+  object (class `neuro_fig`, a patchwork) that is re-arranged for the device
+  it is drawn on, so `ggsave("f.png", plot_overlay(...), width = 6, height =
+  9)` gives a filled, centred layout. `+`, `&`, `|` and `/` work, including
+  `+ labs(title = ...)`.
+* **Return convention.** Figures are returned visibly, like a ggplot;
+  `draw = TRUE` prints immediately and returns the figure invisibly. `plot_ortho()`, `plot_edge_overlay()` and
+  `plot_checkerboard()` now return one assembled figure by default; pass
+  `assemble = FALSE` for the list of panels (previously `draw = FALSE`).
+* **plot_ortho()** draws all views at one physical scale from one 3-D head
+  crop, with a gapped crosshair, per-view world coordinates, and an optional
+  `overlay` (centred on its peak by default).
+* **Registration QC.** `plot_edge_overlay()` thins contours, focuses on the
+  brain, draws coinciding contours in `agree_color` (`NA` turns this off), can compute edges itself
+  (`compute_edges = TRUE`) and has a colour key. `plot_checkerboard()`
+  quantile-matches the moving image, interleaves tiles only inside the brain,
+  anchors the pattern to the visible top-left corner, and states it in a key.
+  Both default their `labels` to `c("fixed", "moving")`.
+* New shared arguments where missing: `unit` (`"index"` or `"mm"` for
+  `zlevels`/`coord`), `n_slices`, `annotate`, `canvas`, `interpolate` and
+  `draw` (all five), and `assemble` (all but `plot_montage()`, which returns
+  a single faceted plot). `ncol = NULL` chooses the layout that fills the canvas.
+* The `style = "report"` bottom legend strip is replaced by a one-line key
+  (plane, neurological convention, and what the threshold shows).
+* Errors use cli and name the offending argument; out-of-range slice positions
+  report the valid range.
+
 ## Configurable colorbar titles
 
 `plot_overlay()`, `plot_montage()`, and `plot_ortho()` gain a `cbar_title`

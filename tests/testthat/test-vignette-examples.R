@@ -272,7 +272,7 @@ test_that("visualization: plot helpers return ggplot objects on matching grids",
   anat <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
   p <- plot_montage(anat, zlevels = c(12, 20, 28), ncol = 3)
   expect_s3_class(p, "ggplot")
-  panels <- plot_ortho(anat, coord = round(dim(anat) / 2), draw = FALSE)
+  panels <- plot_ortho(anat, coord = round(dim(anat) / 2), assemble = FALSE)
   expect_true(length(panels) >= 3)
 })
 
