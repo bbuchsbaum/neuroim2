@@ -33,7 +33,7 @@
   cmap = "grays",
   zlevels = NULL,
   along = 3L,
-  ov_cmap = "inferno",
+  ov_cmap = NULL,
   ov_alpha = 0.5,
   ov_thresh = 0
 )
@@ -63,7 +63,8 @@ transparency thresholds.}
 
 \item{alpha}{opacity for the background layer (0--1).}
 
-\item{ov_cmap}{overlay palette name (default \code{"inferno"}).}
+\item{ov_cmap}{overlay palette; \code{NULL} (default) chooses a two-sided
+palette for signed maps and a sequential one otherwise.}
 
 \item{ov_alpha}{overlay opacity (default 0.5).}
 

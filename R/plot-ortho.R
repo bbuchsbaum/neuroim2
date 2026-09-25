@@ -1,79 +1,132 @@
-#' Orthogonal three-plane view with optional crosshairs
+#' Orthogonal three-plane view with optional crosshairs and overlay
 #'
-#' Creates axial, coronal, and sagittal panels at a given coordinate with
-#' harmonized aesthetics. Returns the three ggplot objects invisibly after
-#' drawing, or without drawing when \code{draw = FALSE}.
+#' Draws sagittal, coronal and axial sections through one point, optionally
+#' with a thresholded statistical map on top (the classic "stat map" view).
+#' All three views share one physical scale and one head-bounding-box crop, so
+#' the crosshair lines up across views.
 #'
-#' @param vol A 3D volume handled by `slice()`.
-#' @param coord Length-3 coordinate of the target point. Interpreted as voxel
-#'   indices by default; set `unit = "mm"` to convert using `coord_to_grid()`
-#'   if available in your environment.
-#' @param unit "index" or "mm".
-#' @param cmap Palette for the slices.
-#' @param range Intensity limits shared by all panels: \code{"robust"},
-#'   \code{"data"}, or an explicit numeric \code{c(lo, hi)}.
-#' @param probs Quantiles for robust range.
-#' @param crosshair Logical; draw crosshair lines.
-#' @param annotate Logical; add orientation glyphs.
+#' @param vol A 3D background volume.
+#' @param coord Length-3 coordinate of the target point: voxel indices
+#'   (\code{unit = "index"}, default) or world coordinates in mm
+#'   (\code{unit = "mm"}). \code{NULL} (default) uses the peak absolute value
+#'   of \code{overlay} when one is given, otherwise the volume centre.
+#' @param unit \code{"index"} or \code{"mm"}: how \code{coord} is interpreted.
+#' @param cmap Palette for the background.
+#' @param range Background intensity limits shared by all panels:
+#'   \code{"robust"} (computed over head voxels), \code{"data"}, or numeric
+#'   \code{c(lo, hi)}.
+#' @param probs Quantiles for robust scaling.
+#' @param crosshair Logical; draw the (gapped) crosshair.
+#' @param annotate Logical; draw orientation letters on every view.
 #' @param downsample Integer decimation for speed.
-#' @param title,subtitle,caption Optional layout-level labels used when drawing.
-#' @param draw Logical; if `TRUE`, draw the panels on the active graphics
-#'   device. If `FALSE`, only return the ggplot objects invisibly.
-#' @param style Visual style: \code{"light"}, \code{"dark"}, or \code{"report"}
-#'   (light card, dark cropped tiles, typography, and a colorbar -- matching
-#'   \code{\link{plot_overlay}}'s report look).
+#' @param title,subtitle,caption Optional figure labels.
+#' @param draw Logical; if \code{TRUE}, also print the figure immediately (and
+#'   return it invisibly). By default the figure is returned visibly.
+#' @param style Visual style: \code{"light"}, \code{"dark"}, or
+#'   \code{"report"}.
 #' @param enhance Display-only enhancement of an unsmoothed statistical
-#'   \code{vol}. \code{FALSE} (default) leaves it untouched; \code{TRUE} applies
-#'   \code{\link{enhance_stat_map}} with defaults; a named \code{list} is
-#'   forwarded as arguments to \code{enhance_stat_map()}.
-#' @param crop,interpolate Logical or \code{NULL}; crop panels to the brain
-#'   bounding box / smooth the raster. \code{NULL} (default) enables both for
-#'   \code{style = "report"} only.
-#' @param cbar_title Character; the quantity label drawn above the colorbar in
-#'   \code{style = "report"}. Defaults to \code{"value"}. Set it to the
-#'   quantity actually being displayed (e.g. \code{"Semipartial r"}) so the
-#'   figure does not assert a quantity it is not showing.
+#'   \code{vol}; see \code{\link{plot_overlay}}.
+#' @param cbar_title Character; the quantity label drawn above the colorbar.
+#'   Supplying it explicitly also turns the colorbar on.
+#' @param crop Logical; crop views to the head bounding box.
+#' @param interpolate Logical; smooth the background raster (default
+#'   \code{TRUE}).
+#' @param colorbar Logical or \code{NULL}. \code{NULL} (default) shows a
+#'   colorbar when it carries information: an \code{overlay} is given, the
+#'   background uses a non-grayscale palette, or \code{cbar_title} is supplied.
+#' @param assemble Logical; if \code{TRUE} (default) return one assembled
+#'   \pkg{patchwork} figure; if \code{FALSE} return the named list of the
+#'   \code{axial}, \code{coronal} and \code{sagittal} ggplots.
+#' @param overlay Optional 3D statistical volume on the same grid as \code{vol},
+#'   drawn over all three views.
+#' @param ov_thresh,ov_cmap,ov_range,ov_alpha,ov_alpha_mode,ov_symmetric,ov_cap
+#'   Overlay threshold, palette, scaling, opacity and opacity mode; identical
+#'   in meaning to the same arguments of \code{\link{plot_overlay}}.
+#' @param canvas Optional \code{c(width, height)} in inches to fit the layout
+#'   to (default: the open device).
+#' @return A figure (class \code{neuro_fig}, a \pkg{patchwork} whose
+#'   layout is re-fitted to the device it is drawn on) when
+#'   \code{assemble = TRUE} or a named list
+#'   of ggplots (\code{assemble = FALSE}); invisibly when \code{draw = TRUE}.
 #' @details The affine determines which native voxel axis is nearest each
 #'   anatomical plane and how that plane must be permuted or flipped for
 #'   display. Oblique images are shown on their regular native voxel planes;
 #'   values are not silently resampled. Use \code{deoblique()} or
 #'   \code{resample_to()} first when true cardinal-plane sections are required.
+#'
+#'   Each view is labelled with the world coordinate of its plane (mm).
+#' @examples
+#' \donttest{
+#' bg <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
+#' p <- plot_ortho(bg, coord = c(24, 26, 26))
+#' ggplot2::ggsave(tempfile(fileext = ".png"), p, width = 9, height = 3.5)
+#' }
+#' @family plot_neuro
 #' @export
 plot_ortho <- function(
   vol, coord = NULL, unit = c("index","mm"),
   cmap = "grays", range = c("robust","data"), probs = c(.02,.98),
   crosshair = TRUE, annotate = TRUE, downsample = 1L,
   title = NULL, subtitle = NULL, caption = NULL,
-  draw = TRUE, style = c("light", "dark", "report"), enhance = FALSE,
-  crop = NULL, interpolate = NULL, cbar_title = "value"
+  draw = FALSE, style = c("light", "dark", "report"), enhance = FALSE,
+  crop = TRUE, interpolate = TRUE, cbar_title = "value",
+  colorbar = NULL, assemble = TRUE,
+  overlay = NULL, ov_thresh = 0, ov_cmap = NULL,
+  ov_range = c("robust", "data"), ov_alpha = 1,
+  ov_alpha_mode = c("binary", "proportional", "ramp", "soft"),
+  ov_symmetric = NULL, ov_cap = NULL, canvas = NULL
 ) {
+  unit_missing <- missing(unit)
+  cbar_title_given <- !missing(cbar_title)
   cbar_title <- validate_cbar_title(cbar_title)
-  unit <- match.arg(unit)
-  style <- match.arg(style)
-
-  is_report   <- identical(style, "report")
-  panel_style <- .plot_style_colors(style)$panel
-  do_crop     <- if (is.null(crop)) is_report else isTRUE(crop)
-  interp_bg   <- if (is.null(interpolate)) is_report else isTRUE(interpolate)
+  unit <- match_choice(unit, c("index", "mm"), "unit")
+  style <- match_choice(style, c("light", "dark", "report"))
+  ov_alpha_mode <- match_choice(ov_alpha_mode, c("binary", "proportional", "ramp", "soft"),
+                                "ov_alpha_mode")
+  tokens <- neuro_style_tokens(style)
+  is_report <- identical(style, "report")
+  do_crop   <- if (is.null(crop)) TRUE else isTRUE(crop)
+  interp_bg <- isTRUE(interpolate)
+  if (!is.null(overlay)) assert_same_neuro_grid(vol, overlay = overlay, reference_name = "vol")
+  ov_thresh <- check_overlay_args(ov_thresh, ov_alpha)
+  unit_hint(coord, unit_missing, vol, what = "coord")
 
   # Optional display-only enhancement of an unsmoothed statistical volume.
   vol <- apply_enhance_arg(vol, enhance)
+  d <- dim(vol)[1:3]
 
-  if (is.null(coord)) coord <- round(dim(vol) / 2)
-
-  # Convert mm -> voxel grid if possible
-  if (unit == "mm") {
-    conv <- try(get("coord_to_grid", mode = "function"), silent = TRUE)
-    sp   <- try(get("space",        mode = "function"), silent = TRUE)
-    if (!inherits(conv, "try-error") && !inherits(sp, "try-error")) {
-      coord <- as.integer(conv(sp(vol), matrix(coord, ncol = 3)))
+  if (is.null(coord)) {
+    coord <- if (!is.null(overlay)) {
+      a <- abs(as.array(overlay))
+      a[!is.finite(a)] <- 0
+      as.integer(arrayInd(which.max(a), dim(a)))
     } else {
-      warning("coord_to_grid()/space() not found; treating 'coord' as voxel indices.")
+      round(d / 2)
+    }
+  } else if (unit == "mm") {
+    if (length(coord) != 3L || any(!is.finite(coord))) {
+      cli::cli_abort("{.arg coord} must be a length-3 world coordinate (mm).", call = NULL)
+    }
+    mm <- coord
+    coord <- as.integer(round(coord_to_grid(space(vol), matrix(coord, ncol = 3))))
+    if (any(coord < 1L | coord > d)) {
+      rng <- world_bounds(vol)
+      cli::cli_abort(c(
+        "{.arg coord} = ({paste(format(mm), collapse = ', ')}) mm lies outside the image.",
+        "i" = "The image spans x {rng[1,1]} to {rng[2,1]}, y {rng[1,2]} to {rng[2,2]}, z {rng[1,3]} to {rng[2,3]} mm."
+      ), call = NULL)
     }
   }
+  if (length(coord) != 3L || anyNA(coord) || any(!is.finite(coord))) {
+    cli::cli_abort("{.arg coord} must be a length-3 coordinate.", call = NULL)
+  }
   coord <- as.integer(round(coord))
-  if (length(coord) != 3L || anyNA(coord) || any(coord < 1L | coord > dim(vol)[1:3])) {
-    stop("`coord` must be a valid length-3 voxel coordinate.", call. = FALSE)
+  if (any(coord < 1L | coord > d)) {
+    cli::cli_abort(c(
+      "{.arg coord} must be a valid voxel coordinate.",
+      "i" = "Valid indices are 1 to {d[1]}, 1 to {d[2]} and 1 to {d[3]}.",
+      "i" = "To give the point in world coordinates, use {.code unit = \"mm\"}."
+    ), call = NULL)
   }
 
   # Find the native grid axis nearest each anatomical normal. This preserves
@@ -86,116 +139,197 @@ plot_ortho <- function(
     integer(1)
   )
   if (anyDuplicated(native_axis_for_world)) {
-    stop("Volume axes do not define three distinct anatomical directions.", call. = FALSE)
+    cli::cli_abort("Volume axes do not define three distinct anatomical directions.",
+                   call = NULL)
   }
 
-  make_slice <- function(plane, world_normal) {
+  planes <- list(axial = 3L, coronal = 2L, sagittal = 1L)
+  info <- lapply(planes, function(world_normal) {
     along <- native_axis_for_world[[world_normal]]
-    oriented <- orient_volume_slice_for_raster(
-      vol,
-      z = coord[[along]],
-      along = along,
-      downsample = downsample
-    )
-    df <- oriented_raster_df(oriented)
-    df$plane <- plane
-    list(
-      oriented = oriented,
-      data = df,
-      cross = slice_grid_to_display(oriented, coord[-along])
-    )
+    oriented <- orient_volume_slice_for_raster(vol, z = coord[[along]], along = along,
+                                               downsample = downsample)
+    list(along = along, z = coord[[along]], oriented = oriented,
+         cross = slice_grid_to_display(oriented, coord[-along]))
+  })
+
+  # Shared intensity limits across the three views.
+  all_vals <- unlist(lapply(info, function(i) as.numeric(i$oriented$mat)))
+  lim <- background_display_limits(range, all_vals, probs = probs)
+
+  # Overlay scale: the same helper plot_overlay() uses.
+  scale <- NULL
+  if (!is.null(overlay)) {
+    ov_all <- as.numeric(as.array(overlay))
+    scale <- overlay_scale(ov_all, ov_range = ov_range, probs = probs,
+                           thresh = ov_thresh, ov_cmap = ov_cmap,
+                           ov_symmetric = ov_symmetric, ov_cap = ov_cap)
+    cap <- max(abs(scale$lim))
+    soft <- if (ov_alpha_mode == "soft") soft_alpha_params(abs(ov_all), thresh = ov_thresh, cap = cap)
+    alpha_fun <- overlay_alpha_fun(ov_alpha_mode, ov_thresh, cap, soft = soft)
   }
 
-  axial <- make_slice("Axial", 3L)
-  coronal <- make_slice("Coronal", 2L)
-  sagittal <- make_slice("Sagittal", 1L)
-  d_ax <- axial$data
-  d_co <- coronal$data
-  d_sa <- sagittal$data
+  # One 3D head bounding box, projected into every view, so the views share a
+  # scale and the crosshair lines up; views are then padded to a common height.
+  bbox <- if (isTRUE(do_crop)) volume_foreground_bbox(vol, overlay, ov_thresh) else NULL
+  windows <- lapply(info, function(i) {
+    full <- list(xlim = raster_extent_from_centers(i$oriented$x),
+                 ylim = raster_extent_from_centers(i$oriented$y))
+    if (is.null(bbox)) return(full)
+    kept <- setdiff(seq_len(3L), i$along)
+    corners <- as.matrix(expand.grid(bbox[1:2, kept[1]], bbox[1:2, kept[2]]))
+    disp <- t(apply(corners, 1L, function(g) slice_grid_to_display(i$oriented, g)))
+    half <- i$oriented$display_spacing / 2
+    # Stay one voxel inside the image horizontally, so the raster always
+    # covers the full width of the view (no 1-px step where padding meets it).
+    inset <- 2 * half[1]
+    list(xlim = c(max(min(disp[, 1]) - half[1], full$xlim[1] + inset),
+                  min(max(disp[, 1]) + half[1], full$xlim[2] - inset)),
+         ylim = c(max(min(disp[, 2]) - half[2], full$ylim[1]), min(max(disp[, 2]) + half[2], full$ylim[2])))
+  })
+  # A common height gives every view the same scale. Windows are grown
+  # upward from the bottom of the field of view where needed: padding above
+  # the head is black on black air (invisible), whereas padding below the
+  # field of view would show as an empty band.
+  extents <- lapply(info, function(i) raster_extent_from_centers(i$oriented$y))
+  common_h <- max(vapply(windows, function(w) diff(w$ylim), numeric(1)))
+  windows <- Map(function(w, ext) {
+    lo <- mean(w$ylim) - common_h / 2
+    lo <- max(lo, ext[1])
+    w$ylim <- c(lo, lo + common_h)
+    w
+  }, windows, extents)
 
-  # Shared limits across panels
-  lim <- resolve_display_limits(range, c(d_ax$value, d_co$value, d_sa$value), probs = probs)
+  world <- as.numeric(grid_to_coord(space(vol), matrix(coord, nrow = 1L)))
+  plane_label <- c(axial = "z", coronal = "y", sagittal = "x")
+  plane_value <- c(axial = world[3], coronal = world[2], sagittal = world[1])
 
-  make_panel <- function(slice_info, plane) {
-    df <- slice_info$data
-    oriented <- slice_info$oriented
-    cross_coord <- slice_info$cross
-    xr <- range(df$x, na.rm = TRUE); yr <- range(df$y, na.rm = TRUE)
-
-    coord <- ggplot2::coord_fixed()
-    if (isTRUE(do_crop)) {
-      fin <- df$value[is.finite(df$value)]
-      if (length(fin)) {
-        thr <- min(fin) + 0.02 * diff(range(fin))
-        keep <- is.finite(df$value) & df$value > thr
-        if (any(keep)) {
-          cx <- range(df$x[keep]); cy <- range(df$y[keep])
-          mx <- diff(cx) * 0.06; my <- diff(cy) * 0.06
-          coord <- ggplot2::coord_fixed(xlim = c(cx[1] - mx, cx[2] + mx),
-                                        ylim = c(cy[1] - my, cy[2] + my),
-                                        expand = FALSE)
-        }
-      }
-    }
-
-    p <- ggplot2::ggplot(df, ggplot2::aes(x, y, fill = value)) +
-      ggplot2::geom_raster(interpolate = interp_bg) +
-      scale_fill_neuro(cmap = cmap, limits = lim, guide = "none") +
-      coord +
-      theme_neuro(style = panel_style) +
-      ggplot2::labs(title = plane)
-    if (is_report) p <- p + report_tile_theme()
-
-    if (crosshair && length(cross_coord) == 2) {
-      p <- p +
-        ggplot2::geom_segment(x = cross_coord[1], xend = cross_coord[1],
-                              y = yr[1], yend = yr[2],
-                              linewidth = .3, colour = "white", alpha = .7) +
-        ggplot2::geom_segment(y = cross_coord[2], yend = cross_coord[2],
-                              x = xr[1], xend = xr[2],
-                              linewidth = .3, colour = "white", alpha = .7)
-    }
-    if (annotate) {
-      p <- p +
-        ggplot2::annotate("text", x = xr[1], y = mean(yr), label = oriented$labels[["left"]],
-                          colour = "white", fontface = "bold") +
-        ggplot2::annotate("text", x = xr[2], y = mean(yr), label = oriented$labels[["right"]],
-                          colour = "white", fontface = "bold") +
-        ggplot2::annotate("text", x = mean(xr), y = yr[2], label = oriented$labels[["top"]],
-                          colour = "white", fontface = "bold") +
-        ggplot2::annotate("text", x = mean(xr), y = yr[1], label = oriented$labels[["bottom"]],
-                          colour = "white", fontface = "bold")
+  is_gray <- length(cmap) == 1L && tolower(cmap) %in% c("grays", "gray", "grey", "greys")
+  make_panel <- function(name) {
+    i <- info[[name]]
+    w <- windows[[name]]
+    layers <- if (!is.null(scale)) {
+      list(overlay_slice_grob(overlay, i$z, i$along, scale, ov_thresh, alpha_fun,
+                              alpha = ov_alpha, downsample = downsample))
+    } else list()
+    label <- sprintf("%s = %s mm", plane_label[[name]], format(round(plane_value[[name]]), trim = TRUE))
+    p <- neuro_tile(i$oriented, bg_lim = lim, bg_cmap = cmap, layers = layers,
+                    window = w, label = label,
+                    orient = if (isTRUE(annotate)) orientation_letters(i$oriented, all = TRUE) else NULL,
+                    tokens = tokens, interpolate = interp_bg,
+                    floor_y = raster_extent_from_centers(i$oriented$y)[1],
+                    # The inferior crop usually cuts through the neck; fade it
+                    # out rather than end the image on a hard edge.
+                    extra = if (!is.null(bbox) && name != "axial" && is_gray) {
+                      list(fade_bottom_layer(w, resolve_cmap(cmap, 2L)[[1L]],
+                                             floor_y = raster_extent_from_centers(i$oriented$y)[1]),
+                           fade_top_layer(w, resolve_cmap(cmap, 2L)[[1L]],
+                                          ceil_y = raster_extent_from_centers(i$oriented$y)[2]))
+                    } else list())
+    if (isTRUE(crosshair) && length(i$cross) == 2L) {
+      p <- add_crosshair(p, i$cross, w, tokens)
     }
     p
   }
+  plots <- lapply(names(planes), make_panel)
+  names(plots) <- names(planes)
 
-  pa <- make_panel(axial, "Axial")
-  pc <- make_panel(coronal, "Coronal")
-  ps <- make_panel(sagittal, "Sagittal")
-  plots <- list(axial = pa, coronal = pc, sagittal = ps)
-  attr(plots, "labels") <- list(title = title, subtitle = subtitle, caption = caption)
-
-  if (isTRUE(is_report)) {
-    combined <- assemble_figure(
-      patchwork::wrap_plots(plots, ncol = 3L),
-      lim = lim, cmap = cmap, thresh = 0, style = style,
-      colorbar = TRUE, cbar_title = cbar_title,
-      title = title, subtitle = subtitle, caption = caption
-    )
-    if (isTRUE(draw)) print(combined)
-    return(invisible(combined))
+  show_cbar <- if (is.null(colorbar)) {
+    !is.null(overlay) || !is_gray || cbar_title_given
+  } else isTRUE(colorbar)
+  cbar <- NULL
+  if (show_cbar) {
+    cbar <- if (!is.null(scale)) {
+      neuro_colorbar(scale$lim, scale$pal, thresh = ov_thresh, diverging = scale$diverging,
+                     tokens = tokens, title = cbar_title,
+                     alpha_fun = if (ov_alpha_mode == "binary") NULL else alpha_fun,
+                     alpha = ov_alpha, over_hi = scale$over_hi, over_lo = scale$over_lo)
+    } else {
+      neuro_colorbar(lim, resolve_cmap(cmap, 256), positions = FALSE,
+                     tokens = tokens, title = cbar_title)
+    }
   }
+  # Conventional reading order: sagittal, coronal, axial.
+  shown <- c("sagittal", "coronal", "axial")
+  widths <- vapply(windows[shown], function(w) diff(w$xlim) / common_h, numeric(1))
+  build <- function(cv) neuro_assemble(unname(plots[shown]), colorbar = cbar, tokens = tokens,
+                        title = title, subtitle = subtitle, caption = caption,
+                        widths = unname(widths), canvas = cv)
+  cv0 <- canvas_size(canvas)
+  fig <- build(cv0)
+  if (is.null(canvas)) fig <- neuro_figure(fig, build, cv0, tokens)
+  neuro_finish(fig, plots, draw = draw, assemble = assemble, title = title,
+               subtitle = subtitle, caption = caption, style = style)
+}
 
-  if (!isTRUE(draw)) {
-    return(invisible(plots))
+#' Voxel bounding box of the head (and supra-threshold overlay)
+#'
+#' @return A 2 x 3 matrix of (min, max) voxel indices per axis, padded by 5\%,
+#'   or NULL when no foreground is found.
+#' @keywords internal
+#' @noRd
+volume_foreground_bbox <- function(vol, overlay = NULL, ov_thresh = 0, margin = 0.13) {
+  arr <- as.array(vol)
+  v <- as.numeric(arr)
+  thr <- foreground_threshold(v)
+  if (!is.finite(thr)) return(NULL)
+  # Frame the brain (bright tissue) plus a margin that takes in the scalp,
+  # rather than the whole head: this keeps the neck out of the S-I extent.
+  thr2 <- foreground_threshold(v[is.finite(v) & v > thr])
+  fg <- arr > (if (is.finite(thr2)) thr2 else thr)
+  fg[is.na(fg)] <- FALSE
+  if (!is.null(overlay)) {
+    ov <- as.array(overlay)
+    extra <- is.finite(ov) & ov != 0 & abs(ov) >= ov_thresh
+    fg <- fg | extra
   }
+  if (!any(fg)) return(NULL)
+  d <- dim(arr)
+  vapply(seq_len(3L), function(ax) {
+    prof <- apply(fg, ax, sum)
+    r <- range(which(prof > 0.08 * max(prof)))
+    pad <- ceiling(diff(r) * margin)
+    c(max(1, r[1] - pad), min(d[[ax]], r[2] + pad))
+  }, numeric(2))
+}
 
-  draw_plot_panel_grid(
-    plots,
-    ncol = 3L,
-    title = title,
-    subtitle = subtitle,
-    caption = caption,
-    style = style
-  )
+#' Gradient layer fading the bottom of a tile into the tile colour
+#' @keywords internal
+#' @noRd
+fade_bottom_layer <- function(window, colour, frac = 0.15, floor_y = -Inf) {
+  # Fade from wherever the image actually ends (the field of view may stop
+  # above the window's lower edge) over the bottom part of the view.
+  h <- diff(window$ylim) * frac
+  # Start a little below the image edge so the last (interpolated) row is
+  # inside the ramp and no hairline survives.
+  y0 <- max(window$ylim[1], floor_y - 0.02 * h)
+  rgb <- grDevices::col2rgb(colour) / 255
+  n <- 64L
+  a <- seq(0, 1, length.out = n)   # row 1 (top) transparent, bottom opaque
+  ras <- array(0, dim = c(n, 1L, 4L))
+  ras[, , 1] <- rgb[1]; ras[, , 2] <- rgb[2]; ras[, , 3] <- rgb[3]
+  ras[, , 4] <- a
+  ggplot2::annotation_custom(grid::rasterGrob(ras, width = grid::unit(1, "npc"),
+                                              height = grid::unit(1, "npc"),
+                                              interpolate = TRUE),
+                             xmin = window$xlim[1], xmax = window$xlim[2],
+                             ymin = y0, ymax = y0 + h)
+}
+
+#' Short gradient hiding the image's top edge where the view is padded above it
+#' @keywords internal
+#' @noRd
+fade_top_layer <- function(window, colour, ceil_y, frac = 0.04) {
+  if (!is.finite(ceil_y) || ceil_y >= window$ylim[2]) return(NULL)
+  h <- diff(window$ylim) * frac
+  rgb <- grDevices::col2rgb(colour) / 255
+  n <- 32L
+  a <- rev(seq(0, 1, length.out = n))  # row 1 (top) opaque, bottom transparent
+  ras <- array(0, dim = c(n, 1L, 4L))
+  ras[, , 1] <- rgb[1]; ras[, , 2] <- rgb[2]; ras[, , 3] <- rgb[3]
+  ras[, , 4] <- a
+  ggplot2::annotation_custom(grid::rasterGrob(ras, width = grid::unit(1, "npc"),
+                                              height = grid::unit(1, "npc"),
+                                              interpolate = TRUE),
+                             xmin = window$xlim[1], xmax = window$xlim[2],
+                             ymin = ceil_y - h, ymax = ceil_y + 0.02 * h)
 }

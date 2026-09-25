@@ -200,18 +200,29 @@ test_that("legend / crop / interpolate toggle independently of style", {
                              ov_thresh = 2.3, draw = FALSE))
 })
 
-test_that("style colors, legend grob, and crop window helpers behave", {
-  expect_identical(.plot_style_colors("report")$panel, "dark")
-  expect_identical(.plot_style_colors("light")$panel, "light")
-  leg <- make_overlay_legend(2.3, "#b40426", "#3b4cc0", symmetric = TRUE,
-                             style = "report", plane = "Axial")
-  expect_true(inherits(leg, "ggplot"))
+test_that("style tokens and the head crop window behave", {
+  for (st in c("light", "dark", "report")) {
+    tk <- neuroim2:::neuro_style_tokens(st)
+    expect_identical(tk$tile, "#000000")
+    expect_true(all(c("card", "fg", "muted", "faint") %in% names(tk)))
+  }
+  expect_error(neuroim2:::match_choice("bogus", c("light", "dark", "report")), "style")
 
   d <- make_signed_overlay()
-  win <- compute_crop_window(d$bg, d$ov, zlevels = c(8L, 10L), along = 3L,
-                             bg_thresh = stats::quantile(as.array(d$bg), 0.2),
-                             ov_thresh = 2.3)
+  win <- neuroim2:::foreground_crop_window(d$bg, zlevels = c(8L, 10L), along = 3L,
+                                           extra = list(d$ov), extra_thresh = 2.3)
   expect_true(is.null(win) || (is.list(win) && all(c("xlim", "ylim") %in% names(win))))
+  if (!is.null(win)) {
+    # Every supra-threshold overlay voxel on the displayed slices is inside the window.
+    for (z in c(8L, 10L)) {
+      o <- neuroim2:::orient_volume_slice_for_raster(d$ov, z, along = 3L)
+      hit <- which(abs(o$mat) > 2.3, arr.ind = TRUE)
+      if (nrow(hit)) {
+        expect_true(all(o$x[hit[, 2]] >= win$xlim[1] & o$x[hit[, 2]] <= win$xlim[2]))
+        expect_true(all(o$y[hit[, 1]] >= win$ylim[1] & o$y[hit[, 1]] <= win$ylim[2]))
+      }
+    }
+  }
 })
 
 # ---- report style is consistent across the plot_ family ---------------------
@@ -221,8 +232,8 @@ test_that("plot_ortho supports style = 'report' and returns an assembled object"
   d <- make_signed_overlay()
   obj <- plot_ortho(d$bg, style = "report", draw = FALSE)
   expect_true(inherits(obj, "patchwork") || inherits(obj, "gg"))
-  # light/dark path still returns the per-panel list
-  lst <- plot_ortho(d$bg, style = "dark", draw = FALSE)
+  # the per-panel list is available on request for any style
+  lst <- plot_ortho(d$bg, style = "dark", draw = FALSE, assemble = FALSE)
   expect_type(lst, "list")
   expect_length(lst, 3L)
 })

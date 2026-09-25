@@ -2,7 +2,8 @@
 
 #' @keywords internal
 #' @noRd
-utils::globalVariables(c("x", "y", "value", "z", "fill"))
+utils::globalVariables(c("x", "y", "value", "z", "fill", "xmin", "xmax", "ymin",
+                         "ymax", "label", "hjust"))
 
 #' Coerce a NeuroSlice (or matrix-like) to a numeric matrix
 #' @keywords internal
@@ -11,7 +12,7 @@ slice_to_matrix <- function(slc) {
   plain_matrix <- function(x) {
     dx <- dim(x)
     if (length(dx) != 2L) {
-      stop("Expected a 2D object when coercing to a plain matrix.", call. = FALSE)
+      cli::cli_abort("Expected a 2D object when coercing to a plain matrix.", call = NULL)
     }
     matrix(
       as.numeric(x),
@@ -71,7 +72,7 @@ volume_slice_matrix <- function(vol, z, along = 3L) {
     "1" = vol[z, , ],
     "2" = vol[, z, ],
     "3" = vol[, , z],
-    stop("`along` must be one of 1, 2, or 3.", call. = FALSE)
+    cli::cli_abort("`along` must be one of 1, 2, or 3.", call = NULL)
   )
   matrix(
     as.numeric(out),
@@ -100,21 +101,21 @@ orient_matrix_for_raster <- function(mat, axis_directions, pixel_spacing,
   mat <- slice_to_matrix(mat)
   axis_directions <- as.matrix(axis_directions)
   if (!identical(dim(axis_directions), c(3L, 2L))) {
-    stop("`axis_directions` must be a 3 x 2 matrix.", call. = FALSE)
+    cli::cli_abort("`axis_directions` must be a 3 x 2 matrix.", call = NULL)
   }
   pixel_spacing <- as.numeric(pixel_spacing)
   if (length(pixel_spacing) != 2L || any(!is.finite(pixel_spacing)) ||
       any(pixel_spacing <= 0)) {
-    stop("`pixel_spacing` must contain two positive finite values.", call. = FALSE)
+    cli::cli_abort("`pixel_spacing` must contain two positive finite values.", call = NULL)
   }
   downsample <- as.integer(downsample)
   if (length(downsample) != 1L || is.na(downsample) || downsample < 1L) {
-    stop("`downsample` must be a positive integer.", call. = FALSE)
+    cli::cli_abort("`downsample` must be a positive integer.", call = NULL)
   }
   if (!is.null(alpha_map)) {
     alpha_map <- slice_to_matrix(alpha_map)
     if (!identical(dim(alpha_map), dim(mat))) {
-      stop("'alpha_map' must have the same dimensions as 'mat'.", call. = FALSE)
+      cli::cli_abort("'alpha_map' must have the same dimensions as 'mat'.", call = NULL)
     }
   }
 
@@ -128,7 +129,7 @@ orient_matrix_for_raster <- function(mat, axis_directions, pixel_spacing,
     numeric(1)
   )
   if (any(strength == 0) || anyDuplicated(anatomical_axis)) {
-    stop("Slice axes must map to two distinct anatomical directions.", call. = FALSE)
+    cli::cli_abort("Slice axes must map to two distinct anatomical directions.", call = NULL)
   }
 
   display_axes <- sort(anatomical_axis)
@@ -243,7 +244,7 @@ oriented_raster_df <- function(oriented) {
 slice_grid_to_display <- function(oriented, grid) {
   grid <- as.numeric(grid)
   if (length(grid) != 2L || any(!is.finite(grid))) {
-    stop("`grid` must contain two finite slice-grid coordinates.", call. = FALSE)
+    cli::cli_abort("`grid` must contain two finite slice-grid coordinates.", call = NULL)
   }
   display_grid <- grid[oriented$input_order]
   display_grid[oriented$flipped] <-
@@ -286,7 +287,7 @@ raster_extent_from_centers <- function(centers) {
 assert_same_neuro_grid <- function(reference, ..., reference_name = "bgvol") {
   ref_dim <- dim(reference)
   if (length(ref_dim) != 3L) {
-    stop(sprintf("`%s` must be a 3D volume.", reference_name), call. = FALSE)
+    cli::cli_abort(sprintf("`%s` must be a 3D volume.", reference_name), call = NULL)
   }
 
   ref_space <- space(reference)
@@ -303,15 +304,15 @@ assert_same_neuro_grid <- function(reference, ..., reference_name = "bgvol") {
     }
 
     if (!identical(dim(volumes[[i]]), ref_dim)) {
-      stop(
+      cli::cli_abort(
         sprintf("`%s` must have the same dimensions as `%s`.", volume_name, reference_name),
-        call. = FALSE
+        call = NULL
       )
     }
     if (!identical(space(volumes[[i]]), ref_space)) {
-      stop(
+      cli::cli_abort(
         sprintf("`%s` must be on the same NeuroSpace grid as `%s`.", volume_name, reference_name),
-        call. = FALSE
+        call = NULL
       )
     }
   }
@@ -325,23 +326,30 @@ assert_same_neuro_grid <- function(reference, ..., reference_name = "bgvol") {
 validate_slice_panel_args <- function(zlevels, along, dims, ncol) {
   along <- as.integer(along)
   if (length(along) != 1L || is.na(along) || along < 1L || along > length(dims)) {
-    stop("`along` must be one of 1, 2, or 3.", call. = FALSE)
+    cli::cli_abort("`along` must be one of 1, 2, or 3.", call = NULL)
   }
 
+  if (is.numeric(zlevels) && any(is.finite(zlevels) & zlevels != round(zlevels))) {
+    cli::cli_abort(c(
+      "{.arg zlevels} must be whole slice indices.",
+      "i" = "To give slice positions in world coordinates, use {.code unit = \"mm\"}."
+    ), call = NULL)
+  }
   zlevels <- as.integer(zlevels)
   if (!length(zlevels)) {
-    stop("`zlevels` must contain at least one slice index.", call. = FALSE)
+    cli::cli_abort("`zlevels` must contain at least one slice index.", call = NULL)
   }
   if (anyNA(zlevels) || any(zlevels < 1L | zlevels > dims[[along]])) {
-    stop(
+    cli::cli_abort(c(
       sprintf("`zlevels` must be valid slice indices along axis %d.", along),
-      call. = FALSE
-    )
+      "i" = sprintf("Valid indices are 1 to %d.", dims[[along]]),
+      "i" = "To give slice positions in world coordinates, use {.code unit = \"mm\"}."
+    ), call = NULL)
   }
 
   ncol <- as.integer(ncol)
   if (length(ncol) != 1L || is.na(ncol) || ncol < 1L) {
-    stop("`ncol` must be a positive integer.", call. = FALSE)
+    cli::cli_abort("`ncol` must be a positive integer.", call = NULL)
   }
 
   list(zlevels = zlevels, along = along, ncol = ncol)
@@ -439,144 +447,11 @@ compute_limits <- function(x, mode = c("robust","data"), probs = c(.02,.98)) {
   rng
 }
 
-#' Shared color tokens for the plotting styles
-#'
-#' \code{"report"} renders dark brain tiles on a light "card" with bold/italic
-#' typography (see the report look); \code{"dark"}/\code{"light"} are the
-#' classic single-tone styles.
-#'
-#' @keywords internal
-#' @noRd
-.plot_style_colors <- function(style = c("light", "dark", "report")) {
-  style <- match.arg(style)
-  switch(style,
-    dark   = list(card = "grey8",   fg = "grey94", muted = "grey72", panel = "dark"),
-    report = list(card = "#f6f6f4", fg = "grey10", muted = "grey40", panel = "dark"),
-    light  = list(card = "white",   fg = "grey12", muted = "grey35", panel = "light")
-  )
-}
 
-#' patchwork plot_annotation theme for the assembled figure (title/card)
-#' @keywords internal
-#' @noRd
-annotation_theme <- function(style) {
-  cols <- .plot_style_colors(style)
-  ggplot2::theme(
-    plot.background = ggplot2::element_rect(fill = cols$card, colour = NA),
-    plot.title    = ggplot2::element_text(face = "bold", colour = cols$fg, size = 16,
-                                           margin = ggplot2::margin(b = 2)),
-    plot.subtitle = ggplot2::element_text(face = "italic", colour = cols$muted, size = 11,
-                                           margin = ggplot2::margin(b = 6)),
-    plot.caption  = ggplot2::element_text(colour = cols$muted, hjust = 0),
-    plot.margin   = grid::unit(c(12, 12, 10, 12), "pt")
-  )
-}
 
-#' Assemble a panel block into a single figure (colorbar, optional legend, card)
-#'
-#' Shared by \code{plot_overlay()}, \code{plot_ortho()}, and \code{plot_montage()}
-#' so the assembled look (right-hand colorbar, light/dark/report card, bold
-#' title) is identical across the family.
-#'
-#' @param panel_block A patchwork/ggplot holding the slice panels.
-#' @param lim Numeric length-2 limits for the colorbar.
-#' @param cmap Palette name for the colorbar.
-#' @param thresh Threshold to mark on the colorbar (0 to omit).
-#' @param style "light"/"dark"/"report".
-#' @param colorbar Logical; append the right-hand colorbar.
-#' @param cbar_title Colorbar title.
-#' @param legend Optional ggplot legend strip placed under the panels.
-#' @param title,subtitle,caption Layout labels.
-#' @return A patchwork object.
-#' @keywords internal
-#' @noRd
-assemble_figure <- function(panel_block, lim, cmap, thresh = 0,
-                            style = "light", colorbar = TRUE,
-                            cbar_title = "value", legend = NULL,
-                            title = NULL, subtitle = NULL, caption = NULL) {
-  top <- panel_block
-  if (isTRUE(colorbar)) {
-    cbar <- make_overlay_colorbar(lim, cmap, thresh = thresh, style = style,
-                                  title = cbar_title)
-    top <- patchwork::wrap_plots(top, cbar, nrow = 1L, widths = c(1, 0.08))
-  }
-  combined <- top
-  if (!is.null(legend)) {
-    combined <- patchwork::wrap_plots(top, legend, ncol = 1L, heights = c(1, 0.11))
-  }
-  combined +
-    patchwork::plot_annotation(title = title, subtitle = subtitle, caption = caption,
-                               theme = annotation_theme(style))
-}
 
-#' Per-panel theme tweaks for borderless "report" brain tiles
-#' @keywords internal
-#' @noRd
-report_tile_theme <- function() {
-  ggplot2::theme(
-    panel.border = ggplot2::element_blank(),
-    plot.margin  = grid::unit(c(5, 5, 5, 5), "pt")
-  )
-}
 
-#' Faceted-montage theme for the "report" style (dark tiles on a light card)
-#' @keywords internal
-#' @noRd
-report_facet_theme <- function() {
-  sc <- .plot_style_colors("report")
-  ggplot2::theme_minimal(base_size = 10) %+replace% ggplot2::theme(
-    plot.background  = ggplot2::element_rect(fill = sc$card, colour = NA),
-    panel.background = ggplot2::element_rect(fill = "black", colour = NA),
-    panel.grid       = ggplot2::element_blank(),
-    panel.spacing    = grid::unit(5, "pt"),
-    axis.title = ggplot2::element_blank(),
-    axis.text  = ggplot2::element_blank(),
-    axis.ticks = ggplot2::element_blank(),
-    strip.background = ggplot2::element_rect(fill = "black", colour = NA),
-    strip.text = ggplot2::element_text(colour = "grey92", face = "bold",
-                                       margin = ggplot2::margin(t = 2, b = 3)),
-    legend.position = "none",
-    plot.margin = grid::unit(c(4, 4, 4, 4), "pt")
-  )
-}
 
-#' Bounding-box crop window (world coords) around the brain + suprathreshold overlay
-#'
-#' Returns \code{list(xlim, ylim)} spanning, across all displayed slices, the
-#' background voxels above \code{bg_thresh} unioned with overlay voxels above
-#' \code{ov_thresh} (so clusters are never clipped), padded by \code{margin}.
-#'
-#' @keywords internal
-#' @noRd
-compute_crop_window <- function(bgvol, overlay, zlevels, along, bg_thresh,
-                                ov_thresh = 0, margin = 0.06) {
-  xs <- NULL; ys <- NULL
-  accumulate <- function(o, keep) {
-    if (!length(keep)) return(invisible())
-    nx <- length(o$x)
-    xi <- ((keep - 1L) %% nx) + 1L
-    yi <- ((keep - 1L) %/% nx) + 1L
-    xs <<- range(c(xs, o$x[xi]))
-    ys <<- range(c(ys, o$y[yi]))
-  }
-  for (z in zlevels) {
-    bg <- volume_slice_matrix(bgvol, z, along = along)
-    o  <- orient_volume_slice_for_raster(bgvol, z, along = along, mat = bg)
-    v  <- c(t(o$mat))
-    accumulate(o, which(is.finite(v) & v > bg_thresh))
-
-    ov <- volume_slice_matrix(overlay, z, along = along)
-    oo <- orient_volume_slice_for_raster(overlay, z, along = along, mat = ov)
-    vo  <- c(t(oo$mat))
-    accumulate(oo, which(is.finite(vo) & abs(vo) > ov_thresh))
-  }
-  if (length(xs) < 2L || length(ys) < 2L || diff(xs) == 0 || diff(ys) == 0) {
-    return(NULL)
-  }
-  padx <- diff(xs) * margin; pady <- diff(ys) * margin
-  list(xlim = c(xs[1] - padx, xs[2] + padx),
-       ylim = c(ys[1] - pady, ys[2] + pady))
-}
 
 #' Validate a colorbar title
 #'
@@ -586,73 +461,11 @@ compute_crop_window <- function(bgvol, overlay, zlevels, along, bg_thresh,
 #' @noRd
 validate_cbar_title <- function(x) {
   if (!is.character(x) || length(x) != 1L || is.na(x)) {
-    stop("`cbar_title` must be a single non-NA character string.", call. = FALSE)
+    cli::cli_abort("`cbar_title` must be a single non-NA character string.", call = NULL)
   }
   x
 }
 
-#' Horizontal legend strip for an assembled overlay figure
-#'
-#' @param thresh Threshold value (0 to omit the threshold entry).
-#' @param pos_col,neg_col Swatch colors for positive/negative values. The
-#'   labels are sign-neutral because the overlay is not necessarily an
-#'   activation map -- it may be a correlation, a semipartial r, a regression
-#'   coefficient, or any other signed quantity.
-#' @param symmetric Logical; show both pos/neg (signed) or a single entry.
-#' @param style "light"/"dark"/"report".
-#' @param plane Plane label ("Axial"/"Coronal"/"Sagittal").
-#' @return A ggplot object (blank panel with swatches + labels).
-#' @keywords internal
-#' @noRd
-make_overlay_legend <- function(thresh, pos_col, neg_col, symmetric = TRUE,
-                                style = c("light", "dark", "report"),
-                                plane = "Axial") {
-  style <- match.arg(style)
-  cols <- .plot_style_colors(style)
-  fg <- cols$fg; muted <- cols$muted
-
-  swatch <- function(p, x, fill, label, sub) {
-    p +
-      ggplot2::annotate("rect", xmin = x, xmax = x + 0.018, ymin = 0.42, ymax = 0.78,
-                        fill = fill, colour = NA) +
-      ggplot2::annotate("text", x = x + 0.028, y = 0.74, label = label, hjust = 0,
-                        vjust = 1, colour = fg, fontface = "bold", size = 3.5) +
-      ggplot2::annotate("text", x = x + 0.028, y = 0.40, label = sub, hjust = 0,
-                        vjust = 1, colour = muted, fontface = "italic", size = 3.0)
-  }
-
-  p <- ggplot2::ggplot() +
-    ggplot2::coord_cartesian(xlim = c(0, 1), ylim = c(0, 1), expand = FALSE)
-
-  if (isTRUE(symmetric)) {
-    p <- swatch(p, 0.02, pos_col, "Positive", "higher than threshold")
-    p <- swatch(p, 0.30, neg_col, "Negative", "lower than threshold")
-  } else {
-    p <- swatch(p, 0.02, pos_col, "Suprathreshold", "above threshold")
-  }
-
-  if (is.finite(thresh) && thresh > 0) {
-    p <- p +
-      ggplot2::annotate("segment", x = 0.58, xend = 0.625, y = 0.60, yend = 0.60,
-                        colour = fg, linetype = "dashed", linewidth = 0.6) +
-      ggplot2::annotate("text", x = 0.635, y = 0.60,
-                        label = sprintf("Threshold (+/-%g)", thresh),
-                        hjust = 0, vjust = 0.5, colour = fg, size = 3.3)
-  }
-
-  p <- p +
-    ggplot2::annotate("text", x = 0.86, y = 0.74, label = plane, hjust = 0, vjust = 1,
-                      colour = fg, fontface = "bold", size = 3.5) +
-    ggplot2::annotate("text", x = 0.86, y = 0.40, label = "orientation", hjust = 0,
-                      vjust = 1, colour = muted, fontface = "italic", size = 3.0)
-
-  p +
-    ggplot2::theme_void() +
-    ggplot2::theme(
-      plot.background = ggplot2::element_rect(fill = cols$card, colour = NA),
-      plot.margin = grid::unit(c(4, 10, 4, 10), "pt")
-    )
-}
 
 #' Self-tuning nonlinear alpha mapping for statistical overlays
 #'
@@ -717,8 +530,7 @@ resolve_display_limits <- function(range_arg, values, probs = c(.02, .98)) {
   if (is.numeric(range_arg)) {
     if (length(range_arg) != 2L || any(!is.finite(range_arg)) ||
         range_arg[1] == range_arg[2]) {
-      stop("A numeric range must be two distinct finite values, c(lo, hi).",
-           call. = FALSE)
+      cli::cli_abort("A numeric range must be two distinct finite values, c(lo, hi).", call = NULL)
     }
     return(range(range_arg))
   }
@@ -726,60 +538,6 @@ resolve_display_limits <- function(range_arg, values, probs = c(.02, .98)) {
   compute_limits(values, mode = mode, probs = probs)
 }
 
-#' Build a standalone colorbar plot for an overlay statistic
-#'
-#' Renders a thin value->color strip with a right-hand axis, and marks the
-#' threshold (and its mirror, for signed maps). Used to give the composited
-#' overlay an explicit scale, since it is drawn as a raster annotation rather
-#' than a mapped ggplot layer.
-#'
-#' @param limits Numeric length-2 display limits.
-#' @param cmap Overlay palette name or color vector.
-#' @param thresh Threshold to mark (0 for none).
-#' @param style "light" or "dark".
-#' @param title Colorbar title.
-#' @return A ggplot object.
-#' @keywords internal
-#' @noRd
-make_overlay_colorbar <- function(limits, cmap, thresh = 0,
-                                  style = c("light", "dark", "report"),
-                                  title = "value") {
-  style <- match.arg(style)
-  sc <- .plot_style_colors(style)
-  cols <- resolve_cmap(cmap, 256)
-  yy <- seq(limits[1], limits[2], length.out = 256)
-  df <- data.frame(x = 1, y = yy, fill = yy)
-  fg <- sc$fg
-  bg <- sc$card
-
-  p <- ggplot2::ggplot(df, ggplot2::aes(x, y, fill = fill)) +
-    ggplot2::geom_raster() +
-    ggplot2::scale_fill_gradientn(colours = cols, limits = limits, guide = "none") +
-    ggplot2::scale_y_continuous(position = "right") +
-    ggplot2::scale_x_continuous(breaks = NULL,
-                                expand = ggplot2::expansion(mult = 0)) +
-    ggplot2::labs(title = title, x = NULL, y = NULL) +
-    ggplot2::theme_minimal(base_size = 9) +
-    ggplot2::theme(
-      panel.grid = ggplot2::element_blank(),
-      plot.background = ggplot2::element_rect(fill = bg, colour = NA),
-      panel.background = ggplot2::element_rect(fill = bg, colour = NA),
-      axis.text.y = ggplot2::element_text(colour = fg),
-      axis.ticks.y = ggplot2::element_line(colour = fg),
-      axis.text.x = ggplot2::element_blank(),
-      plot.title = ggplot2::element_text(colour = fg, size = 9, hjust = 0.5)
-    )
-
-  if (is.finite(thresh) && thresh > 0) {
-    marks <- c(thresh, -thresh)
-    marks <- marks[marks >= limits[1] & marks <= limits[2]]
-    if (length(marks)) {
-      p <- p + ggplot2::geom_hline(yintercept = marks, colour = fg,
-                                   linetype = "dashed", linewidth = 0.3)
-    }
-  }
-  p
-}
 
 #' Apply the `enhance` argument of a plotting function to a volume
 #'
@@ -797,8 +555,7 @@ apply_enhance_arg <- function(vol, enhance, mask = NULL) {
   if (is.list(enhance)) {
     args <- utils::modifyList(args, enhance)
   } else if (!isTRUE(enhance)) {
-    stop("`enhance` must be TRUE, FALSE, or a named list of enhance_stat_map() arguments.",
-         call. = FALSE)
+    cli::cli_abort("`enhance` must be TRUE, FALSE, or a named list of enhance_stat_map() arguments.", call = NULL)
   }
   do.call(enhance_stat_map, args)
 }
@@ -938,4 +695,191 @@ annotate_orientation <- function(plane = c("axial","coronal","sagittal"),
                                xmin = nc/2, xmax = nc/2, ymin = nr + .5, ymax = nr + .5)
   )
   layers
+}
+
+#' Otsu foreground threshold for a background image
+#'
+#' Two-class Otsu split of the finite, non-constant values of an image
+#' (256-bin histogram). Used to separate head/brain from air so that display
+#' windowing, cropping, and default slice selection ignore empty space.
+#'
+#' @param x Numeric vector of image values.
+#' @return A single numeric threshold (or \code{NA} if undetermined).
+#' @keywords internal
+#' @noRd
+foreground_threshold <- function(x) {
+  x <- x[is.finite(x)]
+  if (length(x) < 2L) return(NA_real_)
+  if (length(x) > 2e5) x <- x[seq.int(1L, length(x), length.out = 2e5)]
+  rng <- range(x)
+  if (rng[1] == rng[2]) return(NA_real_)
+  br <- seq(rng[1], rng[2], length.out = 257L)
+  h <- graphics::hist(x, breaks = br, plot = FALSE)
+  p <- h$counts / sum(h$counts)
+  mids <- h$mids
+  w0 <- cumsum(p)
+  mu <- cumsum(p * mids)
+  mu_t <- mu[length(mu)]
+  between <- (mu_t * w0 - mu)^2 / (w0 * (1 - w0))
+  between[!is.finite(between)] <- -Inf
+  br[which.max(between) + 1L]
+}
+
+#' Display window for a structural background image
+#'
+#' For \code{range = "robust"} the window is computed over foreground voxels
+#' only (values above the Otsu threshold) so that air does not drag the upper
+#' limit down and over-expose tissue. The lower limit is the image minimum
+#' (air renders black), the upper limit the \code{probs[2]} quantile of tissue.
+#'
+#' @keywords internal
+#' @noRd
+background_display_limits <- function(range_arg, values, probs = c(.02, .98)) {
+  if (is.numeric(range_arg) || !identical(match.arg(range_arg[1], c("robust", "data")), "robust")) {
+    return(resolve_display_limits(range_arg, values, probs = probs))
+  }
+  v <- values[is.finite(values)]
+  if (!length(v)) return(c(0, 1))
+  thr <- foreground_threshold(v)
+  fg <- if (is.finite(thr)) v[v > thr] else v
+  if (length(fg) < 10L) fg <- v
+  lo <- stats::quantile(v, probs[1], names = FALSE)
+  if (min(v) >= 0) lo <- min(v)
+  # Map air (the non-foreground noise floor) to pure black, so it matches the
+  # tile colour and padding never shows as a seam.
+  if (is.finite(thr)) {
+    air <- v[v <= thr]
+    if (length(air) >= 10L) {
+      lo <- max(lo, min(stats::quantile(air, 0.9, names = FALSE), lo + (thr - lo) / 4))
+    }
+  }
+  # Upper limit a little above the brightest tissue so white matter renders
+  # light grey with texture rather than a clipped white plateau.
+  hi <- stats::quantile(fg, max(probs[2], 0.995), names = FALSE)
+  hi <- lo + (hi - lo) * 1.08
+  if (!is.finite(hi) || hi <= lo) hi <- max(v)
+  if (hi <= lo) hi <- lo + 1
+  c(lo, hi)
+}
+
+#' Choose informative default slices
+#'
+#' Picks \code{n} evenly spaced slices along \code{along} inside the extent of
+#' the foreground (values above the Otsu threshold), trimmed by \code{trim} at
+#' each end so the montage does not open or close on near-empty slices.
+#'
+#' @keywords internal
+#' @noRd
+default_slice_levels <- function(vol, along = 3L, n = 9L, trim = 0.06,
+                                 support = NULL) {
+  d <- dim(vol)[1:3]
+  brain <- structural_slice_range(vol, along)
+  if (!is.null(support) && any(support, na.rm = TRUE)) {
+    support[is.na(support)] <- FALSE
+    prof <- apply(support, along, sum)
+    keep <- which(prof > 0.02 * max(prof))
+    lo <- min(keep); hi <- max(keep)
+    span <- hi - lo
+    lo <- lo + 0.04 * span; hi <- hi - 0.04 * span
+    # Stay inside the substantial-brain range when the overlay allows it, so
+    # the default grid does not open on orbits and skull base; clusters
+    # outside it remain reachable through zlevels.
+    if (!is.null(brain)) {
+      ilo <- max(lo, brain[1]); ihi <- min(hi, brain[2])
+      if (ihi - ilo >= 0.5 * (hi - lo)) { lo <- ilo; hi <- ihi }
+    }
+  } else if (!is.null(brain)) {
+    lo <- brain[1]; hi <- brain[2]
+  } else {
+    lo <- 1 + trim * (d[[along]] - 1); hi <- d[[along]] - trim * (d[[along]] - 1)
+  }
+  unique(as.integer(round(seq(lo, hi, length.out = n))))
+}
+
+#' Slice range covering substantial brain tissue along an axis
+#'
+#' Two-level Otsu: the first split separates head from air, the second
+#' separates bright tissue (brain parenchyma on T1) from scalp and CSF. The
+#' range starts where bright tissue is substantial (skipping neck and skull
+#' base) and runs to near the vertex, trimmed more at the inferior end.
+#' @return c(lo, hi) slice positions, or NULL.
+#' @keywords internal
+#' @noRd
+structural_slice_range <- function(vol, along) {
+  arr <- as.array(vol)
+  v <- as.numeric(arr)
+  thr <- foreground_threshold(v)
+  if (!is.finite(thr)) return(NULL)
+  thr2 <- foreground_threshold(v[is.finite(v) & v > thr])
+  use <- if (is.finite(thr2)) thr2 else thr
+  fg <- arr > use
+  fg[is.na(fg)] <- FALSE
+  prof <- apply(fg, along, sum)
+  if (!any(prof > 0)) return(NULL)
+  big <- which(prof > 0.35 * max(prof))
+  any_t <- which(prof > 0.12 * max(prof))
+  lo <- min(big); hi <- max(any_t)
+  span <- hi - lo
+  c(lo + 0.2 * span, hi - 0.03 * span)
+}
+
+#' World coordinate (mm) of a slice along a native axis
+#'
+#' Returns the world coordinate of the slice centre along the anatomical axis
+#' nearest to the native slicing axis, with a label such as \code{"z = 24"}.
+#'
+#' @keywords internal
+#' @noRd
+slice_world_label <- function(vol, z, along = 3L) {
+  sp <- space(vol)
+  d <- dim(vol)[1:3]
+  g <- (d + 1) / 2
+  g[[along]] <- z
+  w <- as.numeric(grid_to_coord(sp, matrix(g, nrow = 1L)))
+  directions <- perm_mat(axes(sp))
+  world_axis <- which.max(abs(directions[, along]))
+  val <- w[[world_axis]]
+  paste0(c("x", "y", "z")[[world_axis]], " = ", format(round(val), trim = TRUE), " mm")
+}
+
+#' Display limits for a statistical overlay
+#'
+#' Unlike a structural image, a statistical map is mostly zeros (outside the
+#' mask) or near-zero noise. For \code{range = "robust"} the limits are therefore
+#' computed over the non-zero finite values only, with the upper end at the
+#' \code{max(probs[2], 0.99)} quantile of the magnitude, and they are widened if
+#' necessary so that the threshold always lies inside the scale.
+#'
+#' @keywords internal
+#' @noRd
+overlay_display_limits <- function(range_arg, values, probs = c(.02, .98),
+                                   thresh = 0) {
+  if (is.numeric(range_arg)) {
+    return(resolve_display_limits(range_arg, values, probs = probs))
+  }
+  mode <- match.arg(range_arg[1], c("robust", "data"))
+  v <- values[is.finite(values) & values != 0]
+  if (!length(v)) return(c(0, 1))
+  if (mode != "data" && length(v) > 5e5) {
+    # Quantiles of a large map are stable on a regular subsample.
+    v <- v[seq.int(1L, length(v), length.out = 5e5)]
+  }
+  if (mode == "data") {
+    lim <- range(v)
+  } else {
+    hi_p <- max(probs[2], 0.99)
+    # With a threshold, the scale is set by the supra-threshold values (the
+    # ones actually drawn); otherwise by all non-zero values.
+    vv <- if (isTRUE(thresh > 0) && sum(abs(v) >= thresh) >= 10L) v[abs(v) >= thresh] else v
+    lim <- c(stats::quantile(vv, 1 - hi_p, names = FALSE),
+             stats::quantile(vv, hi_p, names = FALSE))
+    if (min(vv) >= 0) lim[1] <- min(0, lim[1])
+    if (lim[1] == lim[2]) lim <- range(v)
+  }
+  if (isTRUE(thresh > 0)) {
+    if (lim[2] > 0 && lim[2] < thresh) lim[2] <- max(max(v), thresh * 1.05)
+    if (lim[1] < 0 && lim[1] > -thresh) lim[1] <- min(min(v), -thresh * 1.05)
+  }
+  if (lim[1] == lim[2]) lim <- lim + c(-0.5, 0.5)
+  lim
 }

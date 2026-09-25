@@ -9,17 +9,29 @@ plot_checkerboard(
   overlay,
   zlevels = NULL,
   along = 3L,
-  tile = 16L,
+  tile = NULL,
   cmap = "grays",
   bg_range = c("robust", "data"),
   ov_range = c("robust", "data"),
   probs = c(0.02, 0.98),
-  ncol = 3L,
+  ncol = NULL,
   title = NULL,
   subtitle = NULL,
   caption = NULL,
-  draw = TRUE,
-  style = c("light", "dark")
+  draw = FALSE,
+  style = c("light", "dark", "report"),
+  labels = c("fixed", "moving"),
+  legend = TRUE,
+  crop = TRUE,
+  mask_background = TRUE,
+  unit = c("index", "mm"),
+  annotate = TRUE,
+  assemble = TRUE,
+  n_slices = 6L,
+  match_intensity = TRUE,
+  canvas = NULL,
+  interpolate = TRUE,
+  focus_brain = TRUE
 )
 }
 \arguments{
@@ -27,29 +39,95 @@ plot_checkerboard(
 
 \item{overlay}{Comparison 3D volume on the same NeuroSpace grid as `bgvol`.}
 
-\item{zlevels}{Slices to plot. Defaults to nine evenly spaced slices.}
+\item{zlevels}{Slices to plot: indices along `along` (\code{unit = "index"})
+or world coordinates (\code{unit = "mm"}). \code{NULL} (default) picks
+\code{n_slices} slices spread over the brain.}
 
 \item{along}{Native voxel-grid axis for slicing. Display orientation is
 inferred from the image affine.}
 
-\item{tile}{Tile width in slice pixels.}
+\item{tile}{Tile width in voxels (the key states the equivalent in mm).
+\code{NULL} (default) picks a clean size in mm giving about ten tiles
+across the head.}
 
 \item{cmap}{Palette used to render the normalized checkerboard image.}
 
-\item{bg_range, ov_range}{"robust" or "data" intensity scaling.}
+\item{bg_range, ov_range}{Intensity scaling of each image: \code{"robust"}
+(computed over head voxels), \code{"data"}, or numeric \code{c(lo, hi)}.
+Each image is windowed independently so tissue contrast, not a brightness
+step, is what differs between tiles.}
 
 \item{probs}{Quantiles for robust scaling.}
 
-\item{ncol}{Number of columns in the facet layout.}
+\item{ncol}{Number of columns (\code{NULL} = chosen to fill the canvas).}
 
 \item{title, subtitle, caption}{Optional layout-level labels used when drawing.}
 
-\item{draw}{Logical; if `TRUE`, draw the panels on the active graphics
-device. If `FALSE`, only return the ggplot objects invisibly.}
+\item{draw}{Logical; if \code{TRUE}, also print the figure immediately (and
+return it invisibly). By default the figure is returned visibly.}
 
-\item{style}{Visual style, either \code{"light"} or \code{"dark"}.}
+\item{style}{Visual style: \code{"light"}, \code{"dark"} or \code{"report"}.}
+
+\item{labels}{Length-2 character vector naming the two images in the key.}
+
+\item{legend}{Logical; draw the key under the panels.}
+
+\item{crop}{Logical; crop panels to the head bounding box.}
+
+\item{mask_background}{Logical; show the checker pattern only inside the
+head (union of both images' foreground), leaving air black.}
+
+\item{unit}{\code{"index"} or \code{"mm"}: how \code{zlevels} is
+interpreted. Panels are labelled in world coordinates.}
+
+\item{annotate}{Logical; draw orientation letters on the first panel.}
+
+\item{assemble}{Logical; return one \pkg{patchwork} figure (default) or the
+list of panel ggplots.}
+
+\item{n_slices}{Number of automatically chosen slices.}
+
+\item{match_intensity}{Logical; map the comparison image's intensities onto
+the reference image's distribution (quantile matching over head voxels)
+before interleaving, so a brightness or contrast difference between the
+images does not masquerade as misalignment. Default \code{TRUE}.}
+
+\item{canvas}{Optional \code{c(width, height)} in inches to fit the layout
+to (default: the open device).}
+
+\item{interpolate}{Logical; smooth the rendered checkerboard (default
+\code{TRUE}), which also softens the head outline.}
+
+\item{focus_brain}{Logical; interleave tiles only inside the (dilated)
+bright-tissue mask of \code{bgvol} and show the fixed image alone on the
+scalp, so the seams where registration is judged dominate the figure
+instead of the stair-stepped head outline. Default \code{TRUE}.}
+}
+\value{
+A figure (class \code{neuro_fig}, a \pkg{patchwork} whose
+  layout is re-fitted to the device it is drawn on) when
+  \code{assemble = TRUE} or a named list
+  of panel ggplots (\code{assemble = FALSE}); invisibly when
+  \code{draw = TRUE}.
 }
 \description{
 Alternates tiles from a background volume and a comparison volume on matched
 slices. This is useful for visual registration QC.
 }
+\examples{
+\donttest{
+fixed <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
+moving <- fixed
+moving[] <- sqrt(fixed[c(2:dim(fixed)[1], 1), , ])   # shifted, different contrast
+p <- plot_checkerboard(fixed, moving)
+ggplot2::ggsave(tempfile(fileext = ".png"), p, width = 8, height = 6)
+}
+}
+\seealso{
+Other plot_neuro: 
+\code{\link{plot_edge_overlay}()},
+\code{\link{plot_montage}()},
+\code{\link{plot_ortho}()},
+\code{\link{plot_overlay}()}
+}
+\concept{plot_neuro}

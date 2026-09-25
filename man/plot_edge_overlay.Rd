@@ -11,19 +11,33 @@ plot_edge_overlay(
   zlevels = NULL,
   along = 3L,
   bg_cmap = "grays",
-  fixed_color = "#00d5ff",
+  fixed_color = "#2bb8f0",
   moving_color = "#ff3b30",
+  agree_color = "#ffd23f",
   bg_range = c("robust", "data"),
   edge_range = c("robust", "data"),
   probs = c(0.02, 0.98),
   edge_thresh = 0,
-  edge_alpha = 0.85,
-  ncol = 3L,
+  edge_alpha = 0.9,
+  ncol = NULL,
   title = NULL,
   subtitle = NULL,
   caption = NULL,
-  draw = TRUE,
-  style = c("light", "dark")
+  draw = FALSE,
+  style = c("light", "dark", "report"),
+  labels = c("fixed", "moving"),
+  legend = TRUE,
+  bg_dim = 0.75,
+  crop = TRUE,
+  unit = c("index", "mm"),
+  annotate = TRUE,
+  assemble = TRUE,
+  n_slices = 6L,
+  thin = TRUE,
+  compute_edges = FALSE,
+  canvas = NULL,
+  interpolate = TRUE,
+  focus_brain = TRUE
 )
 }
 \arguments{
@@ -35,7 +49,9 @@ NeuroSpace grid as `bgvol`.}
 \item{moving_edges}{Edge map for the moving/result image on the same
 NeuroSpace grid as `bgvol`.}
 
-\item{zlevels}{Slices to plot. Defaults to nine evenly spaced slices.}
+\item{zlevels}{Slices to plot: indices along `along` (\code{unit = "index"})
+or world coordinates (\code{unit = "mm"}). \code{NULL} (default) picks
+\code{n_slices} slices spread over the brain.}
 
 \item{along}{Native voxel-grid axis for slicing. Display orientation is
 inferred from the image affine.}
@@ -43,6 +59,10 @@ inferred from the image affine.}
 \item{bg_cmap}{Background palette.}
 
 \item{fixed_color, moving_color}{Overlay colors for the two edge maps.}
+
+\item{agree_color}{Colour for contour pixels present in both edge maps
+(where the images agree), keyed "both"; \code{NA} turns the agreement
+layer and its key entry off.}
 
 \item{bg_range, edge_range}{"robust" or "data" intensity scaling.}
 
@@ -52,17 +72,81 @@ inferred from the image affine.}
 
 \item{edge_alpha}{Global alpha for edge overlays.}
 
-\item{ncol}{Number of columns in the facet layout.}
+\item{ncol}{Number of columns (\code{NULL} = chosen to fill the canvas).}
 
 \item{title, subtitle, caption}{Optional layout-level labels used when drawing.}
 
-\item{draw}{Logical; if `TRUE`, draw the panels on the active graphics
-device. If `FALSE`, only return the ggplot objects invisibly.}
+\item{draw}{Logical; if \code{TRUE}, also print the figure immediately (and
+return it invisibly). By default the figure is returned visibly.}
 
-\item{style}{Visual style, either \code{"light"} or \code{"dark"}.}
+\item{style}{Visual style: \code{"light"}, \code{"dark"} or \code{"report"}.}
+
+\item{labels}{Length-2 character vector naming the fixed and moving edge
+maps in the key (e.g. \code{c("MNI template", "registered EPI")}).}
+
+\item{legend}{Logical; draw the colour key under the panels.}
+
+\item{bg_dim}{Brightness multiplier (0--1) for the background so the edge
+colours read clearly.}
+
+\item{crop}{Logical; crop panels to the head bounding box.}
+
+\item{unit}{\code{"index"} or \code{"mm"}: how \code{zlevels} is
+interpreted. Panels are labelled in world coordinates.}
+
+\item{annotate}{Logical; draw orientation letters on the first panel.}
+
+\item{assemble}{Logical; return one \pkg{patchwork} figure (default) or the
+list of panel ggplots.}
+
+\item{n_slices}{Number of automatically chosen slices.}
+
+\item{thin}{Logical; thin edge bands to their ridge lines (1--2 pixels) so
+the two contours can be compared precisely. Default \code{TRUE}.}
+
+\item{compute_edges}{Logical; if \code{TRUE}, \code{fixed_edges} and
+\code{moving_edges} are ordinary intensity images (e.g. the template and
+the registered image) and their edges are computed per slice as the
+in-plane gradient magnitude, keeping the strongest 12\% of head voxels.}
+
+\item{canvas}{Optional \code{c(width, height)} in inches to fit the layout
+to (default: the open device).}
+
+\item{interpolate}{Logical; smooth the background and anti-alias the edge
+contours (default \code{TRUE}).}
+
+\item{focus_brain}{Logical; fade edges that lie outside the (dilated)
+brain mask of \code{bgvol} (bright tissue connected to the centre of the
+head, which excludes scalp fat), so scalp and skull contours do not
+dominate the comparison. Default \code{TRUE}.}
+}
+\value{
+A figure (class \code{neuro_fig}, a \pkg{patchwork} whose
+  layout is re-fitted to the device it is drawn on) when
+  \code{assemble = TRUE} or a named list
+  of panel ggplots (\code{assemble = FALSE}); invisibly when
+  \code{draw = TRUE}.
 }
 \description{
 Displays a structural/reference background with two edge channels rendered in
 distinct colors. This is intended for registration QC where fixed/template
 edges and moving/result edges should coincide.
 }
+\examples{
+\donttest{
+fixed <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
+moving <- fixed
+moving[] <- fixed[c(2:dim(fixed)[1], 1), , ]   # a one-voxel shift
+p <- plot_edge_overlay(fixed, fixed, moving, compute_edges = TRUE,
+                       labels = c("template", "registered"))
+ggplot2::ggsave(tempfile(fileext = ".png"), p, width = 8, height = 6)
+}
+}
+\seealso{
+Other plot_neuro: 
+\code{\link{plot_checkerboard}()},
+\code{\link{plot_montage}()},
+\code{\link{plot_ortho}()},
+\code{\link{plot_overlay}()}
+}
+\concept{plot_neuro}

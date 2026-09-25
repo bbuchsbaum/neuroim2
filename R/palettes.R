@@ -38,6 +38,17 @@ resolve_cmap <- function(name = "grays", n = 256) {
     cividis = "Cividis"
   )
 
+  sequential <- .sequential_palettes()
+  if (nm %in% names(sequential)) {
+    ramp <- grDevices::colorRampPalette(sequential[[nm]], space = "Lab")
+    return(ramp(n))
+  }
+
+  # Grays is a true black-to-white ramp so that air renders as pure black.
+  if (nm %in% c("grays", "grey", "gray", "greys")) {
+    return(grDevices::gray(seq(0, 1, length.out = n)))
+  }
+
   if (nm %in% names(alias)) {
     pal <- hc_try(alias[[nm]])
     if (!is.null(pal)) return(pal)
@@ -74,9 +85,20 @@ resolve_cmap <- function(name = "grays", n = 256) {
 .diverging_palettes <- function() {
   list(
     coldhot    = c("#2447a8", "#59b7ff", "#111111", "#ffbf4d", "#d7191c"),
+    cold_hot   = c("#b5f0ff", "#45bdf2", "#1f6ad8", "#2239b5", "#161616",
+                   "#b8221a", "#e0401c", "#f78a2a", "#ffe45c"),
     "blue-red" = c("#3b4cc0", "#91bfdb", "#f7f7f7", "#fc8d59", "#b40426"),
     bluered    = c("#3b4cc0", "#91bfdb", "#f7f7f7", "#fc8d59", "#b40426"),
     coolwarm   = c("#3b4cc0", "#91bfdb", "#f7f7f7", "#fc8d59", "#b40426")
+  )
+}
+
+#' Built-in sequential palettes (anchor colors), keyed by lowercase name.
+#' @keywords internal
+#' @noRd
+.sequential_palettes <- function() {
+  list(
+    hot = c("#8f1a13", "#d8341d", "#f78a2a", "#ffc53d", "#fff3a3")
   )
 }
 
