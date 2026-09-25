@@ -52,9 +52,11 @@ colorbar placed beside the tiles.
 `plot_overlay()`, `plot_montage()`, and `plot_ortho()` gain a `cbar_title`
 argument naming the quantity drawn above the report-style colorbar. It defaults
 to `"value"`, which is what the colorbar has always shown, so existing figures
-are unchanged. Set it to the statistic actually being displayed --
-`cbar_title = "Semipartial r"`, `"Delay coefficient (% signal change)"` -- so a
-figure does not assert a quantity it is not showing.
+are unchanged. The new argument is appended after the existing parameters so
+positional callers of `legend` / `crop` / `interpolate` keep working. Set it to
+the statistic actually being displayed -- `cbar_title = "Semipartial r"`,
+`"Delay coefficient (% signal change)"` -- so a figure does not assert a
+quantity it is not showing.
 
 ## Sign-neutral overlay legend (behavior change)
 
