@@ -6,10 +6,6 @@ marker_xy <- function(p, marker = 1) {
   unname(as.numeric(hit[1L, ]))
 }
 
-annotation_labels <- function(p) {
-  built <- ggplot2::ggplot_build(p)
-  vapply(tail(built$data, 4L), function(layer) as.character(layer$label[[1L]]), character(1))
-}
 
 test_that("generic plot and plot_montage preserve axial x/y landmark placement", {
   dims <- c(5L, 7L, 3L)
@@ -77,23 +73,41 @@ test_that("plot_ortho finds anatomical planes after voxel-axis permutation", {
   )
   vol <- NeuroVol(arr, NeuroSpace(dims, trans = affine))
 
-  panels <- plot_ortho(vol, coord = marker, draw = FALSE)
+  panels <- plot_ortho(vol, coord = marker, draw = FALSE, assemble = FALSE)
   expect_named(panels, c("axial", "coronal", "sagittal"))
   expect_equal(marker_xy(panels$axial), c(2, 1))
   expect_equal(marker_xy(panels$coronal), c(2, 4))
   expect_equal(marker_xy(panels$sagittal), c(1, 4))
 
-  expect_equal(annotation_labels(panels$axial), c("L", "R", "A", "P"))
-  expect_equal(annotation_labels(panels$coronal), c("L", "R", "S", "I"))
-  expect_equal(annotation_labels(panels$sagittal), c("P", "A", "S", "I"))
+  sides <- c("left", "right", "top", "bottom")
+  expect_equal(tile_orientation_letters(panels$axial)[sides],
+               c(left = "L", right = "R", top = "A", bottom = "P"))
+  expect_equal(tile_orientation_letters(panels$coronal)[sides],
+               c(left = "L", right = "R", top = "S", bottom = "I"))
+  expect_equal(tile_orientation_letters(panels$sagittal)[sides],
+               c(left = "P", right = "A", top = "S", bottom = "I"))
 
-  # The selected landmark and both crosshair segments must meet at the same
-  # display coordinate in every plane.
+  # Each view is labelled with the world coordinate of its plane. The affine
+  # maps native (i, j, k) to world (k, i, j) - 1, so the marker sits at
+  # world (2, 1, 4).
+  expect_world_label(tile_slice_label(panels$axial), "z = 4")
+  expect_world_label(tile_slice_label(panels$coronal), "y = 1")
+  expect_world_label(tile_slice_label(panels$sagittal), "x = 2")
+
+  # The selected landmark and both crosshair arms must meet at the same
+  # display coordinate in every plane, with a gap that leaves the landmark
+  # itself uncovered.
   for (panel in panels) {
-    built <- ggplot2::ggplot_build(panel)
     xy <- marker_xy(panel)
-    expect_equal(built$data[[2L]]$x[[1L]], xy[[1L]])
-    expect_equal(built$data[[3L]]$y[[1L]], xy[[2L]])
+    segs <- tile_crosshair(panel)
+    vertical <- segs[segs$x == segs$xend, , drop = FALSE]
+    horizontal <- segs[segs$y == segs$yend, , drop = FALSE]
+    expect_gt(nrow(vertical), 0L)
+    expect_gt(nrow(horizontal), 0L)
+    expect_true(all(vertical$x == xy[[1L]]))
+    expect_true(all(horizontal$y == xy[[2L]]))
+    expect_false(any(vertical$y <= xy[[2L]] & vertical$yend >= xy[[2L]]))
+    expect_false(any(horizontal$x <= xy[[1L]] & horizontal$xend >= xy[[1L]]))
   }
 })
 
@@ -108,10 +122,11 @@ test_that("oblique plotting keeps native pixels on a regular warning-free grid",
 
   generic <- plot(vol, zlevels = 3L)
   montage <- plot_montage(vol, zlevels = 3L, ncol = 1L, range = "data")
-  ortho <- plot_ortho(vol, coord = c(2L, 8L, 3L), draw = FALSE)
+  ortho <- plot_ortho(vol, coord = c(2L, 8L, 3L), draw = FALSE, assemble = FALSE)
 
   expect_warning(ggplot2::ggplot_build(generic), NA)
   expect_warning(ggplot2::ggplot_build(montage), NA)
+  expect_length(ortho, 3L)
   for (panel in ortho) {
     expect_warning(ggplot2::ggplot_build(panel), NA)
   }
@@ -136,8 +151,9 @@ test_that("overlay and registration QC plots share the orientation transform", {
   overlay <- plot_overlay(
     bg, ov, zlevels = 2L, draw = FALSE, assemble = FALSE
   )[[1L]]
-  checker <- plot_checkerboard(bg, ov, zlevels = 2L, draw = FALSE)[[1L]]
-  edge <- plot_edge_overlay(bg, edges, edges, zlevels = 2L, draw = FALSE)[[1L]]
+  checker <- plot_checkerboard(bg, ov, zlevels = 2L, draw = FALSE, assemble = FALSE)[[1L]]
+  edge <- plot_edge_overlay(bg, edges, edges, zlevels = 2L, draw = FALSE,
+                            assemble = FALSE)[[1L]]
 
   expect_warning(ggplot2::ggplot_build(overlay), NA)
   expect_warning(ggplot2::ggplot_build(checker), NA)

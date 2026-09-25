@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot-ortho.R
 \name{plot_ortho}
 \alias{plot_ortho}
-\title{Orthogonal three-plane view with optional crosshairs}
+\title{Orthogonal three-plane view with optional crosshairs and overlay}
 \usage{
 plot_ortho(
   vol,
@@ -17,63 +17,96 @@ plot_ortho(
   title = NULL,
   subtitle = NULL,
   caption = NULL,
-  draw = TRUE,
+  draw = FALSE,
   style = c("light", "dark", "report"),
   enhance = FALSE,
+  crop = TRUE,
+  interpolate = TRUE,
   cbar_title = "value",
-  crop = NULL,
-  interpolate = NULL
+  colorbar = NULL,
+  assemble = TRUE,
+  overlay = NULL,
+  ov_thresh = 0,
+  ov_cmap = NULL,
+  ov_range = c("robust", "data"),
+  ov_alpha = 1,
+  ov_alpha_mode = c("binary", "proportional", "ramp", "soft"),
+  ov_symmetric = NULL,
+  ov_cap = NULL,
+  canvas = NULL
 )
 }
 \arguments{
-\item{vol}{A 3D volume handled by `slice()`.}
+\item{vol}{A 3D background volume.}
 
-\item{coord}{Length-3 coordinate of the target point. Interpreted as voxel
-indices by default; set `unit = "mm"` to convert using `coord_to_grid()`
-if available in your environment.}
+\item{coord}{Length-3 coordinate of the target point: voxel indices
+(\code{unit = "index"}, default) or world coordinates in mm
+(\code{unit = "mm"}). \code{NULL} (default) uses the peak absolute value
+of \code{overlay} when one is given, otherwise the volume centre.}
 
-\item{unit}{"index" or "mm".}
+\item{unit}{\code{"index"} or \code{"mm"}: how \code{coord} is interpreted.}
 
-\item{cmap}{Palette for the slices.}
+\item{cmap}{Palette for the background.}
 
-\item{range}{Intensity limits shared by all panels: \code{"robust"},
-\code{"data"}, or an explicit numeric \code{c(lo, hi)}.}
+\item{range}{Background intensity limits shared by all panels:
+\code{"robust"} (computed over head voxels), \code{"data"}, or numeric
+\code{c(lo, hi)}.}
 
-\item{probs}{Quantiles for robust range.}
+\item{probs}{Quantiles for robust scaling.}
 
-\item{crosshair}{Logical; draw crosshair lines.}
+\item{crosshair}{Logical; draw the (gapped) crosshair.}
 
-\item{annotate}{Logical; add orientation glyphs.}
+\item{annotate}{Logical; draw orientation letters on every view.}
 
 \item{downsample}{Integer decimation for speed.}
 
-\item{title, subtitle, caption}{Optional layout-level labels used when drawing.}
+\item{title, subtitle, caption}{Optional figure labels.}
 
-\item{draw}{Logical; if `TRUE`, draw the panels on the active graphics
-device. If `FALSE`, only return the ggplot objects invisibly.}
+\item{draw}{Logical; if \code{TRUE}, also print the figure immediately (and
+return it invisibly). By default the figure is returned visibly.}
 
-\item{style}{Visual style: \code{"light"}, \code{"dark"}, or \code{"report"}
-(light card, dark cropped tiles, typography, and a colorbar -- matching
-\code{\link{plot_overlay}}'s report look).}
+\item{style}{Visual style: \code{"light"}, \code{"dark"}, or
+\code{"report"}.}
 
 \item{enhance}{Display-only enhancement of an unsmoothed statistical
-\code{vol}. \code{FALSE} (default) leaves it untouched; \code{TRUE} applies
-\code{\link{enhance_stat_map}} with defaults; a named \code{list} is
-forwarded as arguments to \code{enhance_stat_map()}.}
+\code{vol}; see \code{\link{plot_overlay}}.}
 
-\item{cbar_title}{Character; the quantity label drawn above the colorbar in
-\code{style = "report"}. Defaults to \code{"value"}. Set it to the
-quantity actually being displayed (e.g. \code{"Semipartial r"}) so the
-figure does not assert a quantity it is not showing.}
+\item{crop}{Logical; crop views to the head bounding box.}
 
-\item{crop, interpolate}{Logical or \code{NULL}; crop panels to the brain
-bounding box / smooth the raster. \code{NULL} (default) enables both for
-\code{style = "report"} only.}
+\item{interpolate}{Logical; smooth the background raster (default
+\code{TRUE}).}
+
+\item{cbar_title}{Character; the quantity label drawn above the colorbar.
+Supplying it explicitly also turns the colorbar on.}
+
+\item{colorbar}{Logical or \code{NULL}. \code{NULL} (default) shows a
+colorbar when it carries information: an \code{overlay} is given, the
+background uses a non-grayscale palette, or \code{cbar_title} is supplied.}
+
+\item{assemble}{Logical; if \code{TRUE} (default) return one assembled
+\pkg{patchwork} figure; if \code{FALSE} return the named list of the
+\code{axial}, \code{coronal} and \code{sagittal} ggplots.}
+
+\item{overlay}{Optional 3D statistical volume on the same grid as \code{vol},
+drawn over all three views.}
+
+\item{ov_thresh, ov_cmap, ov_range, ov_alpha, ov_alpha_mode, ov_symmetric, ov_cap}{Overlay threshold, palette, scaling, opacity and opacity mode; identical
+in meaning to the same arguments of \code{\link{plot_overlay}}.}
+
+\item{canvas}{Optional \code{c(width, height)} in inches to fit the layout
+to (default: the open device).}
+}
+\value{
+A figure (class \code{neuro_fig}, a \pkg{patchwork} whose
+  layout is re-fitted to the device it is drawn on) when
+  \code{assemble = TRUE} or a named list
+  of ggplots (\code{assemble = FALSE}); invisibly when \code{draw = TRUE}.
 }
 \description{
-Creates axial, coronal, and sagittal panels at a given coordinate with
-harmonized aesthetics. Returns the three ggplot objects invisibly after
-drawing, or without drawing when \code{draw = FALSE}.
+Draws sagittal, coronal and axial sections through one point, optionally
+with a thresholded statistical map on top (the classic "stat map" view).
+All three views share one physical scale and one head-bounding-box crop, so
+the crosshair lines up across views.
 }
 \details{
 The affine determines which native voxel axis is nearest each
@@ -81,4 +114,21 @@ The affine determines which native voxel axis is nearest each
   display. Oblique images are shown on their regular native voxel planes;
   values are not silently resampled. Use \code{deoblique()} or
   \code{resample_to()} first when true cardinal-plane sections are required.
+
+  Each view is labelled with the world coordinate of its plane (mm).
 }
+\examples{
+\donttest{
+bg <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
+p <- plot_ortho(bg, coord = c(24, 26, 26))
+ggplot2::ggsave(tempfile(fileext = ".png"), p, width = 9, height = 3.5)
+}
+}
+\seealso{
+Other plot_neuro: 
+\code{\link{plot_checkerboard}()},
+\code{\link{plot_edge_overlay}()},
+\code{\link{plot_montage}()},
+\code{\link{plot_overlay}()}
+}
+\concept{plot_neuro}

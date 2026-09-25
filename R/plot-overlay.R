@@ -1,295 +1,209 @@
-#' Composite an overlay map on a structural background
+#' Composite a statistical map on a structural background
 #'
-#' Works without extra packages by colorizing both layers to rasters and stacking
-#' them as grobs. Great for statistical maps over T1/T2 backgrounds.
+#' Draws a grid of slices through a structural background (e.g. a T1) with a
+#' thresholded statistical map on top, in the style of a journal figure: black
+#' tiles cropped to the head, world-coordinate slice labels, L/R markers, and a
+#' compact colorbar that marks the threshold.
 #'
 #' @param bgvol Background 3D volume.
 #' @param overlay Overlay 3D volume on the same NeuroSpace grid as `bgvol`.
-#' @param zlevels Slices to plot (indices along the third grid axis by default).
+#' @param zlevels Slices to plot, as indices along `along` (\code{unit =
+#'   "index"}, the default) or world coordinates in mm (\code{unit = "mm"}).
+#'   \code{NULL} (default) chooses \code{n_slices} slices spread over the
+#'   extent of the supra-threshold overlay.
 #' @param along Native voxel-grid axis for slicing. Display orientation and
 #'   anatomical plane labels are inferred from the image affine.
 #' @param bg_cmap Background palette (e.g., "grays").
-#' @param ov_cmap Overlay palette (e.g., "inferno").
+#' @param ov_cmap Overlay palette. \code{NULL} (default) chooses automatically:
+#'   the two-sided \code{"cold_hot"} map for signed data, \code{"hot"}
+#'   otherwise. Any name accepted by [resolve_cmap()] or a vector of colours.
 #' @param bg_range,ov_range Background/overlay scaling. Either a mode string,
-#'   \code{"robust"} (quantile clip) or \code{"data"} (min/max), or an explicit
-#'   numeric \code{c(lo, hi)} to pin the scale (e.g. \code{ov_range = c(-6, 6)})
-#'   for consistent coloring across panels and subjects.
+#'   \code{"robust"} or \code{"data"}, or an explicit numeric \code{c(lo, hi)}
+#'   to pin the scale (e.g. \code{ov_range = c(-6, 6)}) for consistent
+#'   colouring across figures and subjects. The robust background window is
+#'   computed over head voxels only; the robust overlay scale is computed once
+#'   from the whole overlay volume (supra-threshold values when a threshold is
+#'   set) and rounded to two significant digits, so a given map always gets
+#'   the same scale whichever slices are shown.
 #' @param probs Quantiles for robust scaling.
-#' @param ov_thresh Numeric threshold; values with |v| < thresh become transparent.
-#' @param ov_alpha Global alpha for overlay (0..1).
-#' @param ov_alpha_mode One of \code{"binary"} (default: pixels above threshold
-#'   get full \code{ov_alpha}, others transparent), \code{"proportional"}
-#'   (per-pixel alpha = |v| / cap), \code{"ramp"} (alpha ramps linearly from 0 at
-#'   \code{ov_thresh} to 1 at the cap), or \code{"soft"} (a nonlinear,
-#'   self-tuning curve, \code{alpha = clamp((|v|-lo)/(hi-lo),0,1)^gamma}, where
-#'   the knee \code{lo} defaults to \code{ov_thresh} or, if unset, the median
-#'   in-mask magnitude, and \code{gamma} adapts to the value distribution so that
-#'   opacity rises rapidly away from zero and the noisy bulk stays faint). The
-#'   cap is shared across all panels so identical values get identical opacity
-#'   everywhere.
+#' @param ov_thresh Numeric threshold; values with |v| < thresh are not drawn.
+#' @param ov_alpha Global opacity of the overlay (0..1).
+#' @param ov_alpha_mode One of \code{"binary"} (default: every supra-threshold
+#'   voxel fully opaque), \code{"proportional"}, \code{"ramp"}, or
+#'   \code{"soft"} (opacity rises nonlinearly with magnitude; the curve
+#'   \code{alpha = floor + (1 - floor) * t^gamma} self-tunes \code{gamma} from
+#'   the data). In the graded modes every voxel that passes a threshold keeps at
+#'   least 60\% opacity, and the colorbar is faded with the same curve so it
+#'   matches the picture.
 #' @param alpha_gamma Optional exponent for \code{ov_alpha_mode = "soft"}.
-#'   \code{NULL} (default) auto-tunes it from the data; larger values push more
-#'   of the low-value range toward transparency.
-#' @param ov_symmetric Logical or \code{NULL}. \code{NULL} (default) auto-selects
-#'   symmetric limits around zero when the overlay has both positive and negative
-#'   values; \code{TRUE}/\code{FALSE} forces the choice. Symmetric limits keep
-#'   negative and positive values equally visible with a diverging palette.
-#' @param ov_cap Optional numeric; the magnitude used as the upper end of the
-#'   (symmetric) color/alpha scale. Defaults to the data-driven limit.
-#' @param ncol Number of columns in the panel layout.
-#' @param title,subtitle,caption Optional layout-level labels used when drawing.
-#' @param draw Logical; if `TRUE`, draw on the active graphics device. If
-#'   `FALSE`, return without drawing.
-#' @param style Visual style: \code{"light"}, \code{"dark"}, or
-#'   \code{"report"} (see Details).
+#'   \code{NULL} (default) auto-tunes it from the data.
+#' @param ov_symmetric Logical or \code{NULL}. \code{NULL} (default) uses
+#'   symmetric limits around zero when the overlay has both signs.
+#' @param ov_cap Optional numeric; the magnitude at the upper end of the
+#'   colour/opacity scale. Defaults to the data-driven limit.
+#' @param ncol Number of columns. \code{NULL} (default) picks the layout that
+#'   best fills the canvas.
+#' @param title,subtitle,caption Optional figure labels, left-aligned with the
+#'   tiles.
+#' @param draw Logical; if \code{TRUE}, also print the figure immediately (and
+#'   return it invisibly). By default the figure is returned visibly, like a
+#'   ggplot, so it prints at the console or in a knitr chunk.
+#' @param style Visual style: \code{"light"} (white card), \code{"report"}
+#'   (warm off-white card with the key strip on), or \code{"dark"} (black
+#'   card). Tiles are black in every style.
 #' @param enhance Display-only enhancement of the (unsmoothed) statistical
 #'   \code{overlay}. \code{FALSE} (default) leaves it untouched; \code{TRUE}
 #'   applies \code{\link{enhance_stat_map}} with defaults; a named \code{list}
-#'   is forwarded as arguments to \code{enhance_stat_map()} (e.g.
-#'   \code{enhance = list(detail_gain = 2, method = "bilateral")}).
-#' @param assemble Logical; if \code{TRUE} (default), return a single assembled
-#'   \pkg{patchwork} object (honoring \code{ncol} and the layout labels) suitable
-#'   for \code{ggsave()}. If \code{FALSE}, draw a panel grid and return the
-#'   per-slice ggplot list invisibly (useful for programmatic access to
-#'   individual panels).
-#' @param colorbar Logical; when \code{assemble = TRUE}, append a colorbar for
-#'   the overlay statistic (with the threshold marked). Default \code{TRUE}.
-#' @param cbar_title Character; the quantity label drawn above the colorbar
-#'   when \code{assemble = TRUE} and \code{colorbar = TRUE}. Defaults to
-#'   \code{"value"}. Set it to the
-#'   statistic actually being displayed (e.g. \code{"Semipartial r"},
-#'   \code{"Delay coefficient (\% signal change)"}) so the figure does not
-#'   assert a quantity it is not showing.
-#' @param legend Logical or \code{NULL}; when \code{assemble = TRUE}, add a
-#'   bottom legend strip (positive/negative swatches, threshold, plane). \code{NULL}
-#'   (default) shows it for \code{style = "report"} only.
-#' @param crop Logical or \code{NULL}; crop every panel to the brain bounding box
-#'   (shared across slices, so framing is consistent). \code{NULL} (default)
-#'   crops for \code{style = "report"} only.
-#' @param interpolate Logical or \code{NULL}; smooth the background raster.
-#'   \code{NULL} (default) interpolates for \code{style = "report"} only.
+#'   is forwarded as arguments to \code{enhance_stat_map()}.
+#' @param assemble Logical; if \code{TRUE} (default), return one assembled
+#'   \pkg{patchwork} figure. If \code{FALSE}, return the list of per-slice
+#'   ggplots.
+#' @param colorbar Logical; draw the colorbar (default \code{TRUE}).
+#' @param cbar_title Character; the quantity label drawn above the colorbar.
+#'   Defaults to \code{"value"}; set it to the statistic actually shown (e.g.
+#'   \code{"t"}, \code{"Semipartial r"}).
+#' @param legend Logical or \code{NULL}; add a one-line key under the tiles
+#'   (plane, neurological convention, and what the threshold shows).
+#'   \code{NULL} (default) shows it for \code{style = "report"} only.
+#' @param crop Logical; crop every panel to the head bounding box (shared
+#'   across slices, and always containing every supra-threshold voxel).
+#' @param interpolate Logical; smooth the background raster (default
+#'   \code{TRUE}). The overlay itself is always drawn with crisp voxels.
+#' @param unit \code{"index"} or \code{"mm"}: how \code{zlevels} is interpreted.
+#'   Panels are always labelled in world coordinates (mm).
+#' @param annotate Logical; draw L/R orientation letters on the first panel.
+#' @param n_slices Number of slices chosen when \code{zlevels} is \code{NULL}.
+#' @param canvas Optional \code{c(width, height)} in inches to freeze the
+#'   layout for one size. By default (\code{NULL}) the layout is re-fitted to
+#'   whatever device the figure is drawn on, including \code{ggsave()}.
+#'
+#' @return A figure (class \code{neuro_fig}, a \pkg{patchwork} whose
+#'   layout is re-fitted to the device it is drawn on) when
+#'   \code{assemble = TRUE} or a list of
+#'   ggplots (\code{assemble = FALSE}); invisibly when \code{draw = TRUE}.
 #'
 #' @details
-#' \strong{Return value.} By default (\code{assemble = TRUE}) the return value is
-#' a single \pkg{patchwork} object that can be passed directly to
-#' \code{ggsave()}. With \code{assemble = FALSE} the montage is drawn as a side
-#' effect and the return value is the \emph{list of per-slice ggplots}
-#' (invisibly); passing that list to \code{ggsave()} saves only one panel.
-#'
 #' \strong{Signed maps.} For overlays with both signs (t/z/contrast maps), the
-#' default palette switches to a diverging one and limits become symmetric so
-#' negatives are as visible as positives; pass \code{ov_cmap}/\code{ov_symmetric}
-#' to override.
+#' default palette is two-sided and the limits symmetric, so negative values
+#' are as visible as positive ones. With a threshold, the colour ramp starts at
+#' a saturated colour at \eqn{\pm}threshold and brightens toward the cap; the
+#' colorbar shows the sub-threshold band in a neutral tone and ticks the
+#' threshold and cap. When the data exceed the cap, the end tick reads
+#' \eqn{\ge} cap.
 #'
-#' \strong{Report style.} \code{style = "report"} renders dark brain tiles on a
-#' light card with bold/italic typography, a titled colorbar, a bottom legend
-#' strip, brain-bbox cropping, and a smoothed background -- a publication-ready
-#' look. The individual features (\code{legend}, \code{crop}, \code{interpolate})
-#' can also be toggled on any style.
+#' \strong{Saving.} The figure's layout is fitted to the device it is drawn
+#' on: \code{p <- plot_overlay(...); ggsave("fig.png", p, width = 6, height =
+#' 9)} re-arranges the tiles for a 6 x 9 in page, and additions such as
+#' \code{p + patchwork::plot_annotation(title = "...")} are kept. Pass
+#' \code{canvas} only to freeze the layout for one size.
 #'
+#' @examples
+#' \donttest{
+#' bg <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
+#' stat <- bg
+#' stat[] <- rnorm(length(stat)) * (bg[] > stats::quantile(bg[], 0.6))
+#' p <- plot_overlay(bg, stat, ov_thresh = 1.5, cbar_title = "z")
+#' tf <- tempfile(fileext = ".png")
+#' ggplot2::ggsave(tf, p, width = 7, height = 5)
+#' }
+#' @family plot_neuro
 #' @export
 plot_overlay <- function(
   bgvol, overlay, zlevels = NULL, along = 3L,
-  bg_cmap = "grays", ov_cmap = "inferno",
+  bg_cmap = "grays", ov_cmap = NULL,
   bg_range = c("robust","data"), ov_range = c("robust","data"),
-  probs = c(.02,.98), ov_thresh = 0, ov_alpha = .7,
+  probs = c(.02,.98), ov_thresh = 0, ov_alpha = 1,
   ov_alpha_mode = c("binary", "proportional", "ramp", "soft"), ov_symmetric = NULL,
   alpha_gamma = NULL,
-  ov_cap = NULL, ncol = 3L, title = NULL, subtitle = NULL, caption = NULL,
-  draw = TRUE, style = c("light", "dark", "report"), enhance = FALSE,
-  assemble = TRUE, colorbar = TRUE, cbar_title = "value", legend = NULL,
-  crop = NULL, interpolate = NULL
+  ov_cap = NULL, ncol = NULL, title = NULL, subtitle = NULL, caption = NULL,
+  draw = FALSE, style = c("light", "dark", "report"), enhance = FALSE,
+  assemble = TRUE, colorbar = TRUE, legend = NULL,
+  crop = TRUE, interpolate = TRUE, cbar_title = "value",
+  unit = c("index", "mm"), annotate = TRUE, n_slices = 12L, canvas = NULL
 ) {
-  ov_cmap_missing <- missing(ov_cmap)
+  unit_missing <- missing(unit)
   assert_same_neuro_grid(bgvol, overlay = overlay)
   cbar_title <- validate_cbar_title(cbar_title)
-  ov_alpha_mode <- match.arg(ov_alpha_mode)
-  style <- match.arg(style)
+  ov_alpha_mode <- match_choice(ov_alpha_mode, c("binary", "proportional", "ramp", "soft"),
+                                "ov_alpha_mode")
+  style <- match_choice(style, c("light", "dark", "report"))
+  unit <- match_choice(unit, c("index", "mm"), "unit")
+  tokens <- neuro_style_tokens(style)
 
-  # Per-style feature defaults (each independently overridable).
   is_report   <- identical(style, "report")
-  panel_style <- .plot_style_colors(style)$panel
   show_legend <- if (is.null(legend)) is_report else isTRUE(legend)
-  do_crop     <- if (is.null(crop)) is_report else isTRUE(crop)
-  interp_bg   <- if (is.null(interpolate)) is_report else isTRUE(interpolate)
+  do_crop     <- if (is.null(crop)) TRUE else isTRUE(crop)
+  interp_bg   <- isTRUE(interpolate)
 
   # Optional display-only enhancement of the (unsmoothed) statistical overlay.
   overlay <- apply_enhance_arg(overlay, enhance)
-  along <- as.integer(along)
-  if (length(along) != 1L || is.na(along) || along < 1L || along > 3L) {
-    stop("`along` must be one of 1, 2, or 3.", call. = FALSE)
-  }
+  ov_thresh <- check_overlay_args(ov_thresh, ov_alpha)
+  check_count(n_slices, "n_slices")
+  unit_hint(zlevels, unit_missing, bgvol)
+  ov_all <- as.numeric(as.array(overlay))
 
-  if (is.null(zlevels)) zlevels <- unique(round(seq(1, dim(bgvol)[along], length.out = 9)))
-  panel_args <- validate_slice_panel_args(zlevels, along, dim(bgvol), ncol)
+  if (is.null(zlevels)) {
+    support <- array(is.finite(ov_all) & ov_all != 0 & abs(ov_all) >= ov_thresh,
+                     dim(overlay)[1:3])
+    zlevels <- resolve_slice_levels(NULL, bgvol, along, n = n_slices,
+                                    support = if (any(support)) support else NULL)
+  } else {
+    zlevels <- resolve_slice_levels(zlevels, bgvol, along, unit = unit)
+  }
+  panel_args <- validate_slice_panel_args(zlevels, along, dim(bgvol), 1L)
   zlevels <- panel_args$zlevels
   along <- panel_args$along
-  ncol <- panel_args$ncol
 
-  selected_values <- function(vol) {
-    unlist(lapply(zlevels, function(z) as.numeric(volume_slice_matrix(vol, z, along = along))))
+  bg_vals <- unlist(lapply(zlevels, function(z) as.numeric(volume_slice_matrix(bgvol, z, along = along))))
+  bg_lim <- background_display_limits(bg_range, bg_vals, probs = probs)
+
+  # One colour scale for the whole map (reproducible across slice choices).
+  scale <- overlay_scale(ov_all, ov_range = ov_range, probs = probs,
+                         thresh = ov_thresh, ov_cmap = ov_cmap,
+                         ov_symmetric = ov_symmetric, ov_cap = ov_cap)
+  cap <- max(abs(scale$lim))
+  soft <- if (ov_alpha_mode == "soft") {
+    soft_alpha_params(abs(ov_all), thresh = ov_thresh, cap = cap, gamma = alpha_gamma)
   }
-  ov_vals <- selected_values(overlay)
-  bg_lim <- resolve_display_limits(bg_range, selected_values(bgvol), probs = probs)
-  ov_lim <- resolve_display_limits(ov_range, ov_vals, probs = probs)
+  alpha_fun <- overlay_alpha_fun(ov_alpha_mode, ov_thresh, cap, soft = soft)
 
-  # Detect a signed (diverging) statistical map across the displayed slices.
-  finite_ov <- ov_vals[is.finite(ov_vals)]
-  signed <- length(finite_ov) > 0L && min(finite_ov) < 0 && max(finite_ov) > 0
-  symmetric <- if (is.null(ov_symmetric)) signed else isTRUE(ov_symmetric)
-
-  # Choose an appropriate palette for signed data. When the caller did not pick a
-  # palette we silently default to a diverging one (documented); when they
-  # explicitly chose a sequential palette for signed data we warn, since
-  # negatives will render on the dark end and read as holes.
-  if (signed) {
-    if (ov_cmap_missing) {
-      ov_cmap <- "blue-red"
-    } else if (!is_diverging_cmap(ov_cmap)) {
-      warning("Overlay has both positive and negative values but `ov_cmap` is not a ",
-              "diverging palette; negative values may render poorly. Consider a ",
-              "diverging palette such as 'RdBu' or 'blue-red'.", call. = FALSE)
-    }
+  # Shared head bounding box (so every panel is framed identically).
+  crop_win <- if (isTRUE(do_crop)) {
+    foreground_crop_window(bgvol, zlevels, along, extra = list(overlay),
+                           extra_thresh = max(ov_thresh, 0))
   }
 
-  # Shared color/alpha cap so identical values look identical across all panels.
-  cap <- if (!is.null(ov_cap)) abs(ov_cap) else max(abs(ov_lim), na.rm = TRUE)
-  if (symmetric && is.finite(cap) && cap > 0) {
-    ov_lim <- c(-cap, cap)
-  }
-  ov_abs_max <- max(abs(ov_lim), na.rm = TRUE)
-  if (!is.finite(ov_abs_max) || ov_abs_max <= 0) ov_abs_max <- 1
-
-  # Nonlinear, self-tuning alpha curve (computed once over the displayed data).
-  soft <- NULL
-  if (ov_alpha_mode == "soft") {
-    soft <- soft_alpha_params(abs(ov_vals), thresh = ov_thresh,
-                              cap = ov_abs_max, gamma = alpha_gamma)
-  }
-
-  # Shared brain bounding box (so every panel is framed identically).
-  crop_win <- NULL
-  if (isTRUE(do_crop)) {
-    bg_fin <- selected_values(bgvol)
-    bg_fin <- bg_fin[is.finite(bg_fin)]
-    if (length(bg_fin)) {
-      bg_thresh <- min(bg_fin) + 0.02 * diff(range(bg_fin))
-      crop_win <- compute_crop_window(bgvol, overlay, zlevels, along,
-                                      bg_thresh = bg_thresh, ov_thresh = ov_thresh)
-    }
-  }
-
-  build_panel <- function(z) {
-    bg <- volume_slice_matrix(bgvol, z, along = along)
-    bg_oriented <- orient_volume_slice_for_raster(
-      bgvol, z, along = along, mat = bg
+  first <- orient_volume_slice_for_raster(bgvol, zlevels[[1L]], along = along)
+  plots <- lapply(seq_along(zlevels), function(k) {
+    z <- zlevels[[k]]
+    bg_oriented <- if (k == 1L) first else orient_volume_slice_for_raster(bgvol, z, along = along)
+    g_ov <- overlay_slice_grob(overlay, z, along, scale, ov_thresh, alpha_fun,
+                               alpha = ov_alpha)
+    neuro_tile(
+      bg_oriented, bg_lim = bg_lim, bg_cmap = bg_cmap, layers = list(g_ov),
+      window = crop_win, label = slice_world_label(bgvol, z, along),
+      orient = if (isTRUE(annotate) && k == 1L) orientation_letters(bg_oriented) else NULL,
+      tokens = tokens, interpolate = interp_bg
     )
-    df_bg <- oriented_raster_df(bg_oriented)
+  })
 
-    # Overlay data; apply threshold then convert to grob for independent palette
-    mov <- volume_slice_matrix(overlay, z, along = along)
-    if (ov_alpha_mode == "binary") {
-      if (isTRUE(ov_thresh > 0)) {
-        below <- !is.na(mov) & abs(mov) < ov_thresh
-        mov[below] <- NA_real_
-      }
-      oriented <- orient_volume_slice_for_raster(
-        overlay, z, along = along, mat = mov
-      )
-      g_ov <- matrix_to_raster_grob(
-        oriented$mat,
-        cmap = ov_cmap,
-        limits = ov_lim,
-        alpha = ov_alpha
-      )
-    } else {
-      abs_mov <- abs(mov)
-      amap <- switch(ov_alpha_mode,
-        proportional = abs_mov / ov_abs_max,     # shared (not per-slice) denominator
-        ramp = {                                  # linear: 0 at thresh -> 1 at cap
-          denom <- ov_abs_max - ov_thresh
-          if (!is.finite(denom) || denom <= 0) denom <- ov_abs_max
-          (abs_mov - ov_thresh) / denom
-        },
-        soft = {                                  # nonlinear, self-tuning gamma curve
-          t <- (abs_mov - soft$lo) / (soft$hi - soft$lo)
-          t[] <- pmin(pmax(t, 0), 1)
-          t^soft$gamma
-        }
-      )
-      amap[] <- pmin(pmax(amap, 0), 1)
-      if (isTRUE(ov_thresh > 0)) {
-        amap[!is.na(abs_mov) & abs_mov < ov_thresh] <- 0
-      }
-      amap[is.na(abs_mov)] <- 0
-      oriented <- orient_volume_slice_for_raster(
-        overlay, z, along = along, mat = mov, alpha_map = amap
-      )
-      g_ov <- matrix_to_raster_grob(
-        oriented$mat,
-        cmap = ov_cmap,
-        limits = ov_lim,
-        alpha = ov_alpha,
-        alpha_map = oriented$alpha_map
-      )
-    }
-
-    slice_label <- c("x", "y", "z")[[along]]
-    xr <- raster_extent_from_centers(bg_oriented$x)
-    yr <- raster_extent_from_centers(bg_oriented$y)
-
-    coord <- if (is.null(crop_win)) {
-      ggplot2::coord_fixed()
-    } else {
-      ggplot2::coord_fixed(xlim = crop_win$xlim, ylim = crop_win$ylim, expand = FALSE)
-    }
-
-    p <- ggplot2::ggplot(df_bg, ggplot2::aes(x, y, fill = value)) +
-      ggplot2::geom_raster(interpolate = interp_bg) +
-      scale_fill_neuro(cmap = bg_cmap, limits = bg_lim, guide = "none") +
-      coord +
-      theme_neuro(style = panel_style) +
-      ggplot2::labs(title = paste0(slice_label, " = ", z)) +
-      ggplot2::annotation_custom(g_ov, xmin = xr[1], xmax = xr[2], ymin = yr[1], ymax = yr[2])
-
-    if (is_report) p <- p + report_tile_theme()  # borderless dark tiles on the card
-
-    p
+  cbar <- if (isTRUE(colorbar)) {
+    neuro_colorbar(scale$lim, scale$pal, thresh = ov_thresh,
+                   diverging = scale$diverging, tokens = tokens, title = cbar_title,
+                   alpha_fun = if (ov_alpha_mode == "binary") NULL else alpha_fun,
+                   alpha = ov_alpha, over_hi = scale$over_hi, over_lo = scale$over_lo)
   }
-
-  plots <- lapply(zlevels, build_panel)
-  attr(plots, "labels") <- list(title = title, subtitle = subtitle, caption = caption)
-
-  if (isTRUE(assemble)) {
-    leg <- NULL
-    if (isTRUE(show_legend)) {
-      pal <- resolve_cmap(ov_cmap, 256)
-      plane <- orient_volume_slice_for_raster(
-        bgvol, zlevels[[1L]], along = along
-      )$plane
-      leg <- make_overlay_legend(ov_thresh, pal[length(pal)], pal[1L],
-                                 symmetric = symmetric, style = style, plane = plane)
-    }
-    combined <- assemble_figure(
-      patchwork::wrap_plots(plots, ncol = ncol),
-      lim = ov_lim, cmap = ov_cmap, thresh = ov_thresh, style = style,
-      colorbar = colorbar, cbar_title = cbar_title, legend = leg,
-      title = title, subtitle = subtitle, caption = caption
-    )
-    if (isTRUE(draw)) print(combined)
-    return(invisible(combined))
+  key <- if (isTRUE(show_legend)) {
+    overlay_key(ov_thresh, scale$diverging, cbar_title, tokens, plane = first$plane)
   }
-
-  if (!isTRUE(draw)) {
-    return(invisible(plots))
-  }
-
-  draw_plot_panel_grid(
-    plots,
-    ncol = ncol,
-    title = title,
-    subtitle = subtitle,
-    caption = caption,
-    style = if (is_report) "dark" else style
-  )
+  build <- function(cv) neuro_assemble(plots, ncol = ncol, tile_aspect = tile_aspect_of(crop_win, first),
+                        colorbar = cbar, key = key, tokens = tokens,
+                        title = title, subtitle = subtitle, caption = caption,
+                        canvas = cv)
+  cv0 <- canvas_size(canvas)
+  fig <- build(cv0)
+  if (is.null(canvas)) fig <- neuro_figure(fig, build, cv0, tokens)
+  neuro_finish(fig, plots, draw = draw, assemble = assemble, title = title,
+               subtitle = subtitle, caption = caption, style = style,
+               panel_names = vapply(zlevels, function(z) slice_world_label(bgvol, z, along), ""))
 }

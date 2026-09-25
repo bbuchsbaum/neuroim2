@@ -69,6 +69,7 @@ Collate:
     'palettes.R'
     'plot-checkerboard.R'
     'plot-edge-overlay.R'
+    'plot-engine.R'
     'plot-helpers.R'
     'plot-montage.R'
     'plot-ortho.R'

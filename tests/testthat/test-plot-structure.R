@@ -62,7 +62,7 @@ test_that("plot_montage honours zlevels and ncol", {
 })
 
 test_that("plot_ortho returns the three anatomical planes", {
-  panels <- plot_ortho(demo_volume(), draw = FALSE)
+  panels <- plot_ortho(demo_volume(), draw = FALSE, assemble = FALSE)
 
   expect_named(panels, c("axial", "coronal", "sagittal"), ignore.order = TRUE)
   for (p in panels) {
@@ -74,14 +74,20 @@ test_that("plot_ortho returns the three anatomical planes", {
 test_that("plot_ortho drops crosshair and annotation layers when asked", {
   vol <- demo_volume()
 
-  with_extras <- plot_ortho(vol, draw = FALSE)
-  without <- plot_ortho(vol, crosshair = FALSE, annotate = FALSE, draw = FALSE)
+  with_extras <- plot_ortho(vol, draw = FALSE, assemble = FALSE)
+  without <- plot_ortho(vol, crosshair = FALSE, annotate = FALSE, draw = FALSE,
+                        assemble = FALSE)
 
   # Turning both off must remove layers, not merely restyle them.
   expect_lt(
     length(without$axial$layers),
     length(with_extras$axial$layers)
   )
+  geoms <- function(p) vapply(p$layers, layer_geom, character(1))
+  expect_true("GeomSegment" %in% geoms(with_extras$axial))
+  expect_false("GeomSegment" %in% geoms(without$axial))
+  expect_length(tile_orientation_letters(with_extras$axial), 4L)
+  expect_length(tile_orientation_letters(without$axial), 0L)
   expect_silent(ggplot2::ggplot_build(without$axial))
 })
 
