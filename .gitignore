@@ -34,3 +34,6 @@ tools/visual-qc-output/
 dev/bench_after.txt
 dev/bench_baseline.txt
 vignettes/Rplots.pdf
+
+# Graphics device output from tests and interactive runs
+Rplots.pdf
