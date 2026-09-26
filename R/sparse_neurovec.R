@@ -43,7 +43,7 @@ SparseNeuroVecSource <- function(meta_info, indices=NULL, mask) {
 }
 
 #' @noRd
-prep_sparsenvec <- function(data, space, mask) {
+prep_sparsenvec <- function(data, space, mask, orientation = "auto") {
   if (!inherits(mask, "LogicalNeuroVol")) {
     mspace <- NeuroSpace(dim(space)[1:3],
                          spacing(space),
@@ -57,7 +57,26 @@ prep_sparsenvec <- function(data, space, mask) {
 
   if (is.matrix(data)) {
     Nind <- sum(mask == TRUE)
-    if (nrow(data) == Nind) {
+    if (orientation != "auto") {
+      # Normalize to the internal [time x voxels] store.
+      if (orientation == "voxels_x_time") {
+        data <- t(data)
+      }
+      if (ncol(data) != Nind) {
+        cli::cli_abort(c(
+          "Explicit matrix {.arg orientation} does not match mask cardinality.",
+          "x" = "After applying {.val {orientation}}, expected {Nind} voxel columns, got {ncol(data)}."
+        ))
+      }
+    } else if (nrow(data) == Nind && ncol(data) == Nind) {
+      # Square matrices are ambiguous under auto; keep the historic
+      # voxels-by-time convention and surface the choice.
+      cli::cli_warn(c(
+        "Matrix is square ({Nind} x {Nind}); assuming {.val voxels_x_time}.",
+        "i" = "Pass {.code orientation = \"time_x_voxels\"} for a square {.fn series} result, or {.code orientation = \"voxels_x_time\"} to silence this warning."
+      ))
+      data <- t(data)
+    } else if (nrow(data) == Nind) {
       data <- t(data)
       if (ncol(data) != cardinality) {
         cli::cli_abort("Data matrix columns ({ncol(data)}) must match cardinality of {.arg mask} ({cardinality}).")
@@ -98,12 +117,24 @@ prep_sparsenvec <- function(data, space, mask) {
 #' Constructs a SparseNeuroVec object for efficient representation and manipulation
 #' of sparse neuroimaging data with many zero or missing values.
 #'
-#' @param data A matrix or a 4-D array containing the neuroimaging data. The dimensions of the data should be consistent with the dimensions of the provided NeuroSpace object and mask.
+#' @param data A matrix or a 4-D array containing the neuroimaging data.
+#'   For matrix input, rows/columns must match either voxels-by-time or
+#'   time-by-voxels relative to \code{mask}; when unambiguous,
+#'   \code{orientation = "auto"} infers the layout from mask cardinality.
+#'   When the matrix is square (\code{n_voxels == n_timepoints}), auto mode
+#'   assumes voxels-by-time and warns -- pass \code{orientation} explicitly
+#'   if the matrix is time-by-voxels (as from \code{\link{series}}).
+#'   For 4-D arrays, axes are always \eqn{x, y, z, time}.
 #' @param space A \link{NeuroSpace} object representing the dimensions and voxel spacing of the neuroimaging data.
 #' @param mask A 3D array, 1D vector of type logical, or an instance of type \link{LogicalNeuroVol}, which specifies the locations of the non-zero values in the data.
 #' @param label Optional character string providing a label for the vector
 #' @param volume_labels Optional character vector of length \code{dim(space)[4]}
 #'   giving per-volume labels.
+#' @param orientation Matrix orientation: \code{"auto"} (default) infers it
+#'   from mask cardinality; a square matrix is interpreted as voxels by time.
+#'   Use \code{"time_x_voxels"} for output from \code{\link{series}}, or
+#'   \code{"voxels_x_time"} to declare rows as voxels explicitly. Ignored for
+#'   4-D arrays.
 #' @return A SparseNeuroVec object, containing the sparse neuroimaging data, mask, and associated NeuroSpace information.
 #' @export
 #'
@@ -114,7 +145,9 @@ prep_sparsenvec <- function(data, space, mask) {
 #' svec <- SparseNeuroVec(mat, bspace, mask)
 #' length(indices(svec)) == sum(mask)
 #' @rdname SparseNeuroVec-class
-SparseNeuroVec <- function(data, space, mask, label = "", volume_labels = character()) {
+SparseNeuroVec <- function(data, space, mask, label = "", volume_labels = character(),
+                           orientation = c("auto", "voxels_x_time", "time_x_voxels")) {
+  orientation <- match.arg(orientation)
 	stopifnot(inherits(space, "NeuroSpace"))
 
   # Ensure space has 4 dimensions
@@ -122,7 +155,7 @@ SparseNeuroVec <- function(data, space, mask, label = "", volume_labels = charac
     stop("The 'space' argument must have exactly 4 dimensions")
   }
 
-  p <- prep_sparsenvec(data, space, mask)
+  p <- prep_sparsenvec(data, space, mask, orientation = orientation)
   volume_labels <- .normalize_volume_labels(volume_labels, dim(p$space)[4])
 
 	new("SparseNeuroVec", space=p$space, mask=p$mask,

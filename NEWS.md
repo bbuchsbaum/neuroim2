@@ -1,5 +1,14 @@
 # neuroim2 0.19.0.9000
 
+## SparseNeuroVec matrix orientation (#31)
+
+`SparseNeuroVec()` documents the matrix layout convention and accepts an
+explicit `orientation` argument (`"auto"`, `"voxels_x_time"`,
+`"time_x_voxels"`). When `n_voxels == n_timepoints`, auto mode keeps the
+historic voxels-by-time assumption but warns; pass
+`orientation = "time_x_voxels"` for a square `series()` result so the data
+are not silently transposed.
+
 ## Redesigned slice figures (behavior change)
 
 `plot_overlay()`, `plot_montage()`, `plot_ortho()`, `plot_edge_overlay()` and
