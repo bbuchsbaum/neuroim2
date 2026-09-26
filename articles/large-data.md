@@ -117,17 +117,17 @@ timings <- rbind(
 
 signif(timings, 2)
 #>            volumes  series
-#> dense       0.0015 0.00005
-#> sparse      0.0015 0.00010
-#> mapped      0.0040 0.00015
-#> filebacked  0.0300 0.01000
+#> dense       0.0015 0.00010
+#> sparse      0.0016 0.00005
+#> mapped      0.0035 0.00010
+#> filebacked  0.0290 0.01100
 ```
 
 ``` r
 
 round(timings["filebacked", "series"] / timings[c("dense", "sparse", "mapped"), "series"])
 #>  dense sparse mapped 
-#>    208    104     69
+#>    106    212    106
 ```
 
 Seconds per call, and the ratio is computed rather than quoted, so it

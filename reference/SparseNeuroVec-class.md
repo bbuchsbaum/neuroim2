@@ -10,16 +10,29 @@ values.
 ## Usage
 
 ``` r
-SparseNeuroVec(data, space, mask, label = "", volume_labels = character())
+SparseNeuroVec(
+  data,
+  space,
+  mask,
+  label = "",
+  volume_labels = character(),
+  orientation = c("auto", "voxels_x_time", "time_x_voxels")
+)
 ```
 
 ## Arguments
 
 - data:
 
-  A matrix or a 4-D array containing the neuroimaging data. The
-  dimensions of the data should be consistent with the dimensions of the
-  provided NeuroSpace object and mask.
+  A matrix or a 4-D array containing the neuroimaging data. For matrix
+  input, rows/columns must match either voxels-by-time or time-by-voxels
+  relative to `mask`; when unambiguous, `orientation = "auto"` infers
+  the layout from mask cardinality. When the matrix is square
+  (`n_voxels == n_timepoints`), auto mode assumes voxels-by-time and
+  warns – pass `orientation` explicitly if the matrix is time-by-voxels
+  (as from
+  [`series`](https://bbuchsbaum.github.io/neuroim2/reference/series-methods.md)).
+  For 4-D arrays, axes are always \\x, y, z, time\\.
 
 - space:
 
@@ -42,6 +55,15 @@ SparseNeuroVec(data, space, mask, label = "", volume_labels = character())
 
   Optional character vector of length `dim(space)[4]` giving per-volume
   labels.
+
+- orientation:
+
+  Matrix orientation: `"auto"` (default) infers it from mask
+  cardinality; a square matrix is interpreted as voxels by time. Use
+  `"time_x_voxels"` for output from
+  [`series`](https://bbuchsbaum.github.io/neuroim2/reference/series-methods.md),
+  or `"voxels_x_time"` to declare rows as voxels explicitly. Ignored for
+  4-D arrays.
 
 ## Value
 

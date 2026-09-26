@@ -2,6 +2,17 @@
 
 ## neuroim2 0.19.0.9000
 
+### SparseNeuroVec matrix orientation ([\#31](https://github.com/bbuchsbaum/neuroim2/issues/31))
+
+[`SparseNeuroVec()`](https://bbuchsbaum.github.io/neuroim2/reference/SparseNeuroVec-class.md)
+documents the matrix layout convention and accepts an explicit
+`orientation` argument (`"auto"`, `"voxels_x_time"`, `"time_x_voxels"`).
+When `n_voxels == n_timepoints`, auto mode keeps the historic
+voxels-by-time assumption but warns; pass
+`orientation = "time_x_voxels"` for a square
+[`series()`](https://bbuchsbaum.github.io/neuroim2/reference/series-methods.md)
+result so the data are not silently transposed.
+
 ### Redesigned slice figures (behavior change)
 
 [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md),

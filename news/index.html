@@ -37,6 +37,10 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.19.0.9000" id="neuroim2-01909000">neuroim2 0.19.0.9000<a class="anchor" aria-label="anchor" href="#neuroim2-01909000"></a></h2>
 <div class="section level3">
+<h3 id="sparseneurovec-matrix-orientation-0-19-0-9000">SparseNeuroVec matrix orientation (<a href="https://github.com/bbuchsbaum/neuroim2/issues/31" class="external-link">#31</a>)<a class="anchor" aria-label="anchor" href="#sparseneurovec-matrix-orientation-0-19-0-9000"></a></h3>
+<p><code><a href="../reference/SparseNeuroVec-class.html">SparseNeuroVec()</a></code> documents the matrix layout convention and accepts an explicit <code>orientation</code> argument (<code>"auto"</code>, <code>"voxels_x_time"</code>, <code>"time_x_voxels"</code>). When <code>n_voxels == n_timepoints</code>, auto mode keeps the historic voxels-by-time assumption but warns; pass <code>orientation = "time_x_voxels"</code> for a square <code><a href="../reference/series-methods.html">series()</a></code> result so the data are not silently transposed.</p>
+</div>
+<div class="section level3">
 <h3 id="redesigned-slice-figures-behavior-change-0-19-0-9000">Redesigned slice figures (behavior change)<a class="anchor" aria-label="anchor" href="#redesigned-slice-figures-behavior-change-0-19-0-9000"></a></h3>
 <p><code><a href="../reference/plot_overlay.html">plot_overlay()</a></code>, <code><a href="../reference/plot_montage.html">plot_montage()</a></code>, <code><a href="../reference/plot_ortho.html">plot_ortho()</a></code>, <code><a href="../reference/plot_edge_overlay.html">plot_edge_overlay()</a></code> and <code><a href="../reference/plot_checkerboard.html">plot_checkerboard()</a></code> now share one figure engine and look like one family: borderless black tiles cropped to the head, world-coordinate slice labels (<code>z = -12 mm</code>), haloed orientation letters, and a compact fixed-width colorbar placed beside the tiles.</p>
 <ul><li>
