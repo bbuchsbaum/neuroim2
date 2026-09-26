@@ -47,6 +47,10 @@ jobs:
           ECO_ATLAS_MIN_CARDS: "1"
           ECO_ATLAS_ENFORCE_EXPORT_SYMBOLS: "1"
           ECO_ATLAS_ENFORCE_ENTRYPOINTS: "1"
+          # Hand-written cards guarantee coverage of the .ecosystem.yml
+          # entrypoints; the LLM pass is capped per run and may not mention
+          # every entrypoint, which made this workflow fail intermittently.
+          ECO_ATLAS_MANUAL_CARDS_PATH: tools/eco_atlas_manual_cards.jsonl
         run: node tools/eco_atlas_distill.mjs
 
       - name: Pack
