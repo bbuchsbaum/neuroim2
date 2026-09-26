@@ -83,6 +83,15 @@ with filtered data.
 
 ## Details
 
+With `range_scale = NULL`, one intensity scale is estimated from all
+finite in-mask values across time in this 4-D input. It is not estimated
+separately for each time point, but separate calls on different subjects
+or contrasts can still use different bandwidths. For batch/group
+comparisons, reuse a positive finite `range_scale` and the same
+`intensity_sigma` across inputs in comparable intensity units. In
+contrast, `bilateral_filter_vec()` estimates a separate scale for each
+volume when `range_scale = NULL`.
+
 Parameter guidance and units: - spatial_sigma: Measured in physical
 units (millimeters). Distances are computed using `spacing(vec)[1:3]`,
 so choose `spatial_sigma` relative to voxel size. As a rule of thumb,

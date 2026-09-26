@@ -40,7 +40,13 @@ plot_overlay(
   unit = c("index", "mm"),
   annotate = TRUE,
   n_slices = 12L,
-  canvas = NULL
+  canvas = NULL,
+  alpha_knee = NULL,
+  alpha_cap = NULL,
+  alpha_floor = NULL,
+  alpha_mid = 0.2,
+  gamma_min = 1.5,
+  gamma_max = 5
 )
 ```
 
@@ -202,6 +208,27 @@ plot_overlay(
   size. By default (`NULL`) the layout is re-fitted to whatever device
   the figure is drawn on, including `ggsave()`.
 
+- alpha_knee, alpha_cap:
+
+  Optional lower (non-negative) and upper (positive) magnitude anchors
+  of the soft opacity curve, independent of the colour limits. `NULL`
+  uses the threshold (or median magnitude) and the colour-scale cap. Fix
+  both and `alpha_gamma` to reproduce one opacity mapping across
+  figures; see
+  [`soft_alpha_params`](https://bbuchsbaum.github.io/neuroim2/reference/soft_alpha_params.md).
+
+- alpha_floor:
+
+  Minimum soft opacity (0–1) above the knee, before `ov_alpha`; values
+  below `ov_thresh` stay transparent. `NULL` (default) uses 0.6 when a
+  threshold is set, otherwise 0.
+
+- alpha_mid, gamma_min, gamma_max:
+
+  Auto-gamma policy passed to
+  [`soft_alpha_params`](https://bbuchsbaum.github.io/neuroim2/reference/soft_alpha_params.md)
+  (0.2 at the median supra-knee magnitude, gamma clamped to \[1.5, 5\]).
+
 ## Value
 
 A figure (class `neuro_fig`, a patchwork whose layout is re-fitted to
@@ -217,6 +244,11 @@ ramp starts at a saturated colour at \\\pm\\threshold and brightens
 toward the cap; the colorbar shows the sub-threshold band in a neutral
 tone and ticks the threshold and cap. When the data exceed the cap, the
 end tick reads \\\ge\\ cap.
+
+**Soft opacity.** In `ov_alpha_mode = "soft"` the resolved curve is
+recorded in `attr(result, "soft_alpha")` for either return form; pass it
+back through `alpha_knee`, `alpha_cap`, `alpha_gamma` and `alpha_floor`
+to reuse it.
 
 **Saving.** The figure's layout is fitted to the device it is drawn on:
 `p <- plot_overlay(...); ggsave("fig.png", p, width = 6, height = 9)`

@@ -62,6 +62,17 @@ bilateral_filter(
 A smoothed image of class
 [`NeuroVol`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroVol-class.md).
 
+## Details
+
+With `range_scale = NULL`, the intensity bandwidth is estimated
+separately for each input volume. Equal `intensity_sigma` values
+therefore do not imply equal bandwidths across subjects, contrasts, or
+observed/null maps. For batch or group workflows, choose one positive
+finite `range_scale` from a reference or pooled in-mask intensity
+distribution and reuse it, along with the same `intensity_sigma`, for
+every map in comparable intensity units. The effective bandwidth is
+`intensity_sigma * range_scale`.
+
 ## Examples
 
 ``` r

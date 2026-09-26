@@ -171,14 +171,14 @@ twenty voxel time courses — on each backend:</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">signif</a></span><span class="op">(</span><span class="va">timings</span>, <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;            volumes  series</span></span>
-<span><span class="co">#&gt; dense       0.0015 0.00010</span></span>
-<span><span class="co">#&gt; sparse      0.0016 0.00005</span></span>
-<span><span class="co">#&gt; mapped      0.0035 0.00010</span></span>
-<span><span class="co">#&gt; filebacked  0.0290 0.01100</span></span></code></pre></div>
+<span><span class="co">#&gt; dense       0.0016 0.00010</span></span>
+<span><span class="co">#&gt; sparse      0.0015 0.00005</span></span>
+<span><span class="co">#&gt; mapped      0.0041 0.00010</span></span>
+<span><span class="co">#&gt; filebacked  0.0300 0.01200</span></span></code></pre></div>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">timings</span><span class="op">[</span><span class="st">"filebacked"</span>, <span class="st">"series"</span><span class="op">]</span> <span class="op">/</span> <span class="va">timings</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dense"</span>, <span class="st">"sparse"</span>, <span class="st">"mapped"</span><span class="op">)</span>, <span class="st">"series"</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  dense sparse mapped </span></span>
-<span><span class="co">#&gt;    106    212    106</span></span></code></pre></div>
+<span><span class="co">#&gt;    116    232    116</span></span></code></pre></div>
 <p>Seconds per call, and the ratio is computed rather than quoted, so it
 stays honest on your machine. Fetching one voxel’s time course from a
 <code>FileBackedNeuroVec</code> costs three to four orders of magnitude

@@ -82,7 +82,13 @@ compact colorbar that marks the threshold.</p>
 <span>  unit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"index"</span>, <span class="st">"mm"</span><span class="op">)</span>,</span>
 <span>  annotate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  n_slices <span class="op">=</span> <span class="fl">12L</span>,</span>
-<span>  canvas <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  canvas <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  alpha_knee <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  alpha_cap <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  alpha_floor <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  alpha_mid <span class="op">=</span> <span class="fl">0.2</span>,</span>
+<span>  gamma_min <span class="op">=</span> <span class="fl">1.5</span>,</span>
+<span>  gamma_max <span class="op">=</span> <span class="fl">5</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -247,6 +253,26 @@ Panels are always labelled in world coordinates (mm).</p></dd>
 layout for one size. By default (<code>NULL</code>) the layout is re-fitted to
 whatever device the figure is drawn on, including <code>ggsave()</code>.</p></dd>
 
+
+<dt id="arg-alpha-knee-alpha-cap">alpha_knee, alpha_cap<a class="anchor" aria-label="anchor" href="#arg-alpha-knee-alpha-cap"></a></dt>
+<dd><p>Optional lower (non-negative) and upper
+(positive) magnitude anchors of the soft opacity curve, independent of the
+colour limits. <code>NULL</code> uses the threshold (or median magnitude) and
+the colour-scale cap. Fix both and <code>alpha_gamma</code> to reproduce one
+opacity mapping across figures; see <code><a href="soft_alpha_params.html">soft_alpha_params</a></code>.</p></dd>
+
+
+<dt id="arg-alpha-floor">alpha_floor<a class="anchor" aria-label="anchor" href="#arg-alpha-floor"></a></dt>
+<dd><p>Minimum soft opacity (0–1) above the knee, before
+<code>ov_alpha</code>; values below <code>ov_thresh</code> stay transparent.
+<code>NULL</code> (default) uses 0.6 when a threshold is set, otherwise 0.</p></dd>
+
+
+<dt id="arg-alpha-mid-gamma-min-gamma-max">alpha_mid, gamma_min, gamma_max<a class="anchor" aria-label="anchor" href="#arg-alpha-mid-gamma-min-gamma-max"></a></dt>
+<dd><p>Auto-gamma policy passed to
+<code><a href="soft_alpha_params.html">soft_alpha_params</a></code> (0.2 at the median supra-knee magnitude,
+gamma clamped to [1.5, 5]).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -264,6 +290,10 @@ a saturated colour at \(\pm\)threshold and brightens toward the cap; the
 colorbar shows the sub-threshold band in a neutral tone and ticks the
 threshold and cap. When the data exceed the cap, the end tick reads
 \(\ge\) cap.</p>
+<p><strong>Soft opacity.</strong> In <code>ov_alpha_mode = "soft"</code> the resolved
+curve is recorded in <code>attr(result, "soft_alpha")</code> for either return
+form; pass it back through <code>alpha_knee</code>, <code>alpha_cap</code>,
+<code>alpha_gamma</code> and <code>alpha_floor</code> to reuse it.</p>
 <p><strong>Saving.</strong> The figure's layout is fitted to the device it is drawn
 on: <code>p &lt;- plot_overlay(...); ggsave("fig.png", p, width = 6, height =
 9)</code> re-arranges the tiles for a 6 x 9 in page, and additions such as

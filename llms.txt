@@ -123,6 +123,8 @@ Plotting utilities for slices, montages, overlays, and palettes
   : Orthogonal three-plane view with optional crosshairs and overlay
 - [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
   : Composite a statistical map on a structural background
+- [`soft_alpha_params()`](https://bbuchsbaum.github.io/neuroim2/reference/soft_alpha_params.md)
+  : Self-tuning nonlinear opacity curve for statistical overlays
 - [`enhance_stat_map()`](https://bbuchsbaum.github.io/neuroim2/reference/enhance_stat_map.md)
   : Enhance an unsmoothed statistical map for visualization
 - [`mapToColors()`](https://bbuchsbaum.github.io/neuroim2/reference/mapToColors.md)

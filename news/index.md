@@ -2,6 +2,37 @@
 
 ## neuroim2 0.19.0.9000
 
+### Reproducible soft-alpha overlays ([\#21](https://github.com/bbuchsbaum/neuroim2/issues/21))
+
+[`soft_alpha_params()`](https://bbuchsbaum.github.io/neuroim2/reference/soft_alpha_params.md)
+is now exported. It validates its inputs, accepts an explicit `knee`,
+and returns an `alpha_floor`, so the soft opacity curve can be previewed
+and reused.
+[`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
+gains `alpha_knee`, `alpha_cap`, `alpha_floor`, `alpha_mid`, `gamma_min`
+and `gamma_max` (appended to the signature), decoupling opacity from the
+colour limits. The resolved curve is recorded in
+`attr(result, "soft_alpha")`. Defaults are unchanged.
+
+### Bilateral filter bandwidths across maps ([\#20](https://github.com/bbuchsbaum/neuroim2/issues/20))
+
+The
+[`bilateral_filter()`](https://bbuchsbaum.github.io/neuroim2/reference/bilateral_filter.md)
+and
+[`bilateral_filter_4d()`](https://bbuchsbaum.github.io/neuroim2/reference/bilateral_filter_4d.md)
+help now explains that `range_scale = NULL` estimates the intensity
+bandwidth per input, so equal `intensity_sigma` values are not
+comparable across subjects or contrasts. For batch or group work, reuse
+one fixed `range_scale`.
+
+### Skull-stripped backgrounds ([\#19](https://github.com/bbuchsbaum/neuroim2/issues/19))
+
+The background window of the redesigned plot functions is computed over
+head voxels, so bright tissue in skull-stripped images is no longer
+clipped (0% of brain voxels clipped on a skull-stripped MNI152 T1,
+versus 5.4% with the previous whole-image robust quantiles).
+`bg_range = "data"` remains available for a full-range window.
+
 ### SparseNeuroVec matrix orientation ([\#31](https://github.com/bbuchsbaum/neuroim2/issues/31))
 
 [`SparseNeuroVec()`](https://bbuchsbaum.github.io/neuroim2/reference/SparseNeuroVec-class.md)
