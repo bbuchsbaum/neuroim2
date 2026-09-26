@@ -54,6 +54,15 @@ noise, leveraging a parallel C++ backend for performance.
 Only in-mask, in-bounds spatial neighbors contribute to each local weighted average.
 }
 \details{
+With \code{range_scale = NULL}, one intensity scale is estimated from all
+finite in-mask values across time in this 4-D input. It is not estimated
+separately for each time point, but separate calls on different subjects or
+contrasts can still use different bandwidths. For batch/group comparisons,
+reuse a positive finite \code{range_scale} and the same \code{intensity_sigma}
+across inputs in comparable intensity units. In contrast,
+\code{bilateral_filter_vec()} estimates a separate scale for each volume
+when \code{range_scale = NULL}.
+
 Parameter guidance and units:
 - spatial_sigma: Measured in physical units (millimeters). Distances are
   computed using \code{spacing(vec)[1:3]}, so choose \code{spatial_sigma}

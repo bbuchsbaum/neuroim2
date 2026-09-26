@@ -164,7 +164,10 @@ plot_ortho <- function(
                            thresh = ov_thresh, ov_cmap = ov_cmap,
                            ov_symmetric = ov_symmetric, ov_cap = ov_cap)
     cap <- max(abs(scale$lim))
-    soft <- if (ov_alpha_mode == "soft") soft_alpha_params(abs(ov_all), thresh = ov_thresh, cap = cap)
+    soft <- if (ov_alpha_mode == "soft") {
+      soft_alpha_params(abs(ov_all), thresh = ov_thresh, cap = cap,
+                        alpha_floor = default_alpha_floor(ov_thresh))
+    }
     alpha_fun <- overlay_alpha_fun(ov_alpha_mode, ov_thresh, cap, soft = soft)
   }
 

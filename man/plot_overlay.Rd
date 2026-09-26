@@ -36,7 +36,13 @@ plot_overlay(
   unit = c("index", "mm"),
   annotate = TRUE,
   n_slices = 12L,
-  canvas = NULL
+  canvas = NULL,
+  alpha_knee = NULL,
+  alpha_cap = NULL,
+  alpha_floor = NULL,
+  alpha_mid = 0.2,
+  gamma_min = 1.5,
+  gamma_max = 5
 )
 }
 \arguments{
@@ -139,6 +145,20 @@ Panels are always labelled in world coordinates (mm).}
 \item{canvas}{Optional \code{c(width, height)} in inches to freeze the
 layout for one size. By default (\code{NULL}) the layout is re-fitted to
 whatever device the figure is drawn on, including \code{ggsave()}.}
+
+\item{alpha_knee, alpha_cap}{Optional lower (non-negative) and upper
+(positive) magnitude anchors of the soft opacity curve, independent of the
+colour limits. \code{NULL} uses the threshold (or median magnitude) and
+the colour-scale cap. Fix both and \code{alpha_gamma} to reproduce one
+opacity mapping across figures; see \code{\link{soft_alpha_params}}.}
+
+\item{alpha_floor}{Minimum soft opacity (0--1) above the knee, before
+\code{ov_alpha}; values below \code{ov_thresh} stay transparent.
+\code{NULL} (default) uses 0.6 when a threshold is set, otherwise 0.}
+
+\item{alpha_mid, gamma_min, gamma_max}{Auto-gamma policy passed to
+\code{\link{soft_alpha_params}} (0.2 at the median supra-knee magnitude,
+gamma clamped to [1.5, 5]).}
 }
 \value{
 A figure (class \code{neuro_fig}, a \pkg{patchwork} whose
@@ -160,6 +180,11 @@ a saturated colour at \eqn{\pm}threshold and brightens toward the cap; the
 colorbar shows the sub-threshold band in a neutral tone and ticks the
 threshold and cap. When the data exceed the cap, the end tick reads
 \eqn{\ge} cap.
+
+\strong{Soft opacity.} In \code{ov_alpha_mode = "soft"} the resolved
+curve is recorded in \code{attr(result, "soft_alpha")} for either return
+form; pass it back through \code{alpha_knee}, \code{alpha_cap},
+\code{alpha_gamma} and \code{alpha_floor} to reuse it.
 
 \strong{Saving.} The figure's layout is fitted to the device it is drawn
 on: \code{p <- plot_overlay(...); ggsave("fig.png", p, width = 6, height =

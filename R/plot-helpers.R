@@ -467,40 +467,81 @@ validate_cbar_title <- function(x) {
 }
 
 
-#' Self-tuning nonlinear alpha mapping for statistical overlays
+#' Self-tuning nonlinear opacity curve for statistical overlays
 #'
-#' Parameters for the \code{"soft"} alpha mode, where per-voxel opacity is
-#' \deqn{alpha(m) = clamp((m - lo) / (hi - lo), 0, 1)^{gamma}.}
-#' The knee \code{lo} (below which alpha is 0) defaults to the threshold, or --
-#' when no threshold is set -- to the median in-mask magnitude, a robust
-#' noise-floor proxy, so near-zero values stay transparent. \code{gamma} is
-#' tuned so the median \emph{displayed} (supra-knee) magnitude maps to a faint
-#' \code{alpha_mid}; this pushes the noisy bulk toward transparency while the
-#' upper tail saturates to opaque, and adapts automatically to the value
-#' distribution. \code{gamma} is clamped to \code{[gamma_min, gamma_max]} so the
-#' curve stays convex (low values are never boosted).
+#' Parameters of the curve used by \code{plot_overlay(ov_alpha_mode = "soft")}.
+#' For magnitude \eqn{m}, opacity is
+#' \deqn{alpha(m) = f + (1 - f)\,\mathrm{clamp}((m - lo) / (hi - lo), 0, 1)^{\gamma},}
+#' where \eqn{f} is \code{alpha_floor}. Plotting then hides values below the
+#' hard threshold and multiplies by \code{ov_alpha}.
+#'
+#' The knee \code{lo} defaults to the threshold or, when no threshold is set,
+#' to the median non-zero magnitude (a robust noise-floor proxy). The cap
+#' \code{hi} defaults to the largest magnitude. When \code{gamma} is not given
+#' it is tuned so the median supra-knee magnitude maps to \code{alpha_mid}
+#' (before the floor), and clamped to \code{[gamma_min, gamma_max]} so the
+#' default curve stays convex; an explicit \code{gamma} bypasses the clamp.
+#' Fix \code{knee}, \code{cap} and \code{gamma} to reuse one curve across
+#' datasets.
 #'
 #' @param mags Numeric vector of overlay magnitudes (typically \code{abs(values)}).
-#' @param thresh Hard/soft threshold; used as the knee when \code{> 0}.
-#' @param cap Upper anchor (mapped to alpha 1); defaults to \code{max(mags)}.
+#' @param thresh Hard threshold; used as the knee when \code{> 0} and
+#'   \code{knee} is not given.
+#' @param cap Optional upper magnitude anchor (opacity 1).
 #' @param gamma Optional fixed exponent; \code{NULL} auto-tunes it.
-#' @param alpha_mid Target alpha for the median displayed magnitude.
-#' @param gamma_min,gamma_max Clamp range for the tuned exponent (>= 1 keeps the
-#'   curve convex; the lower bound guarantees a visible nonlinearity).
-#' @return A list with \code{lo}, \code{hi}, and \code{gamma}.
-#' @keywords internal
-#' @noRd
+#' @param alpha_mid Target opacity for the median supra-knee magnitude when
+#'   \code{gamma} is tuned.
+#' @param gamma_min,gamma_max Clamp range for the tuned exponent.
+#' @param knee Optional non-negative lower magnitude anchor, overriding the
+#'   threshold/median policy. Use \code{0} to ramp from zero.
+#' @param alpha_floor Minimum opacity (0 to 1) above the knee, before
+#'   \code{ov_alpha} and the hard threshold are applied.
+#' @return A list with \code{lo}, \code{hi}, \code{gamma} and
+#'   \code{alpha_floor}.
+#' @examples
+#' p <- soft_alpha_params(0:8, knee = 0, cap = 3, gamma = 0.7, alpha_floor = 0.15)
+#' m <- c(0, 1.6, 2.1, 3, 8)
+#' p$alpha_floor + (1 - p$alpha_floor) *
+#'   pmin(pmax((m - p$lo) / (p$hi - p$lo), 0), 1)^p$gamma
+#' @seealso \code{\link{plot_overlay}}
+#' @export
 soft_alpha_params <- function(mags, thresh = 0, cap = NULL, gamma = NULL,
-                              alpha_mid = 0.2, gamma_min = 1.5, gamma_max = 5) {
+                              alpha_mid = 0.2, gamma_min = 1.5, gamma_max = 5,
+                              knee = NULL, alpha_floor = 0) {
+  scalar <- function(x, name, lower, upper = Inf, strict = FALSE) {
+    if (!is.numeric(x) || length(x) != 1L || !is.finite(x) ||
+        (if (strict) x <= lower else x < lower) || x > upper) {
+      cli::cli_abort("{.arg {name}} must be a single finite number in the allowed range.",
+                     call = NULL)
+    }
+  }
+  scalar(thresh, "thresh", 0)
+  scalar(alpha_floor, "alpha_floor", 0, 1)
+  scalar(alpha_mid, "alpha_mid", 0, 1, strict = TRUE)
+  if (alpha_mid >= 1) cli::cli_abort("{.arg alpha_mid} must be less than 1.", call = NULL)
+  scalar(gamma_min, "gamma_min", 0, strict = TRUE)
+  scalar(gamma_max, "gamma_max", gamma_min)
+  if (!is.null(gamma)) scalar(gamma, "gamma", 0, strict = TRUE)
+  if (!is.null(knee)) scalar(knee, "knee", 0)
+  if (!is.null(cap)) scalar(cap, "cap", 0, strict = TRUE)
+  explicit_knee <- !is.null(knee)
   mags <- mags[is.finite(mags) & mags > 0]
-  knee <- if (isTRUE(thresh > 0)) {
+  knee <- if (explicit_knee) {
+    knee
+  } else if (isTRUE(thresh > 0)) {
     thresh
   } else if (length(mags)) {
     stats::median(mags)
   } else {
     0
   }
-  hi <- if (!is.null(cap) && is.finite(cap)) cap else if (length(mags)) max(mags) else knee + 1
+  hi <- if (!is.null(cap)) cap else if (length(mags)) max(mags) else knee + 1
+  # An explicit cap below the resolved knee is an error. Equality is only an
+  # error when the knee was also explicit: a data-driven cap that lands on a
+  # derived knee (e.g. constant magnitudes) falls through to the rescue below.
+  if (!is.null(cap) && (hi < knee || (explicit_knee && hi <= knee))) {
+    cli::cli_abort("{.arg cap} must exceed {.arg knee}.", call = NULL)
+  }
   if (!is.finite(hi) || hi <= knee) hi <- knee + 1
 
   if (is.null(gamma)) {
@@ -514,7 +555,7 @@ soft_alpha_params <- function(mags, thresh = 0, cap = NULL, gamma = NULL,
     }
     gamma <- min(max(gamma, gamma_min), gamma_max)
   }
-  list(lo = knee, hi = hi, gamma = gamma)
+  list(lo = knee, hi = hi, gamma = gamma, alpha_floor = alpha_floor)
 }
 
 #' Resolve a display-range argument to numeric limits
