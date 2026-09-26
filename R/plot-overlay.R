@@ -37,6 +37,17 @@
 #'   matches the picture.
 #' @param alpha_gamma Optional exponent for \code{ov_alpha_mode = "soft"}.
 #'   \code{NULL} (default) auto-tunes it from the data.
+#' @param alpha_knee,alpha_cap Optional lower (non-negative) and upper
+#'   (positive) magnitude anchors of the soft opacity curve, independent of the
+#'   colour limits. \code{NULL} uses the threshold (or median magnitude) and
+#'   the colour-scale cap. Fix both and \code{alpha_gamma} to reproduce one
+#'   opacity mapping across figures; see \code{\link{soft_alpha_params}}.
+#' @param alpha_floor Minimum soft opacity (0--1) above the knee, before
+#'   \code{ov_alpha}; values below \code{ov_thresh} stay transparent.
+#'   \code{NULL} (default) uses 0.6 when a threshold is set, otherwise 0.
+#' @param alpha_mid,gamma_min,gamma_max Auto-gamma policy passed to
+#'   \code{\link{soft_alpha_params}} (0.2 at the median supra-knee magnitude,
+#'   gamma clamped to [1.5, 5]).
 #' @param ov_symmetric Logical or \code{NULL}. \code{NULL} (default) uses
 #'   symmetric limits around zero when the overlay has both signs.
 #' @param ov_cap Optional numeric; the magnitude at the upper end of the
@@ -91,6 +102,11 @@
 #' threshold and cap. When the data exceed the cap, the end tick reads
 #' \eqn{\ge} cap.
 #'
+#' \strong{Soft opacity.} In \code{ov_alpha_mode = "soft"} the resolved
+#' curve is recorded in \code{attr(result, "soft_alpha")} for either return
+#' form; pass it back through \code{alpha_knee}, \code{alpha_cap},
+#' \code{alpha_gamma} and \code{alpha_floor} to reuse it.
+#'
 #' \strong{Saving.} The figure's layout is fitted to the device it is drawn
 #' on: \code{p <- plot_overlay(...); ggsave("fig.png", p, width = 6, height =
 #' 9)} re-arranges the tiles for a 6 x 9 in page, and additions such as
@@ -119,7 +135,9 @@ plot_overlay <- function(
   draw = FALSE, style = c("light", "dark", "report"), enhance = FALSE,
   assemble = TRUE, colorbar = TRUE, legend = NULL,
   crop = TRUE, interpolate = TRUE, cbar_title = "value",
-  unit = c("index", "mm"), annotate = TRUE, n_slices = 12L, canvas = NULL
+  unit = c("index", "mm"), annotate = TRUE, n_slices = 12L, canvas = NULL,
+  alpha_knee = NULL, alpha_cap = NULL, alpha_floor = NULL,
+  alpha_mid = 0.2, gamma_min = 1.5, gamma_max = 5
 ) {
   unit_missing <- missing(unit)
   assert_same_neuro_grid(bgvol, overlay = overlay)
@@ -163,7 +181,11 @@ plot_overlay <- function(
                          ov_symmetric = ov_symmetric, ov_cap = ov_cap)
   cap <- max(abs(scale$lim))
   soft <- if (ov_alpha_mode == "soft") {
-    soft_alpha_params(abs(ov_all), thresh = ov_thresh, cap = cap, gamma = alpha_gamma)
+    soft_alpha_params(abs(ov_all), thresh = ov_thresh,
+                      cap = if (is.null(alpha_cap)) cap else alpha_cap,
+                      gamma = alpha_gamma, knee = alpha_knee,
+                      alpha_floor = if (is.null(alpha_floor)) default_alpha_floor(ov_thresh) else alpha_floor,
+                      alpha_mid = alpha_mid, gamma_min = gamma_min, gamma_max = gamma_max)
   }
   alpha_fun <- overlay_alpha_fun(ov_alpha_mode, ov_thresh, cap, soft = soft)
 
@@ -202,6 +224,10 @@ plot_overlay <- function(
                         canvas = cv)
   cv0 <- canvas_size(canvas)
   fig <- build(cv0)
+  # Record the resolved soft-alpha curve on either return form (before the
+  # figure is wrapped, so the wrapper still recognises it as unmodified).
+  attr(fig, "soft_alpha") <- soft
+  attr(plots, "soft_alpha") <- soft
   if (is.null(canvas)) fig <- neuro_figure(fig, build, cv0, tokens)
   neuro_finish(fig, plots, draw = draw, assemble = assemble, title = title,
                subtitle = subtitle, caption = caption, style = style,

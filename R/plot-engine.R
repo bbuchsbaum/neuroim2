@@ -338,6 +338,11 @@ overlay_positions <- function(v, lim, thresh = 0, diverging = TRUE, skip = 0.3) 
   pos
 }
 
+#' Default soft-alpha floor: 60\% when a threshold is set, else none
+#' @keywords internal
+#' @noRd
+default_alpha_floor <- function(thresh) if (isTRUE(thresh > 0)) 0.6 else 0
+
 #' Build the per-voxel opacity function for an overlay
 #'
 #' Returns a function of absolute value giving alpha in [0, 1]. The same
@@ -367,7 +372,8 @@ overlay_alpha_fun <- function(mode, thresh, cap, soft = NULL, floor = 0.6) {
     },
     soft = function(m) {
       t <- (m - soft$lo) / max(soft$hi - soft$lo, 1e-12)
-      a <- fl + (1 - fl) * pmin(pmax(t, 0), 1)^soft$gamma
+      sf <- if (is.null(soft$alpha_floor)) fl else soft$alpha_floor
+      a <- sf + (1 - sf) * pmin(pmax(t, 0), 1)^soft$gamma
       ifelse(is.finite(m) & m >= max(thresh, soft$lo) & m > 0, a, 0)
     }
   )
