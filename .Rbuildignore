@@ -46,3 +46,6 @@ test_series_bug.R
 ^man/\.omc$
 ^src/.*\.gcno$
 ^src/.*\.gcda$
+^\.mote$
+^Rplots\.pdf$
+^tests/testthat/Rplots\.pdf$

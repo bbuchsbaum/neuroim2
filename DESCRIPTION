@@ -1,7 +1,7 @@
 Package: neuroim2
 Type: Package
 Title: Data Structures for Brain Imaging Data
-Version: 0.19.0.9000
+Version: 0.20.0
 LinkingTo: 
   Rcpp,
   RcppArmadillo,
@@ -86,6 +86,7 @@ Collate:
     'spat_filter.R'
     'summary_methods.R'
     'theme.R'
+    'vec_blocks.R'
     'zzz.R'
 RoxygenNote: 7.3.3
 Imports:

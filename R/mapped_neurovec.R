@@ -171,6 +171,15 @@ setMethod(f = "load_data",
             # Extract meta information
             meta <- x@meta_info
 
+            # Preserve normalized decoding parameters before discarding the
+            # source metadata. Usually these are scalar; AFNI/source objects
+            # can supply different parameters for individual volumes.
+            scale_indices <- if (length(meta@slope) <= 1L &&
+                                 length(meta@intercept) <= 1L) 1L else seq_len(dim(meta)[4])
+            scales <- lapply(scale_indices, function(i) .data_scale_params(meta, i))
+            slopes <- vapply(scales, `[[`, numeric(1), "slope")
+            intercepts <- vapply(scales, `[[`, numeric(1), "intercept")
+
             # Create memory mapping
             tryCatch({
               fmap <- mmap::mmap(meta@data_file,
@@ -195,6 +204,8 @@ setMethod(f = "load_data",
                 space = bspace,
                 filemap = fmap,
                 offset = as.integer(offset),
+                slope = slopes,
+                intercept = intercepts,
                 label = basename(meta@data_file),
                 volume_labels = nifti_volume_labels(meta@header, expected_length = meta@dims[4]))
           })
@@ -202,7 +213,8 @@ setMethod(f = "load_data",
 #' Linear Access to Memory-Mapped Data
 #'
 #' @description
-#' Internal method providing linear access to memory-mapped data.
+#' Returns decoded values from memory-mapped data, applying the source
+#' slope and intercept exactly once.
 #'
 #' @param x A MappedNeuroVec object
 #' @param i Numeric vector of indices
@@ -212,8 +224,12 @@ setMethod(f = "load_data",
 setMethod(f = "linear_access",
           signature = signature(x = "MappedNeuroVec", i = "numeric"),
           def = function(x, i) {
-            if (!is.numeric(i) || any(is.na(i))) {
-              cli::cli_abort("{.arg i} must be a numeric vector without NA values.")
+            if (!is.numeric(i) || any(!is.finite(i)) || any(i != floor(i))) {
+              cli::cli_abort("{.arg i} must contain finite whole-number indices.")
+            }
+
+            if (any(i < 1) || any(i > prod(dim(x)))) {
+              cli::cli_abort("Index out of bounds: indices must be in [1, {prod(dim(x))}].")
             }
 
             # Calculate adjusted indices
@@ -224,8 +240,13 @@ setMethod(f = "linear_access",
               cli::cli_abort("Index out of bounds: indices must be in [1, {length(x@filemap)}].")
             }
 
-            # Access mapped data
-            x@filemap[idx]
+            vals <- x@filemap[idx]
+            if (all(x@slope == 1) && all(x@intercept == 0)) return(vals)
+            if (length(x@slope) == 1L && length(x@intercept) == 1L) {
+              return(as.numeric(vals) * x@slope + x@intercept)
+            }
+            volumes <- (i - 1) %/% prod(dim(x)[1:3]) + 1
+            as.numeric(vals) * x@slope[volumes] + x@intercept[volumes]
           })
 
 

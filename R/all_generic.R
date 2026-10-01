@@ -106,6 +106,12 @@ setGeneric(name="values", def=function(x, ...) standardGeneric("values"))
 #' linear indexing. Linear indexing is a way of indexing an array by a single index
 #' that is computed from multiple indices using a formula.
 #'
+#' Values are decoded intensities in the source's declared units: file-backed
+#' methods apply stored slope/intercept scaling exactly once. Already decoded
+#' in-memory values are not scaled again. This does not imply that physical
+#' units are known. Request order and repeated indices are preserved; sparse
+#' structural zeros remain zero and stored missing values remain missing.
+#'
 #' @param x a data source.
 #' @param i a vector of indices.
 #' @param ... additional arguments to be passed to methods.

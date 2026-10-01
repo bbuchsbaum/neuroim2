@@ -21,6 +21,13 @@ This function extracts the values of the elements in an array-like object using
 linear indexing. Linear indexing is a way of indexing an array by a single index
 that is computed from multiple indices using a formula.
 }
+\details{
+Values are decoded intensities in the source's declared units: file-backed
+methods apply stored slope/intercept scaling exactly once. Already decoded
+in-memory values are not scaled again. This does not imply that physical
+units are known. Request order and repeated indices are preserved; sparse
+structural zeros remain zero and stored missing values remain missing.
+}
 \examples{
 # Create a sparse neuroimaging vector
 bspace <- NeuroSpace(c(10,10,10,100), c(1,1,1))

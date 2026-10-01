@@ -1,4 +1,18 @@
-# neuroim2 0.19.0.9000
+# neuroim2 0.20.0
+
+## Lazy storage-aware iteration and accessor parity
+
+`vec_blocks()` provides non-caching, memory-budgeted iteration for dense,
+sparse and BigNeuroVec storage. Blocks contain decoded time-by-voxel values,
+original indices, spatial geometry and volume labels. Auto chooses time blocks
+for dense arrays and voxel blocks for sparse/FBM stores. Mapped, file-backed
+and sequence adapters are not yet supported.
+
+`series(NeuroVecSeq, ...)` now preserves time-by-voxel orientation when a
+component result is square. Previously shape-based transposition silently
+permuted its values, including values used by voxel-group `split_reduce()`.
+The regression matrix covers six backends, three encodings, and the public
+read accessors, with independent binary fixtures and explicit class boundaries.
 
 ## Reproducible soft-alpha overlays (#21)
 
@@ -79,6 +93,15 @@ colorbar placed beside the tiles.
   (plane, neurological convention, and what the threshold shows).
 * Errors use cli and name the offending argument; out-of-range slice positions
   report the valid range.
+
+## Scaled memory-mapped reads
+
+`MappedNeuroVec` now retains normalized source slope/intercept metadata and
+applies it in `linear_access()`. Indexing, `series()`, `as.matrix()`, and
+grouped reductions consequently return decoded values for scaled files, in
+agreement with ordinary reads. Previously they returned raw stored values.
+Per-volume scale parameters follow repeated and reordered volume selections.
+This changes results for scaled inputs; identity-scaled reads are unchanged.
 
 ## Configurable colorbar titles
 

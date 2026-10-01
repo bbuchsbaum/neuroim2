@@ -258,6 +258,7 @@ reference:
     Methods for accessing and indexing neuroimaging data
   contents:
   - sub_vector
+  - vec_blocks
   - indices
   - length,NeuroVec-method
   - neuro-ops

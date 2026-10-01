@@ -68,8 +68,12 @@ Memory mapping is particularly useful when:
 \item{\code{filemap}}{An object of class \code{mmap} representing the memory-mapped file
 containing the brain image data.}
 
-\item{\code{offset}}{An integer representing the byte offset within the memory-mapped file
+\item{\code{offset}}{An integer representing the element offset within the memory-mapped file
 where the brain image data starts.}
+
+\item{\code{slope}}{Normalized decoding slopes, either scalar or one per volume.}
+
+\item{\code{intercept}}{Normalized decoding intercepts, either scalar or one per volume.}
 }}
 
 \section{Methods}{
