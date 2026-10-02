@@ -46,3 +46,4 @@ test_series_bug.R
 ^man/\.omc$
 ^src/.*\.gcno$
 ^src/.*\.gcda$
+^\.albersdown\.bak$
