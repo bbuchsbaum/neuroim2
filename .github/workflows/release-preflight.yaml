@@ -1,0 +1,90 @@
+name: release-preflight
+
+on:
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+env:
+  R_KEEP_PKG_SOURCE: yes
+  RCPP_PARALLEL_NUM_THREADS: 2
+  OMP_NUM_THREADS: 2
+  OPENBLAS_NUM_THREADS: 2
+  MAKEFLAGS: -j2
+  _R_CHECK_LIMIT_CORES_: true
+
+jobs:
+  source-check:
+    if: startsWith(github.head_ref, 'release/cran-')
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: devel
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-tinytex@v2
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck, any::roxygen2, local::.
+          needs: check
+      - name: Regenerate reference documentation from exact candidate
+        run: |
+          Rscript -e 'roxygen2::roxygenize(".", roclets = c("rd", "namespace"), load_code = roxygen2::load_installed)'
+          git diff --exit-code -- man NAMESPACE
+      - name: Verify regressions fail on master and pass on candidate
+        env:
+          RELEASE_OUT: ${{ runner.temp }}/release-evidence
+        run: Rscript tools/release/baseline.R
+      - name: Full source build, manual, vignettes and CRAN check
+        env:
+          RELEASE_OUT: ${{ runner.temp }}/release-evidence
+        run: Rscript tools/release/preflight.R
+      - name: Preserve source tarball and check evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-source-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/release-evidence
+          retention-days: 30
+
+  downstream:
+    if: startsWith(github.head_ref, 'release/cran-')
+    needs: source-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck, any::pak, local::.
+          needs: check
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-source-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/release-evidence
+      - name: CRAN reverse dependency comparison and pinned lab integration
+        env:
+          RELEASE_OUT: ${{ runner.temp }}/release-evidence
+          DOWNSTREAM_OUT: ${{ runner.temp }}/downstream-evidence
+        run: Rscript tools/release/downstream.R
+      - name: Preserve downstream sources and results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-downstream-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/downstream-evidence
+          retention-days: 30

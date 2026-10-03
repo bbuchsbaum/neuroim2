@@ -1598,6 +1598,7 @@ setGeneric(name="voxels", def=function(x, ...) standardGeneric("voxels"))
 #' @title Generic Image Method for Creating Visual Representations
 #'
 #' @description Creates a visual representation (or image) from an object.
+#' @usage image(x, ...)
 #'
 #' @param x An object to be rendered as an image.
 #' @param ... Additional arguments passed to methods.
@@ -1611,6 +1612,7 @@ if (!isGeneric("image"))
 #' @title Generic Method for Converting Objects to Raster Format
 #'
 #' @description Converts an object to a raster (bitmap) representation.
+#' @usage as.raster(x, ...)
 #'
 #' @param x An object to be converted.
 #' @param ... Additional arguments passed to the conversion methods.

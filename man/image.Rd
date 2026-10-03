@@ -3,6 +3,9 @@
 \name{image}
 \alias{image}
 \title{Generic Image Method for Creating Visual Representations}
+\usage{
+image(x, ...)
+}
 \arguments{
 \item{x}{An object to be rendered as an image.}
 
