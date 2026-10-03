@@ -57,6 +57,8 @@ jobs:
         run: |
           mkdir -p "$RELEASE_OUT/manual-build"
           R CMD Rd2pdf --no-preview --force --no-clean --build-dir="$RELEASE_OUT/manual-build" --output="$RELEASE_OUT/neuroim2-manual.pdf" .
+      - name: Verify release gate regression cases
+        run: Rscript tools/release/test-check-policy.R
       - name: Verify regressions fail on master and pass on candidate
         env:
           RELEASE_OUT: ${{ runner.temp }}/release-evidence
@@ -105,6 +107,7 @@ jobs:
       - name: Check exact release-built tarball with R-devel, including manual and vignettes
         env:
           RELEASE_OUT: ${{ runner.temp }}/release-evidence
+          RELEASE_CHECK_SERVICE: github-r-devel
         run: Rscript tools/release/preflight.R
       - name: Preserve checked source tarball and check evidence
         if: always()
@@ -112,6 +115,69 @@ jobs:
         with:
           name: release-source-${{ github.event.pull_request.head.sha }}
           path: ${{ runner.temp }}/release-evidence
+          retention-days: 30
+
+  rhub-setup:
+    if: startsWith(github.head_ref, 'release/cran-')
+    needs: source-build
+    runs-on: ubuntu-latest
+    outputs:
+      containers: ${{ steps.setup.outputs.containers }}
+    steps:
+      - uses: r-hub/actions/setup@v1
+        id: setup
+        with:
+          config: ubuntu-clang,clang-ubsan
+
+  rhub-source-check:
+    needs: [source-build, rhub-setup]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        config: ${{ fromJson(needs.rhub-setup.outputs.containers) }}
+    name: R-hub ${{ matrix.config.label }} exact tarball
+    container:
+      image: ${{ matrix.config.container }}
+    env:
+      RELEASE_OUT: ${{ github.workspace }}/../release-evidence
+      RELEASE_CHECK_SERVICE: rhub-${{ matrix.config.label }}
+      RHUB_ACTIONS_CHECK_SCRIPT: Rscript tools/release/preflight.R
+    steps:
+      - uses: r-hub/actions/checkout@v1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: r-hub/actions/platform-info@v1
+        with:
+          job-config: ${{ matrix.config.job-config }}
+      - uses: r-hub/actions/setup-deps@v1
+        with:
+          job-config: ${{ matrix.config.job-config }}
+      - uses: r-lib/actions/setup-tinytex@v2
+      - name: Install PDF manual fonts
+        run: tlmgr install courier helvetic times makeindex
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-build-${{ github.event.pull_request.head.sha }}
+          path: ${{ env.RELEASE_OUT }}
+      # R-hub's default runner rebuilds sources and omits the manual. Its
+      # supported custom script checks our unchanged release-built tarball.
+      - uses: r-hub/actions/run-check@v1
+        with:
+          job-config: ${{ matrix.config.job-config }}
+      - name: Reject sanitizer findings from the custom check
+        if: always()
+        shell: Rscript {0}
+        run: |
+          files <- list.files(file.path(Sys.getenv("RELEASE_OUT"), "check"), recursive=TRUE, full.names=TRUE, pattern="([.]Rout|[.]log|[.]out)$")
+          findings <- unlist(lapply(files, function(f) grep("runtime error:|SUMMARY: (UndefinedBehaviorSanitizer|AddressSanitizer)|ERROR: AddressSanitizer", readLines(f, warn=FALSE), value=TRUE)))
+          if (length(findings)) stop(paste(findings, collapse="\n"))
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release-rhub-${{ matrix.config.label }}-${{ github.event.pull_request.head.sha }}
+          path: ${{ env.RELEASE_OUT }}
           retention-days: 30
 
   downstream:

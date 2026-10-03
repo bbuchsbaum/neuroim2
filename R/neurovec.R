@@ -1540,13 +1540,16 @@ setMethod(f="vectors", signature=signature(x="NeuroVec", subset="missing"),
 #' @rdname vectors-methods
 setMethod(f="vectors", signature=signature(x="DenseNeuroVec", subset="missing"),
           def = function(x) {
+            # Extract the S4 data part once. On R-devel, doing this in the
+            # deferred callback can copy the complete 4D array for every voxel.
+            data <- x@.Data
             ind <- 1:prod(dim(x)[1:3])
             time <- seq(1, dim(x)[4])
             lent <- length(time)
             grid <- indexToGridCpp(ind, dim(x)[1:3])
             f <- function(i) {
               imat <- cbind(do.call("rbind", rep(list(grid[i,]),lent)), time)
-              x@.Data[imat]
+              data[imat]
             }
             deflist::deflist(f, length(ind))
           })

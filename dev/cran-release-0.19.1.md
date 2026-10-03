@@ -1,5 +1,62 @@
 # CRAN release candidate 0.19.1
 
+## Runtime rejection and mandatory release gate
+
+The first 0.19.1 tarball (source `badd3db`, SHA-256
+`62aab075b9483b2f2d565137edf3136d2d20702bd911d66388f2bfcc5f317a29`)
+was submitted with explicit authorization as request 357569. CRAN archived it
+on 2026-10-03. Both platform logs ended `Status: OK`, but the incoming summary
+flagged Windows overall checktime of 37 minutes against a ten-minute limit.
+[The archived logs](https://win-builder.r-project.org/incoming_pretest/neuroim2_0.19.1_20261003_215854/)
+show 31 minutes rebuilding vignettes on Windows and 19 minutes on Debian;
+tests took only 107 and 83 seconds respectively. Passing the previous error/
+warning gate did not establish release readiness.
+
+Chunk profiling on Linux R-devel isolated 405.5 seconds in the `vectors` chunk
+of `regions-and-searchlights.Rmd`; 97% of that article's CPU time was spent in
+`getDataPart`. The corresponding Windows R-devel chunk took 714.6 seconds.
+The dense iterator extracted its complete S4 array on every
+voxel callback. It now extracts the array once when constructing the iterator.
+All nine articles, their full datasets, evaluated chunks and the test suite
+remain enabled. The direct Mac R 4.5 render took only 29 seconds for all nine
+articles, so local rendering alone was not a useful predictor of this R-devel
+cost. `tools/release/profile-vignettes.R` and the runtime-profile workflow retain
+per-chunk timings and R profiles on Linux and Windows R-devel.
+
+The release gate now requires complete checks within 600 elapsed seconds and
+rejects every error, warning and unreviewed NOTE. The only listed exceptions in
+`tools/release/reviewed-notes.dcf` are exact missing optional HTML-tool notes on
+local/Linux runners; they do not apply to win-builder. No timing note is allowed.
+`test-check-policy.R` includes the rejected 37-minute result as a regression case.
+The measured interval covers the whole `R CMD check`, including installation,
+examples, tests, all vignette rebuilding and PDF/HTML manuals.
+
+The workflow checks the same release-R-built tarball on GitHub R-devel and on
+R-hub v2's `ubuntu-clang` and `clang-ubsan` platforms. It uses the official
+R-hub setup/actions with their supported custom check script because the
+default R-hub script rebuilds sources and omits the manual. Artifact SHA-256,
+source commit, log hash, elapsed time and approved-note identifiers are recorded
+in `check-policy.dcf`. Sanitizer findings also fail the workflow.
+
+Before any separately authorized resubmission, upload that unchanged tarball
+to official win-builder R-devel and preserve its receipt and complete logs.
+Record its upload provenance in `upload.dcf` and check start/end UTC plus timing
+basis in `timing.dcf`. The log's start and HTTP Last-Modified provide a
+conservative elapsed bound when the server copies logs after checking. Then run:
+
+```sh
+Rscript tools/release/record-winbuilder.R "$RELEASE_OUT" "$WINBUILDER_RESULTS"
+Rscript tools/release/final-gate.R "$RELEASE_OUT" \
+  "$GITHUB_RDEVEL_RESULTS" "$WINBUILDER_RESULTS" \
+  "$RHUB_CLANG_RESULTS" "$RHUB_UBSAN_RESULTS"
+```
+
+The final gate refuses missing services, mismatched artifacts/commits, changed
+logs, failed checks and excess runtime. Preserve the external result links and
+logs before their retention windows expire. A changed source requires a newly
+built artifact and all required checks again. No CRAN resubmission or
+correspondence is authorized during this remediation.
+
 The preparation task produces a checked candidate. The coordinating parent
 thread owns any separately authorized CRAN upload; this task does not submit,
 merge, tag, release or deploy.

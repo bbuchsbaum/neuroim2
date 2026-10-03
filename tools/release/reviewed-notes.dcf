@@ -1,0 +1,26 @@
+Id: optional-html-tools-unavailable
+Services: local github-r-devel rhub-ubuntu-clang rhub-clang-ubsan
+Note: checking HTML version of manual ... NOTE
+ Skipping checking HTML validation: no command 'tidy' found.
+ Please obtain a recent version of HTML Tidy by downloading a binary
+ release or compiling the source code from <https://www.html-tidy.org/>.
+ Skipping checking math rendering: package 'V8' unavailable
+Reason: These are missing optional validation tools, not skipped PDF manual or
+ vignette execution. The complete check and offline documentation validation
+ still run. Official win-builder R-devel must validate the HTML manual.
+
+Id: optional-html-tidy-unavailable
+Services: local github-r-devel rhub-ubuntu-clang rhub-clang-ubsan
+Note: checking HTML version of manual ... NOTE
+ Skipping checking HTML validation: no command 'tidy' found.
+ Please obtain a recent version of HTML Tidy by downloading a binary
+ release or compiling the source code from <https://www.html-tidy.org/>.
+Reason: HTML Tidy is optional. PDF manual and vignette execution must pass;
+ official win-builder R-devel must validate the HTML manual.
+
+Id: optional-html-v8-unavailable
+Services: local github-r-devel rhub-ubuntu-clang rhub-clang-ubsan
+Note: checking HTML version of manual ... NOTE
+ Skipping checking math rendering: package 'V8' unavailable
+Reason: V8 supplies optional HTML math rendering validation. The complete PDF
+ manual and all vignettes must still build, and win-builder must pass.

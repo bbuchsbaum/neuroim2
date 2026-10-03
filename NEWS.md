@@ -1,5 +1,9 @@
 # neuroim2 0.19.1
 
+* Dense `vectors()` iteration now extracts its underlying array once, avoiding
+  repeated full-array extraction on R-devel. Voxel order and returned values
+  are unchanged; the complete vignette examples and tests remain enabled.
+
 ## Upgrading from CRAN 0.13.0
 
 This release collects the changes recorded below for versions 0.14 through

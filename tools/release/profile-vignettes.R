@@ -39,3 +39,6 @@ for (input in list.files(src, '[.]Rmd$', full.names=TRUE)) {
 }
 print(totals[order(totals$elapsed, decreasing=TRUE), ])
 print(head(chunks[order(chunks$elapsed, decreasing=TRUE), ], 20))
+writeLines(capture.output(sessionInfo()), file.path(out, 'session-info.txt'))
+writeLines(system2('git', c('-C', shQuote(repo), 'rev-parse', 'HEAD'), stdout=TRUE),
+           file.path(out, 'SOURCE_SHA'))
