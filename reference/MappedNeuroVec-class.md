@@ -83,8 +83,16 @@ Memory mapping is particularly useful when:
 
 - `offset`:
 
-  An integer representing the byte offset within the memory-mapped file
-  where the brain image data starts.
+  An integer representing the element offset within the memory-mapped
+  file where the brain image data starts.
+
+- `slope`:
+
+  Normalized decoding slopes, either scalar or one per volume.
+
+- `intercept`:
+
+  Normalized decoding intercepts, either scalar or one per volume.
 
 ## Methods
 

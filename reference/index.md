@@ -278,8 +278,8 @@ Methods for loading and manipulating neuroimaging data
 - [`linear_access()`](https://bbuchsbaum.github.io/neuroim2/reference/linear_access.md)
   : Extract values from an array-like object using linear indexing.
 
-- [`image`](https://bbuchsbaum.github.io/neuroim2/reference/image.md) :
-  Generic Image Method for Creating Visual Representations
+- [`image()`](https://bbuchsbaum.github.io/neuroim2/reference/image.md)
+  : Generic Image Method for Creating Visual Representations
 
 - [`simulate_fmri()`](https://bbuchsbaum.github.io/neuroim2/reference/simulate_fmri.md)
   : Simulate fMRI Data
@@ -811,8 +811,7 @@ Miscellaneous methods and functions
   [`show(`*`<SparseNeuroVec>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/show-methods.md)
   : Show method for NamedAxis objects
 
-- [`as-ClusteredNeuroVol-DenseNeuroVol`](https://bbuchsbaum.github.io/neuroim2/reference/as-ClusteredNeuroVol-DenseNeuroVol.md)
-  [`coerce,ClusteredNeuroVol,DenseNeuroVol-method`](https://bbuchsbaum.github.io/neuroim2/reference/as-ClusteredNeuroVol-DenseNeuroVol.md)
+- [`coerce(`*`<ClusteredNeuroVol>`*`,`*`<DenseNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as-ClusteredNeuroVol-DenseNeuroVol.md)
   : Convert ClusteredNeuroVol to DenseNeuroVol
 
 - [`as.array(`*`<ClusteredNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.array-methods.md)
@@ -876,7 +875,7 @@ Miscellaneous methods and functions
   [`as.raster(`*`<NeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.raster-methods.md)
   : Convert neuroimaging objects to raster images
 
-- [`as.raster`](https://bbuchsbaum.github.io/neuroim2/reference/as.raster.md)
+- [`as.raster()`](https://bbuchsbaum.github.io/neuroim2/reference/as.raster.md)
   : Generic Method for Converting Objects to Raster Format
 
 - [`as.sparse(`*`<DenseNeuroVec>`*`,`*`<LogicalNeuroVol>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as.sparse-methods.md)

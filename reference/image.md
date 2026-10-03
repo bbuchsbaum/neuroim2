@@ -2,6 +2,12 @@
 
 Creates a visual representation (or image) from an object.
 
+## Usage
+
+``` r
+image(x, ...)
+```
+
 ## Arguments
 
 - x:

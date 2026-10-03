@@ -2,6 +2,12 @@
 
 Converts an object to a raster (bitmap) representation.
 
+## Usage
+
+``` r
+as.raster(x, ...)
+```
+
 ## Arguments
 
 - x:

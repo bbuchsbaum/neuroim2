@@ -3,6 +3,13 @@
 This method converts a ClusteredNeuroVol into an equivalent
 DenseNeuroVol object.
 
+## Usage
+
+``` r
+# S4 method for class 'ClusteredNeuroVol,DenseNeuroVol'
+coerce(from, to = "DenseNeuroVol", strict = TRUE)
+```
+
 ## Arguments
 
 - from:
@@ -10,6 +17,14 @@ DenseNeuroVol object.
   A
   [`ClusteredNeuroVol`](https://bbuchsbaum.github.io/neuroim2/reference/ClusteredNeuroVol-class.md)
   object to be converted
+
+- to:
+
+  The target class, `"DenseNeuroVol"`.
+
+- strict:
+
+  Logical; whether to enforce the target class exactly.
 
 ## Value
 

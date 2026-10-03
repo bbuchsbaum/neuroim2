@@ -17,7 +17,7 @@ RAM by keeping data on disk and only loading requested portions into memory.
 Creates a MappedNeuroVec object that provides efficient,
 memory-mapped access to large neuroimaging datasets. This allows processing of
 data larger than available RAM by keeping it on disk and only loading requested
-portions into memory."></head><body>
+portions into memory."><link href="../albers.css" rel="stylesheet"><script>window.albersdownDefaults = window.albersdownDefaults || { family: "red", preset: "homage", style: "minimal" };</script><script src="../albers.js"></script></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -25,7 +25,7 @@ portions into memory."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">neuroim2</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.19.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.19.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -118,8 +118,16 @@ containing the brain image data.</p></dd>
 
 
 <dt><code>offset</code></dt>
-<dd><p>An integer representing the byte offset within the memory-mapped file
+<dd><p>An integer representing the element offset within the memory-mapped file
 where the brain image data starts.</p></dd>
+
+
+<dt><code>slope</code></dt>
+<dd><p>Normalized decoding slopes, either scalar or one per volume.</p></dd>
+
+
+<dt><code>intercept</code></dt>
+<dd><p>Normalized decoding intercepts, either scalar or one per volume.</p></dd>
 
 
 </dl></div>
