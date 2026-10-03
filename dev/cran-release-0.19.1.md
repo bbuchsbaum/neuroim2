@@ -28,6 +28,9 @@ Use a clean checkout of the reviewed candidate SHA with current R-devel,
 R package dependencies, Pandoc, a working LaTeX installation and at least 20 GiB
 free space on the connected Mac. From the checkout root:
 
+Use roxygen2 7.3.3, matching DESCRIPTION, for regeneration; newer roxygen2
+releases change unrelated generated output and are not part of this release.
+
 ```sh
 export RCPP_PARALLEL_NUM_THREADS=2 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2
 export MAKEFLAGS=-j2 _R_CHECK_LIMIT_CORES_=true

@@ -3,6 +3,7 @@ out <- Sys.getenv("RELEASE_OUT", unset = "")
 stopifnot(nzchar(out))
 dir.create(out, recursive = TRUE, showWarnings = FALSE)
 out <- normalizePath(out)
+Sys.setenv(NOT_CRAN = "false")
 writeLines(system2("git", c("rev-parse", "HEAD"), stdout = TRUE),
            file.path(out, "SOURCE_SHA"))
 writeLines(capture.output(sessionInfo()), file.path(out, "session-info.txt"))

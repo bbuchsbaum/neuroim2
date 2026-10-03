@@ -33,11 +33,15 @@ jobs:
       - uses: r-lib/actions/setup-tinytex@v2
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck, any::roxygen2, local::.
+          extra-packages: any::rcmdcheck, any::roxygen2@7.3.3, local::.
           needs: check
       - name: Regenerate reference documentation from exact candidate
+        env:
+          RELEASE_OUT: ${{ runner.temp }}/release-evidence
         run: |
+          mkdir -p "$RELEASE_OUT"
           Rscript -e 'roxygen2::roxygenize(".", roclets = c("rd", "namespace"), load_code = roxygen2::load_installed)'
+          git diff -- man NAMESPACE > "$RELEASE_OUT/documentation.patch"
           git diff --exit-code -- man NAMESPACE
       - name: Verify regressions fail on master and pass on candidate
         env:
