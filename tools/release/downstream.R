@@ -33,7 +33,10 @@ for (pkg in revdeps) {
   src <- file.path(out, paste0(pkg, "-source"))
   dir.create(src)
   untar(tarball, exdir = src)
-  desc <- read.dcf(file.path(src, pkg, "DESCRIPTION"))
+  # read.dcf's explicit fields retain absent optional entries as NA, as
+  # package_dependencies requires every requested column to exist.
+  desc <- read.dcf(file.path(src, pkg, "DESCRIPTION"),
+    fields = c("Package", "Depends", "Imports", "LinkingTo", "Suggests"))
   deps <- tools::package_dependencies(pkg, db = desc,
     which = c("Depends", "Imports", "LinkingTo", "Suggests"))[[1]]
   pak::pkg_install(setdiff(deps, c("R", "neuroim2")), ask = FALSE)
