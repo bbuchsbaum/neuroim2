@@ -46,7 +46,8 @@
 Numeric vector of accessed values
 }
 \description{
-Internal method providing linear access to memory-mapped data.
+Returns decoded values from memory-mapped data, applying the source
+slope and intercept exactly once.
 
 Provides linear access to the data across all vectors in the sequence.
 }

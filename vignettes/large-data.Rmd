@@ -11,6 +11,7 @@ output:
     toc_depth: 2.0
 resource_files:
 - albers.css
+- albers-fonts.css
 - albers.js
 - albers-header.inc
 - albers-header.html

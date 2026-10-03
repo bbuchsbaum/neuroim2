@@ -84,7 +84,10 @@ ClusteredNeuroVol <- function(mask, clusters, label_map=NULL, label="") {
 #' @aliases coerce,ClusteredNeuroVol,DenseNeuroVol-method
 #' @title Convert ClusteredNeuroVol to DenseNeuroVol
 #' @description This method converts a ClusteredNeuroVol into an equivalent DenseNeuroVol object.
+#' @usage \S4method{coerce}{ClusteredNeuroVol,DenseNeuroVol}(from, to = "DenseNeuroVol", strict = TRUE)
 #' @param from A \code{\linkS4class{ClusteredNeuroVol}} object to be converted
+#' @param to The target class, \code{"DenseNeuroVol"}.
+#' @param strict Logical; whether to enforce the target class exactly.
 #' @return A \code{\linkS4class{DenseNeuroVol}} object
 #' @examples
 #'

@@ -1096,8 +1096,10 @@ setValidity("DenseNeuroVec", function(object) {
 #'
 #' @slot filemap An object of class \code{mmap} representing the memory-mapped file
 #'   containing the brain image data.
-#' @slot offset An integer representing the byte offset within the memory-mapped file
+#' @slot offset An integer representing the element offset within the memory-mapped file
 #'   where the brain image data starts.
+#' @slot slope Normalized decoding slopes, either scalar or one per volume.
+#' @slot intercept Normalized decoding intercepts, either scalar or one per volume.
 #'
 #' @details
 #' MappedNeuroVec objects use memory-mapped files to store and access large 4D brain
@@ -1130,9 +1132,11 @@ setValidity("DenseNeuroVec", function(object) {
 setClass("MappedNeuroVec",
          slots = c(
            filemap = "mmap",
-           offset = "integer"
+           offset = "integer",
+           slope = "numeric",
+           intercept = "numeric"
          ),
-         prototype = list(label = ""),
+         prototype = list(label = "", slope = 1, intercept = 0),
          contains = c("NeuroVec", "ArrayLike4D"))
 
 #' AbstractSparseNeuroVec Class

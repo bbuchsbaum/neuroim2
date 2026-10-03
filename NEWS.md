@@ -1,4 +1,54 @@
-# neuroim2 0.19.0.9000
+# neuroim2 0.19.1
+
+## Upgrading from CRAN 0.13.0
+
+This release collects the changes recorded below for versions 0.14 through
+0.19.1. It retains the R >= 4.3 requirement. Analyses and plotting code should
+account for these changes:
+
+* The methodless `neuroim2::scale()` generic has been removed. Use
+  `base::scale()` for ordinary matrices and vectors, and `scale_series()`
+  for neuroimaging time series.
+* `gaussian_blur()` now derives its default kernel width from millimetre-scale
+  `sigma` and voxel spacing. Use `window = 1` explicitly to reproduce the old
+  default kernel; use the new default for the requested smoothing width.
+* `as_canonical()` now permutes and flips voxels without interpolation or
+  cropping. `reorient()` also permutes dimensions and spacing. Previously
+  processed images may have lost data; regenerate them from their originals.
+* `conn_comp()` now enforces `local_maxima_dist`. Peak counts and coordinates
+  may change; rerun peak-based analyses and inspect the resulting tables.
+* `SparseNeuroVec()` accepts an explicit matrix `orientation`. For a square
+  matrix returned by `series()`, use `orientation = "time_x_voxels"`.
+* The five `plot_*` helpers return figures visibly and share new slice,
+  crop, palette, threshold and layout defaults. Use `draw = TRUE` to draw
+  immediately and return invisibly. For panel lists from `plot_ortho()`,
+  `plot_edge_overlay()` or `plot_checkerboard()`, replace `draw = FALSE` with
+  `assemble = FALSE`. Recheck saved figures and downstream panel manipulation.
+
+## Documentation checks
+
+The `image()`, `as.raster()` and ClusteredNeuroVol-to-DenseNeuroVol coercion
+help topics now include usage matching their documented arguments.
+
+## Decoded mapped reads and sequence orientation
+
+`MappedNeuroVec` now applies source intensity slope/intercept exactly once,
+including per-volume scaling. Previously mapped access could return stored
+integers while dense and file-backed access returned decoded intensities.
+Re-read mapped inputs and rerun analyses that used scaled images.
+
+`series(NeuroVecSeq, ...)` now preserves time-by-voxel orientation when the
+number of selected voxels equals the number of time points in a component.
+Previously those square blocks were silently transposed, also affecting
+voxel-group reductions. These two correctness fixes are shared with the
+separate 0.20.0 development work; lazy block iteration is not included here.
+
+Sparse `downsample()`, `scale_series()`, arithmetic, `concat()` and coercion
+from `ROIVec` now preserve time-by-voxel orientation when the number of output
+voxels equals the number of time points. The former shape heuristic silently
+transposed those results.
+Internal sparse reads and dense-to-sparse conversions also declare their known
+matrix layout explicitly, avoiding spurious ambiguity warnings.
 
 ## Reproducible soft-alpha overlays (#21)
 

@@ -3,6 +3,9 @@
 \name{as.raster}
 \alias{as.raster}
 \title{Generic Method for Converting Objects to Raster Format}
+\usage{
+as.raster(x, ...)
+}
 \arguments{
 \item{x}{An object to be converted.}
 

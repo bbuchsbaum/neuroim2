@@ -12,7 +12,12 @@ test_that("explicit sparse orientation preserves non-symmetric square series", {
     expect_equal(as.matrix(a), full)
     expect_equal(as.matrix(b), full)
     # Preserve the existing auto convention for square and rectangular input.
-    expect_equal(series(SparseNeuroVec(t(y), sp, mask), ix), y)
+    if (nt == 3L) {
+      expect_warning(auto <- SparseNeuroVec(t(y), sp, mask), "Matrix is square")
+    } else {
+      expect_warning(auto <- SparseNeuroVec(t(y), sp, mask), NA)
+    }
+    expect_equal(series(auto, ix), y)
   }
   expect_error(SparseNeuroVec(matrix(1, 4, 3), NeuroSpace(c(2,2,2,4)), mask,
                              orientation = "voxels_x_time"), "orientation")

@@ -910,7 +910,7 @@ setAs(from="ROIVec", to="SparseNeuroVec",
         dat <- from@.Data
         mask <- array(0, dim(from@space)[1:3])
         mask[coords(from)] <- 1
-        SparseNeuroVec(dat, from@space, mask=mask)
+        SparseNeuroVec(dat, from@space, mask=mask, orientation = "time_x_voxels")
       })
 
 
@@ -932,7 +932,7 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVec", mask="LogicalNeu
 
             vdim <- dim(x)[1:3]
             dat <- as.matrix(x)[mask == TRUE,]
-            bvec <- SparseNeuroVec(dat, space(x), mask)
+            bvec <- SparseNeuroVec(dat, space(x), mask, orientation = "voxels_x_time")
 
           })
 
@@ -954,7 +954,7 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVec", mask="numeric"),
 
 			dat <- as(x, "matrix")[mask,]
 
-			bvec <- SparseNeuroVec(dat, space(x), logivol)
+			bvec <- SparseNeuroVec(dat, space(x), logivol, orientation = "voxels_x_time")
 
 		})
 

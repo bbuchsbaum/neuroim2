@@ -4,8 +4,15 @@
 \alias{as-ClusteredNeuroVol-DenseNeuroVol}
 \alias{coerce,ClusteredNeuroVol,DenseNeuroVol-method}
 \title{Convert ClusteredNeuroVol to DenseNeuroVol}
+\usage{
+\S4method{coerce}{ClusteredNeuroVol,DenseNeuroVol}(from, to = "DenseNeuroVol", strict = TRUE)
+}
 \arguments{
 \item{from}{A \code{\linkS4class{ClusteredNeuroVol}} object to be converted}
+
+\item{to}{The target class, \code{"DenseNeuroVol"}.}
+
+\item{strict}{Logical; whether to enforce the target class exactly.}
 }
 \value{
 A \code{\linkS4class{DenseNeuroVol}} object

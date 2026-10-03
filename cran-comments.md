@@ -1,14 +1,30 @@
-## Resubmission
+## Release candidate 0.19.1 (not submitted)
 
-This is a resubmission. In this version I have:
+This candidate updates CRAN 0.13.0 with the changes recorded in NEWS through
+0.19.1. NEWS includes migration guidance for result-changing smoothing,
+reorientation, local-maxima, mapped scaling, sequence and sparse-result
+orientation, and plotting behavior. Maintainer and license are unchanged.
 
-* Fixed Windows build failure: added `src/Makevars.win` to correctly link TBB libraries without the non-existent `-lRcppParallel` library flag.
-* Fixed PDF manual generation: replaced Unicode characters (Greek letters Δ, σ and symbols ≈, ×, –) in roxygen documentation with ASCII equivalents to resolve LaTeX errors.
+The three help topics reported in the 2026-07-16 CRAN check snapshot now have
+usage sections generated from their roxygen sources: image, as.raster and
+as-ClusteredNeuroVol-DenseNeuroVol.
 
-## R CMD check results
+The nine vignettes share bundled local fonts to keep installed documentation
+below CRAN's general 5 MB limit. All content and styling are retained; the
+preflight checks packaged and installed resources for offline resolution.
 
-0 errors ✔ | 0 warnings ✔ | 0 notes ✔
+## Validation status
 
-Local check:
+Evidence is recorded in dev/cran-release-0.19.1.md and the draft PR's exact-head
+workflow artifacts. Replace this status with final observed results before
+any submission; the obsolete 0.8.5 check claim has been removed.
 
-- `R CMD check --as-cran neuroim2_0.8.5.tar.gz` (macOS Sonoma 14.3, R 4.5.1).
+Full local R CMD check has not run: the connected Mac has less than the 20 GiB
+free space required by its repository instructions. The release-preflight
+workflow builds vignettes and the PDF manual and runs R CMD check --as-cran on
+the retained source tarball using Linux R-devel. The regular CI matrix also
+checks macOS, Windows and Linux.
+
+The downstream workflow compares current CRAN reverse dependencies against
+the CRAN baseline and candidate and runs pinned fmridataset integration tests.
+Winbuilder, R-hub, macbuilder and CRAN submission have not been requested.
