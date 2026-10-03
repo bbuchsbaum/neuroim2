@@ -942,20 +942,29 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVec", mask="LogicalNeu
 #' @param x A DenseNeuroVec object to convert to a sparse representation.
 #' @param mask A numeric vector representing the mask to apply during conversion.
 #' @return A SparseNeuroVec object resulting from the conversion.
+#' @details For a \code{DenseNeuroVec}, numeric masks use R's vector-indexing
+#'   rules: positive indices retain voxels, negative indices exclude voxels,
+#'   and zeros are ignored. Repeated indices retain a voxel once. Retained
+#'   voxels are stored in ascending spatial-index order, regardless of the
+#'   order supplied in \code{mask}. An empty selection produces an all-zero
+#'   sparse image with the original dimensions. Missing or non-finite indices
+#'   and positive indices outside the spatial extent are rejected.
 #' @export
 #' @rdname as.sparse-methods
 setMethod(f="as.sparse", signature=signature(x="DenseNeuroVec", mask="numeric"),
 		def=function(x, mask) {
 			vdim <- dim(x)[1:3]
-			m <- array(0, vdim)
-			m[mask] <- TRUE
-
+			m <- array(FALSE, vdim)
+			selected <- seq_along(m)[mask]
+			if (anyNA(selected)) {
+				cli::cli_abort("{.arg mask} must select known voxel indices within the spatial extent of {.arg x}.")
+			}
+			m[selected] <- TRUE
 			logivol <- LogicalNeuroVol(m, drop_dim(space(x)))
-
-			dat <- as(x, "matrix")[mask, , drop = FALSE]
-
-			bvec <- SparseNeuroVec(dat, space(x), logivol, orientation = "voxels_x_time")
-
+			# Read rows in the same ascending spatial order as the support map,
+			# including repeated, excluded and empty selections.
+			dat <- as(x, "matrix")[m, , drop = FALSE]
+			SparseNeuroVec(dat, space(x), logivol, orientation = "voxels_x_time")
 		})
 
 #' @rdname apply_mask-methods

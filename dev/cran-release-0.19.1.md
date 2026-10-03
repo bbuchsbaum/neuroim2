@@ -6,22 +6,26 @@ merge, tag, release or deploy.
 
 ## Scope and version
 
-Base: `f1f7f00264b0566beb73d17654ff1e874e66bf3c` on remote master.
-CRAN's package page reports 0.13.0 (published 2026-04-16); its retrieved check
-snapshot is dated 2026-07-16 and is not evidence for this candidate.
+Initial base: `f1f7f00264b0566beb73d17654ff1e874e66bf3c` on remote master.
+PR #46 and the separate website-theme PR #45 were subsequently merged by
+another actor. The follow-up candidate in PR #47 starts from current master
+`f11f6469b32e9143e4a605c8aa1aa5e47ac9a80a`; this task performed no merge.
+CRAN's package page reports 0.13.0 (published 2026-04-16). Its current check
+snapshot is dated 2026-10-03 and is not evidence for this candidate.
 
 0.19.1 advances the existing master development version 0.19.0.9000 and keeps
 0.20.0 available for the separate lazy-iteration feature branch. It does not
 imply a small change from CRAN 0.13.0: NEWS retains the intermediate history
-and adds an upgrade guide. Bradley should confirm this provisional version
-before submission.
+and adds an upgrade guide. The coordinating parent owns the separately
+authorized submission of 0.19.1 after final validation and independent review.
 
 The local `feat/plot-hillclimb` commit
 `b7b874c4aee9b656ae8bf333f3c0a13fc7274f9b` also contains `vec_blocks()` and
 accessor expansion. Only the reproduced mapped-scaling and square-sequence
 correctness fixes, their generated help and regression fixtures are selectively
 backported here. No new iterator is exported. The original branch is unchanged.
-Website-theme PR #45 is separate and has not been merged.
+Website-theme PR #45 was kept separate during release preparation; its changes
+are now in the base because it was merged independently.
 
 Additional isolated reproductions exposed the same square-matrix ambiguity
 in sparse downsampling, scaling, arithmetic, concatenation and ROI conversion.
@@ -32,7 +36,12 @@ Independent review also reproduced a baseline dimension-dropping bug in both
 dense-to-sparse conversion methods. Matrix subsetting now preserves dimensions
 for a single selected voxel or a single time point, with numeric indices and
 LogicalNeuroVol masks. This changes two subsetting expressions and retains the
-existing matrix-orientation contract.
+existing matrix-orientation contract. Follow-up independent review found that
+unsorted numeric masks could assign values to the wrong voxels. Numeric
+conversion now derives both data order and support from the same logical
+selection. Unsorted and repeated indices, negative exclusions, zeros and empty
+selections are tested against independent expected voxel values and equivalent
+logical masks. Invalid indices are rejected instead of silently disappearing.
 
 ## Reproduce checks and submission artifact
 
@@ -88,7 +97,8 @@ The preflight also validates both the built tarball's and installed package's
 documentation: every resource resolves offline, shared assets match source
 bytes, and the complete documentation directory is below 5 MB. It records
 these checks and measured sizes in `vignette-assets.csv`. This is a package
-size fix; no theme, article content or PR #45 changes are included.
+size fix independent of the separately merged theme work; article content is
+unchanged.
 
 The focused before/after script requires all seven independent regression cases
 to fail on an isolated build of the base SHA and pass on the candidate. The
@@ -126,7 +136,7 @@ maintainer coordination before submission; no communications are sent here.
 ## Evidence status
 
 The authoritative completion record is the exact-head results and artifact
-links in [draft PR #46](https://github.com/bbuchsbaum/neuroim2/pull/46). Match
+links in [draft PR #47](https://github.com/bbuchsbaum/neuroim2/pull/47). Match
 its head SHA to each workflow and the artifact's `SOURCE_SHA`; results from a
 superseded commit do not establish the final candidate's status.
 
@@ -140,8 +150,10 @@ initial evidence; the workflow's isolated source installs establish the seven
 before/after package comparisons. Coverage, test counts and any check notes
 belong in the PR evidence record after the final workflows finish.
 
-Release decision: no-go for submission until workflow results and any findings
-are reviewed and the version is confirmed. Draft PR review can proceed.
+Release decision: no-go for submission until the final candidate's workflow
+results and independent review findings are reconciled. Earlier passing
+artifacts are superseded whenever runtime code changes. Coverage against the
+internal 90% target is reported separately; it is not a CRAN policy gate.
 
 Policy references checked during preparation:
 

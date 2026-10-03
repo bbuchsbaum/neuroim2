@@ -4,9 +4,10 @@ This candidate updates CRAN 0.13.0 with the changes recorded in NEWS through
 0.19.1. NEWS includes migration guidance for result-changing smoothing,
 reorientation, local-maxima, mapped scaling, sequence and sparse-result
 orientation, and plotting behavior. Dense-to-sparse conversions also preserve
-singleton voxel/time dimensions. Maintainer and license are unchanged.
+singleton voxel/time dimensions and keep values at their original voxels for
+unsorted or repeated numeric masks. Maintainer and license are unchanged.
 
-The three help topics reported in the 2026-07-16 CRAN check snapshot now have
+The three help topics reported in the 2026-10-03 CRAN check snapshot now have
 usage sections generated from their roxygen sources: image, as.raster and
 as-ClusteredNeuroVol-DenseNeuroVol.
 
@@ -29,4 +30,7 @@ checks macOS, Windows and Linux.
 
 The downstream workflow compares current CRAN reverse dependencies against
 the CRAN baseline and candidate and runs pinned fmridataset integration tests.
-Winbuilder, R-hub, macbuilder and CRAN submission have not been requested.
+Winbuilder, R-hub and macbuilder have not been run. The coordinating parent
+owns the separately authorized CRAN submission after final validation and
+independent review. Use the final handoff's submission comments and exact
+checked tarball; do not reuse results from a superseded candidate.

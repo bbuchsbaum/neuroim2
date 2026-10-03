@@ -56,6 +56,13 @@ with one time point or a mask selecting one voxel. Numeric voxel indices and
 series contracts. Previously these singleton cases errored after dropping the
 selected data to a vector.
 
+Numeric masks also retain each value at its original voxel when indices are
+unsorted or repeated. Previously unsorted indices could silently assign values
+to different voxels, and repeated indices could fail a cardinality check.
+Numeric and equivalent logical masks now agree, including negative exclusions,
+zeros and empty selections. Missing, non-finite and positive out-of-bounds
+indices are rejected. Recompute sparse conversions made with unsorted masks.
+
 ## Reproducible soft-alpha overlays (#21)
 
 `soft_alpha_params()` is now exported. It validates its inputs, accepts an
