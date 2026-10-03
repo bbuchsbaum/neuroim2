@@ -11,8 +11,13 @@ writeLines(capture.output(sessionInfo()), file.path(out, "session-info.txt"))
 # Both options are explicit: no --no-manual or --no-build-vignettes shortcuts.
 tarball <- pkgbuild::build(".", dest_path = out, vignettes = TRUE,
                           manual = TRUE, quiet = FALSE)
-writeLines(system2("sha256sum", shQuote(tarball), stdout = TRUE),
-           file.path(out, "SHA256SUMS"))
+checksum <- if (nzchar(Sys.which("sha256sum"))) {
+  system2("sha256sum", shQuote(tarball), stdout = TRUE)
+} else {
+  system2("shasum", c("-a", "256", shQuote(tarball)), stdout = TRUE)
+}
+stopifnot(is.null(attr(checksum, "status")), length(checksum) == 1L)
+writeLines(checksum, file.path(out, "SHA256SUMS"))
 result <- rcmdcheck::rcmdcheck(tarball, args = "--as-cran",
                              check_dir = file.path(out, "check"),
                              error_on = "never")

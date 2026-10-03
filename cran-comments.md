@@ -2,8 +2,8 @@
 
 This candidate updates CRAN 0.13.0 with the changes recorded in NEWS through
 0.19.1. NEWS includes migration guidance for result-changing smoothing,
-reorientation, local-maxima, mapped scaling, sequence orientation and plotting
-behavior. Maintainer and license are unchanged.
+reorientation, local-maxima, mapped scaling, sequence and sparse-result
+orientation, and plotting behavior. Maintainer and license are unchanged.
 
 The three help topics reported in the 2026-07-16 CRAN check snapshot now have
 usage sections generated from their roxygen sources: image, as.raster and

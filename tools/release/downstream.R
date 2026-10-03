@@ -6,6 +6,7 @@ dir.create(out, recursive = TRUE, showWarnings = FALSE)
 out <- normalizePath(out)
 repos <- c(CRAN = "https://cloud.r-project.org")
 options(repos = repos, timeout = 600)
+Sys.setenv(NOT_CRAN = "false")
 db <- available.packages(repos = repos, type = "source")
 write.csv(db, file.path(out, "cran-package-index.csv"))
 revdeps <- tools::package_dependencies("neuroim2", db, reverse = TRUE,

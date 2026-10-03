@@ -22,6 +22,11 @@ correctness fixes, their generated help and regression fixtures are selectively
 backported here. No new iterator is exported. The original branch is unchanged.
 Website-theme PR #45 is separate and has not been merged.
 
+Additional isolated reproductions exposed the same square-matrix ambiguity
+in sparse downsampling, scaling, arithmetic, concatenation and ROI conversion.
+Those result producers now state their known matrix orientation explicitly;
+the public constructor still warns when callers supply ambiguous square data.
+
 ## Reproduce checks and submission artifact
 
 Use a clean checkout of the reviewed candidate SHA with current R-devel,
@@ -56,7 +61,7 @@ check directory, session information and parsed results identify what was
 checked. The workflow retains these as `release-source-<head SHA>` for 30 days.
 Rebuild and rerun checks if that artifact expires or the source changes.
 
-The focused before/after script requires both independent regression fixtures
+The focused before/after script requires all seven independent regression cases
 to fail on an isolated build of the base SHA and pass on the candidate. The
 full suite exercises dense, sparse, BigNeuroVec, mapped, file-backed and
 sequence backends, FLOAT/SHORT/UBYTE decoding, affine/NIfTI geometry,
@@ -80,10 +85,17 @@ maintainer coordination before submission; no communications are sent here.
 
 ## Evidence status
 
-Pending exact-head workflow completion. Full local check is blocked by the
-disk-space guard (18 GiB free at the start, required minimum 20 GiB). Preliminary
-small mixed-source reproductions confirmed the two defects, but only the
-workflow's isolated builds establish the before/after package evidence.
+The authoritative completion record is the exact-head results and artifact
+links in [draft PR #46](https://github.com/bbuchsbaum/neuroim2/pull/46). Match
+its head SHA to each workflow and the artifact's `SOURCE_SHA`; results from a
+superseded commit do not establish the final candidate's status.
+
+Full local check is blocked by the disk-space guard (18 GiB free at the start,
+required minimum 20 GiB). Local validation includes a 279-topic Rd audit and a
+successful 257-page PDF manual. Small mixed-source reproductions provided
+initial evidence; the workflow's isolated source installs establish the seven
+before/after package comparisons. Coverage, test counts and any check notes
+belong in the PR evidence record after the final workflows finish.
 
 Release decision: no-go for submission until workflow results and any findings
 are reviewed and the version is confirmed. Draft PR review can proceed.

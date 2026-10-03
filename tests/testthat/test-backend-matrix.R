@@ -20,7 +20,10 @@ test_that("sparse producers preserve non-symmetric square time-by-voxel values",
                                     mask, orientation = "time_x_voxels")
   x <- make(input)
   expect_warning(scaled <- scale_series(x, TRUE, TRUE), NA)
-  expect_equal(series(scaled, vox), unname(base::scale(input)))
+  # Compare the data matrix; base::scale also attaches its centering/scaling
+  # parameters, which are not part of the NeuroVec series return contract.
+  expected_scaled <- matrix(as.numeric(base::scale(input)), nrow(input), ncol(input))
+  expect_equal(series(scaled, vox), expected_scaled)
   expect_warning(sum <- x + x, NA)
   expect_equal(series(sum, vox), input * 2)
   a <- make(input[1, , drop = FALSE])
