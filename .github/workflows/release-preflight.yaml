@@ -38,16 +38,19 @@ jobs:
           command -v makeindex
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::pkgbuild, any::roxygen2@7.3.3, local::.
+          extra-packages: any::pkgbuild, any::roxygen2, local::.
           needs: check
+      - name: Install the matching roxygen generator in an isolated library
+        run: |
+          Rscript -e 'lib <- file.path(Sys.getenv("RUNNER_TEMP"), "roxygen-7.3.3"); dir.create(lib, showWarnings = FALSE); pak::pkg_install("url::https://cran.r-project.org/src/contrib/Archive/roxygen2/roxygen2_7.3.3.tar.gz", lib = lib, dependencies = NA, ask = FALSE)'
       - name: Regenerate reference documentation from exact candidate
         env:
           RELEASE_OUT: ${{ runner.temp }}/release-evidence
         run: |
           mkdir -p "$RELEASE_OUT"
-          Rscript -e 'roxygen2::roxygenize(".", roclets = c("rd", "namespace"), load_code = roxygen2::load_installed)'
-          git diff -- man NAMESPACE > "$RELEASE_OUT/documentation.patch"
-          git diff --exit-code -- man NAMESPACE
+          Rscript -e '.libPaths(c(file.path(Sys.getenv("RUNNER_TEMP"), "roxygen-7.3.3"), .libPaths())); stopifnot(as.character(packageVersion("roxygen2")) == "7.3.3"); roxygen2::roxygenize(".", roclets = c("rd", "namespace"), load_code = roxygen2::load_installed)'
+          git diff -- DESCRIPTION man NAMESPACE > "$RELEASE_OUT/documentation.patch"
+          git diff --exit-code -- DESCRIPTION man NAMESPACE
       - name: Check the PDF manual before the expensive package build
         env:
           RELEASE_OUT: ${{ runner.temp }}/release-evidence
