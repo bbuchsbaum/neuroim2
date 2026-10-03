@@ -36,7 +36,8 @@ free space on the connected Mac. From the checkout root:
 Use roxygen2 7.3.3, matching DESCRIPTION, for regeneration; newer roxygen2
 releases change unrelated generated output and are not part of this release.
 The LaTeX installation must include Courier, Helvetica and Times metrics
-(`tlmgr install courier helvetic times` for TinyTeX). The workflow checks the
+and MakeIndex (`tlmgr install courier helvetic times makeindex` for TinyTeX).
+The workflow checks the
 manual early so missing TeX dependencies fail before the long vignette build.
 
 ```sh
