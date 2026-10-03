@@ -24,3 +24,14 @@ Note: checking HTML version of manual ... NOTE
  Skipping checking math rendering: package 'V8' unavailable
 Reason: V8 supplies optional HTML math rendering validation. The complete PDF
  manual and all vignettes must still build, and win-builder must pass.
+
+Id: rhub-ubsan-toolchain-fortify
+Services: rhub-clang-ubsan
+Note: checking compilation flags used ... NOTE
+ Compilation used the following non-portable flag(s):
+   ‘-Wp,-D_FORTIFY_SOURCE=3’
+Reason: The official R-hub clang-ubsan image supplies this flag in its R CMD
+ config CFLAGS/CXXFLAGS/CXX17FLAGS. It is absent from package Makevars.
+ Retain the image's instrumentation and hardening. This exception applies
+ only to this exact flag NOTE on the sanitizer service; ordinary R-devel
+ and win-builder must not report it. Sanitizer findings remain failures.

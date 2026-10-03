@@ -5,7 +5,14 @@ review_check <- function(errors, warnings, notes, elapsed, service,
                          approvals = "tools/release/reviewed-notes.dcf") {
   stopifnot(length(service) == 1L, nzchar(service))
   limit <- 600
-  normalize <- function(x) unname(gsub("[[:space:]]+", " ", trimws(x)))
+  normalize <- function(x) {
+    # R CMD check can decorate a stage heading with CPU/elapsed timings.
+    # Strip only that heading annotation; the NOTE body remains exact and
+    # complete-check elapsed time is reviewed independently below.
+    x <- sub("^(checking [^\\n]+ \\.\\.\\.) \\[[0-9.]+[smh]/[0-9.]+[smh]\\] NOTE(\\n|$)",
+             "\\1 NOTE\\2", x, perl = TRUE)
+    unname(gsub("[[:space:]]+", " ", trimws(x)))
+  }
   approved <- read.dcf(approvals)
   note_ids <- character()
   unreviewed <- character()

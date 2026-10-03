@@ -24,9 +24,13 @@ cost. `tools/release/profile-vignettes.R` and the runtime-profile workflow retai
 per-chunk timings and R profiles on Linux and Windows R-devel.
 
 The release gate now requires complete checks within 600 elapsed seconds and
-rejects every error, warning and unreviewed NOTE. The only listed exceptions in
+rejects every error, warning and unreviewed NOTE. The listed exceptions in
 `tools/release/reviewed-notes.dcf` are exact missing optional HTML-tool notes on
-local/Linux runners; they do not apply to win-builder. No timing note is allowed.
+local/Linux runners and the official R-hub UBSan toolchain's injected
+`-Wp,-D_FORTIFY_SOURCE=3` flag. The latter is verified in the image's R CMD
+config, is absent from package Makevars and applies only to `clang-ubsan`.
+None of these exceptions applies to win-builder. Stage-heading timing
+annotations are normalized; NOTE bodies remain exact. No timing note is allowed.
 `test-check-policy.R` includes the rejected 37-minute result as a regression case.
 The measured interval covers the whole `R CMD check`, including installation,
 examples, tests, all vignette rebuilding and PDF/HTML manuals.

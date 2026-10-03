@@ -168,14 +168,19 @@ jobs:
       - name: Prepare the container's PDF manual tools
         run: |
           if command -v tlmgr >/dev/null 2>&1; then
-            tlmgr install courier helvetic times makeindex
+            tlmgr install courier helvetic times makeindex inconsolata
           else
             apt-get update
-            DEBIAN_FRONTEND=noninteractive apt-get install -y texlive-latex-base texlive-latex-recommended texlive-fonts-recommended
+            DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends texlive-latex-base texlive-latex-recommended texlive-fonts-recommended texlive-fonts-extra
           fi
           command -v pdflatex
           command -v makeindex
           kpsewhich pcrr8t.tfm
+          kpsewhich inconsolata.sty
+      - name: Verify complete PDF manual in the R-hub environment
+        run: |
+          mkdir -p "$RELEASE_OUT"
+          R CMD Rd2pdf --no-preview --force --output="$RELEASE_OUT/rhub-manual-smoke.pdf" .
       - uses: actions/download-artifact@v4
         with:
           name: release-build-${{ github.event.pull_request.head.sha }}
