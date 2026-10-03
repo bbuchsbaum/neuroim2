@@ -931,7 +931,7 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVec", mask="LogicalNeu
             }
 
             vdim <- dim(x)[1:3]
-            dat <- as.matrix(x)[mask == TRUE,]
+            dat <- as.matrix(x)[mask == TRUE, , drop = FALSE]
             bvec <- SparseNeuroVec(dat, space(x), mask, orientation = "voxels_x_time")
 
           })
@@ -952,7 +952,7 @@ setMethod(f="as.sparse", signature=signature(x="DenseNeuroVec", mask="numeric"),
 
 			logivol <- LogicalNeuroVol(m, drop_dim(space(x)))
 
-			dat <- as(x, "matrix")[mask,]
+			dat <- as(x, "matrix")[mask, , drop = FALSE]
 
 			bvec <- SparseNeuroVec(dat, space(x), logivol, orientation = "voxels_x_time")
 
