@@ -141,7 +141,7 @@ jobs:
     container:
       image: ${{ matrix.config.container }}
     env:
-      RELEASE_OUT: ${{ github.workspace }}/../release-evidence
+      RELEASE_OUT: /tmp/release-evidence
       RELEASE_CHECK_SERVICE: rhub-${{ matrix.config.label }}
       RHUB_ACTIONS_CHECK_SCRIPT: Rscript tools/release/preflight.R
     steps:
@@ -154,9 +154,17 @@ jobs:
       - uses: r-hub/actions/setup-deps@v1
         with:
           job-config: ${{ matrix.config.job-config }}
-      - uses: r-lib/actions/setup-tinytex@v2
-      - name: Install PDF manual fonts
-        run: tlmgr install courier helvetic times makeindex
+      - name: Prepare the container's PDF manual tools
+        run: |
+          if command -v tlmgr >/dev/null 2>&1; then
+            tlmgr install courier helvetic times makeindex
+          else
+            apt-get update
+            DEBIAN_FRONTEND=noninteractive apt-get install -y texlive-latex-base texlive-latex-recommended texlive-fonts-recommended
+          fi
+          command -v pdflatex
+          command -v makeindex
+          kpsewhich pcrr8t.tfm
       - uses: actions/download-artifact@v4
         with:
           name: release-build-${{ github.event.pull_request.head.sha }}
