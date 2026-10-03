@@ -9,6 +9,10 @@ The three help topics reported in the 2026-07-16 CRAN check snapshot now have
 usage sections generated from their roxygen sources: image, as.raster and
 as-ClusteredNeuroVol-DenseNeuroVol.
 
+The nine vignettes share bundled local fonts to keep installed documentation
+below CRAN's general 5 MB limit. All content and styling are retained; the
+preflight checks packaged and installed resources for offline resolution.
+
 ## Validation status
 
 Evidence is recorded in dev/cran-release-0.19.1.md and the draft PR's exact-head

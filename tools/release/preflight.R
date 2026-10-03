@@ -18,9 +18,20 @@ checksum <- if (nzchar(Sys.which("sha256sum"))) {
 }
 stopifnot(is.null(attr(checksum, "status")), length(checksum) == 1L)
 writeLines(checksum, file.path(out, "SHA256SUMS"))
+source("tools/release/check-vignette-assets.R")
+unpacked <- file.path(out, "source-docs")
+dir.create(unpacked)
+untar(tarball, files = grep("^neuroim2/inst/doc/", untar(tarball, list = TRUE),
+                           value = TRUE), exdir = unpacked)
+source_assets <- check_vignette_assets(file.path(unpacked, "neuroim2/inst/doc"))
 result <- rcmdcheck::rcmdcheck(tarball, args = "--as-cran",
                              check_dir = file.path(out, "check"),
                              error_on = "never")
 saveRDS(result[c("errors", "warnings", "notes")], file.path(out, "results.rds"))
 writeLines(capture.output(print(result)), file.path(out, "results.txt"))
 stopifnot(length(result$errors) == 0L, length(result$warnings) == 0L)
+installed_assets <- check_vignette_assets(
+  file.path(out, "check/neuroim2.Rcheck/neuroim2/doc"))
+write.csv(rbind(source_assets, installed_assets),
+          file.path(out, "vignette-assets.csv"), row.names = FALSE)
+print(rbind(source_assets, installed_assets))

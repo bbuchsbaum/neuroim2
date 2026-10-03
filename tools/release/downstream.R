@@ -27,6 +27,14 @@ versions <- vapply(libs, function(lib) as.character(packageVersion("neuroim2", l
 writeLines(paste(c("baseline", "candidate"), versions), file.path(out, "versions.txt"))
 stopifnot(versions[2] == read.dcf("DESCRIPTION")[1, "Version"])
 
+# rcmdcheck includes elapsed time in diagnostic headers. Compare the diagnostic
+# itself, while retaining the raw, timed logs as evidence.
+normalize_diagnostics <- function(items) vapply(items, function(item) {
+  lines <- strsplit(item, "\n", fixed = TRUE)[[1]]
+  lines[1] <- sub(" \\[[^]]+\\] (WARNING|ERROR)$", " \\1", lines[1])
+  paste(lines, collapse = "\n")
+}, character(1), USE.NAMES = FALSE)
+
 new_failures <- character()
 for (pkg in revdeps) {
   tarball <- download(pkg)
@@ -50,7 +58,8 @@ for (pkg in revdeps) {
   # Full logs retain existing findings. New errors/warnings fail this gate.
   before <- c(checks[[1]]$errors, checks[[1]]$warnings)
   after <- c(checks[[2]]$errors, checks[[2]]$warnings)
-  new_failures <- c(new_failures, setdiff(after, before))
+  new_failures <- c(new_failures, setdiff(normalize_diagnostics(after),
+                                        normalize_diagnostics(before)))
 }
 
 # A pinned, narrow integration check complements the complete CRAN checks.
@@ -70,8 +79,12 @@ lab_result <- callr::r(function(src, lib, version, log) {
   stopifnot(as.character(packageVersion("neuroim2")) == version)
   sink(log, split = TRUE)
   on.exit(sink())
-  testthat::test_local(src, filter = "nifti-array-source|feature-space",
+  results <- testthat::test_local(src, filter = "nifti-array-source|feature-space",
                        reporter = "summary", stop_on_failure = TRUE)
+  summary <- as.data.frame(results)
+  write.csv(summary[, c("file", "test", "failed", "skipped", "error", "warning", "passed")],
+            sub("[.]txt$", "-counts.csv", log), row.names = FALSE)
+  print(colSums(summary[, c("failed", "skipped", "error", "warning", "passed")]))
   TRUE
 }, args = list(lab_src, libs[2], versions[2], file.path(out, "fmridataset-tests.txt")),
    show = TRUE)

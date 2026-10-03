@@ -66,6 +66,17 @@ check directory, session information and parsed results identify what was
 checked. The workflow retains these as `release-source-<head SHA>` for 30 days.
 Rebuild and rerun checks if that artifact expires or the source changes.
 
+The nine HTML vignettes share their unchanged local font files rather than
+embedding the same fonts nine times. Plots, scripts and layout CSS remain
+embedded. `vignettes/.install_extras` packages the shared font stylesheet,
+all seven fonts and their license. A scratch two-vignette render verified
+identical scripts, images and non-font CSS and distinct embedded figures.
+The preflight also validates both the built tarball's and installed package's
+documentation: every resource resolves offline, shared assets match source
+bytes, and the complete documentation directory is below 5 MB. It records
+these checks and measured sizes in `vignette-assets.csv`. This is a package
+size fix; no theme, article content or PR #45 changes are included.
+
 The focused before/after script requires all seven independent regression cases
 to fail on an isolated build of the base SHA and pass on the candidate. The
 full suite exercises dense, sparse, BigNeuroVec, mapped, file-backed and
@@ -80,6 +91,9 @@ discovers direct Depends/Imports/LinkingTo/Suggests reverse dependencies and
 checks them with isolated baseline and candidate libraries. It requires bidser
 to appear, retains existing findings, and fails on newly observed errors or
 warnings. These checks omit the downstream PDF manuals.
+The comparison removes elapsed times from diagnostic headers only; complete
+raw diagnostics remain in the artifacts. Rechecking a current CRAN package
+can produce an existing incoming-feasibility warning in both versions.
 
 It also runs the `nifti-array-source` and `feature-space` tests from fmridataset
 `ef141af6623b699168fa4329f304992c8b782ed0`. This is focused lab integration,
