@@ -27,6 +27,12 @@ in sparse downsampling, scaling, arithmetic, concatenation and ROI conversion.
 Those result producers now state their known matrix orientation explicitly;
 the public constructor still warns when callers supply ambiguous square data.
 
+Independent review also reproduced a baseline dimension-dropping bug in both
+dense-to-sparse conversion methods. Matrix subsetting now preserves dimensions
+for a single selected voxel or a single time point, with numeric indices and
+LogicalNeuroVol masks. This changes two subsetting expressions and retains the
+existing matrix-orientation contract.
+
 ## Reproduce checks and submission artifact
 
 Use a clean checkout of the reviewed candidate SHA with current R-devel,
@@ -79,7 +85,10 @@ size fix; no theme, article content or PR #45 changes are included.
 
 The focused before/after script requires all seven independent regression cases
 to fail on an isolated build of the base SHA and pass on the candidate. The
-full suite exercises dense, sparse, BigNeuroVec, mapped, file-backed and
+singleton-conversion probe separately exercises 32 numeric/logical-mask cases:
+14 singleton cases fail on master and 18 controls pass; all 32 must pass on
+the candidate. Its logs are retained alongside the other regression evidence.
+The full suite exercises dense, sparse, BigNeuroVec, mapped, file-backed and
 sequence backends, FLOAT/SHORT/UBYTE decoding, affine/NIfTI geometry,
 smoothing, resampling and plot structure. Visual reference snapshots retain
 the existing opt-in environment guard; a green check does not claim those ran.
@@ -109,9 +118,12 @@ links in [draft PR #46](https://github.com/bbuchsbaum/neuroim2/pull/46). Match
 its head SHA to each workflow and the artifact's `SOURCE_SHA`; results from a
 superseded commit do not establish the final candidate's status.
 
-Full local check is blocked by the disk-space guard (18 GiB free at the start,
-required minimum 20 GiB). Local validation includes a 279-topic Rd audit and a
-successful 257-page PDF manual. Small mixed-source reproductions provided
+The initial full local check was blocked by the disk-space guard (18 GiB free,
+required minimum 20 GiB); full release checks run on GitHub. Local validation
+includes a 279-topic Rd audit and a successful 257-page PDF manual. After free
+space recovered above the guard, the singleton fix was installed into an
+isolated local library for focused regression and independent runtime probes.
+Small mixed-source reproductions provided
 initial evidence; the workflow's isolated source installs establish the seven
 before/after package comparisons. Coverage, test counts and any check notes
 belong in the PR evidence record after the final workflows finish.

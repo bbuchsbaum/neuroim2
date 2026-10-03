@@ -50,6 +50,12 @@ transposed those results.
 Internal sparse reads and dense-to-sparse conversions also declare their known
 matrix layout explicitly, avoiding spurious ambiguity warnings.
 
+`as.sparse()` now preserves matrix dimensions when converting a `DenseNeuroVec`
+with one time point or a mask selecting one voxel. Numeric voxel indices and
+`LogicalNeuroVol` masks retain the same voxel-by-time matrix and time-by-voxel
+series contracts. Previously these singleton cases errored after dropping the
+selected data to a vector.
+
 ## Reproducible soft-alpha overlays (#21)
 
 `soft_alpha_params()` is now exported. It validates its inputs, accepts an
