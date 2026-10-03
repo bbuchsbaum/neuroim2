@@ -1,7 +1,8 @@
 # CRAN release candidate 0.19.1
 
-Review candidate only; do not submit, merge, tag, release or deploy as part of
-this preparation.
+The preparation task produces a checked candidate. The coordinating parent
+thread owns any separately authorized CRAN upload; this task does not submit,
+merge, tag, release or deploy.
 
 ## Scope and version
 
@@ -35,7 +36,8 @@ existing matrix-orientation contract.
 
 ## Reproduce checks and submission artifact
 
-Use a clean checkout of the reviewed candidate SHA with current R-devel,
+Use a clean checkout of the reviewed candidate SHA with current release R
+for the source build and current R-devel for the tarball check,
 R package dependencies, Pandoc, a working LaTeX installation and at least 20 GiB
 free space on the connected Mac. From the checkout root:
 
@@ -54,7 +56,10 @@ Rscript -e 'roxygen2::roxygenize(".", roclets=c("rd", "namespace"), load_code=ro
 git diff --exit-code -- man NAMESPACE
 R CMD Rd2pdf --no-preview --force --output="$RELEASE_OUT/neuroim2-manual.pdf" .
 Rscript tools/release/baseline.R
+Rscript tools/release/build-source.R
+# Switch to a separate R-devel installation and dependency library for this step.
 Rscript tools/release/preflight.R
+# Use current release R for downstream comparisons.
 export DOWNSTREAM_OUT="$(mktemp -d)"
 Rscript tools/release/downstream.R
 ```
@@ -65,10 +70,12 @@ with `R_LIBS_USER` pointing to a newly created temporary directory). The workflo
 does this via `setup-r-dependencies`'s `local::.` entry. Do not use a different
 installed neuroim2 version for those checks.
 
-`preflight.R` uses `pkgbuild::build(vignettes=TRUE, manual=TRUE)` and then
-`rcmdcheck::rcmdcheck(tarball, args="--as-cran")`. The uploadable artifact is
+`build-source.R` uses `pkgbuild::build(vignettes=TRUE, manual=TRUE)` with release
+R. `preflight.R` checks the recorded source SHA and tarball checksum, then runs
+`rcmdcheck::rcmdcheck(tarball, args="--as-cran")` with R-devel. Separate CI jobs
+keep their R libraries isolated. The uploadable artifact is
 `neuroim2_0.19.1.tar.gz` in RELEASE_OUT; `SOURCE_SHA`, `SHA256SUMS`, the complete
-check directory, session information and parsed results identify what was
+check directory, both build/check session records and parsed results identify what was
 checked. The workflow retains these as `release-source-<head SHA>` for 30 days.
 Rebuild and rerun checks if that artifact expires or the source changes.
 

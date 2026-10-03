@@ -16,7 +16,7 @@ env:
   _R_CHECK_LIMIT_CORES_: true
 
 jobs:
-  source-check:
+  source-build:
     if: startsWith(github.head_ref, 'release/cran-')
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -28,7 +28,7 @@ jobs:
       - uses: r-lib/actions/setup-pandoc@v2
       - uses: r-lib/actions/setup-r@v2
         with:
-          r-version: devel
+          r-version: release
           use-public-rspm: true
       - uses: r-lib/actions/setup-tinytex@v2
       - name: Install PDF manual fonts
@@ -38,7 +38,7 @@ jobs:
           command -v makeindex
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck, any::roxygen2@7.3.3, local::.
+          extra-packages: any::pkgbuild, any::roxygen2@7.3.3, local::.
           needs: check
       - name: Regenerate reference documentation from exact candidate
         env:
@@ -58,11 +58,52 @@ jobs:
         env:
           RELEASE_OUT: ${{ runner.temp }}/release-evidence
         run: Rscript tools/release/baseline.R
-      - name: Full source build, manual, vignettes and CRAN check
+      - name: Build submission tarball with release R, manual and vignettes
+        env:
+          RELEASE_OUT: ${{ runner.temp }}/release-evidence
+        run: Rscript tools/release/build-source.R
+      - name: Preserve release-built tarball and build evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-build-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/release-evidence
+          retention-days: 30
+
+
+  source-check:
+    if: startsWith(github.head_ref, 'release/cran-')
+    needs: source-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: devel
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-tinytex@v2
+      - name: Install PDF manual fonts
+        run: |
+          tlmgr install courier helvetic times makeindex
+          kpsewhich pcrr8t.tfm
+          command -v makeindex
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck, local::.
+          needs: check
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-build-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/release-evidence
+      - name: Check exact release-built tarball with R-devel, including manual and vignettes
         env:
           RELEASE_OUT: ${{ runner.temp }}/release-evidence
         run: Rscript tools/release/preflight.R
-      - name: Preserve source tarball and check evidence
+      - name: Preserve checked source tarball and check evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:

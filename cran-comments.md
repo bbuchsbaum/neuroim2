@@ -23,8 +23,8 @@ any submission; the obsolete 0.8.5 check claim has been removed.
 Full local R CMD check has not run: the initial preflight was blocked by the
 repository's 20 GiB disk-space guard. After space recovered, the singleton
 fix was verified with an isolated local install and focused tests. The release-preflight
-workflow builds vignettes and the PDF manual and runs R CMD check --as-cran on
-the retained source tarball using Linux R-devel. The regular CI matrix also
+workflow builds the source tarball, vignettes and PDF manual with release R,
+then checks that exact tarball using Linux R-devel. The regular CI matrix also
 checks macOS, Windows and Linux.
 
 The downstream workflow compares current CRAN reverse dependencies against
