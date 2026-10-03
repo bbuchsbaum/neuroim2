@@ -148,6 +148,17 @@ jobs:
       - uses: r-hub/actions/checkout@v1
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+      - name: Verify the exact candidate from the container's R process
+        env:
+          EXPECTED_SOURCE_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: Rscript {0}
+        run: |
+          # R and checkout can use different home directories in containers.
+          # Trust only this checkout in the disposable R process's Git config.
+          stopifnot(system2("git", c("config", "--global", "--add", "safe.directory", shQuote(getwd()))) == 0L)
+          head <- system2("git", c("rev-parse", "HEAD"), stdout=TRUE)
+          stopifnot(is.null(attr(head, "status")),
+                    identical(head, Sys.getenv("EXPECTED_SOURCE_SHA")))
       - uses: r-hub/actions/platform-info@v1
         with:
           job-config: ${{ matrix.config.job-config }}
