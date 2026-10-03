@@ -31,6 +31,10 @@ jobs:
           r-version: devel
           use-public-rspm: true
       - uses: r-lib/actions/setup-tinytex@v2
+      - name: Install PDF manual fonts
+        run: |
+          tlmgr install courier helvetic times
+          kpsewhich pcrr8t.tfm
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck, any::roxygen2@7.3.3, local::.
@@ -43,6 +47,10 @@ jobs:
           Rscript -e 'roxygen2::roxygenize(".", roclets = c("rd", "namespace"), load_code = roxygen2::load_installed)'
           git diff -- man NAMESPACE > "$RELEASE_OUT/documentation.patch"
           git diff --exit-code -- man NAMESPACE
+      - name: Check the PDF manual before the expensive package build
+        env:
+          RELEASE_OUT: ${{ runner.temp }}/release-evidence
+        run: R CMD Rd2pdf --no-preview --force --output="$RELEASE_OUT/neuroim2-manual.pdf" .
       - name: Verify regressions fail on master and pass on candidate
         env:
           RELEASE_OUT: ${{ runner.temp }}/release-evidence

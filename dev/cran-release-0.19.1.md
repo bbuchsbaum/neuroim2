@@ -35,6 +35,9 @@ free space on the connected Mac. From the checkout root:
 
 Use roxygen2 7.3.3, matching DESCRIPTION, for regeneration; newer roxygen2
 releases change unrelated generated output and are not part of this release.
+The LaTeX installation must include Courier, Helvetica and Times metrics
+(`tlmgr install courier helvetic times` for TinyTeX). The workflow checks the
+manual early so missing TeX dependencies fail before the long vignette build.
 
 ```sh
 export RCPP_PARALLEL_NUM_THREADS=2 OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2
@@ -42,6 +45,7 @@ export MAKEFLAGS=-j2 _R_CHECK_LIMIT_CORES_=true
 export RELEASE_OUT="$(mktemp -d)"
 Rscript -e 'roxygen2::roxygenize(".", roclets=c("rd", "namespace"), load_code=roxygen2::load_installed)'
 git diff --exit-code -- man NAMESPACE
+R CMD Rd2pdf --no-preview --force --output="$RELEASE_OUT/neuroim2-manual.pdf" .
 Rscript tools/release/baseline.R
 Rscript tools/release/preflight.R
 export DOWNSTREAM_OUT="$(mktemp -d)"
