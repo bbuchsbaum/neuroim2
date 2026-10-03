@@ -1,5 +1,40 @@
 # These six backends share voxel-series and voxel-matrix layouts. Independent
 # binary fixtures catch decoding and square-matrix orientation regressions.
+test_that("sparse downsampling keeps a square time-by-voxel result oriented", {
+  mask <- array(FALSE, c(4, 4, 4))
+  mask[c(1, 2, 3, 4)] <- TRUE
+  # Two pairs of input voxels average to two output voxels. No symmetric or
+  # constant matrix can expose an accidental transpose here.
+  input <- rbind(c(1, 3, 5, 7), c(10, 30, 50, 70))
+  x <- SparseNeuroVec(input, NeuroSpace(c(4, 4, 4, 2)), mask,
+                     orientation = "time_x_voxels")
+  expect_warning(y <- downsample(x, factor = 0.5), NA)
+  expect_equal(series(y, indices(y)), rbind(c(2, 6), c(20, 60)))
+})
+
+test_that("sparse producers preserve non-symmetric square time-by-voxel values", {
+  mask <- array(FALSE, c(2, 2, 2)); mask[c(1, 3, 6)] <- TRUE
+  vox <- c(1L, 3L, 6L)
+  input <- matrix(c(1, 3, 9, 10, 20, 50, 11, 30, 80), 3, 3)
+  make <- function(m) SparseNeuroVec(m, NeuroSpace(c(2, 2, 2, nrow(m))),
+                                    mask, orientation = "time_x_voxels")
+  x <- make(input)
+  expect_warning(scaled <- scale_series(x, TRUE, TRUE), NA)
+  expect_equal(series(scaled, vox), unname(base::scale(input)))
+  expect_warning(sum <- x + x, NA)
+  expect_equal(series(sum, vox), input * 2)
+  a <- make(input[1, , drop = FALSE])
+  b <- make(input[2:3, , drop = FALSE])
+  expect_warning(joined <- concat(a, b), NA)
+  expect_equal(series(joined, vox), input)
+  expect_warning(joined <- concat(a, make(input[2, , drop = FALSE]),
+                                  make(input[3, , drop = FALSE])), NA)
+  expect_equal(series(joined, vox), input)
+  roi <- ROIVec(space(x), arrayInd(vox, c(2, 2, 2)), input)
+  expect_warning(converted <- as(roi, "SparseNeuroVec"), NA)
+  expect_equal(series(converted, vox), input)
+})
+
 for (encoding in c("FLOAT", "SHORT", "UBYTE")) {
   for (nt in c(3L, 6L)) {
     test_that(paste("backend accessor matrix", encoding, "times", nt), {

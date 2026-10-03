@@ -167,7 +167,8 @@ calculate_downsample_dims <- function(current_dims, current_spacing,
     trans = new_trans
   )
 
-  SparseNeuroVec(out_data, new_space, out_mask, label = x@label)
+  SparseNeuroVec(out_data, new_space, out_mask, label = x@label,
+                 orientation = "time_x_voxels")
 }
 
 #' Downsample a DenseNeuroVec

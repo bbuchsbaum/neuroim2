@@ -641,7 +641,7 @@ setMethod(f="scale_series", signature=signature(x="SparseNeuroVec", center="logi
               M <- sweep(M, 2, sds, "/")
             }
             M <- unname(as.matrix(M))
-            SparseNeuroVec(M, space(x), mask(x))
+            SparseNeuroVec(M, space(x), mask(x), orientation = "time_x_voxels")
           })
 
 #' @export

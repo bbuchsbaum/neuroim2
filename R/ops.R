@@ -266,7 +266,8 @@ setMethod(f="Arith", signature=signature(e1="SparseNeuroVec", e2="SparseNeuroVec
 
             SparseNeuroVec(data = ret[, keep, drop = FALSE],
                            space = space(e1),
-                           mask = new_mask)
+                           mask = new_mask,
+                           orientation = "time_x_voxels")
           })
 
 

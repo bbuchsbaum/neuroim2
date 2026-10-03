@@ -218,6 +218,7 @@ setMethod(f="load_data", signature=c("SparseNeuroVecSource"),
           bspace,
           x@mask,
           label = meta@data_file,
+          orientation = "voxels_x_time",
           volume_labels = nifti_volume_labels(
             meta@header,
             expected_length = length(ind),
@@ -454,6 +455,7 @@ setMethod(f="concat", signature=signature(x="SparseNeuroVec", y="SparseNeuroVec"
                 ndat,
                 nspace,
                 mask = x@mask,
+                orientation = "time_x_voxels",
                 volume_labels = .combine_volume_labels(c(list(x, y), rest))
               )
             } else {
@@ -463,6 +465,7 @@ setMethod(f="concat", signature=signature(x="SparseNeuroVec", y="SparseNeuroVec"
                 ndat,
                 nspace,
                 mask = x@mask,
+                orientation = "time_x_voxels",
                 volume_labels = .combine_volume_labels(list(x, y))
               )
             }

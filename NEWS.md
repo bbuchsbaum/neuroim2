@@ -6,6 +6,9 @@ This release collects the changes recorded below for versions 0.14 through
 0.19.1. It retains the R >= 4.3 requirement. Analyses and plotting code should
 account for these changes:
 
+* The methodless `neuroim2::scale()` generic has been removed. Use
+  `base::scale()` for ordinary matrices and vectors, and `scale_series()`
+  for neuroimaging time series.
 * `gaussian_blur()` now derives its default kernel width from millimetre-scale
   `sigma` and voxel spacing. Use `window = 1` explicitly to reproduce the old
   default kernel; use the new default for the requested smoothing width.
@@ -39,6 +42,13 @@ number of selected voxels equals the number of time points in a component.
 Previously those square blocks were silently transposed, also affecting
 voxel-group reductions. These two correctness fixes are shared with the
 separate 0.20.0 development work; lazy block iteration is not included here.
+
+Sparse `downsample()`, `scale_series()`, arithmetic, `concat()` and coercion
+from `ROIVec` now preserve time-by-voxel orientation when the number of output
+voxels equals the number of time points. The former shape heuristic silently
+transposed those results.
+Internal sparse reads and dense-to-sparse conversions also declare their known
+matrix layout explicitly, avoiding spurious ambiguity warnings.
 
 ## Reproducible soft-alpha overlays (#21)
 
