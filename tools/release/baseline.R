@@ -21,3 +21,6 @@ for (mode in c("before", "after")) {
                  stdout = log, stderr = "2>&1")
   cat(readLines(log), sep = "\n")
 }
+log <- file.path(out, "issue-40-public-writer.log")
+callr::rscript("tools/release/reproduce-issue-40.R", stdout = log, stderr = "2>&1")
+cat(readLines(log), sep = "\n")

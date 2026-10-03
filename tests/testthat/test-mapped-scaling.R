@@ -22,6 +22,38 @@ mapped_short_fixture <- function(slope = 2.5, intercept = -4) {
   list(path = path, dims = dims, stored = stored)
 }
 
+test_that("issue 40 public writer gives dense and mapped reads the same units", {
+  for (dtype in c("FLOAT", "SHORT")) {
+    expected <- array(seq_len(72) / 8 - 1.3, c(3L, 2L, 2L, 6L))
+    path <- tempfile(fileext = ".nii")
+    write_vec(DenseNeuroVec(expected, NeuroSpace(dim(expected))),
+              path, data_type = dtype)
+    dense <- read_vec(path)
+    mapped <- MappedNeuroVec(path)
+    idx <- as.double(c(1, 12, 13, 37, 72))
+    dv <- linear_access(dense, idx)
+    mv <- linear_access(mapped, idx)
+    expect_lt(max(abs(dv - as.vector(expected)[idx])), 1e-3)
+    expect_lt(max(abs(mv - as.vector(expected)[idx])), 1e-3)
+    expect_equal(mv, dv, tolerance = 1e-12)
+    if (dtype == "FLOAT") expect_identical(mv, dv)
+    mmap::munmap(mapped@filemap)
+    unlink(path)
+  }
+})
+
+test_that("zero NIfTI slope leaves stored values unscaled in both readers", {
+  f <- mapped_short_fixture(slope = 0, intercept = 99)
+  on.exit(unlink(f$path))
+  dense <- read_vec(f$path)
+  mapped <- MappedNeuroVec(f$path)
+  on.exit(mmap::munmap(mapped@filemap), add = TRUE, after = FALSE)
+  idx <- c(36, 1, 13, 25, 24, 1)
+  expected <- as.numeric(f$stored[idx])
+  expect_equal(linear_access(dense, idx), expected)
+  expect_equal(linear_access(mapped, idx), expected)
+})
+
 test_that("mapped public accessors decode scaled SHORT values exactly once", {
   for (pars in list(c(2.5, -4), c(-2, 9))) {
     fixture <- mapped_short_fixture(pars[1], pars[2])

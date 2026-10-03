@@ -88,6 +88,11 @@ to fail on an isolated build of the base SHA and pass on the candidate. The
 singleton-conversion probe separately exercises 32 numeric/logical-mask cases:
 14 singleton cases fail on master and 18 controls pass; all 32 must pass on
 the candidate. Its logs are retained alongside the other regression evidence.
+The exact public-writer reproduction from issue #40 also runs against the
+candidate with its SHORT assertion corrected to require dense/mapped agreement;
+FLOAT remains an identity control. The test suite additionally checks the
+zero-slope convention. These tests concern uncompressed native-endian files
+and do not establish behavior for every compressed or endian-conversion path.
 The full suite exercises dense, sparse, BigNeuroVec, mapped, file-backed and
 sequence backends, FLOAT/SHORT/UBYTE decoding, affine/NIfTI geometry,
 smoothing, resampling and plot structure. Visual reference snapshots retain
