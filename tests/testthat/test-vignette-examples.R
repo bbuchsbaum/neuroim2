@@ -3,10 +3,13 @@ library(neuroim2)
 
 # Guarantees that used to be asserted inline, inside the vignettes themselves,
 # via stopifnot() calls in reader-facing chunks. The articles are now free of
-# test scaffolding; the checks live here, where they run on every R CMD check
-# instead of interrupting a first-time reader.
+# test scaffolding; the checks live here, where they run on every CI check
+# instead of interrupting a first-time reader. They are skipped on CRAN, which
+# already rebuilds every vignette, to keep the check within its time budget.
 #
 # Each test names the article whose examples it protects.
+
+skip_on_cran()
 
 # --- vignette("neuroim2"): the tour ------------------------------------------
 

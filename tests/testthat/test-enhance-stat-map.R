@@ -115,6 +115,7 @@ test_that("enhance_stat_map validates its arguments", {
 })
 
 test_that("plot_overlay and plot_ortho accept the enhance argument", {
+  skip_on_cran()
   d <- make_noisy_stat()
   bg <- NeuroVol(array(1, d$dims), d$space)
 
