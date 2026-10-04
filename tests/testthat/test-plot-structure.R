@@ -1,3 +1,7 @@
+# Rendering-heavy: skipped on CRAN to keep the check within its time budget.
+# Runs on every CI check (NOT_CRAN=true).
+skip_on_cran()
+
 ## Structural checks for the plotting entry points.
 ##
 ## These replace the vdiffr golden-image comparisons that used to live in

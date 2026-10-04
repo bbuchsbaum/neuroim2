@@ -41,6 +41,7 @@ test_that("can map over each volume in a FileBackedNeuroVec", {
 })
 
 test_that("can map over first 50 vectors in a FileBackedNeuroVec", {
+  skip_on_cran()
   mean.vec1 <- map_dbl(vectors(gvec, 1:50), mean)
   expect_equal(length(mean.vec1), 50)
 })
@@ -82,6 +83,7 @@ test_that("can extract an ROIVec from a FileBackedNeuroVec", {
 
 
 test_that("can convert FileBackedNeuroVec to matrix", {
+  skip_on_cran()
 
   mat <- as(gvec, "matrix")
 

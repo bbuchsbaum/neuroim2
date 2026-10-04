@@ -1,3 +1,7 @@
+# Rendering-heavy: skipped on CRAN to keep the check within its time budget.
+# Runs on every CI check (NOT_CRAN=true).
+skip_on_cran()
+
 library(testthat)
 
 # Tests for behaviour introduced by the shared plotting engine

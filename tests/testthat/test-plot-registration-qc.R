@@ -1,3 +1,7 @@
+# Rendering-heavy: skipped on CRAN to keep the check within its time budget.
+# Runs on every CI check (NOT_CRAN=true).
+skip_on_cran()
+
 library(testthat)
 
 make_registration_qc_volumes <- function(dims = c(8L, 9L, 5L), space = neuroim2::NeuroSpace(dims)) {
