@@ -40,3 +40,13 @@ as.sparse(x)
 A SparseNeuroVec object resulting from the conversion.
 
 A SparseNeuroVec object resulting from the conversion.
+
+## Details
+
+For a `DenseNeuroVec`, numeric masks use R's vector-indexing rules:
+positive indices retain voxels, negative indices exclude voxels, and
+zeros are ignored. Repeated indices retain a voxel once. Retained voxels
+are stored in ascending spatial-index order, regardless of the order
+supplied in `mask`. An empty selection produces an all-zero sparse image
+with the original dimensions. Missing or non-finite indices and positive
+indices outside the spatial extent are rejected.

@@ -77,6 +77,16 @@ This method converts a DenseNeuroVec object to a sparse representation using a g
     <p>A SparseNeuroVec object resulting from the conversion.</p>
 <p>A SparseNeuroVec object resulting from the conversion.</p>
     </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>For a <code>DenseNeuroVec</code>, numeric masks use R's vector-indexing
+  rules: positive indices retain voxels, negative indices exclude voxels,
+  and zeros are ignored. Repeated indices retain a voxel once. Retained
+  voxels are stored in ascending spatial-index order, regardless of the
+  order supplied in <code>mask</code>. An empty selection produces an all-zero
+  sparse image with the original dimensions. Missing or non-finite indices
+  and positive indices outside the spatial extent are rejected.</p>
+    </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
