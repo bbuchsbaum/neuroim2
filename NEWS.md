@@ -1,5 +1,9 @@
 # neuroim2 0.19.1
 
+* Dense `vectors()` iteration now extracts its underlying array once, avoiding
+  repeated full-array extraction on R-devel. Voxel order and returned values
+  are unchanged; the complete vignette examples and tests remain enabled.
+
 ## Upgrading from CRAN 0.13.0
 
 This release collects the changes recorded below for versions 0.14 through
@@ -49,6 +53,19 @@ voxels equals the number of time points. The former shape heuristic silently
 transposed those results.
 Internal sparse reads and dense-to-sparse conversions also declare their known
 matrix layout explicitly, avoiding spurious ambiguity warnings.
+
+`as.sparse()` now preserves matrix dimensions when converting a `DenseNeuroVec`
+with one time point or a mask selecting one voxel. Numeric voxel indices and
+`LogicalNeuroVol` masks retain the same voxel-by-time matrix and time-by-voxel
+series contracts. Previously these singleton cases errored after dropping the
+selected data to a vector.
+
+Numeric masks also retain each value at its original voxel when indices are
+unsorted or repeated. Previously unsorted indices could silently assign values
+to different voxels, and repeated indices could fail a cardinality check.
+Numeric and equivalent logical masks now agree, including negative exclusions,
+zeros and empty selections. Missing, non-finite and positive out-of-bounds
+indices are rejected. Recompute sparse conversions made with unsorted masks.
 
 ## Reproducible soft-alpha overlays (#21)
 

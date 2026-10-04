@@ -16,7 +16,7 @@ env:
   _R_CHECK_LIMIT_CORES_: true
 
 jobs:
-  source-check:
+  source-build:
     if: startsWith(github.head_ref, 'release/cran-')
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -25,6 +25,66 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-tinytex@v2
+      - name: Install PDF manual fonts
+        run: |
+          tlmgr install courier helvetic times makeindex
+          kpsewhich pcrr8t.tfm
+          command -v makeindex
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::pkgbuild, any::roxygen2, local::.
+          needs: check
+      - name: Install the matching roxygen generator in an isolated library
+        run: |
+          Rscript -e 'lib <- file.path(Sys.getenv("RUNNER_TEMP"), "roxygen-7.3.3"); dir.create(lib, showWarnings = FALSE); pak::pkg_install("url::https://cran.r-project.org/src/contrib/Archive/roxygen2/roxygen2_7.3.3.tar.gz", lib = lib, dependencies = NA, ask = FALSE)'
+      - name: Regenerate reference documentation from exact candidate
+        env:
+          RELEASE_OUT: ${{ runner.temp }}/release-evidence
+        run: |
+          mkdir -p "$RELEASE_OUT"
+          Rscript -e '.libPaths(c(file.path(Sys.getenv("RUNNER_TEMP"), "roxygen-7.3.3"), .libPaths())); stopifnot(as.character(packageVersion("roxygen2")) == "7.3.3"); roxygen2::roxygenize(".", roclets = c("rd", "namespace"), load_code = roxygen2::load_installed)'
+          git diff -- DESCRIPTION man NAMESPACE > "$RELEASE_OUT/documentation.patch"
+          git diff --exit-code -- DESCRIPTION man NAMESPACE
+      - name: Check the PDF manual before the expensive package build
+        env:
+          RELEASE_OUT: ${{ runner.temp }}/release-evidence
+        run: |
+          mkdir -p "$RELEASE_OUT/manual-build"
+          R CMD Rd2pdf --no-preview --force --no-clean --build-dir="$RELEASE_OUT/manual-build" --output="$RELEASE_OUT/neuroim2-manual.pdf" .
+      - name: Verify release gate regression cases
+        run: Rscript tools/release/test-check-policy.R
+      - name: Verify regressions fail on master and pass on candidate
+        env:
+          RELEASE_OUT: ${{ runner.temp }}/release-evidence
+        run: Rscript tools/release/baseline.R
+      - name: Build submission tarball with release R, manual and vignettes
+        env:
+          RELEASE_OUT: ${{ runner.temp }}/release-evidence
+        run: Rscript tools/release/build-source.R
+      - name: Preserve release-built tarball and build evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-build-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/release-evidence
+          retention-days: 30
+
+
+  source-check:
+    if: startsWith(github.head_ref, 'release/cran-')
+    needs: source-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
       - uses: r-lib/actions/setup-pandoc@v2
       - uses: r-lib/actions/setup-r@v2
         with:
@@ -38,36 +98,110 @@ jobs:
           command -v makeindex
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck, any::roxygen2@7.3.3, local::.
+          extra-packages: any::rcmdcheck, local::.
           needs: check
-      - name: Regenerate reference documentation from exact candidate
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-build-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/release-evidence
+      - name: Check exact release-built tarball with R-devel, including manual and vignettes
         env:
           RELEASE_OUT: ${{ runner.temp }}/release-evidence
-        run: |
-          mkdir -p "$RELEASE_OUT"
-          Rscript -e 'roxygen2::roxygenize(".", roclets = c("rd", "namespace"), load_code = roxygen2::load_installed)'
-          git diff -- man NAMESPACE > "$RELEASE_OUT/documentation.patch"
-          git diff --exit-code -- man NAMESPACE
-      - name: Check the PDF manual before the expensive package build
-        env:
-          RELEASE_OUT: ${{ runner.temp }}/release-evidence
-        run: |
-          mkdir -p "$RELEASE_OUT/manual-build"
-          R CMD Rd2pdf --no-preview --force --no-clean --build-dir="$RELEASE_OUT/manual-build" --output="$RELEASE_OUT/neuroim2-manual.pdf" .
-      - name: Verify regressions fail on master and pass on candidate
-        env:
-          RELEASE_OUT: ${{ runner.temp }}/release-evidence
-        run: Rscript tools/release/baseline.R
-      - name: Full source build, manual, vignettes and CRAN check
-        env:
-          RELEASE_OUT: ${{ runner.temp }}/release-evidence
+          RELEASE_CHECK_SERVICE: github-r-devel
         run: Rscript tools/release/preflight.R
-      - name: Preserve source tarball and check evidence
+      - name: Preserve checked source tarball and check evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: release-source-${{ github.event.pull_request.head.sha }}
           path: ${{ runner.temp }}/release-evidence
+          retention-days: 30
+
+  rhub-setup:
+    if: startsWith(github.head_ref, 'release/cran-')
+    needs: source-build
+    runs-on: ubuntu-latest
+    outputs:
+      containers: ${{ steps.setup.outputs.containers }}
+    steps:
+      - uses: r-hub/actions/setup@v1
+        id: setup
+        with:
+          config: ubuntu-clang,clang-ubsan
+
+  rhub-source-check:
+    needs: [source-build, rhub-setup]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        config: ${{ fromJson(needs.rhub-setup.outputs.containers) }}
+    name: R-hub ${{ matrix.config.label }} exact tarball
+    container:
+      image: ${{ matrix.config.container }}
+    env:
+      RELEASE_OUT: /tmp/release-evidence
+      RELEASE_CHECK_SERVICE: rhub-${{ matrix.config.label }}
+      RHUB_ACTIONS_CHECK_SCRIPT: Rscript tools/release/preflight.R
+    steps:
+      - uses: r-hub/actions/checkout@v1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Verify the exact candidate from the container's R process
+        env:
+          EXPECTED_SOURCE_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: Rscript {0}
+        run: |
+          # R and checkout can use different home directories in containers.
+          # Trust only this checkout in the disposable R process's Git config.
+          stopifnot(system2("git", c("config", "--global", "--add", "safe.directory", shQuote(getwd()))) == 0L)
+          head <- system2("git", c("rev-parse", "HEAD"), stdout=TRUE)
+          stopifnot(is.null(attr(head, "status")),
+                    identical(head, Sys.getenv("EXPECTED_SOURCE_SHA")))
+      - uses: r-hub/actions/platform-info@v1
+        with:
+          job-config: ${{ matrix.config.job-config }}
+      - uses: r-hub/actions/setup-deps@v1
+        with:
+          job-config: ${{ matrix.config.job-config }}
+      - name: Prepare the container's PDF manual tools
+        run: |
+          if command -v tlmgr >/dev/null 2>&1; then
+            tlmgr install courier helvetic times makeindex inconsolata
+          else
+            apt-get update
+            DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends texlive-latex-base texlive-latex-recommended texlive-fonts-recommended texlive-fonts-extra
+          fi
+          command -v pdflatex
+          command -v makeindex
+          kpsewhich pcrr8t.tfm
+          kpsewhich inconsolata.sty
+      - name: Verify complete PDF manual in the R-hub environment
+        run: |
+          mkdir -p "$RELEASE_OUT"
+          R CMD Rd2pdf --no-preview --force --output="$RELEASE_OUT/rhub-manual-smoke.pdf" .
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-build-${{ github.event.pull_request.head.sha }}
+          path: ${{ env.RELEASE_OUT }}
+      # R-hub's default runner rebuilds sources and omits the manual. Its
+      # supported custom script checks our unchanged release-built tarball.
+      - uses: r-hub/actions/run-check@v1
+        with:
+          job-config: ${{ matrix.config.job-config }}
+      - name: Reject sanitizer findings from the custom check
+        if: always()
+        shell: Rscript {0}
+        run: |
+          files <- list.files(file.path(Sys.getenv("RELEASE_OUT"), "check"), recursive=TRUE, full.names=TRUE, pattern="([.]Rout|[.]log|[.]out)$")
+          findings <- unlist(lapply(files, function(f) grep("runtime error:|SUMMARY: (UndefinedBehaviorSanitizer|AddressSanitizer)|ERROR: AddressSanitizer", readLines(f, warn=FALSE), value=TRUE)))
+          if (length(findings)) stop(paste(findings, collapse="\n"))
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release-rhub-${{ matrix.config.label }}-${{ github.event.pull_request.head.sha }}
+          path: ${{ env.RELEASE_OUT }}
           retention-days: 30
 
   downstream:

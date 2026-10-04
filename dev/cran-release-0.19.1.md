@@ -1,35 +1,113 @@
 # CRAN release candidate 0.19.1
 
-Review candidate only; do not submit, merge, tag, release or deploy as part of
-this preparation.
+## Runtime rejection and mandatory release gate
+
+The first 0.19.1 tarball (source `badd3db`, SHA-256
+`62aab075b9483b2f2d565137edf3136d2d20702bd911d66388f2bfcc5f317a29`)
+was submitted with explicit authorization as request 357569. CRAN archived it
+on 2026-10-03. Both platform logs ended `Status: OK`, but the incoming summary
+flagged Windows overall checktime of 37 minutes against a ten-minute limit.
+[The archived logs](https://win-builder.r-project.org/incoming_pretest/neuroim2_0.19.1_20261003_215854/)
+show 31 minutes rebuilding vignettes on Windows and 19 minutes on Debian;
+tests took only 107 and 83 seconds respectively. Passing the previous error/
+warning gate did not establish release readiness.
+
+Chunk profiling on Linux R-devel isolated 405.5 seconds in the `vectors` chunk
+of `regions-and-searchlights.Rmd`; 97% of that article's CPU time was spent in
+`getDataPart`. The corresponding Windows R-devel chunk took 714.6 seconds.
+The dense iterator extracted its complete S4 array on every
+voxel callback. It now extracts the array once when constructing the iterator.
+All nine articles, their full datasets, evaluated chunks and the test suite
+remain enabled. The direct Mac R 4.5 render took only 29 seconds for all nine
+articles, so local rendering alone was not a useful predictor of this R-devel
+cost. `tools/release/profile-vignettes.R` and the runtime-profile workflow retain
+per-chunk timings and R profiles on Linux and Windows R-devel.
+
+The release gate now requires complete checks within 600 elapsed seconds and
+rejects every error, warning and unreviewed NOTE. The listed exceptions in
+`tools/release/reviewed-notes.dcf` are exact missing optional HTML-tool notes on
+local/Linux runners and the official R-hub UBSan toolchain's injected
+`-Wp,-D_FORTIFY_SOURCE=3` flag. The latter is verified in the image's R CMD
+config, is absent from package Makevars and applies only to `clang-ubsan`.
+None of these exceptions applies to win-builder. Stage-heading timing
+annotations are normalized; NOTE bodies remain exact. No timing note is allowed.
+`test-check-policy.R` includes the rejected 37-minute result as a regression case.
+The measured interval covers the whole `R CMD check`, including installation,
+examples, tests, all vignette rebuilding and PDF/HTML manuals.
+
+The workflow checks the same release-R-built tarball on GitHub R-devel and on
+R-hub v2's `ubuntu-clang` and `clang-ubsan` platforms. It uses the official
+R-hub setup/actions with their supported custom check script because the
+default R-hub script rebuilds sources and omits the manual. Artifact SHA-256,
+source commit, log hash, elapsed time and approved-note identifiers are recorded
+in `check-policy.dcf`. Sanitizer findings also fail the workflow.
+
+Before any separately authorized resubmission, upload that unchanged tarball
+to official win-builder R-devel and preserve its receipt and complete logs.
+Record its upload provenance in `upload.dcf` and check start/end UTC plus timing
+basis in `timing.dcf`. The log's start and HTTP Last-Modified provide a
+conservative elapsed bound when the server copies logs after checking. Then run:
+
+```sh
+Rscript tools/release/record-winbuilder.R "$RELEASE_OUT" "$WINBUILDER_RESULTS"
+Rscript tools/release/final-gate.R "$RELEASE_OUT" \
+  "$GITHUB_RDEVEL_RESULTS" "$WINBUILDER_RESULTS" \
+  "$RHUB_CLANG_RESULTS" "$RHUB_UBSAN_RESULTS"
+```
+
+The final gate refuses missing services, mismatched artifacts/commits, changed
+logs, failed checks and excess runtime. Preserve the external result links and
+logs before their retention windows expire. A changed source requires a newly
+built artifact and all required checks again. No CRAN resubmission or
+correspondence is authorized during this remediation.
+
+The preparation task produces a checked candidate. The coordinating parent
+thread owns any separately authorized CRAN upload; this task does not submit,
+merge, tag, release or deploy.
 
 ## Scope and version
 
-Base: `f1f7f00264b0566beb73d17654ff1e874e66bf3c` on remote master.
-CRAN's package page reports 0.13.0 (published 2026-04-16); its retrieved check
-snapshot is dated 2026-07-16 and is not evidence for this candidate.
+Initial base: `f1f7f00264b0566beb73d17654ff1e874e66bf3c` on remote master.
+PR #46 and the separate website-theme PR #45 were subsequently merged by
+another actor. The follow-up candidate in PR #47 starts from current master
+`f11f6469b32e9143e4a605c8aa1aa5e47ac9a80a`; this task performed no merge.
+CRAN's package page reports 0.13.0 (published 2026-04-16). Its current check
+snapshot is dated 2026-10-03 and is not evidence for this candidate.
 
 0.19.1 advances the existing master development version 0.19.0.9000 and keeps
 0.20.0 available for the separate lazy-iteration feature branch. It does not
 imply a small change from CRAN 0.13.0: NEWS retains the intermediate history
-and adds an upgrade guide. Bradley should confirm this provisional version
-before submission.
+and adds an upgrade guide. The coordinating parent owns the separately
+authorized submission of 0.19.1 after final validation and independent review.
 
 The local `feat/plot-hillclimb` commit
 `b7b874c4aee9b656ae8bf333f3c0a13fc7274f9b` also contains `vec_blocks()` and
 accessor expansion. Only the reproduced mapped-scaling and square-sequence
 correctness fixes, their generated help and regression fixtures are selectively
 backported here. No new iterator is exported. The original branch is unchanged.
-Website-theme PR #45 is separate and has not been merged.
+Website-theme PR #45 was kept separate during release preparation; its changes
+are now in the base because it was merged independently.
 
 Additional isolated reproductions exposed the same square-matrix ambiguity
 in sparse downsampling, scaling, arithmetic, concatenation and ROI conversion.
 Those result producers now state their known matrix orientation explicitly;
 the public constructor still warns when callers supply ambiguous square data.
 
+Independent review also reproduced a baseline dimension-dropping bug in both
+dense-to-sparse conversion methods. Matrix subsetting now preserves dimensions
+for a single selected voxel or a single time point, with numeric indices and
+LogicalNeuroVol masks. This changes two subsetting expressions and retains the
+existing matrix-orientation contract. Follow-up independent review found that
+unsorted numeric masks could assign values to the wrong voxels. Numeric
+conversion now derives both data order and support from the same logical
+selection. Unsorted and repeated indices, negative exclusions, zeros and empty
+selections are tested against independent expected voxel values and equivalent
+logical masks. Invalid indices are rejected instead of silently disappearing.
+
 ## Reproduce checks and submission artifact
 
-Use a clean checkout of the reviewed candidate SHA with current R-devel,
+Use a clean checkout of the reviewed candidate SHA with current release R
+for the source build and current R-devel for the tarball check,
 R package dependencies, Pandoc, a working LaTeX installation and at least 20 GiB
 free space on the connected Mac. From the checkout root:
 
@@ -48,7 +126,10 @@ Rscript -e 'roxygen2::roxygenize(".", roclets=c("rd", "namespace"), load_code=ro
 git diff --exit-code -- man NAMESPACE
 R CMD Rd2pdf --no-preview --force --output="$RELEASE_OUT/neuroim2-manual.pdf" .
 Rscript tools/release/baseline.R
+Rscript tools/release/build-source.R
+# Switch to a separate R-devel installation and dependency library for this step.
 Rscript tools/release/preflight.R
+# Use current release R for downstream comparisons.
 export DOWNSTREAM_OUT="$(mktemp -d)"
 Rscript tools/release/downstream.R
 ```
@@ -59,10 +140,12 @@ with `R_LIBS_USER` pointing to a newly created temporary directory). The workflo
 does this via `setup-r-dependencies`'s `local::.` entry. Do not use a different
 installed neuroim2 version for those checks.
 
-`preflight.R` uses `pkgbuild::build(vignettes=TRUE, manual=TRUE)` and then
-`rcmdcheck::rcmdcheck(tarball, args="--as-cran")`. The uploadable artifact is
+`build-source.R` uses `pkgbuild::build(vignettes=TRUE, manual=TRUE)` with release
+R. `preflight.R` checks the recorded source SHA and tarball checksum, then runs
+`rcmdcheck::rcmdcheck(tarball, args="--as-cran")` with R-devel. Separate CI jobs
+keep their R libraries isolated. The uploadable artifact is
 `neuroim2_0.19.1.tar.gz` in RELEASE_OUT; `SOURCE_SHA`, `SHA256SUMS`, the complete
-check directory, session information and parsed results identify what was
+check directory, both build/check session records and parsed results identify what was
 checked. The workflow retains these as `release-source-<head SHA>` for 30 days.
 Rebuild and rerun checks if that artifact expires or the source changes.
 
@@ -75,11 +158,20 @@ The preflight also validates both the built tarball's and installed package's
 documentation: every resource resolves offline, shared assets match source
 bytes, and the complete documentation directory is below 5 MB. It records
 these checks and measured sizes in `vignette-assets.csv`. This is a package
-size fix; no theme, article content or PR #45 changes are included.
+size fix independent of the separately merged theme work; article content is
+unchanged.
 
 The focused before/after script requires all seven independent regression cases
 to fail on an isolated build of the base SHA and pass on the candidate. The
-full suite exercises dense, sparse, BigNeuroVec, mapped, file-backed and
+singleton-conversion probe separately exercises 32 numeric/logical-mask cases:
+14 singleton cases fail on master and 18 controls pass; all 32 must pass on
+the candidate. Its logs are retained alongside the other regression evidence.
+The exact public-writer reproduction from issue #40 also runs against the
+candidate with its SHORT assertion corrected to require dense/mapped agreement;
+FLOAT remains an identity control. The test suite additionally checks the
+zero-slope convention. These tests concern uncompressed native-endian files
+and do not establish behavior for every compressed or endian-conversion path.
+The full suite exercises dense, sparse, BigNeuroVec, mapped, file-backed and
 sequence backends, FLOAT/SHORT/UBYTE decoding, affine/NIfTI geometry,
 smoothing, resampling and plot structure. Visual reference snapshots retain
 the existing opt-in environment guard; a green check does not claim those ran.
@@ -105,19 +197,24 @@ maintainer coordination before submission; no communications are sent here.
 ## Evidence status
 
 The authoritative completion record is the exact-head results and artifact
-links in [draft PR #46](https://github.com/bbuchsbaum/neuroim2/pull/46). Match
+links in [draft PR #47](https://github.com/bbuchsbaum/neuroim2/pull/47). Match
 its head SHA to each workflow and the artifact's `SOURCE_SHA`; results from a
 superseded commit do not establish the final candidate's status.
 
-Full local check is blocked by the disk-space guard (18 GiB free at the start,
-required minimum 20 GiB). Local validation includes a 279-topic Rd audit and a
-successful 257-page PDF manual. Small mixed-source reproductions provided
+The initial full local check was blocked by the disk-space guard (18 GiB free,
+required minimum 20 GiB); full release checks run on GitHub. Local validation
+includes a 279-topic Rd audit and a successful 257-page PDF manual. After free
+space recovered above the guard, the singleton fix was installed into an
+isolated local library for focused regression and independent runtime probes.
+Small mixed-source reproductions provided
 initial evidence; the workflow's isolated source installs establish the seven
 before/after package comparisons. Coverage, test counts and any check notes
 belong in the PR evidence record after the final workflows finish.
 
-Release decision: no-go for submission until workflow results and any findings
-are reviewed and the version is confirmed. Draft PR review can proceed.
+Release decision: no-go for submission until the final candidate's workflow
+results and independent review findings are reconciled. Earlier passing
+artifacts are superseded whenever runtime code changes. Coverage against the
+internal 90% target is reported separately; it is not a CRAN policy gate.
 
 Policy references checked during preparation:
 

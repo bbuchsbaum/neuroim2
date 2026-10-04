@@ -16,4 +16,11 @@ for (mode in c("before", "after")) {
   callr::rscript("tools/release/reproduce-backend-defects.R", cmdargs = args,
                  stdout = log, stderr = "2>&1")
   cat(readLines(log), sep = "\n")
+  log <- file.path(out, paste0("singleton-conversion-", mode, ".log"))
+  callr::rscript("tools/release/reproduce-singleton-conversion.R", cmdargs = args,
+                 stdout = log, stderr = "2>&1")
+  cat(readLines(log), sep = "\n")
 }
+log <- file.path(out, "issue-40-public-writer.log")
+callr::rscript("tools/release/reproduce-issue-40.R", stdout = log, stderr = "2>&1")
+cat(readLines(log), sep = "\n")
