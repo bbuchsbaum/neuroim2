@@ -47,3 +47,5 @@ test_series_bug.R
 ^src/.*\.gcno$
 ^src/.*\.gcda$
 ^\.albersdown\.bak$
+^\.mote$
+(^|/)Rplots\.pdf$
