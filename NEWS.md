@@ -31,6 +31,15 @@ account for these changes:
 
 ## Documentation checks
 
+* Vignettes now describe lossless `as_canonical()` reorientation and the
+  dimension and spacing updates made by `reorient()`.
+* Corrected affine repair, physical-volume comparisons, spatial-grid checks
+  before concatenation, and removal of background parcel summaries.
+* Clarified compressed-file support, memory requirements when constructing
+  `BigNeuroVec`, filter comparisons, and interpretation of simulated statistics.
+* Shared vignette setup now guards optional font dependencies and respects
+  each article's theme parameters.
+
 The `image()`, `as.raster()` and ClusteredNeuroVol-to-DenseNeuroVol coercion
 help topics now include usage matching their documented arguments.
 

@@ -27,9 +27,6 @@ vignette: |
 ---
 
 ```{r setup, include = FALSE}
-if (requireNamespace("ragg", quietly = TRUE)) knitr::opts_chunk$set(dev = "ragg_png")
-if (requireNamespace("systemfonts", quietly = TRUE)) albersdown::albers_register_fonts()
-if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("albersdown", quietly = TRUE)) ggplot2::theme_set(albersdown::theme_albers(family = params$family, preset = params$preset))
 source("_common.R")
 ```
 
@@ -152,6 +149,10 @@ parcels <- ClusteredNeuroVol(brain, sample(1:12, sum(brain), replace = TRUE))
 num_clusters(parcels)
 ```
 
+These random labels demonstrate grouping only; each parcel is scattered across
+the brain. Use an atlas or spatial clustering for anatomical parcels, and do
+not use these random parcels for centroid-based neighbourhoods.
+
 `split_clusters()` cuts a 4D image into one object per parcel:
 
 ```{r split-clusters}
@@ -173,8 +174,16 @@ dim(parcel_ts)
 rownames(parcel_ts)
 ```
 
-`split_reduce()` wants one label per voxel in the whole grid, so out-of-mask
-voxels become a group of their own — row `"0"` above, which you drop. Build the
+For spatial grouping, `split_reduce()` wants one label per voxel in the whole
+grid, so out-of-mask voxels become a group of their own — row `"0"` above.
+Drop it before analysis:
+
+```{r drop-background}
+parcel_ts <- parcel_ts[rownames(parcel_ts) != "0", , drop = FALSE]
+dim(parcel_ts)
+```
+
+Build the
 label vector as integers and factor it at the end. Assigning into an existing
 factor instead turns every assigned element into `NA`, with a warning
 (`invalid factor level, NA generated`) that is easy to miss if warnings are
@@ -272,8 +281,10 @@ c(inside = mean(inside), outside = mean(outside), sd_outside = sd(outside),
   z = (mean(inside) - mean(outside)) / sd(outside))
 ```
 
-The planted region sits about three background standard deviations up — a real
-effect, and a modest one. Resist reading the single brightest voxel: with
+The difference is expressed in background standard deviations as a descriptive
+check of the planted effect. It is not an inferential z-statistic: neighbouring
+scores are dependent and the background is not a fitted null distribution.
+Resist reading the single brightest voxel: with
 neighbourhoods this ragged the maximum is often a two-voxel searchlight at the
 mask edge, and which voxel wins changes with the tiling.
 

@@ -27,9 +27,6 @@ vignette: |
 ---
 
 ```{r setup, include = FALSE}
-if (requireNamespace("ragg", quietly = TRUE)) knitr::opts_chunk$set(dev = "ragg_png")
-if (requireNamespace("systemfonts", quietly = TRUE)) albersdown::albers_register_fonts()
-if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("albersdown", quietly = TRUE)) ggplot2::theme_set(albersdown::theme_albers(family = params$family, preset = params$preset))
 source("_common.R")
 ```
 
@@ -170,7 +167,8 @@ spacing(read_vol(anat_file))
 ```
 
 Nothing errors. The image loads and plots correctly, and every **distance,
-volume and ROI radius** derived from it is wrong by a factor of about four. The
+volume and ROI radius** derived from it uses the wrong physical scale.
+Lengths differ by a factor of about four and voxel volumes by about 64. The
 coordinates themselves are not scaled by four — both affines share a translation,
 so they agree exactly at voxel `(1, 1, 1)` and diverge by a growing offset that
 reaches roughly 140 mm at the far corner:
@@ -202,17 +200,16 @@ c(mask = affines_agree(mask_file), anat = affines_agree(anat_file))
 The `is.null()` guard matters: not every format carries these fields, and
 returning `NA` for "cannot tell" is better than erroring on an AFNI file.
 
-If a file is affected and you trust its `pixdim`, rebuild the geometry:
+Disagreement alone does not tell you which transform is correct; qform and
+sform may intentionally describe different coordinate spaces. Check the image's
+provenance before changing either. If you have established that the qform is the
+correct geometry, use its full affine so rotation and axis directions survive:
 
 ```{r repair}
 bad <- read_vol(anat_file)
 fixed <- NeuroVol(
   as.array(bad),
-  NeuroSpace(dim(bad),
-    spacing = anat_hdr@header$pixdim[2:4],
-    origin = anat_hdr@header$qform[1:3, 4],
-    axes = space(bad)@axes
-  )
+  NeuroSpace(dim(bad), trans = anat_hdr@header$qform)
 )
 
 spacing(fixed)
@@ -275,9 +272,11 @@ sp <- NeuroSpace(c(4L, 4L, 4L), spacing = c(1 / 3, 0.123456789012, pi))
 spacing(sp)
 ```
 
-No file was involved. Because both sides of a round trip get the same rounding,
-`identical()` on a re-read affine does succeed, as above. What you cannot rely on
-is an affine you constructed matching the full-precision numbers you passed in.
+No file was involved. The mask's affine above survives this round trip exactly,
+but that is not a guarantee for every affine: NIfTI-1 also stores transform
+coefficients as 32-bit floats. Use `all.equal()` with an appropriate tolerance
+when checking general round trips. An affine you construct may also differ from
+the full-precision numbers you passed in.
 
 ```{r cleanup, include = FALSE}
 unlink(c(out_nii, out_gz, out_byte, out_vec))
