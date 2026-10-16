@@ -65,10 +65,9 @@
     
 <script>document.addEventListener("DOMContentLoaded",function(){document.body.classList.remove("palette-red","palette-lapis","palette-ochre","palette-teal","palette-green","palette-violet","preset-homage","preset-interaction","preset-study","preset-structural","preset-adobe","preset-midnight");document.body.classList.add("palette-red","preset-interaction");});</script><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bbuchsbaum/neuroim2" class="external-link">neuroim2</a></span><span class="op">)</span></span></code></pre></div>
-<p>Four operations change an image’s grid. They are easy to confuse
-because three of them can change its shape, but the distinction that
-matters is different: whether the anatomy stays where it was in the
-scanner.</p>
+<p>Resampling changes the grid on which an image is represented.
+Reorientation changes the order and direction of its axes. Both can
+change array dimensions, but they handle voxel values differently:</p>
 <table class="table">
 <colgroup>
 <col width="25%">
@@ -78,42 +77,42 @@ scanner.</p>
 </colgroup>
 <thead><tr class="header">
 <th align="left">Operation</th>
-<th align="left">Changes the array</th>
-<th align="left">Moves the anatomy in world space</th>
+<th align="left">Handles voxel values by</th>
+<th align="left">Preserves anatomy in world space</th>
 <th align="left">Use when</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td align="left"><code><a href="../reference/downsample-methods.html">downsample()</a></code></td>
+<td align="left">averaging into coarser bins</td>
 <td align="left">yes</td>
-<td align="left">no</td>
 <td align="left">you want fewer voxels</td>
 </tr>
 <tr class="even">
 <td align="left"><code><a href="../reference/resample_to.html">resample_to()</a></code></td>
-<td align="left">yes</td>
-<td align="left">no</td>
+<td align="left">interpolating onto a target grid</td>
+<td align="left">yes, within the target field of view</td>
 <td align="left">you must match another image</td>
 </tr>
 <tr class="odd">
-<td align="left"><code><a href="../reference/reorient-methods.html">reorient()</a></code></td>
-<td align="left"><strong>no</strong></td>
-<td align="left"><strong>yes</strong></td>
-<td align="left">the axis codes are wrong</td>
+<td align="left"><code><a href="../reference/as_canonical.html">as_canonical()</a></code></td>
+<td align="left">permuting and flipping exactly</td>
+<td align="left">yes</td>
+<td align="left">you want RAS array orientation</td>
 </tr>
 <tr class="even">
 <td align="left"><code><a href="../reference/deoblique.html">deoblique()</a></code></td>
+<td align="left">interpolating onto an axis-aligned grid</td>
 <td align="left">yes</td>
-<td align="left">no</td>
 <td align="left">the affine is oblique</td>
 </tr>
 </tbody>
 </table>
-<p>The first, second and fourth rewrite voxel values precisely <em>in
-order to</em> leave the anatomy where it is. <code><a href="../reference/reorient-methods.html">reorient()</a></code> is
-the opposite: it leaves the array alone and relabels the axes, which
-relocates every voxel in world space. That makes it the dangerous one if
-the codes were not in fact wrong.</p>
+<p><code><a href="../reference/reorient-methods.html">reorient()</a></code> operates on a <code>NeuroSpace</code>,
+returning the geometry for a permuted and flipped grid. Use
+<code><a href="../reference/as_canonical.html">as_canonical()</a></code> on an image to update its array and space
+together. Replacing only the space on an unchanged array assigns values
+to the wrong world positions.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">anat</span> <span class="op">&lt;-</span> <span class="fu">demo_anatomy</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">mask</span> <span class="op">&lt;-</span> <span class="fu">demo_mask</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -177,9 +176,10 @@ axis-aligned RAS affine regardless of what the source looked like.</p>
 <span><span class="fu"><a href="../reference/orientation_utils.html">affine_to_axcodes</a></span><span class="op">(</span><span class="fu"><a href="../reference/trans-methods.html">trans</a></span><span class="op">(</span><span class="va">naive</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "R" "A" "S"</span></span></code></pre></div>
 <p>The source runs <code>LAS</code> and the target runs
-<code>RAS</code>. The two affines differ only in the sign of their first
-column, which is enough to put the target grid where the source has no
-data. Resampling into it succeeds and returns an empty image:</p>
+<code>RAS</code>. The target’s first axis points in the opposite
+direction from the same origin, placing its grid where the source has no
+data. Resampling into it warns about the lack of overlap and returns an
+empty image:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="../reference/resample_to.html">resample_to</a></span><span class="op">(</span><span class="va">mask</span>, <span class="va">naive</span>, method <span class="op">=</span> <span class="st">"nearest"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: The resample target covers little of the source image.</span></span>
@@ -192,8 +192,8 @@ data. Resampling into it succeeds and returns an empty image:</p>
 <span><span class="co">#&gt;   way. Pass `trans =` explicitly, or use `resample_to()` with the image you</span></span>
 <span><span class="co">#&gt;   want to match.</span></span>
 <span><span class="co">#&gt; [1] 0</span></span></code></pre></div>
-<p>No error, no warning, no data. Scale the source’s own affine instead,
-which keeps orientation and origin intact:</p>
+<p>Scale the source’s own affine instead, which keeps orientation and
+origin intact:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trans-methods.html">trans</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span></span>
 <span><span class="va">tr</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">tr</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="op">/</span> <span class="fl">1.6</span></span>
@@ -204,21 +204,24 @@ which keeps orientation and origin intact:</p>
 <span><span class="co">#&gt; [1] "L" "A" "S"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="../reference/spacing-methods.html">spacing</a></span><span class="op">(</span><span class="va">finer</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 2.188 2.188 2.312</span></span></code></pre></div>
-<p>Then check the result, every time. Rounding the grid means the true
-scale factors are not exactly 1.6, so compare against the ratio you
-actually got:</p>
+<p>Then check the result, every time. The affine was scaled by 1.6 in
+each direction, so each new voxel has <code>1 / 1.6^3</code> of the
+original voxel volume. Compare physical mask volumes:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">up</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/resample_to.html">resample_to</a></span><span class="op">(</span><span class="va">mask</span>, <span class="va">finer</span>, method <span class="op">=</span> <span class="st">"nearest"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">expected</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/prod.html" class="external-link">prod</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">finer</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>source <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span>, resampled <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">up</span><span class="op">)</span>, expected <span class="op">=</span> <span class="va">expected</span><span class="op">)</span></span>
-<span><span class="co">#&gt;    source resampled  expected </span></span>
-<span><span class="co">#&gt;   29532.0  120126.0  120019.9</span></span>
+<span><span class="va">source_mm3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/prod.html" class="external-link">prod</a></span><span class="op">(</span><span class="fu"><a href="../reference/spacing-methods.html">spacing</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">resampled_mm3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">up</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/prod.html" class="external-link">prod</a></span><span class="op">(</span><span class="fu"><a href="../reference/spacing-methods.html">spacing</a></span><span class="op">(</span><span class="va">up</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>source_mm3 <span class="op">=</span> <span class="va">source_mm3</span>, resampled_mm3 <span class="op">=</span> <span class="va">resampled_mm3</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    source_mm3 resampled_mm3 </span></span>
+<span><span class="co">#&gt;       1338538       1329275</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">up</span><span class="op">)</span> <span class="op">/</span> <span class="va">expected</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.0008840722</span></span></code></pre></div>
-<p>Under a tenth of a percent. A discrepancy much larger than that means
-the target grid does not enclose the source.</p>
+<span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">resampled_mm3</span> <span class="op">/</span> <span class="va">source_mm3</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0.006920062</span></span></code></pre></div>
+<p>Small differences are expected from nearest-neighbour boundary
+sampling. Larger differences warrant checking the target field of view
+and resolution; rounding target dimensions can also change its physical
+extent.</p>
 </div>
 <div class="section level3">
 <h3 id="choosing-an-interpolation-method">Choosing an interpolation method<a class="anchor" aria-label="anchor" href="#choosing-an-interpolation-method"></a>
@@ -277,7 +280,8 @@ themselves; what matters here is what it does to positions.</p>
 <span><span class="co">#&gt; [1] "L" "A" "S"</span></span>
 <span><span class="fu"><a href="../reference/orientation_utils.html">affine_to_axcodes</a></span><span class="op">(</span><span class="fu"><a href="../reference/trans-methods.html">trans</a></span><span class="op">(</span><span class="va">ras</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "R" "A" "S"</span></span></code></pre></div>
-<p>The array is untouched, so the anatomy moves:</p>
+<p>The same numerical grid index can now refer to a different world
+position:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
 <span>  before <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu"><a href="../reference/grid_to_coord-methods.html">grid_to_coord</a></span><span class="op">(</span><span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -286,34 +290,35 @@ themselves; what matters here is what it does to positions.</p>
 <span><span class="co">#&gt;          [,1]   [,2]   [,3]</span></span>
 <span><span class="co">#&gt; before  112.0 -108.5 -46.25</span></span>
 <span><span class="co">#&gt; after  -108.5 -108.5 -46.25</span></span></code></pre></div>
-<p>Voxel <code>(1,1,1)</code> has jumped from <code>x = +112</code> to
-<code>x = -112</code>. Use <code><a href="../reference/reorient-methods.html">reorient()</a></code> when a file’s codes
-are genuinely wrong, not to change how an image is stored.</p>
-<p>There is no <code><a href="../reference/reorient-methods.html">reorient()</a></code> method for a
-<code>NeuroVol</code> — it operates on spaces. To rearrange the array as
-well, reorient a copy of the space and resample into it:</p>
+<p>That compares two grid corners, not the position of the same
+anatomical voxel. There is no <code><a href="../reference/reorient-methods.html">reorient()</a></code> method for a
+<code>NeuroVol</code>. To reorder the values together with their
+geometry, use <code><a href="../reference/as_canonical.html">as_canonical()</a></code>:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">flipped</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/resample_to.html">resample_to</a></span><span class="op">(</span><span class="va">mask</span>, <span class="fu"><a href="../reference/reorient-methods.html">reorient</a></span><span class="op">(</span><span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"R"</span>, <span class="st">"A"</span>, <span class="st">"S"</span><span class="op">)</span><span class="op">)</span>, method <span class="op">=</span> <span class="st">"nearest"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>source <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span>, flipped <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">flipped</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  source flipped </span></span>
-<span><span class="co">#&gt;   29532   29532</span></span></code></pre></div>
-<p>That is lossless here because <code>LAS</code> to <code>RAS</code> is
-a pure flip. It is <strong>not</strong> lossless when the requested
-codes permute axes: <code><a href="../reference/reorient-methods.html">reorient()</a></code> leaves <code>dim</code> and
-<code>spacing</code> alone, so a rotated box no longer encloses the
-original one and the corners are cut off.</p>
+<code class="sourceCode R"><span><span class="va">canonical</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_canonical.html">as_canonical</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/orientation_utils.html">affine_to_axcodes</a></span><span class="op">(</span><span class="fu"><a href="../reference/trans-methods.html">trans</a></span><span class="op">(</span><span class="va">canonical</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "R" "A" "S"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>source <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span>, canonical <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">canonical</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    source canonical </span></span>
+<span><span class="co">#&gt;     29532     29532</span></span></code></pre></div>
+<p>This is a lossless permutation and flip, without interpolation. Axis
+permutations update dimensions and spacing as well:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">permuted</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reorient-methods.html">reorient</a></span><span class="op">(</span><span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"P"</span>, <span class="st">"S"</span>, <span class="st">"R"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">lost</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/resample_to.html">resample_to</a></span><span class="op">(</span><span class="va">mask</span>, <span class="va">permuted</span>, method <span class="op">=</span> <span class="st">"nearest"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">permuted</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_canonical.html">as_canonical</a></span><span class="op">(</span><span class="va">mask</span>, target <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"P"</span>, <span class="st">"S"</span>, <span class="st">"R"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>source <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span>, permuted <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">permuted</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;          [,1] [,2] [,3]</span></span>
+<span><span class="co">#&gt; source     64   64   25</span></span>
+<span><span class="co">#&gt; permuted   64   25   64</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>source <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span>, permuted <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">permuted</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   source permuted </span></span>
+<span><span class="co">#&gt;    29532    29532</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>source <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span>, permuted <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">lost</span><span class="op">)</span>, kept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">lost</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   source permuted     kept </span></span>
-<span><span class="co">#&gt;    29532    29532        1</span></span></code></pre></div>
-<p>A fifth of the mask, gone without a warning. For anything beyond a
-flip, build a target grid that encloses the rotated field of view —
-<code><a href="../reference/space_utils.html">output_aligned_space()</a></code> and <code><a href="../reference/deoblique.html">deoblique()</a></code>’s grid
-arguments exist for this.</p>
+<span><span class="va">back</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_canonical.html">as_canonical</a></span><span class="op">(</span><span class="va">permuted</span>, target <span class="op">=</span> <span class="fu"><a href="../reference/axcodes-methods.html">axcodes</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/all.equal-methods.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="fu"><a href="../reference/as.array.html">as.array</a></span><span class="op">(</span><span class="va">back</span><span class="op">)</span>, <span class="fu"><a href="../reference/as.array.html">as.array</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
+<p>For a target that changes voxel spacing or sampling locations, use
+<code><a href="../reference/resample_to.html">resample_to()</a></code> instead and choose an appropriate
+interpolation method.</p>
 </div>
 <div class="section level2">
 <h2 id="deobliquing">Deobliquing<a class="anchor" aria-label="anchor" href="#deobliquing"></a>
@@ -360,18 +365,12 @@ tilt at all. Pass a grid explicitly if that is not what you want.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>linear <span class="op">=</span> <span class="fu">frac</span><span class="op">(</span><span class="fu"><a href="../reference/deoblique.html">deoblique</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span><span class="op">)</span>, nearest <span class="op">=</span> <span class="fu">frac</span><span class="op">(</span><span class="fu"><a href="../reference/deoblique.html">deoblique</a></span><span class="op">(</span><span class="va">mask</span>, method <span class="op">=</span> <span class="st">"nearest"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     linear    nearest </span></span>
 <span><span class="co">#&gt; 0.02261466 0.00000000</span></span></code></pre></div>
-<p><code><a href="../reference/as_canonical.html">as_canonical()</a></code> is the related convenience, reorienting
-to RAS and resampling in one step. On an image that is already canonical
-it returns the input untouched, so check the codes rather than the
-dimensions — <code><a href="../reference/as_canonical.html">as_canonical()</a></code> never permutes the array:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/orientation_utils.html">affine_to_axcodes</a></span><span class="op">(</span><span class="fu"><a href="../reference/trans-methods.html">trans</a></span><span class="op">(</span><span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "L" "A" "S"</span></span>
-<span><span class="fu"><a href="../reference/orientation_utils.html">affine_to_axcodes</a></span><span class="op">(</span><span class="fu"><a href="../reference/trans-methods.html">trans</a></span><span class="op">(</span><span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="fu"><a href="../reference/as_canonical.html">as_canonical</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "R" "A" "S"</span></span></code></pre></div>
-<p>Because it is <code><a href="../reference/reorient-methods.html">reorient()</a></code> plus <code><a href="../reference/resample-methods.html">resample()</a></code>,
-it inherits the enclosure problem above. Check <code><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum()</a></code>
-afterwards on anything that is not a pure flip.</p>
+<p><code><a href="../reference/as_canonical.html">as_canonical()</a></code> changes axis order and direction without
+removing an oblique tilt. It preserves voxel values exactly, whereas
+<code><a href="../reference/deoblique.html">deoblique()</a></code> interpolates them. Choose
+<code><a href="../reference/deoblique.html">deoblique()</a></code> when you need cardinal-plane sections, and
+<code><a href="../reference/as_canonical.html">as_canonical()</a></code> when you only need a consistent array
+orientation.</p>
 </div>
 <div class="section level2">
 <h2 id="where-to-go-next">Where to go next<a class="anchor" aria-label="anchor" href="#where-to-go-next"></a>

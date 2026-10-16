@@ -90,7 +90,7 @@ Both pieces can be read straight back out:
 
 trans(sp)[1:3, 4]          # translation column = origin
 #> [1]  -90 -126  -72
-diag(trans(sp)[1:3, 1:3])  # diagonal of linear block = voxel sizes
+diag(trans(sp)[1:3, 1:3])  # voxel sizes for this axis-aligned RAS affine
 #> [1] 2 2 2
 ```
 
@@ -269,9 +269,13 @@ identical(trans(reorient(space(mask), c("L", "A", "S"))), trans(space(mask)))
 #> [1] TRUE
 ```
 
-This reinterprets the grid; it does not move the voxels. To resample the
-data itself onto a new grid, see
-[`vignette("resampling-and-orientation")`](https://bbuchsbaum.github.io/neuroim2/articles/resampling-and-orientation.md).
+This returns the geometry for a permuted and flipped grid, including
+updated dimensions and spacing. It does not rearrange image values
+because its input is only a space. Use `as_canonical(mask)` to transform
+the array and space together while preserving each voxel’s world
+position. See
+[`vignette("resampling-and-orientation")`](https://bbuchsbaum.github.io/neuroim2/articles/resampling-and-orientation.md)
+for examples.
 
 ## Oblique affines
 
@@ -341,12 +345,15 @@ identical(trans(sp_back), trans(sp))
 
 ## Four things that catch people out
 
-**Oblique affines.** If `diag(trans(sp)[1:3, 1:3])` disagrees with
-`spacing(sp)`, the image is tilted. Use
+**Oblique affines.** Diagonal entries alone cannot identify voxel sizes
+or tilt: even an axis-aligned LAS image has a negative first diagonal
+entry. Use
+[`spacing()`](https://bbuchsbaum.github.io/neuroim2/reference/spacing-methods.md)
+for edge lengths and
 [`obliquity()`](https://bbuchsbaum.github.io/neuroim2/reference/affine_utils.md)
-to measure it and
+to measure tilt.
 [`deoblique()`](https://bbuchsbaum.github.io/neuroim2/reference/deoblique.md)
-to remove it.
+resamples onto an axis-aligned grid.
 
 **1-based indices.**
 [`grid_to_coord()`](https://bbuchsbaum.github.io/neuroim2/reference/grid_to_coord-methods.md)
@@ -362,9 +369,11 @@ advertises;
 shows how to inspect both.
 
 **Float32 precision.** NIfTI stores affine coefficients as 32-bit
-floats, and neuroim2 rounds to 7 significant figures to match. Round
-trips can show floating-point noise around 0.001 mm. Compare coordinates
-with a tolerance.
+floats, and
+[`NeuroSpace()`](https://bbuchsbaum.github.io/neuroim2/reference/NeuroSpace.md)
+also rounds affines to 7 significant figures. Round-trip error depends
+on the affine and coordinate magnitudes; compare coordinates with a
+tolerance appropriate to your voxel sizes.
 
 ## Quick reference
 

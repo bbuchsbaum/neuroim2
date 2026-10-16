@@ -80,7 +80,10 @@ intensities robustly by default, and return ordinary
 <p>The statistical map here is fitted, not drawn: a design is planted in
 two spheres of a simulated series and a t-statistic is computed at every
 voxel. It shares a <code>NeuroSpace</code> with the anatomy, which every
-overlay helper requires.</p>
+overlay helper requires. The fit uses ordinary least squares without
+modelling the simulated temporal autocorrelation, so these t values and
+thresholds illustrate display settings; they are not calibrated
+inferential statistics.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">zlevels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">12</span>, <span class="fl">38</span>, length.out <span class="op">=</span> <span class="fl">6</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>The plotting helpers read anatomical direction from the image affine.
@@ -158,7 +161,7 @@ negative comparable:</p>
 <span>  zlevels <span class="op">=</span> <span class="va">zlevels</span>, ncol <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>  bg_cmap <span class="op">=</span> <span class="va">anatomy_cmap</span>, bg_range <span class="op">=</span> <span class="st">"robust"</span>,</span>
 <span>  ov_cmap <span class="op">=</span> <span class="st">"coldhot"</span>, ov_thresh <span class="op">=</span> <span class="fl">3</span>, ov_symmetric <span class="op">=</span> <span class="cn">TRUE</span>, ov_alpha <span class="op">=</span> <span class="fl">0.8</span>,</span>
-<span>  title <span class="op">=</span> <span class="st">"t &gt; 3"</span>, style <span class="op">=</span> <span class="st">"dark"</span></span>
+<span>  title <span class="op">=</span> <span class="st">"|t| &gt; 3"</span>, style <span class="op">=</span> <span class="st">"dark"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <img src="visualization_files/figure-html/overlay-1.png" class="r-plt" alt="Six anatomical slices with blue and orange statistical clusters." width="960"><p class="caption">

@@ -143,6 +143,11 @@ num_clusters(parcels)
 #> [1] 12
 ```
 
+These random labels demonstrate grouping only; each parcel is scattered
+across the brain. Use an atlas or spatial clustering for anatomical
+parcels, and do not use these random parcels for centroid-based
+neighbourhoods.
+
 [`split_clusters()`](https://bbuchsbaum.github.io/neuroim2/reference/split_clusters-methods.md)
 cuts a 4D image into one object per parcel:
 
@@ -172,13 +177,22 @@ rownames(parcel_ts)
 #>  [1] "0"  "1"  "2"  "3"  "4"  "5"  "6"  "7"  "8"  "9"  "10" "11" "12"
 ```
 
+For spatial grouping,
 [`split_reduce()`](https://bbuchsbaum.github.io/neuroim2/reference/split_reduce-methods.md)
 wants one label per voxel in the whole grid, so out-of-mask voxels
-become a group of their own — row `"0"` above, which you drop. Build the
-label vector as integers and factor it at the end. Assigning into an
-existing factor instead turns every assigned element into `NA`, with a
-warning (`invalid factor level, NA generated`) that is easy to miss if
-warnings are suppressed.
+become a group of their own — row `"0"` above. Drop it before analysis:
+
+``` r
+
+parcel_ts <- parcel_ts[rownames(parcel_ts) != "0", , drop = FALSE]
+dim(parcel_ts)
+#> [1] 12 40
+```
+
+Build the label vector as integers and factor it at the end. Assigning
+into an existing factor instead turns every assigned element into `NA`,
+with a warning (`invalid factor level, NA generated`) that is easy to
+miss if warnings are suppressed.
 
 The default reduction is the mean; pass `FUN` for anything else.
 
@@ -299,9 +313,11 @@ c(inside = mean(inside), outside = mean(outside), sd_outside = sd(outside),
 #> 0.35817828 0.02258644 0.10519799 3.19009738
 ```
 
-The planted region sits about three background standard deviations up —
-a real effect, and a modest one. Resist reading the single brightest
-voxel: with neighbourhoods this ragged the maximum is often a two-voxel
+The difference is expressed in background standard deviations as a
+descriptive check of the planted effect. It is not an inferential
+z-statistic: neighbouring scores are dependent and the background is not
+a fitted null distribution. Resist reading the single brightest voxel:
+with neighbourhoods this ragged the maximum is often a two-voxel
 searchlight at the mask edge, and which voxel wins changes with the
 tiling.
 

@@ -39,7 +39,14 @@
 <ul><li>The bundled template <code>inst/extdata/mni_downsampled.nii.gz</code> now has a correct sform. Its sform was the identity plus a translation, which takes precedence over the qform and made the image read as 1 mm voxels; it is the MNI152 template downsampled to 48 x 57 x 48, so <code><a href="../reference/spacing-methods.html">spacing()</a></code> now reports about 4.02 mm and its world coordinates are MNI millimetres. Voxel values are unchanged. Code that relied on the old 1 mm geometry of this file (mm radii, kernel widths, world coordinates) should scale accordingly; the vignettes have been updated (<a href="https://github.com/bbuchsbaum/neuroim2/issues/50" class="external-link">#50</a>).</li>
 <li>
 <code><a href="../reference/plot_ortho.html">plot_ortho()</a></code>, <code><a href="../reference/plot_montage.html">plot_montage()</a></code>, <code><a href="../reference/plot_overlay.html">plot_overlay()</a></code>, <code><a href="../reference/plot_checkerboard.html">plot_checkerboard()</a></code> and <code><a href="../reference/plot_edge_overlay.html">plot_edge_overlay()</a></code> gain a <code>label_size</code> argument controlling the size of the in-tile slice label (orientation letters are drawn 10% larger). It was previously fixed at 3.1 and could not be changed by theme settings (<a href="https://github.com/bbuchsbaum/neuroim2/issues/51" class="external-link">#51</a>).</li>
+</ul><div class="section level3">
+<h3 id="documentation-0-19-1-9000">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-19-1-9000"></a></h3>
+<ul><li>Vignettes now describe lossless <code><a href="../reference/as_canonical.html">as_canonical()</a></code> reorientation and the dimension and spacing updates made by <code><a href="../reference/reorient-methods.html">reorient()</a></code>.</li>
+<li>Corrected affine repair, physical-volume comparisons, spatial-grid checks before concatenation, and removal of background parcel summaries.</li>
+<li>Clarified compressed-file support, memory requirements when constructing <code>BigNeuroVec</code>, filter comparisons, and interpretation of simulated statistics.</li>
+<li>Shared vignette setup now guards optional font dependencies and respects each article’s theme parameters.</li>
 </ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.19.1" id="neuroim2-0191">neuroim2 0.19.1<a class="anchor" aria-label="anchor" href="#neuroim2-0191"></a></h2><p class="text-muted">CRAN release: 2026-10-06</p>
 <ul><li>Dense <code><a href="../reference/vectors-methods.html">vectors()</a></code> iteration now extracts its underlying array once, avoiding repeated full-array extraction on R-devel. Voxel order and returned values are unchanged; the complete vignette examples and tests remain enabled.</li>

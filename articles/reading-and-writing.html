@@ -234,11 +234,12 @@ voxels even though <code>pixdim</code> says otherwise:</p>
 <span><span class="fu"><a href="../reference/spacing-methods.html">spacing</a></span><span class="op">(</span><span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">anat_file</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 4.02083 4.01754 4.02083</span></span></code></pre></div>
 <p>Nothing errors. The image loads and plots correctly, and every
-<strong>distance, volume and ROI radius</strong> derived from it is
-wrong by a factor of about four. The coordinates themselves are not
-scaled by four — both affines share a translation, so they agree exactly
-at voxel <code>(1, 1, 1)</code> and diverge by a growing offset that
-reaches 140 to 170 mm per axis at the far corner:</p>
+<strong>distance, volume and ROI radius</strong> derived from it uses
+the wrong physical scale. Lengths differ by a factor of about four and
+voxel volumes by about 64. The coordinates themselves are not scaled by
+four — both affines share a translation, so they agree exactly at voxel
+<code>(1, 1, 1)</code> and diverge by a growing offset that reaches 140
+to 170 mm per axis at the far corner:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">far</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">bad_file</span><span class="op">)</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
@@ -268,17 +269,16 @@ arrives:</p>
 <p>The <code><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null()</a></code> guard matters: not every format carries
 these fields, and returning <code>NA</code> for “cannot tell” is better
 than erroring on an AFNI file.</p>
-<p>If a file is affected and you trust its <code>pixdim</code>, rebuild
-the geometry:</p>
+<p>Disagreement alone does not tell you which transform is correct;
+qform and sform may intentionally describe different coordinate spaces.
+Check the image’s provenance before changing either. If you have
+established that the qform is the correct geometry, use its full affine
+so rotation and axis directions survive:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bad</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">bad_file</span><span class="op">)</span></span>
 <span><span class="va">fixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NeuroVol.html">NeuroVol</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/as.array.html">as.array</a></span><span class="op">(</span><span class="va">bad</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="../reference/NeuroSpace.html">NeuroSpace</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">bad</span><span class="op">)</span>,</span>
-<span>    spacing <span class="op">=</span> <span class="va">bad_hdr</span><span class="op">@</span><span class="va">header</span><span class="op">$</span><span class="va">pixdim</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
-<span>    origin <span class="op">=</span> <span class="va">bad_hdr</span><span class="op">@</span><span class="va">header</span><span class="op">$</span><span class="va">qform</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">4</span><span class="op">]</span>,</span>
-<span>    axes <span class="op">=</span> <span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">bad</span><span class="op">)</span><span class="op">@</span><span class="va">axes</span></span>
-<span>  <span class="op">)</span></span>
+<span>  <span class="fu"><a href="../reference/NeuroSpace.html">NeuroSpace</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">bad</span><span class="op">)</span>, trans <span class="op">=</span> <span class="va">bad_hdr</span><span class="op">@</span><span class="va">header</span><span class="op">$</span><span class="va">qform</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/spacing-methods.html">spacing</a></span><span class="op">(</span><span class="va">fixed</span><span class="op">)</span></span>
@@ -344,9 +344,11 @@ built, not when it is written:</p>
 <span></span>
 <span><span class="fu"><a href="../reference/spacing-methods.html">spacing</a></span><span class="op">(</span><span class="va">sp</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 0.333333 0.123457 3.141590</span></span></code></pre></div>
-<p>No file was involved. Because both sides of a round trip get the same
-rounding, <code><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical()</a></code> on a re-read affine does succeed, as
-above. What you cannot rely on is an affine you constructed matching the
+<p>No file was involved. The mask’s affine above survives this round
+trip exactly, but that is not a guarantee for every affine: NIfTI-1 also
+stores transform coefficients as 32-bit floats. Use
+<code><a href="https://rdrr.io/pkg/Matrix/man/all.equal-methods.html" class="external-link">all.equal()</a></code> with an appropriate tolerance when checking
+general round trips. An affine you construct may also differ from the
 full-precision numbers you passed in.</p>
 </div>
 </div>

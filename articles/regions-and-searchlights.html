@@ -168,6 +168,10 @@ in-mask voxel.</p>
 <span></span>
 <span><span class="fu"><a href="../reference/num_clusters-methods.html">num_clusters</a></span><span class="op">(</span><span class="va">parcels</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 12</span></span></code></pre></div>
+<p>These random labels demonstrate grouping only; each parcel is
+scattered across the brain. Use an atlas or spatial clustering for
+anatomical parcels, and do not use these random parcels for
+centroid-based neighbourhoods.</p>
 <p><code><a href="../reference/split_clusters-methods.html">split_clusters()</a></code> cuts a 4D image into one object per
 parcel:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -189,13 +193,18 @@ matrix:</p>
 <span><span class="co">#&gt; [1] 13 40</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">parcel_ts</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  [1] "0"  "1"  "2"  "3"  "4"  "5"  "6"  "7"  "8"  "9"  "10" "11" "12"</span></span></code></pre></div>
-<p><code><a href="../reference/split_reduce-methods.html">split_reduce()</a></code> wants one label per voxel in the whole
-grid, so out-of-mask voxels become a group of their own — row
-<code>"0"</code> above, which you drop. Build the label vector as
-integers and factor it at the end. Assigning into an existing factor
-instead turns every assigned element into <code>NA</code>, with a
-warning (<code>invalid factor level, NA generated</code>) that is easy
-to miss if warnings are suppressed.</p>
+<p>For spatial grouping, <code><a href="../reference/split_reduce-methods.html">split_reduce()</a></code> wants one label per
+voxel in the whole grid, so out-of-mask voxels become a group of their
+own — row <code>"0"</code> above. Drop it before analysis:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">parcel_ts</span> <span class="op">&lt;-</span> <span class="va">parcel_ts</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">parcel_ts</span><span class="op">)</span> <span class="op">!=</span> <span class="st">"0"</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">parcel_ts</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 12 40</span></span></code></pre></div>
+<p>Build the label vector as integers and factor it at the end.
+Assigning into an existing factor instead turns every assigned element
+into <code>NA</code>, with a warning
+(<code>invalid factor level, NA generated</code>) that is easy to miss
+if warnings are suppressed.</p>
 <p>The default reduction is the mean; pass <code>FUN</code> for anything
 else.</p>
 </div>
@@ -207,7 +216,7 @@ three flavours, and the difference is coverage, not shape.</p>
 <p><code><a href="../reference/searchlight.html">searchlight()</a></code> centres one on each voxel — complete but
 overlapping. Built lazily, neighbourhoods are realised only when
 touched:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/searchlight.html">searchlight</a></span><span class="op">(</span><span class="va">brain</span>, radius <span class="op">=</span> <span class="fl">8</span>, eager <span class="op">=</span> <span class="cn">FALSE</span>, nonzero <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">sl</span><span class="op">)</span></span>
@@ -217,7 +226,7 @@ touched:</p>
 <p><code><a href="../reference/random_searchlight.html">random_searchlight()</a></code> partitions the mask into
 <em>non-overlapping</em> spheres, which covers every voxel exactly once
 for a fraction of the work:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">rsl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/random_searchlight.html">random_searchlight</a></span><span class="op">(</span><span class="va">brain</span>, radius <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span>
 <span></span>
@@ -233,7 +242,7 @@ reason the analysis below is read at the cluster level rather than at
 its single brightest voxel.</p>
 <p><code><a href="../reference/clustered_searchlight.html">clustered_searchlight()</a></code> uses a parcellation instead of
 spheres, giving one neighbourhood per parcel:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="../reference/clustered_searchlight.html">clustered_searchlight</a></span><span class="op">(</span><span class="va">brain</span>, cvol <span class="op">=</span> <span class="va">parcels</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 12</span></span></code></pre></div>
 </div>
@@ -243,7 +252,7 @@ spheres, giving one neighbourhood per parcel:</p>
 <p>Averaging noise proves nothing, so here is a searchlight with a right
 answer. We plant a task response in one sphere, then ask a searchlight
 to find it.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">design</span> <span class="op">&lt;-</span> <span class="fu">demo_design</span><span class="op">(</span><span class="fl">40</span><span class="op">)</span></span>
 <span><span class="va">target</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spherical_roi.html">spherical_roi</a></span><span class="op">(</span><span class="va">mask</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">34</span>, <span class="fl">12</span><span class="op">)</span>, radius <span class="op">=</span> <span class="fl">12</span>, nonzero <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
@@ -257,14 +266,14 @@ to find it.</p>
 <p>Now score each searchlight by how well its voxels track the design.
 This is the map step, and it is an ordinary <code><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply()</a></code> over
 the neighbourhoods:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">score</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">rsl</span>, <span class="kw">function</span><span class="op">(</span><span class="va">r</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="fu"><a href="../reference/values-methods.html">values</a></span><span class="op">(</span><span class="fu"><a href="../reference/series_roi.html">series_roi</a></span><span class="op">(</span><span class="va">planted</span>, <span class="va">r</span><span class="op">)</span><span class="op">)</span>, <span class="va">design</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">score</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] -0.5147689  0.5528228</span></span></code></pre></div>
 <p>Writing the scores back to their voxels turns a list of numbers into
 an image again:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">arr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/array.html" class="external-link">array</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">rsl</span><span class="op">)</span><span class="op">)</span> <span class="va">arr</span><span class="op">[</span><span class="fu"><a href="../reference/coords.html">coords</a></span><span class="op">(</span><span class="va">rsl</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">score</span><span class="op">[</span><span class="va">i</span><span class="op">]</span></span>
 <span><span class="va">score_map</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NeuroVol.html">NeuroVol</a></span><span class="op">(</span><span class="va">arr</span>, <span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -275,7 +284,7 @@ instead when you want a smoothly varying map, at the cost of one
 neighbourhood per voxel rather than one per sphere.</p>
 <p>Did it work? Compare the planted region against the rest of the
 brain, in units of the background’s own spread:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">outside_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">brain</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="../reference/indices.html">indices</a></span><span class="op">(</span><span class="va">target</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">inside</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">score_map</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="../reference/indices.html">indices</a></span><span class="op">(</span><span class="va">target</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="va">outside</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">score_map</span><span class="op">)</span><span class="op">[</span><span class="va">outside_idx</span><span class="op">]</span></span>
@@ -284,12 +293,14 @@ brain, in units of the background’s own spread:</p>
 <span>  z <span class="op">=</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">inside</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">outside</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">outside</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     inside    outside sd_outside          z </span></span>
 <span><span class="co">#&gt; 0.35817828 0.02258644 0.10519799 3.19009738</span></span></code></pre></div>
-<p>The planted region sits about three background standard deviations up
-— a real effect, and a modest one. Resist reading the single brightest
-voxel: with neighbourhoods this ragged the maximum is often a two-voxel
+<p>The difference is expressed in background standard deviations as a
+descriptive check of the planted effect. It is not an inferential
+z-statistic: neighbouring scores are dependent and the background is not
+a fitted null distribution. Resist reading the single brightest voxel:
+with neighbourhoods this ragged the maximum is often a two-voxel
 searchlight at the mask edge, and which voxel wins changes with the
 tiling.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">score_map</span>, zlevels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">9</span>, <span class="fl">12</span>, <span class="fl">15</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <img src="regions-and-searchlights_files/figure-html/score-fig-1.png" class="r-plt" alt="Three axial slices of a searchlight correlation map with one bright cluster." width="770"><p class="caption">
@@ -312,7 +323,7 @@ as maximum signal rather than as no signal.</p>
 clusters, which closes the loop — a result becomes the support for the
 next analysis. Ask for <code>cluster_table = TRUE</code> to get one row
 per cluster:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/conn_comp-methods.html">conn_comp</a></span><span class="op">(</span><span class="va">score_map</span>, threshold <span class="op">=</span> <span class="fl">0.35</span>, cluster_table <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cc</span><span class="op">$</span><span class="va">cluster_table</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="va">cc</span><span class="op">$</span><span class="va">cluster_table</span><span class="op">$</span><span class="va">N</span><span class="op">)</span>, <span class="op">]</span>, <span class="fl">4</span><span class="op">)</span></span>
@@ -337,7 +348,7 @@ cluster.</p>
 volumes of a series, or the time course at every voxel.
 <code><a href="../reference/slices-methods.html">slices()</a></code>, <code><a href="../reference/vols-methods.html">vols()</a></code> and <code><a href="../reference/vectors-methods.html">vectors()</a></code>
 give you those directly.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">anat</span> <span class="op">&lt;-</span> <span class="fu">demo_anatomy</span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">slice_means</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="fu"><a href="../reference/slices-methods.html">slices</a></span><span class="op">(</span><span class="va">anat</span><span class="op">)</span>, <span class="va">mean</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
@@ -349,7 +360,7 @@ give you those directly.</p>
 <span><span class="co">#&gt; [1] 40</span></span></code></pre></div>
 <p><code><a href="../reference/vectors-methods.html">vectors()</a></code> iterates voxel time courses, so mapping over
 it and rewrapping gives a volume:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mean_vol</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NeuroVol.html">NeuroVol</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="fu"><a href="../reference/vectors-methods.html">vectors</a></span><span class="op">(</span><span class="va">bold</span><span class="op">)</span>, <span class="va">mean</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">mean_vol</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 64 64 25</span></span></code></pre></div>
@@ -360,7 +371,7 @@ it and rewrapping gives a volume:</p>
 <p>Searchlight scoring is embarrassingly parallel. neuroim2 imports
 <strong>future</strong>, so the change is one line of setup and
 <code><a href="https://future.apply.futureverse.org/reference/future_lapply.html" class="external-link">future_sapply()</a></code> in place of <code><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply()</a></code>:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.apply.futureverse.org" class="external-link">future.apply</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span>, workers <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span></span>

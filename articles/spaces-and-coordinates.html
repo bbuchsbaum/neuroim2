@@ -143,7 +143,7 @@ an axis-aligned image <code>M</code> is diagonal:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/trans-methods.html">trans</a></span><span class="op">(</span><span class="va">sp</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">4</span><span class="op">]</span>          <span class="co"># translation column = origin</span></span>
 <span><span class="co">#&gt; [1]  -90 -126  -72</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fu"><a href="../reference/trans-methods.html">trans</a></span><span class="op">(</span><span class="va">sp</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span>  <span class="co"># diagonal of linear block = voxel sizes</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fu"><a href="../reference/trans-methods.html">trans</a></span><span class="op">(</span><span class="va">sp</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span>  <span class="co"># voxel sizes for this axis-aligned RAS affine</span></span>
 <span><span class="co">#&gt; [1] 2 2 2</span></span></code></pre></div>
 <p>The inverse (world to voxel) is cached on the space:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
@@ -323,9 +323,12 @@ image already has changes nothing:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu"><a href="../reference/trans-methods.html">trans</a></span><span class="op">(</span><span class="fu"><a href="../reference/reorient-methods.html">reorient</a></span><span class="op">(</span><span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"L"</span>, <span class="st">"A"</span>, <span class="st">"S"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="../reference/trans-methods.html">trans</a></span><span class="op">(</span><span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
-<p>This reinterprets the grid; it does not move the voxels. To resample
-the data itself onto a new grid, see
-<code><a href="../articles/resampling-and-orientation.html">vignette("resampling-and-orientation")</a></code>.</p>
+<p>This returns the geometry for a permuted and flipped grid, including
+updated dimensions and spacing. It does not rearrange image values
+because its input is only a space. Use <code>as_canonical(mask)</code>
+to transform the array and space together while preserving each voxel’s
+world position. See <code><a href="../articles/resampling-and-orientation.html">vignette("resampling-and-orientation")</a></code>
+for examples.</p>
 </div>
 <div class="section level2">
 <h2 id="oblique-affines">Oblique affines<a class="anchor" aria-label="anchor" href="#oblique-affines"></a>
@@ -379,11 +382,11 @@ summary volume:</p>
 <div class="section level2">
 <h2 id="four-things-that-catch-people-out">Four things that catch people out<a class="anchor" aria-label="anchor" href="#four-things-that-catch-people-out"></a>
 </h2>
-<p><strong>Oblique affines.</strong> If
-<code>diag(trans(sp)[1:3, 1:3])</code> disagrees with
-<code>spacing(sp)</code>, the image is tilted. Use
-<code><a href="../reference/affine_utils.html">obliquity()</a></code> to measure it and <code><a href="../reference/deoblique.html">deoblique()</a></code> to
-remove it.</p>
+<p><strong>Oblique affines.</strong> Diagonal entries alone cannot
+identify voxel sizes or tilt: even an axis-aligned LAS image has a
+negative first diagonal entry. Use <code><a href="../reference/spacing-methods.html">spacing()</a></code> for edge
+lengths and <code><a href="../reference/affine_utils.html">obliquity()</a></code> to measure tilt.
+<code><a href="../reference/deoblique.html">deoblique()</a></code> resamples onto an axis-aligned grid.</p>
 <p><strong>1-based indices.</strong> <code><a href="../reference/grid_to_coord-methods.html">grid_to_coord()</a></code>
 subtracts 1 for you. If you ever do raw affine arithmetic yourself,
 subtract it first or every coordinate is off by one voxel.</p>
@@ -395,9 +398,10 @@ affines disagree, what you get may not be what the pixdim field
 advertises; <code><a href="../articles/reading-and-writing.html">vignette("reading-and-writing")</a></code> shows how to
 inspect both.</p>
 <p><strong>Float32 precision.</strong> NIfTI stores affine coefficients
-as 32-bit floats, and neuroim2 rounds to 7 significant figures to match.
-Round trips can show floating-point noise around 0.001 mm. Compare
-coordinates with a tolerance.</p>
+as 32-bit floats, and <code><a href="../reference/NeuroSpace.html">NeuroSpace()</a></code> also rounds affines to 7
+significant figures. Round-trip error depends on the affine and
+coordinate magnitudes; compare coordinates with a tolerance appropriate
+to your voxel sizes.</p>
 </div>
 <div class="section level2">
 <h2 id="quick-reference">Quick reference<a class="anchor" aria-label="anchor" href="#quick-reference"></a>

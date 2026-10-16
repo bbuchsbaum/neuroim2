@@ -167,11 +167,16 @@ compare(original = anat, gaussian = light, guided = guided, bilateral = bilatera
 ![Four axial slices comparing original, Gaussian, guided and bilateral
 filtering.](smoothing-and-filtering_files/figure-html/edge-preserving-1.png)
 
-Gaussian blur against two edge-preserving filters at matched support.
+Gaussian blur against two edge-preserving filters at the stated
+settings.
 
-All three now use a one-voxel radius, so the comparison is about method
-rather than support. The question an edge-preserving filter has to
-answer is: **how much variance can you remove per unit of distortion?**
+These settings illustrate each method rather than match their support:
+`light` uses a Gaussian window derived from its 16 mm FWHM, while the
+guided and bilateral calls use a one-voxel radius. Changes therefore
+reflect both the method and its settings. One descriptive comparison is
+**how much intensity variance changes per unit of change from the
+original image**. Without a clean reference image, reduced variance does
+not by itself establish noise removal.
 
 ``` r
 
@@ -196,16 +201,11 @@ round(rbind(
 #> bilateral 1080.394   0.360      0.029 12.299
 ```
 
-[`bilateral_filter()`](https://bbuchsbaum.github.io/neuroim2/reference/bilateral_filter.md)
-removes a third of the variance for a twentieth of the distortion — an
-exchange rate three times better than the Gaussian’s, and that ratio is
-what “edge preserving” buys you.
-[`gaussian_blur()`](https://bbuchsbaum.github.io/neuroim2/reference/gaussian_blur.md)
-removes more variance outright but pays the most per unit for it.
-[`guided_filter()`](https://bbuchsbaum.github.io/neuroim2/reference/guided_filter.md)
-is the weakest of the three at this `epsilon`: it barely smooths, and
-the little it does costs about what the Gaussian charges. Raise
-`epsilon` towards `sd_in^2` to get more out of it.
+Use the table to compare variance reduction and correlation with the
+input at these settings. The ratio is descriptive and can be unstable
+when distortion is close to zero (it is undefined for the unchanged
+original). It does not separate anatomical contrast from noise. Raise
+`epsilon` towards `sd_in^2` to explore stronger guided smoothing.
 
 Note that a plain whole-array [`sd()`](https://rdrr.io/r/stats/sd.html)
 would have told you the opposite story. Outside the mask these images
@@ -252,8 +252,9 @@ Contrast inside the brain rises by more than half, which is the point,
 and the noise floor outside is untouched because the mask excluded it.
 Drop the mask and that second column climbs instead.
 
-The output does go negative on a non-negative image, so clip before
-writing anything downstream:
+The output can go negative even when the input is non-negative. Inspect
+its range and clip only if the downstream application requires
+non-negative values:
 
 ``` r
 

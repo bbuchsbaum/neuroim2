@@ -194,13 +194,18 @@ units</strong>. On an image scaled 0 to 9533 an <code>epsilon</code> of
 <span><span class="fu">compare</span><span class="op">(</span>original <span class="op">=</span> <span class="va">anat</span>, gaussian <span class="op">=</span> <span class="va">light</span>, guided <span class="op">=</span> <span class="va">guided</span>, bilateral <span class="op">=</span> <span class="va">bilateral</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <img src="smoothing-and-filtering_files/figure-html/edge-preserving-1.png" class="r-plt" alt="Four axial slices comparing original, Gaussian, guided and bilateral filtering." width="770"><p class="caption">
-Gaussian blur against two edge-preserving filters at matched support.
+Gaussian blur against two edge-preserving filters at the stated
+settings.
 </p>
 </div>
-<p>All three now use a one-voxel radius, so the comparison is about
-method rather than support. The question an edge-preserving filter has
-to answer is: <strong>how much variance can you remove per unit of
-distortion?</strong></p>
+<p>These settings illustrate each method rather than match their
+support: <code>light</code> uses a Gaussian window derived from its 16
+mm FWHM, while the guided and bilateral calls use a one-voxel radius.
+Changes therefore reflect both the method and its settings. One
+descriptive comparison is <strong>how much intensity variance changes
+per unit of change from the original image</strong>. Without a clean
+reference image, reduced variance does not by itself establish noise
+removal.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">score</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">v</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as.array.html">as.array</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">[</span><span class="va">inside</span><span class="op">]</span></span>
@@ -221,14 +226,12 @@ distortion?</strong></p>
 <span><span class="co">#&gt; gaussian   559.053   0.829      0.282  2.941</span></span>
 <span><span class="co">#&gt; guided    1291.002   0.087      0.027  3.231</span></span>
 <span><span class="co">#&gt; bilateral 1080.394   0.360      0.029 12.299</span></span></code></pre></div>
-<p><code><a href="../reference/bilateral_filter.html">bilateral_filter()</a></code> removes a third of the variance for a
-twentieth of the distortion — an exchange rate three times better than
-the Gaussian’s, and that ratio is what “edge preserving” buys you.
-<code><a href="../reference/gaussian_blur.html">gaussian_blur()</a></code> removes more variance outright but pays the
-most per unit for it. <code><a href="../reference/guided_filter.html">guided_filter()</a></code> is the weakest of the
-three at this <code>epsilon</code>: it barely smooths, and the little it
-does costs about what the Gaussian charges. Raise <code>epsilon</code>
-towards <code>sd_in^2</code> to get more out of it.</p>
+<p>Use the table to compare variance reduction and correlation with the
+input at these settings. The ratio is descriptive and can be unstable
+when distortion is close to zero (it is undefined for the unchanged
+original). It does not separate anatomical contrast from noise. Raise
+<code>epsilon</code> towards <code>sd_in^2</code> to explore stronger
+guided smoothing.</p>
 <p>Note that a plain whole-array <code><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd()</a></code> would have told you
 the opposite story. Outside the mask these images are nearly constant,
 so filters that flatten air look like strong denoisers when scored over
@@ -266,8 +269,9 @@ where over-enhancement shows first:</p>
 <p>Contrast inside the brain rises by more than half, which is the
 point, and the noise floor outside is untouched because the mask
 excluded it. Drop the mask and that second column climbs instead.</p>
-<p>The output does go negative on a non-negative image, so clip before
-writing anything downstream:</p>
+<p>The output can go negative even when the input is non-negative.
+Inspect its range and clip only if the downstream application requires
+non-negative values:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">sharp_arr</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1]  -122.0209 11914.8799</span></span></code></pre></div>

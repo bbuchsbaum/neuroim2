@@ -24,7 +24,10 @@ identical(space(anat), space(stat_map))
 The statistical map here is fitted, not drawn: a design is planted in
 two spheres of a simulated series and a t-statistic is computed at every
 voxel. It shares a `NeuroSpace` with the anatomy, which every overlay
-helper requires.
+helper requires. The fit uses ordinary least squares without modelling
+the simulated temporal autocorrelation, so these t values and thresholds
+illustrate display settings; they are not calibrated inferential
+statistics.
 
 ``` r
 
@@ -121,7 +124,7 @@ plot_overlay(
   zlevels = zlevels, ncol = 6,
   bg_cmap = anatomy_cmap, bg_range = "robust",
   ov_cmap = "coldhot", ov_thresh = 3, ov_symmetric = TRUE, ov_alpha = 0.8,
-  title = "t > 3", style = "dark"
+  title = "|t| > 3", style = "dark"
 )
 ```
 

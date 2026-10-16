@@ -196,11 +196,12 @@ spacing(read_vol(anat_file))
 ```
 
 Nothing errors. The image loads and plots correctly, and every
-**distance, volume and ROI radius** derived from it is wrong by a factor
-of about four. The coordinates themselves are not scaled by four — both
-affines share a translation, so they agree exactly at voxel `(1, 1, 1)`
-and diverge by a growing offset that reaches 140 to 170 mm per axis at
-the far corner:
+**distance, volume and ROI radius** derived from it uses the wrong
+physical scale. Lengths differ by a factor of about four and voxel
+volumes by about 64. The coordinates themselves are not scaled by four —
+both affines share a translation, so they agree exactly at voxel
+`(1, 1, 1)` and diverge by a growing offset that reaches 140 to 170 mm
+per axis at the far corner:
 
 ``` r
 
@@ -238,18 +239,18 @@ The [`is.null()`](https://rdrr.io/r/base/NULL.html) guard matters: not
 every format carries these fields, and returning `NA` for “cannot tell”
 is better than erroring on an AFNI file.
 
-If a file is affected and you trust its `pixdim`, rebuild the geometry:
+Disagreement alone does not tell you which transform is correct; qform
+and sform may intentionally describe different coordinate spaces. Check
+the image’s provenance before changing either. If you have established
+that the qform is the correct geometry, use its full affine so rotation
+and axis directions survive:
 
 ``` r
 
 bad <- read_vol(bad_file)
 fixed <- NeuroVol(
   as.array(bad),
-  NeuroSpace(dim(bad),
-    spacing = bad_hdr@header$pixdim[2:4],
-    origin = bad_hdr@header$qform[1:3, 4],
-    axes = space(bad)@axes
-  )
+  NeuroSpace(dim(bad), trans = bad_hdr@header$qform)
 )
 
 spacing(fixed)
@@ -336,11 +337,13 @@ spacing(sp)
 #> [1] 0.333333 0.123457 3.141590
 ```
 
-No file was involved. Because both sides of a round trip get the same
-rounding, [`identical()`](https://rdrr.io/r/base/identical.html) on a
-re-read affine does succeed, as above. What you cannot rely on is an
-affine you constructed matching the full-precision numbers you passed
-in.
+No file was involved. The mask’s affine above survives this round trip
+exactly, but that is not a guarantee for every affine: NIfTI-1 also
+stores transform coefficients as 32-bit floats. Use
+[`all.equal()`](https://rdrr.io/pkg/Matrix/man/all.equal-methods.html)
+with an appropriate tolerance when checking general round trips. An
+affine you construct may also differ from the full-precision numbers you
+passed in.
 
 ## AFNI files
 

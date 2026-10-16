@@ -110,11 +110,12 @@ uncompressed NIfTI so that every backend can read it:</p>
 <span><span class="co">#&gt; [1] 64 64 25 60</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.info.html" class="external-link">file.size</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span> <span class="op">/</span> <span class="fl">1e6</span>, <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 24.6</span></span></code></pre></div>
-<p>The file is uncompressed. Every backend can read <code>.nii.gz</code>
-too, but two of them pay for it: memory mapping silently decompresses to
-a temporary uncompressed copy, and file-backed access constructs happily
-and then fails at the first read. Write uncompressed if you intend to
-map.</p>
+<p>The file is uncompressed. Dense and sparse reads support
+<code>.nii.gz</code> directly. Memory mapping requires the optional
+<code>R.utils</code> package to decompress <code>.nii.gz</code> to a
+temporary uncompressed copy and emits a warning. File-backed access does
+not support compressed reads, even though construction may succeed. Use
+an uncompressed <code>.nii</code> for mapped or file-backed access.</p>
 <div class="section level2">
 <h2 id="what-each-backend-costs">What each backend costs<a class="anchor" aria-label="anchor" href="#what-each-backend-costs"></a>
 </h2>
@@ -173,13 +174,13 @@ twenty voxel time courses — on each backend:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">signif</a></span><span class="op">(</span><span class="va">timings</span>, <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;            volumes  series</span></span>
 <span><span class="co">#&gt; dense       0.0015 0.00005</span></span>
-<span><span class="co">#&gt; sparse      0.0016 0.00010</span></span>
-<span><span class="co">#&gt; mapped      0.0059 0.00015</span></span>
-<span><span class="co">#&gt; filebacked  0.0300 0.01200</span></span></code></pre></div>
+<span><span class="co">#&gt; sparse      0.0017 0.00005</span></span>
+<span><span class="co">#&gt; mapped      0.0051 0.00010</span></span>
+<span><span class="co">#&gt; filebacked  0.0260 0.01700</span></span></code></pre></div>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">timings</span><span class="op">[</span><span class="st">"filebacked"</span>, <span class="st">"series"</span><span class="op">]</span> <span class="op">/</span> <span class="va">timings</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dense"</span>, <span class="st">"sparse"</span>, <span class="st">"mapped"</span><span class="op">)</span>, <span class="st">"series"</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  dense sparse mapped </span></span>
-<span><span class="co">#&gt;    232    116     77</span></span></code></pre></div>
+<span><span class="co">#&gt;    336    336    168</span></span></code></pre></div>
 <p>Seconds per call, and the ratio is computed rather than quoted, so it
 stays honest on your machine. Fetching one voxel’s time course from a
 <code>FileBackedNeuroVec</code> costs three to four orders of magnitude
@@ -232,8 +233,11 @@ uncompressed file if it has to:</p>
 writes into <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code> and you have a second full copy of
 the data with no obvious owner.</p>
 <p><strong>BigNeuroVec</strong> backs a masked series with an on-disk
-<code>bigstatsr</code> matrix, which is the option for data larger than
-RAM that still needs voxelwise access:</p>
+<code>bigstatsr</code> matrix for subsequent voxelwise access. However,
+<code>read_vec(mode = "bigvec")</code> first loads the masked data into
+memory and then copies it to the backing matrix. The masked input must
+fit in RAM during construction; this reader does not stream an
+arbitrarily large file directly to disk:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">big</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vec.html">read_vec</a></span><span class="op">(</span><span class="va">path</span>, mode <span class="op">=</span> <span class="st">"bigvec"</span>, mask <span class="op">=</span> <span class="va">brain</span><span class="op">)</span></span>
 <span></span>
@@ -353,9 +357,9 @@ rather than voxel neighbourhoods:</p>
 <td align="left">never for voxel series</td>
 </tr>
 <tr class="odd">
-<td align="left">Larger than RAM, needs voxel access</td>
+<td align="left">On-disk masked matrix, needs voxel access</td>
 <td align="left"><code>BigNeuroVec</code></td>
-<td align="left">on-disk matrix</td>
+<td align="left">masked input must fit in RAM during loading</td>
 </tr>
 <tr class="even">
 <td align="left">Parcel-level analysis is enough</td>

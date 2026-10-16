@@ -163,9 +163,9 @@ or [`apply()`](https://rdrr.io/r/base/apply.html):
 
 ``` r
 
-values <- as.array(anat)[]        # a plain numeric vector: no space
+values <- as.vector(anat)          # a plain numeric vector: no space
 class(values)
-#> [1] "array"
+#> [1] "numeric"
 
 derived <- NeuroVol(values, space(anat))
 identical(space(derived), space(anat))
@@ -310,9 +310,14 @@ rather than rejected. Check before you concatenate:
 
 ``` r
 
-identical(space(run1), space(run2))
-#> [1] FALSE
+same_grid <- identical(dim(run1)[1:3], dim(run2)[1:3]) &&
+  isTRUE(all.equal(trans(run1), trans(run2), tolerance = 1e-6))
+stopifnot(same_grid)
 ```
+
+Compare spatial dimensions and affines, rather than the full 4D spaces:
+runs with different numbers of scans can still share the same spatial
+grid.
 
 [`split_blocks()`](https://bbuchsbaum.github.io/neuroim2/reference/split_blocks-methods.md)
 is the inverse, cutting a concatenated series back into runs given a

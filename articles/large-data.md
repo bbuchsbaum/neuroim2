@@ -49,10 +49,12 @@ round(file.size(path) / 1e6, 1)
 #> [1] 24.6
 ```
 
-The file is uncompressed. Every backend can read `.nii.gz` too, but two
-of them pay for it: memory mapping silently decompresses to a temporary
-uncompressed copy, and file-backed access constructs happily and then
-fails at the first read. Write uncompressed if you intend to map.
+The file is uncompressed. Dense and sparse reads support `.nii.gz`
+directly. Memory mapping requires the optional `R.utils` package to
+decompress `.nii.gz` to a temporary uncompressed copy and emits a
+warning. File-backed access does not support compressed reads, even
+though construction may succeed. Use an uncompressed `.nii` for mapped
+or file-backed access.
 
 ## What each backend costs
 
@@ -118,16 +120,16 @@ timings <- rbind(
 signif(timings, 2)
 #>            volumes  series
 #> dense       0.0015 0.00005
-#> sparse      0.0016 0.00010
-#> mapped      0.0059 0.00015
-#> filebacked  0.0300 0.01200
+#> sparse      0.0017 0.00005
+#> mapped      0.0051 0.00010
+#> filebacked  0.0260 0.01700
 ```
 
 ``` r
 
 round(timings["filebacked", "series"] / timings[c("dense", "sparse", "mapped"), "series"])
 #>  dense sparse mapped 
-#>    232    116     77
+#>    336    336    168
 ```
 
 Seconds per call, and the ratio is computed rather than quoted, so it
@@ -194,9 +196,11 @@ Give it an explicit `file` when you can. Left to itself it writes into
 [`tempdir()`](https://rdrr.io/r/base/tempfile.html) and you have a
 second full copy of the data with no obvious owner.
 
-**BigNeuroVec** backs a masked series with an on-disk `bigstatsr`
-matrix, which is the option for data larger than RAM that still needs
-voxelwise access:
+**BigNeuroVec** backs a masked series with an on-disk `bigstatsr` matrix
+for subsequent voxelwise access. However, `read_vec(mode = "bigvec")`
+first loads the masked data into memory and then copies it to the
+backing matrix. The masked input must fit in RAM during construction;
+this reader does not stream an arbitrarily large file directly to disk:
 
 ``` r
 
@@ -307,7 +311,7 @@ dim(values(windows[[1]]))
 | A mask defines the analysis | `SparseNeuroVec` | stores only admitted voxels |
 | Large uncompressed file, mixed access | `MappedNeuroVec` | cheap on both access patterns |
 | Large file, strictly volume at a time | `FileBackedNeuroVec` | never for voxel series |
-| Larger than RAM, needs voxel access | `BigNeuroVec` | on-disk matrix |
+| On-disk masked matrix, needs voxel access | `BigNeuroVec` | masked input must fit in RAM during loading |
 | Parcel-level analysis is enough | `ClusteredNeuroVec` | orders of magnitude fewer series |
 
 If you are unsure: read with

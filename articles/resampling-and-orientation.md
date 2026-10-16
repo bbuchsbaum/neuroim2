@@ -5,23 +5,23 @@
 library(neuroim2)
 ```
 
-Four operations change an image’s grid. They are easy to confuse because
-three of them can change its shape, but the distinction that matters is
-different: whether the anatomy stays where it was in the scanner.
+Resampling changes the grid on which an image is represented.
+Reorientation changes the order and direction of its axes. Both can
+change array dimensions, but they handle voxel values differently:
 
-| Operation | Changes the array | Moves the anatomy in world space | Use when |
+| Operation | Handles voxel values by | Preserves anatomy in world space | Use when |
 |:---|:---|:---|:---|
-| [`downsample()`](https://bbuchsbaum.github.io/neuroim2/reference/downsample-methods.md) | yes | no | you want fewer voxels |
-| [`resample_to()`](https://bbuchsbaum.github.io/neuroim2/reference/resample_to.md) | yes | no | you must match another image |
-| [`reorient()`](https://bbuchsbaum.github.io/neuroim2/reference/reorient-methods.md) | **no** | **yes** | the axis codes are wrong |
-| [`deoblique()`](https://bbuchsbaum.github.io/neuroim2/reference/deoblique.md) | yes | no | the affine is oblique |
+| [`downsample()`](https://bbuchsbaum.github.io/neuroim2/reference/downsample-methods.md) | averaging into coarser bins | yes | you want fewer voxels |
+| [`resample_to()`](https://bbuchsbaum.github.io/neuroim2/reference/resample_to.md) | interpolating onto a target grid | yes, within the target field of view | you must match another image |
+| [`as_canonical()`](https://bbuchsbaum.github.io/neuroim2/reference/as_canonical.md) | permuting and flipping exactly | yes | you want RAS array orientation |
+| [`deoblique()`](https://bbuchsbaum.github.io/neuroim2/reference/deoblique.md) | interpolating onto an axis-aligned grid | yes | the affine is oblique |
 
-The first, second and fourth rewrite voxel values precisely *in order
-to* leave the anatomy where it is.
 [`reorient()`](https://bbuchsbaum.github.io/neuroim2/reference/reorient-methods.md)
-is the opposite: it leaves the array alone and relabels the axes, which
-relocates every voxel in world space. That makes it the dangerous one if
-the codes were not in fact wrong.
+operates on a `NeuroSpace`, returning the geometry for a permuted and
+flipped grid. Use
+[`as_canonical()`](https://bbuchsbaum.github.io/neuroim2/reference/as_canonical.md)
+on an image to update its array and space together. Replacing only the
+space on an unchanged array assigns values to the wrong world positions.
 
 ``` r
 
@@ -101,10 +101,10 @@ affine_to_axcodes(trans(naive))
 #> [1] "R" "A" "S"
 ```
 
-The source runs `LAS` and the target runs `RAS`. The two affines differ
-only in the sign of their first column, which is enough to put the
-target grid where the source has no data. Resampling into it succeeds
-and returns an empty image:
+The source runs `LAS` and the target runs `RAS`. The target’s first axis
+points in the opposite direction from the same origin, placing its grid
+where the source has no data. Resampling into it warns about the lack of
+overlap and returns an empty image:
 
 ``` r
 
@@ -121,8 +121,8 @@ sum(resample_to(mask, naive, method = "nearest"))
 #> [1] 0
 ```
 
-No error, no warning, no data. Scale the source’s own affine instead,
-which keeps orientation and origin intact:
+Scale the source’s own affine instead, which keeps orientation and
+origin intact:
 
 ``` r
 
@@ -137,25 +137,28 @@ round(spacing(finer), 3)
 #> [1] 2.188 2.188 2.312
 ```
 
-Then check the result, every time. Rounding the grid means the true
-scale factors are not exactly 1.6, so compare against the ratio you
-actually got:
+Then check the result, every time. The affine was scaled by 1.6 in each
+direction, so each new voxel has `1 / 1.6^3` of the original voxel
+volume. Compare physical mask volumes:
 
 ``` r
 
 up <- resample_to(mask, finer, method = "nearest")
 
-expected <- sum(mask) * prod(dim(finer) / dim(mask))
-c(source = sum(mask), resampled = sum(up), expected = expected)
-#>    source resampled  expected 
-#>   29532.0  120126.0  120019.9
+source_mm3 <- sum(mask) * prod(spacing(mask))
+resampled_mm3 <- sum(up) * prod(spacing(up))
+c(source_mm3 = source_mm3, resampled_mm3 = resampled_mm3)
+#>    source_mm3 resampled_mm3 
+#>       1338538       1329275
 
-abs(sum(up) / expected - 1)
-#> [1] 0.0008840722
+abs(resampled_mm3 / source_mm3 - 1)
+#> [1] 0.006920062
 ```
 
-Under a tenth of a percent. A discrepancy much larger than that means
-the target grid does not enclose the source.
+Small differences are expected from nearest-neighbour boundary sampling.
+Larger differences warrant checking the target field of view and
+resolution; rounding target dimensions can also change its physical
+extent.
 
 ### Choosing an interpolation method
 
@@ -223,7 +226,8 @@ affine_to_axcodes(trans(ras))
 #> [1] "R" "A" "S"
 ```
 
-The array is untouched, so the anatomy moves:
+The same numerical grid index can now refer to a different world
+position:
 
 ``` r
 
@@ -236,47 +240,45 @@ rbind(
 #> after  -108.5 -108.5 -46.25
 ```
 
-Voxel `(1,1,1)` has jumped from `x = +112` to `x = -112`. Use
+That compares two grid corners, not the position of the same anatomical
+voxel. There is no
 [`reorient()`](https://bbuchsbaum.github.io/neuroim2/reference/reorient-methods.md)
-when a file’s codes are genuinely wrong, not to change how an image is
-stored.
-
-There is no
-[`reorient()`](https://bbuchsbaum.github.io/neuroim2/reference/reorient-methods.md)
-method for a `NeuroVol` — it operates on spaces. To rearrange the array
-as well, reorient a copy of the space and resample into it:
+method for a `NeuroVol`. To reorder the values together with their
+geometry, use
+[`as_canonical()`](https://bbuchsbaum.github.io/neuroim2/reference/as_canonical.md):
 
 ``` r
 
-flipped <- resample_to(mask, reorient(space(mask), c("R", "A", "S")), method = "nearest")
-
-c(source = sum(mask), flipped = sum(flipped))
-#>  source flipped 
-#>   29532   29532
+canonical <- as_canonical(mask)
+affine_to_axcodes(trans(canonical))
+#> [1] "R" "A" "S"
+c(source = sum(mask), canonical = sum(canonical))
+#>    source canonical 
+#>     29532     29532
 ```
 
-That is lossless here because `LAS` to `RAS` is a pure flip. It is
-**not** lossless when the requested codes permute axes:
-[`reorient()`](https://bbuchsbaum.github.io/neuroim2/reference/reorient-methods.md)
-leaves `dim` and `spacing` alone, so a rotated box no longer encloses
-the original one and the corners are cut off.
+This is a lossless permutation and flip, without interpolation. Axis
+permutations update dimensions and spacing as well:
 
 ``` r
 
-permuted <- reorient(space(mask), c("P", "S", "R"))
-lost <- resample_to(mask, permuted, method = "nearest")
+permuted <- as_canonical(mask, target = c("P", "S", "R"))
+rbind(source = dim(mask), permuted = dim(permuted))
+#>          [,1] [,2] [,3]
+#> source     64   64   25
+#> permuted   64   25   64
+c(source = sum(mask), permuted = sum(permuted))
+#>   source permuted 
+#>    29532    29532
 
-c(source = sum(mask), permuted = sum(lost), kept = sum(lost) / sum(mask))
-#>   source permuted     kept 
-#>    29532    29532        1
+back <- as_canonical(permuted, target = axcodes(mask))
+all.equal(as.array(back), as.array(mask))
+#> [1] TRUE
 ```
 
-A fifth of the mask, gone without a warning. For anything beyond a flip,
-build a target grid that encloses the rotated field of view —
-[`output_aligned_space()`](https://bbuchsbaum.github.io/neuroim2/reference/space_utils.md)
-and
-[`deoblique()`](https://bbuchsbaum.github.io/neuroim2/reference/deoblique.md)’s
-grid arguments exist for this.
+For a target that changes voxel spacing or sampling locations, use
+[`resample_to()`](https://bbuchsbaum.github.io/neuroim2/reference/resample_to.md)
+instead and choose an appropriate interpolation method.
 
 ## Deobliquing
 
@@ -339,27 +341,14 @@ c(linear = frac(deoblique(mask)), nearest = frac(deoblique(mask, method = "neare
 ```
 
 [`as_canonical()`](https://bbuchsbaum.github.io/neuroim2/reference/as_canonical.md)
-is the related convenience, reorienting to RAS and resampling in one
-step. On an image that is already canonical it returns the input
-untouched, so check the codes rather than the dimensions —
+changes axis order and direction without removing an oblique tilt. It
+preserves voxel values exactly, whereas
+[`deoblique()`](https://bbuchsbaum.github.io/neuroim2/reference/deoblique.md)
+interpolates them. Choose
+[`deoblique()`](https://bbuchsbaum.github.io/neuroim2/reference/deoblique.md)
+when you need cardinal-plane sections, and
 [`as_canonical()`](https://bbuchsbaum.github.io/neuroim2/reference/as_canonical.md)
-never permutes the array:
-
-``` r
-
-affine_to_axcodes(trans(space(mask)))
-#> [1] "L" "A" "S"
-affine_to_axcodes(trans(space(as_canonical(mask))))
-#> [1] "R" "A" "S"
-```
-
-Because it is
-[`reorient()`](https://bbuchsbaum.github.io/neuroim2/reference/reorient-methods.md)
-plus
-[`resample()`](https://bbuchsbaum.github.io/neuroim2/reference/resample-methods.md),
-it inherits the enclosure problem above. Check
-[`sum()`](https://rdrr.io/r/base/sum.html) afterwards on anything that
-is not a pure flip.
+when you only need a consistent array orientation.
 
 ## Where to go next
 
