@@ -21,9 +21,6 @@ test_that("tour: anatomy reads as a 3D volume with positive spacing", {
 })
 
 test_that("tour: a millimetre coordinate round-trips to a voxel inside the grid", {
-  # Uses the EPI mask, not the anatomical image: mni_downsampled.nii.gz has an
-  # sform that disagrees with its pixdim, so its world coordinates are not
-  # physically meaningful and no vignette does coordinate work on it.
   mask <- read_vol(system.file("extdata", "global_mask2.nii.gz", package = "neuroim2"))
   vox <- coord_to_grid(mask, c(-34, -28, 10))
   expect_length(as.vector(vox), 3L)
@@ -32,13 +29,13 @@ test_that("tour: a millimetre coordinate round-trips to a voxel inside the grid"
   expect_equal(as.vector(back), c(-34, -28, 10), tolerance = max(spacing(mask)))
 })
 
-test_that("tour: the anatomical image is used for display only", {
-  # Pins the header inconsistency that drove the decision above, so that a
-  # future fix to the shipped file surfaces here rather than silently changing
-  # what the articles show.
+test_that("tour: the anatomical image has its true ~4 mm geometry", {
+  # Pins the voxel size the articles' kernel widths and radii are chosen for.
+  # Until #50 the shipped file's sform said 1 mm while its qform and pixdim
+  # said 4.02 mm; the articles now rely on the corrected header.
   anat <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
-  expect_equal(spacing(anat), c(1, 1, 1))
-  expect_true(all(abs(diff(spacing(anat))) < 1e-8)) # isotropic: aspect ratio safe
+  expect_equal(spacing(anat), c(4.02083, 4.01754, 4.02083), tolerance = 1e-5)
+  expect_lt(max(spacing(anat)) / min(spacing(anat)), 1.001) # near-isotropic
 })
 
 # --- vignette("volumes-and-vectors") -----------------------------------------

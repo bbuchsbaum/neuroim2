@@ -17,14 +17,10 @@
 # which gives voxels genuine AR(1) temporal structure, spatial smoothness and
 # latent components.
 #
-# Caveat on the anatomical image: mni_downsampled.nii.gz has an inconsistent
-# header. Its pixdim records 4.02 mm voxels but its sform -- which is what
-# neuroim2 follows, correctly, because sform_code > 0 -- is the identity with a
-# translation, so spacing(demo_anatomy()) is 1 mm and its world coordinates do
-# not describe a real brain. The image is therefore used for display and
-# intensity work only, where the affine affects nothing but aspect ratio (and
-# it is isotropic either way). Every millimetre-coordinate example uses
-# demo_mask(), whose affine is consistent: 3.5 x 3.5 x 3.7 mm, LAS.
+# The anatomical image, mni_downsampled.nii.gz, is the MNI152 template
+# downsampled to 48 x 57 x 48, i.e. ~4.02 mm voxels in MNI space (RAS). Kernel
+# widths and radii used on it in the articles are chosen for that voxel size.
+# (Before #50 its sform wrongly said 1 mm; that was corrected in the file.)
 
 # Warnings are deliberately NOT suppressed. A warning from a vignette chunk
 # almost always means the example is wrong -- an earlier draft of the regions
@@ -70,8 +66,7 @@ anatomy_cmap <- c("#242424", "#9a9a9a", "#f4f4f4")
 
 # --- demonstration data ------------------------------------------------------
 
-#' Real anatomical image, 48 x 57 x 48, continuous intensities. Display only:
-#' see the header caveat above.
+#' Real anatomical image, 48 x 57 x 48 at ~4.02 mm, continuous intensities.
 demo_anatomy <- function() {
   neuroim2::read_vol(
     system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2")

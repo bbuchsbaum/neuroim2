@@ -56,7 +56,7 @@ return ordinary `ggplot2` objects you can modify or save.
 ```{r data}
 anat <- demo_anatomy()
 brain <- demo_anatomy_mask()
-stat_map <- demo_stat_map(brain, radius_mm = 6)
+stat_map <- demo_stat_map(brain, radius_mm = 24)
 
 identical(space(anat), space(stat_map))
 ```

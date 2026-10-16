@@ -54,6 +54,10 @@
 #'   brain mask of \code{bgvol} (bright tissue connected to the centre of the
 #'   head, which excludes scalp fat), so scalp and skull contours do not
 #'   dominate the comparison. Default \code{TRUE}.
+#' @param label_size Size of the in-tile text, in ggplot2 text units (mm):
+#'   the slice label is drawn at this size and the orientation letters 10\%
+#'   larger. Theme settings do not reach this text, so use this argument to
+#'   scale it with the figure. Default \code{3.1}.
 #' @return A figure (class \code{neuro_fig}, a \pkg{patchwork} whose
 #'   layout is re-fitted to the device it is drawn on) when
 #'   \code{assemble = TRUE} or a named list
@@ -80,12 +84,14 @@ plot_edge_overlay <- function(
     style = c("light", "dark", "report"), labels = c("fixed", "moving"),
     legend = TRUE, bg_dim = 0.75, crop = TRUE, unit = c("index", "mm"),
     annotate = TRUE, assemble = TRUE, n_slices = 6L, thin = TRUE,
-    compute_edges = FALSE, canvas = NULL, interpolate = TRUE, focus_brain = TRUE) {
+    compute_edges = FALSE, canvas = NULL, interpolate = TRUE, focus_brain = TRUE,
+    label_size = 3.1) {
   unit_missing <- missing(unit)
   assert_same_neuro_grid(bgvol, fixed_edges = fixed_edges, moving_edges = moving_edges)
   style <- match_choice(style, c("light", "dark", "report"))
   unit <- match_choice(unit, c("index", "mm"), "unit")
   tokens <- neuro_style_tokens(style)
+  label_size <- check_label_size(label_size)
   labels <- check_labels2(labels)
   show_agree <- !(length(agree_color) == 1L && is.na(agree_color))
   if (show_agree) {
@@ -188,7 +194,8 @@ plot_edge_overlay <- function(
                },
                window = window, label = slice_world_label(bgvol, z, along),
                orient = if (isTRUE(annotate) && k == 1L) orientation_letters(o) else NULL,
-               tokens = tokens, interpolate = isTRUE(interpolate))
+               tokens = tokens, interpolate = isTRUE(interpolate),
+               label_size = label_size)
   })
   key <- if (isTRUE(legend)) {
     neuro_key_strip(Filter(Negate(is.null), list(list(fill = fixed_color, label = labels[[1L]]),

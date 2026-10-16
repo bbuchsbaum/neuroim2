@@ -44,6 +44,10 @@
 #'   in meaning to the same arguments of \code{\link{plot_overlay}}.
 #' @param canvas Optional \code{c(width, height)} in inches to fit the layout
 #'   to (default: the open device).
+#' @param label_size Size of the in-tile text, in ggplot2 text units (mm):
+#'   the slice label is drawn at this size and the orientation letters 10\%
+#'   larger. Theme settings do not reach this text, so use this argument to
+#'   scale it with the figure. Default \code{3.1}.
 #' @return A figure (class \code{neuro_fig}, a \pkg{patchwork} whose
 #'   layout is re-fitted to the device it is drawn on) when
 #'   \code{assemble = TRUE} or a named list
@@ -74,7 +78,7 @@ plot_ortho <- function(
   overlay = NULL, ov_thresh = 0, ov_cmap = NULL,
   ov_range = c("robust", "data"), ov_alpha = 1,
   ov_alpha_mode = c("binary", "proportional", "ramp", "soft"),
-  ov_symmetric = NULL, ov_cap = NULL, canvas = NULL
+  ov_symmetric = NULL, ov_cap = NULL, canvas = NULL, label_size = 3.1
 ) {
   unit_missing <- missing(unit)
   cbar_title_given <- !missing(cbar_title)
@@ -84,6 +88,7 @@ plot_ortho <- function(
   ov_alpha_mode <- match_choice(ov_alpha_mode, c("binary", "proportional", "ramp", "soft"),
                                 "ov_alpha_mode")
   tokens <- neuro_style_tokens(style)
+  label_size <- check_label_size(label_size)
   is_report <- identical(style, "report")
   do_crop   <- if (is.null(crop)) TRUE else isTRUE(crop)
   interp_bg <- isTRUE(interpolate)
@@ -218,7 +223,7 @@ plot_ortho <- function(
     p <- neuro_tile(i$oriented, bg_lim = lim, bg_cmap = cmap, layers = layers,
                     window = w, label = label,
                     orient = if (isTRUE(annotate)) orientation_letters(i$oriented, all = TRUE) else NULL,
-                    tokens = tokens, interpolate = interp_bg,
+                    tokens = tokens, interpolate = interp_bg, label_size = label_size,
                     floor_y = raster_extent_from_centers(i$oriented$y)[1],
                     # The inferior crop usually cuts through the neck; fade it
                     # out rather than end the image on a hard edge.

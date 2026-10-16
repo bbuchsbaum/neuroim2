@@ -31,7 +31,8 @@ plot_checkerboard(
   match_intensity = TRUE,
   canvas = NULL,
   interpolate = TRUE,
-  focus_brain = TRUE
+  focus_brain = TRUE,
+  label_size = 3.1
 )
 }
 \arguments{
@@ -102,6 +103,11 @@ to (default: the open device).}
 bright-tissue mask of \code{bgvol} and show the fixed image alone on the
 scalp, so the seams where registration is judged dominate the figure
 instead of the stair-stepped head outline. Default \code{TRUE}.}
+
+\item{label_size}{Size of the in-tile text, in ggplot2 text units (mm):
+the slice label is drawn at this size and the orientation letters 10\%
+larger. Theme settings do not reach this text, so use this argument to
+scale it with the figure. Default \code{3.1}.}
 }
 \value{
 A figure (class \code{neuro_fig}, a \pkg{patchwork} whose
