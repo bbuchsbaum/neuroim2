@@ -87,6 +87,10 @@
 #' @param canvas Optional \code{c(width, height)} in inches to freeze the
 #'   layout for one size. By default (\code{NULL}) the layout is re-fitted to
 #'   whatever device the figure is drawn on, including \code{ggsave()}.
+#' @param label_size Size of the in-tile text, in ggplot2 text units (mm):
+#'   the slice label is drawn at this size and the orientation letters 10\%
+#'   larger. Theme settings do not reach this text, so use this argument to
+#'   scale it with the figure. Default \code{3.1}.
 #'
 #' @return A figure (class \code{neuro_fig}, a \pkg{patchwork} whose
 #'   layout is re-fitted to the device it is drawn on) when
@@ -137,7 +141,7 @@ plot_overlay <- function(
   crop = TRUE, interpolate = TRUE, cbar_title = "value",
   unit = c("index", "mm"), annotate = TRUE, n_slices = 12L, canvas = NULL,
   alpha_knee = NULL, alpha_cap = NULL, alpha_floor = NULL,
-  alpha_mid = 0.2, gamma_min = 1.5, gamma_max = 5
+  alpha_mid = 0.2, gamma_min = 1.5, gamma_max = 5, label_size = 3.1
 ) {
   unit_missing <- missing(unit)
   assert_same_neuro_grid(bgvol, overlay = overlay)
@@ -147,6 +151,7 @@ plot_overlay <- function(
   style <- match_choice(style, c("light", "dark", "report"))
   unit <- match_choice(unit, c("index", "mm"), "unit")
   tokens <- neuro_style_tokens(style)
+  label_size <- check_label_size(label_size)
 
   is_report   <- identical(style, "report")
   show_legend <- if (is.null(legend)) is_report else isTRUE(legend)
@@ -205,7 +210,7 @@ plot_overlay <- function(
       bg_oriented, bg_lim = bg_lim, bg_cmap = bg_cmap, layers = list(g_ov),
       window = crop_win, label = slice_world_label(bgvol, z, along),
       orient = if (isTRUE(annotate) && k == 1L) orientation_letters(bg_oriented) else NULL,
-      tokens = tokens, interpolate = interp_bg
+      tokens = tokens, interpolate = interp_bg, label_size = label_size
     )
   })
 

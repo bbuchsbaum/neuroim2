@@ -61,6 +61,18 @@ check_overlay_args <- function(ov_thresh, ov_alpha) {
   ov_thresh
 }
 
+#' Validate the in-tile text size (ggplot2 text size, i.e. mm); returns it
+#' @keywords internal
+#' @noRd
+check_label_size <- function(label_size) {
+  if (!is.numeric(label_size) || length(label_size) != 1L ||
+      !is.finite(label_size) || label_size <= 0) {
+    cli::cli_abort("{.arg label_size} must be a single positive number (ggplot2 text size, in mm).",
+                   call = NULL)
+  }
+  as.numeric(label_size)
+}
+
 #' Validate a positive whole-number count
 #' @keywords internal
 #' @noRd
@@ -430,6 +442,8 @@ overlay_slice_grob <- function(overlay, z, along, scale, thresh, alpha_fun,
 #'   (\code{left/right/top/bottom}) to draw, or NULL.
 #' @param tokens Style tokens.
 #' @param interpolate Smooth the background raster.
+#' @param label_size ggplot2 text size of the slice label; orientation letters
+#'   are drawn 10\% larger.
 #' @keywords internal
 #' @noRd
 neuro_tile <- function(oriented, bg_lim, bg_cmap = "grays", layers = list(),

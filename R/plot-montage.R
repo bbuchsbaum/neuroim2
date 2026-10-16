@@ -43,6 +43,10 @@
 #'   return it invisibly). By default it is returned visibly, like any ggplot.
 #' @param canvas Optional \code{c(width, height)} in inches to fit the layout
 #'   to (default: the open device, else 10 x 7.5 in).
+#' @param label_size Size of the in-tile text, in ggplot2 text units (mm):
+#'   the slice label is drawn at this size and the orientation letters 10\%
+#'   larger. Theme settings do not reach this text, so use this argument to
+#'   scale it with the figure. Default \code{3.1}.
 #' @return A figure (class \code{neuro_fig}, a \pkg{patchwork} wrapping one
 #'   faceted ggplot with one facet per slice), returned visibly; invisibly when
 #'   \code{draw = TRUE}. Its layout is re-fitted to the device it is drawn on,
@@ -63,7 +67,7 @@ plot_montage <- function(
   style = c("light", "dark", "report"),
   crop = TRUE, interpolate = TRUE, cbar_title = "value", colorbar = NULL,
   unit = c("index", "mm"), annotate = TRUE, n_slices = 12L,
-  draw = FALSE, canvas = NULL
+  draw = FALSE, canvas = NULL, label_size = 3.1
 ) {
   unit_missing <- missing(unit)
   cbar_title_given <- !missing(cbar_title)
@@ -73,6 +77,7 @@ plot_montage <- function(
   check_count(n_slices, "n_slices")
   if (inherits(x, "NeuroVol")) unit_hint(zlevels, unit_missing, x)
   tokens <- neuro_style_tokens(style)
+  label_size <- check_label_size(label_size)
   is_report <- identical(style, "report")
   do_crop   <- if (is.null(crop)) TRUE else isTRUE(crop)
   interp_bg <- isTRUE(interpolate)
@@ -192,10 +197,10 @@ plot_montage <- function(
         ggplot2::geom_text(data = halo_offsets(lab_df, off),
                            ggplot2::aes(x = x, y = y, label = label),
                            inherit.aes = FALSE, hjust = 0, vjust = 1,
-                           colour = tokens$tile, alpha = 0.85, size = 3.1) +
+                           colour = tokens$tile, alpha = 0.85, size = label_size) +
         ggplot2::geom_text(data = lab_df, ggplot2::aes(x = x, y = y, label = label),
                            inherit.aes = FALSE, hjust = 0, vjust = 1,
-                           colour = tokens$tile_fg, size = 3.1)
+                           colour = tokens$tile_fg, size = label_size)
       if (isTRUE(annotate) && !is.null(first_oriented)) {
         ol <- first_oriented$labels
         or_df <- data.frame(
@@ -209,11 +214,11 @@ plot_montage <- function(
           ggplot2::geom_text(data = halo_offsets(or_df, off),
                              ggplot2::aes(x = x, y = y, label = label, hjust = hjust),
                              inherit.aes = FALSE, vjust = 0.5, fontface = "bold",
-                             colour = tokens$tile, alpha = 0.85, size = 3.4) +
+                             colour = tokens$tile, alpha = 0.85, size = label_size * 1.1) +
           ggplot2::geom_text(data = or_df,
                              ggplot2::aes(x = x, y = y, label = label, hjust = hjust),
                              inherit.aes = FALSE, vjust = 0.5, fontface = "bold",
-                             colour = tokens$tile_fg, size = 3.4)
+                             colour = tokens$tile_fg, size = label_size * 1.1)
       }
       p <- p + ggplot2::coord_fixed(xlim = window$xlim, ylim = window$ylim, expand = FALSE)
     } else {
