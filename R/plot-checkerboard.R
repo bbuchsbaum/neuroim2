@@ -47,6 +47,10 @@
 #'   instead of the stair-stepped head outline. Default \code{TRUE}.
 #' @param interpolate Logical; smooth the rendered checkerboard (default
 #'   \code{TRUE}), which also softens the head outline.
+#' @param label_size Size of the in-tile text, in ggplot2 text units (mm):
+#'   the slice label is drawn at this size and the orientation letters 10\%
+#'   larger. Theme settings do not reach this text, so use this argument to
+#'   scale it with the figure. Default \code{3.1}.
 #' @return A figure (class \code{neuro_fig}, a \pkg{patchwork} whose
 #'   layout is re-fitted to the device it is drawn on) when
 #'   \code{assemble = TRUE} or a named list
@@ -70,12 +74,14 @@ plot_checkerboard <- function(
     style = c("light", "dark", "report"), labels = c("fixed", "moving"),
     legend = TRUE, crop = TRUE, mask_background = TRUE,
     unit = c("index", "mm"), annotate = TRUE, assemble = TRUE, n_slices = 6L,
-    match_intensity = TRUE, canvas = NULL, interpolate = TRUE, focus_brain = TRUE) {
+    match_intensity = TRUE, canvas = NULL, interpolate = TRUE, focus_brain = TRUE,
+    label_size = 3.1) {
   unit_missing <- missing(unit)
   assert_same_neuro_grid(bgvol, overlay = overlay)
   style <- match_choice(style, c("light", "dark", "report"))
   unit <- match_choice(unit, c("index", "mm"), "unit")
   tokens <- neuro_style_tokens(style)
+  label_size <- check_label_size(label_size)
   labels <- check_labels2(labels)
   check_count(n_slices, "n_slices")
   unit_hint(zlevels, unit_missing, bgvol)
@@ -175,7 +181,8 @@ plot_checkerboard <- function(
     neuro_tile(o, bg_lim = c(0, 1), bg_cmap = cmap, window = window,
                label = slice_world_label(bgvol, z, along),
                orient = if (isTRUE(annotate) && k == 1L) orientation_letters(o) else NULL,
-               tokens = tokens, interpolate = isTRUE(interpolate))
+               tokens = tokens, interpolate = isTRUE(interpolate),
+               label_size = label_size)
   })
   key <- if (isTRUE(legend)) {
     tile_mm <- tile * min(spacing(space(bgvol))[-along])

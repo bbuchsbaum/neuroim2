@@ -37,7 +37,8 @@ plot_edge_overlay(
   compute_edges = FALSE,
   canvas = NULL,
   interpolate = TRUE,
-  focus_brain = TRUE
+  focus_brain = TRUE,
+  label_size = 3.1
 )
 }
 \arguments{
@@ -119,6 +120,11 @@ contours (default \code{TRUE}).}
 brain mask of \code{bgvol} (bright tissue connected to the centre of the
 head, which excludes scalp fat), so scalp and skull contours do not
 dominate the comparison. Default \code{TRUE}.}
+
+\item{label_size}{Size of the in-tile text, in ggplot2 text units (mm):
+the slice label is drawn at this size and the orientation letters 10\%
+larger. Theme settings do not reach this text, so use this argument to
+scale it with the figure. Default \code{3.1}.}
 }
 \value{
 A figure (class \code{neuro_fig}, a \pkg{patchwork} whose

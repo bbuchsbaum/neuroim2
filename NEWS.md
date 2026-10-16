@@ -1,3 +1,19 @@
+# neuroim2 0.19.1.9000
+
+* The bundled template `inst/extdata/mni_downsampled.nii.gz` now has a
+  correct sform. Its sform was the identity plus a translation, which takes
+  precedence over the qform and made the image read as 1 mm voxels; it is the
+  MNI152 template downsampled to 48 x 57 x 48, so `spacing()` now reports
+  about 4.02 mm and its world coordinates are MNI millimetres. Voxel values
+  are unchanged. Code that relied on the old 1 mm geometry of this file (mm
+  radii, kernel widths, world coordinates) should scale accordingly; the
+  vignettes have been updated (#50).
+* `plot_ortho()`, `plot_montage()`, `plot_overlay()`, `plot_checkerboard()`
+  and `plot_edge_overlay()` gain a `label_size` argument controlling the size
+  of the in-tile slice label (orientation letters are drawn 10% larger).
+  It was previously fixed at 3.1 and could not be changed by theme settings
+  (#51).
+
 # neuroim2 0.19.1
 
 * Dense `vectors()` iteration now extracts its underlying array once, avoiding

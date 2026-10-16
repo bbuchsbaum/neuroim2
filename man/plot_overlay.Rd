@@ -42,7 +42,8 @@ plot_overlay(
   alpha_floor = NULL,
   alpha_mid = 0.2,
   gamma_min = 1.5,
-  gamma_max = 5
+  gamma_max = 5,
+  label_size = 3.1
 )
 }
 \arguments{
@@ -159,6 +160,11 @@ opacity mapping across figures; see \code{\link{soft_alpha_params}}.}
 \item{alpha_mid, gamma_min, gamma_max}{Auto-gamma policy passed to
 \code{\link{soft_alpha_params}} (0.2 at the median supra-knee magnitude,
 gamma clamped to [1.5, 5]).}
+
+\item{label_size}{Size of the in-tile text, in ggplot2 text units (mm):
+the slice label is drawn at this size and the orientation letters 10\%
+larger. Theme settings do not reach this text, so use this argument to
+scale it with the figure. Default \code{3.1}.}
 }
 \value{
 A figure (class \code{neuro_fig}, a \pkg{patchwork} whose
