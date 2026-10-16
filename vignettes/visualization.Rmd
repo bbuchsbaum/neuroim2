@@ -27,7 +27,7 @@ vignette: |
 ---
 
 ```{r setup, include = FALSE}
-source("_common.R")
+source("_common.R", local = TRUE)
 knitr::opts_chunk$set(fig.width = 8, dpi = 120)
 ```
 

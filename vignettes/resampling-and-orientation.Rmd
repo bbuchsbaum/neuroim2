@@ -27,7 +27,7 @@ vignette: |
 ---
 
 ```{r setup, include = FALSE}
-source("_common.R")
+source("_common.R", local = TRUE)
 ```
 
 ```{r albers-classes, echo=FALSE, results='asis'}
@@ -119,16 +119,17 @@ naive <- NeuroSpace(round(dim(mask) * 1.6), spacing(mask) / 1.6, origin = origin
 affine_to_axcodes(trans(naive))
 ```
 
-The source runs `LAS` and the target runs `RAS`. The two affines differ only in
-the sign of their first column, which is enough to put the target grid where the
-source has no data. Resampling into it succeeds and returns an empty image:
+The source runs `LAS` and the target runs `RAS`. The target's first axis points
+in the opposite direction from the same origin, placing its grid where the
+source has no data. Resampling into it warns about the lack of overlap and
+returns an empty image:
 
 ```{r bad-resample}
 sum(resample_to(mask, naive, method = "nearest"))
 ```
 
-No error, no warning, no data. Scale the source's own affine instead, which
-keeps orientation and origin intact:
+Scale the source's own affine instead, which keeps orientation and origin
+intact:
 
 ```{r good-target}
 tr <- trans(mask)
