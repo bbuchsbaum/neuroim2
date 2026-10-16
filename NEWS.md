@@ -14,6 +14,17 @@
   It was previously fixed at 3.1 and could not be changed by theme settings
   (#51).
 
+## Documentation
+
+* Vignettes now describe lossless `as_canonical()` reorientation and the
+  dimension and spacing updates made by `reorient()`.
+* Corrected affine repair, physical-volume comparisons, spatial-grid checks
+  before concatenation, and removal of background parcel summaries.
+* Clarified compressed-file support, memory requirements when constructing
+  `BigNeuroVec`, filter comparisons, and interpretation of simulated statistics.
+* Shared vignette setup now guards optional font dependencies and respects
+  each article's theme parameters.
+
 # neuroim2 0.19.1
 
 * Dense `vectors()` iteration now extracts its underlying array once, avoiding

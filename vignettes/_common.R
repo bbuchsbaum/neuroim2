@@ -41,9 +41,21 @@ knitr::opts_chunk$set(
   fig.alt = "Plot output"
 )
 
+if (requireNamespace("ragg", quietly = TRUE)) {
+  knitr::opts_chunk$set(dev = "ragg_png")
+}
+
+if (requireNamespace("albersdown", quietly = TRUE) &&
+    requireNamespace("systemfonts", quietly = TRUE)) {
+  albersdown::albers_register_fonts()
+}
+
 if (requireNamespace("ggplot2", quietly = TRUE)) {
   if (requireNamespace("albersdown", quietly = TRUE)) {
-    ggplot2::theme_set(albersdown::theme_albers(family = "red", preset = "homage"))
+    article_params <- if (exists("params", inherits = TRUE)) params else list()
+    family <- if (is.null(article_params$family)) "red" else article_params$family
+    preset <- if (is.null(article_params$preset)) "interaction" else article_params$preset
+    ggplot2::theme_set(albersdown::theme_albers(family = family, preset = preset))
   } else {
     ggplot2::theme_set(neuroim2::theme_neuro())
   }

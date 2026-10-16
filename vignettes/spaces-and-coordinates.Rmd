@@ -27,10 +27,7 @@ vignette: |
 ---
 
 ```{r setup, include = FALSE}
-if (requireNamespace("ragg", quietly = TRUE)) knitr::opts_chunk$set(dev = "ragg_png")
-if (requireNamespace("systemfonts", quietly = TRUE)) albersdown::albers_register_fonts()
-if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("albersdown", quietly = TRUE)) ggplot2::theme_set(albersdown::theme_albers(family = params$family, preset = params$preset))
-source("_common.R")
+source("_common.R", local = TRUE)
 ```
 
 ```{r albers-classes, echo=FALSE, results='asis'}
@@ -112,7 +109,7 @@ Both pieces can be read straight back out:
 
 ```{r decompose-affine}
 trans(sp)[1:3, 4]          # translation column = origin
-diag(trans(sp)[1:3, 1:3])  # diagonal of linear block = voxel sizes
+diag(trans(sp)[1:3, 1:3])  # voxel sizes for this axis-aligned RAS affine
 ```
 
 The inverse (world to voxel) is cached on the space:
@@ -271,8 +268,11 @@ already has changes nothing:
 identical(trans(reorient(space(mask), c("L", "A", "S"))), trans(space(mask)))
 ```
 
-This reinterprets the grid; it does not move the voxels. To resample the data
-itself onto a new grid, see `vignette("resampling-and-orientation")`.
+This returns the geometry for a permuted and flipped grid, including updated
+dimensions and spacing. It does not rearrange image values because its input is
+only a space. Use `as_canonical(mask)` to transform the array and space together
+while preserving each voxel's world position. See
+`vignette("resampling-and-orientation")` for examples.
 
 ## Oblique affines
 
@@ -323,9 +323,10 @@ identical(trans(sp_back), trans(sp))
 
 ## Four things that catch people out
 
-**Oblique affines.** If `diag(trans(sp)[1:3, 1:3])` disagrees with `spacing(sp)`,
-the image is tilted. Use `obliquity()` to measure it and `deoblique()` to remove
-it.
+**Oblique affines.** Diagonal entries alone cannot identify voxel sizes or
+tilt: even an axis-aligned LAS image has a negative first diagonal entry.
+Use `spacing()` for edge lengths and `obliquity()` to measure tilt.
+`deoblique()` resamples onto an axis-aligned grid.
 
 **1-based indices.** `grid_to_coord()` subtracts 1 for you. If you ever do raw
 affine arithmetic yourself, subtract it first or every coordinate is off by one
@@ -338,8 +339,9 @@ what you get may not be what the pixdim field advertises;
 `vignette("reading-and-writing")` shows how to inspect both.
 
 **Float32 precision.** NIfTI stores affine coefficients as 32-bit floats, and
-neuroim2 rounds to 7 significant figures to match. Round trips can show
-floating-point noise around 0.001 mm. Compare coordinates with a tolerance.
+`NeuroSpace()` also rounds affines to 7 significant figures. Round-trip error
+depends on the affine and coordinate magnitudes; compare coordinates with a
+tolerance appropriate to your voxel sizes.
 
 ## Quick reference
 

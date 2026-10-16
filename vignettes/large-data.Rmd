@@ -27,10 +27,7 @@ vignette: |
 ---
 
 ```{r setup, include = FALSE}
-if (requireNamespace("ragg", quietly = TRUE)) knitr::opts_chunk$set(dev = "ragg_png")
-if (requireNamespace("systemfonts", quietly = TRUE)) albersdown::albers_register_fonts()
-if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("albersdown", quietly = TRUE)) ggplot2::theme_set(albersdown::theme_albers(family = params$family, preset = params$preset))
-source("_common.R")
+source("_common.R", local = TRUE)
 ```
 
 ```{r albers-classes, echo=FALSE, results='asis'}
@@ -90,10 +87,11 @@ dim(bold)
 round(file.size(path) / 1e6, 1)
 ```
 
-The file is uncompressed. Every backend can read `.nii.gz` too, but two of them
-pay for it: memory mapping silently decompresses to a temporary uncompressed
-copy, and file-backed access constructs happily and then fails at the first
-read. Write uncompressed if you intend to map.
+The file is uncompressed. Dense and sparse reads support `.nii.gz` directly.
+Memory mapping requires the optional `R.utils` package to decompress `.nii.gz`
+to a temporary uncompressed copy and emits a warning. File-backed access does
+not support compressed reads, even though construction may succeed. Use an
+uncompressed `.nii` for mapped or file-backed access.
 
 ## What each backend costs
 
@@ -202,8 +200,11 @@ isTRUE(all.equal(as.numeric(series(converted, 32, 32, 12)), ref))
 Give it an explicit `file` when you can. Left to itself it writes into
 `tempdir()` and you have a second full copy of the data with no obvious owner.
 
-**BigNeuroVec** backs a masked series with an on-disk `bigstatsr` matrix, which
-is the option for data larger than RAM that still needs voxelwise access:
+**BigNeuroVec** backs a masked series with an on-disk `bigstatsr` matrix for
+subsequent voxelwise access. However, `read_vec(mode = "bigvec")` first loads
+the masked data into memory and then copies it to the backing matrix. The masked
+input must fit in RAM during construction; this reader does not stream an
+arbitrarily large file directly to disk:
 
 ```{r bigvec}
 big <- read_vec(path, mode = "bigvec", mask = brain)
@@ -294,7 +295,7 @@ unlink(c(path, mmap_path, big@data$backingfile))
 | A mask defines the analysis | `SparseNeuroVec` | stores only admitted voxels |
 | Large uncompressed file, mixed access | `MappedNeuroVec` | cheap on both access patterns |
 | Large file, strictly volume at a time | `FileBackedNeuroVec` | never for voxel series |
-| Larger than RAM, needs voxel access | `BigNeuroVec` | on-disk matrix |
+| On-disk masked matrix, needs voxel access | `BigNeuroVec` | masked input must fit in RAM during loading |
 | Parcel-level analysis is enough | `ClusteredNeuroVec` | orders of magnitude fewer series |
 
 If you are unsure: read with `read_vec()`, and change only when a measurement

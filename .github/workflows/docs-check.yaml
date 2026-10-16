@@ -70,6 +70,10 @@ jobs:
           test -z "$tracked" || { echo "$tracked"; exit 1; }
         shell: bash
 
+      - name: Check isolated vignette setup
+        run: Rscript tools/check-vignette-setup.R
+        shell: bash
+
       - name: Render authoritative vignette subset
         run: |
           files <- c(
@@ -83,6 +87,9 @@ jobs:
           out_dir <- file.path(tempdir(), "docs-check")
           dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
           for (f in files) {
-            rmarkdown::render(f, output_dir = out_dir, quiet = TRUE)
+            rmarkdown::render(
+              f, output_dir = out_dir, quiet = TRUE,
+              envir = new.env(parent = globalenv())
+            )
           }
         shell: Rscript {0}
