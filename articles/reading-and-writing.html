@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">neuroim2</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.19.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.19.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -199,20 +199,28 @@ is set. The standard says use the sform when
 <span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/all.equal-methods.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="va">hdr</span><span class="op">@</span><span class="va">header</span><span class="op">$</span><span class="va">qform</span>, <span class="va">hdr</span><span class="op">@</span><span class="va">header</span><span class="op">$</span><span class="va">sform</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
 <p>They do not always agree. The anatomical image shipped with this
-package is a real example — its qform describes 4 mm voxels and its
-sform describes 1 mm ones:</p>
+package was a real example in neuroim2 0.19.1 and earlier: its qform
+described 4 mm voxels while its sform had lost the scaling and described
+1 mm ones. Recreate that fault in a temporary copy:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">anat_hdr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_header.html">read_header</a></span><span class="op">(</span><span class="va">anat_file</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">bad_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".nii.gz"</span><span class="op">)</span></span>
+<span><span class="va">img</span> <span class="op">&lt;-</span> <span class="fu">RNifti</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RNifti/man/readNifti.html" class="external-link">readNifti</a></span><span class="op">(</span><span class="va">anat_file</span><span class="op">)</span></span>
+<span><span class="va">broken</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu">RNifti</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RNifti/man/xform.html" class="external-link">xform</a></span><span class="op">(</span><span class="va">img</span>, useQuaternionFirst <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>, <span class="fl">4</span>, <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="va">broken</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span> <span class="co"># identity scaling, translation kept</span></span>
+<span><span class="fu">RNifti</span><span class="fu">::</span><span class="fu">sform</span><span class="op">(</span><span class="va">img</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/structure.html" class="external-link">structure</a></span><span class="op">(</span><span class="va">broken</span>, code <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span></span>
+<span><span class="fu">RNifti</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RNifti/man/writeNifti.html" class="external-link">writeNifti</a></span><span class="op">(</span><span class="va">img</span>, <span class="va">bad_file</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">anat_hdr</span><span class="op">@</span><span class="va">header</span><span class="op">$</span><span class="va">pixdim</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span>
+<span><span class="va">bad_hdr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_header.html">read_header</a></span><span class="op">(</span><span class="va">bad_file</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">bad_hdr</span><span class="op">@</span><span class="va">header</span><span class="op">$</span><span class="va">pixdim</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span>
 <span><span class="co">#&gt; [1] 4.02083 4.01754 4.02083</span></span>
-<span><span class="va">anat_hdr</span><span class="op">@</span><span class="va">header</span><span class="op">$</span><span class="va">qform</span></span>
+<span><span class="va">bad_hdr</span><span class="op">@</span><span class="va">header</span><span class="op">$</span><span class="va">qform</span></span>
 <span><span class="co">#&gt;         [,1]    [,2]    [,3] [,4]</span></span>
 <span><span class="co">#&gt; [1,] 4.02083 0.00000 0.00000  -96</span></span>
 <span><span class="co">#&gt; [2,] 0.00000 4.01754 0.00000 -132</span></span>
 <span><span class="co">#&gt; [3,] 0.00000 0.00000 4.02083  -78</span></span>
 <span><span class="co">#&gt; [4,] 0.00000 0.00000 0.00000    1</span></span>
-<span><span class="va">anat_hdr</span><span class="op">@</span><span class="va">header</span><span class="op">$</span><span class="va">sform</span></span>
+<span><span class="va">bad_hdr</span><span class="op">@</span><span class="va">header</span><span class="op">$</span><span class="va">sform</span></span>
 <span><span class="co">#&gt;      [,1] [,2] [,3] [,4]</span></span>
 <span><span class="co">#&gt; [1,]    1    0    0  -96</span></span>
 <span><span class="co">#&gt; [2,]    0    1    0 -132</span></span>
@@ -221,19 +229,21 @@ sform describes 1 mm ones:</p>
 <p>Both codes are set, so the sform wins and the image reports 1 mm
 voxels even though <code>pixdim</code> says otherwise:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/spacing-methods.html">spacing</a></span><span class="op">(</span><span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">anat_file</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 1 1 1</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/spacing-methods.html">spacing</a></span><span class="op">(</span><span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">bad_file</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1 1 1</span></span>
+<span><span class="fu"><a href="../reference/spacing-methods.html">spacing</a></span><span class="op">(</span><span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">anat_file</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 4.02083 4.01754 4.02083</span></span></code></pre></div>
 <p>Nothing errors. The image loads and plots correctly, and every
 <strong>distance, volume and ROI radius</strong> derived from it is
 wrong by a factor of about four. The coordinates themselves are not
 scaled by four — both affines share a translation, so they agree exactly
 at voxel <code>(1, 1, 1)</code> and diverge by a growing offset that
-reaches roughly 140 mm at the far corner:</p>
+reaches 140 to 170 mm per axis at the far corner:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">far</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">anat_file</span><span class="op">)</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">far</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">bad_file</span><span class="op">)</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">sform_xyz</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/grid_to_coord-methods.html">grid_to_coord</a></span><span class="op">(</span><span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">anat_file</span><span class="op">)</span><span class="op">)</span>, <span class="va">far</span><span class="op">)</span></span>
-<span><span class="va">qform_xyz</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">anat_hdr</span><span class="op">@</span><span class="va">header</span><span class="op">$</span><span class="va">qform</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">far</span> <span class="op">-</span> <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span>
+<span><span class="va">sform_xyz</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/grid_to_coord-methods.html">grid_to_coord</a></span><span class="op">(</span><span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">bad_file</span><span class="op">)</span><span class="op">)</span>, <span class="va">far</span><span class="op">)</span></span>
+<span><span class="va">qform_xyz</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">bad_hdr</span><span class="op">@</span><span class="va">header</span><span class="op">$</span><span class="va">qform</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">far</span> <span class="op">-</span> <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>sform <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">sform_xyz</span><span class="op">)</span>, qform <span class="op">=</span> <span class="va">qform_xyz</span><span class="op">)</span></span>
 <span><span class="co">#&gt;            [,1]      [,2]    [,3]</span></span>
@@ -251,27 +261,31 @@ arrives:</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/Logic.html" class="external-link">isTRUE</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/all.equal-methods.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="va">h</span><span class="op">@</span><span class="va">header</span><span class="op">$</span><span class="va">qform</span>, <span class="va">h</span><span class="op">@</span><span class="va">header</span><span class="op">$</span><span class="va">sform</span>, tolerance <span class="op">=</span> <span class="fl">1e-4</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>mask <span class="op">=</span> <span class="fu">affines_agree</span><span class="op">(</span><span class="va">mask_file</span><span class="op">)</span>, anat <span class="op">=</span> <span class="fu">affines_agree</span><span class="op">(</span><span class="va">anat_file</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  mask  anat </span></span>
-<span><span class="co">#&gt;  TRUE FALSE</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>mask <span class="op">=</span> <span class="fu">affines_agree</span><span class="op">(</span><span class="va">mask_file</span><span class="op">)</span>, anat <span class="op">=</span> <span class="fu">affines_agree</span><span class="op">(</span><span class="va">anat_file</span><span class="op">)</span>,</span>
+<span>  broken <span class="op">=</span> <span class="fu">affines_agree</span><span class="op">(</span><span class="va">bad_file</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   mask   anat broken </span></span>
+<span><span class="co">#&gt;   TRUE   TRUE  FALSE</span></span></code></pre></div>
 <p>The <code><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null()</a></code> guard matters: not every format carries
 these fields, and returning <code>NA</code> for “cannot tell” is better
 than erroring on an AFNI file.</p>
 <p>If a file is affected and you trust its <code>pixdim</code>, rebuild
 the geometry:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">bad</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">anat_file</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">bad</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">bad_file</span><span class="op">)</span></span>
 <span><span class="va">fixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NeuroVol.html">NeuroVol</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/as.array.html">as.array</a></span><span class="op">(</span><span class="va">bad</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="../reference/NeuroSpace.html">NeuroSpace</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">bad</span><span class="op">)</span>,</span>
-<span>    spacing <span class="op">=</span> <span class="va">anat_hdr</span><span class="op">@</span><span class="va">header</span><span class="op">$</span><span class="va">pixdim</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
-<span>    origin <span class="op">=</span> <span class="va">anat_hdr</span><span class="op">@</span><span class="va">header</span><span class="op">$</span><span class="va">qform</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">4</span><span class="op">]</span>,</span>
+<span>    spacing <span class="op">=</span> <span class="va">bad_hdr</span><span class="op">@</span><span class="va">header</span><span class="op">$</span><span class="va">pixdim</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>    origin <span class="op">=</span> <span class="va">bad_hdr</span><span class="op">@</span><span class="va">header</span><span class="op">$</span><span class="va">qform</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">4</span><span class="op">]</span>,</span>
 <span>    axes <span class="op">=</span> <span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">bad</span><span class="op">)</span><span class="op">@</span><span class="va">axes</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/spacing-methods.html">spacing</a></span><span class="op">(</span><span class="va">fixed</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 4.02083 4.01754 4.02083</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 4.02083 4.01754 4.02083</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/all.equal-methods.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="fu"><a href="../reference/trans-methods.html">trans</a></span><span class="op">(</span><span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">fixed</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="../reference/trans-methods.html">trans</a></span><span class="op">(</span><span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">anat_file</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>          check.attributes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="writing">Writing<a class="anchor" aria-label="anchor" href="#writing"></a>

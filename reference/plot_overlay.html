@@ -13,7 +13,7 @@ compact colorbar that marks the threshold."><link href="../albers.css" rel="styl
 
     <a class="navbar-brand me-2" href="../index.html">neuroim2</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.19.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.19.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,7 +88,8 @@ compact colorbar that marks the threshold.</p>
 <span>  alpha_floor <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  alpha_mid <span class="op">=</span> <span class="fl">0.2</span>,</span>
 <span>  gamma_min <span class="op">=</span> <span class="fl">1.5</span>,</span>
-<span>  gamma_max <span class="op">=</span> <span class="fl">5</span></span>
+<span>  gamma_max <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  label_size <span class="op">=</span> <span class="fl">3.1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -272,6 +273,13 @@ opacity mapping across figures; see <code><a href="soft_alpha_params.html">soft_
 <dd><p>Auto-gamma policy passed to
 <code><a href="soft_alpha_params.html">soft_alpha_params</a></code> (0.2 at the median supra-knee magnitude,
 gamma clamped to [1.5, 5]).</p></dd>
+
+
+<dt id="arg-label-size">label_size<a class="anchor" aria-label="anchor" href="#arg-label-size"></a></dt>
+<dd><p>Size of the in-tile text, in ggplot2 text units (mm):
+the slice label is drawn at this size and the orientation letters 10%
+larger. Theme settings do not reach this text, so use this argument to
+scale it with the figure. Default <code>3.1</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

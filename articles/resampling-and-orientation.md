@@ -44,7 +44,7 @@ dim(anat)
 dim(half)
 #> [1] 24 28 24
 round(spacing(half), 3)
-#> [1] 2.000 2.036 2.000
+#> [1] 8.042 8.179 8.042
 ```
 
 The result is no longer isotropic, because `round(57 * 0.5)` is 28

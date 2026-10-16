@@ -15,7 +15,7 @@ modify or save.
 
 anat <- demo_anatomy()
 brain <- demo_anatomy_mask()
-stat_map <- demo_stat_map(brain, radius_mm = 6)
+stat_map <- demo_stat_map(brain, radius_mm = 24)
 
 identical(space(anat), space(stat_map))
 #> [1] TRUE
@@ -138,7 +138,7 @@ is the first number a reviewer asks for:
 a <- as.array(stat_map)
 c(positive = sum(a > 3), negative = sum(a < -3), total_brain = sum(a != 0))
 #>    positive    negative total_brain 
-#>        2056         874       28647
+#>        2043         862       28647
 ```
 
 `ov_symmetric = TRUE` forces the colour scale to be centred on zero.
@@ -168,8 +168,8 @@ round(rbind(
   enhanced = c(max(enh), sum(enh > 3), sd(enh[quiet]))
 ), 3)
 #>            peak above_3 quiet_sd
-#> raw      12.414    2056    1.030
-#> enhanced 16.005    4522    1.631
+#> raw      12.421    2043    1.030
+#> enhanced 16.073    4521    1.631
 ```
 
 Read that table carefully, because it is the reason this is a display

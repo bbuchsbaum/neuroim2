@@ -153,22 +153,30 @@ all.equal(hdr@header$qform, hdr@header$sform)
 ```
 
 They do not always agree. The anatomical image shipped with this package
-is a real example — its qform describes 4 mm voxels and its sform
-describes 1 mm ones:
+was a real example in neuroim2 0.19.1 and earlier: its qform described 4
+mm voxels while its sform had lost the scaling and described 1 mm ones.
+Recreate that fault in a temporary copy:
 
 ``` r
 
-anat_hdr <- read_header(anat_file)
+bad_file <- tempfile(fileext = ".nii.gz")
+img <- RNifti::readNifti(anat_file)
+broken <- matrix(RNifti::xform(img, useQuaternionFirst = FALSE), 4, 4)
+broken[1:3, 1:3] <- diag(3) # identity scaling, translation kept
+RNifti::sform(img) <- structure(broken, code = 1L)
+RNifti::writeNifti(img, bad_file)
 
-anat_hdr@header$pixdim[2:4]
+bad_hdr <- read_header(bad_file)
+
+bad_hdr@header$pixdim[2:4]
 #> [1] 4.02083 4.01754 4.02083
-anat_hdr@header$qform
+bad_hdr@header$qform
 #>         [,1]    [,2]    [,3] [,4]
 #> [1,] 4.02083 0.00000 0.00000  -96
 #> [2,] 0.00000 4.01754 0.00000 -132
 #> [3,] 0.00000 0.00000 4.02083  -78
 #> [4,] 0.00000 0.00000 0.00000    1
-anat_hdr@header$sform
+bad_hdr@header$sform
 #>      [,1] [,2] [,3] [,4]
 #> [1,]    1    0    0  -96
 #> [2,]    0    1    0 -132
@@ -181,23 +189,25 @@ even though `pixdim` says otherwise:
 
 ``` r
 
-spacing(read_vol(anat_file))
+spacing(read_vol(bad_file))
 #> [1] 1 1 1
+spacing(read_vol(anat_file))
+#> [1] 4.02083 4.01754 4.02083
 ```
 
 Nothing errors. The image loads and plots correctly, and every
 **distance, volume and ROI radius** derived from it is wrong by a factor
 of about four. The coordinates themselves are not scaled by four — both
 affines share a translation, so they agree exactly at voxel `(1, 1, 1)`
-and diverge by a growing offset that reaches roughly 140 mm at the far
-corner:
+and diverge by a growing offset that reaches 140 to 170 mm per axis at
+the far corner:
 
 ``` r
 
-far <- matrix(dim(read_vol(anat_file)), nrow = 1)
+far <- matrix(dim(read_vol(bad_file)), nrow = 1)
 
-sform_xyz <- grid_to_coord(space(read_vol(anat_file)), far)
-qform_xyz <- (anat_hdr@header$qform %*% c(far - 1, 1))[1:3]
+sform_xyz <- grid_to_coord(space(read_vol(bad_file)), far)
+qform_xyz <- (bad_hdr@header$qform %*% c(far - 1, 1))[1:3]
 
 rbind(sform = as.vector(sform_xyz), qform = qform_xyz)
 #>            [,1]      [,2]    [,3]
@@ -218,9 +228,10 @@ affines_agree <- function(file) {
   isTRUE(all.equal(h@header$qform, h@header$sform, tolerance = 1e-4))
 }
 
-c(mask = affines_agree(mask_file), anat = affines_agree(anat_file))
-#>  mask  anat 
-#>  TRUE FALSE
+c(mask = affines_agree(mask_file), anat = affines_agree(anat_file),
+  broken = affines_agree(bad_file))
+#>   mask   anat broken 
+#>   TRUE   TRUE  FALSE
 ```
 
 The [`is.null()`](https://rdrr.io/r/base/NULL.html) guard matters: not
@@ -231,18 +242,21 @@ If a file is affected and you trust its `pixdim`, rebuild the geometry:
 
 ``` r
 
-bad <- read_vol(anat_file)
+bad <- read_vol(bad_file)
 fixed <- NeuroVol(
   as.array(bad),
   NeuroSpace(dim(bad),
-    spacing = anat_hdr@header$pixdim[2:4],
-    origin = anat_hdr@header$qform[1:3, 4],
+    spacing = bad_hdr@header$pixdim[2:4],
+    origin = bad_hdr@header$qform[1:3, 4],
     axes = space(bad)@axes
   )
 )
 
 spacing(fixed)
 #> [1] 4.02083 4.01754 4.02083
+all.equal(trans(space(fixed)), trans(space(read_vol(anat_file))),
+          check.attributes = FALSE)
+#> [1] TRUE
 ```
 
 ## Writing

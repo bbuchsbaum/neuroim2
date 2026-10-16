@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">neuroim2</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.19.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.19.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,11 +75,12 @@ than asserted.</p>
 <span><span class="va">brain</span> <span class="op">&lt;-</span> <span class="fu">demo_anatomy_mask</span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/spacing-methods.html">spacing</a></span><span class="op">(</span><span class="va">anat</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 1 1 1</span></span></code></pre></div>
-<p>That 1 mm matters for everything below: kernel widths are specified
-in millimetres, so what a filter actually does depends on
-<code>sigma</code> <strong>relative to the voxel size</strong>. On this
-image the two happen to coincide.</p>
+<span><span class="co">#&gt; [1] 4.02083 4.01754 4.02083</span></span></code></pre></div>
+<p>Those 4 mm voxels matter for everything below: kernel widths are
+specified in millimetres, so what a filter actually does depends on
+<code>sigma</code> <strong>relative to the voxel size</strong>. A 16 mm
+FWHM spans four voxels here, the same smoothing in voxel terms that 4 mm
+gives a 1 mm structural.</p>
 <p>Every number in this article is computed inside the brain mask.
 Statistics over the whole array are dominated by the 75% of voxels that
 are air, where every filter looks identical and every difference is
@@ -107,10 +108,10 @@ invisible.</p>
 every voxel becomes a weighted average of its neighbours regardless of
 what is there.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">light</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gaussian_blur.html">gaussian_blur</a></span><span class="op">(</span><span class="va">anat</span>, <span class="va">brain</span>, fwhm <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span><span class="va">heavy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gaussian_blur.html">gaussian_blur</a></span><span class="op">(</span><span class="va">anat</span>, <span class="va">brain</span>, fwhm <span class="op">=</span> <span class="fl">9</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">light</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gaussian_blur.html">gaussian_blur</a></span><span class="op">(</span><span class="va">anat</span>, <span class="va">brain</span>, fwhm <span class="op">=</span> <span class="fl">16</span><span class="op">)</span></span>
+<span><span class="va">heavy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gaussian_blur.html">gaussian_blur</a></span><span class="op">(</span><span class="va">anat</span>, <span class="va">brain</span>, fwhm <span class="op">=</span> <span class="fl">32</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">compare</span><span class="op">(</span>original <span class="op">=</span> <span class="va">anat</span>, `FWHM 4 mm` <span class="op">=</span> <span class="va">light</span>, `FWHM 9 mm` <span class="op">=</span> <span class="va">heavy</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">compare</span><span class="op">(</span>original <span class="op">=</span> <span class="va">anat</span>, `FWHM 16 mm` <span class="op">=</span> <span class="va">light</span>, `FWHM 32 mm` <span class="op">=</span> <span class="va">heavy</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <img src="smoothing-and-filtering_files/figure-html/gaussian-1.png" class="r-plt" alt="Three axial slices: original, lightly smoothed, heavily smoothed." width="770"><p class="caption">
 Gaussian smoothing at two kernel widths.
@@ -188,7 +189,7 @@ units</strong>. On an image scaled 0 to 9533 an <code>epsilon</code> of
 <code class="sourceCode R"><span><span class="va">sd_in</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">baseline</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">guided</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/guided_filter.html">guided_filter</a></span><span class="op">(</span><span class="va">anat</span>, radius <span class="op">=</span> <span class="fl">1</span>, epsilon <span class="op">=</span> <span class="op">(</span><span class="fl">0.6</span> <span class="op">*</span> <span class="va">sd_in</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span>
-<span><span class="va">bilateral</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bilateral_filter.html">bilateral_filter</a></span><span class="op">(</span><span class="va">anat</span>, <span class="va">brain</span>, spatial_sigma <span class="op">=</span> <span class="fl">2</span>, intensity_sigma <span class="op">=</span> <span class="fl">1</span>, window <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">bilateral</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bilateral_filter.html">bilateral_filter</a></span><span class="op">(</span><span class="va">anat</span>, <span class="va">brain</span>, spatial_sigma <span class="op">=</span> <span class="fl">8</span>, intensity_sigma <span class="op">=</span> <span class="fl">1</span>, window <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">compare</span><span class="op">(</span>original <span class="op">=</span> <span class="va">anat</span>, gaussian <span class="op">=</span> <span class="va">light</span>, guided <span class="op">=</span> <span class="va">guided</span>, bilateral <span class="op">=</span> <span class="va">bilateral</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
@@ -217,9 +218,9 @@ distortion?</strong></p>
 <span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                 sd removed distortion  ratio</span></span>
 <span><span class="co">#&gt; original  1350.807   0.000      0.000    NaN</span></span>
-<span><span class="co">#&gt; gaussian   556.862   0.830      0.283  2.933</span></span>
+<span><span class="co">#&gt; gaussian   559.053   0.829      0.282  2.941</span></span>
 <span><span class="co">#&gt; guided    1291.002   0.087      0.027  3.231</span></span>
-<span><span class="co">#&gt; bilateral 1080.282   0.360      0.029 12.294</span></span></code></pre></div>
+<span><span class="co">#&gt; bilateral 1080.394   0.360      0.029 12.299</span></span></code></pre></div>
 <p><code><a href="../reference/bilateral_filter.html">bilateral_filter()</a></code> removes a third of the variance for a
 twentieth of the distortion — an exchange rate three times better than
 the Gaussian’s, and that ratio is what “edge preserving” buys you.

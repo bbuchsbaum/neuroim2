@@ -37,7 +37,8 @@ plot_ortho(
   ov_alpha_mode = c("binary", "proportional", "ramp", "soft"),
   ov_symmetric = NULL,
   ov_cap = NULL,
-  canvas = NULL
+  canvas = NULL,
+  label_size = 3.1
 )
 ```
 
@@ -142,6 +143,13 @@ plot_ortho(
 
   Optional `c(width, height)` in inches to fit the layout to (default:
   the open device).
+
+- label_size:
+
+  Size of the in-tile text, in ggplot2 text units (mm): the slice label
+  is drawn at this size and the orientation letters 10% larger. Theme
+  settings do not reach this text, so use this argument to scale it with
+  the figure. Default `3.1`.
 
 ## Value
 

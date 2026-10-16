@@ -31,7 +31,8 @@ plot_montage(
   annotate = TRUE,
   n_slices = 12L,
   draw = FALSE,
-  canvas = NULL
+  canvas = NULL,
+  label_size = 3.1
 )
 ```
 
@@ -125,6 +126,13 @@ plot_montage(
 
   Optional `c(width, height)` in inches to fit the layout to (default:
   the open device, else 10 x 7.5 in).
+
+- label_size:
+
+  Size of the in-tile text, in ggplot2 text units (mm): the slice label
+  is drawn at this size and the orientation letters 10% larger. Theme
+  settings do not reach this text, so use this argument to scale it with
+  the figure. Default `3.1`.
 
 ## Value
 

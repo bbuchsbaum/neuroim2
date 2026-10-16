@@ -9,7 +9,7 @@ slices. This is useful for visual registration QC."><link href="../albers.css" r
 
     <a class="navbar-brand me-2" href="../index.html">neuroim2</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.19.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.19.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -71,7 +71,8 @@ slices. This is useful for visual registration QC.</p>
 <span>  match_intensity <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  canvas <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  interpolate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  focus_brain <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  focus_brain <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  label_size <span class="op">=</span> <span class="fl">3.1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -193,6 +194,13 @@ to (default: the open device).</p></dd>
 bright-tissue mask of <code>bgvol</code> and show the fixed image alone on the
 scalp, so the seams where registration is judged dominate the figure
 instead of the stair-stepped head outline. Default <code>TRUE</code>.</p></dd>
+
+
+<dt id="arg-label-size">label_size<a class="anchor" aria-label="anchor" href="#arg-label-size"></a></dt>
+<dd><p>Size of the in-tile text, in ggplot2 text units (mm):
+the slice label is drawn at this size and the orientation letters 10%
+larger. Theme settings do not reach this text, so use this argument to
+scale it with the figure. Default <code>3.1</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

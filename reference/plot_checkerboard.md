@@ -33,7 +33,8 @@ plot_checkerboard(
   match_intensity = TRUE,
   canvas = NULL,
   interpolate = TRUE,
-  focus_brain = TRUE
+  focus_brain = TRUE,
+  label_size = 3.1
 )
 ```
 
@@ -154,6 +155,13 @@ plot_checkerboard(
   of `bgvol` and show the fixed image alone on the scalp, so the seams
   where registration is judged dominate the figure instead of the
   stair-stepped head outline. Default `TRUE`.
+
+- label_size:
+
+  Size of the in-tile text, in ggplot2 text units (mm): the slice label
+  is drawn at this size and the orientation letters 10% larger. Theme
+  settings do not reach this text, so use this argument to scale it with
+  the figure. Default `3.1`.
 
 ## Value
 

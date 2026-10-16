@@ -17,13 +17,14 @@ anat <- demo_anatomy()
 brain <- demo_anatomy_mask()
 
 spacing(anat)
-#> [1] 1 1 1
+#> [1] 4.02083 4.01754 4.02083
 ```
 
-That 1 mm matters for everything below: kernel widths are specified in
-millimetres, so what a filter actually does depends on `sigma`
-**relative to the voxel size**. On this image the two happen to
-coincide.
+Those 4 mm voxels matter for everything below: kernel widths are
+specified in millimetres, so what a filter actually does depends on
+`sigma` **relative to the voxel size**. A 16 mm FWHM spans four voxels
+here, the same smoothing in voxel terms that 4 mm gives a 1 mm
+structural.
 
 Every number in this article is computed inside the brain mask.
 Statistics over the whole array are dominated by the 75% of voxels that
@@ -61,10 +62,10 @@ average of its neighbours regardless of what is there.
 
 ``` r
 
-light <- gaussian_blur(anat, brain, fwhm = 4)
-heavy <- gaussian_blur(anat, brain, fwhm = 9)
+light <- gaussian_blur(anat, brain, fwhm = 16)
+heavy <- gaussian_blur(anat, brain, fwhm = 32)
 
-compare(original = anat, `FWHM 4 mm` = light, `FWHM 9 mm` = heavy)
+compare(original = anat, `FWHM 16 mm` = light, `FWHM 32 mm` = heavy)
 ```
 
 ![Three axial slices: original, lightly smoothed, heavily
@@ -158,7 +159,7 @@ has to be scaled to the data.
 sd_in <- sd(baseline)
 
 guided <- guided_filter(anat, radius = 1, epsilon = (0.6 * sd_in)^2)
-bilateral <- bilateral_filter(anat, brain, spatial_sigma = 2, intensity_sigma = 1, window = 1)
+bilateral <- bilateral_filter(anat, brain, spatial_sigma = 8, intensity_sigma = 1, window = 1)
 
 compare(original = anat, gaussian = light, guided = guided, bilateral = bilateral)
 ```
@@ -190,9 +191,9 @@ round(rbind(
 ), 3)
 #>                 sd removed distortion  ratio
 #> original  1350.807   0.000      0.000    NaN
-#> gaussian   556.862   0.830      0.283  2.933
+#> gaussian   559.053   0.829      0.282  2.941
 #> guided    1291.002   0.087      0.027  3.231
-#> bilateral 1080.282   0.360      0.029 12.294
+#> bilateral 1080.394   0.360      0.029 12.299
 ```
 
 [`bilateral_filter()`](https://bbuchsbaum.github.io/neuroim2/reference/bilateral_filter.md)

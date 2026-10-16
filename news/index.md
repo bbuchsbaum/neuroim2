@@ -1,6 +1,31 @@
 # Changelog
 
+## neuroim2 0.19.1.9000
+
+- The bundled template `inst/extdata/mni_downsampled.nii.gz` now has a
+  correct sform. Its sform was the identity plus a translation, which
+  takes precedence over the qform and made the image read as 1 mm
+  voxels; it is the MNI152 template downsampled to 48 x 57 x 48, so
+  [`spacing()`](https://bbuchsbaum.github.io/neuroim2/reference/spacing-methods.md)
+  now reports about 4.02 mm and its world coordinates are MNI
+  millimetres. Voxel values are unchanged. Code that relied on the old 1
+  mm geometry of this file (mm radii, kernel widths, world coordinates)
+  should scale accordingly; the vignettes have been updated
+  ([\#50](https://github.com/bbuchsbaum/neuroim2/issues/50)).
+- [`plot_ortho()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_ortho.md),
+  [`plot_montage()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_montage.md),
+  [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md),
+  [`plot_checkerboard()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_checkerboard.md)
+  and
+  [`plot_edge_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_edge_overlay.md)
+  gain a `label_size` argument controlling the size of the in-tile slice
+  label (orientation letters are drawn 10% larger). It was previously
+  fixed at 3.1 and could not be changed by theme settings
+  ([\#51](https://github.com/bbuchsbaum/neuroim2/issues/51)).
+
 ## neuroim2 0.19.1
+
+CRAN release: 2026-10-06
 
 - Dense
   [`vectors()`](https://bbuchsbaum.github.io/neuroim2/reference/vectors-methods.md)
@@ -338,9 +363,9 @@ on a `NeuroSpace` permutes `dim` and `spacing` along with the affine.
 
 `local_maxima_dist` had no effect at any value. `.pruneCoords()` read
 the neighbour distances out of
-[`dbscan::kNN()`](https://rdrr.io/pkg/dbscan/man/kNN.html)’s result as
-`ret$distances`; that component is called `dist`, and `$` does not
-partially match a name longer than the one it is looking for, so the
+[`dbscan::kNN()`](http://michael.hahsler.net/dbscan/reference/kNN.md)’s
+result as `ret$distances`; that component is called `dist`, and `$` does
+not partially match a name longer than the one it is looking for, so the
 lookup returned `NULL`, the comparison became `logical(0)`, and the
 pruning loop exited on its first pass every time. The `local_maxima`
 table listed every in-mask voxel – 25,538 rows for 12 components on a 3
@@ -371,8 +396,9 @@ value. It is deterministic and the reported maxima are at least
   `conn_comp(...)$local_maxima`. What it returned before was the
   component’s voxel list, not its maxima.
 - The search is now a single compiled pass over a uniform grid rather
-  than a [`dbscan::kNN()`](https://rdrr.io/pkg/dbscan/man/kNN.html) call
-  per component per round, which is also what made the rest of
+  than a
+  [`dbscan::kNN()`](http://michael.hahsler.net/dbscan/reference/kNN.md)
+  call per component per round, which is also what made the rest of
   [`conn_comp()`](https://bbuchsbaum.github.io/neuroim2/reference/conn_comp-methods.md)
   worth speeding up. `dbscan` is no longer used here.
 

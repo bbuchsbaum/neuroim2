@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">neuroim2</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.19.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.19.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,7 +73,7 @@ intensities robustly by default, and return ordinary
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">anat</span> <span class="op">&lt;-</span> <span class="fu">demo_anatomy</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">brain</span> <span class="op">&lt;-</span> <span class="fu">demo_anatomy_mask</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">stat_map</span> <span class="op">&lt;-</span> <span class="fu">demo_stat_map</span><span class="op">(</span><span class="va">brain</span>, radius_mm <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
+<span><span class="va">stat_map</span> <span class="op">&lt;-</span> <span class="fu">demo_stat_map</span><span class="op">(</span><span class="va">brain</span>, radius_mm <span class="op">=</span> <span class="fl">24</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">anat</span><span class="op">)</span>, <span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">stat_map</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
@@ -171,7 +171,7 @@ this is the first number a reviewer asks for:</p>
 <code class="sourceCode R"><span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as.array.html">as.array</a></span><span class="op">(</span><span class="va">stat_map</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>positive <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">a</span> <span class="op">&gt;</span> <span class="fl">3</span><span class="op">)</span>, negative <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">a</span> <span class="op">&lt;</span> <span class="op">-</span><span class="fl">3</span><span class="op">)</span>, total_brain <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">a</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    positive    negative total_brain </span></span>
-<span><span class="co">#&gt;        2056         874       28647</span></span></code></pre></div>
+<span><span class="co">#&gt;        2043         862       28647</span></span></code></pre></div>
 <p><code>ov_symmetric = TRUE</code> forces the colour scale to be
 centred on zero. Without it, an asymmetric map assigns different colours
 to <code>+4</code> and <code>-4</code>, which is misleading with a
@@ -198,8 +198,8 @@ size:</p>
 <span>  enhanced <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">enh</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">enh</span> <span class="op">&gt;</span> <span class="fl">3</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">enh</span><span class="op">[</span><span class="va">quiet</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;            peak above_3 quiet_sd</span></span>
-<span><span class="co">#&gt; raw      12.414    2056    1.030</span></span>
-<span><span class="co">#&gt; enhanced 16.005    4522    1.631</span></span></code></pre></div>
+<span><span class="co">#&gt; raw      12.421    2043    1.030</span></span>
+<span><span class="co">#&gt; enhanced 16.073    4521    1.631</span></span></code></pre></div>
 <p>Read that table carefully, because it is the reason this is a display
 tool. The peak grows by about a third — and the spread of the
 <em>quiet</em> voxels grows by more. Enhancement amplifies the noise

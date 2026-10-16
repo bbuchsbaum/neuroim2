@@ -46,7 +46,8 @@ plot_overlay(
   alpha_floor = NULL,
   alpha_mid = 0.2,
   gamma_min = 1.5,
-  gamma_max = 5
+  gamma_max = 5,
+  label_size = 3.1
 )
 ```
 
@@ -228,6 +229,13 @@ plot_overlay(
   Auto-gamma policy passed to
   [`soft_alpha_params`](https://bbuchsbaum.github.io/neuroim2/reference/soft_alpha_params.md)
   (0.2 at the median supra-knee magnitude, gamma clamped to \[1.5, 5\]).
+
+- label_size:
+
+  Size of the in-tile text, in ggplot2 text units (mm): the slice label
+  is drawn at this size and the orientation letters 10% larger. Theme
+  settings do not reach this text, so use this argument to scale it with
+  the figure. Default `3.1`.
 
 ## Value
 
