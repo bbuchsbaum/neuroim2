@@ -90,14 +90,12 @@ Collate:
 RoxygenNote: 7.3.3
 Imports:
   purrr,
-  mmap,
   Rcpp,
   RcppParallel,
   RNifti,
   dbscan,
   stringr,
   methods,
-  bigstatsr,
   RNiftyReg,
   future,
   future.apply,
@@ -109,6 +107,8 @@ Imports:
   patchwork
 Suggests:
     testthat,
+    mmap,
+    bigstatsr,
     covr,
     knitr,
     pkgdown,

@@ -96,26 +96,30 @@ and memory space. Key features include:
 }
 
 \examples{
+# Memory mapping requires the optional 'mmap' package
+if (requireNamespace("mmap", quietly = TRUE)) {
+  file_path <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
+  mapped_vec <- MappedNeuroVec(file_path)
 
-# Create a MappedNeuroVec object (pseudo-code)
-file_path <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
-mapped_vec <- MappedNeuroVec(file_path)
-
-# Access a subset of the data
-subset <- mapped_vec[,,, 1:2]
+  # Access a subset of the data
+  subset <- mapped_vec[,,, 1:2]
+}
 
 
-# Create mapped vector from NIFTI file
-mvec <- MappedNeuroVec(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
+# Memory mapping requires the optional 'mmap' package
+if (requireNamespace("mmap", quietly = TRUE)) {
+  # Create mapped vector from NIFTI file
+  mvec <- MappedNeuroVec(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
 
-# Extract first volume
-vol1 <- mvec[[1]]
+  # Extract first volume
+  vol1 <- mvec[[1]]
 
-# Get dimensions
-dim(mvec)
+  # Get dimensions
+  dim(mvec)
 
-# Access specific timepoint
-timepoint <- mvec[, , , 2]
+  # Access specific timepoint
+  timepoint <- mvec[, , , 2]
+}
 
 
 }

@@ -45,18 +45,26 @@ for (encoding in c("FLOAT", "SHORT", "UBYTE")) {
       on.exit(unlink(f$path), add = TRUE)
       ref <- matrix(f$expected, 6, nt)
       dense <- read_vec(f$path, mode = "normal")
-      mapped <- MappedNeuroVec(f$path)
-      on.exit(mmap::munmap(mapped@filemap), add = TRUE, after = FALSE)
       fb <- FileBackedNeuroVec(f$path)
       fullmask <- array(TRUE, c(3, 2, 1))
       sparse <- SparseNeuroVec(f$expected, space(dense), fullmask)
-      # bigstatsr is an Imports dependency; absence is a failure, not a skip.
-      backing <- tempfile()
-      on.exit(unlink(paste0(backing, c(".bk", ".rds"))), add = TRUE)
-      big <- BigNeuroVec(f$expected, space(dense), fullmask, backingfile = backing)
-      seq <- NeuroVecSeq(mapped, sparse, fb)
-      backends <- list(dense = dense, sparse = sparse, big = big,
-                       mapped = mapped, filebacked = fb, sequence = seq)
+      backends <- list(dense = dense, sparse = sparse)
+      # The mapped and FBM backends need the optional 'mmap' and 'bigstatsr'
+      # packages; the remaining backends are checked either way.
+      if (requireNamespace("bigstatsr", quietly = TRUE)) {
+        backing <- tempfile()
+        on.exit(unlink(paste0(backing, c(".bk", ".rds"))), add = TRUE)
+        backends$big <- BigNeuroVec(f$expected, space(dense), fullmask, backingfile = backing)
+      }
+      first <- dense
+      if (requireNamespace("mmap", quietly = TRUE)) {
+        mapped <- MappedNeuroVec(f$path)
+        on.exit(mmap::munmap(mapped@filemap), add = TRUE, after = FALSE)
+        backends$mapped <- mapped
+        first <- mapped
+      }
+      backends$filebacked <- fb
+      backends$sequence <- NeuroVecSeq(first, sparse, fb)
       expect_equal(as.matrix(dense), ref)
       for (name in names(backends)) {
         x <- backends[[name]]
@@ -82,6 +90,7 @@ for (encoding in c("FLOAT", "SHORT", "UBYTE")) {
 }
 
 test_that("sparse, FBM and mixed sequence keep support and missing values distinct", {
+  skip_if_not_installed("bigstatsr")
   arr <- array(as.numeric(1:18), c(3, 2, 1, 3))
   arr[1] <- NA_real_
   mask <- array(c(TRUE, FALSE, TRUE, FALSE, TRUE, TRUE), c(3, 2, 1))

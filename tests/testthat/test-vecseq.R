@@ -103,6 +103,7 @@ test_that("can read a sparse NeuroVecSeq", {
 })
 
 test_that("can use a MappedNeuroVec as elements in a NeuroVecSeq", {
+  skip_if_not_installed("mmap")
   vec <- read_vec(gmask5)
   vs <- NeuroVecSeq(vec,vec,vec)
 

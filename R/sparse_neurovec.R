@@ -176,7 +176,9 @@ setMethod(f="load_data", signature=c("SparseNeuroVecSource"),
 				mask_idx <- which(M)
 
 				is_gzip <- identical(meta@descriptor@data_encoding, "gzip") || endsWith(meta@data_file, ".gz")
-				mmap_ok <- !is_gzip && identical(.Platform$endian, meta@endian)
+				# Fall back to sequential streaming when the optional 'mmap' package
+				# is unavailable (e.g. webR) or the data type cannot be mapped.
+				mmap_ok <- !is_gzip && .can_mmap(meta) && .has_mmap()
 
 				arr <- if (mmap_ok) {
 				  # Read only masked voxels for requested volumes via mmap.

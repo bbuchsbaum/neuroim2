@@ -824,12 +824,45 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
 
 
 
+#' Is the optional 'mmap' package available?
 #' @keywords internal
-#' @importFrom mmap int8 uint8 int16 int32 real32 real64
-#' @importFrom mmap mmap char mmapFlags munmap
+#' @noRd
+.has_mmap <- function() {
+  requireNamespace("mmap", quietly = TRUE)
+}
+
+#' Stop informatively unless the optional 'mmap' package is available
+#' @keywords internal
+#' @noRd
+.require_mmap <- function() {
+  if (!.has_mmap()) {
+    stop("Package 'mmap' is required for memory-mapped file access. ",
+         "Install it with install.packages(\"mmap\"), or read the image ",
+         "without mode = \"mmap\".", call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
+#' Stop informatively unless the optional 'bigstatsr' package is available
+#' @keywords internal
+#' @noRd
+.require_bigstatsr <- function() {
+  if (!requireNamespace("bigstatsr", quietly = TRUE)) {
+    stop("Package 'bigstatsr' is required for file-backed BigNeuroVec storage. ",
+         "Install it with install.packages(\"bigstatsr\").", call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
+#' Map a neuroim2 data-type name to an 'mmap' vector type.
+#'
+#' Evaluated only when a memory map is actually being created, so the optional
+#' 'mmap' package is never touched on ordinary read paths.
+#' @keywords internal
 #' @noRd
 .getMMapMode <- function(code) {
   code <- toupper(code)
+  .require_mmap()
   switch(code,
     BYTE   = mmap::int8(),
     UBYTE  = mmap::uint8(),

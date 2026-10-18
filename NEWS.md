@@ -1,5 +1,13 @@
 # neuroim2 0.19.1.9000
 
+* `mmap` and `bigstatsr` moved from Imports to Suggests, so neuroim2 installs
+  and loads where neither is available (e.g. webR/WebAssembly). Memory-mapped
+  access (`read_vec(mode = "mmap")`, `MappedNeuroVec()`, `as_mmap()`) and
+  `BigNeuroVec` / `read_vec(mode = "bigvec")` now stop with an informative
+  message when the package they need is missing. Masked reads that used a
+  memory map internally fall back to the streaming reader, which also now
+  serves data types `mmap` cannot map instead of failing. `BigNeuroVec`'s
+  `data` slot is declared `"ANY"` and validated as an `FBM`.
 * The bundled template `inst/extdata/mni_downsampled.nii.gz` now has a
   correct sform. Its sform was the identity plus a translation, which takes
   precedence over the qform and made the image read as 1 mm voxels; it is the

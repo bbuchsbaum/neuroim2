@@ -3,6 +3,7 @@ context("mmap cache")
 library(neuroim2)
 
 test_that("memory-mapped reads reuse a cached handle for the same file", {
+  skip_if_not_installed("mmap")
   ns <- asNamespace("neuroim2")
   clear_cache <- get(".clear_mmap_cache", envir = ns)
   cache_size <- get(".mmap_cache_size", envir = ns)
