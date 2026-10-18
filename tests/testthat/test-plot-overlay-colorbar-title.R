@@ -42,6 +42,7 @@ test_that("cbar_title is appended after existing parameters", {
 })
 
 test_that("plot_overlay forwards cbar_title to the assembled colorbar", {
+  skip_if_not_installed("patchwork")
   fx <- signed_overlay_fixture()
   title <- "Delay coefficient (% signal change)"
 
@@ -54,6 +55,7 @@ test_that("plot_overlay forwards cbar_title to the assembled colorbar", {
 })
 
 test_that("plot_overlay defaults the colorbar title to 'value'", {
+  skip_if_not_installed("patchwork")
   fx <- signed_overlay_fixture()
 
   p <- neuroim2::plot_overlay(
@@ -65,6 +67,7 @@ test_that("plot_overlay defaults the colorbar title to 'value'", {
 })
 
 test_that("the report key does not assert 'activation' and states the signed threshold", {
+  skip_if_not_installed("patchwork")
   fx <- signed_overlay_fixture()
 
   # style = "report" is the path that enables the key under the panels.
@@ -83,6 +86,7 @@ test_that("the report key does not assert 'activation' and states the signed thr
 })
 
 test_that("unsigned overlays get a one-sided suprathreshold key", {
+  skip_if_not_installed("patchwork")
   sp <- neuroim2::NeuroSpace(c(8L, 8L, 4L), spacing = c(2, 2, 2))
   set.seed(7)
   bg <- neuroim2::NeuroVol(array(runif(8 * 8 * 4), c(8, 8, 4)), sp)
@@ -115,6 +119,7 @@ test_that("plot_overlay rejects a malformed cbar_title", {
 })
 
 test_that("plot_montage forwards cbar_title to its colorbar", {
+  skip_if_not_installed("patchwork")
   sp <- neuroim2::NeuroSpace(c(8L, 8L, 4L), spacing = c(2, 2, 2))
   set.seed(11)
   vol <- neuroim2::NeuroVol(array(runif(8 * 8 * 4), c(8, 8, 4)), sp)
@@ -133,6 +138,7 @@ test_that("plot_montage forwards cbar_title to its colorbar", {
 })
 
 test_that("plot_ortho forwards cbar_title in report style", {
+  skip_if_not_installed("patchwork")
   sp <- neuroim2::NeuroSpace(c(8L, 8L, 8L), spacing = c(2, 2, 2))
   set.seed(13)
   vol <- neuroim2::NeuroVol(array(runif(8 * 8 * 8), c(8, 8, 8)), sp)
@@ -151,6 +157,7 @@ test_that("plot_ortho forwards cbar_title in report style", {
 })
 
 test_that("colorbar entry points default to the historical 'value' title", {
+  skip_if_not_installed("patchwork")
   sp <- neuroim2::NeuroSpace(c(8L, 8L, 8L), spacing = c(2, 2, 2))
   set.seed(17)
   vol <- neuroim2::NeuroVol(array(runif(8 * 8 * 8), c(8, 8, 8)), sp)
@@ -164,6 +171,7 @@ test_that("colorbar entry points default to the historical 'value' title", {
 })
 
 test_that("grayscale structural views omit the uninformative colorbar by default", {
+  skip_if_not_installed("patchwork")
   sp <- neuroim2::NeuroSpace(c(8L, 8L, 8L), spacing = c(2, 2, 2))
   set.seed(19)
   vol <- neuroim2::NeuroVol(array(runif(8 * 8 * 8), c(8, 8, 8)), sp)

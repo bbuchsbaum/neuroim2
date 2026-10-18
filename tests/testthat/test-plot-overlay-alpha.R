@@ -80,6 +80,7 @@ test_that("orient_slice_for_raster handles flipped x-axis (radiological LPI-like
 })
 
 test_that("plot_overlay tolerates NAs in overlay with ov_thresh > 0", {
+  skip_if_not_installed("patchwork")
   sp <- neuroim2::NeuroSpace(c(5, 5, 3))
   bg <- neuroim2::NeuroVol(array(0, dim = c(5, 5, 3)), sp)
   ov_arr <- array(stats::rnorm(5 * 5 * 3), dim = c(5, 5, 3))
@@ -106,6 +107,7 @@ test_that("plot_overlay tolerates NAs in overlay with ov_thresh > 0", {
 })
 
 test_that("plot_overlay supports ov_alpha_mode='proportional'", {
+  skip_if_not_installed("patchwork")
   dims <- c(6L, 9L, 4L)
   sp <- neuroim2::NeuroSpace(dims)
   bg <- neuroim2::NeuroVol(array(0, dim = dims), sp)
@@ -132,6 +134,7 @@ test_that("plot_overlay supports ov_alpha_mode='proportional'", {
 })
 
 test_that("plot_overlay validates grids and can return panels without drawing", {
+  skip_if_not_installed("patchwork")
   dims <- c(6L, 9L, 4L)
   sp <- neuroim2::NeuroSpace(dims)
   bg <- neuroim2::NeuroVol(array(0, dim = dims), sp)

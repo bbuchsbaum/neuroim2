@@ -58,6 +58,7 @@ test_that("is_diverging_cmap classifies palettes", {
 # ---- #19.3: numeric range arguments -----------------------------------------
 
 test_that("plot_overlay accepts numeric ov_range / bg_range", {
+  skip_if_not_installed("patchwork")
   d <- make_signed_overlay()
   res <- plot_overlay(d$bg, d$ov, zlevels = 10L,
                       ov_range = c(-6, 6), bg_range = c(0, 1000), draw = FALSE)
@@ -73,6 +74,7 @@ test_that("plot_overlay rejects malformed numeric ranges", {
 })
 
 test_that("plot_ortho and plot_montage accept numeric range", {
+  skip_if_not_installed("patchwork")
   d <- make_signed_overlay()
   expect_silent(plot_ortho(d$bg, range = c(0, 1000), draw = FALSE))
   pm <- plot_montage(d$bg, zlevels = c(8L, 10L), range = c(0, 1000))
@@ -82,6 +84,7 @@ test_that("plot_ortho and plot_montage accept numeric range", {
 # ---- #18.1: signed maps -> diverging + symmetric ----------------------------
 
 test_that("signed overlays default to a diverging palette silently", {
+  skip_if_not_installed("patchwork")
   d <- make_signed_overlay()
   # default ov_cmap on signed data: no message/warning, returns a renderable
   expect_silent(res <- plot_overlay(d$bg, d$ov, zlevels = 10L, draw = FALSE))
@@ -89,6 +92,7 @@ test_that("signed overlays default to a diverging palette silently", {
 })
 
 test_that("assemble = FALSE returns the per-slice ggplot list", {
+  skip_if_not_installed("patchwork")
   d <- make_signed_overlay()
   res <- plot_overlay(d$bg, d$ov, zlevels = c(8L, 10L), draw = FALSE, assemble = FALSE)
   expect_type(res, "list")
@@ -97,6 +101,7 @@ test_that("assemble = FALSE returns the per-slice ggplot list", {
 })
 
 test_that("explicit sequential palette on signed data warns", {
+  skip_if_not_installed("patchwork")
   d <- make_signed_overlay()
   expect_warning(
     plot_overlay(d$bg, d$ov, zlevels = 10L, ov_cmap = "inferno", draw = FALSE),
@@ -105,11 +110,13 @@ test_that("explicit sequential palette on signed data warns", {
 })
 
 test_that("a diverging palette on signed data does not warn", {
+  skip_if_not_installed("patchwork")
   d <- make_signed_overlay()
   expect_silent(plot_overlay(d$bg, d$ov, zlevels = 10L, ov_cmap = "RdBu", draw = FALSE))
 })
 
 test_that("purely positive overlays keep the requested sequential palette", {
+  skip_if_not_installed("patchwork")
   sp <- NeuroSpace(c(12L, 12L, 12L))
   bg <- NeuroVol(array(0, c(12,12,12)), sp)
   a <- array(0, c(12,12,12)); a[4:8, 4:8, ] <- 5
@@ -120,6 +127,7 @@ test_that("purely positive overlays keep the requested sequential palette", {
 # ---- #19.4: ramp alpha mode -------------------------------------------------
 
 test_that("plot_overlay supports ov_alpha_mode = 'ramp'", {
+  skip_if_not_installed("patchwork")
   d <- make_signed_overlay()
   res <- plot_overlay(d$bg, d$ov, zlevels = c(8L, 10L),
                       ov_alpha_mode = "ramp", ov_thresh = 2, draw = FALSE)
@@ -150,6 +158,7 @@ test_that("soft_alpha_params yields a convex, monotone, self-tuning curve", {
 })
 
 test_that("plot_overlay supports ov_alpha_mode = 'soft'", {
+  skip_if_not_installed("patchwork")
   d <- make_signed_overlay()
   res <- plot_overlay(d$bg, d$ov, zlevels = c(8L, 10L),
                       ov_alpha_mode = "soft", draw = FALSE)
@@ -198,6 +207,7 @@ test_that("style = 'report' assembles a single object with legend + crop", {
 })
 
 test_that("legend / crop / interpolate toggle independently of style", {
+  skip_if_not_installed("patchwork")
   d <- make_signed_overlay()
   expect_silent(plot_overlay(d$bg, d$ov, zlevels = 10L, style = "dark",
                              legend = TRUE, crop = TRUE, interpolate = TRUE,
@@ -267,6 +277,7 @@ test_that("report style ggsave round-trips for ortho and montage", {
 # ---- #18.2: shared (not per-slice) alpha denominator ------------------------
 
 test_that("proportional alpha uses a shared cap across panels", {
+  skip_if_not_installed("patchwork")
   # Two slices with very different peak magnitudes: identical raw values must
   # map to identical alpha regardless of which slice they sit on. We check this
   # indirectly via the documented behavior that the denominator is the shared

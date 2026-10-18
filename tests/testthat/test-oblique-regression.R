@@ -32,6 +32,7 @@ test_that("downsample of oblique vol has correct output dimensions", {
 })
 
 test_that("resample preserves data for identity transform", {
+  skip_if_not_installed("RNiftyReg")
   skip_on_cran()
   vol <- make_vol(c(10, 10, 10), spacing = c(2, 2, 2))
   target_sp <- space(vol)
@@ -42,6 +43,7 @@ test_that("resample preserves data for identity transform", {
 })
 
 test_that("resample with oblique target space produces valid output", {
+  skip_if_not_installed("RNiftyReg")
   skip_on_cran()
   vol <- make_vol(c(16, 16, 16), spacing = c(2, 2, 2))
   # Oblique target
@@ -57,6 +59,7 @@ test_that("resample with oblique target space produces valid output", {
 })
 
 test_that("deoblique produces axis-aligned output", {
+  skip_if_not_installed("RNiftyReg")
   skip_on_cran()
   aff <- matrix(c(2, 0.5, 0, -80,
                    0.0, 2, 0, -120,

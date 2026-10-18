@@ -53,9 +53,11 @@
 #'   so \code{ggsave()} at any size gives a filled, centred grid.
 #' @examples
 #' \donttest{
-#' bg <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
-#' p <- plot_montage(bg, title = "MNI152 (downsampled)")
-#' ggplot2::ggsave(tempfile(fileext = ".png"), p, width = 8, height = 6)
+#' if (requireNamespace("patchwork", quietly = TRUE)) {
+#'   bg <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
+#'   p <- plot_montage(bg, title = "MNI152 (downsampled)")
+#'   ggplot2::ggsave(tempfile(fileext = ".png"), p, width = 8, height = 6)
+#' }
 #' }
 #' @family plot_neuro
 #' @export
@@ -69,6 +71,7 @@ plot_montage <- function(
   unit = c("index", "mm"), annotate = TRUE, n_slices = 12L,
   draw = FALSE, canvas = NULL, label_size = 3.1
 ) {
+  .require_patchwork()
   unit_missing <- missing(unit)
   cbar_title_given <- !missing(cbar_title)
   cbar_title <- validate_cbar_title(cbar_title)

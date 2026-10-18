@@ -3,6 +3,7 @@ context("plot_ortho coverage")
 library(neuroim2)
 
 test_that("plot_ortho returns one assembled figure (visible unless drawn)", {
+  skip_if_not_installed("patchwork")
   sp <- NeuroSpace(c(10L, 10L, 10L), c(1, 1, 1))
   vol <- DenseNeuroVol(array(rnorm(1000), c(10, 10, 10)), sp)
   pdf(file = NULL)
@@ -16,6 +17,7 @@ test_that("plot_ortho returns one assembled figure (visible unless drawn)", {
 })
 
 test_that("plot_ortho(assemble = FALSE) returns the named list of panels", {
+  skip_if_not_installed("patchwork")
   sp <- NeuroSpace(c(10L, 10L, 10L), c(1, 1, 1))
   vol <- DenseNeuroVol(array(rnorm(1000), c(10, 10, 10)), sp)
   pdf(file = NULL)
@@ -26,6 +28,7 @@ test_that("plot_ortho(assemble = FALSE) returns the named list of panels", {
 })
 
 test_that("plot_ortho panels are ggplot objects", {
+  skip_if_not_installed("patchwork")
   sp <- NeuroSpace(c(10L, 10L, 10L), c(1, 1, 1))
   vol <- DenseNeuroVol(array(rnorm(1000), c(10, 10, 10)), sp)
   pdf(file = NULL)
@@ -37,6 +40,7 @@ test_that("plot_ortho panels are ggplot objects", {
 })
 
 test_that("plot_ortho works with explicit coord", {
+  skip_if_not_installed("patchwork")
   sp <- NeuroSpace(c(10L, 10L, 10L), c(1, 1, 1))
   vol <- DenseNeuroVol(array(rnorm(1000), c(10, 10, 10)), sp)
   pdf(file = NULL)
@@ -47,6 +51,7 @@ test_that("plot_ortho works with explicit coord", {
 })
 
 test_that("plot_ortho works with crosshair=FALSE and annotate=FALSE", {
+  skip_if_not_installed("patchwork")
   sp <- NeuroSpace(c(10L, 10L, 10L), c(1, 1, 1))
   vol <- DenseNeuroVol(array(rnorm(1000), c(10, 10, 10)), sp)
   pdf(file = NULL)
@@ -58,6 +63,7 @@ test_that("plot_ortho works with crosshair=FALSE and annotate=FALSE", {
 })
 
 test_that("plot_ortho works with range='data'", {
+  skip_if_not_installed("patchwork")
   sp <- NeuroSpace(c(10L, 10L, 10L), c(1, 1, 1))
   vol <- DenseNeuroVol(array(rnorm(1000), c(10, 10, 10)), sp)
   pdf(file = NULL)
@@ -67,6 +73,7 @@ test_that("plot_ortho works with range='data'", {
 })
 
 test_that("plot_ortho works with downsample > 1", {
+  skip_if_not_installed("patchwork")
   sp <- NeuroSpace(c(20L, 20L, 20L), c(1, 1, 1))
   vol <- DenseNeuroVol(array(rnorm(8000), c(20, 20, 20)), sp)
   pdf(file = NULL)
@@ -78,6 +85,7 @@ test_that("plot_ortho works with downsample > 1", {
 })
 
 test_that("plot_ortho unit='mm' path runs without error", {
+  skip_if_not_installed("patchwork")
   sp <- NeuroSpace(c(10L, 10L, 10L), c(2, 2, 2))
   vol <- DenseNeuroVol(array(rnorm(1000), c(10, 10, 10)), sp)
   pdf(file = NULL)
@@ -88,6 +96,7 @@ test_that("plot_ortho unit='mm' path runs without error", {
 })
 
 test_that("plot_ortho supports draw=FALSE and validates coordinates", {
+  skip_if_not_installed("patchwork")
   sp <- NeuroSpace(c(10L, 10L, 10L), c(1, 1, 1))
   vol <- DenseNeuroVol(array(rnorm(1000), c(10, 10, 10)), sp)
 

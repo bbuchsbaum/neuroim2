@@ -105,9 +105,11 @@ plain matrices.
 }
 \examples{
 \donttest{
-bg <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
-p <- plot_montage(bg, title = "MNI152 (downsampled)")
-ggplot2::ggsave(tempfile(fileext = ".png"), p, width = 8, height = 6)
+if (requireNamespace("patchwork", quietly = TRUE)) {
+  bg <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
+  p <- plot_montage(bg, title = "MNI152 (downsampled)")
+  ggplot2::ggsave(tempfile(fileext = ".png"), p, width = 8, height = 6)
+}
 }
 }
 \seealso{

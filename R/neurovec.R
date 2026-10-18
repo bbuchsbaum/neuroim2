@@ -1431,7 +1431,7 @@ read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap
         if (!requireNamespace("R.utils")) {
           stop("must install 'R.utils' to enable temporary gzip decompression")
         }
-        oname <- stringr::str_replace(fname, ".gz$", "")
+        oname <- sub(".gz$", "", fname)
         tdir <- tempdir()
         oname <- paste0(tdir, "/", basename(oname))
         R.utils::gunzip(fname, destname=oname, remove=FALSE)

@@ -50,7 +50,9 @@ newtrans <- cbind(newtrans4X3, c(space(img)@origin,1))
 
 rspace <- NeuroSpace(rspace@dim*2, rspace@spacing/2, origin=rspace@origin, trans=trans(img))
 \donttest{
-rvol <- resample(img, rspace)
+if (requireNamespace("RNiftyReg", quietly = TRUE)) {
+  rvol <- resample(img, rspace)
+}
 }
 
 
@@ -58,8 +60,10 @@ rvol <- resample(img, rspace)
 src_vol <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 targ_vol <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 
-# Resample source to match target
-resampled <- resample(src_vol, targ_vol, interpolation=1)
+# Resample source to match target (requires the suggested package RNiftyReg)
+if (requireNamespace("RNiftyReg", quietly = TRUE)) {
+  resampled <- resample(src_vol, targ_vol, interpolation=1)
+}
 
 
 }

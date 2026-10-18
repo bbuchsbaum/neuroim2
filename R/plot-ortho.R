@@ -61,9 +61,11 @@
 #'   Each view is labelled with the world coordinate of its plane (mm).
 #' @examples
 #' \donttest{
-#' bg <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
-#' p <- plot_ortho(bg, coord = c(24, 26, 26))
-#' ggplot2::ggsave(tempfile(fileext = ".png"), p, width = 9, height = 3.5)
+#' if (requireNamespace("patchwork", quietly = TRUE)) {
+#'   bg <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
+#'   p <- plot_ortho(bg, coord = c(24, 26, 26))
+#'   ggplot2::ggsave(tempfile(fileext = ".png"), p, width = 9, height = 3.5)
+#' }
 #' }
 #' @family plot_neuro
 #' @export

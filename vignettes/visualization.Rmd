@@ -84,7 +84,7 @@ cardinal-plane sections rather than a view of the stored voxel planes.
 returns a figure object that prints like a ggplot and can be passed to
 `ggsave()`; its layout is re-fitted to whatever size you save it at.
 
-```{r montage, fig.cap = "Six axial slices with robust intensity scaling.", fig.alt = "Six axial anatomical slices on a dark background.", fig.height = 3.4, dev.args = list(bg = "#141414")}
+```{r montage, requires = "patchwork", fig.cap = "Six axial slices with robust intensity scaling.", fig.alt = "Six axial anatomical slices on a dark background.", fig.height = 3.4, dev.args = list(bg = "#141414")}
 plot_montage(anat,
   zlevels = zlevels, ncol = 6,
   cmap = anatomy_cmap, range = "robust",
@@ -94,7 +94,7 @@ plot_montage(anat,
 
 `style = "light"` is the version for a manuscript page:
 
-```{r montage-light, fig.cap = "The same slices in the light style.", fig.alt = "Four axial anatomical slices, dark brain tiles on a light page.", fig.height = 3.4}
+```{r montage-light, requires = "patchwork", fig.cap = "The same slices in the light style.", fig.alt = "Four axial anatomical slices, dark brain tiles on a light page.", fig.height = 3.4}
 plot_montage(anat,
   zlevels = zlevels[1:4], ncol = 4,
   cmap = anatomy_cmap, range = "robust",
@@ -111,7 +111,7 @@ flattens everything else to black.
 `plot_ortho()` is for when you care about a specific point rather than a set of
 slices. The crosshairs confirm that all three panels show the same place.
 
-```{r ortho, fig.cap = "Axial, coronal and sagittal views through one voxel.", fig.alt = "Three orthogonal slices with crosshairs.", fig.height = 3.6, dev.args = list(bg = "#141414")}
+```{r ortho, requires = "patchwork", fig.cap = "Axial, coronal and sagittal views through one voxel.", fig.alt = "Three orthogonal slices with crosshairs.", fig.height = 3.6, dev.args = list(bg = "#141414")}
 plot_ortho(anat,
   coord = round(dim(anat) / 2), unit = "index",
   cmap = anatomy_cmap, title = "Three-plane view", style = "dark"
@@ -121,7 +121,7 @@ plot_ortho(anat,
 `assemble = FALSE` returns the individual panels instead of one figure, which
 is what you want when arranging them yourself:
 
-```{r ortho-panels}
+```{r ortho-panels, requires = "patchwork"}
 names(plot_ortho(anat, coord = round(dim(anat) / 2), assemble = FALSE))
 ```
 
@@ -130,7 +130,7 @@ names(plot_ortho(anat, coord = round(dim(anat) / 2), assemble = FALSE))
 `plot_overlay()` puts one volume on top of another. For a signed map, a
 diverging palette with symmetric limits keeps positive and negative comparable:
 
-```{r overlay, fig.cap = "Thresholded signed t-map over the anatomy.", fig.alt = "Six anatomical slices with blue and orange statistical clusters.", fig.height = 3.6, dev.args = list(bg = "#141414")}
+```{r overlay, requires = "patchwork", fig.cap = "Thresholded signed t-map over the anatomy.", fig.alt = "Six anatomical slices with blue and orange statistical clusters.", fig.height = 3.6, dev.args = list(bg = "#141414")}
 plot_overlay(
   bgvol = anat, overlay = stat_map,
   zlevels = zlevels, ncol = 6,
@@ -192,7 +192,7 @@ Two images on the same grid can be compared directly. `plot_checkerboard()`
 alternates tiles between them, so misalignment shows up as anatomy breaking
 across tile edges.
 
-```{r checkerboard, fig.cap = "Checkerboard against a copy shifted by four voxels. Anatomy steps across tile boundaries.", fig.alt = "Three large checkerboard slices; brain structures are offset between alternating tiles.", fig.height = 4.6, dev.args = list(bg = "#141414")}
+```{r checkerboard, requires = "patchwork", fig.cap = "Checkerboard against a copy shifted by four voxels. Anatomy steps across tile boundaries.", fig.alt = "Three large checkerboard slices; brain structures are offset between alternating tiles.", fig.height = 4.6, dev.args = list(bg = "#141414")}
 shifted <- demo_shifted(anat, by = 4L)
 
 plot_checkerboard(anat, shifted,
@@ -207,7 +207,7 @@ small to see, so prefer a few large slices over many small ones.
 `plot_edge_overlay()` compares boundaries instead, which is easier to judge when
 the two images have different contrast:
 
-```{r edges, fig.cap = "Fixed and moving edge maps. Where the colours separate, the images disagree.", fig.alt = "Edge overlay slices with two colours of outline separating.", fig.height = 3.6, dev.args = list(bg = "#141414")}
+```{r edges, requires = "patchwork", fig.cap = "Fixed and moving edge maps. Where the colours separate, the images disagree.", fig.alt = "Edge overlay slices with two colours of outline separating.", fig.height = 3.6, dev.args = list(bg = "#141414")}
 fixed_edges <- demo_edges(brain)
 moving_edges <- demo_edges(demo_shifted(brain, by = 4L))
 

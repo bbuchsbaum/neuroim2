@@ -8,6 +8,13 @@
   memory map internally fall back to the streaming reader, which also now
   serves data types `mmap` cannot map instead of failing. `BigNeuroVec`'s
   `data` slot is declared `"ANY"` and validated as an `FBM`.
+* `RNiftyReg` and `patchwork` moved from Imports to Suggests, and `stringr` is
+  no longer a dependency (the AFNI/NIML header parsers use base R with the
+  same results). `resample()`, `resample_to()` and `deoblique()` on volumes
+  need `RNiftyReg`; the assembled plotting functions (`plot_ortho()`,
+  `plot_montage()`, `plot_overlay()`, `plot_checkerboard()`,
+  `plot_edge_overlay()`) need `patchwork`. Each stops with an informative
+  message when its package is missing.
 * The bundled template `inst/extdata/mni_downsampled.nii.gz` now has a
   correct sform. Its sform was the identity plus a translation, which takes
   precedence over the qform and made the image read as 1 mm voxels; it is the

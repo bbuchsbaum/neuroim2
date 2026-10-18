@@ -854,6 +854,29 @@ setMethod(f="scale_series", signature=signature(x="NeuroVec", center="missing", 
   invisible(TRUE)
 }
 
+#' Stop informatively unless the optional 'patchwork' package is available
+#' @keywords internal
+#' @noRd
+.require_patchwork <- function() {
+  if (!requireNamespace("patchwork", quietly = TRUE)) {
+    stop("Package 'patchwork' is required to assemble multi-panel figures. ",
+         "Install it with install.packages(\"patchwork\").", call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
+#' Stop informatively unless the optional 'RNiftyReg' package is available
+#' @keywords internal
+#' @noRd
+.require_rniftyreg <- function() {
+  if (!requireNamespace("RNiftyReg", quietly = TRUE)) {
+    stop("Package 'RNiftyReg' is required for resampling (resample(), ",
+         "resample_to(), deoblique()). Install it with ",
+         "install.packages(\"RNiftyReg\").", call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
 #' Map a neuroim2 data-type name to an 'mmap' vector type.
 #'
 #' Evaluated only when a memory map is actually being created, so the optional

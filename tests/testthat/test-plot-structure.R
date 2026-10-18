@@ -59,6 +59,7 @@ test_that("plot(NeuroSlice) builds a single 2D panel", {
 })
 
 test_that("plot_montage honours zlevels and ncol", {
+  skip_if_not_installed("patchwork")
   p <- plot_montage(demo_volume(), zlevels = c(5L, 10L, 15L), ncol = 3L)
 
   expect_s3_class(p, "ggplot")
@@ -66,6 +67,7 @@ test_that("plot_montage honours zlevels and ncol", {
 })
 
 test_that("plot_ortho returns the three anatomical planes", {
+  skip_if_not_installed("patchwork")
   panels <- plot_ortho(demo_volume(), draw = FALSE, assemble = FALSE)
 
   expect_named(panels, c("axial", "coronal", "sagittal"), ignore.order = TRUE)
@@ -76,6 +78,7 @@ test_that("plot_ortho returns the three anatomical planes", {
 })
 
 test_that("plot_ortho drops crosshair and annotation layers when asked", {
+  skip_if_not_installed("patchwork")
   vol <- demo_volume()
 
   with_extras <- plot_ortho(vol, draw = FALSE, assemble = FALSE)
@@ -96,6 +99,7 @@ test_that("plot_ortho drops crosshair and annotation layers when asked", {
 })
 
 test_that("plot_overlay builds in both alpha modes", {
+  skip_if_not_installed("patchwork")
   set.seed(42)
   bg <- make_vol(c(20L, 20L, 20L))
   ov <- make_vol(c(20L, 20L, 20L))
@@ -113,6 +117,7 @@ test_that("plot_overlay builds in both alpha modes", {
 })
 
 test_that("plot_overlay panels cover the requested slices", {
+  skip_if_not_installed("patchwork")
   set.seed(42)
   bg <- make_vol(c(20L, 20L, 20L))
   ov <- make_vol(c(20L, 20L, 20L))

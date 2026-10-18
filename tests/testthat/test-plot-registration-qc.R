@@ -14,6 +14,7 @@ make_registration_qc_volumes <- function(dims = c(8L, 9L, 5L), space = neuroim2:
 }
 
 test_that("plot_checkerboard returns ggplot panels and an assembled figure", {
+  skip_if_not_installed("patchwork")
   vols <- make_registration_qc_volumes()
 
   result <- neuroim2::plot_checkerboard(
@@ -49,6 +50,7 @@ test_that("plot_checkerboard returns ggplot panels and an assembled figure", {
 })
 
 test_that("plot_edge_overlay returns ggplot panels and an assembled figure", {
+  skip_if_not_installed("patchwork")
   vols <- make_registration_qc_volumes()
 
   result <- neuroim2::plot_edge_overlay(
@@ -97,6 +99,7 @@ test_that("registration QC plots reject volumes on different grids", {
 })
 
 test_that("registration QC plots validate panel layout arguments", {
+  skip_if_not_installed("patchwork")
   vols <- make_registration_qc_volumes()
 
   expect_error(
@@ -118,6 +121,7 @@ test_that("registration QC plots validate panel layout arguments", {
 })
 
 test_that("registration QC plots draw panel grids with layout labels", {
+  skip_if_not_installed("patchwork")
   vols <- make_registration_qc_volumes(c(5L, 6L, 4L))
   tf <- tempfile(fileext = ".png")
   grDevices::png(tf)
@@ -155,6 +159,7 @@ test_that("registration QC plots draw panel grids with layout labels", {
 })
 
 test_that("plot_edge_overlay keeps all-zero edge slices transparent", {
+  skip_if_not_installed("patchwork")
   dims <- c(4L, 4L, 2L)
   sp <- neuroim2::NeuroSpace(dims)
   bg <- neuroim2::NeuroVol(array(1, dim = dims), sp)

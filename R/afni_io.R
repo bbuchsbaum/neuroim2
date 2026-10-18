@@ -1,8 +1,34 @@
+#' Split one string on a regular expression, keeping empty pieces
+#'
+#' Base replacement for \code{stringr::str_split(x, pattern)[[1]]}: unlike
+#' \code{strsplit()} it keeps a trailing empty piece ("a~b~" gives
+#' \code{c("a", "b", "")}) and returns \code{""} for an empty string. Patterns
+#' are Perl-compatible.
+#' @param x A single string (only the first element is used).
+#' @param pattern Regular expression to split on (must not match the empty string).
 #' @keywords internal
-#' @importFrom stringr str_split str_trim str_sub
+#' @noRd
+.str_split1 <- function(x, pattern) {
+  x <- x[1]
+  if (is.na(x)) return(NA_character_)
+  m <- gregexpr(pattern, x, perl = TRUE)[[1]]
+  if (m[1] == -1L) return(x)
+  starts <- c(1L, m + attr(m, "match.length"))
+  ends <- c(m - 1L, nchar(x))
+  substring(x, starts, ends)
+}
+
+#' Trim leading and trailing (Unicode) whitespace, as stringr::str_trim()
+#' @keywords internal
+#' @noRd
+.str_trim <- function(x) {
+  trimws(x, whitespace = "[\\h\\v]")
+}
+
+#' @keywords internal
 #' @noRd
 parseIntAttribute <- function(line){
-	as.integer(str_split(str_trim(paste(line, collapse=" ")), "\\s+")[[1]])
+	as.integer(.str_split1(.str_trim(paste(line, collapse=" ")), "[\\h\\v]+"))
 }
 
 #' Parse float attribute
@@ -14,7 +40,7 @@ parseIntAttribute <- function(line){
 #' @keywords internal
 #' @noRd
 parseFloatAttribute <- function(line){
-	as.numeric(str_split(str_trim(paste(line, collapse=" ")), "\\s+")[[1]])
+	as.numeric(.str_split1(.str_trim(paste(line, collapse=" ")), "[\\h\\v]+"))
 }
 
 #' Parse string attribute
@@ -27,12 +53,12 @@ parseFloatAttribute <- function(line){
 #' @noRd
 parseStringAttribute <- function(line) {
 	
-	res <- str_split(line, "~")[[1]]
+	res <- .str_split1(line[1], "~")
 	if (length(res) > 1) {
-		res[1] <- str_sub(res[1], 2)
+		res[1] <- substring(res[1], 2)
 		res[1:(length(res)-1)]
 	} else {
-		str_sub(res[1:(length(res)-1)], 2)
+		substring(res[1:(length(res)-1)], 2)
 	}
 }
 
@@ -45,9 +71,9 @@ parseStringAttribute <- function(line) {
 #' @keywords internal
 #' @noRd
 parseElement <- function(inputLines) {
-	atype <- str_trim(str_split(inputLines[[1]], "=")[[1]])[2]
-	name <- str_trim(str_split(inputLines[[2]], "=")[[1]])[2]
-	count <- str_trim(str_split(inputLines[[3]], "=")[[1]])[2]
+	atype <- .str_trim(.str_split1(inputLines[[1]], "="))[2]
+	name <- .str_trim(.str_split1(inputLines[[2]], "="))[2]
+	count <- .str_trim(.str_split1(inputLines[[3]], "="))[2]
 
 	content <- if (atype == "string-attribute") {
 		parseStringAttribute(inputLines[4:length(inputLines)])
@@ -95,10 +121,9 @@ read_afni_header <- function(file_name) {
 #' @param line A character vector representing one or more lines of text.
 #' @return An integer vector parsed from the input.
 #' @keywords internal
-#' @importFrom stringr str_split str_trim str_sub
 #' @noRd
 parseIntAttribute <- function(line){
-	as.integer(str_split(str_trim(paste(line, collapse=" ")), "\\s+")[[1]])
+	as.integer(.str_split1(.str_trim(paste(line, collapse=" ")), "[\\h\\v]+"))
 }
 
 

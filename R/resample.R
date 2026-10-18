@@ -78,16 +78,18 @@ convert_hd <- function(hd) {
 #' src_vol <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #' targ_vol <- read_vol(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #'
-#' # Resample source to match target
-#' resampled <- resample(src_vol, targ_vol, interpolation=1)
+#' # Resample source to match target (requires the suggested package RNiftyReg)
+#' if (requireNamespace("RNiftyReg", quietly = TRUE)) {
+#'   resampled <- resample(src_vol, targ_vol, interpolation=1)
+#' }
 #' 
 #'
 #' @seealso \code{\link{NeuroVol}} for the base volume class
 #' @importFrom RNifti asNifti
-#' @importFrom RNiftyReg buildAffine applyTransform
 #' @export
 setMethod(f="resample", signature=signature("NeuroVol", "NeuroVol"),
           def=function(source, target, interpolation=3L) {
+            .require_rniftyreg()
             .warn_if_disjoint(space(source), space(target))
             # Only the geometry of these headers is used, so name the datatype
             # rather than letting as_nifti_header() scan the values to infer one.
@@ -160,7 +162,6 @@ setMethod(f="resample", signature=signature("NeuroVol", "NeuroVol"),
 #' @param target A NeuroSpace object representing the target space to match the dimensions and orientation of the source volume.
 #' @param interpolation A single integer specifying the type of interpolation to be applied to the final resampled image. May be 0 (nearest neighbor), 1 (trilinear), or 3 (cubic spline). No other values are valid.
 #' @import RNifti
-#' @importFrom RNiftyReg buildAffine applyTransform
 #' @rdname resample-methods
 #' @export
 setMethod(f="resample", signature=signature("NeuroVol", "NeuroSpace"),

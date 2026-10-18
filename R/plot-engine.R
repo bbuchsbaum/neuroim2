@@ -763,6 +763,7 @@ blend_colours <- function(cols, bg, alpha) {
 #' @keywords internal
 #' @noRd
 neuro_key_strip <- function(items, tokens, fontsize = 8.5) {
+  .require_patchwork()
   # All text shares one gpar set on the parent tree, so grobWidth() is
   # evaluated in the font the text is drawn in and positions stay exact.
   # Items are separated by a short vertical rule (no font metrics involved).
@@ -833,6 +834,7 @@ overlay_key <- function(thresh, diverging, quantity, tokens, plane = "Axial") {
 neuro_assemble <- function(plots, ncol = NULL, tile_aspect = 1, colorbar = NULL,
                            key = NULL, tokens, title = NULL, subtitle = NULL,
                            caption = NULL, widths = NULL, canvas = NULL) {
+  .require_patchwork()
   n <- length(plots)
   if (!is.null(ncol)) {
     ok <- is.numeric(ncol) && length(ncol) == 1L && is.finite(ncol) &&
@@ -950,6 +952,7 @@ title_block_height <- function(title, subtitle) {
 #' @keywords internal
 #' @noRd
 title_element <- function(title, subtitle, tokens) {
+  .require_patchwork()
   grobs <- list()
   base <- grid::unit(0.14, "in")
   if (!is.null(subtitle)) {
@@ -986,6 +989,7 @@ scale_tile_text <- function(p, k) {
 #' @keywords internal
 #' @noRd
 caption_element <- function(caption, tokens) {
+  .require_patchwork()
   patchwork::wrap_elements(full = grid::textGrob(
     caption, x = 0, y = 0.5, hjust = 0, vjust = 0.5,
     gp = grid::gpar(col = tokens$muted, fontsize = 8.5))) +
@@ -997,6 +1001,7 @@ caption_element <- function(caption, tokens) {
 #' @keywords internal
 #' @noRd
 card_spacer <- function(tokens) {
+  .require_patchwork()
   patchwork::plot_spacer() +
     ggplot2::theme(plot.background = ggplot2::element_blank(),
                    plot.margin = grid::unit(c(0, 0, 0, 0), "pt"))
@@ -1085,6 +1090,7 @@ neuro_fig_strip <- function(x) {
 #' @keywords internal
 #' @noRd
 neuro_fig_add <- function(e1, e2, op) {
+  .require_patchwork()
   env <- attr(e1, "neuro_figure")
   # labs()/ggtitle() on a composed figure would land on an inner cell; turn
   # figure-level titles into a patchwork annotation styled like the family.
