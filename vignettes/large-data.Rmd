@@ -43,6 +43,17 @@ cat(sprintf(
 ))
 ```
 
+```{r optional-packages, include = FALSE}
+# The memory-mapped and BigNeuroVec backends compared below use the suggested
+# packages 'mmap' and 'bigstatsr'. Without them the code is shown but not run.
+has_backends <- requireNamespace("mmap", quietly = TRUE) &&
+  requireNamespace("bigstatsr", quietly = TRUE)
+knitr::opts_chunk$set(eval = has_backends)
+```
+
+The memory-mapped and `BigNeuroVec` backends rely on the suggested packages
+`mmap` and `bigstatsr`; install them to run every example here.
+
 ```{r load}
 library(neuroim2)
 ```

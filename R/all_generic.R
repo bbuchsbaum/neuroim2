@@ -56,7 +56,9 @@ setGeneric("as.matrix", function(x, ...) standardGeneric("as.matrix"))
 #'
 #' rspace <- NeuroSpace(rspace@dim*2, rspace@spacing/2, origin=rspace@origin, trans=trans(img))
 #' \donttest{
-#' rvol <- resample(img, rspace)
+#' if (requireNamespace("RNiftyReg", quietly = TRUE)) {
+#'   rvol <- resample(img, rspace)
+#' }
 #' }
 #'
 #'

@@ -1116,17 +1116,16 @@ setValidity("DenseNeuroVec", function(object) {
 #' \code{\link[mmap]{mmap}} for details on memory-mapped file objects.
 #'
 #' @examples
+#' # Memory mapping requires the optional 'mmap' package
+#' if (requireNamespace("mmap", quietly = TRUE)) {
+#'   file_path <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
+#'   mapped_vec <- MappedNeuroVec(file_path)
 #'
-#
-#' # Create a MappedNeuroVec object (pseudo-code)
-#' file_path <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")
-#' mapped_vec <- MappedNeuroVec(file_path)
-#'
-#' # Access a subset of the data
-#' subset <- mapped_vec[,,, 1:2]
+#'   # Access a subset of the data
+#'   subset <- mapped_vec[,,, 1:2]
+#' }
 #'
 #'
-#' @importFrom mmap mmap
 #' @export
 #' @rdname MappedNeuroVec-class
 setClass("MappedNeuroVec",
@@ -1318,14 +1317,22 @@ setClass(
 #' \code{\link{NeuroVec-class}} for the base 4D brain image class.
 #' \code{\link[bigstatsr]{FBM}} for details on File-Backed Big Matrix objects.
 #'
-#' @importFrom bigstatsr FBM
 #' @export
 #' @rdname BigNeuroVec-class
 setClass("BigNeuroVec",
          slots = c(
-           data = "FBM"
+           # Declared as "ANY" so the class can be defined without the optional
+           # 'bigstatsr' package; the validity method requires an FBM.
+           data = "ANY"
          ),
-         contains = c("NeuroVec", "AbstractSparseNeuroVec", "ArrayLike4D"))
+         contains = c("NeuroVec", "AbstractSparseNeuroVec", "ArrayLike4D"),
+         validity = function(object) {
+           if (!inherits(object@data, "FBM")) {
+             "'data' slot must be a bigstatsr FBM (file-backed big matrix)"
+           } else {
+             TRUE
+           }
+         })
 
 #' FileBackedNeuroVec Class
 #'

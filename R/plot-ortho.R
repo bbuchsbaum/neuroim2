@@ -61,9 +61,11 @@
 #'   Each view is labelled with the world coordinate of its plane (mm).
 #' @examples
 #' \donttest{
-#' bg <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
-#' p <- plot_ortho(bg, coord = c(24, 26, 26))
-#' ggplot2::ggsave(tempfile(fileext = ".png"), p, width = 9, height = 3.5)
+#' if (requireNamespace("patchwork", quietly = TRUE)) {
+#'   bg <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
+#'   p <- plot_ortho(bg, coord = c(24, 26, 26))
+#'   ggplot2::ggsave(tempfile(fileext = ".png"), p, width = 9, height = 3.5)
+#' }
 #' }
 #' @family plot_neuro
 #' @export
@@ -262,9 +264,13 @@ plot_ortho <- function(
   build <- function(cv) neuro_assemble(unname(plots[shown]), colorbar = cbar, tokens = tokens,
                         title = title, subtitle = subtitle, caption = caption,
                         widths = unname(widths), canvas = cv)
-  cv0 <- canvas_size(canvas)
-  fig <- build(cv0)
-  if (is.null(canvas)) fig <- neuro_figure(fig, build, cv0, tokens)
+  # Panels-only output (assemble = FALSE) needs no figure, and so no patchwork.
+  fig <- NULL
+  if (isTRUE(assemble)) {
+    cv0 <- canvas_size(canvas)
+    fig <- build(cv0)
+    if (is.null(canvas)) fig <- neuro_figure(fig, build, cv0, tokens)
+  }
   neuro_finish(fig, plots, draw = draw, assemble = assemble, title = title,
                subtitle = subtitle, caption = caption, style = style)
 }

@@ -34,6 +34,7 @@ test_that("deoblique() supports newgrid and gridset controls", {
 })
 
 test_that("deoblique() resamples NeuroVol to deobliqued target", {
+  skip_if_not_installed("RNiftyReg")
   tx <- diag(c(2, 3, 4, 1))
   tx[1, 2] <- 0.3
   sp <- neuroim2::NeuroSpace(c(14, 10, 8), spacing = c(2, 3, 4), trans = tx)

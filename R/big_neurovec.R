@@ -42,10 +42,7 @@ BigNeuroVec <- function(data, space, mask, label = "", volume_labels = character
   type <- match.arg(type)
   stopifnot(inherits(space, "NeuroSpace"))
 
-  if (!requireNamespace("bigstatsr", quietly = TRUE)) {
-    stop("Package 'bigstatsr' is needed for this function to work. Please install it.",
-         call. = FALSE)
-  }
+  .require_bigstatsr()
 
   p <- prep_sparsenvec(data, space, mask)
   volume_labels <- .normalize_volume_labels(volume_labels, dim(p$space)[4])

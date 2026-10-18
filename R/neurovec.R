@@ -1183,6 +1183,7 @@ setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character",
 #' @rdname as_mmap
 setMethod("as_mmap", signature(x = "NeuroVec"),
           function(x, file = NULL, data_type = "FLOAT", overwrite = FALSE, ...) {
+            .require_mmap()
             if (inherits(x, "MappedNeuroVec")) {
               return(x)
             }
@@ -1362,22 +1363,33 @@ setMethod(f="split_blocks", signature=signature(x="NeuroVec", indices="factor"),
 #' img <- read_vec(system.file("extdata", "global_mask_v4.nii", package="neuroim2"))
 #'
 #'
-#' # Memory-mapped loading for large files
-#' big_img <- read_vec(system.file("extdata", "global_mask_v4.nii", package="neuroim2"), mode="mmap")
+#' # Memory-mapped loading for large files (requires the optional 'mmap' package)
+#' if (requireNamespace("mmap", quietly = TRUE)) {
+#'   big_img <- read_vec(system.file("extdata", "global_mask_v4.nii", package="neuroim2"), mode="mmap")
+#' }
 #'
-#' # Load masked data for memory efficiency
-#' mask <- as.logical(big_img[[1]])
-#' masked_data <- read_vec(system.file("extdata", "global_mask_v4.nii", package="neuroim2"),
-#'                mask=mask, mode="bigvec")
+#' # File-backed masked data (requires the optional 'bigstatsr' package)
+#' if (requireNamespace("bigstatsr", quietly = TRUE)) {
+#'   mask <- as.logical(img[[1]])
+#'   masked_data <- read_vec(system.file("extdata", "global_mask_v4.nii", package="neuroim2"),
+#'                  mask=mask, mode="bigvec")
+#' }
 #'
 #'
 #' @export
 #' @note
 #' * Memory-mapping (.mmap mode) is not supported for gzipped files
 #' * The bigvec mode requires a mask to be specified
+#' * The "mmap" mode requires the suggested package \pkg{mmap}, and the
+#'   "bigvec" mode requires the suggested package \pkg{bigstatsr}
 #' * When loading multiple files, they must have compatible dimensions
 read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap", "bigvec", "filebacked")) {
   mode <- match.arg(mode)
+  if (mode == "mmap") {
+    .require_mmap()
+  } else if (mode == "bigvec") {
+    .require_bigstatsr()
+  }
 
   get_source <- function(x, indices, mask) {
     if (endsWith(x, ".nii")) {
@@ -1420,7 +1432,7 @@ read_vec  <- function(file_name, indices=NULL, mask=NULL, mode=c("normal", "mmap
         if (!requireNamespace("R.utils")) {
           stop("must install 'R.utils' to enable temporary gzip decompression")
         }
-        oname <- stringr::str_replace(fname, ".gz$", "")
+        oname <- sub(".gz$", "", fname)
         tdir <- tempdir()
         oname <- paste0(tdir, "/", basename(oname))
         R.utils::gunzip(fname, destname=oname, remove=FALSE)

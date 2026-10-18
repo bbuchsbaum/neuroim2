@@ -122,11 +122,13 @@ slices. This is useful for visual registration QC.
 }
 \examples{
 \donttest{
-fixed <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
-moving <- fixed
-moving[] <- sqrt(fixed[c(2:dim(fixed)[1], 1), , ])   # shifted, different contrast
-p <- plot_checkerboard(fixed, moving)
-ggplot2::ggsave(tempfile(fileext = ".png"), p, width = 8, height = 6)
+if (requireNamespace("patchwork", quietly = TRUE)) {
+  fixed <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
+  moving <- fixed
+  moving[] <- sqrt(fixed[c(2:dim(fixed)[1], 1), , ])   # shifted, different contrast
+  p <- plot_checkerboard(fixed, moving)
+  ggplot2::ggsave(tempfile(fileext = ".png"), p, width = 8, height = 6)
+}
 }
 }
 \seealso{

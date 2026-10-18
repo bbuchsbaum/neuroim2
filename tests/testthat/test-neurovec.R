@@ -366,6 +366,7 @@ test_that("can write and read back an image vector", {
 })
 
 test_that("can write and read back an image vector as a bigneurovec", {
+  skip_if_not_installed("bigstatsr")
   mask <- read_vol(gmask)
   maskvec <- concat(mask,mask)
   fname <- paste(tempfile(), ".nii", sep="")

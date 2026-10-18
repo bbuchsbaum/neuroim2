@@ -1,3 +1,6 @@
+# Every test in this file reads through a memory map.
+skip_if_not_installed("mmap")
+
 # Write the header and SHORT payload independently of neuroim2's writer.
 mapped_short_fixture <- function(slope = 2.5, intercept = -4) {
   path <- tempfile(fileext = ".nii")

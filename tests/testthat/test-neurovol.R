@@ -204,6 +204,7 @@ test_that("can map values over a NeuroVol", {
 })
 
 test_that("can resample a NeuroVol", {
+  skip_if_not_installed("RNiftyReg")
   vol1 <- read_vol(gmask)
 
   tr <- trans(vol1)

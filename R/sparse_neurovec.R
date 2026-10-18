@@ -176,7 +176,10 @@ setMethod(f="load_data", signature=c("SparseNeuroVecSource"),
 				mask_idx <- which(M)
 
 				is_gzip <- identical(meta@descriptor@data_encoding, "gzip") || endsWith(meta@data_file, ".gz")
-				mmap_ok <- !is_gzip && identical(.Platform$endian, meta@endian)
+				# Use the compiled reader when the optional 'mmap' package is
+				# unavailable (e.g. webR), the file is gzipped, or the data type
+				# cannot be mapped.
+				mmap_ok <- !is_gzip && .can_mmap(meta) && .has_mmap()
 
 				arr <- if (mmap_ok) {
 				  # Read only masked voxels for requested volumes via mmap.
@@ -190,24 +193,19 @@ setMethod(f="load_data", signature=c("SparseNeuroVecSource"),
 				  }
 				  mat
 				} else {
-				  # Stream volumes sequentially (works for gzipped inputs too).
-				  reader <- data_reader(meta, offset = 0)
-				  on.exit(close(reader), add = TRUE)
-
-				  pos <- split(seq_along(ind), ind)
-				  out <- matrix(0, nrow = length(mask_idx), ncol = length(ind))
-				  max_vol <- max(ind)
-
-				  for (t in seq_len(max_vol)) {
-				    vol_dat <- read_elements(reader, nels)
-				    rows <- pos[[as.character(t)]]
-				    if (!is.null(rows)) {
-				      pars <- .data_scale_params(meta, index = t)
-				      scaled <- as.numeric(vol_dat[mask_idx]) * pars$slope + pars$intercept
-				      out[, rows] <- matrix(scaled, nrow = length(mask_idx), ncol = length(rows))
-				    }
+				  # Compiled whole-volume reader (the one dense reads use): correct for
+				  # every NIfTI data type, including UINT/LONG/ULONG values above 2^31,
+				  # and for gzipped files. Volumes are read in chunks so at most ~128 MB
+				  # of unmasked data is held at once, and only the mask rows are kept.
+				  vols <- sort(unique(ind))
+				  chunk <- max(1L, as.integer(floor(2^24 / nels)))
+				  kept <- matrix(0, nrow = length(mask_idx), ncol = length(vols))
+				  for (start in seq(1L, length(vols), by = chunk)) {
+				    cols <- start:min(start + chunk - 1L, length(vols))
+				    block <- read_mapped_vols(meta, vols[cols])
+				    kept[, cols] <- block[mask_idx, , drop = FALSE]
 				  }
-				  out
+				  kept[, match(ind, vols), drop = FALSE]
 				}
 
 				bspace <- NeuroSpace(c(dim(meta)[1:3], length(ind)), meta@spacing,
@@ -831,6 +829,7 @@ setAs(from="SparseNeuroVec", to="DenseNeuroVec",
 #' @rdname as_mmap
 setMethod("as_mmap", signature(x = "SparseNeuroVec"),
           function(x, file = NULL, data_type = "FLOAT", overwrite = FALSE, ...) {
+            .require_mmap()
             dense <- as(x, "DenseNeuroVec")
             as_mmap(dense, file = file, data_type = data_type, overwrite = overwrite, ...)
           })

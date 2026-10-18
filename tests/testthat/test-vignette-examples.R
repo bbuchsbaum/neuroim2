@@ -199,6 +199,7 @@ test_that("resampling: downsample halves the grid and doubles the spacing", {
 })
 
 test_that("resampling: resample_to lands on the requested grid", {
+  skip_if_not_installed("RNiftyReg")
   anat <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
   sp <- space(anat)
   target <- NeuroSpace(dim(sp) * 2L, spacing(sp) / 2, origin = origin(sp))
@@ -269,6 +270,7 @@ test_that("visualization: the demo stat map is a genuine signed t-map", {
 })
 
 test_that("visualization: plot helpers return ggplot objects on matching grids", {
+  skip_if_not_installed("patchwork")
   anat <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
   p <- plot_montage(anat, zlevels = c(12, 20, 28), ncol = 3)
   expect_s3_class(p, "ggplot")

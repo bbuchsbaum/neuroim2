@@ -127,24 +127,26 @@ MappedNeuroVecSource <- function(file_name) {
 #' }
 #'
 #' @examples
-#' # Create mapped vector from NIFTI file
-#' mvec <- MappedNeuroVec(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
+#' # Memory mapping requires the optional 'mmap' package
+#' if (requireNamespace("mmap", quietly = TRUE)) {
+#'   # Create mapped vector from NIFTI file
+#'   mvec <- MappedNeuroVec(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
 #'
-#' # Extract first volume
-#' vol1 <- mvec[[1]]
+#'   # Extract first volume
+#'   vol1 <- mvec[[1]]
 #'
-#' # Get dimensions
-#' dim(mvec)
+#'   # Get dimensions
+#'   dim(mvec)
 #'
-#' # Access specific timepoint
-#' timepoint <- mvec[, , , 2]
+#'   # Access specific timepoint
+#'   timepoint <- mvec[, , , 2]
+#' }
 #'
 #'
 #' @seealso
 #
 #' \code{\link[mmap]{mmap}} for memory mapping details
 #'
-#' @importFrom mmap mmap mmapFlags
 #' @importFrom methods new
 #'
 #' @export
@@ -181,6 +183,7 @@ setMethod(f = "load_data",
             intercepts <- vapply(scales, `[[`, numeric(1), "intercept")
 
             # Create memory mapping
+            .require_mmap()
             tryCatch({
               fmap <- mmap::mmap(meta@data_file,
                                 mode = .getMMapMode(meta@data_type),
@@ -369,6 +372,7 @@ setMethod("as_mmap", signature(x = "MappedNeuroVec"),
 #' @rdname as_mmap
 setMethod("as_mmap", signature(x = "FileBackedNeuroVec"),
           function(x, file = NULL, ...) {
+            .require_mmap()
             fn <- x@meta@data_file
             if (endsWith(fn, ".gz")) {
               stop("as_mmap: cannot memory-map gzipped file; re-save as uncompressed NIfTI with write_vec().")

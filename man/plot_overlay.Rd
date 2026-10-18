@@ -200,12 +200,14 @@ on: \code{p <- plot_overlay(...); ggsave("fig.png", p, width = 6, height =
 }
 \examples{
 \donttest{
-bg <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
-stat <- bg
-stat[] <- rnorm(length(stat)) * (bg[] > stats::quantile(bg[], 0.6))
-p <- plot_overlay(bg, stat, ov_thresh = 1.5, cbar_title = "z")
-tf <- tempfile(fileext = ".png")
-ggplot2::ggsave(tf, p, width = 7, height = 5)
+if (requireNamespace("patchwork", quietly = TRUE)) {
+  bg <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
+  stat <- bg
+  stat[] <- rnorm(length(stat)) * (bg[] > stats::quantile(bg[], 0.6))
+  p <- plot_overlay(bg, stat, ov_thresh = 1.5, cbar_title = "z")
+  tf <- tempfile(fileext = ".png")
+  ggplot2::ggsave(tf, p, width = 7, height = 5)
+}
 }
 }
 \seealso{

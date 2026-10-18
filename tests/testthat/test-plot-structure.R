@@ -59,6 +59,7 @@ test_that("plot(NeuroSlice) builds a single 2D panel", {
 })
 
 test_that("plot_montage honours zlevels and ncol", {
+  skip_if_not_installed("patchwork")
   p <- plot_montage(demo_volume(), zlevels = c(5L, 10L, 15L), ncol = 3L)
 
   expect_s3_class(p, "ggplot")
@@ -96,6 +97,7 @@ test_that("plot_ortho drops crosshair and annotation layers when asked", {
 })
 
 test_that("plot_overlay builds in both alpha modes", {
+  skip_if_not_installed("patchwork")
   set.seed(42)
   bg <- make_vol(c(20L, 20L, 20L))
   ov <- make_vol(c(20L, 20L, 20L))
