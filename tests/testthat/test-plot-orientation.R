@@ -62,7 +62,6 @@ test_that("plot_montage orients a permuted native plane anatomically", {
 })
 
 test_that("plot_ortho finds anatomical planes after voxel-axis permutation", {
-  skip_if_not_installed("patchwork")
   dims <- c(5L, 6L, 7L)
   marker <- c(2L, 5L, 3L)
   arr <- array(0, dims)
@@ -142,7 +141,6 @@ test_that("oblique plotting keeps native pixels on a regular warning-free grid",
 })
 
 test_that("overlay and registration QC plots share the orientation transform", {
-  skip_if_not_installed("patchwork")
   dims <- c(6L, 8L, 4L)
   affine <- diag(4)
   affine[1, 2] <- 0.2

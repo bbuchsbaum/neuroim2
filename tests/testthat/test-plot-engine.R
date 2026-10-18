@@ -119,7 +119,6 @@ test_that("plot_ortho(assemble = TRUE) returns one patchwork figure", {
 })
 
 test_that("plot_ortho with an overlay centres on the overlay peak", {
-  skip_if_not_installed("patchwork")
   dims <- c(10L, 11L, 12L)
   sp <- neuroim2::NeuroSpace(dims)
   set.seed(9)
@@ -250,7 +249,6 @@ test_that("plot_checkerboard rejects fractional and non-positive tiles", {
 })
 
 test_that("plot_ortho views share one height and stay above the field-of-view floor", {
-  skip_if_not_installed("patchwork")
   dims <- c(20L, 24L, 16L)
   sp <- neuroim2::NeuroSpace(dims)
   arr <- array(0, dims)
@@ -267,7 +265,6 @@ test_that("plot_ortho views share one height and stay above the field-of-view fl
 })
 
 test_that("tile padding uses the background palette's lowest colour", {
-  skip_if_not_installed("patchwork")
   dims <- c(10L, 10L, 6L)
   vol <- neuroim2::NeuroVol(array(runif(600), dims), neuroim2::NeuroSpace(dims))
   p <- neuroim2::plot_ortho(vol, cmap = "viridis", assemble = FALSE)$axial

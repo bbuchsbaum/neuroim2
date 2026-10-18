@@ -49,3 +49,4 @@ test_series_bug.R
 ^\.albersdown\.bak$
 ^\.mote$
 (^|/)Rplots\.pdf$
+^\.git$

@@ -264,9 +264,13 @@ plot_ortho <- function(
   build <- function(cv) neuro_assemble(unname(plots[shown]), colorbar = cbar, tokens = tokens,
                         title = title, subtitle = subtitle, caption = caption,
                         widths = unname(widths), canvas = cv)
-  cv0 <- canvas_size(canvas)
-  fig <- build(cv0)
-  if (is.null(canvas)) fig <- neuro_figure(fig, build, cv0, tokens)
+  # Panels-only output (assemble = FALSE) needs no figure, and so no patchwork.
+  fig <- NULL
+  if (isTRUE(assemble)) {
+    cv0 <- canvas_size(canvas)
+    fig <- build(cv0)
+    if (is.null(canvas)) fig <- neuro_figure(fig, build, cv0, tokens)
+  }
   neuro_finish(fig, plots, draw = draw, assemble = assemble, title = title,
                subtitle = subtitle, caption = caption, style = style)
 }

@@ -372,6 +372,7 @@ setMethod("as_mmap", signature(x = "MappedNeuroVec"),
 #' @rdname as_mmap
 setMethod("as_mmap", signature(x = "FileBackedNeuroVec"),
           function(x, file = NULL, ...) {
+            .require_mmap()
             fn <- x@meta@data_file
             if (endsWith(fn, ".gz")) {
               stop("as_mmap: cannot memory-map gzipped file; re-save as uncompressed NIfTI with write_vec().")

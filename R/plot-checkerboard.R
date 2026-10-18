@@ -186,7 +186,7 @@ plot_checkerboard <- function(
                tokens = tokens, interpolate = isTRUE(interpolate),
                label_size = label_size)
   })
-  key <- if (isTRUE(legend)) {
+  key <- if (isTRUE(legend) && isTRUE(assemble)) {
     tile_mm <- tile * min(spacing(space(bgvol))[-along])
     neuro_key_strip(Filter(Negate(is.null), list(
       list(fill = NA, label = sprintf("Top-left tile: %s, alternating with %s", labels[[1L]], labels[[2L]])),
@@ -200,9 +200,13 @@ plot_checkerboard <- function(
   build <- function(cv) neuro_assemble(plots, ncol = ncol, tile_aspect = tile_aspect_of(window, o1),
                         key = key, tokens = tokens, title = title,
                         subtitle = subtitle, caption = caption, canvas = cv)
-  cv0 <- canvas_size(canvas)
-  fig <- build(cv0)
-  if (is.null(canvas)) fig <- neuro_figure(fig, build, cv0, tokens)
+  # Panels-only output (assemble = FALSE) needs no figure, and so no patchwork.
+  fig <- NULL
+  if (isTRUE(assemble)) {
+    cv0 <- canvas_size(canvas)
+    fig <- build(cv0)
+    if (is.null(canvas)) fig <- neuro_figure(fig, build, cv0, tokens)
+  }
   neuro_finish(fig, plots, draw = draw, assemble = assemble, title = title,
                subtitle = subtitle, caption = caption, style = style,
                panel_names = vapply(zlevels, function(z) slice_world_label(bgvol, z, along), ""))

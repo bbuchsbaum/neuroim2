@@ -1183,6 +1183,7 @@ setMethod(f="write_vec",signature=signature(x="NeuroVec", file_name="character",
 #' @rdname as_mmap
 setMethod("as_mmap", signature(x = "NeuroVec"),
           function(x, file = NULL, data_type = "FLOAT", overwrite = FALSE, ...) {
+            .require_mmap()
             if (inherits(x, "MappedNeuroVec")) {
               return(x)
             }

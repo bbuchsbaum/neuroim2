@@ -121,7 +121,7 @@ plot_ortho(anat,
 `assemble = FALSE` returns the individual panels instead of one figure, which
 is what you want when arranging them yourself:
 
-```{r ortho-panels, requires = "patchwork"}
+```{r ortho-panels}
 names(plot_ortho(anat, coord = round(dim(anat) / 2), assemble = FALSE))
 ```
 

@@ -67,7 +67,6 @@ test_that("plot_montage honours zlevels and ncol", {
 })
 
 test_that("plot_ortho returns the three anatomical planes", {
-  skip_if_not_installed("patchwork")
   panels <- plot_ortho(demo_volume(), draw = FALSE, assemble = FALSE)
 
   expect_named(panels, c("axial", "coronal", "sagittal"), ignore.order = TRUE)
@@ -78,7 +77,6 @@ test_that("plot_ortho returns the three anatomical planes", {
 })
 
 test_that("plot_ortho drops crosshair and annotation layers when asked", {
-  skip_if_not_installed("patchwork")
   vol <- demo_volume()
 
   with_extras <- plot_ortho(vol, draw = FALSE, assemble = FALSE)
@@ -117,7 +115,6 @@ test_that("plot_overlay builds in both alpha modes", {
 })
 
 test_that("plot_overlay panels cover the requested slices", {
-  skip_if_not_installed("patchwork")
   set.seed(42)
   bg <- make_vol(c(20L, 20L, 20L))
   ov <- make_vol(c(20L, 20L, 20L))

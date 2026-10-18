@@ -92,7 +92,6 @@ test_that("signed overlays default to a diverging palette silently", {
 })
 
 test_that("assemble = FALSE returns the per-slice ggplot list", {
-  skip_if_not_installed("patchwork")
   d <- make_signed_overlay()
   res <- plot_overlay(d$bg, d$ov, zlevels = c(8L, 10L), draw = FALSE, assemble = FALSE)
   expect_type(res, "list")

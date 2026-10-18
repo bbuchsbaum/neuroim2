@@ -26,7 +26,6 @@ test_that("explicit sparse orientation preserves non-symmetric square series", {
 })
 
 test_that("default background limits retain bright tissue (#19)", {
-  skip_if_not_installed("patchwork")
   # A skull-stripped-like image: air 0, tissue 100, a small bright patch 200.
   # The default window is computed over head voxels, so the bright patch must
   # not be clipped (the old whole-image robust quantiles clipped it at 100).

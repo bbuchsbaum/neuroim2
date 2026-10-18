@@ -159,7 +159,6 @@ test_that("registration QC plots draw panel grids with layout labels", {
 })
 
 test_that("plot_edge_overlay keeps all-zero edge slices transparent", {
-  skip_if_not_installed("patchwork")
   dims <- c(4L, 4L, 2L)
   sp <- neuroim2::NeuroSpace(dims)
   bg <- neuroim2::NeuroVol(array(1, dim = dims), sp)

@@ -45,7 +45,6 @@ test_that("plot_montage() passes label_size to slice labels and letters (#51)", 
 })
 
 test_that("plot_overlay() passes label_size to its tiles (#51)", {
-  skip_if_not_installed("patchwork")
   bg <- label_size_bg()
   stat <- bg
   stat[] <- as.numeric(bg[] > stats::quantile(bg[], 0.9)) * 3
@@ -56,7 +55,6 @@ test_that("plot_overlay() passes label_size to its tiles (#51)", {
 })
 
 test_that("registration QC plots pass label_size to their tiles (#51)", {
-  skip_if_not_installed("patchwork")
   bg <- label_size_bg()
   moving <- bg
   moving[] <- bg[c(2:dim(bg)[1], 1), , ]

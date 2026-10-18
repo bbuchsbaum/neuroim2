@@ -134,7 +134,6 @@ test_that("plot_overlay supports ov_alpha_mode='proportional'", {
 })
 
 test_that("plot_overlay validates grids and can return panels without drawing", {
-  skip_if_not_installed("patchwork")
   dims <- c(6L, 9L, 4L)
   sp <- neuroim2::NeuroSpace(dims)
   bg <- neuroim2::NeuroVol(array(0, dim = dims), sp)

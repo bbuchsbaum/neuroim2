@@ -4,17 +4,27 @@
   and loads where neither is available (e.g. webR/WebAssembly). Memory-mapped
   access (`read_vec(mode = "mmap")`, `MappedNeuroVec()`, `as_mmap()`) and
   `BigNeuroVec` / `read_vec(mode = "bigvec")` now stop with an informative
-  message when the package they need is missing. Masked reads that used a
-  memory map internally fall back to the streaming reader, which also now
-  serves data types `mmap` cannot map instead of failing. `BigNeuroVec`'s
-  `data` slot is declared `"ANY"` and validated as an `FBM`.
+  message when the package they need is missing; `as_mmap()` stops before
+  writing any file. `BigNeuroVec`'s `data` slot is declared `"ANY"` and
+  validated as an `FBM`.
+* Masked reads (`read_vec(file, mask = )`) use a memory map only for
+  uncompressed BYTE/UBYTE/SHORT/INT/FLOAT/DOUBLE images when `mmap` is
+  installed. Every other case (no `mmap`, gzipped files, and the remaining
+  data types) now uses the compiled reader behind dense reads, a few volumes
+  at a time, keeping only the masked voxels. This fixes masked reads of
+  UINT/LONG/ULONG images, which previously failed for uncompressed files and,
+  for `.nii.gz`, silently wrapped values above 2^31.
 * `RNiftyReg` and `patchwork` moved from Imports to Suggests, and `stringr` is
   no longer a dependency (the AFNI/NIML header parsers use base R with the
   same results). `resample()`, `resample_to()` and `deoblique()` on volumes
   need `RNiftyReg`; the assembled plotting functions (`plot_ortho()`,
   `plot_montage()`, `plot_overlay()`, `plot_checkerboard()`,
-  `plot_edge_overlay()`) need `patchwork`. Each stops with an informative
-  message when its package is missing.
+  `plot_edge_overlay()`) need `patchwork` to build an assembled figure. Each
+  stops with an informative message when its package is missing; with
+  `assemble = FALSE`, `plot_ortho()`, `plot_overlay()`, `plot_checkerboard()`
+  and `plot_edge_overlay()` return their ggplot panels without `patchwork`
+  (the figure-level key strip is then not built). `plot_montage()` always
+  needs `patchwork`.
 * The bundled template `inst/extdata/mni_downsampled.nii.gz` now has a
   correct sform. Its sform was the identity plus a translation, which takes
   precedence over the qform and made the image read as 1 mm voxels; it is the

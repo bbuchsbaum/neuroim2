@@ -222,20 +222,24 @@ plot_overlay <- function(
                    alpha_fun = if (ov_alpha_mode == "binary") NULL else alpha_fun,
                    alpha = ov_alpha, over_hi = scale$over_hi, over_lo = scale$over_lo)
   }
-  key <- if (isTRUE(show_legend)) {
+  key <- if (isTRUE(show_legend) && isTRUE(assemble)) {
     overlay_key(ov_thresh, scale$diverging, cbar_title, tokens, plane = first$plane)
   }
   build <- function(cv) neuro_assemble(plots, ncol = ncol, tile_aspect = tile_aspect_of(crop_win, first),
                         colorbar = cbar, key = key, tokens = tokens,
                         title = title, subtitle = subtitle, caption = caption,
                         canvas = cv)
-  cv0 <- canvas_size(canvas)
-  fig <- build(cv0)
   # Record the resolved soft-alpha curve on either return form (before the
   # figure is wrapped, so the wrapper still recognises it as unmodified).
-  attr(fig, "soft_alpha") <- soft
   attr(plots, "soft_alpha") <- soft
-  if (is.null(canvas)) fig <- neuro_figure(fig, build, cv0, tokens)
+  # Panels-only output (assemble = FALSE) needs no figure, and so no patchwork.
+  fig <- NULL
+  if (isTRUE(assemble)) {
+    cv0 <- canvas_size(canvas)
+    fig <- build(cv0)
+    attr(fig, "soft_alpha") <- soft
+    if (is.null(canvas)) fig <- neuro_figure(fig, build, cv0, tokens)
+  }
   neuro_finish(fig, plots, draw = draw, assemble = assemble, title = title,
                subtitle = subtitle, caption = caption, style = style,
                panel_names = vapply(zlevels, function(z) slice_world_label(bgvol, z, along), ""))

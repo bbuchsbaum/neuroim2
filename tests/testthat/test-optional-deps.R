@@ -30,3 +30,33 @@ test_that("BigNeuroVec validity requires an FBM in the data slot", {
     "FBM"
   )
 })
+
+test_that("as_mmap stops before writing a file when mmap is unavailable", {
+  vec <- read_vec(system.file("extdata", "global_mask_v4.nii", package = "neuroim2"))
+  out <- tempfile(fileext = ".nii")
+  local_mocked_bindings(.has_mmap = function() FALSE, .package = "neuroim2")
+  expect_error(as_mmap(vec, file = out), "Package 'mmap' is required")
+  expect_false(file.exists(out))
+  sparse <- as.sparse(vec, vec[[1]] > 0)
+  expect_error(as_mmap(sparse, file = out), "Package 'mmap' is required")
+  expect_false(file.exists(out))
+})
+
+test_that("assemble = FALSE returns plain ggplot panels without patchwork", {
+  bg <- read_vol(system.file("extdata", "mni_downsampled.nii.gz", package = "neuroim2"))
+  stat <- bg
+  stat[] <- (bg[] > stats::quantile(bg[], 0.7)) * 3
+  moving <- bg
+  local_mocked_bindings(
+    .require_patchwork = function() stop("patchwork unavailable (mocked)"),
+    .package = "neuroim2"
+  )
+  is_panels <- function(p) is.list(p) && length(p) > 0 &&
+    all(vapply(p, inherits, logical(1), "ggplot"))
+  expect_true(is_panels(plot_ortho(bg, assemble = FALSE)))
+  expect_true(is_panels(plot_overlay(bg, stat, ov_thresh = 1, assemble = FALSE)))
+  expect_true(is_panels(plot_checkerboard(bg, moving, assemble = FALSE)))
+  expect_true(is_panels(plot_edge_overlay(bg, bg, moving, compute_edges = TRUE,
+                                          assemble = FALSE)))
+  expect_error(plot_ortho(bg), "patchwork unavailable")
+})
