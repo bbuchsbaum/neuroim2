@@ -6,6 +6,8 @@
 \alias{resample,NeuroVol,NeuroSpace-method}
 \alias{resample,ClusteredNeuroVol,NeuroSpace-method}
 \alias{resample,ClusteredNeuroVol,NeuroVol-method}
+\alias{resample,NeuroVol,NeuroVec-method}
+\alias{resample,ClusteredNeuroVol,NeuroVec-method}
 \title{Resample an Image to Match the Space of Another Image}
 \usage{
 resample(source, target, ...)
@@ -17,6 +19,10 @@ resample(source, target, ...)
 \S4method{resample}{ClusteredNeuroVol,NeuroSpace}(source, target, interpolation = 0L)
 
 \S4method{resample}{ClusteredNeuroVol,NeuroVol}(source, target, interpolation = 0L)
+
+\S4method{resample}{NeuroVol,NeuroVec}(source, target, interpolation = 3L)
+
+\S4method{resample}{ClusteredNeuroVol,NeuroVec}(source, target, interpolation = 0L)
 }
 \arguments{
 \item{source}{A NeuroVol object representing the source volume to be resampled.}
@@ -37,6 +43,10 @@ This method resamples a NeuroVol object (\code{source}) to match the dimensions 
 
 This method preserves discrete cluster labels and label mappings when
 resampling clustered volumes to a new space.
+
+A volume has no time axis, so a 4-D target (e.g. a functional run, or its
+4-D \code{NeuroSpace}) contributes only its spatial grid: the result is a
+3-D volume on the target's first three axes.
 }
 \examples{
 
