@@ -2,6 +2,12 @@
 
 ## neuroim2 0.19.1.9000
 
+- `coords(<ROIVol>, real = TRUE)` now returns voxel-centre world
+  coordinates, identical to
+  [`grid_to_coord()`](https://bbuchsbaum.github.io/neuroim2/reference/grid_to_coord-methods.md).
+  It previously subtracted 0.5 from the 1-based grid coordinates before
+  applying the affine, placing every voxel half a voxel off its centre
+  (by `spacing / 2` along each axis).
 - The bundled template `inst/extdata/mni_downsampled.nii.gz` now has a
   correct sform. Its sform was the identity plus a translation, which
   takes precedence over the qform and made the image read as 1 mm
@@ -378,7 +384,7 @@ on a `NeuroSpace` permutes `dim` and `spacing` along with the affine.
 
 `local_maxima_dist` had no effect at any value. `.pruneCoords()` read
 the neighbour distances out of
-[`dbscan::kNN()`](http://michael.hahsler.net/dbscan/reference/kNN.md)’s
+[`dbscan::kNN()`](https://michael.hahsler.net/dbscan/reference/kNN.html)’s
 result as `ret$distances`; that component is called `dist`, and `$` does
 not partially match a name longer than the one it is looking for, so the
 lookup returned `NULL`, the comparison became `logical(0)`, and the
@@ -412,7 +418,7 @@ value. It is deterministic and the reported maxima are at least
   component’s voxel list, not its maxima.
 - The search is now a single compiled pass over a uniform grid rather
   than a
-  [`dbscan::kNN()`](http://michael.hahsler.net/dbscan/reference/kNN.md)
+  [`dbscan::kNN()`](https://michael.hahsler.net/dbscan/reference/kNN.html)
   call per component per round, which is also what made the rest of
   [`conn_comp()`](https://bbuchsbaum.github.io/neuroim2/reference/conn_comp-methods.md)
   worth speeding up. `dbscan` is no longer used here.
