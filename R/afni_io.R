@@ -71,7 +71,8 @@ parseElement <- function(inputLines) {
 #' @keywords internal
 #' @noRd
 read_afni_header <- function(file_name) {
-	inputLines <- scan(file_name, what=character(), sep="\n", blank.lines.skip=FALSE)
+	inputLines <- scan(file_name, what=character(), sep="\n", blank.lines.skip=FALSE,
+	                   quiet=TRUE)
 	idx <- which(unlist(lapply(inputLines, function(lin) lin == ""))) + 1
 	lastIdx <- length(inputLines)
 	attlen <- diff(c(idx, lastIdx+1))

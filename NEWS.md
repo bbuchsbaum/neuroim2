@@ -1,5 +1,13 @@
 # neuroim2 0.19.1.9000
 
+* AFNI datasets (`.HEAD`/`.BRIK`) are now placed correctly in world space.
+  AFNI records geometry in DICOM (RAI) coordinates, but the reader used the
+  DICOM `ORIGIN` as an RAS origin and built the transform from `abs(DELTA)`,
+  so datasets were mirrored in x and y (e.g. an LPI dataset read as RAS with
+  its origin sign-flipped). `trans()`, `spacing()` and `origin()` of AFNI
+  headers now come from `IJK_TO_DICOM_REAL` (or `IJK_TO_DICOM`, or
+  `ORIENT_SPECIFIC`/`DELTA`/`ORIGIN`) converted to RAS, matching nibabel's
+  AFNI reader.
 * The bundled template `inst/extdata/mni_downsampled.nii.gz` now has a
   correct sform. Its sform was the identity plus a translation, which takes
   precedence over the qform and made the image read as 1 mm voxels; it is the

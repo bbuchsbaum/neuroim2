@@ -159,6 +159,66 @@ setMethod("trans", "NIFTIMetaInfo",
     }
   })
 
+#' Get AFNI Transformation Matrix
+#'
+#' AFNI stores geometry in DICOM (RAI) coordinates; see \code{.afni_affine}.
+#'
+#' @param x AFNIMetaInfo object
+#' @return 4x4 transformation matrix (RAS)
+#' @keywords internal
+#' @noRd
+setMethod("trans", "AFNIMetaInfo",
+  function(x) {
+    .afni_affine(x@header)
+  })
+
+#' RAS voxel-to-world affine of an AFNI header
+#'
+#' AFNI records geometry in DICOM coordinates (+x = Left, +y = Posterior,
+#' +z = Superior). Negating x and y gives the RAS affine used everywhere
+#' else in the package (and by nibabel's AFNI reader). Uses
+#' \code{IJK_TO_DICOM_REAL} (which carries obliquity) when present, else
+#' \code{IJK_TO_DICOM}, else \code{ORIENT_SPECIFIC}, \code{DELTA} and
+#' \code{ORIGIN}.
+#'
+#' @param afni_header Parsed AFNI header list (see \code{read_afni_header}).
+#' @return 4x4 numeric matrix.
+#' @keywords internal
+#' @noRd
+.afni_affine <- function(afni_header) {
+  ras_from_dicom <- diag(c(-1, -1, 1))
+  usable <- function(m) {
+    !is.null(m) && length(m) >= 12 && all(is.finite(m[1:12])) &&
+      qr(matrix(m[1:12], 3, 4, byrow = TRUE)[, 1:3])$rank == 3
+  }
+  tdicom <- NULL
+  for (nm in c("IJK_TO_DICOM_REAL", "IJK_TO_DICOM")) {
+    m <- afni_header[[nm]]$content
+    if (usable(m)) {
+      tdicom <- matrix(m[1:12], 3, 4, byrow = TRUE)
+      break
+    }
+  }
+  if (is.null(tdicom)) {
+    orient <- afni_header$ORIENT_SPECIFIC$content
+    delta <- afni_header$DELTA$content
+    origin <- afni_header$ORIGIN$content
+    if (is.null(orient) || is.null(delta) || is.null(origin)) {
+      stop("AFNI header has neither IJK_TO_DICOM(_REAL) nor ",
+           "ORIENT_SPECIFIC/DELTA/ORIGIN")
+    }
+    # Codes 0/1: x (R2L/L2R), 2/3: y (P2A/A2P), 4/5: z (I2S/S2I); DELTA and
+    # ORIGIN are already signed in DICOM coordinates.
+    tdicom <- matrix(0, 3, 4)
+    for (i in 1:3) {
+      ax <- orient[i] %/% 2 + 1
+      tdicom[ax, i] <- delta[i]
+      tdicom[ax, 4] <- origin[i]
+    }
+  }
+  rbind(ras_from_dicom %*% tdicom, c(0, 0, 0, 1))
+}
+
 #' Extract NIFTI Dimensions
 #'
 #' @param nifti_header NIFTI header list
@@ -484,15 +544,8 @@ AFNIMetaInfo <- function(descriptor, afni_header) {
     afni_header$BRICK_LABS$content
   }
 
-  # Calculate space transformation
-  Tdicom <- tryCatch({
-    matrix(afni_header$IJK_TO_DICOM$content, 3, 4, byrow = TRUE)
-  }, error = function(e) {
-    stop("Invalid IJK_TO_DICOM transformation in AFNI header")
-  })
-
-  TLPI <- perm_mat(OrientationList3D$AXIAL_RAI) %*% Tdicom[1:3, ]
-  TLPI <- rbind(TLPI, c(0, 0, 0, 1))
+  # Voxel-to-world transform in RAS (AFNI stores DICOM/RAI coordinates)
+  Tras <- .afni_affine(afni_header)
 
   # Determine data type and size
   # AFNI's MRI_TYPE enum. MRI_byte is *unsigned*; mapping it to the signed
@@ -519,10 +572,10 @@ AFNIMetaInfo <- function(descriptor, afni_header) {
         data_type = data_type,
         bytes_per_element = as.integer(bytes_per_element),
         dims = .Dim,
-        spatial_axes = .nearestAnatomy(TLPI),
+        spatial_axes = .nearestAnatomy(Tras),
         additional_axes = NullAxis,
-        spacing = abs(afni_header$DELTA$content),
-        origin = afni_header$ORIGIN$content,
+        spacing = sqrt(colSums(Tras[1:3, 1:3]^2)),
+        origin = Tras[1:3, 4],
         label = labs,
         intercept = 0,
         slope = ifelse(afni_header$BRICK_FLOAT_FACS$content == 0,
