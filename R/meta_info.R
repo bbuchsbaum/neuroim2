@@ -129,6 +129,7 @@ setMethod("data_reader", "AFNIMetaInfo",
 #' @name trans
 #' @rdname trans-methods
 #' @aliases trans,MetaInfo-method trans,NIFTIMetaInfo-method
+#'   trans,AFNIMetaInfo-method
 #' @export
 setMethod("trans", "MetaInfo",
   function(x) {
