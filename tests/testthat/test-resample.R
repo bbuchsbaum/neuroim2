@@ -69,3 +69,37 @@ test_that("resample(ClusteredNeuroVol, NeuroVol) forces nearest neighbor interpo
   expect_equal(space(res), space(target_vol))
   expect_setequal(unique(res@clusters), c(1L, 2L))
 })
+
+test_that("a volume resamples onto the spatial grid of a 4-D target", {
+  skip_on_cran()
+  source <- NeuroVol(array(rnorm(8 * 8 * 8), c(8, 8, 8)), NeuroSpace(c(8, 8, 8)))
+  grid3 <- NeuroSpace(c(6, 6, 6), spacing = c(1.2, 1.2, 1.2), origin = c(1, 2, 3))
+  run <- NeuroVec(array(0, c(6, 6, 6, 4)), add_dim(grid3, 4))
+  expected <- resample(source, grid3, 1L)
+
+  for (target in list(run, space(run))) {
+    out <- resample(source, target, 1L)
+    expect_s4_class(out, "NeuroVol")
+    expect_equal(dim(out), c(6L, 6L, 6L))
+    expect_equal(trans(space(out)), trans(grid3))
+    expect_equal(as.array(out), as.array(expected))
+  }
+})
+
+test_that("resample(ClusteredNeuroVol, <4-D target>) keeps labels on the spatial grid", {
+  sp <- NeuroSpace(c(4, 4, 4))
+  mask <- LogicalNeuroVol(array(TRUE, dim = c(4, 4, 4)), sp)
+  cvol <- ClusteredNeuroVol(mask, rep(1:2, each = 32),
+                            label_map = list(a = 1L, b = 2L))
+  grid3 <- NeuroSpace(c(4, 4, 4), spacing = c(0.5, 0.5, 0.5))
+  run <- NeuroVec(array(0, c(4, 4, 4, 3)), add_dim(grid3, 3))
+  expected <- resample(cvol, grid3)
+
+  for (target in list(run, space(run))) {
+    out <- resample(cvol, target)
+    expect_s4_class(out, "ClusteredNeuroVol")
+    expect_equal(dim(out), c(4L, 4L, 4L))
+    expect_equal(out@clusters, expected@clusters)
+    expect_equal(names(out@label_map), c("a", "b"))
+  }
+})

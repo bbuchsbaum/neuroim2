@@ -165,6 +165,7 @@ setMethod(f="resample", signature=signature("NeuroVol", "NeuroVol"),
 #' @export
 setMethod(f="resample", signature=signature("NeuroVol", "NeuroSpace"),
           def=function(source, target, interpolation=3L) {
+            target <- .spatial_grid(target)
             targ <- NeuroVol(array(0, dim(target)), space=target)
             callGeneric(source, targ, interpolation)
           })
@@ -178,7 +179,7 @@ setMethod(f="resample", signature=signature("NeuroVol", "NeuroSpace"),
 #' @export
 setMethod(f="resample", signature=signature("ClusteredNeuroVol", "NeuroSpace"),
           def=function(source, target, interpolation=0L) {
-            .resample_clustered_neurovol(source, target, interpolation)
+            .resample_clustered_neurovol(source, .spatial_grid(target), interpolation)
           })
 
 #' @rdname resample-methods
@@ -187,3 +188,34 @@ setMethod(f="resample", signature=signature("ClusteredNeuroVol", "NeuroVol"),
           def=function(source, target, interpolation=0L) {
             .resample_clustered_neurovol(source, space(target), interpolation)
           })
+
+#' Resample a volume onto the spatial grid of a NeuroVec
+#'
+#' A volume has no time axis, so a 4-D target (e.g. a functional run, or its
+#' 4-D \code{NeuroSpace}) contributes only its spatial grid: the result is a
+#' 3-D volume on the target's first three axes.
+#'
+#' @rdname resample-methods
+#' @export
+setMethod(f="resample", signature=signature("NeuroVol", "NeuroVec"),
+          def=function(source, target, interpolation=3L) {
+            resample(source, .spatial_grid(space(target)), interpolation)
+          })
+
+#' @rdname resample-methods
+#' @export
+setMethod(f="resample", signature=signature("ClusteredNeuroVol", "NeuroVec"),
+          def=function(source, target, interpolation=0L) {
+            .resample_clustered_neurovol(source, .spatial_grid(space(target)),
+                                         interpolation)
+          })
+
+#' Spatial grid of a resample target
+#'
+#' A 4-D space contributes its first three axes; a 3-D space is returned as is.
+#'
+#' @keywords internal
+#' @noRd
+.spatial_grid <- function(target) {
+  if (ndim(target) == 4) drop_dim(target) else target
+}
