@@ -2,6 +2,14 @@
 
 ## neuroim2 0.19.1.9000
 
+- [`resample()`](https://bbuchsbaum.github.io/neuroim2/reference/resample-methods.md)
+  (and so
+  [`resample_to()`](https://bbuchsbaum.github.io/neuroim2/reference/resample_to.md))
+  accepts a 4-D target – a `NeuroVec` or a 4-D `NeuroSpace`, e.g. a
+  functional run – for a volume source, resampling onto the target’s
+  spatial grid. Previously there was no method for a `NeuroVec` target,
+  and a 4-D `NeuroSpace` target failed. `ClusteredNeuroVol` sources keep
+  their labels as before.
 - AFNI datasets (`.HEAD`/`.BRIK`) are now placed correctly in world
   space. AFNI records geometry in DICOM (RAI) coordinates, but the
   reader used the DICOM `ORIGIN` as an RAS origin and built the

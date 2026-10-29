@@ -9,6 +9,10 @@ dimensions and orientation of a NeuroSpace object (`target`).
 This method preserves discrete cluster labels and label mappings when
 resampling clustered volumes to a new space.
 
+A volume has no time axis, so a 4-D target (e.g. a functional run, or
+its 4-D `NeuroSpace`) contributes only its spatial grid: the result is a
+3-D volume on the target's first three axes.
+
 ## Usage
 
 ``` r
@@ -24,6 +28,12 @@ resample(source, target, interpolation = 3L)
 resample(source, target, interpolation = 0L)
 
 # S4 method for class 'ClusteredNeuroVol,NeuroVol'
+resample(source, target, interpolation = 0L)
+
+# S4 method for class 'NeuroVol,NeuroVec'
+resample(source, target, interpolation = 3L)
+
+# S4 method for class 'ClusteredNeuroVol,NeuroVec'
 resample(source, target, interpolation = 0L)
 ```
 
