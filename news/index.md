@@ -2,6 +2,18 @@
 
 ## neuroim2 0.19.1.9000
 
+- AFNI datasets (`.HEAD`/`.BRIK`) are now placed correctly in world
+  space. AFNI records geometry in DICOM (RAI) coordinates, but the
+  reader used the DICOM `ORIGIN` as an RAS origin and built the
+  transform from `abs(DELTA)`, so datasets were mirrored in x and y
+  (e.g. an LPI dataset read as RAS with its origin sign-flipped).
+  [`trans()`](https://bbuchsbaum.github.io/neuroim2/reference/trans-methods.md),
+  [`spacing()`](https://bbuchsbaum.github.io/neuroim2/reference/spacing-methods.md)
+  and
+  [`origin()`](https://bbuchsbaum.github.io/neuroim2/reference/origin-methods.md)
+  of AFNI headers now come from `IJK_TO_DICOM_REAL` (or `IJK_TO_DICOM`,
+  or `ORIENT_SPECIFIC`/`DELTA`/`ORIGIN`) converted to RAS, matching
+  nibabel’s AFNI reader.
 - `coords(<ROIVol>, real = TRUE)` now returns voxel-centre world
   coordinates, identical to
   [`grid_to_coord()`](https://bbuchsbaum.github.io/neuroim2/reference/grid_to_coord-methods.md).
