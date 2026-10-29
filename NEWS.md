@@ -8,6 +8,10 @@
   headers now come from `IJK_TO_DICOM_REAL` (or `IJK_TO_DICOM`, or
   `ORIENT_SPECIFIC`/`DELTA`/`ORIGIN`) converted to RAS, matching nibabel's
   AFNI reader.
+* `coords(<ROIVol>, real = TRUE)` now returns voxel-centre world
+  coordinates, identical to `grid_to_coord()`. It previously subtracted 0.5
+  from the 1-based grid coordinates before applying the affine, placing every
+  voxel half a voxel off its centre (by `spacing / 2` along each axis).
 * The bundled template `inst/extdata/mni_downsampled.nii.gz` now has a
   correct sform. Its sform was the identity plus a translation, which takes
   precedence over the qform and made the image read as 1 mm voxels; it is the
