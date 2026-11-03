@@ -8,7 +8,7 @@
 \alias{[,ArrayLike3D,missing,numeric,ANY-method}
 \title{Array-like access for 3-dimensional data structures}
 \usage{
-\S4method{[}{ArrayLike3D,numeric,missing,ANY}(x, i, j, k, ..., drop = TRUE)
+\S4method{[}{ArrayLike3D,numeric,missing,ANY}(x, i, j, ..., drop = TRUE)
 
 \S4method{[}{ArrayLike3D,matrix,missing,ANY}(x, i, j, k, ..., drop = TRUE)
 
@@ -23,11 +23,11 @@
 
 \item{j}{Second index or dimension.}
 
-\item{k}{Third index or dimension.}
-
 \item{...}{Additional arguments passed to methods.}
 
 \item{drop}{Logical. If TRUE, the result is coerced to the lowest possible dimension.}
+
+\item{k}{Third index or dimension.}
 }
 \value{
 A subset of the input object, with dimensions depending on the indexing and the `drop` parameter.
@@ -35,4 +35,11 @@ A subset of the input object, with dimensions depending on the indexing and the 
 \description{
 This generic function provides array-like access for 3-dimensional data structures.
 It allows for flexible indexing and subsetting of 3D arrays or array-like objects.
+}
+\details{
+As for base arrays, \code{x[i]} with a single numeric index is linear
+(column-major) indexing and returns one value per element of \code{i}, so
+\code{vol[which(mask)]} returns the masked values. \code{x[i, ]},
+\code{x[i, , ]}, \code{x[i, , k]} and \code{x[i, drop = FALSE]} index the
+first dimension instead.
 }

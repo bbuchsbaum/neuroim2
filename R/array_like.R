@@ -33,6 +33,13 @@ NULL
 #'
 #' @return A subset of the input object, with dimensions depending on the indexing and the `drop` parameter.
 #'
+#' @details
+#' As for base arrays, \code{x[i]} with a single numeric index is linear
+#' (column-major) indexing and returns one value per element of \code{i}, so
+#' \code{vol[which(mask)]} returns the masked values. \code{x[i, ]},
+#' \code{x[i, , ]}, \code{x[i, , k]} and \code{x[i, drop = FALSE]} index the
+#' first dimension instead.
+#'
 #' @name extractor3d
 #' @rdname extractor3d
 NULL
@@ -227,9 +234,16 @@ setMethod(f="[", signature=signature(x = "ArrayLike4D", i = "missing", j = "nume
 #' @method [ ArrayLike3D
 #' @export
 setMethod(f="[", signature=signature(x = "ArrayLike3D", i = "numeric", j = "missing", drop="ANY"),
-          def=function (x, i, j, k, ..., drop=TRUE) {
+          def=function (x, i, j, ..., drop=TRUE) {
+            # x[i] is linear indexing; see extract_k() below (#60). Sparse
+            # backends return a sparseVector from linear_access(); `[` returns
+            # plain values, like the slice path and dense volumes.
+            if (nargs() == 2L) {
+              return(as.vector(linear_access(x, i)))
+            }
             d <- dim(x)
-            if (missing(k)) k <- seq_len(d[3])
+            k <- extract_k(...)
+            if (is.null(k)) k <- seq_len(d[3])
             j_full <- seq_len(d[2])
             ni <- length(i); nj <- length(j_full); nk <- length(k)
 
@@ -332,53 +346,39 @@ setMethod(f="[", signature=signature(x = "DenseNeuroVec", i = "numeric", j = "nu
             x@.Data[i, j, k, m, drop = drop]
           })
 
+# As for base arrays, x[i] is linear indexing, while x[i, ], x[i, , k] and
+# x[i, drop = FALSE] index the first dimension. The choice is made from the
+# shape of the call (nargs() == 2 only for a bare x[i]), never from the values
+# of i (#60). These methods keep the generic's formals (x, i, j, ..., drop) so
+# that nargs() counts the caller's arguments: declaring `k` would make R wrap
+# the body in .local(), where x[i] and x[i, ] look the same. A third index
+# therefore arrives as the first element of `...`.
+extract_k <- function(...) if (...length() >= 1L && !missing(..1)) ..1 else NULL
+
 # DenseNeuroVol explicit extractor to ensure S4 dispatch respects drop
 #' @rdname extract-methods
 #' @export
 setMethod(f="[", signature=signature(x = "DenseNeuroVol", i = "numeric", j = "missing"),
-          def=function (x, i, j, k, ..., drop=TRUE) {
-            if (missing(k)) {
-              # Decide between first-dimension slicing (x[i, ]) and linear
-              # indexing (x[idx]). range() is a single C pass and avoids the
-              # temporary logical vector that `all(i >= 1 & i <= d1)` allocates.
-              if (length(i) > 0L) {
-                rng <- range(i)
-                in_first_dim <- rng[1L] >= 1 && rng[2L] <= dim(x)[1L]
-              } else {
-                in_first_dim <- TRUE
-              }
-              if (in_first_dim) {
-                # Index the underlying array directly: identical column-major
-                # ordering to grid_to_index(), but no grid materialisation.
-                x@.Data[i, , , drop = drop]
-              } else {
-                linear_access(x, i)
-              }
-            } else {
-              x@.Data[i, , k, drop = drop]
+          def=function (x, i, j, ..., drop=TRUE) {
+            if (nargs() == 2L) {
+              return(linear_access(x, i))
             }
+            k <- extract_k(...)
+            # Index the underlying array directly: identical column-major
+            # ordering to grid_to_index(), but no grid materialisation.
+            if (is.null(k)) x@.Data[i, , , drop = drop] else x@.Data[i, , k, drop = drop]
           })
 
 # integer index dispatch to numeric path
 #' @rdname extract-methods
 #' @export
 setMethod(f="[", signature=signature(x = "DenseNeuroVol", i = "integer", j = "missing"),
-          def=function (x, i, j, k, ..., drop=TRUE) {
-            if (missing(k)) {
-              if (length(i) > 0L) {
-                rng <- range(i)
-                in_first_dim <- rng[1L] >= 1L && rng[2L] <= dim(x)[1L]
-              } else {
-                in_first_dim <- TRUE
-              }
-              if (in_first_dim) {
-                x@.Data[i, , , drop = drop]
-              } else {
-                linear_access(x, as.numeric(i))
-              }
-            } else {
-              x@.Data[i, , k, drop = drop]
+          def=function (x, i, j, ..., drop=TRUE) {
+            if (nargs() == 2L) {
+              return(linear_access(x, as.numeric(i)))
             }
+            k <- extract_k(...)
+            if (is.null(k)) x@.Data[i, , , drop = drop] else x@.Data[i, , k, drop = drop]
           })
 
 #' Array extraction for ClusteredNeuroVec
