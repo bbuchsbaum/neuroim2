@@ -19,20 +19,22 @@ grob_labels <- function(p) {
 
 layer_geom <- function(layer) class(layer$geom)[[1L]]
 
-#' Built data of every layer whose geom is `geom` (e.g. "GeomText").
+#' Built data of every layer whose geom is one of `geom` (e.g. "GeomText"),
+#' in drawing order.
 built_layers_of <- function(p, geom) {
   built <- ggplot2::ggplot_build(p)
-  keep <- vapply(p$layers, layer_geom, character(1)) == geom
+  keep <- vapply(p$layers, layer_geom, character(1)) %in% geom
   built$data[keep]
 }
 
 #' Built data of the foreground text layers of a tile.
 #'
-#' Tile text is drawn over a translucent "halo" (offset copies of the same
-#' labels); the halo layers carry alpha < 1 and are skipped here.
+#' The slice label is set on a box (a label layer); orientation letters are
+#' drawn over a translucent "halo" (offset copies of the same letters), whose
+#' layers carry alpha < 1 and are skipped here.
 tile_text_data <- function(p) {
   Filter(function(d) !("alpha" %in% names(d)) || all(is.na(d$alpha) | d$alpha >= 1),
-         built_layers_of(p, "GeomText"))
+         built_layers_of(p, c("GeomText", "GeomLabel")))
 }
 
 #' All text annotations of a tile, in drawing order.

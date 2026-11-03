@@ -248,7 +248,7 @@ plot_ortho <- function(
   if (show_cbar) {
     cbar <- if (!is.null(scale)) {
       neuro_colorbar(scale$lim, scale$pal, thresh = ov_thresh, diverging = scale$diverging,
-                     tokens = tokens, title = cbar_title,
+                     skip = scale$skip, tokens = tokens, title = cbar_title,
                      alpha_fun = if (ov_alpha_mode == "binary") NULL else alpha_fun,
                      alpha = ov_alpha, over_hi = scale$over_hi, over_lo = scale$over_lo)
     } else {
