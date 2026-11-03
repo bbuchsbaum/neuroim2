@@ -23,7 +23,7 @@ neuro_style_tokens <- function(style = c("light", "dark", "report")) {
                cross = "#5fd0ff", gutter = 2)
   # Separator between adjacent tiles: the page colour (black on the dark
   # page, so the tiles merge into it).
-  utils::modifyList(base, switch(style,
+  tokens <- utils::modifyList(base, switch(style,
     light  = list(card = "#ffffff", fg = "#1a1a1a", muted = "#5f5f5f",
                   faint = "#e7e7e7", seam = "#ffffff"),
     report = list(card = "#f7f7f5", fg = "#161616", muted = "#5a5a58",
@@ -31,6 +31,42 @@ neuro_style_tokens <- function(style = c("light", "dark", "report")) {
     dark   = list(card = "#000000", fg = "#ededed", muted = "#a0a0a0",
                   faint = "#2c2c2c", seam = "#000000")
   ))
+  host_style_tokens(tokens)
+}
+
+# A host application can restyle every figure of the family through options,
+# without passing arguments to each plot call: `neuro.ground` (the slice
+# tile), `neuro.card` (the figure's background) and `neuro.cross`
+# (crosshairs). Text on the tile and the seams between tiles follow from
+# them. Unset options leave the style as it is.
+host_style_tokens <- function(tokens) {
+  ground <- getOption("neuro.ground")
+  card <- getOption("neuro.card")
+  if (!is.null(ground)) {
+    dark <- relative_luminance(ground) < 0.4
+    tokens$tile <- ground
+    tokens$tile_fg <- if (dark) "#f2f2f2" else "#1a1a1a"
+    tokens$tile_muted <- if (dark) "#9a9a9a" else "#5f5f5f"
+  }
+  if (!is.null(card)) {
+    tokens$card <- card
+    tokens$seam <- card
+    dark <- relative_luminance(card) < 0.4
+    tokens$fg <- if (dark) "#ededed" else "#161616"
+    tokens$muted <- if (dark) "#a0a0a0" else "#5a5a58"
+  }
+  tokens$cross <- getOption("neuro.cross", tokens$cross)
+  tokens
+}
+
+# The colour a slice tile is filled with: the host's ground when one is set,
+# else the background colour map's lowest colour.
+tile_colour <- function(cmap) getOption("neuro.ground", resolve_cmap(cmap, 2L)[[1L]])
+
+relative_luminance <- function(colour) {
+  rgb <- grDevices::col2rgb(colour)[, 1] / 255
+  lin <- ifelse(rgb <= 0.03928, rgb / 12.92, ((rgb + 0.055) / 1.055)^2.4)
+  sum(c(0.2126, 0.7152, 0.0722) * lin)
 }
 
 #' Match a string argument against its choices with a cli error
@@ -457,8 +493,17 @@ neuro_tile <- function(oriented, bg_lim, bg_cmap = "grays", layers = list(),
   if (is.null(window)) window <- list(xlim = xr, ylim = yr)
   # The tile field (and any padding beyond the image) takes the palette's
   # lowest colour, so it is continuous with the image's own background
-  # whatever the colour map.
-  tokens$tile <- resolve_cmap(bg_cmap, 2L)[[1L]]
+  # whatever the colour map. A host ground (option `neuro.ground`) replaces
+  # it, and the background's darkest voxels are then left empty so the
+  # ground shows around the anatomy.
+  tokens$tile <- tile_colour(bg_cmap)
+  if (!is.null(getOption("neuro.ground"))) {
+    # Voxels in the darkest fifth of the display range (outside the brain,
+    # partial-volume edges, neck) are left empty rather than drawn black.
+    lim <- if (length(bg_lim) == 2L && all(is.finite(bg_lim))) bg_lim else range(df$value, na.rm = TRUE)
+    floor <- lim[1] + 0.2 * diff(lim)
+    df$value[!is.na(df$value) & df$value <= floor] <- NA
+  }
   p <- ggplot2::ggplot(df, ggplot2::aes(x, y, fill = value)) +
     ggplot2::geom_raster(interpolate = interpolate) +
     scale_fill_neuro(cmap = bg_cmap, limits = bg_lim, guide = "none",

@@ -228,9 +228,9 @@ plot_ortho <- function(
                     # The inferior crop usually cuts through the neck; fade it
                     # out rather than end the image on a hard edge.
                     extra = if (!is.null(bbox) && name != "axial" && is_gray) {
-                      list(fade_bottom_layer(w, resolve_cmap(cmap, 2L)[[1L]],
+                      list(fade_bottom_layer(w, tile_colour(cmap),
                                              floor_y = raster_extent_from_centers(i$oriented$y)[1]),
-                           fade_top_layer(w, resolve_cmap(cmap, 2L)[[1L]],
+                           fade_top_layer(w, tile_colour(cmap),
                                           ceil_y = raster_extent_from_centers(i$oriented$y)[2]))
                     } else list())
     if (isTRUE(crosshair) && length(i$cross) == 2L) {
