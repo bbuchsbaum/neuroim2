@@ -80,7 +80,7 @@ compact colorbar that marks the threshold.</p>
 <span>  interpolate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  cbar_title <span class="op">=</span> <span class="st">"value"</span>,</span>
 <span>  unit <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"index"</span>, <span class="st">"mm"</span><span class="op">)</span>,</span>
-<span>  annotate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  annotate <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_slices <span class="op">=</span> <span class="fl">12L</span>,</span>
 <span>  canvas <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  alpha_knee <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -123,8 +123,14 @@ anatomical plane labels are inferred from the image affine.</p></dd>
 
 <dt id="arg-ov-cmap">ov_cmap<a class="anchor" aria-label="anchor" href="#arg-ov-cmap"></a></dt>
 <dd><p>Overlay palette. <code>NULL</code> (default) chooses automatically:
-the two-sided <code>"cold_hot"</code> map for signed data, <code>"hot"</code>
-otherwise. Any name accepted by [resolve_cmap()] or a vector of colours.</p></dd>
+for signed data the host's diverging ramp,
+<code>getOption("neuro.palette.diverging")</code>, when it is set, else the
+two-sided <code>"cold_hot"</code> map; <code>"hot"</code> otherwise. Any name accepted
+by [resolve_cmap()] or a vector of colours; a short vector is taken as
+the anchors of a ramp and interpolated. With a threshold the ramp starts
+30% of the way along each arm, skipping the palette's neutral start,
+except for a two-sided ramp of 5, 7, ... anchors around a neutral middle
+(such as a host ramp), which starts at the first anchor past the middle.</p></dd>
 
 
 <dt id="arg-bg-range-ov-range">bg_range, ov_range<a class="anchor" aria-label="anchor" href="#arg-bg-range-ov-range"></a></dt>
@@ -242,7 +248,10 @@ Panels are always labelled in world coordinates (mm).</p></dd>
 
 
 <dt id="arg-annotate">annotate<a class="anchor" aria-label="anchor" href="#arg-annotate"></a></dt>
-<dd><p>Logical; draw L/R orientation letters on the first panel.</p></dd>
+<dd><p>Logical or <code>NULL</code>; draw L/R orientation letters on the
+first panel. <code>NULL</code> (default) draws them unless the key is shown,
+since the key already states the convention ("neurological view (L =
+left)") and the letters would sit on the anatomy.</p></dd>
 
 
 <dt id="arg-n-slices">n_slices<a class="anchor" aria-label="anchor" href="#arg-n-slices"></a></dt>

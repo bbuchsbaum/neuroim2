@@ -38,7 +38,7 @@ plot_overlay(
   interpolate = TRUE,
   cbar_title = "value",
   unit = c("index", "mm"),
-  annotate = TRUE,
+  annotate = NULL,
   n_slices = 12L,
   canvas = NULL,
   alpha_knee = NULL,
@@ -79,9 +79,16 @@ plot_overlay(
 
 - ov_cmap:
 
-  Overlay palette. `NULL` (default) chooses automatically: the two-sided
-  `"cold_hot"` map for signed data, `"hot"` otherwise. Any name accepted
-  by \[resolve_cmap()\] or a vector of colours.
+  Overlay palette. `NULL` (default) chooses automatically: for signed
+  data the host's diverging ramp,
+  `getOption("neuro.palette.diverging")`, when it is set, else the
+  two-sided `"cold_hot"` map; `"hot"` otherwise. Any name accepted by
+  \[resolve_cmap()\] or a vector of colours; a short vector is taken as
+  the anchors of a ramp and interpolated. With a threshold the ramp
+  starts 30% of the way along each arm, skipping the palette's neutral
+  start, except for a two-sided ramp of 5, 7, ... anchors around a
+  neutral middle (such as a host ramp), which starts at the first anchor
+  past the middle.
 
 - bg_range, ov_range:
 
@@ -197,7 +204,10 @@ plot_overlay(
 
 - annotate:
 
-  Logical; draw L/R orientation letters on the first panel.
+  Logical or `NULL`; draw L/R orientation letters on the first panel.
+  `NULL` (default) draws them unless the key is shown, since the key
+  already states the convention ("neurological view (L = left)") and the
+  letters would sit on the anatomy.
 
 - n_slices:
 

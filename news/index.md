@@ -2,6 +2,36 @@
 
 ## neuroim2 0.19.1.9000
 
+- Signed overlays in
+  [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
+  and
+  [`plot_ortho()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_ortho.md)
+  use the host’s diverging ramp,
+  `options(neuro.palette.diverging = ...)`, when `ov_cmap` is `NULL`, so
+  statistical maps are drawn in the same ramp as the design-matrix and
+  contrast figures of fmridesign and fmrireg. With the option unset the
+  default stays `"cold_hot"`; an unusable value is reported and ignored
+  ([\#62](https://github.com/bbuchsbaum/neuroim2/issues/62)).
+
+- A host ramp of anchors around a neutral middle (5, 7, … colours, such
+  as `neuro.palette.diverging`) starts at its first anchor past the
+  middle at +/-threshold, rather than at a washed-out tint 30% of the
+  way along. Short colour vectors given as `ov_cmap` are interpolated to
+  a graded ramp rather than drawn in a few flat bands. Named palettes
+  and full palette vectors are unchanged
+  ([\#62](https://github.com/bbuchsbaum/neuroim2/issues/62)).
+
+- Slice labels on the tiles of every slice figure sit on a small box of
+  the tile colour, so anatomy reaching the top of a cropped tile no
+  longer runs through them. In
+  [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
+  the L/R letters are left off the first tile when the key is shown (by
+  default with `style = "report"`), because the key under the tiles
+  already states the convention. `annotate = NULL` (the new default)
+  draws the letters whenever the key is not shown; `annotate = TRUE`
+  forces them
+  ([\#63](https://github.com/bbuchsbaum/neuroim2/issues/63)).
+
 - [`resample()`](https://bbuchsbaum.github.io/neuroim2/reference/resample-methods.md)
   (and so
   [`resample_to()`](https://bbuchsbaum.github.io/neuroim2/reference/resample_to.md))
@@ -10,6 +40,7 @@
   spatial grid. Previously there was no method for a `NeuroVec` target,
   and a 4-D `NeuroSpace` target failed. `ClusteredNeuroVol` sources keep
   their labels as before.
+
 - AFNI datasets (`.HEAD`/`.BRIK`) are now placed correctly in world
   space. AFNI records geometry in DICOM (RAI) coordinates, but the
   reader used the DICOM `ORIGIN` as an RAS origin and built the
@@ -22,12 +53,14 @@
   of AFNI headers now come from `IJK_TO_DICOM_REAL` (or `IJK_TO_DICOM`,
   or `ORIENT_SPECIFIC`/`DELTA`/`ORIGIN`) converted to RAS, matching
   nibabel’s AFNI reader.
+
 - `coords(<ROIVol>, real = TRUE)` now returns voxel-centre world
   coordinates, identical to
   [`grid_to_coord()`](https://bbuchsbaum.github.io/neuroim2/reference/grid_to_coord-methods.md).
   It previously subtracted 0.5 from the 1-based grid coordinates before
   applying the affine, placing every voxel half a voxel off its centre
   (by `spacing / 2` along each axis).
+
 - The bundled template `inst/extdata/mni_downsampled.nii.gz` now has a
   correct sform. Its sform was the identity plus a translation, which
   takes precedence over the qform and made the image read as 1 mm
@@ -38,6 +71,7 @@
   mm geometry of this file (mm radii, kernel widths, world coordinates)
   should scale accordingly; the vignettes have been updated
   ([\#50](https://github.com/bbuchsbaum/neuroim2/issues/50)).
+
 - [`plot_ortho()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_ortho.md),
   [`plot_montage()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_montage.md),
   [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md),
