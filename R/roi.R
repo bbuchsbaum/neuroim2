@@ -527,9 +527,10 @@ setMethod(f="as.logical", signature=signature(x = "ROIVol"),
 setMethod(f="coords", signature=signature(x = "ROIVol"),
           def=function(x, real=FALSE) {
             if(real) {
-              input <- t(cbind(x@coords - 0.5, rep(1, nrow(x@coords))) );
-              ret <- t(trans(x@space) %*% input);
-              ret[,1:3, drop=FALSE]
+              # Voxel centres, via the same 1-based grid -> world mapping as
+              # grid_to_coord(); the former `coords - 0.5` placed every voxel
+              # half a voxel off its centre.
+              grid_to_coord(x@space, x@coords)
             } else {
               x@coords
             }

@@ -300,15 +300,70 @@ overlay_scale <- function(values, ov_range = "robust", probs = c(.02, .98),
     if (auto_range && lim[1] > 0) lim[1] <- 0
   }
   if (is.null(ov_cmap)) {
-    ov_cmap <- if (symmetric) "cold_hot" else "hot"
+    host <- if (symmetric) host_diverging_palette()
+    ov_cmap <- if (!is.null(host)) host else if (symmetric) "cold_hot" else "hot"
   } else if (signed && length(ov_cmap) == 1L && !is_diverging_cmap(ov_cmap)) {
     cli::cli_warn(c("The overlay has positive and negative values but {.arg ov_cmap} is not diverging.",
                     "i" = "Negative values may render poorly; consider {.val cold_hot} or {.val RdBu}."))
   }
-  list(lim = lim, pal = resolve_cmap(ov_cmap, 256), cmap = ov_cmap,
+  list(lim = lim, pal = overlay_palette(ov_cmap), cmap = ov_cmap,
+       skip = overlay_skip(ov_cmap, symmetric),
        diverging = symmetric, signed = signed,
        over_hi = length(fin) > 0L && max(fin) > lim[2] * (1 + 1e-9),
        over_lo = length(fin) > 0L && min(fin) < lim[1] * (1 + 1e-9) && lim[1] < 0)
+}
+
+#' The host's diverging palette (option \code{neuro.palette.diverging}), or NULL
+#'
+#' A host application that draws other signed figures in one diverging ramp
+#' (fmridesign, fmrireg) sets it once, so statistical maps use the same ramp.
+#' An unusable value is reported and ignored.
+#' @keywords internal
+#' @noRd
+host_diverging_palette <- function() {
+  pal <- getOption("neuro.palette.diverging")
+  if (is.null(pal)) return(NULL)
+  ok <- is.character(pal) && length(pal) >= 3L && !anyNA(pal) &&
+    !inherits(tryCatch(grDevices::col2rgb(pal), error = function(e) e), "error")
+  if (!ok) {
+    cli::cli_warn(c("Ignoring {.code options(neuro.palette.diverging)}: it must be a vector of at least three colours.",
+                    "i" = "Using {.val cold_hot} for the signed overlay."))
+    return(NULL)
+  }
+  pal
+}
+
+#' Overlay palette at 256 colours
+#'
+#' A short colour vector (the anchors of a ramp, e.g. a host palette) is
+#' interpolated, so the overlay is graded rather than drawn in a few flat
+#' bands. Longer vectors are used as given.
+#' @keywords internal
+#' @noRd
+overlay_palette <- function(cmap, n = 256L) {
+  if (length(cmap) > 1L && length(cmap) < n) {
+    return(grDevices::colorRampPalette(cmap, space = "Lab")(n))
+  }
+  resolve_cmap(cmap, n)
+}
+
+#' Fraction of each palette arm skipped at the threshold
+#'
+#' A palette's start (the dark centre of cold_hot, the near-black start of
+#' hot, the white middle of a blue-white-red ramp) would hide near-threshold
+#' voxels, so the ramp normally starts 30\% of the way along each arm. A host
+#' ramp is a short list of anchors around a neutral middle (an odd number, at
+#' least five, e.g. \code{neuro.palette.diverging}); 30\% of its arm is still
+#' a washed-out tint, so it starts at the first anchor past the middle, the
+#' palette's palest real colour. Full palettes (256 colours, e.g. from
+#' [resolve_cmap()]) and named palettes keep the 30\% start, so a palette
+#' looks the same whether it is passed by name or as colours.
+#' @keywords internal
+#' @noRd
+overlay_skip <- function(cmap, diverging, n_full = 256L) {
+  n <- length(cmap)
+  anchors <- n >= 5L && n < n_full && n %% 2L == 1L
+  if (isTRUE(diverging) && anchors) 2 / (n - 1L) else 0.3
 }
 
 #' Map overlay values to palette positions (threshold-aware)
@@ -338,7 +393,9 @@ overlay_positions <- function(v, lim, thresh = 0, diverging = TRUE, skip = 0.3) 
     ok <- ok & m >= thresh
     den <- max(cap - thresh, .Machine$double.eps)
     s <- pmin(pmax((m[ok] - thresh) / den, 0), 1)
-    pos[ok] <- 0.5 + sign(v[ok]) * 0.5 * (sk + (1 - sk) * s)
+    # The floor keeps +/-threshold on its own side of the palette centre when
+    # nothing is skipped.
+    pos[ok] <- 0.5 + sign(v[ok]) * 0.5 * pmax(sk + (1 - sk) * s, 1e-9)
   } else {
     lo <- if (thresh > 0) max(lim[1], thresh) else lim[1]
     hi <- lim[2]
@@ -391,13 +448,26 @@ overlay_alpha_fun <- function(mode, thresh, cap, soft = NULL, floor = 0.6) {
   )
 }
 
+#' Palette index of each position in [0, 1]
+#'
+#' Each of the \code{n} colours covers an equal share of [0, 1], so the two
+#' halves of an even-length two-sided palette meet exactly at 0.5. The overlay
+#' and its colorbar both use this, so they always pick the same colours.
+#' @return Integer indices (NA where \code{pos} is not finite).
+#' @keywords internal
+#' @noRd
+palette_index <- function(pos, n) {
+  idx <- 1L + floor(pos * n)
+  idx[!is.finite(idx)] <- NA
+  as.integer(pmax(1, pmin(n, idx)))
+}
+
 #' Build an RGBA raster array from palette positions
 #' @keywords internal
 #' @noRd
 positions_to_rgba <- function(pos, nr, nc, cols, alpha = 1, alpha_map = NULL) {
-  idx <- 1L + floor(pos * (length(cols) - 1L))
-  idx[!is.finite(idx)] <- 1L
-  idx <- pmax(1L, pmin(length(cols), idx))
+  idx <- palette_index(pos, length(cols))
+  idx[is.na(idx)] <- 1L
   rgb <- grDevices::col2rgb(cols[idx]) / 255
   eff <- if (is.null(alpha_map)) rep(alpha, length(pos)) else as.numeric(alpha_map) * alpha
   eff[!is.finite(eff) | !is.finite(pos)] <- 0
@@ -420,7 +490,7 @@ overlay_slice_grob <- function(overlay, z, along, scale, thresh, alpha_fun,
   o <- orient_volume_slice_for_raster(overlay, z, along = along, mat = mov,
                                       alpha_map = amap, downsample = downsample)
   pos <- overlay_positions(as.numeric(o$mat), scale$lim, thresh = thresh,
-                           diverging = scale$diverging)
+                           diverging = scale$diverging, skip = scale$skip)
   grid::rasterGrob(positions_to_rgba(pos, nrow(o$mat), ncol(o$mat), scale$pal,
                                      alpha = alpha, alpha_map = o$alpha_map),
                    interpolate = FALSE)
@@ -507,6 +577,28 @@ halo_text <- function(x, y, label, hjust, vjust, colour, halo, size,
   )
 }
 
+#' Text on a box of the tile colour
+#'
+#' The slice label sits in the corner of a tightly cropped tile, where the
+#' anatomy often reaches the edge; a halo alone leaves it struck through by
+#' the tissue behind it, so the label is set on a small box of the tile's own
+#' colour instead.
+#' @keywords internal
+#' @noRd
+boxed_text <- function(x, y, label, colour, fill, size) {
+  # ggplot2 4.0 renamed the border controls of geom_label().
+  border <- if (utils::packageVersion("ggplot2") >= "4.0.0") {
+    list(border.colour = NA)
+  } else {
+    list(label.size = 0)
+  }
+  do.call(ggplot2::annotate, c(list(
+    "label", x = x, y = y, label = label, hjust = 0, vjust = 1,
+    colour = colour, fill = fill, size = size,
+    label.padding = grid::unit(1.6, "pt"), label.r = grid::unit(1, "pt")
+  ), border))
+}
+
 #' Add the in-tile slice label and orientation letters
 #' @keywords internal
 #' @noRd
@@ -517,8 +609,8 @@ add_tile_text <- function(p, window, label = NULL, orient = NULL, tokens,
   pad <- 0.035 * s
   off <- 0.0045 * s
   if (!is.null(label) && nzchar(label)) {
-    p <- p + halo_text(window$xlim[1] + pad, window$ylim[2] - pad, label, 0, 1,
-                       tokens$tile_fg, tokens$tile, label_size, offset = off)
+    p <- p + boxed_text(window$xlim[1] + pad, window$ylim[2] - pad, label,
+                        tokens$tile_fg, tokens$tile, label_size)
   }
   if (!is.null(orient) && length(orient)) {
     pos <- list(
@@ -642,22 +734,25 @@ add_crosshair <- function(p, at, window, tokens, gap = 0.045, edge = 0.12) {
 #'   (the end tick is then prefixed with a comparison sign).
 #' @param tokens Style tokens.
 #' @param title Title drawn above the bar.
+#' @param skip Fraction of each palette arm skipped at the threshold; pass the
+#'   overlay scale's \code{skip} so the bar samples the palette as the overlay
+#'   does.
 #' @keywords internal
 #' @noRd
 neuro_colorbar <- function(lim, cols, thresh = 0, diverging = FALSE,
                            positions = TRUE, tokens, title = NULL,
                            alpha_fun = NULL, alpha = 1, over_hi = FALSE,
-                           over_lo = FALSE) {
+                           over_lo = FALSE, skip = 0.3) {
   n <- 256L
   edges <- seq(lim[1], lim[2], length.out = n + 1L)
   mids <- (edges[-1] + edges[-(n + 1L)]) / 2
   pos <- if (isTRUE(positions)) {
-    overlay_positions(mids, lim, thresh = thresh, diverging = diverging)
+    overlay_positions(mids, lim, thresh = thresh, diverging = diverging, skip = skip)
   } else {
     (mids - lim[1]) / diff(lim)
   }
-  idx <- 1L + floor(pos * (length(cols) - 1L))
-  fill <- ifelse(is.finite(idx), cols[pmax(1L, pmin(length(cols), idx))], tokens$faint)
+  idx <- palette_index(pos, length(cols))
+  fill <- ifelse(is.finite(idx), cols[idx], tokens$faint)
   if (!is.null(alpha_fun)) {
     # Fade toward a tissue grey, not the page: faded voxels in the figure sit
     # on brain, so this is the colour they actually take on.
@@ -977,7 +1072,7 @@ title_element <- function(title, subtitle, tokens) {
 #' @noRd
 scale_tile_text <- function(p, k) {
   p$layers <- lapply(p$layers, function(l) {
-    if (!inherits(l$geom, "GeomText") || is.null(l$aes_params$size)) return(l)
+    if (!inherits(l$geom, c("GeomText", "GeomLabel")) || is.null(l$aes_params$size)) return(l)
     l2 <- ggplot2::ggproto(NULL, l)
     l2$aes_params <- utils::modifyList(l$aes_params, list(size = l$aes_params$size * k))
     l2

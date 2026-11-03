@@ -34,7 +34,7 @@ plot_overlay(
   interpolate = TRUE,
   cbar_title = "value",
   unit = c("index", "mm"),
-  annotate = TRUE,
+  annotate = NULL,
   n_slices = 12L,
   canvas = NULL,
   alpha_knee = NULL,
@@ -62,8 +62,14 @@ anatomical plane labels are inferred from the image affine.}
 \item{bg_cmap}{Background palette (e.g., "grays").}
 
 \item{ov_cmap}{Overlay palette. \code{NULL} (default) chooses automatically:
-the two-sided \code{"cold_hot"} map for signed data, \code{"hot"}
-otherwise. Any name accepted by [resolve_cmap()] or a vector of colours.}
+for signed data the host's diverging ramp,
+\code{getOption("neuro.palette.diverging")}, when it is set, else the
+two-sided \code{"cold_hot"} map; \code{"hot"} otherwise. Any name accepted
+by [resolve_cmap()] or a vector of colours; a short vector is taken as
+the anchors of a ramp and interpolated. With a threshold the ramp starts
+30\% of the way along each arm, skipping the palette's neutral start,
+except for a two-sided ramp of 5, 7, ... anchors around a neutral middle
+(such as a host ramp), which starts at the first anchor past the middle.}
 
 \item{bg_range, ov_range}{Background/overlay scaling. Either a mode string,
 \code{"robust"} or \code{"data"}, or an explicit numeric \code{c(lo, hi)}
@@ -139,7 +145,10 @@ Defaults to \code{"value"}; set it to the statistic actually shown (e.g.
 \item{unit}{\code{"index"} or \code{"mm"}: how \code{zlevels} is interpreted.
 Panels are always labelled in world coordinates (mm).}
 
-\item{annotate}{Logical; draw L/R orientation letters on the first panel.}
+\item{annotate}{Logical or \code{NULL}; draw L/R orientation letters on the
+first panel. \code{NULL} (default) draws them unless the key is shown,
+since the key already states the convention ("neurological view (L =
+left)") and the letters would sit on the anatomy.}
 
 \item{n_slices}{Number of slices chosen when \code{zlevels} is \code{NULL}.}
 

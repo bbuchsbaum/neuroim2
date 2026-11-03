@@ -120,6 +120,18 @@ test_that("ROIVol coords with real=TRUE returns real-world coordinates", {
   rc <- coords(roi, real = TRUE)
   expect_equal(ncol(rc), 3L)
   expect_equal(nrow(rc), nrow(gc))
+  # Real coordinates are voxel centres: the same as grid_to_coord().
+  expect_equal(unname(rc), unname(grid_to_coord(sp, gc)))
+})
+
+test_that("ROIVol real coords are voxel centres under a flipped affine", {
+  tx <- diag(c(-2, 2, 2, 1))
+  tx[1:3, 4] <- c(90, -126, -72)
+  sp <- NeuroSpace(c(10L, 10L, 10L), c(2, 2, 2), trans = tx)
+  roi <- cuboid_roi(sp, c(1, 1, 1), 0)
+  # Grid (1, 1, 1) is the first voxel centre, which the affine puts at its
+  # translation.
+  expect_equal(as.vector(coords(roi, real = TRUE)), c(90, -126, -72))
 })
 
 # ---------------------------------------------------------------------------

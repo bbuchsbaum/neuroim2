@@ -5,6 +5,7 @@
 \alias{trans}
 \alias{trans,MetaInfo-method}
 \alias{trans,NIFTIMetaInfo-method}
+\alias{trans,AFNIMetaInfo-method}
 \alias{trans,NeuroObj-method}
 \alias{trans,NeuroHyperVec-method}
 \alias{trans,NeuroSpace-method}

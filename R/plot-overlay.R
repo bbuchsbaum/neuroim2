@@ -15,8 +15,14 @@
 #'   anatomical plane labels are inferred from the image affine.
 #' @param bg_cmap Background palette (e.g., "grays").
 #' @param ov_cmap Overlay palette. \code{NULL} (default) chooses automatically:
-#'   the two-sided \code{"cold_hot"} map for signed data, \code{"hot"}
-#'   otherwise. Any name accepted by [resolve_cmap()] or a vector of colours.
+#'   for signed data the host's diverging ramp,
+#'   \code{getOption("neuro.palette.diverging")}, when it is set, else the
+#'   two-sided \code{"cold_hot"} map; \code{"hot"} otherwise. Any name accepted
+#'   by [resolve_cmap()] or a vector of colours; a short vector is taken as
+#'   the anchors of a ramp and interpolated. With a threshold the ramp starts
+#'   30\% of the way along each arm, skipping the palette's neutral start,
+#'   except for a two-sided ramp of 5, 7, ... anchors around a neutral middle
+#'   (such as a host ramp), which starts at the first anchor past the middle.
 #' @param bg_range,ov_range Background/overlay scaling. Either a mode string,
 #'   \code{"robust"} or \code{"data"}, or an explicit numeric \code{c(lo, hi)}
 #'   to pin the scale (e.g. \code{ov_range = c(-6, 6)}) for consistent
@@ -82,7 +88,10 @@
 #'   \code{TRUE}). The overlay itself is always drawn with crisp voxels.
 #' @param unit \code{"index"} or \code{"mm"}: how \code{zlevels} is interpreted.
 #'   Panels are always labelled in world coordinates (mm).
-#' @param annotate Logical; draw L/R orientation letters on the first panel.
+#' @param annotate Logical or \code{NULL}; draw L/R orientation letters on the
+#'   first panel. \code{NULL} (default) draws them unless the key is shown,
+#'   since the key already states the convention ("neurological view (L =
+#'   left)") and the letters would sit on the anatomy.
 #' @param n_slices Number of slices chosen when \code{zlevels} is \code{NULL}.
 #' @param canvas Optional \code{c(width, height)} in inches to freeze the
 #'   layout for one size. By default (\code{NULL}) the layout is re-fitted to
@@ -141,7 +150,7 @@ plot_overlay <- function(
   draw = FALSE, style = c("light", "dark", "report"), enhance = FALSE,
   assemble = TRUE, colorbar = TRUE, legend = NULL,
   crop = TRUE, interpolate = TRUE, cbar_title = "value",
-  unit = c("index", "mm"), annotate = TRUE, n_slices = 12L, canvas = NULL,
+  unit = c("index", "mm"), annotate = NULL, n_slices = 12L, canvas = NULL,
   alpha_knee = NULL, alpha_cap = NULL, alpha_floor = NULL,
   alpha_mid = 0.2, gamma_min = 1.5, gamma_max = 5, label_size = 3.1
 ) {
@@ -159,6 +168,7 @@ plot_overlay <- function(
   show_legend <- if (is.null(legend)) is_report else isTRUE(legend)
   do_crop     <- if (is.null(crop)) TRUE else isTRUE(crop)
   interp_bg   <- isTRUE(interpolate)
+  show_orient <- if (is.null(annotate)) !show_legend else isTRUE(annotate)
 
   # Optional display-only enhancement of the (unsmoothed) statistical overlay.
   overlay <- apply_enhance_arg(overlay, enhance)
@@ -211,14 +221,14 @@ plot_overlay <- function(
     neuro_tile(
       bg_oriented, bg_lim = bg_lim, bg_cmap = bg_cmap, layers = list(g_ov),
       window = crop_win, label = slice_world_label(bgvol, z, along),
-      orient = if (isTRUE(annotate) && k == 1L) orientation_letters(bg_oriented) else NULL,
+      orient = if (show_orient && k == 1L) orientation_letters(bg_oriented) else NULL,
       tokens = tokens, interpolate = interp_bg, label_size = label_size
     )
   })
 
   cbar <- if (isTRUE(colorbar)) {
     neuro_colorbar(scale$lim, scale$pal, thresh = ov_thresh,
-                   diverging = scale$diverging, tokens = tokens, title = cbar_title,
+                   diverging = scale$diverging, skip = scale$skip, tokens = tokens, title = cbar_title,
                    alpha_fun = if (ov_alpha_mode == "binary") NULL else alpha_fun,
                    alpha = ov_alpha, over_hi = scale$over_hi, over_lo = scale$over_lo)
   }
