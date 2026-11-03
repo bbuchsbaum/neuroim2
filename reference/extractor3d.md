@@ -8,7 +8,7 @@ or array-like objects.
 
 ``` r
 # S4 method for class 'ArrayLike3D,numeric,missing,ANY'
-x[i, j, k, ..., drop = TRUE]
+x[i, j, ..., drop = TRUE]
 
 # S4 method for class 'ArrayLike3D,matrix,missing,ANY'
 x[i, j, k, ..., drop = TRUE]
@@ -34,10 +34,6 @@ x[i, j, k, ..., drop = TRUE]
 
   Second index or dimension.
 
-- k:
-
-  Third index or dimension.
-
 - ...:
 
   Additional arguments passed to methods.
@@ -47,7 +43,20 @@ x[i, j, k, ..., drop = TRUE]
   Logical. If TRUE, the result is coerced to the lowest possible
   dimension.
 
+- k:
+
+  Third index or dimension.
+
 ## Value
 
 A subset of the input object, with dimensions depending on the indexing
 and the \`drop\` parameter.
+
+## Details
+
+As for base arrays, `x[i]` with a single numeric index is linear
+(column-major) indexing and returns one value per element of `i`, so
+`vol[which(mask)]` returns the masked values. `drop` is ignored for
+linear indexing, so `x[i, drop = FALSE]` is linear too. `x[i, ]`,
+`x[i, , ]` and `x[i, , k]` index the first dimension instead; use
+`x[i, , , drop = FALSE]` to keep all three dimensions of a slice.

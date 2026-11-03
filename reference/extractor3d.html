@@ -45,7 +45,7 @@ It allows for flexible indexing and subsetting of 3D arrays or array-like object
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for class 'ArrayLike3D,numeric,missing,ANY'</span></span>
-<span><span class="va">x</span><span class="op">[</span><span class="va">i</span>, <span class="va">j</span>, <span class="va">k</span>, <span class="va">...</span>, drop <span class="op">=</span> <span class="cn">TRUE</span><span class="op">]</span></span>
+<span><span class="va">x</span><span class="op">[</span><span class="va">i</span>, <span class="va">j</span>, <span class="va">...</span>, drop <span class="op">=</span> <span class="cn">TRUE</span><span class="op">]</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'ArrayLike3D,matrix,missing,ANY'</span></span>
 <span><span class="va">x</span><span class="op">[</span><span class="va">i</span>, <span class="va">j</span>, <span class="va">k</span>, <span class="va">...</span>, drop <span class="op">=</span> <span class="cn">TRUE</span><span class="op">]</span></span>
@@ -73,10 +73,6 @@ It allows for flexible indexing and subsetting of 3D arrays or array-like object
 <dd><p>Second index or dimension.</p></dd>
 
 
-<dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>
-<dd><p>Third index or dimension.</p></dd>
-
-
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments passed to methods.</p></dd>
 
@@ -84,10 +80,24 @@ It allows for flexible indexing and subsetting of 3D arrays or array-like object
 <dt id="arg-drop">drop<a class="anchor" aria-label="anchor" href="#arg-drop"></a></dt>
 <dd><p>Logical. If TRUE, the result is coerced to the lowest possible dimension.</p></dd>
 
+
+<dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>
+<dd><p>Third index or dimension.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A subset of the input object, with dimensions depending on the indexing and the `drop` parameter.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>As for base arrays, <code>x[i]</code> with a single numeric index is linear
+(column-major) indexing and returns one value per element of <code>i</code>, so
+<code>vol[which(mask)]</code> returns the masked values. <code>drop</code> is ignored
+for linear indexing, so <code>x[i, drop = FALSE]</code> is linear too.
+<code>x[i, ]</code>, <code>x[i, , ]</code> and <code>x[i, , k]</code> index the first
+dimension instead; use <code>x[i, , , drop = FALSE]</code> to keep all three
+dimensions of a slice.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

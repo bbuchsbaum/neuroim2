@@ -2,6 +2,31 @@
 
 ## neuroim2 0.19.1.9000
 
+- `vol[i]` with a single numeric index is now always linear indexing, as
+  for base arrays
+  ([\#60](https://github.com/bbuchsbaum/neuroim2/issues/60)). On
+  `DenseNeuroVol`, an index vector whose values all fell within
+  `dim(vol)[1]` used to return whole first-dimension slices instead, so
+  `vol[which(mask)]` silently returned the wrong values when the mask
+  lay in the first x-row, and
+  [`conn_comp()`](https://bbuchsbaum.github.io/neuroim2/reference/conn_comp-methods.md)
+  failed with “argument lengths differ” on such masks. `SparseNeuroVol`
+  and `ClusteredNeuroVol` never did linear indexing through `vol[i]`;
+  they do now and return plain values. `vol[i, drop = FALSE]` is linear
+  indexing too, as in base R (it returned a slice only when `i` fitted
+  the first dimension); use `vol[i, , , drop = FALSE]` for a slice.
+  `vol[i, ]`, `vol[i, , ]` and `vol[i, , k]` still index the first
+  dimension. The same mistake gave wrong values from
+  [`split_fill()`](https://bbuchsbaum.github.io/neuroim2/reference/split_fill-methods.md)
+  and an error from `as.sparse(<DenseNeuroVol>, <numeric>)` when the
+  selected voxels all lay in the first x-row; both are fixed.
+- [`conn_comp()`](https://bbuchsbaum.github.io/neuroim2/reference/conn_comp-methods.md)
+  and
+  [`ClusteredNeuroVol()`](https://bbuchsbaum.github.io/neuroim2/reference/ClusteredNeuroVol-class.md)
+  no longer warn “clustered volume only contains 1 partition” when there
+  is a single cluster
+  ([\#59](https://github.com/bbuchsbaum/neuroim2/issues/59)). A single
+  component is an ordinary result.
 - Signed overlays in
   [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
   and
@@ -12,7 +37,6 @@
   contrast figures of fmridesign and fmrireg. With the option unset the
   default stays `"cold_hot"`; an unusable value is reported and ignored
   ([\#62](https://github.com/bbuchsbaum/neuroim2/issues/62)).
-
 - A host ramp of anchors around a neutral middle (5, 7, … colours, such
   as `neuro.palette.diverging`) starts at its first anchor past the
   middle at +/-threshold, rather than at a washed-out tint 30% of the
@@ -20,7 +44,6 @@
   a graded ramp rather than drawn in a few flat bands. Named palettes
   and full palette vectors are unchanged
   ([\#62](https://github.com/bbuchsbaum/neuroim2/issues/62)).
-
 - Slice labels on the tiles of every slice figure sit on a small box of
   the tile colour, so anatomy reaching the top of a cropped tile no
   longer runs through them. In
@@ -31,7 +54,6 @@
   draws the letters whenever the key is not shown; `annotate = TRUE`
   forces them
   ([\#63](https://github.com/bbuchsbaum/neuroim2/issues/63)).
-
 - [`resample()`](https://bbuchsbaum.github.io/neuroim2/reference/resample-methods.md)
   (and so
   [`resample_to()`](https://bbuchsbaum.github.io/neuroim2/reference/resample_to.md))
@@ -40,7 +62,6 @@
   spatial grid. Previously there was no method for a `NeuroVec` target,
   and a 4-D `NeuroSpace` target failed. `ClusteredNeuroVol` sources keep
   their labels as before.
-
 - AFNI datasets (`.HEAD`/`.BRIK`) are now placed correctly in world
   space. AFNI records geometry in DICOM (RAI) coordinates, but the
   reader used the DICOM `ORIGIN` as an RAS origin and built the
@@ -53,14 +74,12 @@
   of AFNI headers now come from `IJK_TO_DICOM_REAL` (or `IJK_TO_DICOM`,
   or `ORIENT_SPECIFIC`/`DELTA`/`ORIGIN`) converted to RAS, matching
   nibabel’s AFNI reader.
-
 - `coords(<ROIVol>, real = TRUE)` now returns voxel-centre world
   coordinates, identical to
   [`grid_to_coord()`](https://bbuchsbaum.github.io/neuroim2/reference/grid_to_coord-methods.md).
   It previously subtracted 0.5 from the 1-based grid coordinates before
   applying the affine, placing every voxel half a voxel off its centre
   (by `spacing / 2` along each axis).
-
 - The bundled template `inst/extdata/mni_downsampled.nii.gz` now has a
   correct sform. Its sform was the identity plus a translation, which
   takes precedence over the qform and made the image read as 1 mm
@@ -71,7 +90,6 @@
   mm geometry of this file (mm radii, kernel widths, world coordinates)
   should scale accordingly; the vignettes have been updated
   ([\#50](https://github.com/bbuchsbaum/neuroim2/issues/50)).
-
 - [`plot_ortho()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_ortho.md),
   [`plot_montage()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_montage.md),
   [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md),

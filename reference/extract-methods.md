@@ -12,10 +12,10 @@ based on provided indices.
 x[i, j, k, m, ..., drop = TRUE]
 
 # S4 method for class 'DenseNeuroVol,numeric,missing,ANY'
-x[i, j, k, ..., drop = TRUE]
+x[i, j, ..., drop = TRUE]
 
 # S4 method for class 'DenseNeuroVol,integer,missing,ANY'
-x[i, j, k, ..., drop = TRUE]
+x[i, j, ..., drop = TRUE]
 
 # S4 method for class 'NeuroVec,numeric'
 x[[i]]
