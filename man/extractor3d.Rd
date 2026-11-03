@@ -39,7 +39,9 @@ It allows for flexible indexing and subsetting of 3D arrays or array-like object
 \details{
 As for base arrays, \code{x[i]} with a single numeric index is linear
 (column-major) indexing and returns one value per element of \code{i}, so
-\code{vol[which(mask)]} returns the masked values. \code{x[i, ]},
-\code{x[i, , ]}, \code{x[i, , k]} and \code{x[i, drop = FALSE]} index the
-first dimension instead.
+\code{vol[which(mask)]} returns the masked values. \code{drop} is ignored
+for linear indexing, so \code{x[i, drop = FALSE]} is linear too.
+\code{x[i, ]}, \code{x[i, , ]} and \code{x[i, , k]} index the first
+dimension instead; use \code{x[i, , , drop = FALSE]} to keep all three
+dimensions of a slice.
 }

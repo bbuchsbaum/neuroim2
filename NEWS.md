@@ -7,8 +7,13 @@
   in the first x-row, and `conn_comp()` failed with "argument lengths differ"
   on such masks. `SparseNeuroVol` and `ClusteredNeuroVol` never did linear
   indexing through `vol[i]`; they do now and return plain values.
-  `vol[i, ]`, `vol[i, , ]`, `vol[i, , k]` and `vol[i, drop = FALSE]` still
-  index the first dimension.
+  `vol[i, drop = FALSE]` is linear indexing too, as in base R (it returned a
+  slice only when `i` fitted the first dimension); use
+  `vol[i, , , drop = FALSE]` for a slice. `vol[i, ]`, `vol[i, , ]` and
+  `vol[i, , k]` still index the first dimension. The same mistake gave wrong
+  values from `split_fill()` and an error from
+  `as.sparse(<DenseNeuroVol>, <numeric>)` when the selected voxels all lay in
+  the first x-row; both are fixed.
 * `conn_comp()` and `ClusteredNeuroVol()` no longer warn "clustered volume
   only contains 1 partition" when there is a single cluster (#59). A single
   component is an ordinary result.

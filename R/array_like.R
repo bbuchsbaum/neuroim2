@@ -36,9 +36,11 @@ NULL
 #' @details
 #' As for base arrays, \code{x[i]} with a single numeric index is linear
 #' (column-major) indexing and returns one value per element of \code{i}, so
-#' \code{vol[which(mask)]} returns the masked values. \code{x[i, ]},
-#' \code{x[i, , ]}, \code{x[i, , k]} and \code{x[i, drop = FALSE]} index the
-#' first dimension instead.
+#' \code{vol[which(mask)]} returns the masked values. \code{drop} is ignored
+#' for linear indexing, so \code{x[i, drop = FALSE]} is linear too.
+#' \code{x[i, ]}, \code{x[i, , ]} and \code{x[i, , k]} index the first
+#' dimension instead; use \code{x[i, , , drop = FALSE]} to keep all three
+#' dimensions of a slice.
 #'
 #' @name extractor3d
 #' @rdname extractor3d
@@ -238,7 +240,7 @@ setMethod(f="[", signature=signature(x = "ArrayLike3D", i = "numeric", j = "miss
             # x[i] is linear indexing; see extract_k() below (#60). Sparse
             # backends return a sparseVector from linear_access(); `[` returns
             # plain values, like the slice path and dense volumes.
-            if (nargs() == 2L) {
+            if ((nargs() - !missing(drop)) == 2L) {
               return(as.vector(linear_access(x, i)))
             }
             d <- dim(x)
@@ -346,10 +348,10 @@ setMethod(f="[", signature=signature(x = "DenseNeuroVec", i = "numeric", j = "nu
             x@.Data[i, j, k, m, drop = drop]
           })
 
-# As for base arrays, x[i] is linear indexing, while x[i, ], x[i, , k] and
-# x[i, drop = FALSE] index the first dimension. The choice is made from the
-# shape of the call (nargs() == 2 only for a bare x[i]), never from the values
-# of i (#60). These methods keep the generic's formals (x, i, j, ..., drop) so
+# As for base arrays, x[i] is linear indexing (with or without `drop`, which
+# does not count as an index), while x[i, ], x[i, , ] and x[i, , k] index the
+# first dimension. The choice is made from the shape of the call, never from
+# the values of i (#60). These methods keep the generic's formals (x, i, j, ..., drop) so
 # that nargs() counts the caller's arguments: declaring `k` would make R wrap
 # the body in .local(), where x[i] and x[i, ] look the same. A third index
 # therefore arrives as the first element of `...`.
@@ -360,7 +362,7 @@ extract_k <- function(...) if (...length() >= 1L && !missing(..1)) ..1 else NULL
 #' @export
 setMethod(f="[", signature=signature(x = "DenseNeuroVol", i = "numeric", j = "missing"),
           def=function (x, i, j, ..., drop=TRUE) {
-            if (nargs() == 2L) {
+            if ((nargs() - !missing(drop)) == 2L) {
               return(linear_access(x, i))
             }
             k <- extract_k(...)
@@ -374,7 +376,7 @@ setMethod(f="[", signature=signature(x = "DenseNeuroVol", i = "numeric", j = "mi
 #' @export
 setMethod(f="[", signature=signature(x = "DenseNeuroVol", i = "integer", j = "missing"),
           def=function (x, i, j, ..., drop=TRUE) {
-            if (nargs() == 2L) {
+            if ((nargs() - !missing(drop)) == 2L) {
               return(linear_access(x, as.numeric(i)))
             }
             k <- extract_k(...)
