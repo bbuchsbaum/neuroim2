@@ -98,3 +98,13 @@ test_that("split_fill gives correct values for a level covering the first x-row"
   expect_equal(as.vector(out[1:5]), rep(mean(1:5), 5))
   expect_equal(as.vector(out[6:144]), rep(mean(6:144), 139))
 })
+
+test_that("an explicit empty third index selects no z-slices", {
+  f <- first_row_fixture()
+  for (nm in names(f$vols)) {
+    v <- f$vols[[nm]]
+    expect_equal(dim(v[1, , NULL, drop = FALSE]), c(1L, 6L, 0L), info = nm)
+    expect_equal(dim(v[1, , integer(0)]), c(6L, 0L), info = nm)
+    expect_equal(dim(v[1L, , NULL, drop = FALSE]), c(1L, 6L, 0L), info = nm)
+  }
+})
