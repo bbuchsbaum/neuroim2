@@ -90,25 +90,24 @@ Collate:
 RoxygenNote: 7.3.3
 Imports:
   purrr,
-  mmap,
   Rcpp,
   RcppParallel,
   RNifti,
   dbscan,
-  stringr,
   methods,
-  bigstatsr,
-  RNiftyReg,
   future,
   future.apply,
   deflist,
   cli,
   ggplot2,
   magrittr,
-  grid,
-  patchwork
+  grid
 Suggests:
     testthat,
+    mmap,
+    bigstatsr,
+    RNiftyReg,
+    patchwork,
     covr,
     knitr,
     pkgdown,

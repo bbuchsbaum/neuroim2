@@ -24,6 +24,7 @@ expect_tile_sizes <- function(p, size, letters = TRUE) {
 }
 
 test_that("plot_ortho() passes label_size to every view (#51)", {
+  skip_if_not_installed("patchwork")
   bg <- label_size_bg()
   expect_true("label_size" %in% names(formals(plot_ortho)))
   default <- plot_ortho(bg, assemble = FALSE)
@@ -37,6 +38,7 @@ test_that("plot_ortho() passes label_size to every view (#51)", {
 })
 
 test_that("plot_montage() passes label_size to slice labels and letters (#51)", {
+  skip_if_not_installed("patchwork")
   bg <- label_size_bg()
   expect_tile_sizes(plot_montage(bg, n_slices = 4L), 3.1)
   expect_tile_sizes(plot_montage(bg, n_slices = 4L, label_size = 5), 5)
@@ -65,6 +67,7 @@ test_that("registration QC plots pass label_size to their tiles (#51)", {
 })
 
 test_that("label_size is validated (#51)", {
+  skip_if_not_installed("patchwork")
   bg <- label_size_bg()
   for (bad in list(0, -1, NA_real_, Inf, "big", c(3, 4))) {
     expect_error(plot_ortho(bg, label_size = bad, assemble = FALSE),

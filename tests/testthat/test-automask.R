@@ -17,7 +17,8 @@ make_mask_backend_fixture <- function() {
   list(
     path = path,
     dense = dense,
-    mmap = read_vec(path, mode = "mmap"),
+    # Memory mapping needs the optional 'mmap' package.
+    mmap = if (requireNamespace("mmap", quietly = TRUE)) read_vec(path, mode = "mmap"),
     filebacked = read_vec(path, mode = "filebacked")
   )
 }
@@ -172,17 +173,19 @@ test_that("mapped and file-backed clip_level paths match dense results", {
   dense_scalar <- clip_level(fixture$dense, representative = "median", gradual = FALSE)
   dense_grad <- as.array(clip_level(fixture$dense, representative = "median", gradual = TRUE))
 
-  expect_equal(
-    clip_level(fixture$mmap, representative = "median", gradual = FALSE),
-    dense_scalar
-  )
+  if (!is.null(fixture$mmap)) {
+    expect_equal(
+      clip_level(fixture$mmap, representative = "median", gradual = FALSE),
+      dense_scalar
+    )
+    expect_equal(
+      as.array(clip_level(fixture$mmap, representative = "median", gradual = TRUE)),
+      dense_grad
+    )
+  }
   expect_equal(
     clip_level(fixture$filebacked, representative = "median", gradual = FALSE),
     dense_scalar
-  )
-  expect_equal(
-    as.array(clip_level(fixture$mmap, representative = "median", gradual = TRUE)),
-    dense_grad
   )
   expect_equal(
     as.array(clip_level(fixture$filebacked, representative = "median", gradual = TRUE)),
@@ -199,15 +202,16 @@ test_that("mapped and file-backed automask/apply_mask paths match dense results"
   dense_mask_arr <- as.array(dense_mask)
   dense_applied <- as.array(apply_mask(fixture$dense, dense_mask))
 
-  mmap_mask <- automask(fixture$mmap, representative = "mean_abs", gradual = FALSE, peels = 0)
+  if (!is.null(fixture$mmap)) {
+    mmap_mask <- automask(fixture$mmap, representative = "mean_abs", gradual = FALSE, peels = 0)
+    expect_equal(as.array(mmap_mask), dense_mask_arr)
+    expect_equal(
+      unname(as.vector(as.array(apply_mask(fixture$mmap, dense_mask)))),
+      unname(as.vector(dense_applied))
+    )
+  }
   fb_mask <- automask(fixture$filebacked, representative = "mean_abs", gradual = FALSE, peels = 0)
-
-  expect_equal(as.array(mmap_mask), dense_mask_arr)
   expect_equal(as.array(fb_mask), dense_mask_arr)
-  expect_equal(
-    unname(as.vector(as.array(apply_mask(fixture$mmap, dense_mask)))),
-    unname(as.vector(dense_applied))
-  )
   expect_equal(
     unname(as.vector(as.array(apply_mask(fixture$filebacked, dense_mask)))),
     unname(as.vector(dense_applied))

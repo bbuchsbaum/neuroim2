@@ -1,6 +1,9 @@
 library(testthat)
 library(neuroim2)
 
+# Every test in this file reads through a memory map.
+skip_if_not_installed("mmap")
+
 context("backend parity")
 
 backend_fixture <- system.file("extdata", "global_mask_v4.nii", package = "neuroim2")

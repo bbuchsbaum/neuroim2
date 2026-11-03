@@ -3,6 +3,7 @@ context("plot_ortho coverage")
 library(neuroim2)
 
 test_that("plot_ortho returns one assembled figure (visible unless drawn)", {
+  skip_if_not_installed("patchwork")
   sp <- NeuroSpace(c(10L, 10L, 10L), c(1, 1, 1))
   vol <- DenseNeuroVol(array(rnorm(1000), c(10, 10, 10)), sp)
   pdf(file = NULL)

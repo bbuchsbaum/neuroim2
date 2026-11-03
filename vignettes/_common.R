@@ -41,6 +41,15 @@ knitr::opts_chunk$set(
   fig.alt = "Plot output"
 )
 
+# Chunks that need a suggested package declare it with the chunk option
+# `requires = "pkg"`; they are shown but not run when it is not installed.
+knitr::opts_hooks$set(requires = function(options) {
+  if (!all(vapply(options$requires, requireNamespace, logical(1), quietly = TRUE))) {
+    options$eval <- FALSE
+  }
+  options
+})
+
 if (requireNamespace("ragg", quietly = TRUE)) {
   knitr::opts_chunk$set(dev = "ragg_png")
 }

@@ -40,6 +40,7 @@ test_that("default background limits retain bright tissue (#19)", {
 })
 
 test_that("soft alpha controls affect rendered pixels independently of color", {
+  skip_if_not_installed("patchwork")
   dims <- c(3, 2, 1); s <- NeuroSpace(dims)
   bg <- NeuroVol(array(1, dims),s)
   vals <- c(0, 1, 2, 3, 8, NA_real_)

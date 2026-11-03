@@ -1,6 +1,9 @@
 library(purrr)
 library(testthat)
 
+# Every test in this file reads through a memory map.
+skip_if_not_installed("mmap")
+
 context("mapped neurovec")
 
 gmask <- system.file("extdata", "global_mask_v4.nii", package="neuroim2")

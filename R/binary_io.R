@@ -29,7 +29,7 @@
   keys <- ls(.mmap_cache, all.names = TRUE)
   for (key in keys) {
     handle <- get(key, envir = .mmap_cache, inherits = FALSE)
-    if (inherits(handle, "mmap")) {
+    if (inherits(handle, "mmap") && .has_mmap()) {
       try(mmap::munmap(handle), silent = TRUE)
     }
   }
@@ -48,6 +48,7 @@
 
   key <- .mmap_cache_key(meta)
   if (!exists(key, envir = .mmap_cache, inherits = FALSE)) {
+    .require_mmap()
     handle <- mmap::mmap(
       meta@data_file,
       mode = .getMMapMode(meta@data_type),

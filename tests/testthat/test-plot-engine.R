@@ -33,6 +33,7 @@ test_that("overlay_display_limits keeps the threshold inside the scale", {
 })
 
 test_that("automatic slice selection skips empty planes", {
+  skip_if_not_installed("patchwork")
   dims <- c(12L, 12L, 30L)
   arr <- array(0, dims)
   arr[3:10, 3:10, 8:22] <- 100 + runif(8 * 8 * 15)
@@ -86,6 +87,7 @@ test_that("slice_world_label reports world coordinates in mm", {
 })
 
 test_that("plot_montage labels panels with world coordinates", {
+  skip_if_not_installed("patchwork")
   sp <- neuroim2::NeuroSpace(c(10L, 12L, 14L), spacing = c(2, 2, 3),
                              origin = c(-10, -20, -30))
   set.seed(3)
@@ -96,6 +98,7 @@ test_that("plot_montage labels panels with world coordinates", {
 })
 
 test_that("plot_ortho(assemble = TRUE) returns one patchwork figure", {
+  skip_if_not_installed("patchwork")
   set.seed(5)
   sp <- neuroim2::NeuroSpace(c(12L, 12L, 12L), spacing = c(2, 2, 2))
   vol <- neuroim2::NeuroVol(array(runif(12^3), c(12L, 12L, 12L)), sp)
@@ -134,6 +137,7 @@ test_that("plot_ortho with an overlay centres on the overlay peak", {
 })
 
 test_that("registration QC keys name both images", {
+  skip_if_not_installed("patchwork")
   dims <- c(8L, 9L, 5L)
   sp <- neuroim2::NeuroSpace(dims)
   bg <- neuroim2::NeuroVol(array(seq_len(prod(dims)), dims), sp)
@@ -173,6 +177,7 @@ test_that("registration QC keys name both images", {
 })
 
 test_that("overlay_key states the threshold without 'activation' wording", {
+  skip_if_not_installed("patchwork")
   tokens <- neuroim2:::neuro_style_tokens("report")
   key_text <- function(...) paste(grob_labels(neuroim2:::overlay_key(...)), collapse = " ")
 
@@ -194,6 +199,7 @@ test_that("overlay_key states the threshold without 'activation' wording", {
 })
 
 test_that("device-fitted figures re-fit on draw and keep later additions", {
+  skip_if_not_installed("patchwork")
   dims <- c(12L, 14L, 10L)
   sp <- neuroim2::NeuroSpace(dims)
   set.seed(1)
@@ -224,6 +230,7 @@ test_that("device-fitted figures re-fit on draw and keep later additions", {
 })
 
 test_that("slice positions given without a unit trigger a one-time hint on non-trivial affines", {
+  skip_if_not_installed("patchwork")
   dims <- c(10L, 10L, 10L)
   sp <- neuroim2::NeuroSpace(dims, origin = c(-20, -30, -40))
   bg <- neuroim2::NeuroVol(array(runif(prod(dims)), dims), sp)
@@ -266,6 +273,7 @@ test_that("tile padding uses the background palette's lowest colour", {
 })
 
 test_that("plot_edge_overlay validates agree_color and can turn agreement off", {
+  skip_if_not_installed("patchwork")
   dims <- c(8L, 8L, 4L)
   sp <- neuroim2::NeuroSpace(dims)
   bg <- neuroim2::NeuroVol(array(runif(prod(dims)), dims), sp)

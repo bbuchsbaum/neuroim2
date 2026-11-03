@@ -215,6 +215,7 @@ test_that("searchlight_coords() validates its arguments", {
 # ---------------------------------------------------------------------------
 
 test_that("a target grid that misses the source is flagged", {
+  skip_if_not_installed("RNiftyReg")
   sp <- NeuroSpace(c(12L, 12L, 12L), c(2, 2, 2),
                    trans = rbind(c(-2, 0, 0, 12), c(0, 2, 0, -12),
                                  c(0, 0, 2, -12), c(0, 0, 0, 1)))

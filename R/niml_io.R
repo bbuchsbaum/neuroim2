@@ -49,9 +49,9 @@ read_niml_data <- function(fconn, meta) {
   } else {
     ret <- readLines(fconn, n=nels*nvols+1)[-1]
     if (type == "integer") {
-      matrix(as.integer(stringr::str_trim(ret)), nvols,nels)
+      matrix(as.integer(.str_trim(ret)), nvols,nels)
     } else if (type == "double") {
-      matrix(as.numeric(stringr::str_trim(ret)), nvols, nels)
+      matrix(as.numeric(.str_trim(ret)), nvols, nels)
     } else {
       stop(paste("unrecognized type: ", type))
     }
@@ -85,7 +85,7 @@ parse_niml_header <- function(fconn) {
   out <- gsub("\"", "", out)
   out <- gsub("/", "", out)
 
-  ret <- parse_niml_element(str_trim(out))
+  ret <- parse_niml_element(.str_trim(out))
   ret
 }
 

@@ -124,7 +124,7 @@ in the opposite direction from the same origin, placing its grid where the
 source has no data. Resampling into it warns about the lack of overlap and
 returns an empty image:
 
-```{r bad-resample}
+```{r bad-resample, requires = "RNiftyReg"}
 sum(resample_to(mask, naive, method = "nearest"))
 ```
 
@@ -144,7 +144,7 @@ round(spacing(finer), 3)
 Then check the result, every time. The affine was scaled by 1.6 in each
 direction, so each new voxel has `1 / 1.6^3` of the original voxel volume. Compare physical mask volumes:
 
-```{r good-resample}
+```{r good-resample, requires = "RNiftyReg"}
 up <- resample_to(mask, finer, method = "nearest")
 
 source_mm3 <- sum(mask) * prod(spacing(mask))
@@ -165,7 +165,7 @@ rounding target dimensions can also change its physical extent.
 **labels and masks take `"nearest"`, continuous data takes `"linear"` or
 `"cubic"`**, and the reason is one number:
 
-```{r interpolation}
+```{r interpolation, requires = "RNiftyReg"}
 lin <- resample_to(mask, finer, method = "linear")
 a <- as.array(lin)
 
@@ -185,7 +185,7 @@ method you use.
 The common real task needs no target construction — pass the image whose grid
 you want:
 
-```{r match-image}
+```{r match-image, requires = "RNiftyReg"}
 coarse <- downsample(mask, factor = 0.5) # used only as a grid donor
 matched <- resample_to(mask, coarse, method = "nearest")
 
@@ -266,7 +266,7 @@ round(obliquity(trans(space(tilted))) * 180 / pi, 2)
 `deoblique()` builds an axis-aligned space enclosing the field of view and, given
 a volume rather than a space, resamples the data into it.
 
-```{r deoblique}
+```{r deoblique, requires = "RNiftyReg"}
 straight <- deoblique(tilted)
 
 rbind(before = c(dim(tilted), round(spacing(space(tilted)), 2)),
@@ -282,7 +282,7 @@ grid explicitly if that is not what you want.
 `deoblique()` also defaults to `method = "linear"`, the opposite of
 `resample_to()`. On a mask, pass `method = "nearest"`:
 
-```{r deoblique-mask}
+```{r deoblique-mask, requires = "RNiftyReg"}
 frac <- function(x) mean(abs(as.array(x) - round(as.array(x))) > 1e-6)
 
 c(linear = frac(deoblique(mask)), nearest = frac(deoblique(mask, method = "nearest")))

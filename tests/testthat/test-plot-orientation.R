@@ -8,6 +8,7 @@ marker_xy <- function(p, marker = 1) {
 
 
 test_that("generic plot and plot_montage preserve axial x/y landmark placement", {
+  skip_if_not_installed("patchwork")
   dims <- c(5L, 7L, 3L)
   arr <- array(0, dims)
   arr[2L, 6L, 2L] <- 1
@@ -38,6 +39,7 @@ test_that("generic plot and plot_montage preserve axial x/y landmark placement",
 })
 
 test_that("plot_montage orients a permuted native plane anatomically", {
+  skip_if_not_installed("patchwork")
   dims <- c(5L, 6L, 7L)
   arr <- array(0, dims)
   arr[2L, 5L, 3L] <- 1
@@ -112,6 +114,7 @@ test_that("plot_ortho finds anatomical planes after voxel-axis permutation", {
 })
 
 test_that("oblique plotting keeps native pixels on a regular warning-free grid", {
+  skip_if_not_installed("patchwork")
   dims <- c(8L, 10L, 6L)
   arr <- array(0, dims)
   arr[2L, 8L, 3L] <- 1

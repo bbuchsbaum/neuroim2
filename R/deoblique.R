@@ -41,7 +41,9 @@
 #' # Resample a volume to deobliqued space
 #' vol <- NeuroVol(array(rnorm(prod(dim(sp_obl))), dim(sp_obl)), sp_obl)
 #' \donttest{
-#' vol_deob <- deoblique(vol, method = "linear")
+#' if (requireNamespace("RNiftyReg", quietly = TRUE)) {
+#'   vol_deob <- deoblique(vol, method = "linear")
+#' }
 #' }
 #'
 #' @export

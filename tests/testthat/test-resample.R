@@ -5,6 +5,7 @@ library(neuroim2)
 
 # Test the resample(NeuroVol, NeuroVol) function
 test_that("resample(NeuroVol, NeuroVol) works correctly", {
+  skip_if_not_installed("RNiftyReg")
   skip_on_cran()
   source <- NeuroVol(array(rnorm(64 * 64 * 64), c(64, 64, 64)), NeuroSpace(c(64, 64, 64)))
   target <- NeuroVol(array(rnorm(64 * 64 * 64), c(64, 64, 64)), NeuroSpace(c(64, 64, 64)))
@@ -19,6 +20,7 @@ test_that("resample(NeuroVol, NeuroVol) works correctly", {
 
 # Test the resample(NeuroVol, NeuroSpace) function
 test_that("resample(NeuroVol, NeuroSpace) works correctly", {
+  skip_if_not_installed("RNiftyReg")
   skip_on_cran()
   source <- NeuroVol(array(rnorm(64 * 64 * 64), c(64, 64, 64)), NeuroSpace(c(64, 64, 64)))
   target_space <- NeuroSpace(c(64, 64, 64))
@@ -32,6 +34,7 @@ test_that("resample(NeuroVol, NeuroSpace) works correctly", {
 })
 
 test_that("resample(ClusteredNeuroVol, NeuroSpace) preserves labels and label map", {
+  skip_if_not_installed("RNiftyReg")
   sp <- NeuroSpace(c(4, 4, 4))
   mask_data <- array(FALSE, dim = c(4, 4, 4))
   mask_data[1:2, 1:2, 1:2] <- TRUE
@@ -53,6 +56,7 @@ test_that("resample(ClusteredNeuroVol, NeuroSpace) preserves labels and label ma
 })
 
 test_that("resample(ClusteredNeuroVol, NeuroVol) forces nearest neighbor interpolation", {
+  skip_if_not_installed("RNiftyReg")
   sp <- NeuroSpace(c(4, 4, 4))
   mask <- LogicalNeuroVol(array(TRUE, dim = c(4, 4, 4)), sp)
   clusters <- rep(1:2, each = 32)
@@ -72,6 +76,7 @@ test_that("resample(ClusteredNeuroVol, NeuroVol) forces nearest neighbor interpo
 
 test_that("a volume resamples onto the spatial grid of a 4-D target", {
   skip_on_cran()
+  skip_if_not_installed("RNiftyReg")
   source <- NeuroVol(array(rnorm(8 * 8 * 8), c(8, 8, 8)), NeuroSpace(c(8, 8, 8)))
   grid3 <- NeuroSpace(c(6, 6, 6), spacing = c(1.2, 1.2, 1.2), origin = c(1, 2, 3))
   run <- NeuroVec(array(0, c(6, 6, 6, 4)), add_dim(grid3, 4))
@@ -87,6 +92,7 @@ test_that("a volume resamples onto the spatial grid of a 4-D target", {
 })
 
 test_that("resample(ClusteredNeuroVol, <4-D target>) keeps labels on the spatial grid", {
+  skip_if_not_installed("RNiftyReg")
   sp <- NeuroSpace(c(4, 4, 4))
   mask <- LogicalNeuroVol(array(TRUE, dim = c(4, 4, 4)), sp)
   cvol <- ClusteredNeuroVol(mask, rep(1:2, each = 32),
