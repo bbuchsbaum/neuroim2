@@ -12,10 +12,11 @@ make_vec <- function() {
   DenseNeuroVec(array(1:16, dim=c(2,2,2,2)), sp)
 }
 
-test_that("ArrayLike3D respects drop when only i supplied", {
+test_that("ArrayLike3D respects drop when slicing the first dimension", {
   vol <- make_vol()
-  res <- vol[1, drop=FALSE]
-  expect_equal(dim(res), c(1,2,2))
+  # A single index is linear indexing, as for base arrays; drop is ignored (#60).
+  expect_equal(vol[1, drop=FALSE], 1)
+  expect_equal(vol[3, drop=FALSE], 3)
   res2 <- vol[1,, , drop=FALSE]
   expect_equal(dim(res2), c(1,2,2))
   res_drop <- vol[1,,]

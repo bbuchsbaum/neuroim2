@@ -25,6 +25,23 @@
   and `plot_edge_overlay()` return their ggplot panels without `patchwork`
   (the figure-level key strip is then not built). `plot_montage()` always
   needs `patchwork`.
+* `vol[i]` with a single numeric index is now always linear indexing, as for
+  base arrays (#60). On `DenseNeuroVol`, an index vector whose values all fell
+  within `dim(vol)[1]` used to return whole first-dimension slices instead,
+  so `vol[which(mask)]` silently returned the wrong values when the mask lay
+  in the first x-row, and `conn_comp()` failed with "argument lengths differ"
+  on such masks. `SparseNeuroVol` and `ClusteredNeuroVol` never did linear
+  indexing through `vol[i]`; they do now and return plain values.
+  `vol[i, drop = FALSE]` is linear indexing too, as in base R (it returned a
+  slice only when `i` fitted the first dimension); use
+  `vol[i, , , drop = FALSE]` for a slice. `vol[i, ]`, `vol[i, , ]` and
+  `vol[i, , k]` still index the first dimension. The same mistake gave wrong
+  values from `split_fill()` and an error from
+  `as.sparse(<DenseNeuroVol>, <numeric>)` when the selected voxels all lay in
+  the first x-row; both are fixed.
+* `conn_comp()` and `ClusteredNeuroVol()` no longer warn "clustered volume
+  only contains 1 partition" when there is a single cluster (#59). A single
+  component is an ordinary result.
 * Signed overlays in `plot_overlay()` and `plot_ortho()` use the host's
   diverging ramp, `options(neuro.palette.diverging = ...)`, when `ov_cmap` is
   `NULL`, so statistical maps are drawn in the same ramp as the design-matrix
@@ -44,7 +61,6 @@
   the key under the tiles already states the convention.
   `annotate = NULL` (the new default) draws the letters whenever the key is
   not shown; `annotate = TRUE` forces them (#63).
-
 * `resample()` (and so `resample_to()`) accepts a 4-D target -- a
   `NeuroVec` or a 4-D `NeuroSpace`, e.g. a functional run -- for a volume
   source, resampling onto the target's spatial grid. Previously there was no
