@@ -76,6 +76,7 @@ test_that("resample(ClusteredNeuroVol, NeuroVol) forces nearest neighbor interpo
 
 test_that("a volume resamples onto the spatial grid of a 4-D target", {
   skip_on_cran()
+  skip_if_not_installed("RNiftyReg")
   source <- NeuroVol(array(rnorm(8 * 8 * 8), c(8, 8, 8)), NeuroSpace(c(8, 8, 8)))
   grid3 <- NeuroSpace(c(6, 6, 6), spacing = c(1.2, 1.2, 1.2), origin = c(1, 2, 3))
   run <- NeuroVec(array(0, c(6, 6, 6, 4)), add_dim(grid3, 4))
@@ -91,6 +92,7 @@ test_that("a volume resamples onto the spatial grid of a 4-D target", {
 })
 
 test_that("resample(ClusteredNeuroVol, <4-D target>) keeps labels on the spatial grid", {
+  skip_if_not_installed("RNiftyReg")
   sp <- NeuroSpace(c(4, 4, 4))
   mask <- LogicalNeuroVol(array(TRUE, dim = c(4, 4, 4)), sp)
   cvol <- ClusteredNeuroVol(mask, rep(1:2, each = 32),
