@@ -28,9 +28,9 @@
 \usage{
 \S4method{[}{DenseNeuroVec,numeric,numeric,ANY}(x, i, j, k, m, ..., drop = TRUE)
 
-\S4method{[}{DenseNeuroVol,numeric,missing,ANY}(x, i, j, k, ..., drop = TRUE)
+\S4method{[}{DenseNeuroVol,numeric,missing,ANY}(x, i, j, ..., drop = TRUE)
 
-\S4method{[}{DenseNeuroVol,integer,missing,ANY}(x, i, j, k, ..., drop = TRUE)
+\S4method{[}{DenseNeuroVol,integer,missing,ANY}(x, i, j, ..., drop = TRUE)
 
 \S4method{[[}{NeuroVec,numeric}(x, i)
 
