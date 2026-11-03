@@ -97,3 +97,25 @@ test_that("conn_comp respects different connectivity patterns", {
   cc26 <- conn_comp_3D(arr, connect="26-connect")
   expect_equal(max(cc26$index), 1)
 })
+
+test_that("a single connected component is returned without a warning (#59)", {
+  a <- array(FALSE, c(5, 5, 5))
+  a[2:3, 2:3, 2:3] <- TRUE
+  sp <- NeuroSpace(c(5, 5, 5))
+  for (cn in c("6-connect", "18-connect", "26-connect")) {
+    expect_no_warning(cc <- conn_comp(LogicalNeuroVol(a, sp), connect = cn))
+    expect_equal(num_clusters(cc$index), 1L)
+    expect_equal(sort(unique(as.vector(cc$index@data@x))), 1L)
+    expect_equal(sum(as.array(cc$size) > 0), 8L)
+  }
+})
+
+test_that("ClusteredNeuroVol accepts a one-partition clustering silently", {
+  sp <- NeuroSpace(c(4, 4, 4))
+  m <- array(FALSE, c(4, 4, 4))
+  m[1:2, 1:2, 1] <- TRUE
+  mask <- LogicalNeuroVol(m, sp)
+  expect_no_warning(cv <- ClusteredNeuroVol(mask, rep(3L, 4)))
+  expect_equal(num_clusters(cv), 1L)
+  expect_equal(names(cv@label_map), "Clus_3")
+})

@@ -48,9 +48,8 @@ ClusteredNeuroVol <- function(mask, clusters, label_map=NULL, label="") {
 
   stopifnot(length(clusters) == sum(mask))
 
-  if (length(ids) == 1) {
-    warning("clustered volume only contains 1 partition")
-  }
+  # A single partition is a valid clustering (e.g. one supra-threshold blob
+  # from conn_comp()), so it is not warned about.
 
   if (is.null(label_map)) {
     labs <- paste("Clus_", ids, sep="")
