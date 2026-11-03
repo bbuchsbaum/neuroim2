@@ -1,5 +1,25 @@
 # neuroim2 0.19.1.9000
 
+* Signed overlays in `plot_overlay()` and `plot_ortho()` use the host's
+  diverging ramp, `options(neuro.palette.diverging = ...)`, when `ov_cmap` is
+  `NULL`, so statistical maps are drawn in the same ramp as the design-matrix
+  and contrast figures of fmridesign and fmrireg. With the option unset the
+  default stays `"cold_hot"`; an unusable value is reported and ignored
+  (#62).
+* A host ramp of anchors around a neutral middle (5, 7, ... colours, such as
+  `neuro.palette.diverging`) starts at its first anchor past the middle at
+  +/-threshold, rather than at a washed-out tint 30% of the way along. Short
+  colour vectors given as `ov_cmap` are interpolated to a graded ramp rather
+  than drawn in a few flat bands. Named palettes and full palette vectors are
+  unchanged (#62).
+* Slice labels on the tiles of every slice figure sit on a small box of the
+  tile colour, so anatomy reaching the top of a cropped tile no longer runs
+  through them. In `plot_overlay()` the L/R letters are left off the first
+  tile when the key is shown (by default with `style = "report"`), because
+  the key under the tiles already states the convention.
+  `annotate = NULL` (the new default) draws the letters whenever the key is
+  not shown; `annotate = TRUE` forces them (#63).
+
 * `resample()` (and so `resample_to()`) accepts a 4-D target -- a
   `NeuroVec` or a 4-D `NeuroSpace`, e.g. a functional run -- for a volume
   source, resampling onto the target's spatial grid. Previously there was no
