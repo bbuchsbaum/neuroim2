@@ -2,6 +2,19 @@
 
 ## neuroim2 0.19.1.9000
 
+- Slice labels in
+  [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
+  and
+  [`plot_montage()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_montage.md)
+  no longer sit on the anatomy in small tiles. The label has a fixed
+  physical size while the crop margin around the head is proportional to
+  the head, so with many slices in a row, a narrow figure, or an image
+  whose head fills the field of view, the label (and in
+  [`plot_overlay()`](https://bbuchsbaum.github.io/neuroim2/reference/plot_overlay.md)
+  its box) covered the top of the brain. The top of the tiles is now
+  raised by just enough for the label to clear the foreground at the
+  size the figure is drawn; figures whose margin already fits the label
+  are unchanged.
 - New
   [`as_neuro()`](https://bbuchsbaum.github.io/neuroim2/reference/as_neuro.md)
   and
