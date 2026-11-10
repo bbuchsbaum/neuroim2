@@ -345,6 +345,79 @@ with an appropriate tolerance when checking general round trips. An
 affine you construct may also differ from the full-precision numbers you
 passed in.
 
+## Working with other packages
+
+Not every image starts as a file you read yourself. A registration from
+RNiftyReg, a brain extraction from fslr, an image a collaborator’s
+script already holds as an RNifti or oro.nifti object — these are in
+memory, in another package’s class.
+[`as_neuro()`](https://bbuchsbaum.github.io/neuroim2/reference/as_neuro.md)
+brings them in without a detour through disk:
+
+``` r
+
+img <- RNifti::readNifti(anat_file)
+class(img)
+#> [1] "niftiImage" "array"
+
+anat <- as_neuro(img)
+class(anat)[1]
+#> [1] "DenseNeuroVol"
+```
+
+The geometry comes across with the values. RNifti and neuroim2 describe
+the affine the same way — zero-based voxel indices to RAS millimetres —
+so the result is the object
+[`read_vol()`](https://bbuchsbaum.github.io/neuroim2/reference/read_vol.md)
+would have built from the file:
+
+``` r
+
+all.equal(trans(anat), trans(read_vol(anat_file)))
+#> [1] TRUE
+all.equal(as.array(anat), as.array(read_vol(anat_file)))
+#> [1] TRUE
+```
+
+A 3D image becomes a `DenseNeuroVol` and a 4D one a `DenseNeuroVec`. The
+same call takes an oro.nifti `nifti` object, which is what
+[`oro.nifti::readNIfTI()`](https://rdrr.io/pkg/oro.nifti/man/read_nifti.html),
+`neurobase::readnii()` and the fslr commands return.
+
+[`as_nifti()`](https://bbuchsbaum.github.io/neuroim2/reference/as_neuro.md)
+goes the other way, for handing a result to a function that wants an
+RNifti image:
+
+``` r
+
+smoothed <- gaussian_blur(anat, as.mask(anat > 0), sigma = 4)
+
+out_img <- as_nifti(smoothed)
+class(out_img)
+#> [1] "niftiImage" "array"
+RNifti::pixdim(out_img)
+#> [1] 4.02083 4.01754 4.02083
+```
+
+The affine is written to both the sform and the qform, so the two cannot
+disagree in the way “The two affines” described.
+[`RNifti::asNifti()`](https://rdrr.io/pkg/RNifti/man/asNifti.html) works
+on neuroim2 objects too and gives the same result. For an oro.nifti
+object, pass the image on:
+
+``` r
+
+oro_img <- oro.nifti::nii2oro(as_nifti(smoothed))
+```
+
+Two limits are worth knowing. Only values and geometry cross over:
+volume labels, NIfTI extensions and descriptive header fields do not.
+And
+[`as_nifti()`](https://bbuchsbaum.github.io/neuroim2/reference/as_neuro.md)
+marks the affine as scanner-anatomical unless told otherwise — pass
+`xform_code = 4` for an image in MNI space if a downstream tool reads
+the code.
+
 ## AFNI files
 
 AFNI `HEAD`/`BRIK` pairs are read by the same functions — pass the
@@ -367,4 +440,5 @@ names(read_header("subject_anat+orig.HEAD")@header)
   — reading files too big to hold in memory
 - [`?read_vol`](https://bbuchsbaum.github.io/neuroim2/reference/read_vol.md),
   [`?read_header`](https://bbuchsbaum.github.io/neuroim2/reference/read_header.md),
-  [`?write_vol`](https://bbuchsbaum.github.io/neuroim2/reference/write_vol-methods.md)
+  [`?write_vol`](https://bbuchsbaum.github.io/neuroim2/reference/write_vol-methods.md),
+  [`?as_neuro`](https://bbuchsbaum.github.io/neuroim2/reference/as_neuro.md)

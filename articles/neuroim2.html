@@ -132,14 +132,14 @@ origin becomes a position on its grid. The answer is fractional because
 a millimetre coordinate rarely lands on a voxel centre. Going back is
 exact:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/grid_to_coord-methods.html">grid_to_coord</a></span><span class="op">(</span><span class="va">mask</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="va">g</span>, nrow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/grid_to_coord-methods.html">grid_to_coord</a></span><span class="op">(</span><span class="va">mask</span>, <span class="va">g</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      [,1] [,2] [,3]</span></span>
 <span><span class="co">#&gt; [1,]  -34  -28   10</span></span></code></pre></div>
 <p>Keep the fractional position if you are going to interpolate, and
 round it only when you need an integer index — rounding moves you up to
 half a voxel, which here is about 1.8 mm on any one axis:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/grid_to_coord-methods.html">grid_to_coord</a></span><span class="op">(</span><span class="va">mask</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/grid_to_coord-methods.html">grid_to_coord</a></span><span class="op">(</span><span class="va">mask</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      [,1] [,2] [,3]</span></span>
 <span><span class="co">#&gt; [1,]  -35  -28 9.25</span></span></code></pre></div>
 <p>This image is in native scanner space, not a template space, so its

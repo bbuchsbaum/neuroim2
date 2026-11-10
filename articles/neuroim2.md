@@ -94,7 +94,7 @@ exact:
 
 ``` r
 
-grid_to_coord(mask, matrix(g, nrow = 1))
+grid_to_coord(mask, g)
 #>      [,1] [,2] [,3]
 #> [1,]  -34  -28   10
 ```
@@ -105,7 +105,7 @@ voxel, which here is about 1.8 mm on any one axis:
 
 ``` r
 
-grid_to_coord(mask, matrix(round(g), nrow = 1))
+grid_to_coord(mask, round(g))
 #>      [,1] [,2] [,3]
 #> [1,]  -35  -28 9.25
 ```

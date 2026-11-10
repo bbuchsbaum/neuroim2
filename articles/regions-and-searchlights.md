@@ -365,6 +365,19 @@ and its peak sits beside the centre we planted at `(20, 34, 12)`.
 `cc$voxels` holds the coordinates of each one, so a cluster can become
 an ROI immediately.
 
+The table’s `x`, `y` and `z` are grid indices. A report wants
+millimetres, and the coordinate functions take those columns as they
+are:
+
+``` r
+
+top <- cc$cluster_table[which.max(cc$cluster_table$N), ]
+
+grid_to_coord(score_map, top[, c("x", "y", "z")])
+#>      [,1] [,2]  [,3]
+#> [1,] 45.5 -3.5 -9.25
+```
+
 Note that `cc$size` is a *volume*, not a per-cluster vector: every voxel
 holds the size of the cluster it belongs to. Use `cluster_table$N` when
 you want one number per cluster.

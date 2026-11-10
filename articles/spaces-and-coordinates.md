@@ -143,7 +143,7 @@ them.
 
 ``` r
 
-grid_to_index(sp, matrix(c(10, 12, 5), nrow = 1))
+grid_to_index(sp, c(10, 12, 5))
 #> [1] 17098
 index_to_grid(sp, 17098L)
 #>      [,1] [,2] [,3]
@@ -158,14 +158,15 @@ subtracts 1 from the 1-based grid before applying the affine, so voxel
 
 ``` r
 
-grid_to_coord(sp, matrix(c(1, 1, 1), nrow = 1))
+grid_to_coord(sp, c(1, 1, 1))
 #>      [,1] [,2] [,3]
 #> [1,]  -90 -126  -72
 origin(sp)
 #> [1]  -90 -126  -72
 ```
 
-Pass a matrix with one row per point to convert many at once:
+A single point is a plain vector. Pass a matrix with one row per point
+to convert many at once:
 
 ``` r
 
@@ -202,9 +203,50 @@ skip the grid step:
 index_to_coord(sp, 12345L)
 #>      [,1] [,2] [,3]
 #> [1,]   22 -126  -66
-coord_to_index(sp, matrix(c(22, -126, -66), nrow = 1))
+coord_to_index(sp, c(22, -126, -66))
 #> [1] 12345
 ```
+
+### On an image, and from a table
+
+Everything above was called on a `NeuroSpace`, but you rarely hold one
+by itself. Every conversion takes the image instead — a `NeuroVol`, a
+`NeuroVec`, a mask — and uses its space. So the commonest question of
+all, *where is the peak of this map?*, is one line:
+
+``` r
+
+anat <- demo_anatomy()
+
+index_to_coord(anat, which.max(anat))
+#>           [,1]     [,2]      [,3]
+#> [1,] -43.72921 -3.43872 -29.75004
+```
+
+One index gives a one-row matrix, so the result has the same shape
+whether you ask about one voxel or a thousand.
+
+Coordinates often arrive as a table rather than a matrix — peaks copied
+from a paper, or the output of
+[`conn_comp()`](https://bbuchsbaum.github.io/neuroim2/reference/conn_comp-methods.md).
+A data frame with one point per row works wherever a matrix does:
+
+``` r
+
+seeds <- data.frame(x = c(-40, 40, 0), y = c(-24, -24, -52), z = c(52, 52, 28))
+
+coord_to_index(anat, seeds)
+#> [1] 88863 88883 72121
+round(coord_to_grid(anat, seeds))
+#>      [,1] [,2] [,3]
+#> [1,]   15   28   33
+#> [2,]   35   28   33
+#> [3,]   25   21   27
+```
+
+Select the coordinate columns first if the table carries anything else.
+A label or a statistic alongside them is an error, not something quietly
+ignored.
 
 ### A round trip
 
@@ -377,20 +419,24 @@ tolerance appropriate to your voxel sizes.
 
 ## Quick reference
 
-| Function                | Maps              | Typical use                   |
-|:------------------------|:------------------|:------------------------------|
-| `grid_to_index(sp, m)`  | grid to linear    | looking up voxel data         |
-| `index_to_grid(sp, i)`  | linear to grid    | interpreting array subscripts |
-| `grid_to_coord(sp, m)`  | grid to mm        | reporting a location          |
-| `coord_to_grid(sp, m)`  | mm to grid        | atlas and seed lookup         |
-| `index_to_coord(sp, i)` | linear to mm      | shortcut past the grid        |
-| `coord_to_index(sp, m)` | mm to linear      | mask extraction               |
-| `affine_to_axcodes(a)`  | affine to `"RAS"` | orientation check             |
-| `reorient(sp, codes)`   | space to space    | standardise orientation       |
-| `voxel_sizes(a)`        | affine to mm      | physical voxel size           |
-| `obliquity(a)`          | affine to radians | tilt check                    |
-| `add_dim(sp, n)`        | 3D to 4D          | attach a time axis            |
-| `drop_dim(sp)`          | 4D to 3D          | strip a time axis             |
+| Function               | Maps              | Typical use                   |
+|:-----------------------|:------------------|:------------------------------|
+| `grid_to_index(x, m)`  | grid to linear    | looking up voxel data         |
+| `index_to_grid(x, i)`  | linear to grid    | interpreting array subscripts |
+| `grid_to_coord(x, m)`  | grid to mm        | reporting a location          |
+| `coord_to_grid(x, m)`  | mm to grid        | atlas and seed lookup         |
+| `index_to_coord(x, i)` | linear to mm      | shortcut past the grid        |
+| `coord_to_index(x, m)` | mm to linear      | mask extraction               |
+| `affine_to_axcodes(a)` | affine to `"RAS"` | orientation check             |
+| `reorient(sp, codes)`  | space to space    | standardise orientation       |
+| `voxel_sizes(a)`       | affine to mm      | physical voxel size           |
+| `obliquity(a)`         | affine to radians | tilt check                    |
+| `add_dim(sp, n)`       | 3D to 4D          | attach a time axis            |
+| `drop_dim(sp)`         | 4D to 3D          | strip a time axis             |
+
+In the first six rows `x` is a `NeuroSpace` or any image that has one;
+`m` is a vector for one point, or a matrix or data frame with one point
+per row.
 
 ## Where to go next
 

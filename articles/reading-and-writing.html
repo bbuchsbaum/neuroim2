@@ -352,6 +352,58 @@ full-precision numbers you passed in.</p>
 </div>
 </div>
 <div class="section level2">
+<h2 id="working-with-other-packages">Working with other packages<a class="anchor" aria-label="anchor" href="#working-with-other-packages"></a>
+</h2>
+<p>Not every image starts as a file you read yourself. A registration
+from RNiftyReg, a brain extraction from fslr, an image a collaborator’s
+script already holds as an RNifti or oro.nifti object — these are in
+memory, in another package’s class. <code><a href="../reference/as_neuro.html">as_neuro()</a></code> brings them
+in without a detour through disk:</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">img</span> <span class="op">&lt;-</span> <span class="fu">RNifti</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RNifti/man/readNifti.html" class="external-link">readNifti</a></span><span class="op">(</span><span class="va">anat_file</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">img</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "niftiImage" "array"</span></span>
+<span></span>
+<span><span class="va">anat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_neuro.html">as_neuro</a></span><span class="op">(</span><span class="va">img</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">anat</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
+<span><span class="co">#&gt; [1] "DenseNeuroVol"</span></span></code></pre></div>
+<p>The geometry comes across with the values. RNifti and neuroim2
+describe the affine the same way — zero-based voxel indices to RAS
+millimetres — so the result is the object <code><a href="../reference/read_vol.html">read_vol()</a></code> would
+have built from the file:</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/all.equal-methods.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="fu"><a href="../reference/trans-methods.html">trans</a></span><span class="op">(</span><span class="va">anat</span><span class="op">)</span>, <span class="fu"><a href="../reference/trans-methods.html">trans</a></span><span class="op">(</span><span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">anat_file</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/all.equal-methods.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="fu"><a href="../reference/as.array.html">as.array</a></span><span class="op">(</span><span class="va">anat</span><span class="op">)</span>, <span class="fu"><a href="../reference/as.array.html">as.array</a></span><span class="op">(</span><span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="va">anat_file</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
+<p>A 3D image becomes a <code>DenseNeuroVol</code> and a 4D one a
+<code>DenseNeuroVec</code>. The same call takes an oro.nifti
+<code>nifti</code> object, which is what
+<code><a href="https://rdrr.io/pkg/oro.nifti/man/read_nifti.html" class="external-link">oro.nifti::readNIfTI()</a></code>, <code>neurobase::readnii()</code>
+and the fslr commands return.</p>
+<p><code><a href="../reference/as_neuro.html">as_nifti()</a></code> goes the other way, for handing a result to a
+function that wants an RNifti image:</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">smoothed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gaussian_blur.html">gaussian_blur</a></span><span class="op">(</span><span class="va">anat</span>, <span class="fu"><a href="../reference/as.mask.html">as.mask</a></span><span class="op">(</span><span class="va">anat</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span>, sigma <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">out_img</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_neuro.html">as_nifti</a></span><span class="op">(</span><span class="va">smoothed</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">out_img</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "niftiImage" "array"</span></span>
+<span><span class="fu">RNifti</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RNifti/man/pixdim.html" class="external-link">pixdim</a></span><span class="op">(</span><span class="va">out_img</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 4.02083 4.01754 4.02083</span></span></code></pre></div>
+<p>The affine is written to both the sform and the qform, so the two
+cannot disagree in the way “The two affines” described.
+<code><a href="https://rdrr.io/pkg/RNifti/man/asNifti.html" class="external-link">RNifti::asNifti()</a></code> works on neuroim2 objects too and gives
+the same result. For an oro.nifti object, pass the image on:</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">oro_img</span> <span class="op">&lt;-</span> <span class="fu">oro.nifti</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/oro.nifti/man/nii2oro.html" class="external-link">nii2oro</a></span><span class="op">(</span><span class="fu"><a href="../reference/as_neuro.html">as_nifti</a></span><span class="op">(</span><span class="va">smoothed</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Two limits are worth knowing. Only values and geometry cross over:
+volume labels, NIfTI extensions and descriptive header fields do not.
+And <code><a href="../reference/as_neuro.html">as_nifti()</a></code> marks the affine as scanner-anatomical
+unless told otherwise — pass <code>xform_code = 4</code> for an image in
+MNI space if a downstream tool reads the code.</p>
+</div>
+<div class="section level2">
 <h2 id="afni-files">AFNI files<a class="anchor" aria-label="anchor" href="#afni-files"></a>
 </h2>
 <p>AFNI <code>HEAD</code>/<code>BRIK</code> pairs are read by the same
@@ -359,7 +411,7 @@ functions — pass the <code>.HEAD</code> file and the matching
 <code>.BRIK</code> is found beside it. <code><a href="../reference/read_header.html">read_header()</a></code>
 returns an <code>AFNIMetaInfo</code> whose <code>header</code> slot
 holds the AFNI attribute list:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">vol</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_vol.html">read_vol</a></span><span class="op">(</span><span class="st">"subject_anat+orig.HEAD"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="../reference/read_header.html">read_header</a></span><span class="op">(</span><span class="st">"subject_anat+orig.HEAD"</span><span class="op">)</span><span class="op">@</span><span class="va">header</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -375,7 +427,7 @@ you just read means</li>
 in memory</li>
 <li>
 <code><a href="../reference/read_vol.html">?read_vol</a></code>, <code><a href="../reference/read_header.html">?read_header</a></code>,
-<code><a href="../reference/write_vol-methods.html">?write_vol</a></code>
+<code><a href="../reference/write_vol-methods.html">?write_vol</a></code>, <code><a href="../reference/as_neuro.html">?as_neuro</a></code>
 </li>
 </ul>
 </div>

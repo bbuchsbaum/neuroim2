@@ -209,7 +209,7 @@ them.
 <h3 id="grid-and-linear-index">Grid and linear index<a class="anchor" aria-label="anchor" href="#grid-and-linear-index"></a>
 </h3>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/grid_to_index-methods.html">grid_to_index</a></span><span class="op">(</span><span class="va">sp</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">12</span>, <span class="fl">5</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/grid_to_index-methods.html">grid_to_index</a></span><span class="op">(</span><span class="va">sp</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">12</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 17098</span></span>
 <span><span class="fu"><a href="../reference/index_to_grid-methods.html">index_to_grid</a></span><span class="op">(</span><span class="va">sp</span>, <span class="fl">17098L</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      [,1] [,2] [,3]</span></span>
@@ -222,12 +222,13 @@ them.
 applying the affine, so voxel <code>(1, 1, 1)</code> lands exactly on
 the origin:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/grid_to_coord-methods.html">grid_to_coord</a></span><span class="op">(</span><span class="va">sp</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/grid_to_coord-methods.html">grid_to_coord</a></span><span class="op">(</span><span class="va">sp</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      [,1] [,2] [,3]</span></span>
 <span><span class="co">#&gt; [1,]  -90 -126  -72</span></span>
 <span><span class="fu"><a href="../reference/origin-methods.html">origin</a></span><span class="op">(</span><span class="va">sp</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1]  -90 -126  -72</span></span></code></pre></div>
-<p>Pass a matrix with one row per point to convert many at once:</p>
+<p>A single point is a plain vector. Pass a matrix with one row per
+point to convert many at once:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>   <span class="fl">1</span>,  <span class="fl">1</span>,  <span class="fl">1</span>,</span>
@@ -257,15 +258,48 @@ the grid step:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/index_to_coord-methods.html">index_to_coord</a></span><span class="op">(</span><span class="va">sp</span>, <span class="fl">12345L</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      [,1] [,2] [,3]</span></span>
 <span><span class="co">#&gt; [1,]   22 -126  -66</span></span>
-<span><span class="fu"><a href="../reference/coord_to_index-methods.html">coord_to_index</a></span><span class="op">(</span><span class="va">sp</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">22</span>, <span class="op">-</span><span class="fl">126</span>, <span class="op">-</span><span class="fl">66</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/coord_to_index-methods.html">coord_to_index</a></span><span class="op">(</span><span class="va">sp</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">22</span>, <span class="op">-</span><span class="fl">126</span>, <span class="op">-</span><span class="fl">66</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 12345</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="on-an-image-and-from-a-table">On an image, and from a table<a class="anchor" aria-label="anchor" href="#on-an-image-and-from-a-table"></a>
+</h3>
+<p>Everything above was called on a <code>NeuroSpace</code>, but you
+rarely hold one by itself. Every conversion takes the image instead — a
+<code>NeuroVol</code>, a <code>NeuroVec</code>, a mask — and uses its
+space. So the commonest question of all, <em>where is the peak of this
+map?</em>, is one line:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">anat</span> <span class="op">&lt;-</span> <span class="fu">demo_anatomy</span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/index_to_coord-methods.html">index_to_coord</a></span><span class="op">(</span><span class="va">anat</span>, <span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="va">anat</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;           [,1]     [,2]      [,3]</span></span>
+<span><span class="co">#&gt; [1,] -43.72921 -3.43872 -29.75004</span></span></code></pre></div>
+<p>One index gives a one-row matrix, so the result has the same shape
+whether you ask about one voxel or a thousand.</p>
+<p>Coordinates often arrive as a table rather than a matrix — peaks
+copied from a paper, or the output of <code><a href="../reference/conn_comp-methods.html">conn_comp()</a></code>. A data
+frame with one point per row works wherever a matrix does:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">seeds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">40</span>, <span class="fl">40</span>, <span class="fl">0</span><span class="op">)</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">24</span>, <span class="op">-</span><span class="fl">24</span>, <span class="op">-</span><span class="fl">52</span><span class="op">)</span>, z <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">52</span>, <span class="fl">52</span>, <span class="fl">28</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/coord_to_index-methods.html">coord_to_index</a></span><span class="op">(</span><span class="va">anat</span>, <span class="va">seeds</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 88863 88883 72121</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="../reference/coord_to_grid-methods.html">coord_to_grid</a></span><span class="op">(</span><span class="va">anat</span>, <span class="va">seeds</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      [,1] [,2] [,3]</span></span>
+<span><span class="co">#&gt; [1,]   15   28   33</span></span>
+<span><span class="co">#&gt; [2,]   35   28   33</span></span>
+<span><span class="co">#&gt; [3,]   25   21   27</span></span></code></pre></div>
+<p>Select the coordinate columns first if the table carries anything
+else. A label or a statistic alongside them is an error, not something
+quietly ignored.</p>
 </div>
 <div class="section level3">
 <h3 id="a-round-trip">A round trip<a class="anchor" aria-label="anchor" href="#a-round-trip"></a>
 </h3>
 <p>Going out to millimetres and back returns the voxel you started from,
 by either route:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">idx</span> <span class="op">&lt;-</span> <span class="fl">12345L</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/grid_to_index-methods.html">grid_to_index</a></span><span class="op">(</span><span class="va">sp</span>, <span class="fu"><a href="../reference/coord_to_grid-methods.html">coord_to_grid</a></span><span class="op">(</span><span class="va">sp</span>, <span class="fu"><a href="../reference/grid_to_coord-methods.html">grid_to_coord</a></span><span class="op">(</span><span class="va">sp</span>, <span class="fu"><a href="../reference/index_to_grid-methods.html">index_to_grid</a></span><span class="op">(</span><span class="va">sp</span>, <span class="va">idx</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
@@ -302,7 +336,7 @@ the anatomical direction each axis runs <em>towards</em>:</p>
 <p><code>"RAS"</code> means axis 1 runs towards the right, axis 2
 towards the front, axis 3 towards the top — the NIfTI and MNI
 convention. Read it straight from an affine:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/orientation_utils.html">affine_to_axcodes</a></span><span class="op">(</span><span class="fu"><a href="../reference/trans-methods.html">trans</a></span><span class="op">(</span><span class="va">sp</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "R" "A" "S"</span></span>
 <span><span class="fu"><a href="../reference/orientation_utils.html">affine_to_axcodes</a></span><span class="op">(</span><span class="fu"><a href="../reference/trans-methods.html">trans</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span><span class="op">)</span></span>
@@ -313,13 +347,13 @@ comes out mirrored, and it is worth checking with
 <code><a href="../reference/orientation_utils.html">affine_to_axcodes()</a></code> before trusting two images to line
 up.</p>
 <p><code><a href="../reference/reorient-methods.html">reorient()</a></code> rewrites a space to a target orientation:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sp_ras</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reorient-methods.html">reorient</a></span><span class="op">(</span><span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"R"</span>, <span class="st">"A"</span>, <span class="st">"S"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/orientation_utils.html">affine_to_axcodes</a></span><span class="op">(</span><span class="fu"><a href="../reference/trans-methods.html">trans</a></span><span class="op">(</span><span class="va">sp_ras</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "R" "A" "S"</span></span></code></pre></div>
 <p>It is relative to where you started, so asking for the orientation an
 image already has changes nothing:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu"><a href="../reference/trans-methods.html">trans</a></span><span class="op">(</span><span class="fu"><a href="../reference/reorient-methods.html">reorient</a></span><span class="op">(</span><span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"L"</span>, <span class="st">"A"</span>, <span class="st">"S"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="../reference/trans-methods.html">trans</a></span><span class="op">(</span><span class="fu"><a href="../reference/space-methods.html">space</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
 <p>This returns the geometry for a permuted and flipped grid, including
@@ -334,7 +368,7 @@ for examples.</p>
 </h2>
 <p>Scanners often acquire at a slight tilt, which puts off-diagonal
 terms in the affine:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">aff_obl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>   <span class="fl">2.0</span>,  <span class="fl">0.2</span>,  <span class="fl">0.0</span>,  <span class="op">-</span><span class="fl">90</span>,</span>
 <span>   <span class="fl">0.0</span>,  <span class="fl">2.0</span>,  <span class="fl">0.1</span>, <span class="op">-</span><span class="fl">126</span>,</span>
@@ -346,7 +380,7 @@ terms in the affine:</p>
 <p><code><a href="../reference/spacing-methods.html">spacing()</a></code> returns the <strong>column norms</strong> of
 the linear block — the true physical edge lengths — which is why it
 disagrees with the diagonal here:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/spacing-methods.html">spacing</a></span><span class="op">(</span><span class="va">sp_obl</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 2.00000 2.00998 2.00250</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">aff_obl</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span><span class="op">)</span></span>
@@ -354,7 +388,7 @@ disagrees with the diagonal here:</p>
 <p>Always use <code><a href="../reference/spacing-methods.html">spacing()</a></code>, never the diagonal.
 <code><a href="../reference/affine_utils.html">obliquity()</a></code> quantifies the tilt, and
 <code><a href="../reference/affine_utils.html">voxel_sizes()</a></code> computes edge lengths from any affine:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/affine_utils.html">obliquity</a></span><span class="op">(</span><span class="va">aff_obl</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 0.00000000 0.09966865 0.04995840</span></span>
 <span><span class="fu"><a href="../reference/affine_utils.html">obliquity</a></span><span class="op">(</span><span class="fu"><a href="../reference/trans-methods.html">trans</a></span><span class="op">(</span><span class="va">sp</span><span class="op">)</span><span class="op">)</span></span>
@@ -369,7 +403,7 @@ disagrees with the diagonal here:</p>
 <code><a href="../reference/drop_dim-methods.html">drop_dim()</a></code> reverses it. Both leave the spatial affine
 untouched, which is what makes it safe to move between a series and a
 summary volume:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sp_4d</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_dim-methods.html">add_dim</a></span><span class="op">(</span><span class="va">sp</span>, <span class="fl">200L</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">sp_4d</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1]  64  64  40 200</span></span>
@@ -418,32 +452,32 @@ to your voxel sizes.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left"><code>grid_to_index(sp, m)</code></td>
+<td align="left"><code>grid_to_index(x, m)</code></td>
 <td align="left">grid to linear</td>
 <td align="left">looking up voxel data</td>
 </tr>
 <tr class="even">
-<td align="left"><code>index_to_grid(sp, i)</code></td>
+<td align="left"><code>index_to_grid(x, i)</code></td>
 <td align="left">linear to grid</td>
 <td align="left">interpreting array subscripts</td>
 </tr>
 <tr class="odd">
-<td align="left"><code>grid_to_coord(sp, m)</code></td>
+<td align="left"><code>grid_to_coord(x, m)</code></td>
 <td align="left">grid to mm</td>
 <td align="left">reporting a location</td>
 </tr>
 <tr class="even">
-<td align="left"><code>coord_to_grid(sp, m)</code></td>
+<td align="left"><code>coord_to_grid(x, m)</code></td>
 <td align="left">mm to grid</td>
 <td align="left">atlas and seed lookup</td>
 </tr>
 <tr class="odd">
-<td align="left"><code>index_to_coord(sp, i)</code></td>
+<td align="left"><code>index_to_coord(x, i)</code></td>
 <td align="left">linear to mm</td>
 <td align="left">shortcut past the grid</td>
 </tr>
 <tr class="even">
-<td align="left"><code>coord_to_index(sp, m)</code></td>
+<td align="left"><code>coord_to_index(x, m)</code></td>
 <td align="left">mm to linear</td>
 <td align="left">mask extraction</td>
 </tr>
@@ -480,6 +514,9 @@ to your voxel sizes.</p>
 </tr>
 </tbody>
 </table>
+<p>In the first six rows <code>x</code> is a <code>NeuroSpace</code> or
+any image that has one; <code>m</code> is a vector for one point, or a
+matrix or data frame with one point per row.</p>
 </div>
 <div class="section level2">
 <h2 id="where-to-go-next">Where to go next<a class="anchor" aria-label="anchor" href="#where-to-go-next"></a>
