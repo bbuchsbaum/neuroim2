@@ -25,6 +25,9 @@ index_to_grid(x, idx)
 
 # S4 method for class 'NeuroVol,integer'
 index_to_grid(x, idx)
+
+# S4 method for class 'NeuroObj,numeric'
+index_to_grid(x, idx)
 ```
 
 ## Arguments

@@ -10,13 +10,7 @@ index_to_coord(x, idx)
 # S4 method for class 'NeuroSpace,numeric'
 index_to_coord(x, idx)
 
-# S4 method for class 'NeuroSpace,integer'
-index_to_coord(x, idx)
-
-# S4 method for class 'NeuroVol,integer'
-index_to_coord(x, idx)
-
-# S4 method for class 'NeuroVec,integer'
+# S4 method for class 'NeuroObj,numeric'
 index_to_coord(x, idx)
 ```
 
@@ -24,15 +18,17 @@ index_to_coord(x, idx)
 
 - x:
 
-  the object
+  the object: a `NeuroSpace`, or anything that has one, such as a
+  `NeuroVol` or `NeuroVec`
 
 - idx:
 
-  the 1D indices
+  the 1D indices, integer or double
 
 ## Value
 
-A numeric `matrix` of real-world coordinates.
+A numeric `matrix` of real-world coordinates with one row per index,
+including when there is only one.
 
 ## Examples
 
@@ -43,4 +39,11 @@ g <- index_to_coord(bvol, idx)
 idx2 <- coord_to_index(bvol, g)
 all.equal(idx, idx2)
 #> [1] TRUE
+
+# Where, in millimetres, is the largest value of a map?
+vol <- read_vol(system.file("extdata", "mni_downsampled.nii.gz",
+                            package = "neuroim2"))
+index_to_coord(vol, which.max(vol))
+#>           [,1]     [,2]      [,3]
+#> [1,] -43.72921 -3.43872 -29.75004
 ```

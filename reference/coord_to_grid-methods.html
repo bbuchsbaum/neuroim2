@@ -49,6 +49,12 @@
 <span><span class="co"># S4 method for class 'NeuroSpace,numeric'</span></span>
 <span><span class="fu">coord_to_grid</span><span class="op">(</span><span class="va">x</span>, <span class="va">coords</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># S4 method for class 'NeuroObj,ANY'</span></span>
+<span><span class="fu">coord_to_grid</span><span class="op">(</span><span class="va">x</span>, <span class="va">coords</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'NeuroSpace,data.frame'</span></span>
+<span><span class="fu">coord_to_grid</span><span class="op">(</span><span class="va">x</span>, <span class="va">coords</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># S4 method for class 'NeuroVol,matrix'</span></span>
 <span><span class="fu">coord_to_grid</span><span class="op">(</span><span class="va">x</span>, <span class="va">coords</span><span class="op">)</span></span>
 <span></span>
@@ -61,16 +67,19 @@
 
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>the object</p></dd>
+<dd><p>the object: a <code>NeuroSpace</code>, or anything that has one, such
+as a <code>NeuroVol</code> or <code>NeuroVec</code></p></dd>
 
 
 <dt id="arg-coords">coords<a class="anchor" aria-label="anchor" href="#arg-coords"></a></dt>
-<dd><p>a matrix of real world coordinates</p></dd>
+<dd><p>real world coordinates: a matrix or data frame with one
+point per row, or a vector giving a single point</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A numeric <code>matrix</code> of grid coordinates.</p>
+    <p>A numeric <code>matrix</code> of grid coordinates, or a vector when
+  <code>coords</code> is a single point.</p>
     </div>
 
     <div class="section level2">

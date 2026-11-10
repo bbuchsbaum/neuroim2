@@ -15,17 +15,25 @@ coord_to_index(x, coords)
 
 # S4 method for class 'NeuroVol,matrix'
 coord_to_index(x, coords)
+
+# S4 method for class 'NeuroObj,ANY'
+coord_to_index(x, coords)
+
+# S4 method for class 'NeuroSpace,data.frame'
+coord_to_index(x, coords)
 ```
 
 ## Arguments
 
 - x:
 
-  the object
+  the object: a `NeuroSpace`, or anything that has one, such as a
+  `NeuroVol` or `NeuroVec`
 
 - coords:
 
-  a matrix of real world coordinates
+  real world coordinates: a matrix or data frame with one point per row,
+  or a vector giving a single point
 
 ## Value
 

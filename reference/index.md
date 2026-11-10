@@ -632,6 +632,11 @@ Methods for input-output operations
 - [`read_image()`](https://bbuchsbaum.github.io/neuroim2/reference/read_image.md)
   : read_image
 
+- [`as_neuro()`](https://bbuchsbaum.github.io/neuroim2/reference/as_neuro.md)
+  [`as_nifti()`](https://bbuchsbaum.github.io/neuroim2/reference/as_neuro.md)
+  [`asNifti(`*`<NeuroObj>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as_neuro.md)
+  : Convert between neuroim2 objects and RNifti / oro.nifti images
+
 - [`write_elements()`](https://bbuchsbaum.github.io/neuroim2/reference/write_elements-methods.md)
   : Write a sequence of elements from an input source
 
@@ -896,6 +901,11 @@ Miscellaneous methods and functions
 
 - [`as_mmap()`](https://bbuchsbaum.github.io/neuroim2/reference/as_mmap.md)
   : Convert a NeuroVec to a memory-mapped representation
+
+- [`as_neuro()`](https://bbuchsbaum.github.io/neuroim2/reference/as_neuro.md)
+  [`as_nifti()`](https://bbuchsbaum.github.io/neuroim2/reference/as_neuro.md)
+  [`asNifti(`*`<NeuroObj>`*`)`](https://bbuchsbaum.github.io/neuroim2/reference/as_neuro.md)
+  : Convert between neuroim2 objects and RNifti / oro.nifti images
 
 - [`as_nifti_header()`](https://bbuchsbaum.github.io/neuroim2/reference/as_nifti_header.md)
   : Construct a Minimal NIfTI-1 Header from a NeuroVol

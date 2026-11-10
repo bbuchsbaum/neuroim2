@@ -11,13 +11,16 @@ grid_to_coord(x, coords)
 # S4 method for class 'NeuroSpace,matrix'
 grid_to_coord(x, coords)
 
-# S4 method for class 'NeuroSpace,matrix'
-grid_to_coord(x, coords)
-
 # S4 method for class 'NeuroSpace,numeric'
 grid_to_coord(x, coords)
 
 # S4 method for class 'NeuroVol,matrix'
+grid_to_coord(x, coords)
+
+# S4 method for class 'NeuroObj,ANY'
+grid_to_coord(x, coords)
+
+# S4 method for class 'NeuroSpace,data.frame'
 grid_to_coord(x, coords)
 ```
 
@@ -25,15 +28,17 @@ grid_to_coord(x, coords)
 
 - x:
 
-  the object
+  the object: a `NeuroSpace`, or anything that has one, such as a
+  `NeuroVol` or `NeuroVec`
 
 - coords:
 
-  a matrix of grid coordinates
+  grid coordinates: a matrix or data frame with one point per row, or a
+  vector giving a single point
 
 ## Value
 
-A numeric `matrix` of real-world coordinates.
+A numeric `matrix` of real-world coordinates, one row per point.
 
 ## Examples
 

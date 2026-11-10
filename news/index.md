@@ -2,6 +2,54 @@
 
 ## neuroim2 0.19.1.9000
 
+- New
+  [`as_neuro()`](https://bbuchsbaum.github.io/neuroim2/reference/as_neuro.md)
+  and
+  [`as_nifti()`](https://bbuchsbaum.github.io/neuroim2/reference/as_neuro.md)
+  move images between neuroim2 and the rest of the R neuroimaging
+  ecosystem without a round trip through a file.
+  [`as_neuro()`](https://bbuchsbaum.github.io/neuroim2/reference/as_neuro.md)
+  takes an RNifti `niftiImage` (or `internalImage`) or an oro.nifti
+  `nifti` object – so also the output of RNiftyReg, neurobase and fslr –
+  and returns a `DenseNeuroVol` or `DenseNeuroVec` with the image’s
+  affine.
+  [`as_nifti()`](https://bbuchsbaum.github.io/neuroim2/reference/as_neuro.md)
+  returns a `niftiImage` from any volume or vector, writing the affine
+  to both sform and qform.
+  [`RNifti::asNifti()`](https://rdrr.io/pkg/RNifti/man/asNifti.html)
+  dispatches on neuroim2 objects too.
+- The coordinate conversions –
+  [`index_to_coord()`](https://bbuchsbaum.github.io/neuroim2/reference/index_to_coord-methods.md),
+  [`index_to_grid()`](https://bbuchsbaum.github.io/neuroim2/reference/index_to_grid-methods.md),
+  [`coord_to_index()`](https://bbuchsbaum.github.io/neuroim2/reference/coord_to_index-methods.md),
+  [`coord_to_grid()`](https://bbuchsbaum.github.io/neuroim2/reference/coord_to_grid-methods.md),
+  [`grid_to_coord()`](https://bbuchsbaum.github.io/neuroim2/reference/grid_to_coord-methods.md)
+  and
+  [`grid_to_index()`](https://bbuchsbaum.github.io/neuroim2/reference/grid_to_index-methods.md)
+  – now work on any volume or vector, not only on its `NeuroSpace`, and
+  whether the indices or coordinates are stored as integer or double.
+  Previously which calls had a method depended on both:
+  `index_to_coord(vol, 100)` and `coord_to_index(vec, c(0, 0, 0))`
+  failed with “unable to find an inherited method”, and
+  `index_to_coord(vol, 100L)` with “non-conformable arguments”
+  ([\#58](https://github.com/bbuchsbaum/neuroim2/issues/58)).
+- [`index_to_coord()`](https://bbuchsbaum.github.io/neuroim2/reference/index_to_coord-methods.md)
+  accepts a single index and returns a one-row matrix; it failed with
+  “non-conformable arguments” for one double index, as in
+  `index_to_coord(space(vol), 5)`
+  ([\#54](https://github.com/bbuchsbaum/neuroim2/issues/54)).
+- [`coord_to_index()`](https://bbuchsbaum.github.io/neuroim2/reference/coord_to_index-methods.md),
+  [`coord_to_grid()`](https://bbuchsbaum.github.io/neuroim2/reference/coord_to_grid-methods.md),
+  [`grid_to_coord()`](https://bbuchsbaum.github.io/neuroim2/reference/grid_to_coord-methods.md)
+  and
+  [`grid_to_index()`](https://bbuchsbaum.github.io/neuroim2/reference/grid_to_index-methods.md)
+  accept a data frame with one point per row, such as a table of peak
+  coordinates. A matrix with the wrong number of columns is reported as
+  such, with a hint when it looks transposed, rather than as
+  “non-conformable arguments”.
+- [`grid_to_index()`](https://bbuchsbaum.github.io/neuroim2/reference/grid_to_index-methods.md)
+  with a length-3 grid coordinate works on a 4-D space; it failed with
+  “`dimensions` must have length 3, not 4”.
 - `vol[i]` with a single numeric index is now always linear indexing, as
   for base arrays
   ([\#60](https://github.com/bbuchsbaum/neuroim2/issues/60)). On

@@ -25,6 +25,12 @@ grid_to_index(x, coords)
 
 # S4 method for class 'NeuroVol,numeric'
 grid_to_index(x, coords)
+
+# S4 method for class 'NeuroObj,ANY'
+grid_to_index(x, coords)
+
+# S4 method for class 'NeuroSpace,data.frame'
+grid_to_index(x, coords)
 ```
 
 ## Arguments
