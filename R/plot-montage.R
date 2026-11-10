@@ -179,6 +179,16 @@ plot_montage <- function(
     nc <- if (is.null(user_ncol)) auto_ncol(length(facets), tile_aspect, avail_w / avail_h) else user_ncol
     nc <- max(1L, min(as.integer(nc), length(facets)))
     nr <- ceiling(length(facets) / nc)
+    # Raise the top of the tiles when the crop margin is too small for the
+    # slice labels at this size, so they sit above the anatomy, not on it.
+    fg_top <- attr(window, "fg_top")
+    extra <- if (oriented_input && !is.null(fg_top)) {
+      label_headroom(xw, yw, window$ylim[2L] - fg_top, label_size,
+                     w_max = avail_w / nc, h_max = avail_h / nr, boxed = FALSE)
+    } else 0
+    ylim <- c(window$ylim[1L], window$ylim[2L] + extra)
+    lab_df$y <- window$ylim[2L] + extra - pad
+    tile_aspect <- xw / (yw + extra)
     grid_aspect <- nc * tile_aspect / nr
     block_w <- min(avail_w, avail_h * grid_aspect)
     block_h <- block_w / grid_aspect
@@ -220,7 +230,7 @@ plot_montage <- function(
                              inherit.aes = FALSE, vjust = 0.5, fontface = "bold",
                              colour = tokens$tile_fg, size = label_size * 1.1)
       }
-      p <- p + ggplot2::coord_fixed(xlim = window$xlim, ylim = window$ylim, expand = FALSE)
+      p <- p + ggplot2::coord_fixed(xlim = window$xlim, ylim = ylim, expand = FALSE)
     } else {
       p <- p + coord_neuro_fixed()
     }
