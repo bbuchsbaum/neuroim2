@@ -1,5 +1,31 @@
 # neuroim2 0.19.1.9000
 
+* New `as_neuro()` and `as_nifti()` move images between neuroim2 and the
+  rest of the R neuroimaging ecosystem without a round trip through a file.
+  `as_neuro()` takes an RNifti `niftiImage` (or `internalImage`) or an
+  oro.nifti `nifti` object -- so also the output of RNiftyReg, neurobase and
+  fslr -- and returns a `DenseNeuroVol` or `DenseNeuroVec` with the image's
+  affine. `as_nifti()` returns a `niftiImage` from any volume or vector,
+  writing the affine to both sform and qform. `RNifti::asNifti()` dispatches
+  on neuroim2 objects too.
+* The coordinate conversions -- `index_to_coord()`, `index_to_grid()`,
+  `coord_to_index()`, `coord_to_grid()`, `grid_to_coord()` and
+  `grid_to_index()` -- now work on any volume or vector, not only on its
+  `NeuroSpace`, and whether the indices or coordinates are stored as integer
+  or double. Previously which calls had a method depended on both:
+  `index_to_coord(vol, 100)` and `coord_to_index(vec, c(0, 0, 0))` failed with
+  "unable to find an inherited method", and `index_to_coord(vol, 100L)` with
+  "non-conformable arguments" (#58).
+* `index_to_coord()` accepts a single index and returns a one-row matrix; it
+  failed with "non-conformable arguments" for one double index, as in
+  `index_to_coord(space(vol), 5)` (#54).
+* `coord_to_index()`, `coord_to_grid()`, `grid_to_coord()` and
+  `grid_to_index()` accept a data frame with one point per row, such as a
+  table of peak coordinates. A matrix with the wrong number of columns is
+  reported as such, with a hint when it looks transposed, rather than as
+  "non-conformable arguments".
+* `grid_to_index()` with a length-3 grid coordinate works on a 4-D space; it
+  failed with "`dimensions` must have length 3, not 4".
 * `vol[i]` with a single numeric index is now always linear indexing, as for
   base arrays (#60). On `DenseNeuroVol`, an index vector whose values all fell
   within `dim(vol)[1]` used to return whole first-dimension slices instead,

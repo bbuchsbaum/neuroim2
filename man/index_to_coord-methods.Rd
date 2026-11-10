@@ -3,28 +3,24 @@
 \name{index_to_coord}
 \alias{index_to_coord}
 \alias{index_to_coord,NeuroSpace,numeric-method}
-\alias{index_to_coord,NeuroSpace,integer-method}
-\alias{index_to_coord,NeuroVol,integer-method}
-\alias{index_to_coord,NeuroVec,integer-method}
+\alias{index_to_coord,NeuroObj,numeric-method}
 \title{convert 1d indices to n-dimensional real world coordinates}
 \usage{
 index_to_coord(x, idx)
 
 \S4method{index_to_coord}{NeuroSpace,numeric}(x, idx)
 
-\S4method{index_to_coord}{NeuroSpace,integer}(x, idx)
-
-\S4method{index_to_coord}{NeuroVol,integer}(x, idx)
-
-\S4method{index_to_coord}{NeuroVec,integer}(x, idx)
+\S4method{index_to_coord}{NeuroObj,numeric}(x, idx)
 }
 \arguments{
-\item{x}{the object}
+\item{x}{the object: a \code{NeuroSpace}, or anything that has one, such
+as a \code{NeuroVol} or \code{NeuroVec}}
 
-\item{idx}{the 1D indices}
+\item{idx}{the 1D indices, integer or double}
 }
 \value{
-A numeric \code{matrix} of real-world coordinates.
+A numeric \code{matrix} of real-world coordinates with one row
+  per index, including when there is only one.
 }
 \description{
 convert 1d indices to n-dimensional real world coordinates
@@ -35,4 +31,9 @@ idx <- 1:10
 g <- index_to_coord(bvol, idx)
 idx2 <- coord_to_index(bvol, g)
 all.equal(idx, idx2)
+
+# Where, in millimetres, is the largest value of a map?
+vol <- read_vol(system.file("extdata", "mni_downsampled.nii.gz",
+                            package = "neuroim2"))
+index_to_coord(vol, which.max(vol))
 }

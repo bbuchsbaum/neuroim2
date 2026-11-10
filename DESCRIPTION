@@ -50,6 +50,7 @@ Collate:
     'globals.R'
     'header_api.R'
     'index_vol.R'
+    'interop.R'
     'mapped_neurovec.R'
     'meta_info.R'
     'meta_info_api.R'
@@ -117,6 +118,7 @@ Suggests:
     rmarkdown,
     albersdown,
     Gmedian,
+    oro.nifti,
     R.utils,
     spelling,
     systemfonts,

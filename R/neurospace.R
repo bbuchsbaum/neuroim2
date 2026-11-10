@@ -329,33 +329,11 @@ setMethod(f="index_to_coord", signature=signature(x="NeuroSpace", idx="numeric")
             # Grid indices are 1-based; the affine expects 0-based positions,
             # so subtract 1 -- matching grid_to_coord(). Subtracting 0.5 here
             # would place every result half a voxel off that path.
+            #
+            # drop = FALSE throughout: one index is one row, not a vector.
             grid <- index_to_grid(x, idx) - 1
-            res <- trans(x) %*% t(cbind(grid[,1:d], rep(1,nrow(grid))))
-            t(res[1:d,])
-          })
-
-#' @export
-#' @rdname index_to_coord-methods
-setMethod(f="index_to_coord", signature=signature(x="NeuroSpace", idx="integer"),
-          def=function(x, idx) {
-            grid <- index_to_grid(x, idx) - 1
-            res <- trans(x) %*% t(cbind(grid, rep(1,nrow(grid))))
-            t(res[1:ndim(x),])
-          })
-
-#' @export
-#' @rdname index_to_coord-methods
-setMethod(f="index_to_coord", signature=signature(x="NeuroVol", idx="integer"),
-          def=function(x, idx) {
-            callGeneric(space(x), as.numeric(idx))
-          })
-
-
-#' @export
-#' @rdname index_to_coord-methods
-setMethod(f="index_to_coord", signature=signature(x="NeuroVec", idx="integer"),
-          def=function(x, idx) {
-            callGeneric(space(x), as.numeric(idx))
+            res <- trans(x) %*% t(cbind(grid[, 1:d, drop=FALSE], rep(1, nrow(grid))))
+            t(res[1:d, , drop=FALSE])
           })
 
 
@@ -373,6 +351,7 @@ setMethod(f="coord_to_index", signature=signature(x="NeuroSpace", coords="matrix
             # below. A world coordinate names the nearest voxel centre, so
             # round-to-nearest is also the right semantics for points that do
             # not land on a centre at all.
+            .check_coord_cols(coords, x)
             grid = t(inverse_trans(x) %*% t(cbind(coords, rep(1, nrow(coords)))))
             grid_to_index(x, round(grid[,1:3, drop=FALSE] + 1))
           })
@@ -392,6 +371,7 @@ setMethod(f="coord_to_index", signature=signature(x="NeuroSpace", coords="numeri
 #' @rdname coord_to_grid-methods
 setMethod(f="coord_to_grid", signature=signature(x="NeuroSpace", coords="matrix"),
           def=function(x, coords) {
+            .check_coord_cols(coords, x)
             grid = t(inverse_trans(x) %*% t(cbind(coords, rep(1, nrow(coords)))))
             grid[,1:3] + 1
           })
@@ -459,22 +439,13 @@ setMethod(f="grid_to_grid", signature=signature(x="matrix", vox="matrix"),
 #' @rdname grid_to_coord-methods
 setMethod(f="grid_to_coord", signature=signature(x="NeuroSpace", coords="matrix"),
           def=function(x, coords) {
+            .check_coord_cols(coords, x)
             input <- t(cbind(coords-1, rep(1, nrow(coords))))
             ret <- t(trans(x) %*% input)
             md <- min(ndim(x), 3)
             ret[,1:md,drop=FALSE]
           })
 
-
-#' @export
-#' @rdname grid_to_coord-methods
-setMethod(f="grid_to_coord", signature=signature(x="NeuroSpace", coords="matrix"),
-          def=function(x, coords) {
-            input <- t(cbind(coords-1, rep(1, nrow(coords))))
-            ret <- t(trans(x) %*% input)
-            md <- min(ndim(x), 3)
-            ret[,1:md,drop=FALSE]
-          })
 
 #' @export
 #' @rdname grid_to_coord-methods
@@ -538,7 +509,7 @@ setMethod(f="grid_to_index", signature=signature(x="NeuroSpace", coords="numeric
 		    if (length(coords) != 3) {
 		      cli::cli_abort("{.arg coords} must have length 3 for a 3D space, not {length(coords)}.")
 		    }
-			  .gridToIndex3D(dim(x), matrix(coords, nrow=1, byrow=TRUE))
+			  .gridToIndex3D(dx[1:3], matrix(coords, nrow=1, byrow=TRUE))
 		  }
 		}
 )
@@ -682,6 +653,100 @@ setMethod(f="origin", signature=signature(x = "NeuroVec"), def=function(x) space
 #' @export
 #' @rdname axes-methods
 setMethod(f="axes", signature=signature(x = "NeuroSpace"), def=function(x) x@axes)
+
+
+# ---------------------------------------------------------------------------
+# Coordinate conversion on anything that has a space
+#
+# The conversions are defined on NeuroSpace. A volume, vector or slice converts
+# through its space, whatever the storage type of the second argument: without
+# these, index_to_coord(vol, 100) and coord_to_index(vec, c(0, 0, 0)) had no
+# method, and which calls worked depended on integer-versus-double.
+# Methods written for a particular class (e.g. IndexLookupVol) are more
+# specific and still win.
+# ---------------------------------------------------------------------------
+
+#' @export
+#' @rdname index_to_coord-methods
+setMethod(f="index_to_coord", signature=signature(x="NeuroObj", idx="numeric"),
+          def=function(x, idx) index_to_coord(space(x), idx))
+
+#' @export
+#' @rdname index_to_grid-methods
+setMethod(f="index_to_grid", signature=signature(x="NeuroObj", idx="numeric"),
+          def=function(x, idx) index_to_grid(space(x), idx))
+
+#' @export
+#' @rdname coord_to_grid-methods
+setMethod(f="coord_to_grid", signature=signature(x="NeuroObj", coords="ANY"),
+          def=function(x, coords) coord_to_grid(space(x), coords))
+
+#' @export
+#' @rdname coord_to_index-methods
+setMethod(f="coord_to_index", signature=signature(x="NeuroObj", coords="ANY"),
+          def=function(x, coords) coord_to_index(space(x), coords))
+
+#' @export
+#' @rdname grid_to_coord-methods
+setMethod(f="grid_to_coord", signature=signature(x="NeuroObj", coords="ANY"),
+          def=function(x, coords) grid_to_coord(space(x), coords))
+
+#' @export
+#' @rdname grid_to_index-methods
+setMethod(f="grid_to_index", signature=signature(x="NeuroObj", coords="ANY"),
+          def=function(x, coords) grid_to_index(space(x), coords))
+
+
+# A table of coordinates -- the peaks of conn_comp(), a data frame of MNI
+# coordinates read from a paper -- is one point per row, like a matrix.
+
+#' @export
+#' @rdname coord_to_grid-methods
+setMethod(f="coord_to_grid", signature=signature(x="NeuroSpace", coords="data.frame"),
+          def=function(x, coords) coord_to_grid(x, .coord_table(coords)))
+
+#' @export
+#' @rdname coord_to_index-methods
+setMethod(f="coord_to_index", signature=signature(x="NeuroSpace", coords="data.frame"),
+          def=function(x, coords) coord_to_index(x, .coord_table(coords)))
+
+#' @export
+#' @rdname grid_to_coord-methods
+setMethod(f="grid_to_coord", signature=signature(x="NeuroSpace", coords="data.frame"),
+          def=function(x, coords) grid_to_coord(x, .coord_table(coords)))
+
+#' @export
+#' @rdname grid_to_index-methods
+setMethod(f="grid_to_index", signature=signature(x="NeuroSpace", coords="data.frame"),
+          def=function(x, coords) grid_to_index(x, .coord_table(coords)))
+
+#' @keywords internal
+#' @noRd
+.coord_table <- function(coords) {
+  if (!all(vapply(coords, is.numeric, logical(1)))) {
+    cli::cli_abort(c(
+      "A data frame of coordinates must have only numeric columns.",
+      "i" = "Select the coordinate columns first, e.g. {.code df[, c(\"x\", \"y\", \"z\")]}."
+    ))
+  }
+  unname(as.matrix(coords))
+}
+
+# Check that points given as rows have one column per spatial axis, so that a
+# transposed or 2-column matrix is named as such rather than surfacing as
+# "non-conformable arguments" from the affine product.
+#' @keywords internal
+#' @noRd
+.check_coord_cols <- function(coords, x, arg = "coords") {
+  d <- min(ndim(x), 3L)
+  if (ncol(coords) != d) {
+    cli::cli_abort(c(
+      "{.arg {arg}} must have {d} columns, one row per point; it has {ncol(coords)}.",
+      "i" = if (nrow(coords) == d) "It has {d} rows: did you mean {.code t({arg})}?"
+    ))
+  }
+  invisible(coords)
+}
 
 
 #' @export

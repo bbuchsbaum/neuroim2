@@ -923,9 +923,11 @@ setGeneric(name="index_to_grid",   def=function(x, idx) standardGeneric("index_t
 
 #' convert 1d indices to n-dimensional real world coordinates
 #'
-#' @param x the object
-#' @param idx the 1D indices
-#' @return A numeric \code{matrix} of real-world coordinates.
+#' @param x the object: a \code{NeuroSpace}, or anything that has one, such
+#'   as a \code{NeuroVol} or \code{NeuroVec}
+#' @param idx the 1D indices, integer or double
+#' @return A numeric \code{matrix} of real-world coordinates with one row
+#'   per index, including when there is only one.
 #' @export
 #' @examples
 #' bvol <- NeuroVol(array(0, c(10,10,10)), NeuroSpace(c(10,10,10), c(1,1,1)))
@@ -933,13 +935,20 @@ setGeneric(name="index_to_grid",   def=function(x, idx) standardGeneric("index_t
 #' g <- index_to_coord(bvol, idx)
 #' idx2 <- coord_to_index(bvol, g)
 #' all.equal(idx, idx2)
+#'
+#' # Where, in millimetres, is the largest value of a map?
+#' vol <- read_vol(system.file("extdata", "mni_downsampled.nii.gz",
+#'                             package = "neuroim2"))
+#' index_to_coord(vol, which.max(vol))
 #' @rdname index_to_coord-methods
 setGeneric(name="index_to_coord",   def=function(x, idx) standardGeneric("index_to_coord"))
 
 #' convert n-dimensional real world coordinates to 1D indices
 #'
-#' @param x the object
-#' @param coords a matrix of real world coordinates
+#' @param x the object: a \code{NeuroSpace}, or anything that has one, such
+#'   as a \code{NeuroVol} or \code{NeuroVec}
+#' @param coords real world coordinates: a matrix or data frame with one
+#'   point per row, or a vector giving a single point
 #' @return An integer \code{vector} of 1D indices corresponding to \code{coords}.
 #' @export
 #' @examples
@@ -953,9 +962,12 @@ setGeneric(name="coord_to_index",   def=function(x, coords) standardGeneric("coo
 
 #' convert n-dimensional real world coordinates to grid coordinates
 #'
-#' @param x the object
-#' @param coords a matrix of real world coordinates
-#' @return A numeric \code{matrix} of grid coordinates.
+#' @param x the object: a \code{NeuroSpace}, or anything that has one, such
+#'   as a \code{NeuroVol} or \code{NeuroVec}
+#' @param coords real world coordinates: a matrix or data frame with one
+#'   point per row, or a vector giving a single point
+#' @return A numeric \code{matrix} of grid coordinates, or a vector when
+#'   \code{coords} is a single point.
 #' @export
 #' @examples
 #' # Create a simple 3D volume
@@ -969,9 +981,12 @@ setGeneric(name="coord_to_grid",   def=function(x, coords) standardGeneric("coor
 
 #' Generic function to convert N-dimensional grid coordinates to real world coordinates
 #'
-#' @param x the object
-#' @param coords a matrix of grid coordinates
-#' @return A numeric \code{matrix} of real-world coordinates.
+#' @param x the object: a \code{NeuroSpace}, or anything that has one, such
+#'   as a \code{NeuroVol} or \code{NeuroVec}
+#' @param coords grid coordinates: a matrix or data frame with one point per
+#'   row, or a vector giving a single point
+#' @return A numeric \code{matrix} of real-world coordinates, one row per
+#'   point.
 #' @export
 #' @examples
 #' # Create a simple 3D volume
@@ -1006,7 +1021,8 @@ setGeneric(name="grid_to_grid",   def=function(x, vox) standardGeneric("grid_to_
 
 #' Generic function to convert N-dimensional grid coordinates to 1D indices
 #' @param x the object, typically a \code{NeuroVol} or \code{NeuroSpace} instance.
-#' @param coords a matrix where each row is a coordinate or a vector of length equal to \code{ndim(x)}
+#' @param coords a matrix or data frame where each row is a coordinate, or a
+#'   vector giving a single coordinate
 #' @return An integer \code{vector} of 1D indices corresponding to \code{coords}.
 #' @export
 #' @examples

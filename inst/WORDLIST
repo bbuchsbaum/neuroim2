@@ -190,6 +190,7 @@ fallbacks
 filebacked
 flavours
 framewise
+fslr
 ggplot
 ggplots
 globals
@@ -232,6 +233,7 @@ neighbourhoods
 neighbouring
 neighbours
 neuroanatomical
+neurobase
 neuroim
 neuroimaging
 ni
@@ -248,6 +250,7 @@ nvoxels
 octants
 optimisations
 ornt
+oro
 parcellated
 parcellation
 parcellations
@@ -274,6 +277,7 @@ renormalized
 representable
 reweighting
 rewrapping
+RNiftyReg
 roi
 roxygen
 sagittal
