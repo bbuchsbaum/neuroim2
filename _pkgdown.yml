@@ -279,6 +279,7 @@ reference:
   - read_vec
   - read_vol
   - read_image
+  - as_neuro
   - write_elements
   - write_vec
   - write_vol

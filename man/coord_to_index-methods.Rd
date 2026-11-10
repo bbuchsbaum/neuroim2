@@ -5,6 +5,8 @@
 \alias{coord_to_index,NeuroSpace,matrix-method}
 \alias{coord_to_index,NeuroSpace,numeric-method}
 \alias{coord_to_index,NeuroVol,matrix-method}
+\alias{coord_to_index,NeuroObj,ANY-method}
+\alias{coord_to_index,NeuroSpace,data.frame-method}
 \title{convert n-dimensional real world coordinates to 1D indices}
 \usage{
 coord_to_index(x, coords)
@@ -14,11 +16,17 @@ coord_to_index(x, coords)
 \S4method{coord_to_index}{NeuroSpace,numeric}(x, coords)
 
 \S4method{coord_to_index}{NeuroVol,matrix}(x, coords)
+
+\S4method{coord_to_index}{NeuroObj,ANY}(x, coords)
+
+\S4method{coord_to_index}{NeuroSpace,data.frame}(x, coords)
 }
 \arguments{
-\item{x}{the object}
+\item{x}{the object: a \code{NeuroSpace}, or anything that has one, such
+as a \code{NeuroVol} or \code{NeuroVec}}
 
-\item{coords}{a matrix of real world coordinates}
+\item{coords}{real world coordinates: a matrix or data frame with one
+point per row, or a vector giving a single point}
 }
 \value{
 An integer \code{vector} of 1D indices corresponding to \code{coords}.

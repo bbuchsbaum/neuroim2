@@ -5,25 +5,32 @@
 \alias{grid_to_coord,NeuroSpace,matrix-method}
 \alias{grid_to_coord,NeuroSpace,numeric-method}
 \alias{grid_to_coord,NeuroVol,matrix-method}
+\alias{grid_to_coord,NeuroObj,ANY-method}
+\alias{grid_to_coord,NeuroSpace,data.frame-method}
 \title{Generic function to convert N-dimensional grid coordinates to real world coordinates}
 \usage{
 grid_to_coord(x, coords)
 
 \S4method{grid_to_coord}{NeuroSpace,matrix}(x, coords)
 
-\S4method{grid_to_coord}{NeuroSpace,matrix}(x, coords)
-
 \S4method{grid_to_coord}{NeuroSpace,numeric}(x, coords)
 
 \S4method{grid_to_coord}{NeuroVol,matrix}(x, coords)
+
+\S4method{grid_to_coord}{NeuroObj,ANY}(x, coords)
+
+\S4method{grid_to_coord}{NeuroSpace,data.frame}(x, coords)
 }
 \arguments{
-\item{x}{the object}
+\item{x}{the object: a \code{NeuroSpace}, or anything that has one, such
+as a \code{NeuroVol} or \code{NeuroVec}}
 
-\item{coords}{a matrix of grid coordinates}
+\item{coords}{grid coordinates: a matrix or data frame with one point per
+row, or a vector giving a single point}
 }
 \value{
-A numeric \code{matrix} of real-world coordinates.
+A numeric \code{matrix} of real-world coordinates, one row per
+  point.
 }
 \description{
 Generic function to convert N-dimensional grid coordinates to real world coordinates

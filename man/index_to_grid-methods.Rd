@@ -8,6 +8,7 @@
 \alias{index_to_grid,NeuroVec,integer-method}
 \alias{index_to_grid,NeuroVol,index-method}
 \alias{index_to_grid,NeuroVol,integer-method}
+\alias{index_to_grid,NeuroObj,numeric-method}
 \title{Convert 1d indices to n-dimensional grid coordinates}
 \usage{
 index_to_grid(x, idx)
@@ -23,6 +24,8 @@ index_to_grid(x, idx)
 \S4method{index_to_grid}{NeuroVol,index}(x, idx)
 
 \S4method{index_to_grid}{NeuroVol,integer}(x, idx)
+
+\S4method{index_to_grid}{NeuroObj,numeric}(x, idx)
 }
 \arguments{
 \item{x}{A \code{NeuroSlice} object}

@@ -8,6 +8,8 @@
 \alias{grid_to_index,NeuroSpace,numeric-method}
 \alias{grid_to_index,NeuroVol,matrix-method}
 \alias{grid_to_index,NeuroVol,numeric-method}
+\alias{grid_to_index,NeuroObj,ANY-method}
+\alias{grid_to_index,NeuroSpace,data.frame-method}
 \title{Generic function to convert N-dimensional grid coordinates to 1D indices}
 \usage{
 grid_to_index(x, coords)
@@ -23,6 +25,10 @@ grid_to_index(x, coords)
 \S4method{grid_to_index}{NeuroVol,matrix}(x, coords)
 
 \S4method{grid_to_index}{NeuroVol,numeric}(x, coords)
+
+\S4method{grid_to_index}{NeuroObj,ANY}(x, coords)
+
+\S4method{grid_to_index}{NeuroSpace,data.frame}(x, coords)
 }
 \arguments{
 \item{x}{A \code{NeuroSlice} object}

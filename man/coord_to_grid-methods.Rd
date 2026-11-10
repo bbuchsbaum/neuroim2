@@ -4,6 +4,8 @@
 \alias{coord_to_grid}
 \alias{coord_to_grid,NeuroSpace,matrix-method}
 \alias{coord_to_grid,NeuroSpace,numeric-method}
+\alias{coord_to_grid,NeuroObj,ANY-method}
+\alias{coord_to_grid,NeuroSpace,data.frame-method}
 \alias{coord_to_grid,NeuroVol,matrix-method}
 \alias{coord_to_grid,NeuroVol,numeric-method}
 \title{convert n-dimensional real world coordinates to grid coordinates}
@@ -14,17 +16,24 @@ coord_to_grid(x, coords)
 
 \S4method{coord_to_grid}{NeuroSpace,numeric}(x, coords)
 
+\S4method{coord_to_grid}{NeuroObj,ANY}(x, coords)
+
+\S4method{coord_to_grid}{NeuroSpace,data.frame}(x, coords)
+
 \S4method{coord_to_grid}{NeuroVol,matrix}(x, coords)
 
 \S4method{coord_to_grid}{NeuroVol,numeric}(x, coords)
 }
 \arguments{
-\item{x}{the object}
+\item{x}{the object: a \code{NeuroSpace}, or anything that has one, such
+as a \code{NeuroVol} or \code{NeuroVec}}
 
-\item{coords}{a matrix of real world coordinates}
+\item{coords}{real world coordinates: a matrix or data frame with one
+point per row, or a vector giving a single point}
 }
 \value{
-A numeric \code{matrix} of grid coordinates.
+A numeric \code{matrix} of grid coordinates, or a vector when
+  \code{coords} is a single point.
 }
 \description{
 convert n-dimensional real world coordinates to grid coordinates
