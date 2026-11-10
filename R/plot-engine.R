@@ -670,10 +670,11 @@ foreground_crop_window <- function(bgvol, zlevels, along, extra = list(),
     bg_thresh <- foreground_threshold(vals)
   }
   if (!is.finite(bg_thresh)) return(NULL)
-  xs <- NULL; ys <- NULL; ext_x <- NULL; ext_y <- NULL
+  xs <- NULL; ys <- NULL; ext_x <- NULL; ext_y <- NULL; half_y <- 0
   add <- function(o, keep) {
     ext_x <<- range(c(ext_x, raster_extent_from_centers(o$x)))
     ext_y <<- range(c(ext_y, raster_extent_from_centers(o$y)))
+    if (length(o$y) > 1L) half_y <<- abs(o$y[2L] - o$y[1L]) / 2
     if (!length(keep)) return(invisible())
     nx <- length(o$x)
     xi <- ((keep - 1L) %% nx) + 1L
@@ -693,8 +694,85 @@ foreground_crop_window <- function(bgvol, zlevels, along, extra = list(),
   }
   if (length(xs) < 2L || length(ys) < 2L || diff(xs) == 0 || diff(ys) == 0) return(NULL)
   pad <- max(diff(xs), diff(ys)) * margin
-  list(xlim = c(max(xs[1] - pad, ext_x[1]), min(xs[2] + pad, ext_x[2])),
-       ylim = c(max(ys[1] - pad, ext_y[1]), min(ys[2] + pad, ext_y[2])))
+  win <- list(xlim = c(max(xs[1] - pad, ext_x[1]), min(xs[2] + pad, ext_x[2])),
+              ylim = c(max(ys[1] - pad, ext_y[1]), min(ys[2] + pad, ext_y[2])))
+  # Top edge of the foreground (voxel edge, not centre): what a slice label in
+  # the top of the tile has to clear. See label_headroom().
+  attr(win, "fg_top") <- ys[2] + half_y
+  win
+}
+
+#' Room to add above a tile so its slice label clears the anatomy
+#'
+#' The label sits in the top-left corner of the tile. A tile is cropped to the
+#' head with a margin that is a fraction of the head, while the label has a
+#' fixed physical size, so on a small tile -- many slices in a row, a narrow
+#' figure, or an image whose head fills the field of view so the margin is
+#' clipped -- the label is taller than the margin and lands on tissue. This
+#' returns how far (in data units) the top of the window must be raised for
+#' the label to sit wholly above the foreground, which is zero whenever the
+#' existing margin already does the job.
+#'
+#' The answer depends on the physical size of the tile, which depends on the
+#' window's aspect, which this changes; \code{w_max} and \code{h_max} are the
+#' largest width and height (inches) a tile may take, and the two cases --
+#' tile limited by width, tile limited by height -- are solved in turn.
+#'
+#' @param xw,yw Width and height of the window, data units.
+#' @param room Distance from the top of the foreground to the top of the
+#'   window, data units.
+#' @param label_size ggplot2 text size of the label as drawn.
+#' @param w_max,h_max Largest tile width and height, inches.
+#' @param boxed Whether the label is drawn on a box (\code{boxed_text()}).
+#' @return Extra height, data units (>= 0).
+#' @keywords internal
+#' @noRd
+label_headroom <- function(xw, yw, room, label_size, w_max, h_max, boxed = TRUE) {
+  if (!is.numeric(room) || length(room) != 1L || !is.finite(room)) return(0)
+  if (!all(is.finite(c(xw, yw, w_max, h_max))) || min(xw, yw, w_max, h_max) <= 0) return(0)
+  inset <- 0.035 * max(xw, yw)                  # as placed by add_tile_text()
+  # One line of text, the box padding (1.6 pt a side) and a hair of clearance.
+  label_in <- (label_size * ggplot2::.pt + (if (boxed) 3.2 else 0) + 1.5) / 72
+  extra_at <- function(in_per_unit) max(0, inset + label_in / in_per_unit - room)
+
+  # Width-limited: the scale is fixed by the tile width.
+  ipu <- w_max / xw
+  e <- extra_at(ipu)
+  if ((yw + e) * ipu <= h_max) return(e)
+  # Height-limited: (yw + e) * ipu = h_max with e = inset + label_in / ipu - room.
+  denom <- yw + inset - room
+  if (denom > 0 && h_max > label_in) {
+    ipu <- (h_max - label_in) / denom
+    e <- extra_at(ipu)
+    if (e > 0) return(e)
+  }
+  0
+}
+
+#' Raise the top of a tile, taking its slice label up with it
+#'
+#' The original tile is left untouched: tiles are reused when a figure is
+#' re-fitted to another canvas.
+#' @keywords internal
+#' @noRd
+raise_tile_top <- function(p, extra) {
+  if (!is.finite(extra) || extra <= 0) return(p)
+  lim <- p$coordinates$limits
+  if (is.null(lim$y)) return(p)
+  # ggproto() takes its parent lazily: name it first, or the new coord would
+  # be its own parent once assigned back into `p`.
+  parent <- p$coordinates
+  p$coordinates <- ggplot2::ggproto(NULL, parent,
+                                    limits = list(x = lim$x, y = c(lim$y[1L], lim$y[2L] + extra)))
+  p$layers <- lapply(p$layers, function(l) {
+    if (!inherits(l$geom, "GeomLabel") || is.null(l$data$y)) return(l)
+    l2 <- ggplot2::ggproto(NULL, l)
+    d <- l$data
+    d$y <- d$y + extra
+    l2$data <- d
+    l2
+  })
+  p
 }
 
 #' Gapped crosshair that stops short of the tile edges
@@ -927,7 +1005,8 @@ overlay_key <- function(thresh, diverging, quantity, tokens, plane = "Axial") {
 #' @noRd
 neuro_assemble <- function(plots, ncol = NULL, tile_aspect = 1, colorbar = NULL,
                            key = NULL, tokens, title = NULL, subtitle = NULL,
-                           caption = NULL, widths = NULL, canvas = NULL) {
+                           caption = NULL, widths = NULL, canvas = NULL,
+                           label_room = NULL) {
   n <- length(plots)
   if (!is.null(ncol)) {
     ok <- is.numeric(ncol) && length(ncol) == 1L && is.finite(ncol) &&
@@ -958,14 +1037,29 @@ neuro_assemble <- function(plots, ncol = NULL, tile_aspect = 1, colorbar = NULL,
   }
   block_w <- min(avail_w, avail_h * grid_aspect)
   block_h <- block_w / grid_aspect
-  spare_w <- max(avail_w - block_w, 0)
-  spare_h <- max(avail_h - block_h, 0)
 
   # Scale in-tile text (slice labels, orientation letters) with the tile
   # height, so small figures (a 3.5 in journal column) stay legible.
   tile_h <- block_h / nrow
   k <- min(1, max(0.8, tile_h / 2.6))
   if (k < 0.999) plots <- lapply(plots, scale_tile_text, k = k)
+
+  # Give the slice labels a clear strip above the anatomy when the crop
+  # margin is too small for them at this size (see label_headroom()).
+  lim <- plots[[1L]]$coordinates$limits
+  if (!is.null(label_room) && is.null(widths) && !is.null(lim$x) && !is.null(lim$y)) {
+    xw <- diff(lim$x); yw <- diff(lim$y)
+    extra <- label_headroom(xw, yw, label_room$room, label_room$label_size * k,
+                            w_max = avail_w / ncol, h_max = avail_h / nrow)
+    if (extra > 0) {
+      plots <- lapply(plots, raise_tile_top, extra = extra)
+      grid_aspect <- ncol * (xw / (yw + extra)) / nrow
+      block_w <- min(avail_w, avail_h * grid_aspect)
+      block_h <- block_w / grid_aspect
+    }
+  }
+  spare_w <- max(avail_w - block_w, 0)
+  spare_h <- max(avail_h - block_h, 0)
   grid_block <- patchwork::wrap_plots(plots, ncol = ncol, nrow = nrow, widths = widths)
 
   # Main row: tiles plus the colorbar immediately to their right.

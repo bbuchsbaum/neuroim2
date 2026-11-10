@@ -233,10 +233,15 @@ plot_overlay <- function(
   key <- if (isTRUE(show_legend)) {
     overlay_key(ov_thresh, scale$diverging, cbar_title, tokens, plane = first$plane)
   }
+  # How much room the crop left above the anatomy, for the slice labels.
+  fg_top <- attr(crop_win, "fg_top")
+  label_room <- if (!is.null(fg_top)) {
+    list(room = crop_win$ylim[2L] - fg_top, label_size = label_size)
+  }
   build <- function(cv) neuro_assemble(plots, ncol = ncol, tile_aspect = tile_aspect_of(crop_win, first),
                         colorbar = cbar, key = key, tokens = tokens,
                         title = title, subtitle = subtitle, caption = caption,
-                        canvas = cv)
+                        canvas = cv, label_room = label_room)
   cv0 <- canvas_size(canvas)
   fig <- build(cv0)
   # Record the resolved soft-alpha curve on either return form (before the
