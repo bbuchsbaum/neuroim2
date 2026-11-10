@@ -112,7 +112,7 @@ becomes a position on its grid. The answer is fractional because a millimetre
 coordinate rarely lands on a voxel centre. Going back is exact:
 
 ```{r coord-back}
-grid_to_coord(mask, matrix(g, nrow = 1))
+grid_to_coord(mask, g)
 ```
 
 Keep the fractional position if you are going to interpolate, and round it only
@@ -120,7 +120,7 @@ when you need an integer index — rounding moves you up to half a voxel, which
 here is about 1.8 mm on any one axis:
 
 ```{r coord-round}
-grid_to_coord(mask, matrix(round(g), nrow = 1))
+grid_to_coord(mask, round(g))
 ```
 
 This image is in native scanner space, not a template space, so its origin is

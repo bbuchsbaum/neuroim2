@@ -294,6 +294,61 @@ the full-precision numbers you passed in.
 unlink(c(out_nii, out_gz, out_byte, out_vec))
 ```
 
+## Working with other packages
+
+Not every image starts as a file you read yourself. A registration from
+RNiftyReg, a brain extraction from fslr, an image a collaborator's script
+already holds as an RNifti or oro.nifti object — these are in memory, in
+another package's class. `as_neuro()` brings them in without a detour through
+disk:
+
+```{r from-rnifti}
+img <- RNifti::readNifti(anat_file)
+class(img)
+
+anat <- as_neuro(img)
+class(anat)[1]
+```
+
+The geometry comes across with the values. RNifti and neuroim2 describe the
+affine the same way — zero-based voxel indices to RAS millimetres — so the
+result is the object `read_vol()` would have built from the file:
+
+```{r from-rnifti-check}
+all.equal(trans(anat), trans(read_vol(anat_file)))
+all.equal(as.array(anat), as.array(read_vol(anat_file)))
+```
+
+A 3D image becomes a `DenseNeuroVol` and a 4D one a `DenseNeuroVec`. The same
+call takes an oro.nifti `nifti` object, which is what `oro.nifti::readNIfTI()`,
+`neurobase::readnii()` and the fslr commands return.
+
+`as_nifti()` goes the other way, for handing a result to a function that wants
+an RNifti image:
+
+```{r to-rnifti}
+smoothed <- gaussian_blur(anat, as.mask(anat > 0), sigma = 4)
+
+out_img <- as_nifti(smoothed)
+class(out_img)
+RNifti::pixdim(out_img)
+```
+
+The affine is written to both the sform and the qform, so the two cannot
+disagree in the way "The two affines" described. `RNifti::asNifti()` works
+on neuroim2 objects too and gives the same result. For an oro.nifti object,
+pass the image on:
+
+```{r to-oro, eval = FALSE}
+oro_img <- oro.nifti::nii2oro(as_nifti(smoothed))
+```
+
+Two limits are worth knowing. Only values and geometry cross over: volume
+labels, NIfTI extensions and descriptive header fields do not. And
+`as_nifti()` marks the affine as scanner-anatomical unless told otherwise —
+pass `xform_code = 4` for an image in MNI space if a downstream tool reads the
+code.
+
 ## AFNI files
 
 AFNI `HEAD`/`BRIK` pairs are read by the same functions — pass the `.HEAD` file
@@ -309,4 +364,4 @@ names(read_header("subject_anat+orig.HEAD")@header)
 
 - `vignette("spaces-and-coordinates")` — what the affine you just read means
 - `vignette("large-data")` — reading files too big to hold in memory
-- `?read_vol`, `?read_header`, `?write_vol`
+- `?read_vol`, `?read_header`, `?write_vol`, `?as_neuro`
